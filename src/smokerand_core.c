@@ -115,6 +115,22 @@ double poisson_pvalue(double x, double lambda)
 
 
 /**
+ * @brief Asymptotic approximation for chi-square c.d.f.
+ * @details References:
+ * - Wilson E.B., Hilferty M.M. The distribution of chi-square // Proceedings
+ * of the National Academy of Sciences. 1931. Vol. 17. N 12. P. 684-688.
+ * https://doi.org/10.1073/pnas.17.12.684
+ */
+double chi2_cdf(double x, unsigned long f)
+{
+    double s2 = 2.0 / (9.0 * f);
+    double mu = 1 - s2;
+    double z = (pow(x/f, 1.0/3.0) - mu) / sqrt(s2);
+    return 0.5 + 0.5 * erf(z / sqrt(2));
+}
+
+
+/**
  * @brief Asymptotic approximation for p-value of chi-square distribution.
  * @details References:
  * - Wilson E.B., Hilferty M.M. The distribution of chi-square // Proceedings
@@ -238,7 +254,12 @@ void radixsort32(uint64_t *x, size_t len)
 static inline void bspace_make_tuples(const BSpaceNDOptions *opts, const GeneratorInfo *gi,
     void *state, uint64_t *u, size_t len)
 {
-    uint64_t mask = (1ull << opts->nbits_per_dim) - 1ull;
+    uint64_t mask;
+    if (opts->nbits_per_dim == 64) {
+        mask = 0xFFFFFFFFFFFFFFFF;
+    } else {
+        mask = (1ull << opts->nbits_per_dim) - 1ull;
+    }
     for (size_t j = 0; j < len; j++) {
         u[j] = 0;
         for (size_t k = 0; k < opts->ndims; k++) {
@@ -275,31 +296,34 @@ static unsigned int bspace_get_ndups(uint64_t *x, size_t len, int nbits)
 /**
  * @brief n-dimensional birthday spacings test.
  */
-TestResults bspace_nd_test(const BSpaceNDOptions *opts, const GeneratorInfo *gi, void *state,
-    const CallerAPI *intf)
+TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
     TestResults ans;
     if (opts->ndims * opts->nbits_per_dim > 64 ||
-        (gi->nbits != 32 && gi->nbits != 64)) {
+        (obj->gi->nbits != 32 && obj->gi->nbits != 64)) {
         return ans;
     }
     unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
+    size_t total_len = 1ull << opts->log2_len;
+    if (total_len < (1ull << 24)) {
+        total_len = 1ull << 24;
+    }
     size_t len = pow(2.0, (nbits_total + 4.0) / 3.0);
     double lambda = pow(len, 3.0) / (4 * pow(2.0, nbits_total));
-    size_t nsamples = (1ull << 24) / len;
+    size_t nsamples = total_len / len;
     if (nsamples < 5) nsamples = 5;
     // Show information about the test
-    intf->printf("Birthday spacings test\n");
-    intf->printf("  ndims = %d; nbits_per_dim = %d; get_lower = %d\n",
+    obj->intf->printf("Birthday spacings test\n");
+    obj->intf->printf("  ndims = %d; nbits_per_dim = %d; get_lower = %d\n",
         opts->ndims, opts->nbits_per_dim, opts->get_lower);
-    intf->printf("  nsamples = %lld; len = %lld, lambda = %g\n",
+    obj->intf->printf("  nsamples = %lld; len = %lld, lambda = %g\n",
         nsamples, len, lambda);
     // Compute number of duplicates
     uint64_t *u = calloc(len, sizeof(uint64_t));
     uint64_t *ndups = calloc(nsamples, sizeof(uint64_t));
     ans.name = "Birthday spacings (ND)";
     for (size_t i = 0; i < nsamples; i++) {
-        bspace_make_tuples(opts, gi, state, u, len);
+        bspace_make_tuples(opts, obj->gi, obj->state, u, len);
         if (nbits_total > 32) {
             ndups[i] = bspace_get_ndups(u, len, 64);
         } else {
@@ -307,19 +331,22 @@ TestResults bspace_nd_test(const BSpaceNDOptions *opts, const GeneratorInfo *gi,
         }
     }    
     // Statistical analysis
-    if (nsamples < 512) {
+    if (nsamples < 5120000) {
         // Variant a: total number of duplicates
-        intf->printf("  Analysis of total number of duplicates (Poisson distribution)\n");
+        obj->intf->printf("  Analysis of total number of duplicates (Poisson distribution)\n");
         uint64_t ndups_total = 0;
         for (size_t i = 0; i < nsamples; i++) {
             ndups_total += ndups[i];
         }
         ans.x = (double) ndups_total;
-        ans.p = poisson_cdf(ans.x, lambda * nsamples);
+        ans.p = poisson_pvalue(ans.x, lambda * nsamples);
+        ans.alpha = poisson_cdf(ans.x, lambda * nsamples);
+        obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
+        obj->intf->printf("\n");
     } else {
         // Variant b: chi square criteria
-        intf->printf("  Analysis of discrete distribution (chi-square distribution)\n");
-        size_t nbins = lambda * 4;
+        obj->intf->printf("  Analysis of discrete distribution (chi-square distribution)\n");
+        size_t nbins = lambda + sqrt(lambda) * 4;
         unsigned int *Oi = calloc(nbins, sizeof(unsigned int));
         unsigned int Oi_sum = 0;
         for (size_t i = 0; i < nsamples; i++) {
@@ -327,28 +354,29 @@ TestResults bspace_nd_test(const BSpaceNDOptions *opts, const GeneratorInfo *gi,
             Oi[ind]++;
             Oi_sum++;
         }
-        printf("%6s", "#");
+        obj->intf->printf("%6s", "#");
         for (size_t i = 0; i < nbins; i++) {
             if (i != nbins - 1) {
-                printf("%5d ", (int) i);
+                obj->intf->printf("%5d ", (int) i);
             } else {
-                printf(">=%3d ", (int) i);
+                obj->intf->printf(">=%3d ", (int) i);
             }
         }
-        printf("\n%6s", "Oi:");
+        obj->intf->printf("\n%6s", "Oi:");
         for (size_t i = 0; i < nbins; i++) {
             printf("%5d ", Oi[i]);
         }
         double Ei = exp(-lambda) * nsamples;
         ans.x = 0.0; // chi2emp
-        printf("\n%6s", "Ei:");
+        obj->intf->printf("\n%6s", "Ei:");
         for (size_t i = 0; i < nbins; i++) {
-            printf("%5.0f ", Ei);
+            obj->intf->printf("%5.0f ", Ei);
             ans.x += pow(Oi[i] - Ei, 2.0) / Ei;
             Ei *= lambda / (i + 1.0);
         }
-        printf("\n");
         ans.p = chi2_pvalue(ans.x, nbins - 1);
+        ans.alpha = chi2_cdf(ans.x, nbins - 1);
+        obj->intf->printf("\n  x = %g; p = %g\n\n", ans.x, ans.p);
         free(Oi);
     }
     free(u);
@@ -357,8 +385,7 @@ TestResults bspace_nd_test(const BSpaceNDOptions *opts, const GeneratorInfo *gi,
 }
 
 
-TestResults collisionover_test(const BSpaceNDOptions *opts, const GeneratorInfo *gi,
-    void *state, const CallerAPI *intf)
+TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
     size_t n = 50000000;
     const int rshift = (opts->ndims - 1) * opts->nbits_per_dim;
@@ -369,16 +396,16 @@ TestResults collisionover_test(const BSpaceNDOptions *opts, const GeneratorInfo 
     double nstates = Oi[0];
     TestResults ans;
     ans.name = "CollisionOver";
-    intf->printf("CollisionOver test\n");
+    obj->intf->printf("CollisionOver test\n");
     // Initialize the first tuple
     for (int j = 0; j < 8; j++) {
         cur_tuple >>= opts->nbits_per_dim;
-        cur_tuple |= (gi->get_bits(state) & mask) << rshift;
+        cur_tuple |= (obj->gi->get_bits(obj->state) & mask) << rshift;
     }
     // Generate other tuples
     for (size_t i = 0; i < n; i++) {
         cur_tuple >>= opts->nbits_per_dim;
-        cur_tuple |= (gi->get_bits(state) & mask) << rshift;
+        cur_tuple |= (obj->gi->get_bits(obj->state) & mask) << rshift;
         u[i] = cur_tuple;
     }
     // Find collisions by sorting the array
@@ -398,13 +425,14 @@ TestResults collisionover_test(const BSpaceNDOptions *opts, const GeneratorInfo 
     double mu = nstates * (lambda - 1 + exp(-lambda));
     ans.x = Oi[2];
     ans.p = poisson_pvalue(ans.x, mu);
-    intf->printf("  %5s %16s %16s\n", "Freq", "Oi", "Ei");
+    ans.alpha = poisson_cdf(ans.x, mu);
+    obj->intf->printf("  %5s %16s %16s\n", "Freq", "Oi", "Ei");
     for (int i = 0; i < 4; i++) {
-        intf->printf("  %5d %16lld %16.1f\n", i, Oi[i], Ei);
+        obj->intf->printf("  %5d %16lld %16.1f\n", i, Oi[i], Ei);
         Ei *= lambda / (i + 1.0);
     }
-    intf->printf("  lambda = %g, mu = %g\n", lambda, mu);
-    intf->printf("\n");
+    obj->intf->printf("  lambda = %g, mu = %g\n", lambda, mu);
+    obj->intf->printf("  x = %g; p = %g\n\n", ans.x, ans.p);
     free(u);
     return ans;
 }
@@ -417,26 +445,26 @@ TestResults collisionover_test(const BSpaceNDOptions *opts, const GeneratorInfo 
  * @brief Knuth's gap test for detecting lagged Fibonacci generators.
  * @details Gap is \f$ [0;\beta) \f$ where $\beta = 1 / (2^{shl}) \f$.
  */
-TestResults gap_test(unsigned int shl, const GeneratorInfo *gi, void *state, const CallerAPI *intf)
+TestResults gap_test(GeneratorState *obj, unsigned int shl)
 {
     const double Ei_min = 10.0;
     double p = 1.0 / (1 << shl); // beta in the floating point format
-    uint64_t beta = 1ull << (gi->nbits - shl);
+    uint64_t beta = 1ull << (obj->gi->nbits - shl);
     uint64_t u;
     size_t ngaps = 10000000;
     size_t nbins = log(Ei_min / (ngaps * p)) / log(1 - p);
     size_t *Oi = calloc(nbins + 1, sizeof(size_t));
     TestResults ans;
     ans.name = "Gap";
-    intf->printf("Gap test\n");
-    intf->printf("  alpha = 0.0; beta = %g; shl = %u;\n", p, shl);
-    intf->printf("  ngaps = %llu; nbins = %llu\n", ngaps, nbins);
+    obj->intf->printf("Gap test\n");
+    obj->intf->printf("  alpha = 0.0; beta = %g; shl = %u;\n", p, shl);
+    obj->intf->printf("  ngaps = %llu; nbins = %llu\n", ngaps, nbins);
     for (size_t i = 0; i < ngaps; i++) {
         size_t gap_len = 0;
-        u = gi->get_bits(state);
+        u = obj->gi->get_bits(obj->state);
         while (u > beta) {
             gap_len++;
-            u = gi->get_bits(state);
+            u = obj->gi->get_bits(obj->state);
         }
         Oi[(gap_len < nbins) ? gap_len : nbins]++;
     }
@@ -448,13 +476,14 @@ TestResults gap_test(unsigned int shl, const GeneratorInfo *gi, void *state, con
     }
     free(Oi);
     ans.p = chi2_pvalue(ans.x, nbins - 1);
-    intf->printf("  x = %g; p = %g\n\n", ans.x, ans.p);
+    ans.alpha = chi2_cdf(ans.x, nbins - 1);
+    obj->intf->printf("  x = %g; p = %g\n\n", ans.x, ans.p);
     return ans;
 }
 
 
 
-TestResults monobit_freq_test(const GeneratorInfo *gi, void *state, const CallerAPI *intf)
+TestResults monobit_freq_test(GeneratorState *obj)
 {
     int sum_per_byte[256];
     size_t len = 1ull << 28;
@@ -472,22 +501,85 @@ TestResults monobit_freq_test(const GeneratorInfo *gi, void *state, const Caller
         sum_per_byte[i] -= 4;
     }
     int64_t bitsum = 0;
-    unsigned int nbytes = gi->nbits / 8;
+    unsigned int nbytes = obj->gi->nbits / 8;
     for (size_t i = 0; i < len; i++) {
-        uint64_t u = gi->get_bits(state);
+        uint64_t u = obj->gi->get_bits(obj->state);
         for (size_t j = 0; j < nbytes; j++) {
             bitsum += sum_per_byte[u & 0xFF];
             u >>= 8;
         }
     }
-    ans.x = fabs((double) bitsum) / sqrt(len * gi->nbits);
+    ans.x = fabs((double) bitsum) / sqrt(len * obj->gi->nbits);
     ans.p = erfc(ans.x / sqrt(2));
-    intf->printf("Monobit frequency test\n");
-    intf->printf("  Number of bits: %llu\n", len * gi->nbits);
-    intf->printf("  sum = %lld; x = %g; p = %g\n",
+    ans.alpha = erf(ans.x / sqrt(2));
+    obj->intf->printf("Monobit frequency test\n");
+    obj->intf->printf("  Number of bits: %llu\n", len * obj->gi->nbits);
+    obj->intf->printf("  sum = %lld; x = %g; p = %g\n",
         bitsum, ans.x, ans.p);
-    intf->printf("\n");    
+    obj->intf->printf("\n");    
     return ans;
 }
 
+
+static int cmp_doubles(const void *aptr, const void *bptr)
+{
+    double aval = *((double *) aptr), bval = *((double *) bptr);
+    if (aval < bval) return -1;
+    else if (aval == bval) return 0;
+    else return 1;
+}
+
+
+TestResults byte_freq_test(GeneratorState *obj)
+{
+    size_t block_len = 1ull << 16;
+    size_t nblocks = 1024;
+    size_t bytefreq[256];
+    
+    unsigned int nbytes_per_num = obj->gi->nbits / 8;
+    unsigned int nbytes = nbytes_per_num * block_len;
+    double *chi2 = calloc(nblocks, sizeof(double));
+
+    TestResults ans;
+    ans.name = "ByteFreq";
+    obj->intf->printf("Byte frequency test\n");
+    obj->intf->printf("  nblocks = %lld; block_len = %lld\n",
+            (unsigned long long) nblocks,
+            (unsigned long long) block_len);
+    for (size_t ii = 0; ii < nblocks; ii++) {
+        for (size_t i = 0; i < 256; i++) {
+            bytefreq[i] = 0;
+        }
+        for (size_t i = 0; i < block_len; i++) {
+            uint64_t u = obj->gi->get_bits(obj->state);        
+            for (size_t j = 0; j < nbytes_per_num; j++) {
+                bytefreq[u & 0xFF]++;
+                u >>= 8;
+            }
+        }
+        chi2[ii] = 0;
+        double Ei = nbytes / 256.0;
+        for (size_t i = 0; i < 256; i++) {
+            chi2[ii] += pow(bytefreq[i] - Ei, 2.0) / Ei;
+        }
+    }
+    // Kolmogorov-Smirnov test
+    qsort(chi2, nblocks, sizeof(double), cmp_doubles);
+    double D = 0.0;
+    for (size_t i = 0; i < nblocks; i++) {
+        double f = chi2_cdf(chi2[i], 255);
+        double idbl = (double) i;
+        double Dplus = (idbl + 1.0) / nblocks - f;
+        double Dminus = f - idbl / nblocks;
+        if (Dplus > D) D = Dplus;
+        if (Dminus > D) D = Dminus;
+    }
+    double K = sqrt(nblocks) * D + 1.0 / (6.0 * sqrt(nblocks));
+    ans.x = K;
+    ans.p = ks_pvalue(K);
+    ans.alpha = 1.0 - ans.p;
+    printf("  K = %g, p = %g\n\n", K, ans.p);
+    free(chi2);
+    return ans;
+}
 

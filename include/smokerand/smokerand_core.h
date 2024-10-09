@@ -78,6 +78,15 @@ typedef struct {
 
 typedef int (*GetGenInfoFunc)(GeneratorInfo *gi);
 
+/**
+ * @brief Input data for generic statistical test, mainly PNG and its state.
+ */
+typedef struct {
+    const GeneratorInfo *gi; ///< Generator to be tested
+    void *state; ///< Pointer to generator state
+    const CallerAPI *intf; ///< Will be used for output
+} GeneratorState;
+
 
 typedef struct
 {
@@ -96,6 +105,7 @@ void GeneratorModule_unload(GeneratorModule *mod);
 typedef struct {
     const char *name; ///< Test name
     double p; ///< p-value
+    double alpha; ///< 1 - p where p is p-value
     double x; ///< Empirical random value
 } TestResults;
 
@@ -105,6 +115,7 @@ double ks_pvalue(double x);
 double gammainc(double a, double x);
 double poisson_cdf(double x, double lambda);
 double poisson_pvalue(double x, double lambda);
+double chi2_cdf(double x, unsigned long f);
 double chi2_pvalue(double x, unsigned long f);
 void radixsort32(uint64_t *x, size_t len);
 void radixsort64(uint64_t *x, size_t len);
@@ -120,16 +131,17 @@ void radixsort64(uint64_t *x, size_t len);
 typedef struct {
     unsigned int nbits_per_dim; ///< Number of bits per dimension.
     unsigned int ndims; ///< Number of dimensions.
+    unsigned int log2_len; ///< log2(len): i.e. 24 corresponds to len = 2^24
     int get_lower; ///< 0/1 - use lower/higher part of PRNG output.
 } BSpaceNDOptions;
 
 
-TestResults bspace_nd_test(const BSpaceNDOptions *opts, const GeneratorInfo *gi, void *state,
-    const CallerAPI *intf);
-TestResults collisionover_test(const BSpaceNDOptions *opts, const GeneratorInfo *gi,
-    void *state, const CallerAPI *intf);
-TestResults gap_test(unsigned int shl, const GeneratorInfo *gi, void *state, const CallerAPI *intf);
-TestResults monobit_freq_test(const GeneratorInfo *gi, void *state, const CallerAPI *intf);
+TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts);
+TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts);
+TestResults gap_test(GeneratorState *obj, unsigned int shl);
+TestResults monobit_freq_test(GeneratorState *obj);
+TestResults byte_freq_test(GeneratorState *obj);
+
 
 
 ////////////////////////////////////////
