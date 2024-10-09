@@ -29,7 +29,7 @@ typedef struct {
 } Lcg63State;
 
 
-static uint32_t get_bits32(void *state)
+static uint64_t get_bits(void *state)
 {
     static const int64_t m = 9223372036854775783LL; // 2^63 - 25
     static const int64_t a = 3163036175LL; // See Line 4 in Table 1

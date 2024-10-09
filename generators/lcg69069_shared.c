@@ -23,7 +23,7 @@ typedef struct {
 } Lcg32State;
 
 
-static uint32_t get_bits32(void *state)
+static uint64_t get_bits(void *state)
 {
     Lcg32State *obj = state;
     obj->x = 69069 * obj->x + 12345;
