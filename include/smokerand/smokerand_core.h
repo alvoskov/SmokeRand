@@ -70,25 +70,10 @@ CallerAPI CallerAPI_init();
 typedef struct {
     const char *name; ///< Generator name
     void *(*create)(const CallerAPI *intf); ///< Create PRNG example
-    uint32_t (*get_bits32)(void *state); ///< Return u32 pseudorandom number
-    uint64_t (*get_bits64)(void *state); ///< Return u64 pseudorandom number
+    uint64_t (*get_bits)(void *state); ///< Return u32/u64 pseudorandom number
+    unsigned int nbits; ///< Number of bits returned by the generator (32 or 64)    
     int (*self_test)(const CallerAPI *intf); ///< Run internal self-test
 } GeneratorInfo;
-
-/**
- * @brief Get the number of bits returned by the generator.
- * @return 32 (32-bit PRNG), 64 (64-bit PRNG) or 0 (corrupted PRNG).
- */
-static inline int GeneratorInfo_get_nbits(const GeneratorInfo *gi)
-{
-    if (gi->get_bits32 != NULL && gi->get_bits64 == NULL) {
-        return 32;
-    } else if (gi->get_bits64 != NULL && gi->get_bits32 == NULL) {
-        return 64;
-    } else {
-        return 0;
-    }
-}
 
 
 typedef int (*GetGenInfoFunc)(GeneratorInfo *gi);
@@ -115,6 +100,7 @@ typedef struct {
 } TestResults;
 
 
+const char *interpret_pvalue(double pvalue);
 double ks_pvalue(double x);
 double gammainc(double a, double x);
 double poisson_cdf(double x, double lambda);
@@ -138,8 +124,12 @@ typedef struct {
 } BSpaceNDOptions;
 
 
-TestResults bspace_nd_test(BSpaceNDOptions *opts, const GeneratorInfo *gi, void *state,
+TestResults bspace_nd_test(const BSpaceNDOptions *opts, const GeneratorInfo *gi, void *state,
     const CallerAPI *intf);
+TestResults collisionover_test(const BSpaceNDOptions *opts, const GeneratorInfo *gi,
+    void *state, const CallerAPI *intf);
+TestResults gap_test(unsigned int shl, const GeneratorInfo *gi, void *state, const CallerAPI *intf);
+TestResults monobit_freq_test(const GeneratorInfo *gi, void *state, const CallerAPI *intf);
 
 
 ////////////////////////////////////////

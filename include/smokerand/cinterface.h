@@ -9,7 +9,7 @@
  * unsigned 32-bit numbers.
  * @details  Requires the next functions to be defined:
  *
- * - `static uint32_t get_bits32(void *state);`
+ * - `static uint64_t get_bits(void *state);`
  * - `static void *create(CallerAPI *intf);`
  *
  * It also relies on default prolog (intf static variable, some exports etc.),
@@ -19,8 +19,8 @@
 int EXPORT gen_getinfo(GeneratorInfo *gi) { \
     gi->name = prng_name; \
     gi->create = create; \
-    gi->get_bits32 = get_bits32; \
-    gi->get_bits64 = NULL; \
+    gi->get_bits = get_bits; \
+    gi->nbits = 32; \
     gi->self_test = selftest_func; \
     return 1; \
 }
@@ -30,7 +30,7 @@ int EXPORT gen_getinfo(GeneratorInfo *gi) { \
  * unsigned 32-bit numbers.
  * @details  Requires the next functions to be defined:
  *
- * - `static uint32_t get_bits32(void *state);`
+ * - `static uint64_t get_bits(void *state);`
  * - `static void *create(CallerAPI *intf);`
  *
  * It also relies on default prolog (intf static variable, some exports etc.),
@@ -40,8 +40,8 @@ int EXPORT gen_getinfo(GeneratorInfo *gi) { \
 int EXPORT gen_getinfo(GeneratorInfo *gi) { \
     gi->name = prng_name; \
     gi->create = create; \
-    gi->get_bits32 = NULL; \
-    gi->get_bits64 = get_bits64; \
+    gi->get_bits = get_bits; \
+    gi->nbits = 64; \
     gi->self_test = selftest_func; \
     return 1; \
 }

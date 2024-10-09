@@ -30,7 +30,7 @@ static inline uint64_t ror64(uint64_t x, uint64_t r)
     return (x << r) | (x >> (64 - r));
 }
 
-static uint64_t get_bits64(void *state)
+static uint64_t get_bits(void *state)
 {
     RrmxmxState *obj = state;
     static uint64_t const M = 0x9fb21c651e98df25;
