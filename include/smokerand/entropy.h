@@ -1,0 +1,3 @@
+#ifndef __SMOKERAND_ENTROPY_H
+#define __SMOKERAND_ENTROPY_H
+#endif
