@@ -100,7 +100,7 @@ void GeneratorModule_unload(GeneratorModule *mod);
 
 
 /**
- * @brief Keeps test name and results.
+ * @brief Test name and results.
  */
 typedef struct {
     const char *name; ///< Test name
@@ -108,6 +108,27 @@ typedef struct {
     double alpha; ///< 1 - p where p is p-value
     double x; ///< Empirical random value
 } TestResults;
+
+/**
+ * @brief Test generalized description.
+ */
+typedef struct {
+    const char *name;
+    TestResults (*run)(GeneratorState *obj);
+} TestDescription;
+
+
+/**
+ * @brief Tests battery description.
+ */
+typedef struct {
+    const char *name; 
+    const TestDescription *tests;
+} TestsBattery;
+
+size_t TestsBattery_ntests(const TestsBattery *obj);
+void TestsBattery_run(const TestsBattery *bat,
+    const GeneratorInfo *gen, const CallerAPI *intf);
 
 
 const char *interpret_pvalue(double pvalue);

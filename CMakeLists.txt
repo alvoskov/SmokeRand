@@ -28,6 +28,7 @@ find_library(M_LIB m)
 # Executables
 add_executable(smokerand src/smokerand.c
     src/smokerand_core.c include/smokerand/smokerand_core.h
+    src/entropy.c include/smokerand/entropy.h
     src/lineardep.c include/smokerand/lineardep.h
     include/smokerand/cinterface.h)
 target_include_directories(smokerand PRIVATE include)

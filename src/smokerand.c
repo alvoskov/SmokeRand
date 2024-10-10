@@ -1,5 +1,6 @@
 #include "smokerand/smokerand_core.h"
 #include "smokerand/lineardep.h"
+#include "smokerand/entropy.h"
 #include <stdio.h>
 #include <time.h>
 
@@ -14,12 +15,6 @@ static inline void TestResults_print(const TestResults obj)
         printf("\n");
     }
 }
-
-
-typedef struct {
-    const char *name;
-    TestResults (*run)(GeneratorState *obj);
-} TestDescription;
 
 
 TestDescription get_monobit_freq()
@@ -51,7 +46,7 @@ static uint64_t get_bits64_from32(void *state)
 
 TestResults bspace64_1d_test(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 64, .ndims = 1, .log2_len = 30, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 64, .ndims = 1, .log2_len = 24, .get_lower = 1};
     if (obj->gi->nbits == 64) {
         return bspace_nd_test(obj, &opts);
     } else {
@@ -144,16 +139,15 @@ TestResults matrixrank_4096(GeneratorState *obj)
 
 
 
+size_t TestsBattery_ntests(const TestsBattery *obj);
+void TestsBattery_run(const TestsBattery *bat,
+    const GeneratorInfo *gen, const CallerAPI *intf);
 
 
 
 void battery_default(GeneratorInfo *gen, CallerAPI *intf)
 {
-    printf("===== Starting 'default' battery =====\n");
-    void *state = gen->create(intf);
-    GeneratorState obj = {.gi = gen, .state = state, .intf = intf};
-
-    const TestDescription battery[] = {
+    const TestDescription tests[] = {
         {"monobit_freq", monobit_freq_test},
         {"byte_freq", byte_freq_test},
         {"bspace32_1d", bspace32_1d_test},
@@ -174,35 +168,10 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf)
         {NULL, NULL}
     };
 
-    size_t ntests;
-    for (ntests = 0; battery[ntests].run != NULL; ntests++) { }
-    TestResults *results = calloc(ntests, sizeof(TestResults));
-
-    time_t tic = time(NULL);
-    for (size_t i = 0; i < ntests; i++) {
-        results[i] = battery[i].run(&obj);
-        results[i].name = battery[i].name;
-    }
-    time_t toc = time(NULL);
-
-    intf->printf("  %20s %10s %10s %10s\n", "Test name", "xemp", "p", "1 - p");
-    for (size_t i = 0; i < ntests; i++) {
-        intf->printf("  %20s %10.3g %10.3g %10.3g %10s\n",
-            results[i].name, results[i].x, results[i].p,
-            results[i].alpha,
-            interpret_pvalue(results[i].p));
-    }
-    unsigned int nseconds_total = toc - tic;
-    int s = nseconds_total % 60;
-    int m = (nseconds_total / 60) % 60;
-    int h = (nseconds_total / 3600);
-    intf->printf("Elapsed time: %.2d:%.2d:%.2d\n", h, m, s);
-    free(results);
-
-
-
-    intf->free(state);
-    
+    const TestsBattery bat = {
+        "default", tests
+    };
+    TestsBattery_run(&bat, gen, intf);
 }
 
 void battery_self_test(GeneratorInfo *gen, const CallerAPI *intf)
@@ -240,9 +209,9 @@ int main(int argc, char *argv[])
     if (!mod.valid) {
         return 1;
     }
-    
 
-    printf("Battery name: %s\n", battery_name);
+    printf("Seed generator self-test: %s\n",
+        xxtea_test() ? "PASSED" : "FAILED");
 
     if (!strcmp(battery_name, "default")) {
         battery_default(&mod.gen, &intf);

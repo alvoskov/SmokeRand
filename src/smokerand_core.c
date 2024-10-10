@@ -1,4 +1,5 @@
 #include "smokerand/smokerand_core.h"
+#include "smokerand/entropy.h"
 #include <math.h>
 #include <float.h>
 #include <stdio.h>
@@ -7,19 +8,24 @@
 #include <time.h>
 
 
+static Entropy entropy = {{0, 0, 0, 0}, 0};
+
 static uint32_t get_seed32(void)
 {
-    return time(NULL);
+    return Entropy_seed64(&entropy) >> 32;
 }
 
 static uint64_t get_seed64(void)
 {
-    return time(NULL);
+    return Entropy_seed64(&entropy);
 }
 
 CallerAPI CallerAPI_init()
 {
-    CallerAPI intf;
+    CallerAPI intf;    
+    if (entropy.state == 0) {
+        Entropy_init(&entropy);
+    }
     intf.get_seed32 = get_seed32;
     intf.get_seed64 = get_seed64;
     intf.malloc = malloc;
@@ -195,7 +201,6 @@ void GeneratorModule_unload(GeneratorModule *mod)
     }
 }
 
-
 ///////////////////////////////
 ///// Sorting subroutines /////
 ///////////////////////////////
@@ -245,6 +250,55 @@ void radixsort32(uint64_t *x, size_t len)
     countsort64(x,   out, len, 16);
     free(out);
 }
+
+/////////////////////////////////////////////
+///// TestsBattery class implementation /////
+/////////////////////////////////////////////
+
+
+size_t TestsBattery_ntests(const TestsBattery *obj)
+{
+    size_t ntests;
+    for (ntests = 0; obj->tests[ntests].run != NULL; ntests++) { }
+    return ntests;
+}
+
+
+void TestsBattery_run(const TestsBattery *bat,
+    const GeneratorInfo *gen, const CallerAPI *intf)
+{
+    intf->printf("===== Starting '%s' battery =====\n", bat->name);
+    void *state = gen->create(intf);
+    GeneratorState obj = {.gi = gen, .state = state, .intf = intf};
+
+    size_t ntests = TestsBattery_ntests(bat);
+    TestResults *results = calloc(ntests, sizeof(TestResults));
+    time_t tic = time(NULL);
+    for (size_t i = 0; i < ntests; i++) {
+        results[i] = bat->tests[i].run(&obj);
+        results[i].name = bat->tests[i].name;
+    }
+    time_t toc = time(NULL);
+
+    intf->printf("  %20s %10s %10s %10s\n", "Test name", "xemp", "p", "1 - p");
+    for (size_t i = 0; i < ntests; i++) {
+        intf->printf("  %20s %10.3g %10.3g %10.3g %10s\n",
+            results[i].name, results[i].x, results[i].p,
+            results[i].alpha,
+            interpret_pvalue(results[i].p));
+    }
+    unsigned int nseconds_total = toc - tic;
+    int s = nseconds_total % 60;
+    int m = (nseconds_total / 60) % 60;
+    int h = (nseconds_total / 3600);
+    intf->printf("Elapsed time: %.2d:%.2d:%.2d\n", h, m, s);
+    free(results);
+    intf->free(state);
+}
+
+
+
+
 
 /////////////////////////////
 ///// Statistical tests /////
