@@ -123,3 +123,68 @@ TestResults matrixrank_test(GeneratorState *obj, size_t n, unsigned int max_nbit
     obj->intf->printf("  x = %g; p = %g; 1-p = %g\n\n", ans.x, ans.p, ans.alpha);
     return ans;
 }
+
+
+
+
+size_t berlekamp_massey(const char *s, size_t n)
+{
+    size_t L = 0; // Complexity
+    size_t N = 0; // Current position
+    int m = -1;
+    char *C = calloc(n, sizeof(char)); C[0] = 1; // Coeffs.
+    char *B = calloc(n, sizeof(char)); B[0] = 1; // Prev.coeffs.
+    char *T = calloc(n, sizeof(char)); // Temp. copy of coeffs.
+    while (N < n) {
+        char d = s[N];
+        for (size_t i = 1; i <= L; i++) {
+            d ^= C[i] & s[N - i];
+        }
+        if (d == 1) {
+            memcpy(T, C, n * sizeof(char));
+            for (size_t i = 0; i <= n - N + m - 1; i++) {
+                C[N - m + i] ^= B[i];
+            }
+            if (2*L <= N) {
+                L = N + 1 - L;
+                m = N;
+                memcpy(B, T, n * sizeof(char));
+            }
+        }
+        N++;
+    }
+    free(C);
+    free(B);
+    free(T);
+    return L;
+}
+
+
+
+/**
+ * @brief Linear complexity test.
+ * @details
+ * https://doi.org/10.1016/S0020-0190(97)00004-5
+ * @param nbits Number of bits (recommended value is 200000)
+ * @param bitpos Bit position (0 is the lowest);
+ */
+TestResults linearcomp_test(GeneratorState *obj, size_t nbits, unsigned int bitpos)
+{
+    TestResults ans = {.name = "linearcomp", .x = NAN, .p = NAN};
+    char *s = calloc(nbits, sizeof(char));
+    obj->intf->printf("Linear complexity test\n");
+    obj->intf->printf("  nbits: %lld\n", (long long) nbits);
+    uint64_t mask = 1ull << bitpos;
+    for (size_t i = 0; i < nbits; i++) {
+        if (obj->gi->get_bits(obj->state) & mask)
+            s[i] = 1;
+    }
+    double parity = nbits & 1;
+    double mu = nbits / 2.0 + (9.0 - parity) / 36.0;
+    double sigma = sqrt(86.0/81.0);
+    ans.x = berlekamp_massey(s, nbits);
+    double z = (ans.x - mu) / sigma;
+    ans.p = 0.5 * erfc(-z / sqrt(2.0));
+    obj->intf->printf("  L = %g; z = %g; p = %g\n\n", ans.x, z, ans.p);
+    return ans;
+}

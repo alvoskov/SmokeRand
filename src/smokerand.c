@@ -138,6 +138,21 @@ TestResults matrixrank_4096(GeneratorState *obj)
 
 
 
+TestResults linearcomp_high(GeneratorState *obj)
+{
+    return linearcomp_test(obj, 200000, obj->gi->nbits - 1);
+}
+
+
+TestResults linearcomp_low(GeneratorState *obj)
+{
+    return linearcomp_test(obj, 200000, 0);
+}
+
+
+
+
+
 
 size_t TestsBattery_ntests(const TestsBattery *obj);
 void TestsBattery_run(const TestsBattery *bat,
@@ -148,6 +163,8 @@ void TestsBattery_run(const TestsBattery *bat,
 void battery_default(GeneratorInfo *gen, CallerAPI *intf)
 {
     const TestDescription tests[] = {
+        {"linearcomp_high", linearcomp_high},
+        {"linearcomp_low", linearcomp_low},
         {"monobit_freq", monobit_freq_test},
         {"byte_freq", byte_freq_test},
         {"bspace32_1d", bspace32_1d_test},
