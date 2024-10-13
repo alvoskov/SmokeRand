@@ -6,9 +6,12 @@
  * \f[
  * X_{n} = X_{n - 607} + X_{n - 273}
  * \f]
- * and returns either higher 32 bits (as unsigned integer) or higher
- * 52 bits (as double). The initial values in the ring buffer are filled
- * by the 64-bit PCG generator.
+ * and returns higher 32 bits. The initial values in the ring buffer
+ * are filled by the 64-bit PCG generator.
+ * 
+ * Sources of parameters:
+ *
+ * 1. https://www.boost.org/doc/libs/master/boost/random/lagged_fibonacci.hpp
  *
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
@@ -24,8 +27,19 @@
 
 PRNG_CMODULE_PROLOG
 
+// Fails both birthday spacings and gap512 tests
 #define LFIB_A 607
 #define LFIB_B 273
+
+
+// Still fails birthday spacings test, gap512 is "suspiciuos"
+//#define LFIB_A 1279
+//#define LFIB_B 418
+
+// Still fails birthday spacings test, gap512 is passed
+//#define LFIB_A 2281
+//#define LFIB_B 1252
+
 
 typedef struct {
     uint64_t U[LFIB_A + 1]; ///< Ring buffer (only values 1..17 are used)

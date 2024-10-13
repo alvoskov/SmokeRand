@@ -126,29 +126,47 @@ TestResults matrixrank_test(GeneratorState *obj, size_t n, unsigned int max_nbit
 
 
 
+static inline void xorbytes(uint8_t *a, uint8_t *b, size_t len)
+{
+/*
+    // Simpler but non optimized code
+    for (size_t i = 0; i < len; i++) {
+        a[i] ^= b[i];
+    }
+*/    
+    uint64_t *av = (uint64_t *) a, *bv = (uint64_t *) b;
+    size_t nwords = len / 8;
+    for (size_t i = 0; i < nwords; i++) {
+        av[i] ^= bv[i];
+    }
+    a += nwords * 8;
+    b += nwords * 8;
+    for (size_t i = 0; i < len % 8; i++) {
+        a[i] ^= b[i];
+    }    
+}
 
-size_t berlekamp_massey(const char *s, size_t n)
+
+size_t berlekamp_massey(const uint8_t *s, size_t n)
 {
     size_t L = 0; // Complexity
     size_t N = 0; // Current position
-    int m = -1;
-    char *C = calloc(n, sizeof(char)); C[0] = 1; // Coeffs.
-    char *B = calloc(n, sizeof(char)); B[0] = 1; // Prev.coeffs.
-    char *T = calloc(n, sizeof(char)); // Temp. copy of coeffs.
+    long m = -1;
+    uint8_t *C = calloc(n, sizeof(uint8_t)); C[0] = 1; // Coeffs.
+    uint8_t *B = calloc(n, sizeof(uint8_t)); B[0] = 1; // Prev.coeffs.
+    uint8_t *T = calloc(n, sizeof(uint8_t)); // Temp. copy of coeffs.
     while (N < n) {
         char d = s[N];
         for (size_t i = 1; i <= L; i++) {
             d ^= C[i] & s[N - i];
         }
         if (d == 1) {
-            memcpy(T, C, n * sizeof(char));
-            for (size_t i = 0; i <= n - N + m - 1; i++) {
-                C[N - m + i] ^= B[i];
-            }
+            memcpy(T, C, (L + 1) * sizeof(uint8_t));
+            xorbytes(&C[N - m], B, n - N + m);
             if (2*L <= N) {
                 L = N + 1 - L;
                 m = N;
-                memcpy(B, T, n * sizeof(char));
+                memcpy(B, T, (L + 1) * sizeof(uint8_t));
             }
         }
         N++;
@@ -171,7 +189,7 @@ size_t berlekamp_massey(const char *s, size_t n)
 TestResults linearcomp_test(GeneratorState *obj, size_t nbits, unsigned int bitpos)
 {
     TestResults ans = {.name = "linearcomp", .x = NAN, .p = NAN};
-    char *s = calloc(nbits, sizeof(char));
+    uint8_t *s = calloc(nbits, sizeof(uint8_t));
     obj->intf->printf("Linear complexity test\n");
     obj->intf->printf("  nbits: %lld\n", (long long) nbits);
     uint64_t mask = 1ull << bitpos;
@@ -185,6 +203,7 @@ TestResults linearcomp_test(GeneratorState *obj, size_t nbits, unsigned int bitp
     ans.x = berlekamp_massey(s, nbits);
     double z = (ans.x - mu) / sigma;
     ans.p = 0.5 * erfc(-z / sqrt(2.0));
+    ans.alpha = 0.5 + 0.5 * erf(-z / sqrt(2.0));
     obj->intf->printf("  L = %g; z = %g; p = %g\n\n", ans.x, z, ans.p);
     return ans;
 }

@@ -52,7 +52,7 @@ const char *interpret_pvalue(double pvalue)
     } else if (pvalue < pvalue_warning || pvalue > 1.0 - pvalue_warning) {
         return "SUSPICIOUS";
     } else {
-        return "Good";
+        return "Ok";
     }
 }
 
@@ -280,10 +280,11 @@ void TestsBattery_run(const TestsBattery *bat,
     }
     time_t toc = time(NULL);
 
-    intf->printf("  %20s %10s %10s %10s\n", "Test name", "xemp", "p", "1 - p");
+    intf->printf("  %3s %20s %10s %10s %10s\n",
+        "#", "Test name", "xemp", "p", "1 - p");
     for (size_t i = 0; i < ntests; i++) {
-        intf->printf("  %20s %10.3g %10.3g %10.3g %10s\n",
-            results[i].name, results[i].x, results[i].p,
+        intf->printf("  %3d %20s %10.3g %10.3g %10.3g %10s\n",
+            (int) i + 1, results[i].name, results[i].x, results[i].p,
             results[i].alpha,
             interpret_pvalue(results[i].p));
     }
@@ -291,7 +292,7 @@ void TestsBattery_run(const TestsBattery *bat,
     int s = nseconds_total % 60;
     int m = (nseconds_total / 60) % 60;
     int h = (nseconds_total / 3600);
-    intf->printf("Elapsed time: %.2d:%.2d:%.2d\n", h, m, s);
+    intf->printf("\nElapsed time: %.2d:%.2d:%.2d\n\n", h, m, s);
     free(results);
     intf->free(state);
 }

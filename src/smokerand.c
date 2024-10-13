@@ -1,8 +1,10 @@
 #include "smokerand/smokerand_core.h"
 #include "smokerand/lineardep.h"
 #include "smokerand/entropy.h"
+#include "smokerand/bat_default.h"
 #include <stdio.h>
 #include <time.h>
+#include <math.h>
 
 
 
@@ -17,179 +19,6 @@ static inline void TestResults_print(const TestResults obj)
 }
 
 
-TestDescription get_monobit_freq()
-{
-    TestDescription descr = {.name = "monobit_freq", .run = monobit_freq_test};
-    return descr;
-}
-
-TestResults bspace32_1d_test(GeneratorState *obj)
-{
-    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 1, .get_lower = 1};
-    return bspace_nd_test(obj, &opts);
-}
-
-
-
-typedef struct {
-    const GeneratorInfo *gen32;
-    void *state;
-} Bits64From32State;
-
-static uint64_t get_bits64_from32(void *state)
-{
-    Bits64From32State *obj = state;
-    uint64_t x = obj->gen32->get_bits(obj->state);
-    uint64_t y = obj->gen32->get_bits(obj->state);
-    return (x << 32) | y;
-}
-
-TestResults bspace64_1d_test(GeneratorState *obj)
-{
-    BSpaceNDOptions opts = {.nbits_per_dim = 64, .ndims = 1, .log2_len = 24, .get_lower = 1};
-    if (obj->gi->nbits == 64) {
-        return bspace_nd_test(obj, &opts);
-    } else {
-        GeneratorInfo gen32dup = *(obj->gi);
-        gen32dup.get_bits = get_bits64_from32;
-        Bits64From32State statedup = {obj->gi, obj->state};
-        GeneratorState objdup = {.gi = &gen32dup, .state = &statedup, .intf = obj->intf};
-        return bspace_nd_test(&objdup, &opts);
-    }
-}
-
-
-TestResults bspace32_2d_test(GeneratorState *obj)
-{
-    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 2, .log2_len = 24, .get_lower = 1};
-    return bspace_nd_test(obj, &opts);
-}
-
-TestResults bspace21_3d_test(GeneratorState *obj)
-{
-    BSpaceNDOptions opts = {.nbits_per_dim = 21, .ndims = 3, .log2_len = 24, .get_lower = 1};
-    return bspace_nd_test(obj, &opts);
-}
-
-TestResults bspace8_8d_test(GeneratorState *obj)
-{
-    BSpaceNDOptions opts = {.nbits_per_dim = 8, .ndims = 8, .log2_len = 24, .get_lower = 1};
-    return bspace_nd_test(obj, &opts);
-}
-
-
-TestResults collisionover8_5d(GeneratorState *obj)
-{
-    BSpaceNDOptions opts = {.nbits_per_dim = 8, .ndims = 5, .get_lower = 1};
-    return collisionover_test(obj, &opts);
-}
-
-TestResults collisionover5_8d(GeneratorState *obj)
-{
-    BSpaceNDOptions opts = {.nbits_per_dim = 5, .ndims = 8, .get_lower = 1};
-    return collisionover_test(obj, &opts);
-}
-
-TestResults collisionover13_3d(GeneratorState *obj)
-{
-    BSpaceNDOptions opts = {.nbits_per_dim = 13, .ndims = 3, .get_lower = 1};
-    return collisionover_test(obj, &opts);
-}
-
-TestResults collisionover20_2d(GeneratorState *obj)
-{
-    BSpaceNDOptions opts = {.nbits_per_dim = 20, .ndims = 2, .get_lower = 1};
-    return collisionover_test(obj, &opts);
-}
-
-
-TestResults gap_inv256(GeneratorState *obj)
-{
-    return gap_test(obj, 8);
-}
-
-TestResults gap_inv512(GeneratorState *obj)
-{
-    return gap_test(obj, 9);
-}
-
-
-
-TestResults matrixrank_1024_low8(GeneratorState *obj)
-{
-    return matrixrank_test(obj, 1024, 8);
-}
-
-TestResults matrixrank_4096_low8(GeneratorState *obj)
-{
-    return matrixrank_test(obj, 4096, 8);
-}
-
-
-TestResults matrixrank_1024(GeneratorState *obj)
-{
-    return matrixrank_test(obj, 1024, 64);
-}
-
-TestResults matrixrank_4096(GeneratorState *obj)
-{
-    return matrixrank_test(obj, 4096, 64);
-}
-
-
-
-TestResults linearcomp_high(GeneratorState *obj)
-{
-    return linearcomp_test(obj, 200000, obj->gi->nbits - 1);
-}
-
-
-TestResults linearcomp_low(GeneratorState *obj)
-{
-    return linearcomp_test(obj, 200000, 0);
-}
-
-
-
-
-
-
-size_t TestsBattery_ntests(const TestsBattery *obj);
-void TestsBattery_run(const TestsBattery *bat,
-    const GeneratorInfo *gen, const CallerAPI *intf);
-
-
-
-void battery_default(GeneratorInfo *gen, CallerAPI *intf)
-{
-    const TestDescription tests[] = {
-        {"linearcomp_high", linearcomp_high},
-        {"linearcomp_low", linearcomp_low},
-        {"monobit_freq", monobit_freq_test},
-        {"byte_freq", byte_freq_test},
-        {"bspace32_1d", bspace32_1d_test},
-        {"bspace64_1d", bspace64_1d_test},
-        {"bspace32_2d", bspace32_2d_test},
-        {"bspace21_3d", bspace21_3d_test},
-        {"bspace8_8d", bspace8_8d_test},
-        {"collover8_5d", collisionover8_5d},
-        {"collover5_8d", collisionover5_8d},
-        {"collover13_3d", collisionover13_3d},
-        {"collover20_2d", collisionover20_2d},
-        {"gap_inv512", gap_inv512},
-        {"gap_inv256", gap_inv256},
-        {"matrixrank_1024", matrixrank_1024},
-        {"matrixrank_1024_low8", matrixrank_1024_low8},
-        {"matrixrank_4096", matrixrank_4096},
-        {"matrixrank_4096_low8", matrixrank_4096_low8},
-        {NULL, NULL}
-    };
-
-    const TestsBattery bat = {
-        "default", tests
-    };
-    TestsBattery_run(&bat, gen, intf);
-}
 
 void battery_self_test(GeneratorInfo *gen, const CallerAPI *intf)
 {
@@ -203,6 +32,68 @@ void battery_self_test(GeneratorInfo *gen, const CallerAPI *intf)
     } else {
         intf->printf("Internal self-test failed\n");
     }    
+}
+
+
+
+static int cmp_ints(const void *aptr, const void *bptr)
+{
+    uint64_t aval = *((uint64_t *) aptr), bval = *((uint64_t *) bptr);
+    if (aval < bval) { return -1; }
+    else if (aval == bval) { return 0; }
+    else { return 1; }
+}
+
+
+
+typedef struct {
+    size_t n; ///< Number of values
+    unsigned int e; ///< Leave only values with zeros in lower (e - 1) bits
+} BirthdayOptions;
+
+
+void birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
+{
+    uint64_t *x = calloc(opts->n, sizeof(uint64_t));
+    if (x == NULL) {
+        obj->intf->printf("  Not enough memory (8GiB is required)\n");
+        return;
+    }
+    double lambda = pow(opts->n, 2.0) / pow(2.0, obj->gi->nbits - opts->e + 1.0);
+    obj->intf->printf("  lambda = %g\n", lambda);
+    obj->intf->printf("  Filling the array with 'birthdays'\n");
+    uint64_t mask = (1ull << opts->e) - 1;
+    for (size_t i = 0; i < opts->n; i++) {
+        uint64_t u;
+        do {
+            u = obj->gi->get_bits(obj->state);
+        } while ((u & mask) != 0);
+        x[i] = u;
+        if (i % (opts->n / 1000) == 0) {
+            obj->intf->printf("\r    %.1f %% completed", 100.0 * i / (double) opts->n);
+        }
+    }
+    obj->intf->printf("\n  Sorting the array\n");
+    // qsort is used instead of radix sort to prevent "out of memory" error:
+    // 2^30 of u64 is 8GiB of data
+    qsort(x, opts->n, sizeof(uint64_t), cmp_ints); // Not radix: to prevent "out of memory"
+    obj->intf->printf("  Searching duplicates\n");
+    unsigned int ndups = 0;
+    for (size_t i = 0; i < opts->n - 1; i++) {
+        if (x[i] == x[i + 1])
+            ndups++;
+    }
+
+    obj->intf->printf("Number of duplicates: %d\n", ndups);
+}
+
+void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
+{
+    intf->printf("64-bit birthday test\n");
+    BirthdayOptions opts = {.n = 1ull << 30, .e = 7}; // 10
+    void *state = gen->create(intf);
+    GeneratorState obj = {.gi = gen, .state = state, .intf = intf};
+    birthday_test(&obj, &opts);
 }
 
 int main(int argc, char *argv[]) 
@@ -234,6 +125,8 @@ int main(int argc, char *argv[])
         battery_default(&mod.gen, &intf);
     } else if (!strcmp(battery_name, "selftest")) {
         battery_self_test(&mod.gen, &intf);
+    } else if (!strcmp(battery_name, "birthday")) {
+        battery_birthday(&mod.gen, &intf);
     } else {
         printf("Unknown battery %s\n", battery_name);
         GeneratorModule_unload(&mod);
