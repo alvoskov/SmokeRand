@@ -2,6 +2,7 @@
 #include "smokerand/lineardep.h"
 #include "smokerand/entropy.h"
 #include "smokerand/bat_default.h"
+#include "smokerand/bat_full.h"
 #include <stdio.h>
 #include <time.h>
 #include <math.h>
@@ -123,6 +124,8 @@ int main(int argc, char *argv[])
 
     if (!strcmp(battery_name, "default")) {
         battery_default(&mod.gen, &intf);
+    } else if (!strcmp(battery_name, "full")) {
+        battery_full(&mod.gen, &intf);
     } else if (!strcmp(battery_name, "selftest")) {
         battery_self_test(&mod.gen, &intf);
     } else if (!strcmp(battery_name, "birthday")) {
