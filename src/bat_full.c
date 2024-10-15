@@ -1,10 +1,10 @@
-#include "smokerand/bat_default.h"
+#include "smokerand/bat_full.h"
 #include "smokerand/lineardep.h"
 #include "smokerand/entropy.h"
 
 static TestResults bspace32_1d_test(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 8192, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 32768, .get_lower = 1};
     return bspace_nd_test(obj, &opts);
 }
 
@@ -26,7 +26,7 @@ static uint64_t get_bits64_from32(void *state)
 // log2len = 30 for improved test
 static TestResults bspace64_1d_test(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 64, .ndims = 1, .nsamples = 30, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 64, .ndims = 1, .nsamples = 100, .get_lower = 1};
     if (obj->gi->nbits == 64) {
         return bspace_nd_test(obj, &opts);
     } else {
@@ -41,19 +41,19 @@ static TestResults bspace64_1d_test(GeneratorState *obj)
 
 static TestResults bspace32_2d_test(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 2, .nsamples = 30, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 2, .nsamples = 100, .get_lower = 1};
     return bspace_nd_test(obj, &opts);
 }
 
 static TestResults bspace21_3d_test(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 21, .ndims = 3, .nsamples = 10, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 21, .ndims = 3, .nsamples = 100, .get_lower = 1};
     return bspace_nd_test(obj, &opts);
 }
 
 static TestResults bspace8_8d_test(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 8, .ndims = 8, .nsamples = 10, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 8, .ndims = 8, .nsamples = 100, .get_lower = 1};
     return bspace_nd_test(obj, &opts);
 }
 
@@ -83,10 +83,16 @@ static TestResults collisionover20_2d(GeneratorState *obj)
 }
 
 
-static TestResults gap_inv256(GeneratorState *obj)
+static TestResults gap_inv512(GeneratorState *obj)
 {
-    return gap_test(obj, 8);
+    return gap_test(obj, 9);
 }
+
+static TestResults gap_inv1024(GeneratorState *obj)
+{
+    return gap_test(obj, 10);
+}
+
 
 
 static TestResults matrixrank_4096(GeneratorState *obj)
@@ -99,23 +105,34 @@ static TestResults matrixrank_4096_low8(GeneratorState *obj)
     return matrixrank_test(obj, 4096, 8);
 }
 
+static TestResults matrixrank_8192(GeneratorState *obj)
+{
+    return matrixrank_test(obj, 8192, 64);
+}
+
+static TestResults matrixrank_8192_low8(GeneratorState *obj)
+{
+    return matrixrank_test(obj, 8192, 8);
+}
+
+
 static TestResults linearcomp_high(GeneratorState *obj)
 {
-    return linearcomp_test(obj, 100000, obj->gi->nbits - 1);
+    return linearcomp_test(obj, 500000, obj->gi->nbits - 1);
 }
 
 static TestResults linearcomp_mid(GeneratorState *obj)
 {
-    return linearcomp_test(obj, 100000, obj->gi->nbits / 2 - 1);
+    return linearcomp_test(obj, 500000, obj->gi->nbits / 2 - 1);
 }
 
 
 static TestResults linearcomp_low(GeneratorState *obj)
 {
-    return linearcomp_test(obj, 100000, 0);
+    return linearcomp_test(obj, 500000, 0);
 }
 
-void battery_default(GeneratorInfo *gen, CallerAPI *intf)
+void battery_full(GeneratorInfo *gen, CallerAPI *intf)
 {
     const TestDescription tests[] = {
         {"monobit_freq", monobit_freq_test},
@@ -129,12 +146,15 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf)
         {"collover5_8d", collisionover5_8d},
         {"collover13_3d", collisionover13_3d},
         {"collover20_2d", collisionover20_2d},
-        {"gap_inv256", gap_inv256},
+        {"gap_inv512", gap_inv512},
+        {"gap_inv1024", gap_inv1024},
         {"linearcomp_high", linearcomp_high},
         {"linearcomp_mid", linearcomp_mid},
         {"linearcomp_low", linearcomp_low},
         {"matrixrank_4096", matrixrank_4096},
         {"matrixrank_4096_low8", matrixrank_4096_low8},
+        {"matrixrank_8192", matrixrank_8192},
+        {"matrixrank_8192_low8", matrixrank_8192_low8},
         {NULL, NULL}
     };
 

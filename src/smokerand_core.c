@@ -359,25 +359,27 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
         return ans;
     }
     unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
+/*
     size_t total_len = 1ull << opts->log2_len;
     if (total_len < (1ull << 24)) {
         total_len = 1ull << 24;
     }
+*/
     size_t len = pow(2.0, (nbits_total + 4.0) / 3.0);
     double lambda = pow(len, 3.0) / (4 * pow(2.0, nbits_total));
-    size_t nsamples = total_len / len;
-    if (nsamples < 5) nsamples = 5;
+//    size_t nsamples = total_len / len;
+//    if (nsamples < 5) nsamples = 5;
     // Show information about the test
     obj->intf->printf("Birthday spacings test\n");
     obj->intf->printf("  ndims = %d; nbits_per_dim = %d; get_lower = %d\n",
         opts->ndims, opts->nbits_per_dim, opts->get_lower);
     obj->intf->printf("  nsamples = %lld; len = %lld, lambda = %g\n",
-        nsamples, len, lambda);
+        opts->nsamples, len, lambda);
     // Compute number of duplicates
     uint64_t *u = calloc(len, sizeof(uint64_t));
-    uint64_t *ndups = calloc(nsamples, sizeof(uint64_t));
+    uint64_t *ndups = calloc(opts->nsamples, sizeof(uint64_t));
     ans.name = "Birthday spacings (ND)";
-    for (size_t i = 0; i < nsamples; i++) {
+    for (size_t i = 0; i < opts->nsamples; i++) {
         bspace_make_tuples(opts, obj->gi, obj->state, u, len);
         if (nbits_total > 32) {
             ndups[i] = bspace_get_ndups(u, len, 64);
@@ -386,16 +388,16 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
         }
     }    
     // Statistical analysis
-    if (nsamples < 5120000) {
+    if (opts->nsamples < 5120000) {
         // Variant a: total number of duplicates
         obj->intf->printf("  Analysis of total number of duplicates (Poisson distribution)\n");
         uint64_t ndups_total = 0;
-        for (size_t i = 0; i < nsamples; i++) {
+        for (size_t i = 0; i < opts->nsamples; i++) {
             ndups_total += ndups[i];
         }
         ans.x = (double) ndups_total;
-        ans.p = poisson_pvalue(ans.x, lambda * nsamples);
-        ans.alpha = poisson_cdf(ans.x, lambda * nsamples);
+        ans.p = poisson_pvalue(ans.x, lambda * opts->nsamples);
+        ans.alpha = poisson_cdf(ans.x, lambda * opts->nsamples);
         obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
         obj->intf->printf("\n");
     } else {
@@ -404,7 +406,7 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
         size_t nbins = lambda + sqrt(lambda) * 4;
         unsigned int *Oi = calloc(nbins, sizeof(unsigned int));
         unsigned int Oi_sum = 0;
-        for (size_t i = 0; i < nsamples; i++) {
+        for (size_t i = 0; i < opts->nsamples; i++) {
             size_t ind = (ndups[i] < nbins) ? ndups[i] : nbins;
             Oi[ind]++;
             Oi_sum++;
@@ -421,7 +423,7 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
         for (size_t i = 0; i < nbins; i++) {
             printf("%5d ", Oi[i]);
         }
-        double Ei = exp(-lambda) * nsamples;
+        double Ei = exp(-lambda) * opts->nsamples;
         ans.x = 0.0; // chi2emp
         obj->intf->printf("\n%6s", "Ei:");
         for (size_t i = 0; i < nbins; i++) {

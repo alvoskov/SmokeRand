@@ -152,7 +152,7 @@ void radixsort64(uint64_t *x, size_t len);
 typedef struct {
     unsigned int nbits_per_dim; ///< Number of bits per dimension.
     unsigned int ndims; ///< Number of dimensions.
-    unsigned int log2_len; ///< log2(len): i.e. 24 corresponds to len = 2^24
+    unsigned int nsamples; ///< Number of samples.
     int get_lower; ///< 0/1 - use lower/higher part of PRNG output.
 } BSpaceNDOptions;
 
