@@ -128,7 +128,8 @@ typedef struct {
 
 size_t TestsBattery_ntests(const TestsBattery *obj);
 void TestsBattery_run(const TestsBattery *bat,
-    const GeneratorInfo *gen, const CallerAPI *intf);
+    const GeneratorInfo *gen, const CallerAPI *intf,
+    unsigned int nthreads);
 
 
 const char *interpret_pvalue(double pvalue);

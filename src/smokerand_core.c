@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <pthread.h>
+
 
 
 static Entropy entropy = {{0, 0, 0, 0}, 0};
@@ -79,26 +81,62 @@ double ks_pvalue(double x)
 }
 
 
+static double gammainc_lower_series(double a, double x)
+{
+    double mul = exp(-x + a*log(x) - lgamma(a)), sum = 0.0;
+    double t = 1.0 / a;
+    for (int i = 1; i < 1000 && t > DBL_EPSILON; i++) {
+        sum += t;
+        t *= x / (a + i);
+    }
+    return mul * sum;
+}
+
+static double gammainc_upper_contfrac(double a, double x)
+{
+    double mul = exp(-x + a*log(x) - lgamma(a));
+    double b0 = x + 1 - a, b1 = x + 3 - a;
+    double p0 = b0, q0 = 1.0;
+    double p1 = b1 * b0 + (a - 1.0), q1 = b1;
+    double f = p1/q1, f_old = p0/q0;
+    double c = p1/p0, d = q0 / q1;
+    for (int i = 2; i < 50 && fabs(f - f_old) > DBL_EPSILON; i++) {
+        f_old = f;
+        double bk = x + 2*i + 1 - a;
+        double ak = i * (a - i);
+        if (c < 1e-30) c = 1e-30;
+        c = bk + ak / c;
+        d = 1.0 / (bk + ak * d);
+        f *= c * d;
+    }
+    return mul / f;
+}
+
 /**
- * @brief An approximation of incomplete gamma function for implementation
- * of Poisson C.D.F. and its p-values computation.
+ * @brief An approximation of lower incomplete gamma function for
+ * implementation of Poisson C.D.F. and its p-values computation.
  * @details References:
  * - https://gmd.copernicus.org/articles/3/329/2010/gmd-3-329-2010.pdf
  * - https://functions.wolfram.com/GammaBetaErf/Gamma2/06/02/02/
  */
 double gammainc(double a, double x)
 {
-    double mul = exp(-x + a*log(x) - lgamma(a)), sum = 0.0;
-    if (x < 10 * a) {
-        double t = 1.0 / a;
-        for (int i = 1; i < 1000 && t > DBL_EPSILON; i++) {
-            sum += t;
-            t *= x / (a + i);
-        }
-        return mul * sum;
+    if (x < a + 1) {
+        return gammainc_lower_series(a, x);
     } else {
-        sum = 1 / x * ( 1 - (1 - a) / x - (2 - a) * (1 - a) / (x*x));
-        return 1.0 - mul * sum;
+        return 1.0 - gammainc_upper_contfrac(a, x);
+    }
+}
+
+/**
+ * @brief An approximation of upper incomplemete gamma function
+ */
+double gammainc_upper(double a, double x)
+{
+    if (x < a + 1) {
+        return 1.0 - gammainc_lower_series(a, x);
+    } else {
+        return gammainc_upper_contfrac(a, x);
     }
 }
 
@@ -107,7 +145,7 @@ double gammainc(double a, double x)
  */
 double poisson_cdf(double x, double lambda)
 {
-    return 1.0 - gammainc(floor(x) + 1.0, lambda);
+    return gammainc_upper(floor(x) + 1.0, lambda);
 }
 
 /**
@@ -264,8 +302,41 @@ size_t TestsBattery_ntests(const TestsBattery *obj)
 }
 
 
+
+typedef struct {
+    pthread_t thrd_id;
+    TestDescription *tests;
+    size_t *tests_inds;
+    size_t ntests;
+    TestResults *results;
+    const GeneratorInfo *gi;
+    const CallerAPI *intf;
+} BatteryThread;
+
+
+static pthread_mutex_t battery_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+void *battery_thread(void *data)
+{
+    BatteryThread *th_data = data;
+    pthread_mutex_lock(&battery_mutex);
+    void *state = th_data->gi->create(th_data->intf);
+    pthread_mutex_unlock(&battery_mutex);
+    th_data->intf->printf("vvvvvvvvvv Thread %lld started vvvvvvvvvv\n", (int) th_data->thrd_id);
+    GeneratorState obj = {.gi = th_data->gi, .state = state, .intf = th_data->intf};
+    for (size_t i = 0; i < th_data->ntests; i++) {
+        size_t ind = th_data->tests_inds[i];
+        th_data->results[ind] = th_data->tests[i].run(&obj);
+        th_data->results[ind].name = th_data->tests[i].name;
+    }
+    th_data->intf->printf("^^^^^^^^^^ Thread %lld finished ^^^^^^^^^^\n", (int) th_data->thrd_id);
+    return NULL;
+}
+
+
 void TestsBattery_run(const TestsBattery *bat,
-    const GeneratorInfo *gen, const CallerAPI *intf)
+    const GeneratorInfo *gen, const CallerAPI *intf,
+    unsigned int nthreads)
 {
     intf->printf("===== Starting '%s' battery =====\n", bat->name);
     void *state = gen->create(intf);
@@ -274,9 +345,50 @@ void TestsBattery_run(const TestsBattery *bat,
     size_t ntests = TestsBattery_ntests(bat);
     TestResults *results = calloc(ntests, sizeof(TestResults));
     time_t tic = time(NULL);
-    for (size_t i = 0; i < ntests; i++) {
-        results[i] = bat->tests[i].run(&obj);
-        results[i].name = bat->tests[i].name;
+
+    if (nthreads == 1) {
+        // One-threaded version
+        for (size_t i = 0; i < ntests; i++) {
+            results[i] = bat->tests[i].run(&obj);
+            results[i].name = bat->tests[i].name;
+        }
+    } else {
+        // Multithreaded version
+        BatteryThread *th = calloc(nthreads, sizeof(BatteryThread));
+        size_t *th_pos = calloc(nthreads, sizeof(size_t));
+        // Preallocate arrays
+        for (size_t i = 0; i < ntests; i++) {
+            size_t ind = i % nthreads;
+            th[ind].ntests++;
+        }
+        for (size_t i = 0; i < nthreads; i++) {
+            th[i].tests = calloc(th->ntests, sizeof(TestDescription));
+            th[i].tests_inds = calloc(th->ntests, sizeof(size_t));
+            th[i].gi = gen;
+            th[i].intf = intf;
+            th[i].results = results;
+        }
+        // Dispatch tests
+        for (size_t i = 0; i < ntests; i++) {
+            size_t ind = i % nthreads;
+            th[ind].tests[th_pos[ind]] = bat->tests[i];
+            th[ind].tests_inds[th_pos[ind]++] = i;
+        }
+        // Run threads
+        for (size_t i = 0; i < nthreads; i++) {        
+            pthread_create(&th[i].thrd_id, NULL, battery_thread, &th[i]);
+        }
+        // Get data from threads
+        for (size_t i = 0; i < nthreads; i++) {
+            pthread_join(th[i].thrd_id, NULL);
+        }
+        // Deallocate array
+        for (size_t i = 0; i < nthreads; i++) {
+            free(th[i].tests);
+            free(th[i].tests_inds);
+        }
+        free(th);
+        free(th_pos);
     }
     time_t toc = time(NULL);
 
@@ -359,16 +471,8 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
         return ans;
     }
     unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
-/*
-    size_t total_len = 1ull << opts->log2_len;
-    if (total_len < (1ull << 24)) {
-        total_len = 1ull << 24;
-    }
-*/
     size_t len = pow(2.0, (nbits_total + 4.0) / 3.0);
     double lambda = pow(len, 3.0) / (4 * pow(2.0, nbits_total));
-//    size_t nsamples = total_len / len;
-//    if (nsamples < 5) nsamples = 5;
     // Show information about the test
     obj->intf->printf("Birthday spacings test\n");
     obj->intf->printf("  ndims = %d; nbits_per_dim = %d; get_lower = %d\n",
@@ -388,54 +492,15 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
         }
     }    
     // Statistical analysis
-    if (opts->nsamples < 5120000) {
-        // Variant a: total number of duplicates
-        obj->intf->printf("  Analysis of total number of duplicates (Poisson distribution)\n");
-        uint64_t ndups_total = 0;
-        for (size_t i = 0; i < opts->nsamples; i++) {
-            ndups_total += ndups[i];
-        }
-        ans.x = (double) ndups_total;
-        ans.p = poisson_pvalue(ans.x, lambda * opts->nsamples);
-        ans.alpha = poisson_cdf(ans.x, lambda * opts->nsamples);
-        obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
-        obj->intf->printf("\n");
-    } else {
-        // Variant b: chi square criteria
-        obj->intf->printf("  Analysis of discrete distribution (chi-square distribution)\n");
-        size_t nbins = lambda + sqrt(lambda) * 4;
-        unsigned int *Oi = calloc(nbins, sizeof(unsigned int));
-        unsigned int Oi_sum = 0;
-        for (size_t i = 0; i < opts->nsamples; i++) {
-            size_t ind = (ndups[i] < nbins) ? ndups[i] : nbins;
-            Oi[ind]++;
-            Oi_sum++;
-        }
-        obj->intf->printf("%6s", "#");
-        for (size_t i = 0; i < nbins; i++) {
-            if (i != nbins - 1) {
-                obj->intf->printf("%5d ", (int) i);
-            } else {
-                obj->intf->printf(">=%3d ", (int) i);
-            }
-        }
-        obj->intf->printf("\n%6s", "Oi:");
-        for (size_t i = 0; i < nbins; i++) {
-            printf("%5d ", Oi[i]);
-        }
-        double Ei = exp(-lambda) * opts->nsamples;
-        ans.x = 0.0; // chi2emp
-        obj->intf->printf("\n%6s", "Ei:");
-        for (size_t i = 0; i < nbins; i++) {
-            obj->intf->printf("%5.0f ", Ei);
-            ans.x += pow(Oi[i] - Ei, 2.0) / Ei;
-            Ei *= lambda / (i + 1.0);
-        }
-        ans.p = chi2_pvalue(ans.x, nbins - 1);
-        ans.alpha = chi2_cdf(ans.x, nbins - 1);
-        obj->intf->printf("\n  x = %g; p = %g\n\n", ans.x, ans.p);
-        free(Oi);
+    uint64_t ndups_total = 0;
+    for (size_t i = 0; i < opts->nsamples; i++) {
+        ndups_total += ndups[i];
     }
+    ans.x = (double) ndups_total;
+    ans.p = poisson_pvalue(ans.x, lambda * opts->nsamples);
+    ans.alpha = poisson_cdf(ans.x, lambda * opts->nsamples);
+    obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
+    obj->intf->printf("\n");
     free(u);
     free(ndups);
     return ans;
@@ -590,7 +655,7 @@ static int cmp_doubles(const void *aptr, const void *bptr)
 TestResults byte_freq_test(GeneratorState *obj)
 {
     size_t block_len = 1ull << 16;
-    size_t nblocks = 1024;
+    size_t nblocks = 4096;
     size_t bytefreq[256];
     
     unsigned int nbytes_per_num = obj->gi->nbits / 8;

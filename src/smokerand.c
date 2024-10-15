@@ -97,19 +97,57 @@ void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
     birthday_test(&obj, &opts);
 }
 
+void print_help()
+{
+    printf("Usage: smokerand battery generator_lib\n");
+    printf(" battery: battery name; supported batteries:\n");
+    printf("   - default\n");
+    printf("   - selftest\n");
+    printf("  generator_lib: name of dynamic library with PRNG that export the functions:\n");
+    printf("   - int gen_getinfo(GeneratorInfo *gi)\n");
+    printf("\n");
+}
+
+
 int main(int argc, char *argv[]) 
 {
     if (argc < 3) {
-        printf("Usage: smokerand battery generator_lib\n");
-        printf(" battery: battery name; supported batteries:\n");
-        printf("   - default\n");
-        printf("   - selftest\n");
-        printf("  generator_lib: name of dynamic library with PRNG that export the functions:\n");
-        printf("   - int gen_getinfo(GeneratorInfo *gi)\n");
-        printf("\n");
+        print_help();
         return 0;
     }
-    CallerAPI intf = CallerAPI_init();
+    int nthreads = 1;
+    int testid = 0;
+
+    for (int i = 3; i < argc; i++) {
+        char argname[32];
+        int argval;
+        char *eqpos = strchr(argv[i], '=');
+        size_t len = strlen(argv[i]);
+        if (len < 3 || (argv[i][0] != '-' || argv[i][1] != '-') || eqpos == NULL) {
+            printf("Argument '%s' should have --argname=argval layout\n", argv[i]);
+            return 1;
+        }
+        size_t name_len = (eqpos - argv[i]) - 2;
+        if (name_len >= 32) name_len = 31;
+        memcpy(argname, &argv[i][2], name_len); argname[name_len] = '\0';
+        argval = atoi(eqpos + 1);
+        if (argval <= 0) {
+            printf("Invalid value of argument '%s'\n", argname);
+            return 1;
+        }
+
+        if (!strcmp(argname, "nthreads")) {
+            nthreads = argval;
+        } else if (!strcmp(argname, "testid")) {
+            testid = argval;
+        } else {
+            printf("Unknown argument '%s'\n", argname);
+            return 1;
+        }
+    }
+    (void) testid;
+
+    CallerAPI intf = CallerAPI_init();    
     char *battery_name = argv[1];
     char *generator_lib = argv[2];
 
@@ -123,9 +161,9 @@ int main(int argc, char *argv[])
         xxtea_test() ? "PASSED" : "FAILED");
 
     if (!strcmp(battery_name, "default")) {
-        battery_default(&mod.gen, &intf);
+        battery_default(&mod.gen, &intf, nthreads);
     } else if (!strcmp(battery_name, "full")) {
-        battery_full(&mod.gen, &intf);
+        battery_full(&mod.gen, &intf, nthreads);
     } else if (!strcmp(battery_name, "selftest")) {
         battery_self_test(&mod.gen, &intf);
     } else if (!strcmp(battery_name, "birthday")) {

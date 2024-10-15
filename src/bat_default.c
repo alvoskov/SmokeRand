@@ -23,10 +23,10 @@ static uint64_t get_bits64_from32(void *state)
     return (x << 32) | y;
 }
 
-// log2len = 30 for improved test
+
 static TestResults bspace64_1d_test(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 64, .ndims = 1, .nsamples = 30, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 64, .ndims = 1, .nsamples = 50, .get_lower = 1};
     if (obj->gi->nbits == 64) {
         return bspace_nd_test(obj, &opts);
     } else {
@@ -41,7 +41,7 @@ static TestResults bspace64_1d_test(GeneratorState *obj)
 
 static TestResults bspace32_2d_test(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 2, .nsamples = 30, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 2, .nsamples = 10, .get_lower = 1};
     return bspace_nd_test(obj, &opts);
 }
 
@@ -83,9 +83,9 @@ static TestResults collisionover20_2d(GeneratorState *obj)
 }
 
 
-static TestResults gap_inv256(GeneratorState *obj)
+static TestResults gap_inv512(GeneratorState *obj)
 {
-    return gap_test(obj, 8);
+    return gap_test(obj, 9);
 }
 
 
@@ -115,7 +115,7 @@ static TestResults linearcomp_low(GeneratorState *obj)
     return linearcomp_test(obj, 100000, 0);
 }
 
-void battery_default(GeneratorInfo *gen, CallerAPI *intf)
+void battery_default(GeneratorInfo *gen, CallerAPI *intf, unsigned int nthreads)
 {
     const TestDescription tests[] = {
         {"monobit_freq", monobit_freq_test},
@@ -129,7 +129,7 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf)
         {"collover5_8d", collisionover5_8d},
         {"collover13_3d", collisionover13_3d},
         {"collover20_2d", collisionover20_2d},
-        {"gap_inv256", gap_inv256},
+        {"gap_inv512", gap_inv512},
         {"linearcomp_high", linearcomp_high},
         {"linearcomp_mid", linearcomp_mid},
         {"linearcomp_low", linearcomp_low},
@@ -141,5 +141,5 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf)
     const TestsBattery bat = {
         "default", tests
     };
-    TestsBattery_run(&bat, gen, intf);
+    TestsBattery_run(&bat, gen, intf, nthreads);
 }

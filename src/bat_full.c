@@ -132,7 +132,7 @@ static TestResults linearcomp_low(GeneratorState *obj)
     return linearcomp_test(obj, 500000, 0);
 }
 
-void battery_full(GeneratorInfo *gen, CallerAPI *intf)
+void battery_full(GeneratorInfo *gen, CallerAPI *intf, unsigned int nthreads)
 {
     const TestDescription tests[] = {
         {"monobit_freq", monobit_freq_test},
@@ -161,5 +161,5 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf)
     const TestsBattery bat = {
         "default", tests
     };
-    TestsBattery_run(&bat, gen, intf);
+    TestsBattery_run(&bat, gen, intf, nthreads);
 }
