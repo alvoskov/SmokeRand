@@ -7,15 +7,10 @@
  * (but hard to memorize) multiplier 0xfc0072fa0b15f4fd from 
  * https://doi.org/10.1002/spe.3030 doesn't improve PractRand 0.94 results.
  *
- * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * All rights reserved.
- *
- * This software is provided under the Apache 2 License.
- *
- * In scientific publications which used this software, a reference to it
- * would be appreciated.
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 

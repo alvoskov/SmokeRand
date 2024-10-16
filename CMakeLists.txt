@@ -27,7 +27,8 @@ find_library(M_LIB m)
 
 # Executables
 add_executable(smokerand src/smokerand.c
-    src/smokerand_core.c include/smokerand/smokerand_core.h
+    src/core.c include/smokerand/core.h
+    src/coretests.c include/smokerand/coretests.h
     src/entropy.c include/smokerand/entropy.h
     src/lineardep.c include/smokerand/lineardep.h
     src/bat_default.c include/smokerand/bat_default.h
@@ -37,7 +38,7 @@ target_include_directories(smokerand PRIVATE include)
 
 # Examples of plugins, i.e. modules with PRNGs
 foreach(prng_name alfib coveyou64 kiss64 kiss93 kiss99
-    lcg69069 lcg64 lcg64prime lcg128 minstd mt19937 mwc64 mwc128
+    lcg69069 lcg64 lcg64prime lcg96 lcg128 minstd mt19937 mwc64 mwc128
     rrmxmx sezgin63 shr3 xorwow xoroshiro128plus xoroshiro1024star xsh)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c include/smokerand/cinterface.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})

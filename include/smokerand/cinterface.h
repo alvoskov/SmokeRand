@@ -1,6 +1,6 @@
 #ifndef __SMOKERAND_CINTERFACE_H
 #define __SMOKERAND_CINTERFACE_H
-#include "smokerand/smokerand_core.h"
+#include "smokerand/core.h"
 
 #define PRNG_CMODULE_PROLOG SHARED_ENTRYPOINT_CODE
 

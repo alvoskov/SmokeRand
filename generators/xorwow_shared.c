@@ -1,8 +1,7 @@
 /**
  * @file xorwow_shared.c
  * @brief xorwow pseudorandom number generator.
- * @details Fails the next test from BigCrush:
- * - 81  LinearComp, r = 29             1 - eps1
+ * @details Fails bspace8_8d, linearcomp_low and matrixrank tests.
  *
  * References:
  *
@@ -11,15 +10,12 @@
  * 2. cuRAND library programming guide.
  *    https://docs.nvidia.com/cuda/curand/testing.html
  *
- * @copyright xorwow algorithm is developed by G. Marsaglia.
- *
- * Implementation for TestU01-threads:
- * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * All rights reserved.
+ * This software is licensed under the MIT license.
  *
- * This software is provided under the Apache 2 License.
+ * xorwow algorithm is developed by G.Marsaglia.
  */
 #include "smokerand/cinterface.h"
 

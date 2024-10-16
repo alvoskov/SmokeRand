@@ -2,27 +2,12 @@
  * @file shr3_shared.c
  * @brief An implementation of SHR3 - classic 32-bit LSFR generator
  * proposed by G. Marsaglia.
- * @details Fails SmallCrush:
- *
- *           Test                          p-value
- *     ----------------------------------------------
- *      1  BirthdaySpacings                 eps
- *      2  Collision                        eps
- *      6  MaxOft                           eps
- *      8  MatrixRank                       eps
- *     10  RandomWalk1 H                    eps
- *     ----------------------------------------------
- *     All other tests were passed
+ * @details Fails almost all statistical tests.
  *
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * All rights reserved.
- *
- * This software is provided under the Apache 2 License.
- *
- * In scientific publications which used this software, a reference to it
- * would be appreciated.
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 

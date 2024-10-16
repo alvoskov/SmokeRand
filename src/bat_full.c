@@ -1,10 +1,11 @@
 #include "smokerand/bat_full.h"
+#include "smokerand/coretests.h"
 #include "smokerand/lineardep.h"
 #include "smokerand/entropy.h"
 
 static TestResults bspace32_1d_test(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 32768, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 1 << 21, .get_lower = 1};
     return bspace_nd_test(obj, &opts);
 }
 
@@ -26,7 +27,7 @@ static uint64_t get_bits64_from32(void *state)
 // log2len = 30 for improved test
 static TestResults bspace64_1d_test(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 64, .ndims = 1, .nsamples = 100, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 64, .ndims = 1, .nsamples = 200, .get_lower = 1};
     if (obj->gi->nbits == 64) {
         return bspace_nd_test(obj, &opts);
     } else {
@@ -41,19 +42,19 @@ static TestResults bspace64_1d_test(GeneratorState *obj)
 
 static TestResults bspace32_2d_test(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 2, .nsamples = 100, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 2, .nsamples = 200, .get_lower = 1};
     return bspace_nd_test(obj, &opts);
 }
 
 static TestResults bspace21_3d_test(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 21, .ndims = 3, .nsamples = 100, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 21, .ndims = 3, .nsamples = 200, .get_lower = 1};
     return bspace_nd_test(obj, &opts);
 }
 
 static TestResults bspace8_8d_test(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 8, .ndims = 8, .nsamples = 100, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 8, .ndims = 8, .nsamples = 200, .get_lower = 1};
     return bspace_nd_test(obj, &opts);
 }
 

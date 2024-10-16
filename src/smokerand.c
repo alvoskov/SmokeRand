@@ -1,4 +1,12 @@
-#include "smokerand/smokerand_core.h"
+/**
+ * @file smokerand.c
+ * @brief SmokeRand command line interface.
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
+#include "smokerand/coretests.h"
 #include "smokerand/lineardep.h"
 #include "smokerand/entropy.h"
 #include "smokerand/bat_default.h"
@@ -57,7 +65,8 @@ void birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
 {
     uint64_t *x = calloc(opts->n, sizeof(uint64_t));
     if (x == NULL) {
-        obj->intf->printf("  Not enough memory (8GiB is required)\n");
+        obj->intf->printf("  Not enough memory (2^%.0f bytes is required)\n",
+            log2(opts->n));
         return;
     }
     double lambda = pow(opts->n, 2.0) / pow(2.0, obj->gi->nbits - opts->e + 1.0);
@@ -147,7 +156,7 @@ int main(int argc, char *argv[])
     }
     (void) testid;
 
-    CallerAPI intf = CallerAPI_init();    
+    CallerAPI intf = (nthreads == 1) ? CallerAPI_init() : CallerAPI_init_mthr();
     char *battery_name = argv[1];
     char *generator_lib = argv[2];
 

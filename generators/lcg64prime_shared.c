@@ -11,15 +11,10 @@
  *    http://dx.doi.org/10.1090/S0025-5718-99-00996-5
  * 2. https://en.wikipedia.org/wiki/Linear_congruential_generator
  *
- * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * All rights reserved.
- *
- * This software is provided under the Apache 2 License.
- *
- * In scientific publications which used this software, a reference to it
- * would be appreciated.
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 

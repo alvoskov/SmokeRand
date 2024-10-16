@@ -1,3 +1,13 @@
+/**
+ * @file core.h
+ * @brief Subroutines and special functions required for implementation
+ * of statistical tests.
+ *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #ifndef __SMOKERAND_CORE_H
 #define __SMOKERAND_CORE_H
 #include <stdint.h>
@@ -61,7 +71,8 @@ typedef struct {
     int (*strcmp)(const char *lhs, const char *rhs); ///< Pointer to strcmp function
 } CallerAPI;
 
-CallerAPI CallerAPI_init();
+CallerAPI CallerAPI_init(void);
+CallerAPI CallerAPI_init_mthr(void);
 
 /**
  * @brief Keeps the description of pseudorandon number generator.
@@ -141,29 +152,6 @@ double chi2_cdf(double x, unsigned long f);
 double chi2_pvalue(double x, unsigned long f);
 void radixsort32(uint64_t *x, size_t len);
 void radixsort64(uint64_t *x, size_t len);
-
-
-/////////////////////////////
-///// Statistical tests /////
-/////////////////////////////
-
-/**
- * @brief Options for n-dimensional birthday spacings tests.
- */
-typedef struct {
-    unsigned int nbits_per_dim; ///< Number of bits per dimension.
-    unsigned int ndims; ///< Number of dimensions.
-    unsigned int nsamples; ///< Number of samples.
-    int get_lower; ///< 0/1 - use lower/higher part of PRNG output.
-} BSpaceNDOptions;
-
-
-TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts);
-TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts);
-TestResults gap_test(GeneratorState *obj, unsigned int shl);
-TestResults monobit_freq_test(GeneratorState *obj);
-TestResults byte_freq_test(GeneratorState *obj);
-
 
 
 ////////////////////////////////////////

@@ -1,5 +1,12 @@
+/**
+ * @file lineardep.c
+ * @brief Implementation of linear complexity and matrix rank tests.
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/lineardep.h"
-#include "smokerand/smokerand_core.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -74,7 +81,21 @@ static size_t calc_bin_matrix_rank(uint32_t *a, size_t n)
 }
 
 
-
+/**
+ * @brief Matrix rank tests based on generation of random matrices.
+ * @details References:
+ * 
+ * 1. Rukhin A., Soto J. et al. A Statistical Test Suite for Random and
+ *    Pseudorandom Number Generators for Cryptographic Applications //
+ *    NIST SP 800-22 Rev. 1a. https://doi.org/10.6028/NIST.SP.800-22r1a
+ * 2. Kolchin V. F. Random graphs. Cambridge University Press. 1998.
+ *    ISBN 9780511721342
+ *    https://doi.org/10.1017/CBO9780511721342
+ * 3. OEIS A048651 (https://oeis.org/A048651).
+ *
+ * @param n Size of nxn square matrix.
+ * @param max_nbits Number of lower bits that will be used (8, 32, 64)
+ */
 TestResults matrixrank_test(GeneratorState *obj, size_t n, unsigned int max_nbits)
 {
     int nmat = 32, Oi[3] = {0, 0, 0};
@@ -125,8 +146,13 @@ TestResults matrixrank_test(GeneratorState *obj, size_t n, unsigned int max_nbit
 }
 
 
-
-static inline void xorbytes(uint8_t *a, uint8_t *b, size_t len)
+/**
+ * @brief Performs the a[i] ^= b[i] operation for the given vectors.
+ * @param a    This vector (a) will be modified.
+ * @param b    This vector (b) will not be modified.
+ * @param len  Vectors lengths.
+ */
+static inline void xorbytes(uint8_t *a, const uint8_t *b, size_t len)
 {
 /*
     // Simpler but non optimized code
@@ -146,7 +172,13 @@ static inline void xorbytes(uint8_t *a, uint8_t *b, size_t len)
     }    
 }
 
-
+/**
+ * @brief Berlekamp-Massey algorithm for computation of linear complexity
+ * of bit sequence.
+ * @param s Bit sequence, each byte corresponds to ONE bit.
+ * @param n Number of bits (length of s array).
+ * @return Linear complexity.
+ */
 size_t berlekamp_massey(const uint8_t *s, size_t n)
 {
     size_t L = 0; // Complexity
@@ -180,11 +212,15 @@ size_t berlekamp_massey(const uint8_t *s, size_t n)
 
 
 /**
- * @brief Linear complexity test.
- * @details
- * https://doi.org/10.1016/S0020-0190(97)00004-5
+ * @brief Linear complexity test based on Berlekamp-Massey algorithm.
+ * @details Formula for p-value computation may be found in:
+ *
+ * 1. M.Z. Wang. Linear complexity profiles and jump complexity //
+ *    // Information Processing Letters. 1997. V. 61. P. 165-168.
+ *    https://doi.org/10.1016/S0020-0190(97)00004-5
+ *
  * @param nbits Number of bits (recommended value is 200000)
- * @param bitpos Bit position (0 is the lowest);
+ * @param bitpos Bit position (0 is the lowest).
  */
 TestResults linearcomp_test(GeneratorState *obj, size_t nbits, unsigned int bitpos)
 {

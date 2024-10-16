@@ -1,21 +1,12 @@
 /**
  * @file sezgin63_shared.c
  * @brief Implementation of 63-bit LCG with prime modulus.
- * @details Passes SmallCrush and Crush, but systematically gives
- * suspect p-values at BigCrush test N13 (BirthdaySpacings, t = 2).
- *
- * References:
- * - F. Sezgin, T.M. Sezgin. Finding the best portable
- *   congruential random number generators // Computer Physics
- *   Communications. 2013. V. 184. N 8. P. 1889-1897.
- *   https://doi.org/10.1016/j.cpc.2013.03.013.
+ * @details Gives suspicious values at some bspace tests.
  *
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * All rights reserved.
- *
- * This software is provided under the Apache 2 License.
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 

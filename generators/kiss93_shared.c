@@ -2,19 +2,13 @@
  * @file kiss93_shared.c
  * @brief KISS93 pseudorandom number generator. It passes SmallCrush
  * but fails the LinearComp (r = 29) test in the Crush battery (N72).
+ *
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * @copyright The KISS93 algorithm is developed by George Marsaglia.
+ * This software is licensed under the MIT license.
  *
- * Implementation for TestU01-threads:
- *
- * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
- * alvoskov@gmail.com
- *
- * All rights reserved.
- *
- * This software is provided under the Apache 2 License.
+ * The KISS93 algorithm is developed by George Marsaglia.
  */
 #include "smokerand/cinterface.h"
 

@@ -1,4 +1,5 @@
 #include "smokerand/bat_default.h"
+#include "smokerand/coretests.h"
 #include "smokerand/lineardep.h"
 #include "smokerand/entropy.h"
 
@@ -81,7 +82,6 @@ static TestResults collisionover20_2d(GeneratorState *obj)
     BSpaceNDOptions opts = {.nbits_per_dim = 20, .ndims = 2, .get_lower = 1};
     return collisionover_test(obj, &opts);
 }
-
 
 static TestResults gap_inv512(GeneratorState *obj)
 {

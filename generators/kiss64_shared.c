@@ -9,19 +9,12 @@
  * - https://www.thecodingforums.com/threads/64-bit-kiss-rngs.673657/
  * - https://ssau.ru/pagefiles/sbornik_pit_2021.pdf
  *
- * @copyright KISS64 was developed by George Marsaglia.
- * 
- * Implementation for TestU01-threads:
- *
- * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * All rights reserved.
+ * This software is licensed under the MIT license.
  *
- * This software is provided under the Apache 2 License.
- *
- * In scientific publications which used this software, a reference to it
- * would be appreciated.
+ * KISSS64 algorithm was developed by George Marsaglia.
  */
 #include "smokerand/cinterface.h"
 

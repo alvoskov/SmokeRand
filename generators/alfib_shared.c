@@ -8,6 +8,8 @@
  * \f]
  * and returns higher 32 bits. The initial values in the ring buffer
  * are filled by the 64-bit PCG generator.
+ *
+ * Fails bspace32_1d and gap_inv512 tests.
  * 
  * Sources of parameters:
  *
@@ -16,12 +18,7 @@
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * All rights reserved.
- *
- * This software is provided under the Apache 2 License.
- *
- * In scientific publications which used this software, a reference to it
- * would be appreciated.
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 
@@ -42,7 +39,7 @@ PRNG_CMODULE_PROLOG
 
 
 typedef struct {
-    uint64_t U[LFIB_A + 1]; ///< Ring buffer (only values 1..17 are used)
+    uint64_t U[LFIB_A + 1]; ///< Ring buffer (U[0] is not used)
     int i;
     int j;
 } ALFib_State;

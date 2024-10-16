@@ -1,12 +1,26 @@
-/// MT19937 algorithm
-// https://github.com/dajobe/libmtwist
-// http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
+/**
+ * @file mt19937_shared.c
+ * @brief Mersenne twister (MT19937) implementation.
+ * @details The MT19937 algorithm is developed by M. Matsumoto and
+ * T. Nishimura. This implementation is based on public domain code
+ * by dajobe [1].
+ *
+ * 1. https://github.com/dajobe/libmtwist
+ * 2. http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
+ * 3. M. Matsumoto and T. Nishimura, "Mersenne Twister: A 623-dimensionally
+ *    equidistributed uniform pseudorandom number generator" // ACM Trans.
+ *    on Modeling and Computer Simulation. 1998. V. 8. N 1. P.3-30.
+ *    https://doi.org/10.1145/272991.272995
+ *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
-
-
 
 #define MTWIST_N           624
 #define MTWIST_M           397
