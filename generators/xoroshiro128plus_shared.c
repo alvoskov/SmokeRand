@@ -2,7 +2,7 @@
  * @file xoroshiro128plus_shared.c
  * @brief xoroshiro128+ pseurorandom number generator.
  * @details The implementation is based on public domain code by D.Blackman
- * and S.Vigna. This PRNG fails matrixrank and linearcomp tests.
+ * and S.Vigna (vigna@acm.org). This PRNG fails matrixrank and linearcomp tests.
  *
  * References:
  * 1. D. Blackman, S. Vigna. Scrambled Linear Pseudorandom Number Generators
@@ -25,7 +25,7 @@ static inline uint64_t rotl(const uint64_t x, int k)
 }
 
 /**
- * @brief xoroshiro128+ PRNG state.
+ * @brief xoroshiro128+ PRNG state. Mustn't be initialized as (0, 0).
  */
 typedef struct {
     uint64_t s[2];
@@ -47,7 +47,7 @@ static uint64_t get_bits(void *state)
 static void *create(const CallerAPI *intf)
 {
     Xoroshiro128PlusState *obj = intf->malloc(sizeof(Xoroshiro128PlusState));
-    obj->s[0] = intf->get_seed64() | 0x1;
+    obj->s[0] = intf->get_seed64();
     obj->s[1] = intf->get_seed64() | 0x1;
     return (void *) obj;    
 }

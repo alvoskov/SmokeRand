@@ -9,6 +9,11 @@ static TestResults bspace32_1d_test(GeneratorState *obj)
     return bspace_nd_test(obj, &opts);
 }
 
+static TestResults bspace32_1d_hi_test(GeneratorState *obj)
+{
+    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 4096, .get_lower = 0};
+    return bspace_nd_test(obj, &opts);
+}
 
 
 typedef struct {
@@ -111,6 +116,7 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf, unsigned int nthreads)
         {"byte_freq", byte_freq_test},
         {"bspace64_1d", bspace64_1d_test},
         {"bspace32_1d", bspace32_1d_test},
+        {"bspace32_1d_hi", bspace32_1d_hi_test},
         {"bspace32_2d", bspace32_2d_test},
         {"bspace21_3d", bspace21_3d_test},
         {"bspace16_4d", bspace16_4d_test},

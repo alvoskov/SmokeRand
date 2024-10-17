@@ -1,8 +1,7 @@
 # SmokeRand
-SmokeRand is a set of tests for pseudorandom number generators.
-
-PRNGs for SmokeRand should return either 32-bit or 64-bit unsigned uniformly
-distributed integers.
+SmokeRand is a set of tests for pseudorandom number generators. PRNGs for
+SmokeRand should return either 32-bit or 64-bit unsigned uniformly distributed
+unsigned integers.
 
 Implemented algorithms:
 
@@ -46,7 +45,7 @@ Desired tests:
 2. Chi2 frequency test for bytes and 16-bit chunks
 3. Birthday spacings test
 4. Gap test
-5. Matrix rank test: 512, 1024, 2048, 4096, 8192(?)
+5. Matrix rank test: 4096, 8192
 6. Linear complexity test
 7. CollisionOver test.
 

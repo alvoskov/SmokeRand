@@ -51,7 +51,7 @@ static uint64_t get_bits(void *state)
     obj->U[obj->i] = x;
     if(--obj->i == 0) obj->i = LFIB_A;
 	if(--obj->j == 0) obj->j = LFIB_A;
-    return x >> 32;
+    return x;
 }
 
 static void *create(const CallerAPI *intf)
@@ -66,4 +66,4 @@ static void *create(const CallerAPI *intf)
     return (void *) obj;
 }
 
-MAKE_UINT32_PRNG("ALFib", NULL)
+MAKE_UINT64_PRNG("ALFib", NULL)

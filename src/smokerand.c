@@ -18,6 +18,85 @@
 
 
 
+
+/**
+ * @brief Keeps PRNG speed measurements results.
+ */
+typedef struct
+{
+    double ns_per_call; ///< Nanoseconds per call
+    double ticks_per_call; ///< Processor ticks per call
+} SpeedResults;
+
+/**
+ * @brief PRNG speed measurement for uint32 output
+ */
+static SpeedResults measure_speed(GeneratorInfo *gen, const CallerAPI *intf)
+{
+    void *state = gen->create(intf);
+    SpeedResults results;
+    double ns_total = 0.0;
+    for (size_t niter = 2; ns_total < 0.5e9; niter <<= 1) {
+        clock_t tic = clock();
+        uint64_t tic_proc = cpuclock();
+        uint64_t sum = 0;
+        for (size_t i = 0; i < niter; i++) {
+            sum += gen->get_bits(state);
+        }
+        uint64_t toc_proc = cpuclock();
+        clock_t toc = clock();
+        ns_total = 1.0e9 * (toc - tic) / CLOCKS_PER_SEC;
+        results.ns_per_call = ns_total / niter;
+        results.ticks_per_call = (double) (toc_proc - tic_proc) / niter;
+    }
+    free(state);
+    return results;
+}
+
+static void *dummy_create(const CallerAPI *intf)
+{
+    (void) intf;
+    return NULL;
+}
+
+static uint64_t dummy_get_bits(void *state)
+{
+    (void) state;
+    return 0;
+}
+
+
+void battery_speed(GeneratorInfo *gen, const CallerAPI *intf)
+{
+    GeneratorInfo dummy_gen = {.name = "dummy", .create = dummy_create,
+        .get_bits = dummy_get_bits, .nbits = gen->nbits,
+        .self_test = NULL};
+    printf("===== Generator speed measurements =====\n");
+    SpeedResults speed_full = measure_speed(gen, intf);
+    SpeedResults speed_dummy = measure_speed(&dummy_gen, intf);
+    double ns_per_call_corr = speed_full.ns_per_call - speed_dummy.ns_per_call;
+    double ticks_per_call_corr = speed_full.ticks_per_call - speed_dummy.ticks_per_call;
+    double cpb_corr = ticks_per_call_corr / (gen->nbits / 8);
+    double gb_per_sec = (double) gen->nbits / 8.0 / (1.0e-9 * ns_per_call_corr) / pow(2.0, 30.0);
+
+    printf("Generator name:    %s\n", gen->name);
+    printf("Output size, bits: %d\n", (int) gen->nbits);
+    printf("Nanoseconds per call:\n");
+    printf("  Raw result:                %g\n", speed_full.ns_per_call);
+    printf("  For empty 'dummy' PRNG:    %g\n", speed_dummy.ns_per_call);
+    printf("  Corrected result:          %g\n", ns_per_call_corr);
+    printf("  Corrected result (GB/sec): %g\n", gb_per_sec);
+    printf("CPU ticks per call:\n");
+    printf("  Raw result:                %g\n", speed_full.ticks_per_call);
+    printf("  For empty 'dummy' PRNG:    %g\n", speed_dummy.ticks_per_call);
+    printf("  Corrected result:          %g\n", ticks_per_call_corr);
+    printf("  Corrected result (cpB):    %g\n\n", cpb_corr);
+}
+
+
+
+
+
 static inline void TestResults_print(const TestResults obj)
 {
     printf("%s: p = %.3g; xemp = %g", obj.name, obj.p, obj.x);
@@ -209,6 +288,8 @@ int main(int argc, char *argv[])
         battery_full(gi, &intf, opts.nthreads);
     } else if (!strcmp(battery_name, "selftest")) {
         battery_self_test(gi, &intf);
+    } else if (!strcmp(battery_name, "speed")) {
+        battery_speed(gi, &intf);
     } else if (!strcmp(battery_name, "birthday")) {
         battery_birthday(gi, &intf);
     } else {

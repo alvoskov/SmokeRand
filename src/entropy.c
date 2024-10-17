@@ -71,7 +71,7 @@ static uint64_t mix_rdseed(const uint64_t x)
     return x ^ rd;
 }
 
-static uint64_t cpuclock(void)
+uint64_t cpuclock(void)
 {
     return __rdtsc();
 }
