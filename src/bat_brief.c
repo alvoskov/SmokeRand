@@ -1,7 +1,20 @@
+/**
+ * @file bat_brief.c
+ * @brief The `brief` battery of tests that runs in about 1 minute.
+ *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/bat_default.h"
 #include "smokerand/coretests.h"
 #include "smokerand/lineardep.h"
 #include "smokerand/entropy.h"
+
+///////////////////////////////////
+///// Birthday spacings tests /////
+///////////////////////////////////
 
 static TestResults bspace32_1d_test(GeneratorState *obj)
 {
@@ -69,29 +82,37 @@ static TestResults bspace8_8d_test(GeneratorState *obj)
     return bspace_nd_test(obj, &opts);
 }
 
+///////////////////////////////
+///// CollisionOver tests /////
+///////////////////////////////
+
 static TestResults collisionover8_5d(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 8, .ndims = 5, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 8, .ndims = 5, .nsamples = 3, .get_lower = 1};
     return collisionover_test(obj, &opts);
 }
 
 static TestResults collisionover5_8d(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 5, .ndims = 8, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 5, .ndims = 8, .nsamples = 3, .get_lower = 1};
     return collisionover_test(obj, &opts);
 }
 
 static TestResults collisionover13_3d(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 13, .ndims = 3, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 13, .ndims = 3, .nsamples = 3, .get_lower = 1};
     return collisionover_test(obj, &opts);
 }
 
 static TestResults collisionover20_2d(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 20, .ndims = 2, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 20, .ndims = 2, .nsamples = 3, .get_lower = 1};
     return collisionover_test(obj, &opts);
 }
+
+///////////////////////////////////
+///// Linear complexity tests /////
+///////////////////////////////////
 
 static TestResults linearcomp_high(GeneratorState *obj)
 {
@@ -116,7 +137,7 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf, unsigned int nthreads)
         {"byte_freq", byte_freq_test},
         {"bspace64_1d", bspace64_1d_test},
         {"bspace32_1d", bspace32_1d_test},
-        {"bspace32_1d_hi", bspace32_1d_hi_test},
+        {"bspace32_1d_high", bspace32_1d_hi_test},
         {"bspace32_2d", bspace32_2d_test},
         {"bspace21_3d", bspace21_3d_test},
         {"bspace16_4d", bspace16_4d_test},

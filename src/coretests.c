@@ -184,34 +184,45 @@ TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     uint64_t *u = calloc(n, sizeof(uint64_t));
     uint64_t Oi[4] = {1ull << opts->ndims * opts->nbits_per_dim, 0, 0, 0};
     double nstates = Oi[0];
+    double lambda = (n - opts->ndims + 1.0) / nstates;
+    double mu = nstates * (lambda - 1 + exp(-lambda));
     TestResults ans;
     ans.name = "CollisionOver";
     obj->intf->printf("CollisionOver test\n");
-    collisionover_make_tuples(opts, obj->gi, obj->state, u, n);
-    // Find collisions by sorting the array
-    radixsort64(u, n);
-    size_t ncopies = 0;
-    for (size_t i = 0; i < n - 1; i++) {
-        if (u[i] == u[i + 1]) {
-            ncopies++;
-        } else {
-            Oi[(ncopies < 3) ? (ncopies + 1) : 3]++;
-            Oi[0]--;
-            ncopies = 0;
+    obj->intf->printf("  ndims = %d; nbits_per_dim = %d; get_lower = %d\n",
+        opts->ndims, opts->nbits_per_dim, opts->get_lower);
+    obj->intf->printf("  nsamples = %lld; len = %lld, mu = %g\n",
+        opts->nsamples, n, mu);
+
+    ans.x = 0;
+    for (size_t i = 0; i < opts->nsamples; i++) {
+        collisionover_make_tuples(opts, obj->gi, obj->state, u, n);
+        // Find collisions by sorting the array
+        radixsort64(u, n);
+        size_t ncopies = 0;
+        for (size_t i = 0; i < n - 1; i++) {
+            if (u[i] == u[i + 1]) {
+                ncopies++;
+            } else {
+                Oi[(ncopies < 3) ? (ncopies + 1) : 3]++;
+                Oi[0]--;
+                ncopies = 0;
+            }
         }
     }
-    double lambda = (n - opts->ndims + 1.0) / nstates;
-    double Ei = exp(-lambda) * nstates;
-    double mu = nstates * (lambda - 1 + exp(-lambda));
-    ans.x = Oi[2];
-    ans.p = poisson_pvalue(ans.x, mu);
-    ans.alpha = poisson_cdf(ans.x, mu);
+    ans.x += Oi[2];
+    ans.p = poisson_pvalue(ans.x, mu * opts->nsamples);
+    ans.alpha = poisson_cdf(ans.x, mu * opts->nsamples);
+    // Frequency table
+    double Ei = exp(-lambda) * nstates * opts->nsamples;
     obj->intf->printf("  %5s %16s %16s\n", "Freq", "Oi", "Ei");
     for (int i = 0; i < 4; i++) {
         obj->intf->printf("  %5d %16lld %16.1f\n", i, Oi[i], Ei);
         Ei *= lambda / (i + 1.0);
     }
-    obj->intf->printf("  lambda = %g, mu = %g\n", lambda, mu);
+    // Calculate statistics for p-value
+    obj->intf->printf("  lambda = %g, mu = %g * %d\n",
+        lambda, mu, (int) opts->nsamples);
     obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
     free(u);

@@ -108,18 +108,33 @@ CallerAPI CallerAPI_init_mthr(void)
 
 
 
-const char *interpret_pvalue(double pvalue)
+PValueCategory get_pvalue_category(double pvalue)
 {
-    const double pvalue_fail = 1.0e-10;
-    const double pvalue_warning = 1.0e-3;
-    if (pvalue < pvalue_fail || pvalue > 1.0 - pvalue_fail) {
-        return "FAIL";
-    } else if (pvalue < pvalue_warning || pvalue > 1.0 - pvalue_warning) {
-        return "SUSPICIOUS";
+    const double pvalue_fail_val = 1.0e-10;
+    const double pvalue_warn_val = 1.0e-3;
+    if (pvalue < pvalue_fail_val || pvalue > 1.0 - pvalue_fail_val) {
+        return pvalue_failed;
+    } else if (pvalue < pvalue_warn_val || pvalue > 1.0 - pvalue_warn_val) {
+        return pvalue_warning;
     } else {
-        return "Ok";
+        return pvalue_passed;
     }
 }
+
+const char *interpret_pvalue(double pvalue)
+{
+    switch (get_pvalue_category(pvalue)) {
+    case pvalue_failed:
+        return "FAIL";
+    case pvalue_warning:
+        return "SUSPICIOUS";
+    case pvalue_passed:
+        return "Ok";
+    default:
+        return "???";
+    }
+}
+
 
 
 
@@ -463,17 +478,30 @@ void TestsBattery_run(const TestsBattery *bat,
         printf("-");
     }
     printf("\n");
+    unsigned int npassed = 0, nwarnings = 0, nfailed = 0; 
     for (size_t i = 0; i < ntests; i++) {
         printf("  %3d %20s %10.3g %10.3g %10.3g %10s\n",
             (int) i + 1, results[i].name, results[i].x, results[i].p,
             results[i].alpha,
             interpret_pvalue(results[i].p));
+        switch (get_pvalue_category(results[i].p)) {
+        case pvalue_passed:
+            npassed++; break;
+        case pvalue_warning:
+            nwarnings++; break;
+        case pvalue_failed:
+            nfailed++; break;
+        }
     }
+    printf("\n");
+    printf("Passed:       %u\n", npassed);
+    printf("Suspicious:   %u\n", nwarnings);
+    printf("Failed:       %u\n", nfailed);
     unsigned int nseconds_total = toc - tic;
     int s = nseconds_total % 60;
     int m = (nseconds_total / 60) % 60;
     int h = (nseconds_total / 3600);
-    printf("\nElapsed time: %.2d:%.2d:%.2d\n\n", h, m, s);    
+    printf("Elapsed time: %.2d:%.2d:%.2d\n\n", h, m, s);    
     free(results);
     free(state);
 }

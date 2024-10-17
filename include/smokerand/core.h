@@ -143,7 +143,14 @@ void TestsBattery_run(const TestsBattery *bat,
     unsigned int nthreads);
 
 
+typedef enum {
+    pvalue_passed = 0,
+    pvalue_warning = 1,
+    pvalue_failed = 2
+} PValueCategory;
+
 const char *interpret_pvalue(double pvalue);
+PValueCategory get_pvalue_category(double pvalue);
 double ks_pvalue(double x);
 double gammainc(double a, double x);
 double poisson_cdf(double x, double lambda);

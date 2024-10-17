@@ -141,7 +141,8 @@ TestResults matrixrank_test(GeneratorState *obj, size_t n, unsigned int max_nbit
     }
     ans.p = exp(-0.5 * ans.x);
     ans.alpha = -expm1(-0.5 * ans.x);
-    obj->intf->printf("  x = %g; p = %g; 1-p = %g\n\n", ans.x, ans.p, ans.alpha);
+    obj->intf->printf("  x = %g; p = %g; 1-p = %g\n", ans.x, ans.p, ans.alpha);
+    obj->intf->printf("\n");
     return ans;
 }
 
@@ -240,6 +241,7 @@ TestResults linearcomp_test(GeneratorState *obj, size_t nbits, unsigned int bitp
     double z = (ans.x - mu) / sigma;
     ans.p = 0.5 * erfc(-z / sqrt(2.0));
     ans.alpha = 0.5 + 0.5 * erf(-z / sqrt(2.0));
-    obj->intf->printf("  L = %g; z = %g; p = %g\n\n", ans.x, z, ans.p);
+    obj->intf->printf("  L = %g; z = %g; p = %g\n", ans.x, z, ans.p);
+    obj->intf->printf("\n");
     return ans;
 }
