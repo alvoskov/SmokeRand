@@ -1,6 +1,6 @@
 # SmokeRand
-SmokeRand is a set of tests for pseudorandom number generators. PRNGs for
-SmokeRand should return either 32-bit or 64-bit unsigned uniformly distributed
+SmokeRand is a set of tests for pseudorandom number generators. Tested
+generators should return either 32-bit or 64-bit unsigned uniformly distributed
 unsigned integers.
 
 Implemented algorithms:
@@ -94,8 +94,8 @@ The birthday test generates input values using the next algorithm:
 
 # Modifications of linear complexity tests
 
- Name            | Bit for 32/64-bit PRNG | 
------------------|------------------------|
- linearcomp_high | 31/63                  |
- linearcomp_mid  | 15/31                  |
- linearcomp_low  | 0/0                    |
+ Name            | Bit for 32/64-bit PRNG
+-----------------|------------------------
+ linearcomp_high | 31/63
+ linearcomp_mid  | 15/31
+ linearcomp_low  | 0/0
