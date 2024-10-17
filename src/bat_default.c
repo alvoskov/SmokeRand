@@ -46,15 +46,58 @@ static TestResults bspace32_2d_test(GeneratorState *obj)
     return bspace_nd_test(obj, &opts);
 }
 
+static TestResults bspace32_2d_test_high(GeneratorState *obj)
+{
+    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 2, .nsamples = 10, .get_lower = 0};
+    return bspace_nd_test(obj, &opts);
+}
+
 static TestResults bspace21_3d_test(GeneratorState *obj)
 {
     BSpaceNDOptions opts = {.nbits_per_dim = 21, .ndims = 3, .nsamples = 10, .get_lower = 1};
     return bspace_nd_test(obj, &opts);
 }
 
+static TestResults bspace21_3d_test_high(GeneratorState *obj)
+{
+    BSpaceNDOptions opts = {.nbits_per_dim = 21, .ndims = 3, .nsamples = 10, .get_lower = 0};
+    return bspace_nd_test(obj, &opts);
+}
+
+static TestResults bspace16_4d_test(GeneratorState *obj)
+{
+    BSpaceNDOptions opts = {.nbits_per_dim = 16, .ndims = 4, .nsamples = 10, .get_lower = 1};
+    return bspace_nd_test(obj, &opts);
+}
+
+static TestResults bspace16_4d_test_high(GeneratorState *obj)
+{
+    BSpaceNDOptions opts = {.nbits_per_dim = 16, .ndims = 4, .nsamples = 10, .get_lower = 0};
+    return bspace_nd_test(obj, &opts);
+}
+
+
 static TestResults bspace8_8d_test(GeneratorState *obj)
 {
     BSpaceNDOptions opts = {.nbits_per_dim = 8, .ndims = 8, .nsamples = 10, .get_lower = 1};
+    return bspace_nd_test(obj, &opts);
+}
+
+static TestResults bspace8_8d_test_high(GeneratorState *obj)
+{
+    BSpaceNDOptions opts = {.nbits_per_dim = 8, .ndims = 8, .nsamples = 10, .get_lower = 0};
+    return bspace_nd_test(obj, &opts);
+}
+
+static TestResults bspace4_16d_test(GeneratorState *obj)
+{
+    BSpaceNDOptions opts = {.nbits_per_dim = 4, .ndims = 16, .nsamples = 10, .get_lower = 1};
+    return bspace_nd_test(obj, &opts);
+}
+
+static TestResults bspace4_16d_test_high(GeneratorState *obj)
+{
+    BSpaceNDOptions opts = {.nbits_per_dim = 4, .ndims = 16, .nsamples = 10, .get_lower = 0};
     return bspace_nd_test(obj, &opts);
 }
 
@@ -65,9 +108,21 @@ static TestResults collisionover8_5d(GeneratorState *obj)
     return collisionover_test(obj, &opts);
 }
 
+static TestResults collisionover8_5d_high(GeneratorState *obj)
+{
+    BSpaceNDOptions opts = {.nbits_per_dim = 8, .ndims = 5, .get_lower = 0};
+    return collisionover_test(obj, &opts);
+}
+
 static TestResults collisionover5_8d(GeneratorState *obj)
 {
     BSpaceNDOptions opts = {.nbits_per_dim = 5, .ndims = 8, .get_lower = 1};
+    return collisionover_test(obj, &opts);
+}
+
+static TestResults collisionover5_8d_high(GeneratorState *obj)
+{
+    BSpaceNDOptions opts = {.nbits_per_dim = 5, .ndims = 8, .get_lower = 0};
     return collisionover_test(obj, &opts);
 }
 
@@ -77,9 +132,21 @@ static TestResults collisionover13_3d(GeneratorState *obj)
     return collisionover_test(obj, &opts);
 }
 
+static TestResults collisionover13_3d_high(GeneratorState *obj)
+{
+    BSpaceNDOptions opts = {.nbits_per_dim = 13, .ndims = 3, .get_lower = 0};
+    return collisionover_test(obj, &opts);
+}
+
 static TestResults collisionover20_2d(GeneratorState *obj)
 {
     BSpaceNDOptions opts = {.nbits_per_dim = 20, .ndims = 2, .get_lower = 1};
+    return collisionover_test(obj, &opts);
+}
+
+static TestResults collisionover20_2d_high(GeneratorState *obj)
+{
+    BSpaceNDOptions opts = {.nbits_per_dim = 20, .ndims = 2, .get_lower = 0};
     return collisionover_test(obj, &opts);
 }
 
@@ -120,15 +187,26 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf, unsigned int nthreads)
     const TestDescription tests[] = {
         {"monobit_freq", monobit_freq_test},
         {"byte_freq", byte_freq_test},
-        {"bspace32_1d", bspace32_1d_test},
         {"bspace64_1d", bspace64_1d_test},
+        {"bspace32_1d", bspace32_1d_test},
         {"bspace32_2d", bspace32_2d_test},
+        {"bspace32_2d_high", bspace32_2d_test_high},
         {"bspace21_3d", bspace21_3d_test},
+        {"bspace21_3d_high", bspace21_3d_test_high},
+        {"bspace16_4d", bspace16_4d_test},
+        {"bspace16_4d_high", bspace16_4d_test_high},
         {"bspace8_8d", bspace8_8d_test},
-        {"collover8_5d", collisionover8_5d},
-        {"collover5_8d", collisionover5_8d},
-        {"collover13_3d", collisionover13_3d},
+        {"bspace8_8d_high", bspace8_8d_test_high},
+        {"bspace4_16d", bspace4_16d_test},
+        {"bspace4_16d_high", bspace4_16d_test_high},
         {"collover20_2d", collisionover20_2d},
+        {"collover20_2d_high", collisionover20_2d_high},
+        {"collover13_3d", collisionover13_3d},
+        {"collover13_3d_high", collisionover13_3d_high},
+        {"collover8_5d", collisionover8_5d},
+        {"collover8_5d_high", collisionover8_5d_high},
+        {"collover5_8d", collisionover5_8d},
+        {"collover5_8d_high", collisionover5_8d_high},
         {"gap_inv512", gap_inv512},
         {"linearcomp_high", linearcomp_high},
         {"linearcomp_mid", linearcomp_mid},

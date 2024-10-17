@@ -98,7 +98,7 @@ static size_t calc_bin_matrix_rank(uint32_t *a, size_t n)
  */
 TestResults matrixrank_test(GeneratorState *obj, size_t n, unsigned int max_nbits)
 {
-    int nmat = 32, Oi[3] = {0, 0, 0};
+    int nmat = 64, Oi[3] = {0, 0, 0};
     double pi[3] = {0.1284, 0.5776, 0.2888};
     size_t mat_len = n * n / 32;
     TestResults ans = {.name = "mrank", .x = 0, .p = NAN};

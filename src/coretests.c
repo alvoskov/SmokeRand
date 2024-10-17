@@ -22,20 +22,37 @@
 /////////////////////////////
 
 
-static inline void bspace_make_tuples(const BSpaceNDOptions *opts, const GeneratorInfo *gi,
-    void *state, uint64_t *u, size_t len)
+/**
+ * @brief Make non-overlapping tuples (points in n-dimensional space) for
+ * birthday spacings test. It may use either higher or lower bits.
+ */
+static inline void bspace_make_tuples(const BSpaceNDOptions *opts,
+    const GeneratorInfo *gi, void *state, uint64_t *u, size_t len)
 {
-    uint64_t mask;
-    if (opts->nbits_per_dim == 64) {
-        mask = 0xFFFFFFFFFFFFFFFF;
+    if (opts->get_lower) {
+        // Take lower bits
+        uint64_t mask;
+        if (opts->nbits_per_dim == 64) {
+            mask = 0xFFFFFFFFFFFFFFFF;
+        } else {
+            mask = (1ull << opts->nbits_per_dim) - 1ull;
+        }
+        for (size_t j = 0; j < len; j++) {
+            u[j] = 0;
+            for (size_t k = 0; k < opts->ndims; k++) {
+                u[j] <<= opts->nbits_per_dim;
+                u[j] |= gi->get_bits(state) & mask;
+            }
+        }
     } else {
-        mask = (1ull << opts->nbits_per_dim) - 1ull;
-    }
-    for (size_t j = 0; j < len; j++) {
-        u[j] = 0;
-        for (size_t k = 0; k < opts->ndims; k++) {
-            u[j] <<= opts->nbits_per_dim;
-            u[j] |= gi->get_bits(state) & mask;
+        // Take higher bits
+        unsigned int shl = gi->nbits - opts->nbits_per_dim;
+        for (size_t j = 0; j < len; j++) {
+            u[j] = 0;
+            for (size_t k = 0; k < opts->ndims; k++) {
+                u[j] <<= opts->nbits_per_dim;
+                u[j] |= gi->get_bits(state) >> shl;
+            }
         }
     }
 }
@@ -94,7 +111,7 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
         } else {
             ndups[i] = bspace_get_ndups(u, len, 32);
         }
-    }    
+    }
     // Statistical analysis
     uint64_t ndups_total = 0;
     for (size_t i = 0; i < opts->nsamples; i++) {
@@ -110,6 +127,53 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     return ans;
 }
 
+
+/**
+ * @brief Make overlapping tuples (points in n-dimensional space) for
+ * collisionover test. It may use either higher or lower bits.
+ */
+static inline void collisionover_make_tuples(const BSpaceNDOptions *opts,
+    const GeneratorInfo *gi, void *state, uint64_t *u, size_t len)
+{
+    uint64_t cur_tuple = 0;
+    const int rshift = (opts->ndims - 1) * opts->nbits_per_dim;
+    if (opts->get_lower) {
+        // Take lower bits
+        uint64_t mask;
+        if (opts->nbits_per_dim == 64) {
+            mask = 0xFFFFFFFFFFFFFFFF;
+        } else {
+            mask = (1ull << opts->nbits_per_dim) - 1ull;
+        }
+        // Initialize the first tuple
+        for (int j = 0; j < 8; j++) {
+            cur_tuple >>= opts->nbits_per_dim;
+            cur_tuple |= (gi->get_bits(state) & mask) << rshift;
+        }
+        // Generate other tuples
+        for (size_t i = 0; i < len; i++) {
+            cur_tuple >>= opts->nbits_per_dim;
+            cur_tuple |= (gi->get_bits(state) & mask) << rshift;
+            u[i] = cur_tuple;
+        }
+    } else {
+        // Take higher bits
+        unsigned int shr = gi->nbits - opts->nbits_per_dim;
+        // Initialize the first tuple
+        for (int j = 0; j < 8; j++) {
+            cur_tuple >>= opts->nbits_per_dim;
+            cur_tuple |= (gi->get_bits(state) >> shr) << rshift;
+        }
+        // Generate other tuples
+        for (size_t i = 0; i < len; i++) {
+            cur_tuple >>= opts->nbits_per_dim;
+            cur_tuple |= (gi->get_bits(state) >> shr) << rshift;
+            u[i] = cur_tuple;
+        }
+    }
+}
+
+
 /**
  * @brief "CollisionOver" modification of "Monkey test". The algorithm was
  * suggested by developers of TestU01.
@@ -117,26 +181,13 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
     size_t n = 50000000;
-    const int rshift = (opts->ndims - 1) * opts->nbits_per_dim;
-    uint64_t mask = (1ull << opts->nbits_per_dim) - 1ull;
     uint64_t *u = calloc(n, sizeof(uint64_t));
-    uint64_t cur_tuple = 0;
     uint64_t Oi[4] = {1ull << opts->ndims * opts->nbits_per_dim, 0, 0, 0};
     double nstates = Oi[0];
     TestResults ans;
     ans.name = "CollisionOver";
     obj->intf->printf("CollisionOver test\n");
-    // Initialize the first tuple
-    for (int j = 0; j < 8; j++) {
-        cur_tuple >>= opts->nbits_per_dim;
-        cur_tuple |= (obj->gi->get_bits(obj->state) & mask) << rshift;
-    }
-    // Generate other tuples
-    for (size_t i = 0; i < n; i++) {
-        cur_tuple >>= opts->nbits_per_dim;
-        cur_tuple |= (obj->gi->get_bits(obj->state) & mask) << rshift;
-        u[i] = cur_tuple;
-    }
+    collisionover_make_tuples(opts, obj->gi, obj->state, u, n);
     // Find collisions by sorting the array
     radixsort64(u, n);
     size_t ncopies = 0;

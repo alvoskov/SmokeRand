@@ -455,8 +455,14 @@ void TestsBattery_run(const TestsBattery *bat,
     }
     time_t toc = time(NULL);
 
+    printf("Generator name:    %s\n", gen->name);
+    printf("Output size, bits: %d\n", (int) gen->nbits);
     printf("  %3s %20s %10s %10s %10s\n",
         "#", "Test name", "xemp", "p", "1 - p");
+    for (size_t i = 0; i < 75; i++) {
+        printf("-");
+    }
+    printf("\n");
     for (size_t i = 0; i < ntests; i++) {
         printf("  %3d %20s %10.3g %10.3g %10.3g %10s\n",
             (int) i + 1, results[i].name, results[i].x, results[i].p,
@@ -470,4 +476,30 @@ void TestsBattery_run(const TestsBattery *bat,
     printf("\nElapsed time: %.2d:%.2d:%.2d\n\n", h, m, s);    
     free(results);
     free(state);
+}
+
+////////////////////////////////////////////////////////////////
+///// Implementation of generator with reversed bits order /////
+////////////////////////////////////////////////////////////////
+
+static GeneratorInfo original_gen;
+
+static uint64_t get_bits32_reversed(void *state)
+{
+    return reverse_bits32((uint32_t) original_gen.get_bits(state));
+}
+
+static uint64_t get_bits64_reversed(void *state)
+{
+    return reverse_bits64(original_gen.get_bits(state));
+}
+
+GeneratorInfo reversed_generator_set(const GeneratorInfo *gi)
+{
+    original_gen = *gi;
+    GeneratorInfo reversed_gen = {.name = gi->name,
+        .create = gi->create,
+        .get_bits = (gi->nbits == 32) ? get_bits32_reversed : get_bits64_reversed,
+        .nbits = gi->nbits, .self_test = gi->self_test};
+    return reversed_gen;
 }
