@@ -66,20 +66,22 @@ The birthday test generates input values using the next algorithm:
 
  Name        | nbits | ndim | Detected PRNGs
 -------------|-------|------|------------------------------------------------------
+ bspace64_1d | 64    | 1    | 64-bit LCG with prime modulus
  bspace32_1d | 32    | 1    | Additive LFib PRNGs and LCGs with m = 2^{96}
  bspace32_2d | 32    | 2    | LCGs
- bspace64_1d | 64    | 1    | 64-bit LCG with prime modulus
  bspace21_3d | 21    | 3    | 64-bit MWC generators.
+ bspace16_4d | 16    | 4    | 
  bspace8_8d  | 8     | 8    | LCGs with m = 2^{64}
 
 # Modifications of collision over test
 
- Name         | nbits | ndim | Detected PRNGs
---------------|-------|------|--------------------
- collover8_5d | 8     | 5    |
- collover5_8d | 5     | 8    |
- collover13_3 | 13    | 3    |
- collover20_2 | 20    | 2    |
+ Name          | nbits | ndim | Detected PRNGs
+---------------|-------|------|--------------------
+ collover20_2d | 20    | 2    |
+ collover13_3d | 13    | 3    |
+ collover8_5d  | 8     | 5    |
+ collover5_8d  | 5     | 8    |
+
 
 # Modifications of matrix rank test
 

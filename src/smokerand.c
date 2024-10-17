@@ -10,6 +10,7 @@
 #include "smokerand/lineardep.h"
 #include "smokerand/entropy.h"
 #include "smokerand/bat_default.h"
+#include "smokerand/bat_brief.h"
 #include "smokerand/bat_full.h"
 #include <stdio.h>
 #include <time.h>
@@ -118,15 +119,18 @@ void print_help()
 }
 
 
-int main(int argc, char *argv[]) 
-{
-    if (argc < 3) {
-        print_help();
-        return 0;
-    }
-    int nthreads = 1;
-    int testid = 0;
+typedef struct {
+    int nthreads;
+    int testid;
+    int reverse_bits;
+} SmokeRandSettings;
 
+
+int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
+{
+    obj->nthreads = 1;
+    obj->testid = 0;
+    obj->reverse_bits = 0;
     for (int i = 3; i < argc; i++) {
         char argname[32];
         int argval;
@@ -140,26 +144,43 @@ int main(int argc, char *argv[])
         if (name_len >= 32) name_len = 31;
         memcpy(argname, &argv[i][2], name_len); argname[name_len] = '\0';
         argval = atoi(eqpos + 1);
-        if (argval <= 0) {
-            printf("Invalid value of argument '%s'\n", argname);
-            return 1;
-        }
-
         if (!strcmp(argname, "nthreads")) {
-            nthreads = argval;
+            obj->nthreads = argval;
+            if (argval <= 0) {
+                printf("Invalid value of argument '%s'\n", argname);
+                return 1;
+            }
         } else if (!strcmp(argname, "testid")) {
-            testid = argval;
+            obj->testid = argval;
+            if (argval <= 0) {
+                printf("Invalid value of argument '%s'\n", argname);
+                return 1;
+            }
+        } else if (!strcmp(argname, "reverse-bits")) {
+            obj->reverse_bits = argval;
         } else {
             printf("Unknown argument '%s'\n", argname);
             return 1;
         }
     }
-    (void) testid;
+    return 0;
+}
 
-    CallerAPI intf = (nthreads == 1) ? CallerAPI_init() : CallerAPI_init_mthr();
+
+int main(int argc, char *argv[]) 
+{
+    if (argc < 3) {
+        print_help();
+        return 0;
+    }
+    GeneratorInfo reversed_gen;
+    SmokeRandSettings opts;
+    if (SmokeRandSettings_load(&opts, argc, argv)) {
+        return 1;
+    }
+    CallerAPI intf = (opts.nthreads == 1) ? CallerAPI_init() : CallerAPI_init_mthr();
     char *battery_name = argv[1];
     char *generator_lib = argv[2];
-
 
     GeneratorModule mod = GeneratorModule_load(generator_lib);
     if (!mod.valid) {
@@ -169,14 +190,27 @@ int main(int argc, char *argv[])
     printf("Seed generator self-test: %s\n",
         xxtea_test() ? "PASSED" : "FAILED");
 
+    GeneratorInfo *gi = &mod.gen;
+    if (opts.reverse_bits) {
+        reversed_gen = reversed_generator_set(gi);
+        gi = &reversed_gen;
+        printf("All tests will be run with the reverse bits order\n");
+    }
+
+    printf("Generator name:    %s\n", gi->name);
+    printf("Output size, bits: %d\n", gi->nbits);
+
+
     if (!strcmp(battery_name, "default")) {
-        battery_default(&mod.gen, &intf, nthreads);
+        battery_default(gi, &intf, opts.nthreads);
+    } else if (!strcmp(battery_name, "brief")) {
+        battery_brief(gi, &intf, opts.nthreads);
     } else if (!strcmp(battery_name, "full")) {
-        battery_full(&mod.gen, &intf, nthreads);
+        battery_full(gi, &intf, opts.nthreads);
     } else if (!strcmp(battery_name, "selftest")) {
-        battery_self_test(&mod.gen, &intf);
+        battery_self_test(gi, &intf);
     } else if (!strcmp(battery_name, "birthday")) {
-        battery_birthday(&mod.gen, &intf);
+        battery_birthday(gi, &intf);
     } else {
         printf("Unknown battery %s\n", battery_name);
         GeneratorModule_unload(&mod);
@@ -187,3 +221,4 @@ int main(int argc, char *argv[])
     GeneratorModule_unload(&mod);
     return 0;
 }
+           

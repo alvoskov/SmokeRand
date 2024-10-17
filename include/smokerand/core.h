@@ -153,6 +153,13 @@ double chi2_pvalue(double x, unsigned long f);
 void radixsort32(uint64_t *x, size_t len);
 void radixsort64(uint64_t *x, size_t len);
 
+typedef struct {
+    void *original_state;
+    const GeneratorInfo *original_gen;
+} ReversedGen32State;
+
+
+GeneratorInfo reversed_generator_set(const GeneratorInfo *gi);
 
 ////////////////////////////////////////
 ///// Some useful inline functions /////
@@ -167,6 +174,20 @@ static inline uint32_t reverse_bits32(uint32_t x)
     x = ((x & 0xAAAAAAAA) >> 1) | ((x & 0x55555555) << 1);
     return x;
 }
+
+
+static inline uint64_t reverse_bits64(uint64_t x)
+{
+    x = (x >> 32) | (x << 32);
+    x = ((x & 0xFFFF0000FFFF0000) >> 16) | ((x & 0x0000FFFF0000FFFF) << 16);
+    x = ((x & 0xFF00FF00FF00FF00) >> 8)  | ((x & 0x00FF00FF00FF00FF) << 8);
+    x = ((x & 0xF0F0F0F0F0F0F0F0) >> 4)  | ((x & 0x0F0F0F0F0F0F0F0F) << 4);
+    x = ((x & 0xCCCCCCCCCCCCCCCC) >> 2)  | ((x & 0x3333333333333333) << 2);
+    x = ((x & 0xAAAAAAAAAAAAAAAA) >> 1)  | ((x & 0x5555555555555555) << 1);
+    return x;
+}
+
+
 
 
 /**
