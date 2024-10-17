@@ -1,7 +1,25 @@
 # SmokeRand
 SmokeRand is a set of tests for pseudorandom number generators. Tested
 generators should return either 32-bit or 64-bit unsigned uniformly distributed
-unsigned integers.
+unsigned integers. Its set of tests resembles SmallCrush, Crush and BigCrush
+from TestU01 but has several important differences:
+
+- Supports 64-bit generators directly, without taking upper/lower parts,
+  interleaving etc.
+- Direct access to the lowest bits of 32 or 64 bit generator that improves
+  sensitivity of tests.
+- Minimialistic sets of tests. However, the selected tests are powerful
+  enough to detect flaws in a lot of popular PRNGs.
+- High speed: `brief` battery runs in less than 1 minute, `default` in less
+  than 5 minutes and `full` in less than 1 hour.
+- Multithreading support by means of POSIX threads.
+
+Requirements:
+
+- C99 compiler.
+- 64-bit CPU.
+- 4GiB of RAM minimal, 16GiB recommended.
+- CMake.
 
 Implemented algorithms:
 
