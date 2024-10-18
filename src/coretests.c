@@ -23,10 +23,10 @@
 
 
 /**
- * @brief Make non-overlapping tuples (points in n-dimensional space) for
- * birthday spacings test. It may use either higher or lower bits.
+ * @brief Make non-overlapping 64-bit tuples (points in n-dimensional space)
+ * for birthday spacings test. It may use either higher or lower bits.
  */
-static inline void bspace_make_tuples(const BSpaceNDOptions *opts,
+static inline void bspace_make_tuples64(const BSpaceNDOptions *opts,
     const GeneratorInfo *gi, void *state, uint64_t *u, size_t len)
 {
     if (opts->get_lower) {
@@ -57,28 +57,122 @@ static inline void bspace_make_tuples(const BSpaceNDOptions *opts,
     }
 }
 
-static unsigned int bspace_get_ndups(uint64_t *x, size_t len, int nbits)
+
+/**
+ * @brief Make non-overlapping 32-bit tuples (points in n-dimensional space)
+ * for birthday spacings test. It may use either higher or lower bits.
+ */
+static inline void bspace_make_tuples32(const BSpaceNDOptions *opts,
+    const GeneratorInfo *gi, void *state, uint32_t *u, size_t len)
+{
+    if (opts->get_lower) {
+        // Take lower bits
+        uint64_t mask;
+        if (opts->nbits_per_dim == 32) {
+            mask = 0xFFFFFFFF;
+        } else {
+            mask = (1ull << opts->nbits_per_dim) - 1ull;
+        }
+        for (size_t j = 0; j < len; j++) {
+            u[j] = 0;
+            for (size_t k = 0; k < opts->ndims; k++) {
+                u[j] <<= opts->nbits_per_dim;
+                u[j] |= gi->get_bits(state) & mask;
+            }
+        }
+    } else {
+        // Take higher bits
+        unsigned int shl = gi->nbits - opts->nbits_per_dim;
+        for (size_t j = 0; j < len; j++) {
+            u[j] = 0;
+            for (size_t k = 0; k < opts->ndims; k++) {
+                u[j] <<= opts->nbits_per_dim;
+                u[j] |= gi->get_bits(state) >> shl;
+            }
+        }
+    }
+}
+
+
+static unsigned int bspace_get_ndups64(uint64_t *x, size_t len)
 {
     unsigned int ndups = 0;
-    if (nbits == 32) {
-        radixsort32(x, len);
-    } else {
-        radixsort64(x, len);
-    }
+    radixsort64(x, len);
     for (size_t i = 0; i < len - 1; i++) {
         x[i] = x[i + 1] - x[i];
     }
-    if (nbits == 32) {
-        radixsort32(x, len - 1);
-    } else {
-        radixsort64(x, len - 1);
-    }
+    radixsort64(x, len - 1);
     for (size_t i = 0; i < len - 2; i++) {
         if (x[i] == x[i + 1])
             ndups++;
     }
     return ndups;
 }
+
+
+static unsigned int bspace_get_ndups32(uint32_t *x, size_t len)
+{
+    unsigned int ndups = 0;
+    radixsort32(x, len);
+    for (size_t i = 0; i < len - 1; i++) {
+        x[i] = x[i + 1] - x[i];
+    }
+    radixsort32(x, len - 1);
+    for (size_t i = 0; i < len - 2; i++) {
+        if (x[i] == x[i + 1])
+            ndups++;
+    }
+    return ndups;
+}
+
+
+
+/**
+ * @brief 32-bit version of n-dimensional birthday spacings test.
+ * @return Number of duplicates.
+ */
+static unsigned long bspace32_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
+{
+    unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
+    size_t len = pow(2.0, (nbits_total + 4.0) / 3.0);
+    uint32_t *u = calloc(len, sizeof(uint32_t));
+    unsigned long *ndups = calloc(opts->nsamples, sizeof(unsigned long));
+    for (size_t i = 0; i < opts->nsamples; i++) {
+        bspace_make_tuples32(opts, obj->gi, obj->state, u, len);
+            ndups[i] = bspace_get_ndups32(u, len);
+    }
+    unsigned long ndups_total = 0;
+    for (size_t i = 0; i < opts->nsamples; i++) {
+        ndups_total += ndups[i];
+    }
+    free(u);
+    free(ndups);
+    return ndups_total;
+}
+
+/**
+ * @brief 64-bit version of n-dimensional birthday spacings test.
+ * @return Number of duplicates.
+ */
+static size_t bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
+{
+    unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
+    size_t len = pow(2.0, (nbits_total + 4.0) / 3.0);
+    uint64_t *u = calloc(len, sizeof(uint64_t));
+    unsigned long *ndups = calloc(opts->nsamples, sizeof(unsigned long));
+    for (size_t i = 0; i < opts->nsamples; i++) {
+        bspace_make_tuples64(opts, obj->gi, obj->state, u, len);
+            ndups[i] = bspace_get_ndups64(u, len);
+    }
+    unsigned long ndups_total = 0;
+    for (size_t i = 0; i < opts->nsamples; i++) {
+        ndups_total += ndups[i];
+    }
+    free(u);
+    free(ndups);
+    return ndups_total;
+}
+
 
 
 /**
@@ -101,29 +195,17 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     obj->intf->printf("  nsamples = %lld; len = %lld, lambda = %g\n",
         opts->nsamples, len, lambda);
     // Compute number of duplicates
-    uint64_t *u = calloc(len, sizeof(uint64_t));
-    uint64_t *ndups = calloc(opts->nsamples, sizeof(uint64_t));
-    ans.name = "Birthday spacings (ND)";
-    for (size_t i = 0; i < opts->nsamples; i++) {
-        bspace_make_tuples(opts, obj->gi, obj->state, u, len);
-        if (nbits_total > 32) {
-            ndups[i] = bspace_get_ndups(u, len, 64);
-        } else {
-            ndups[i] = bspace_get_ndups(u, len, 32);
-        }
-    }
-    // Statistical analysis
-    uint64_t ndups_total = 0;
-    for (size_t i = 0; i < opts->nsamples; i++) {
-        ndups_total += ndups[i];
+    unsigned long ndups_total = 0;
+    if (nbits_total > 32) {
+        ndups_total = bspace64_nd_test(obj, opts);
+    } else {
+        ndups_total = bspace32_nd_test(obj, opts);
     }
     ans.x = (double) ndups_total;
     ans.p = poisson_pvalue(ans.x, lambda * opts->nsamples);
     ans.alpha = poisson_cdf(ans.x, lambda * opts->nsamples);
     obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
-    free(u);
-    free(ndups);
     return ans;
 }
 

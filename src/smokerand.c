@@ -141,18 +141,20 @@ typedef struct {
 } BirthdayOptions;
 
 
-void birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
+TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
 {
-    uint64_t *x = calloc(opts->n, sizeof(uint64_t));
-    if (x == NULL) {
-        obj->intf->printf("  Not enough memory (2^%.0f bytes is required)\n",
-            log2(opts->n));
-        return;
-    }
+    TestResults ans = {.x = NAN, .p = NAN, .alpha = NAN};
     double lambda = pow(opts->n, 2.0) / pow(2.0, obj->gi->nbits - opts->e + 1.0);
     obj->intf->printf("  lambda = %g\n", lambda);
     obj->intf->printf("  Filling the array with 'birthdays'\n");
     uint64_t mask = (1ull << opts->e) - 1;
+    time_t tic = time(NULL);
+    uint64_t *x = calloc(opts->n, sizeof(uint64_t));
+    if (x == NULL) {
+        obj->intf->printf("  Not enough memory (2^%.0f bytes is required)\n",
+            log2(opts->n * 8.0));
+        return ans;
+    }
     for (size_t i = 0; i < opts->n; i++) {
         uint64_t u;
         do {
@@ -160,7 +162,14 @@ void birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
         } while ((u & mask) != 0);
         x[i] = u;
         if (i % (opts->n / 1000) == 0) {
-            obj->intf->printf("\r    %.1f %% completed", 100.0 * i / (double) opts->n);
+            unsigned long nseconds_total, nseconds_left;            
+            nseconds_total = time(NULL) - tic;
+            nseconds_left = ((unsigned long long) nseconds_total * (opts->n - i)) / (i + 1);
+            obj->intf->printf("\r    %.1f %% completed; ", 100.0 * i / (double) opts->n);
+            obj->intf->printf("time elapsed: "); print_elapsed_time(nseconds_total);
+            obj->intf->printf("; time left: ");
+            print_elapsed_time(nseconds_left);
+            obj->intf->printf("    ");
         }
     }
     obj->intf->printf("\n  Sorting the array\n");
@@ -168,22 +177,34 @@ void birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
     // 2^30 of u64 is 8GiB of data
     qsort(x, opts->n, sizeof(uint64_t), cmp_ints); // Not radix: to prevent "out of memory"
     obj->intf->printf("  Searching duplicates\n");
-    unsigned int ndups = 0;
+    unsigned long ndups = 0;
     for (size_t i = 0; i < opts->n - 1; i++) {
         if (x[i] == x[i + 1])
             ndups++;
     }
-
-    obj->intf->printf("Number of duplicates: %d\n", ndups);
+    ans.x = (double) ndups;
+    ans.p = poisson_cdf(ans.x, lambda);
+    ans.alpha = poisson_pvalue(ans.x, lambda);
+    obj->intf->printf("  x = %g (ndups); p = %g; 1-p=%g\n", ans.x, ans.p, ans.alpha);
+    free(x);
+    return ans;
 }
 
 void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
 {
+    size_t n = 1ull << 30;
+    BirthdayOptions opts_small = {.n = n, .e = 7};
+    BirthdayOptions opts_large = {.n = n, .e = 10};
     intf->printf("64-bit birthday test\n");
-    BirthdayOptions opts = {.n = 1ull << 30, .e = 7}; // 10
     void *state = gen->create(intf);
     GeneratorState obj = {.gi = gen, .state = state, .intf = intf};
-    birthday_test(&obj, &opts);
+    TestResults ans = birthday_test(&obj, &opts_small);
+    if (ans.x == 0) {
+        intf->printf("  No duplicates found: more sensitive test requred\n");
+        intf->printf("  Running the variant with larger lambda\n");
+        ans = birthday_test(&obj, &opts_large);
+    }
+    (void) ans;
 }
 
 void print_help()
@@ -208,7 +229,7 @@ typedef struct {
 int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
 {
     obj->nthreads = 1;
-    obj->testid = 0;
+    obj->testid = TESTS_ALL;
     obj->reverse_bits = 0;
     for (int i = 3; i < argc; i++) {
         char argname[32];
@@ -281,11 +302,11 @@ int main(int argc, char *argv[])
 
 
     if (!strcmp(battery_name, "default")) {
-        battery_default(gi, &intf, opts.nthreads);
+        battery_default(gi, &intf, opts.testid, opts.nthreads);
     } else if (!strcmp(battery_name, "brief")) {
-        battery_brief(gi, &intf, opts.nthreads);
+        battery_brief(gi, &intf, opts.testid, opts.nthreads);
     } else if (!strcmp(battery_name, "full")) {
-        battery_full(gi, &intf, opts.nthreads);
+        battery_full(gi, &intf, opts.testid, opts.nthreads);
     } else if (!strcmp(battery_name, "selftest")) {
         battery_self_test(gi, &intf);
     } else if (!strcmp(battery_name, "speed")) {

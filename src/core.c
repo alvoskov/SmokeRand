@@ -343,12 +343,35 @@ static void countsort64(uint64_t *out, const uint64_t *x, size_t len, unsigned i
     free(offsets);
 }
 
+
+/**
+ * @brief 16-bit counting sort for 32-bit arrays.
+ */
+static void countsort32(uint32_t *out, const uint32_t *x, size_t len, unsigned int shr)
+{
+    size_t *offsets = calloc(65536, sizeof(size_t));
+    for (size_t i = 0; i < len; i++) {
+        unsigned int pos = ((x[i] >> shr) & 0xFFFF);
+        offsets[pos]++;
+    }
+    for (size_t i = 1; i < 65536; i++) {
+        offsets[i] += offsets[i - 1];
+    }
+    for (size_t i = len; i-- != 0; ) {
+        unsigned int digit = ((x[i] >> shr) & 0xFFFF);
+        size_t offset = --offsets[digit];
+        out[offset] = x[i];
+    }
+    free(offsets);
+}
+
+
 /**
  * @brief Radix sort for 64-bit unsigned integers.
  */
 void radixsort64(uint64_t *x, size_t len)
 {
-    uint64_t *out = (uint64_t *) calloc(len, sizeof(uint64_t));
+    uint64_t *out = calloc(len, sizeof(uint64_t));
     countsort64(out, x,   len, 0);
     countsort64(x,   out, len, 16);
     countsort64(out, x,   len, 32);
@@ -359,13 +382,38 @@ void radixsort64(uint64_t *x, size_t len)
 /**
  * @brief Radix sort for 32-bit unsigned integers.
  */
-void radixsort32(uint64_t *x, size_t len)
+void radixsort32(uint32_t *x, size_t len)
 {
-    uint64_t *out = (uint64_t *) calloc(len, sizeof(uint64_t));
-    countsort64(out, x,   len, 0);
-    countsort64(x,   out, len, 16);
+    uint32_t *out = calloc(len, sizeof(uint32_t));
+    countsort32(out, x,   len, 0);
+    countsort32(x,   out, len, 16);
     free(out);
 }
+
+
+/**
+ * @brief Converts the number of seconds to the hours/minutes/seconds
+ * format. Useful for showing the elapsed time.
+ */
+TimeHMS nseconds_to_hms(unsigned long nseconds_total)
+{
+    TimeHMS hms;
+    hms.h = (nseconds_total / 3600);
+    hms.m = (nseconds_total / 60) % 60;
+    hms.s = nseconds_total % 60;
+    return hms;
+}
+
+/**
+ * @brief Prints elapsed time in hh:mm:ss format to stdout.
+ * @param nseconds_total  Number of seconds.
+ */
+void print_elapsed_time(unsigned long nseconds_total)
+{    
+    TimeHMS hms = nseconds_to_hms(nseconds_total);
+    printf("%.2d:%.2d:%.2d", hms.h, hms.m, hms.s);
+}
+
 
 /////////////////////////////////////////////
 ///// TestsBattery class implementation /////
@@ -459,7 +507,7 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
 static void TestResults_print_report(const TestResults *results,
     size_t ntests, time_t nseconds_total)
 {
-    printf("  %3s %20s %10s %10s %10s\n",
+    printf("  %3s %-20s %10s %10s %10s\n",
         "#", "Test name", "xemp", "p", "1 - p");
     for (size_t i = 0; i < 75; i++) {
         printf("-");
@@ -467,7 +515,7 @@ static void TestResults_print_report(const TestResults *results,
     printf("\n");
     unsigned int npassed = 0, nwarnings = 0, nfailed = 0; 
     for (size_t i = 0; i < ntests; i++) {
-        printf("  %3d %20s %10.3g %10.3g %10.3g %10s\n",
+        printf("  %3d %-20s %10.3g %10.3g %10.3g %10s\n",
             (int) i + 1, results[i].name, results[i].x, results[i].p,
             results[i].alpha,
             interpret_pvalue(results[i].p));
@@ -480,44 +528,63 @@ static void TestResults_print_report(const TestResults *results,
             nfailed++; break;
         }
     }
+    for (size_t i = 0; i < 75; i++) {
+        printf("-");
+    }
     printf("\n");
     printf("Passed:       %u\n", npassed);
     printf("Suspicious:   %u\n", nwarnings);
     printf("Failed:       %u\n", nfailed);
-    int s = nseconds_total % 60;
-    int m = (nseconds_total / 60) % 60;
-    int h = (nseconds_total / 3600);
-    printf("Elapsed time: %.2d:%.2d:%.2d\n\n", h, m, s);    
+    printf("Elapsed time: "); print_elapsed_time(nseconds_total);
+    printf("\n\n");
 }
 
 void TestsBattery_run(const TestsBattery *bat,
     const GeneratorInfo *gen, const CallerAPI *intf,
-    unsigned int nthreads)
+    unsigned int testid, unsigned int nthreads)
 {
-    printf("===== Starting '%s' battery =====\n", bat->name);
+    time_t tic, toc;
     void *state = gen->create(intf);
-    GeneratorState obj = {.gi = gen, .state = state, .intf = intf};
+    TestResults *results = NULL;
     size_t ntests = TestsBattery_ntests(bat);
-    TestResults *results = calloc(ntests, sizeof(TestResults));
-    time_t tic = time(NULL);
-
-    if (nthreads == 1) {
-        // One-threaded version
-        for (size_t i = 0; i < ntests; i++) {
-            results[i] = bat->tests[i].run(&obj);
-            results[i].name = bat->tests[i].name;
+    printf("===== Starting '%s' battery =====\n", bat->name);
+    GeneratorState obj = {.gi = gen, .state = state, .intf = intf};
+    if (testid >= ntests) {
+        fprintf(stderr, "Invalid test id %u", testid);
+        return;
+    }
+    size_t nresults = ntests;
+    tic = time(NULL);
+    if (testid == TESTS_ALL) {
+        results = calloc(ntests, sizeof(TestResults));
+        nresults = ntests;
+        if (nthreads == 1) {
+            // One-threaded version
+            for (size_t i = 0; i < ntests; i++) {
+                results[i] = bat->tests[i].run(&obj);
+                results[i].name = bat->tests[i].name;
+            }
+        } else {
+            // Multithreaded version
+            TestsBattery_run_threads(bat, ntests, gen, intf, nthreads, results);
         }
     } else {
-        // Multithreaded version
-        TestsBattery_run_threads(bat, ntests, gen, intf, nthreads, results);
+        results = calloc(1, sizeof(TestResults));
+        nresults = 1;
+        *results = bat->tests[testid - 1].run(&obj);
+        results->name = bat->tests[testid - 1].name;
     }
-    time_t toc = time(NULL);
-
+    toc = time(NULL);
     printf("\n");
-    printf("==================== '%s' battery report ====================\n", bat->name);
+    if (testid == TESTS_ALL) {
+        printf("==================== '%s' battery report ====================\n", bat->name);
+    } else {
+        printf("==================== '%s' battery test #%d report ====================\n",
+            bat->name, testid);
+    }
     printf("Generator name:    %s\n", gen->name);
     printf("Output size, bits: %d\n\n", (int) gen->nbits);
-    TestResults_print_report(results, ntests, toc - tic);
+    TestResults_print_report(results, nresults, toc - tic);
     free(results);
     free(state);
 }

@@ -14,6 +14,10 @@ from TestU01 but has several important differences:
   than 5 minutes and `full` in less than 1 hour.
 - Multithreading support by means of POSIX threads.
 
+Existing solutions:
+
+1. https://dl.acm.org/doi/abs/10.1145/3447773
+
 Requirements:
 
 - C99 compiler.

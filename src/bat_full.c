@@ -16,15 +16,25 @@
 ///// Birthday spacings tests /////
 ///////////////////////////////////
 
+/**
+ * @brief One-dimensional 32-bit birthday spacings test. Allows to catch additive lagged 
+ * Fibonacci PRNGs, LCGs with m = 2^{96} and PCG32. In the case of 32-bit PRNG it is
+ * equivalent to `bspace32_1d'.
+ */
 static TestResults bspace32_1d(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 1 << 21, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 1 << 22, .get_lower = 1};
     return bspace_nd_test(obj, &opts);
 }
 
+/**
+ * @brief One-dimensional 32-bit birthday spacings test. Allows to catch additive lagged 
+ * Fibonacci PRNGs, LCGs with m = 2^{96} and PCG32. In the case of 32-bit PRNG it is
+ * equivalent to `bspace32_1d'.
+ */
 static TestResults bspace32_1d_high(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 1 << 21, .get_lower = 0};
+    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 1 << 22, .get_lower = 0};
     return bspace_nd_test(obj, &opts);
 }
 
@@ -219,7 +229,8 @@ static TestResults linearcomp_low(GeneratorState *obj)
     return linearcomp_test(obj, 500000, 0);
 }
 
-void battery_full(GeneratorInfo *gen, CallerAPI *intf, unsigned int nthreads)
+void battery_full(GeneratorInfo *gen, CallerAPI *intf,
+    unsigned int testid, unsigned int nthreads)
 {
     const TestDescription tests[] = {
         {"monobit_freq", monobit_freq_test},
@@ -258,5 +269,5 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf, unsigned int nthreads)
     const TestsBattery bat = {
         "default", tests
     };
-    TestsBattery_run(&bat, gen, intf, nthreads);
+    TestsBattery_run(&bat, gen, intf, testid, nthreads);
 }

@@ -15,6 +15,8 @@
 #define M_PI (3.14159265358979323846)
 #endif
 
+#define TESTS_ALL 0
+
 #if defined(_MSC_VER) && !defined(__clang__)
 #include <intrin.h>
 #pragma intrinsic(_umul128)
@@ -140,7 +142,7 @@ typedef struct {
 size_t TestsBattery_ntests(const TestsBattery *obj);
 void TestsBattery_run(const TestsBattery *bat,
     const GeneratorInfo *gen, const CallerAPI *intf,
-    unsigned int nthreads);
+    unsigned int testid, unsigned int nthreads);
 
 
 typedef enum {
@@ -157,7 +159,7 @@ double poisson_cdf(double x, double lambda);
 double poisson_pvalue(double x, double lambda);
 double chi2_cdf(double x, unsigned long f);
 double chi2_pvalue(double x, unsigned long f);
-void radixsort32(uint64_t *x, size_t len);
+void radixsort32(uint32_t *x, size_t len);
 void radixsort64(uint64_t *x, size_t len);
 
 typedef struct {
@@ -167,6 +169,16 @@ typedef struct {
 
 
 GeneratorInfo reversed_generator_set(const GeneratorInfo *gi);
+
+typedef struct {
+    unsigned int h; ///< Hours
+    unsigned short m; ///< Minutes
+    unsigned short s; ///< Seconds
+} TimeHMS;
+
+
+TimeHMS nseconds_to_hms(unsigned long nseconds_total);
+void print_elapsed_time(unsigned long nseconds_total);
 
 ////////////////////////////////////////
 ///// Some useful inline functions /////

@@ -110,6 +110,15 @@ static TestResults collisionover20_2d(GeneratorState *obj)
     return collisionover_test(obj, &opts);
 }
 
+/////////////////////
+///// Gap tests /////
+/////////////////////
+
+static TestResults gap_inv512(GeneratorState *obj)
+{
+    return gap_test(obj, 9);
+}
+
 ///////////////////////////////////
 ///// Linear complexity tests /////
 ///////////////////////////////////
@@ -130,7 +139,8 @@ static TestResults linearcomp_low(GeneratorState *obj)
     return linearcomp_test(obj, 50000, 0);
 }
 
-void battery_brief(GeneratorInfo *gen, CallerAPI *intf, unsigned int nthreads)
+void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
+    unsigned int testid, unsigned int nthreads)
 {
     const TestDescription tests[] = {
         {"monobit_freq", monobit_freq_test},
@@ -146,6 +156,7 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf, unsigned int nthreads)
         {"collover13_3d", collisionover13_3d},
         {"collover8_5d", collisionover8_5d},
         {"collover5_8d", collisionover5_8d},
+        {"gap_inv512", gap_inv512},
         {"linearcomp_high", linearcomp_high},
         {"linearcomp_mid", linearcomp_mid},
         {"linearcomp_low", linearcomp_low},
@@ -155,5 +166,5 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf, unsigned int nthreads)
     const TestsBattery bat = {
         "brief", tests
     };
-    TestsBattery_run(&bat, gen, intf, nthreads);
+    TestsBattery_run(&bat, gen, intf, testid, nthreads);
 }
