@@ -412,66 +412,53 @@ void *battery_thread(void *data)
 }
 
 
-void TestsBattery_run(const TestsBattery *bat,
+
+static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
     const GeneratorInfo *gen, const CallerAPI *intf,
-    unsigned int nthreads)
+    unsigned int nthreads, TestResults *results)
 {
-    printf("===== Starting '%s' battery =====\n", bat->name);
-    void *state = gen->create(intf);
-    GeneratorState obj = {.gi = gen, .state = state, .intf = intf};
-
-    size_t ntests = TestsBattery_ntests(bat);
-    TestResults *results = calloc(ntests, sizeof(TestResults));
-    time_t tic = time(NULL);
-
-    if (nthreads == 1) {
-        // One-threaded version
-        for (size_t i = 0; i < ntests; i++) {
-            results[i] = bat->tests[i].run(&obj);
-            results[i].name = bat->tests[i].name;
-        }
-    } else {
-        // Multithreaded version
-        BatteryThread *th = calloc(nthreads, sizeof(BatteryThread));
-        size_t *th_pos = calloc(nthreads, sizeof(size_t));
-        // Preallocate arrays
-        for (size_t i = 0; i < ntests; i++) {
-            size_t ind = i % nthreads;
-            th[ind].ntests++;
-        }
-        for (size_t i = 0; i < nthreads; i++) {
-            th[i].tests = calloc(th->ntests, sizeof(TestDescription));
-            th[i].tests_inds = calloc(th->ntests, sizeof(size_t));
-            th[i].gi = gen;
-            th[i].intf = intf;
-            th[i].results = results;
-        }
-        // Dispatch tests
-        for (size_t i = 0; i < ntests; i++) {
-            size_t ind = i % nthreads;
-            th[ind].tests[th_pos[ind]] = bat->tests[i];
-            th[ind].tests_inds[th_pos[ind]++] = i;
-        }
-        // Run threads
-        for (size_t i = 0; i < nthreads; i++) {        
-            pthread_create(&th[i].thrd_id, NULL, battery_thread, &th[i]);
-        }
-        // Get data from threads
-        for (size_t i = 0; i < nthreads; i++) {
-            pthread_join(th[i].thrd_id, NULL);
-        }
-        // Deallocate array
-        for (size_t i = 0; i < nthreads; i++) {
-            free(th[i].tests);
-            free(th[i].tests_inds);
-        }
-        free(th);
-        free(th_pos);
+    // Multithreaded version
+    BatteryThread *th = calloc(nthreads, sizeof(BatteryThread));
+    size_t *th_pos = calloc(nthreads, sizeof(size_t));
+    // Preallocate arrays
+    for (size_t i = 0; i < ntests; i++) {
+        size_t ind = i % nthreads;
+        th[ind].ntests++;
     }
-    time_t toc = time(NULL);
+    for (size_t i = 0; i < nthreads; i++) {
+        th[i].tests = calloc(th->ntests, sizeof(TestDescription));
+        th[i].tests_inds = calloc(th->ntests, sizeof(size_t));
+        th[i].gi = gen;
+        th[i].intf = intf;
+        th[i].results = results;
+    }
+    // Dispatch tests
+    for (size_t i = 0; i < ntests; i++) {
+        size_t ind = i % nthreads;
+        th[ind].tests[th_pos[ind]] = bat->tests[i];
+        th[ind].tests_inds[th_pos[ind]++] = i;
+    }
+    // Run threads
+    for (size_t i = 0; i < nthreads; i++) {        
+        pthread_create(&th[i].thrd_id, NULL, battery_thread, &th[i]);
+    }
+    // Get data from threads
+    for (size_t i = 0; i < nthreads; i++) {
+        pthread_join(th[i].thrd_id, NULL);
+    }
+    // Deallocate array
+    for (size_t i = 0; i < nthreads; i++) {
+        free(th[i].tests);
+        free(th[i].tests_inds);
+    }
+    free(th);
+    free(th_pos);
+}
 
-    printf("Generator name:    %s\n", gen->name);
-    printf("Output size, bits: %d\n", (int) gen->nbits);
+
+static void TestResults_print_report(const TestResults *results,
+    size_t ntests, time_t nseconds_total)
+{
     printf("  %3s %20s %10s %10s %10s\n",
         "#", "Test name", "xemp", "p", "1 - p");
     for (size_t i = 0; i < 75; i++) {
@@ -497,11 +484,40 @@ void TestsBattery_run(const TestsBattery *bat,
     printf("Passed:       %u\n", npassed);
     printf("Suspicious:   %u\n", nwarnings);
     printf("Failed:       %u\n", nfailed);
-    unsigned int nseconds_total = toc - tic;
     int s = nseconds_total % 60;
     int m = (nseconds_total / 60) % 60;
     int h = (nseconds_total / 3600);
     printf("Elapsed time: %.2d:%.2d:%.2d\n\n", h, m, s);    
+}
+
+void TestsBattery_run(const TestsBattery *bat,
+    const GeneratorInfo *gen, const CallerAPI *intf,
+    unsigned int nthreads)
+{
+    printf("===== Starting '%s' battery =====\n", bat->name);
+    void *state = gen->create(intf);
+    GeneratorState obj = {.gi = gen, .state = state, .intf = intf};
+    size_t ntests = TestsBattery_ntests(bat);
+    TestResults *results = calloc(ntests, sizeof(TestResults));
+    time_t tic = time(NULL);
+
+    if (nthreads == 1) {
+        // One-threaded version
+        for (size_t i = 0; i < ntests; i++) {
+            results[i] = bat->tests[i].run(&obj);
+            results[i].name = bat->tests[i].name;
+        }
+    } else {
+        // Multithreaded version
+        TestsBattery_run_threads(bat, ntests, gen, intf, nthreads, results);
+    }
+    time_t toc = time(NULL);
+
+    printf("\n");
+    printf("==================== '%s' battery report ====================\n", bat->name);
+    printf("Generator name:    %s\n", gen->name);
+    printf("Output size, bits: %d\n\n", (int) gen->nbits);
+    TestResults_print_report(results, ntests, toc - tic);
     free(results);
     free(state);
 }
