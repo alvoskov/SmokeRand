@@ -204,7 +204,7 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     ans.x = (double) ndups_total;
     ans.p = poisson_pvalue(ans.x, lambda * opts->nsamples);
     ans.alpha = poisson_cdf(ans.x, lambda * opts->nsamples);
-    obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
+    obj->intf->printf("  x = %.0f; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
     return ans;
 }

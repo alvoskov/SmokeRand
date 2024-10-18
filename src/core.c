@@ -163,7 +163,7 @@ static double gammainc_lower_series(double a, double x)
 {
     double mul = exp(-x + a*log(x) - lgamma(a)), sum = 0.0;
     double t = 1.0 / a;
-    for (int i = 1; i < 1000 && t > DBL_EPSILON; i++) {
+    for (int i = 1; i < 1000000 && t > DBL_EPSILON; i++) {
         sum += t;
         t *= x / (a + i);
     }
@@ -178,7 +178,7 @@ static double gammainc_upper_contfrac(double a, double x)
     double p1 = b1 * b0 + (a - 1.0), q1 = b1;
     double f = p1/q1, f_old = p0/q0;
     double c = p1/p0, d = q0 / q1;
-    for (int i = 2; i < 50 && fabs(f - f_old) > DBL_EPSILON; i++) {
+    for (int i = 2; i < 1000000 && fabs(f - f_old) > DBL_EPSILON; i++) {
         f_old = f;
         double bk = x + 2*i + 1 - a;
         double ak = i * (a - i);
