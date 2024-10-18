@@ -141,10 +141,40 @@ typedef struct {
 } BirthdayOptions;
 
 
+static double freq_to_chi2emp(unsigned long long *freq, size_t len)
+{
+    unsigned long long sum = 0, Ei;
+    double chi2emp = 0.0;
+    for (size_t i = 0; i < len; i++) {
+        sum += freq[i];
+    }
+    Ei = sum / len;    
+    for (size_t i = 0; i < len; i++) {
+        chi2emp += pow((long long) freq[i] - (long long) Ei, 2.0) / Ei;
+    }
+    return chi2emp;
+}
+
+static inline void calc_frequencies(unsigned long long *bytefreq,
+    unsigned long long *w16freq, const uint64_t u)
+{
+     uint64_t t = u;
+     for (size_t j = 0; j < 8; j++) {
+         bytefreq[t & 0xFF]++;
+         t >>= 8;
+     }
+     t = u;
+     for (size_t j = 0; j < 4; j++) {
+         w16freq[t & 0xFFFF]++;
+         t >>= 16;
+     }
+}
+
 TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
 {
     TestResults ans = {.x = NAN, .p = NAN, .alpha = NAN};
     double lambda = pow(opts->n, 2.0) / pow(2.0, obj->gi->nbits - opts->e + 1.0);
+    unsigned long long bytefreq[256], *w16freq;
     obj->intf->printf("  lambda = %g\n", lambda);
     obj->intf->printf("  Filling the array with 'birthdays'\n");
     uint64_t mask = (1ull << opts->e) - 1;
@@ -155,10 +185,15 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
             log2(opts->n * 8.0));
         return ans;
     }
+    w16freq = calloc(65536, sizeof(unsigned long long));
+    for (size_t i = 0; i < 256; i++) {
+        bytefreq[i] = 0;
+    }
     for (size_t i = 0; i < opts->n; i++) {
         uint64_t u;
-        do {
+        do {            
             u = obj->gi->get_bits(obj->state);
+            calc_frequencies(bytefreq, w16freq, u);
         } while ((u & mask) != 0);
         x[i] = u;
         if (i % (opts->n / 1000) == 0) {
@@ -172,6 +207,14 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
             obj->intf->printf("    ");
         }
     }
+    // Frequencies analysis
+    double chi2emp_bytes = freq_to_chi2emp(bytefreq, 256);
+    double chi2emp_w16 = freq_to_chi2emp(w16freq, 65536);
+    printf("\n  chi2emp_bytes = %g, p = %g\n",
+        chi2emp_bytes, chi2_cdf(chi2emp_bytes, 255));
+    printf("  chi2emp_w16   = %g, p = %g\n",
+        chi2emp_w16, chi2_cdf(chi2emp_w16, 65535));
+    obj->intf->printf("\n");
     obj->intf->printf("\n  Sorting the array\n");
     // qsort is used instead of radix sort to prevent "out of memory" error:
     // 2^30 of u64 is 8GiB of data
@@ -187,6 +230,7 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
     ans.alpha = poisson_pvalue(ans.x, lambda);
     obj->intf->printf("  x = %g (ndups); p = %g; 1-p=%g\n", ans.x, ans.p, ans.alpha);
     free(x);
+    free(w16freq);
     return ans;
 }
 
@@ -200,7 +244,7 @@ void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
     GeneratorState obj = {.gi = gen, .state = state, .intf = intf};
     TestResults ans = birthday_test(&obj, &opts_small);
     if (ans.x == 0) {
-        intf->printf("  No duplicates found: more sensitive test requred\n");
+        intf->printf("  No duplicates found: more sensitive test required\n");
         intf->printf("  Running the variant with larger lambda\n");
         ans = birthday_test(&obj, &opts_large);
     }
