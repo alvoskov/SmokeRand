@@ -251,6 +251,152 @@ void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
     (void) ans;
 }
 
+
+
+typedef struct {
+    size_t inds[4];
+} Neighbours2D;
+
+
+typedef struct {
+    unsigned int L; ///< Lattice size
+    unsigned int N; ///< Number of elements, LxL
+    int energy; ///< Internal energy (integer, dimensionless)
+    int8_t *s; ///< Spins (-1 or +1)
+    Neighbours2D *nn; ///< Neigbours
+} Ising2DLattice;
+
+
+static inline int inc_modL(int i, int L)
+{
+    return (++i) % L;
+}
+
+static inline int dec_modL(int i, int L)
+{
+    i--;
+    return (i >= 0) ? i : (L - 1);
+}
+
+void Ising2DLattice_init(Ising2DLattice *obj, unsigned int L)
+{
+    obj->L = L;
+    obj->N = L * L;
+    obj->energy = 2 * obj->N;
+    obj->s = calloc(obj->N, sizeof(int8_t));
+    obj->nn = calloc(obj->N, sizeof(Neighbours2D));
+    // Precalculate neighbours indexes
+    for (size_t i = 0; i < obj->N; i++) {
+        int ix = i % L, iy = i / L;
+        //printf("%d %d | ", ix, iy);
+        obj->s[i] = +1;
+        obj->nn[i].inds[0] = iy * L + inc_modL(ix, L);
+        obj->nn[i].inds[1] = iy * L + dec_modL(ix, L);
+        obj->nn[i].inds[2] = inc_modL(iy, L) * L + ix;
+        obj->nn[i].inds[3] = dec_modL(iy, L) * L + ix;
+    }
+}
+
+void Ising2DLattice_print(Ising2DLattice *obj)
+{
+    for (size_t i = 0, pos = 0; i < obj->L; i++) {
+        for (size_t j = 0; j < obj->L; j++) {
+            printf("%2d ", (int) obj->s[pos++]);
+        }
+        printf("\n");
+    }
+}
+
+
+void Ising2DLattice_flip_internal(Ising2DLattice *obj, size_t ind, int8_t s0, GeneratorState *gs)
+{
+    const uint64_t p_int = (gs->gi->nbits == 32) ? 2515933592ull : 10806402496730587136ull; // p * 2^nbits
+    // Calculate energy change and flip spin
+    int nn_eq = 0; // Number of neighbours with equal sign
+    for (size_t i = 0; i < 4; i++) {
+        size_t nn_ind = obj->nn[ind].inds[i];
+        if (obj->s[nn_ind] == s0) {
+            nn_eq++;
+        }
+    }
+    obj->energy -= (nn_eq - 2) * 4;
+    obj->s[ind] = -s0;
+    // Go to neighbours
+    for (size_t i = 0; i < 4; i++) {
+        size_t nn_ind = obj->nn[ind].inds[i];
+        uint64_t rnd = gs->gi->get_bits(gs->state);
+        if (obj->s[nn_ind] == s0 && rnd <= p_int) {
+            Ising2DLattice_flip_internal(obj, nn_ind, s0, gs);
+        }
+    }    
+}
+
+
+void Ising2DLattice_flip(Ising2DLattice *obj, size_t ind, GeneratorState *gs)
+{
+    Ising2DLattice_flip_internal(obj, ind, obj->s[ind], gs);
+}
+
+void Ising2DLattice_free(Ising2DLattice *obj)
+{
+    free(obj->s); obj->s = NULL;
+    free(obj->nn); obj->nn = NULL;    
+}
+
+
+// 10.1103/PhysRevLett.69.3382
+void battery_ising(GeneratorInfo *gen, const CallerAPI *intf)
+{
+    Ising2DLattice obj;
+    Ising2DLattice_init(&obj, 16);
+    size_t sample_len = 1000000, nsamples = 10;
+    const double e_ref = 1.4530649029;
+
+
+    void *state = gen->create(intf);
+    GeneratorState gs = {.gi = gen, .state = state, .intf = intf};
+
+    // Warm-up
+    for (size_t i = 0; i < sample_len; i++) {
+        Ising2DLattice_flip(&obj, gs.gi->get_bits(gs.state) % obj.N, &gs);
+    }
+    // Sampling
+    double *e = calloc(nsamples, sizeof(double));
+    double *c = calloc(nsamples, sizeof(double));
+    for (size_t ii = 0; ii < nsamples; ii++) {
+        unsigned long long energy_sum = 0, energy_sum2 = 0;
+        for (size_t i = 0; i < sample_len; i++) {
+            Ising2DLattice_flip(&obj, gs.gi->get_bits(gs.state) % obj.N, &gs);
+            energy_sum += obj.energy;
+            energy_sum2 += obj.energy * obj.energy;
+        }
+        e[ii] = (double) energy_sum / sample_len / obj.N;
+        c[ii] = (double) (energy_sum2) / sample_len / obj.N - e[ii] * e[ii];
+        printf("e = %.8f, c = %.8f\n", e[ii], c[ii]);
+    }
+    // Mean and std
+    double e_mean = 0.0, e_std = 0;
+    for (size_t i = 0; i < nsamples; i++) {
+        e_mean += e[i];
+    }
+    e_mean /= nsamples;
+    for (size_t i = 0; i < nsamples; i++) {
+        e_std += pow(e[i] - e_mean, 2.0);
+    }
+    e_std = sqrt(e_std / (nsamples - 1));
+    printf("e_mean = %g; e_std = %g; z = %g\n", e_mean, e_std,
+        (e_mean - e_ref) / (e_std / sqrt(nsamples)));
+    free(e);
+
+    Ising2DLattice_print(&obj);
+    Ising2DLattice_free(&obj);
+}
+
+
+
+
+
+
 void print_help()
 {
     printf("Usage: smokerand battery generator_lib\n");
@@ -357,6 +503,8 @@ int main(int argc, char *argv[])
         battery_speed(gi, &intf);
     } else if (!strcmp(battery_name, "birthday")) {
         battery_birthday(gi, &intf);
+    } else if (!strcmp(battery_name, "ising")) {
+        battery_ising(gi, &intf);
     } else {
         printf("Unknown battery %s\n", battery_name);
         GeneratorModule_unload(&mod);
