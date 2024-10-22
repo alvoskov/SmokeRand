@@ -18,8 +18,7 @@
 
 /**
  * @brief One-dimensional 32-bit birthday spacings test. Allows to catch additive lagged 
- * Fibonacci PRNGs, LCGs with m = 2^{96} and PCG32. In the case of 32-bit PRNG it is
- * equivalent to `bspace32_1d'.
+ * Fibonacci PRNGs. In the case of 32-bit PRNG it is equivalent to `bspace32_1d'.
  */
 static TestResults bspace32_1d(GeneratorState *obj)
 {
@@ -29,8 +28,7 @@ static TestResults bspace32_1d(GeneratorState *obj)
 
 /**
  * @brief One-dimensional 32-bit birthday spacings test. Allows to catch additive lagged 
- * Fibonacci PRNGs, LCGs with m = 2^{96} and PCG32. In the case of 32-bit PRNG it is
- * equivalent to `bspace32_1d'.
+ * Fibonacci PRNGs. In the case of 32-bit PRNG it is equivalent to `bspace32_1d'.
  */
 static TestResults bspace32_1d_high(GeneratorState *obj)
 {
@@ -88,6 +86,18 @@ static TestResults bspace21_3d(GeneratorState *obj)
 static TestResults bspace21_3d_high(GeneratorState *obj)
 {
     BSpaceNDOptions opts = {.nbits_per_dim = 21, .ndims = 3, .nsamples = 250, .get_lower = 0};
+    return bspace_nd_test(obj, &opts);
+}
+
+static TestResults bspace16_4d(GeneratorState *obj)
+{
+    BSpaceNDOptions opts = {.nbits_per_dim = 16, .ndims = 4, .nsamples = 250, .get_lower = 1};
+    return bspace_nd_test(obj, &opts);
+}
+
+static TestResults bspace16_4d_high(GeneratorState *obj)
+{
+    BSpaceNDOptions opts = {.nbits_per_dim = 16, .ndims = 4, .nsamples = 250, .get_lower = 0};
     return bspace_nd_test(obj, &opts);
 }
 
@@ -179,9 +189,14 @@ static TestResults gap_inv512(GeneratorState *obj)
     return gap_test(obj, &(GapOptions) {.shl = 9, .ngaps = 10000000});
 }
 
+/**
+ * @brief This modification of gap test allows to catch some additive/subtractive
+ * lagged Fibonacci PRNGs with big lags. Also detects ChaCha12 with 32-bit
+ * counter: the test consumes more than 2^36 values.
+ */
 static TestResults gap_inv1024(GeneratorState *obj)
 {
-    return gap_test(obj, &(GapOptions) {.shl = 10, .ngaps = 10000000});
+    return gap_test(obj, &(GapOptions) {.shl = 10, .ngaps = 100000000});
 }
 
 
@@ -235,6 +250,7 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
     const TestDescription tests[] = {
         {"monobit_freq", monobit_freq_test},
         {"byte_freq", byte_freq_test},
+        {"word16_freq", word16_freq_test},
         {"bspace64_1d", bspace64_1d},
         {"bspace32_1d", bspace32_1d},
         {"bspace32_1d_high", bspace32_1d_high},
@@ -242,6 +258,8 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         {"bspace32_2d_high", bspace32_2d_high},
         {"bspace21_3d", bspace21_3d},
         {"bspace21_3d_high", bspace21_3d_high},
+        {"bspace16_4d", bspace16_4d},
+        {"bspace16_4d_high", bspace16_4d_high},
         {"bspace8_8d", bspace8_8d},
         {"bspace8_8d_high", bspace8_8d_high},
         {"bspace4_16d", bspace4_16d},
@@ -267,7 +285,7 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
     };
 
     const TestsBattery bat = {
-        "default", tests
+        "full", tests
     };
     TestsBattery_run(&bat, gen, intf, testid, nthreads);
 }

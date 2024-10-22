@@ -150,10 +150,14 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
 void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
 {
     size_t n = 1ull << 30;
-    BirthdayOptions opts_small = {.n = n, .e = 7};
-    BirthdayOptions opts_large = {.n = n, .e = 10};
-    intf->printf("64-bit birthday test\n");
-    void *state = gen->create(intf);
+    BirthdayOptions opts_small = {.n = n, .e = 7}; // lambda = 4
+    BirthdayOptions opts_large = {.n = n, .e = 10}; // lambda = 32
+    intf->printf("64-bit birthday paradox test\n");
+    if (gen->nbits != 64) {
+        intf->printf("  Error: the generator must return 64-bit values\n");
+        return;
+    }
+    void *state = gen->create(intf);    
     GeneratorState obj = {.gi = gen, .state = state, .intf = intf};
     TestResults ans = birthday_test(&obj, &opts_small);
     if (ans.x == 0) {
@@ -161,6 +165,7 @@ void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
         intf->printf("  Running the variant with larger lambda\n");
         ans = birthday_test(&obj, &opts_large);
     }
+    free(state);
     (void) ans;
 }
 
@@ -260,7 +265,8 @@ void Ising2DLattice_free(Ising2DLattice *obj)
 }
 
 
-// 10.1103/PhysRevLett.69.3382
+// http://dx.doi.org/10.1103/PhysRevLett.69.3382
+// http://dx.doi.org/10.1140/epjst/e2012-01637-8
 void battery_ising(GeneratorInfo *gen, const CallerAPI *intf)
 {
     Ising2DLattice obj;

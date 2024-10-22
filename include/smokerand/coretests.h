@@ -39,5 +39,6 @@ TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 TestResults gap_test(GeneratorState *obj, const GapOptions *opts);
 TestResults monobit_freq_test(GeneratorState *obj);
 TestResults byte_freq_test(GeneratorState *obj);
+TestResults word16_freq_test(GeneratorState *obj);
 
 #endif

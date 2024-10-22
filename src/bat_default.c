@@ -221,6 +221,7 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf,
     const TestDescription tests[] = {
         {"monobit_freq", monobit_freq_test},
         {"byte_freq", byte_freq_test},
+        {"word16_freq", word16_freq_test},
         {"bspace64_1d", bspace64_1d},
         {"bspace32_1d", bspace32_1d},
         {"bspace32_1d_high", bspace32_1d_high},

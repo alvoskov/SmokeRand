@@ -328,6 +328,7 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     size_t ngaps = opts->ngaps;
     size_t nbins = log(Ei_min / (ngaps * p)) / log(1 - p);
     size_t *Oi = calloc(nbins + 1, sizeof(size_t));
+    unsigned long long nvalues = 0;
     TestResults ans;
     ans.name = "Gap";
     obj->intf->printf("Gap test\n");
@@ -336,9 +337,11 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     for (size_t i = 0; i < ngaps; i++) {
         size_t gap_len = 0;
         u = obj->gi->get_bits(obj->state);
+        nvalues++;
         while (u > beta) {
             gap_len++;
             u = obj->gi->get_bits(obj->state);
+            nvalues++;
         }
         Oi[(gap_len < nbins) ? gap_len : nbins]++;
     }
@@ -351,6 +354,7 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     free(Oi);
     ans.p = chi2_pvalue(ans.x, nbins - 1);
     ans.alpha = chi2_cdf(ans.x, nbins - 1);
+    obj->intf->printf("  Values processed: %llu (2^%.1f)\n", nvalues, log2(nvalues));
     obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
     return ans;
@@ -406,47 +410,55 @@ static int cmp_doubles(const void *aptr, const void *bptr)
     else return 1;
 }
 
-/**
- * @brief Bytes frequency test.
- */
-TestResults byte_freq_test(GeneratorState *obj)
-{
-    size_t block_len = 1ull << 16;
-    size_t nblocks = 4096;
-    size_t bytefreq[256];
-    
-    unsigned int nbytes_per_num = obj->gi->nbits / 8;
-    unsigned int nbytes = nbytes_per_num * block_len;
-    double *chi2 = calloc(nblocks, sizeof(double));
 
+/**
+ * @brief Frequencies of n-bit words.
+ */
+TestResults nbit_words_freq_test(GeneratorState *obj,
+    const unsigned int bits_per_word, const unsigned int average_freq)
+{
+    size_t block_len = (1ull << (bits_per_word)) * average_freq;
+    size_t nblocks = 4096;
+    unsigned int nwords_per_num = obj->gi->nbits / bits_per_word;
+    unsigned int nwords = nwords_per_num * block_len;
+    size_t nbins = 1ull << bits_per_word;
+    uint64_t mask = nbins - 1;
+    double *chi2 = calloc(nblocks, sizeof(double));
+    size_t *wfreq = calloc(nwords, sizeof(size_t));
+    
     TestResults ans;
-    ans.name = "ByteFreq";
-    obj->intf->printf("Byte frequency test\n");
+    if (bits_per_word == 8) {
+        ans.name = "BytesFreq";
+        obj->intf->printf("Byte frequency test\n");
+    } else {
+        ans.name = "WordsFreq";
+        obj->intf->printf("%u-bit words frequency test\n", bits_per_word);
+    }
     obj->intf->printf("  nblocks = %lld; block_len = %lld\n",
             (unsigned long long) nblocks,
             (unsigned long long) block_len);
     for (size_t ii = 0; ii < nblocks; ii++) {
-        for (size_t i = 0; i < 256; i++) {
-            bytefreq[i] = 0;
+        for (size_t i = 0; i < nbins; i++) {
+            wfreq[i] = 0;
         }
         for (size_t i = 0; i < block_len; i++) {
             uint64_t u = obj->gi->get_bits(obj->state);        
-            for (size_t j = 0; j < nbytes_per_num; j++) {
-                bytefreq[u & 0xFF]++;
+            for (size_t j = 0; j < nwords_per_num; j++) {
+                wfreq[u & mask]++;
                 u >>= 8;
             }
         }
         chi2[ii] = 0;
-        double Ei = nbytes / 256.0;
-        for (size_t i = 0; i < 256; i++) {
-            chi2[ii] += pow(bytefreq[i] - Ei, 2.0) / Ei;
+        double Ei = (double) nwords / (double) nbins;
+        for (size_t i = 0; i < nbins; i++) {
+            chi2[ii] += pow(wfreq[i] - Ei, 2.0) / Ei;
         }
     }
     // Kolmogorov-Smirnov test
     qsort(chi2, nblocks, sizeof(double), cmp_doubles);
     double D = 0.0;
     for (size_t i = 0; i < nblocks; i++) {
-        double f = chi2_cdf(chi2[i], 255);
+        double f = chi2_cdf(chi2[i], nbins - 1);
         double idbl = (double) i;
         double Dplus = (idbl + 1.0) / nblocks - f;
         double Dminus = f - idbl / nblocks;
@@ -461,5 +473,23 @@ TestResults byte_freq_test(GeneratorState *obj)
     obj->intf->printf("\n");
     free(chi2);
     return ans;
+}
+
+
+
+/**
+ * @brief Bytes frequency test.
+ */
+TestResults byte_freq_test(GeneratorState *obj)
+{
+    return nbit_words_freq_test(obj, 8, 256);
+}
+
+/**
+ * @brief 16-bit words frequency test.
+ */
+TestResults word16_freq_test(GeneratorState *obj)
+{
+    return nbit_words_freq_test(obj, 16, 16);
 }
 

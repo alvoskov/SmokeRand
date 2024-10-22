@@ -17,9 +17,7 @@
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * All rights reserved.
- *
- * This software is provided under the Apache 2 License.
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 
@@ -40,7 +38,7 @@ static inline uint64_t get_bits(void *state)
     RC4State *obj = state;
     uint64_t v = 0;
     uint8_t *s = obj->s, i = obj->i, j = obj->j;
-    for (size_t k = 0; k < 8; k++) {
+    for (size_t k = 0; k < 4; k++) {
         uint8_t ss = s[++i];
         j += ss;
         s[i] = s[j];
@@ -76,4 +74,4 @@ static void *create(const CallerAPI *intf)
 }
 
 
-MAKE_UINT64_PRNG("RC4", NULL)
+MAKE_UINT32_PRNG("RC4", NULL)

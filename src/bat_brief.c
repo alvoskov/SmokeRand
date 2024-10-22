@@ -114,6 +114,11 @@ static TestResults collisionover20_2d(GeneratorState *obj)
 ///// Gap tests /////
 /////////////////////
 
+/**
+ * @brief A modification of gap tests that consumes more than \f$ 2^32 \f$
+ * values and allows to detect any PRNG with 32-bit state. It also detects
+ * additive/subtractive lagged Fibonacci and AWC/SWB generators.
+ */
 static TestResults gap_inv512(GeneratorState *obj)
 {
     return gap_test(obj, &(GapOptions) {.shl = 9, .ngaps = 10000000});
