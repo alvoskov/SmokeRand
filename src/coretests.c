@@ -319,19 +319,19 @@ TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
  * @brief Knuth's gap test for detecting lagged Fibonacci generators.
  * @details Gap is \f$ [0;\beta) \f$ where $\beta = 1 / (2^{shl}) \f$.
  */
-TestResults gap_test(GeneratorState *obj, unsigned int shl)
+TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
 {
     const double Ei_min = 10.0;
-    double p = 1.0 / (1 << shl); // beta in the floating point format
-    uint64_t beta = 1ull << (obj->gi->nbits - shl);
+    double p = 1.0 / (1 << opts->shl); // beta in the floating point format
+    uint64_t beta = 1ull << (obj->gi->nbits - opts->shl);
     uint64_t u;
-    size_t ngaps = 10000000;
+    size_t ngaps = opts->ngaps;
     size_t nbins = log(Ei_min / (ngaps * p)) / log(1 - p);
     size_t *Oi = calloc(nbins + 1, sizeof(size_t));
     TestResults ans;
     ans.name = "Gap";
     obj->intf->printf("Gap test\n");
-    obj->intf->printf("  alpha = 0.0; beta = %g; shl = %u;\n", p, shl);
+    obj->intf->printf("  alpha = 0.0; beta = %g; shl = %u;\n", p, opts->shl);
     obj->intf->printf("  ngaps = %llu; nbins = %llu\n", ngaps, nbins);
     for (size_t i = 0; i < ngaps; i++) {
         size_t gap_len = 0;

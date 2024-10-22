@@ -176,12 +176,12 @@ static TestResults collisionover20_2d_high(GeneratorState *obj)
 
 static TestResults gap_inv512(GeneratorState *obj)
 {
-    return gap_test(obj, 9);
+    return gap_test(obj, &(GapOptions) {.shl = 9, .ngaps = 10000000});
 }
 
 static TestResults gap_inv1024(GeneratorState *obj)
 {
-    return gap_test(obj, 10);
+    return gap_test(obj, &(GapOptions) {.shl = 10, .ngaps = 10000000});
 }
 
 

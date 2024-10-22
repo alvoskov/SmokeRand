@@ -30,6 +30,7 @@ add_executable(smokerand src/smokerand.c
     src/core.c include/smokerand/core.h
     src/coretests.c include/smokerand/coretests.h
     src/entropy.c include/smokerand/entropy.h
+    src/extratests.c include/smokerand/extratests.h
     src/lineardep.c include/smokerand/lineardep.h
     src/bat_default.c include/smokerand/bat_default.h
     src/bat_brief.c include/smokerand/bat_brief.h
@@ -38,7 +39,7 @@ add_executable(smokerand src/smokerand.c
 target_include_directories(smokerand PRIVATE include)
 
 # Examples of plugins, i.e. modules with PRNGs
-foreach(prng_name alfib alfib_mod coveyou64 kiss64 kiss93 kiss99
+foreach(prng_name alfib alfib_mod chacha coveyou64 kiss64 kiss93 kiss99
     lcg69069 lcg64 lcg64prime lcg96 lcg128 minstd mt19937 mulberry32 mwc64 mwc64x mwc128
     r1279 rc4 rrmxmx pcg32 pcg64 sezgin63 shr3 swb swbw
     speck128 speck128_avx splitmix32 sqxor sqxor32

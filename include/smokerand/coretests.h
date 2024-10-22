@@ -21,10 +21,22 @@ typedef struct {
     int get_lower; ///< 0/1 - use lower/higher part of PRNG output.
 } BSpaceNDOptions;
 
+/**
+ * @brief Options for gap test.
+ * @details Recommended options:
+ *
+ * - shl = 9, ngaps = 1e7
+ * - shl = 10, ngaps = 1e7
+ * - shl = 10, ngaps = 1e8
+ */
+typedef struct {
+    unsigned int shl; ///< Gap is [0; 2^{-shl})
+    unsigned long ngaps; ///< Number of gaps
+} GapOptions;
 
 TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts);
 TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts);
-TestResults gap_test(GeneratorState *obj, unsigned int shl);
+TestResults gap_test(GeneratorState *obj, const GapOptions *opts);
 TestResults monobit_freq_test(GeneratorState *obj);
 TestResults byte_freq_test(GeneratorState *obj);
 

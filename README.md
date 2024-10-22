@@ -1,4 +1,5 @@
-# SmokeRand
+# Introduction
+
 SmokeRand is a set of tests for pseudorandom number generators. Tested
 generators should return either 32-bit or 64-bit unsigned uniformly distributed
 unsigned integers. Its set of tests resembles SmallCrush, Crush and BigCrush
@@ -17,6 +18,8 @@ from TestU01 but has several important differences:
 Existing solutions:
 
 1. https://dl.acm.org/doi/abs/10.1145/3447773
+2. PractRand
+3. Ent
 
 Requirements:
 
@@ -25,7 +28,24 @@ Requirements:
 - 4GiB of RAM minimal, 16GiB recommended.
 - CMake.
 
-Implemented algorithms:
+Implemented tests:
+
+1. Monobit frequency test
+2. Chi2 frequency test for bytes and 16-bit chunks
+3. Birthday spacings test
+4. Gap test
+5. Matrix rank test: 4096, 8192
+6. Linear complexity test
+7. CollisionOver test.
+
+Extra tests:
+
+1. 64-bit birthday test (very slow)
+2. 2d ising model test (very slow)
+3. Long runs of chi2 test / monobit freq test
+
+
+# Implemented algorithms
 
  Algoritrhm  | Description
 -------------|---------------------------------------------------------------------------
@@ -60,24 +80,7 @@ Implemented algorithms:
  xsh         | xorshift64
 
 
-
-Desired tests:
-
-1. Monobit frequency test
-2. Chi2 frequency test for bytes and 16-bit chunks
-3. Birthday spacings test
-4. Gap test
-5. Matrix rank test: 4096, 8192
-6. Linear complexity test
-7. CollisionOver test.
-
-Extra tests:
-
-1. 64-bit birthday test (very long run)
-2. Long runs of chi2 test / monobit freq test
-
-
-# Modifications of birthday test
+# Modifications of birthday spacings test
 
 The birthday test generates input values using the next algorithm:
 
@@ -104,6 +107,15 @@ The birthday test generates input values using the next algorithm:
  collover5_8d  | 5     | 8    |
 
 
+# Modifications of linear complexity tests
+
+ Name            | Bit for 32/64-bit PRNG
+-----------------|------------------------
+ linearcomp_high | 31/63
+ linearcomp_mid  | 15/31
+ linearcomp_low  | 0/0
+
+
 # Modifications of matrix rank test
 
  Name                 | n      | nbits
@@ -112,12 +124,3 @@ The birthday test generates input values using the next algorithm:
  matrixrank_4096_low8 | 4096   | 8
  matrixrank_8192      | 8192   | 32/64
  matrixrank_8192_low8 | 8192   | 8
-
-
-# Modifications of linear complexity tests
-
- Name            | Bit for 32/64-bit PRNG
------------------|------------------------
- linearcomp_high | 31/63
- linearcomp_mid  | 15/31
- linearcomp_low  | 0/0
