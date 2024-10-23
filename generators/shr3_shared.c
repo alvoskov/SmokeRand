@@ -21,7 +21,7 @@ typedef struct {
 } SHR3State;
 
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     SHR3State *obj = state;
     obj->x ^= (obj->x << 17);

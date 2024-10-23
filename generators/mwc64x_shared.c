@@ -28,7 +28,7 @@ typedef struct {
     uint64_t data;
 } MWC64XState;
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     const uint64_t A0 = 0xff676488; // 2^32 - 10001272
     MWC64XState *obj = state;

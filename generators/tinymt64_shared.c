@@ -128,7 +128,7 @@ void tinymt64_init(tinymt64_t * random, uint64_t seed)
  * @param random tinymt internal status
  * @return 32-bit unsigned integer r (0 <= r < 2^32)
  */
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     tinymt64_t *random = state;
     tinymt64_next_state(random);
@@ -170,7 +170,7 @@ static int run_self_test(const CallerAPI *intf)
     tinymt64_init(obj, 1);
     int is_ok = 1;
     for (size_t i = 0; i < 30; i++) {
-        uint64_t x = get_bits(obj);
+        uint64_t x = get_bits_raw(obj);
         if (x != refval[i]) {
             is_ok = 0;
             break;

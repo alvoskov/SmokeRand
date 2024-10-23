@@ -36,7 +36,7 @@ typedef struct {
 } Sfc64State;
 
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     enum {BARREL_SHIFT = 24, RSHIFT = 11, LSHIFT = 3};
     Sfc64State *obj = state;
@@ -53,7 +53,7 @@ static void *create(const CallerAPI *intf)
     obj->a = obj->b = obj->c = intf->get_seed64();
     obj->counter = 1;
 	for (int i = 0; i < 16; i++) {
-        get_bits(obj);
+        get_bits_raw(obj);
     }
     return (void *) obj;
 }

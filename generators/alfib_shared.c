@@ -47,7 +47,7 @@ typedef struct {
     int j;
 } ALFib_State;
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     ALFib_State *obj = state;
     uint64_t x = obj->U[obj->i] + obj->U[obj->j];

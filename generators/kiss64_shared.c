@@ -33,7 +33,7 @@ typedef struct {
 } KISS64State;
 
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     KISS64State *obj = state;
     // MWC generator
@@ -77,7 +77,7 @@ static int run_self_test(const CallerAPI *intf)
     obj.y = 362436362436362436ULL;  obj.z = 1066149217761810ULL;
     uint64_t val;
     for (size_t i = 0; i < 100000000; i++) {
-        val = get_bits(&obj);
+        val = get_bits_raw(&obj);
     }
     intf->printf("Reference value: %llu\n", refval);
     intf->printf("Obtained value:  %llu\n", val);

@@ -23,7 +23,7 @@ typedef struct {
     uint32_t S3;
 } KISS93State;
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     KISS93State *obj = state;
     obj->S1 = 69069 * obj->S1 + 23606797;

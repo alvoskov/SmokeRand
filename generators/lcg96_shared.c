@@ -29,7 +29,7 @@ typedef struct {
 /**
  * @brief A cross-compiler implementation of 128-bit LCG.
  */
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     Lcg128State *obj = state;
     const __uint128_t a = 0x60b11728995deb95 | ( ((__uint128_t) 0xdc879768) << 64);
@@ -55,7 +55,7 @@ static int run_self_test(const CallerAPI *intf)
     Lcg128State obj = {.x = 1234567890};
     uint64_t u, u_ref = 0xea5267e2;
     for (size_t i = 0; i < 1000000; i++) {
-        u = get_bits(&obj);
+        u = get_bits_raw(&obj);
     }
     intf->printf("Result: %llX; reference value: %llX\n", u, u_ref);
     return u == u_ref;

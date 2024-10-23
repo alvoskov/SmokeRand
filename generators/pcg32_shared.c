@@ -25,7 +25,7 @@ typedef struct {
     uint64_t x;
 } Pcg32State;
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     Pcg32State *obj = state;
     uint32_t xorshifted = (uint32_t) ( ((obj->x >> 18u) ^ obj->x) >> 27u );

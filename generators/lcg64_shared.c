@@ -18,7 +18,7 @@ typedef struct {
     uint64_t x;
 } Lcg64State;
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     Lcg64State *obj = state;
     obj->x = obj->x * 6906969069 + 1;

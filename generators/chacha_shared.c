@@ -216,7 +216,7 @@ void ChaCha_init(ChaChaState *obj, size_t nrounds, const uint32_t *seed)
     obj->pos = 16;
 }
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     ChaChaState *obj = state;
     if (obj->pos >= 16) {

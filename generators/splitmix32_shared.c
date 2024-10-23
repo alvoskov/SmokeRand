@@ -1,5 +1,5 @@
 /**
- * @file sqxor32_shared.c
+ * @file splitmix32_shared.c
  * @brief 32-bit modification of SplitMix (mainly for SmokeRand testing)
  * @details 
  *
@@ -13,14 +13,14 @@
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief SQXOR 32-bit PRNG state.
+ * @brief SplitMix32 32-bit PRNG state.
  */
 typedef struct {
     uint32_t w; /**< "Weyl sequence" counter state */
 } SplitMix32State;
 
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     SplitMix32State *obj = state;
     const uint32_t c = 0x9E3779B9;

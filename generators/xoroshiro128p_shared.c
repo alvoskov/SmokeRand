@@ -32,7 +32,7 @@ typedef struct {
 } Xoroshiro128PlusState;
 
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     Xoroshiro128PlusState *obj = state;
 	const uint64_t s0 = obj->s[0];

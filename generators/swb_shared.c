@@ -29,7 +29,7 @@ typedef struct {
 } SwbState;
 
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     SwbState *obj = state;
     uint32_t x;

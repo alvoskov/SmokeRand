@@ -123,7 +123,7 @@ static inline void RanluxppState_next(RanluxppState *r)
 /////////////////////
 
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     RanluxppState *obj = state;
     if (obj->pos == 9) {
@@ -168,7 +168,7 @@ static int run_self_test(const CallerAPI *intf)
     RanluxppState *obj = intf->malloc(sizeof(RanluxppState));
     RanluxppState_init(obj, 1, DEFAULT_P);
     for (size_t i = 0; i < sizeof(x_ref) / sizeof(x_ref[0]); i++) {
-        uint64_t x = get_bits(obj);
+        uint64_t x = get_bits_raw(obj);
         if (x != x_ref[i]) {
             passed = 0;
         }

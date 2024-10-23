@@ -33,7 +33,7 @@ typedef struct {
 } Xoroshiro1024StarState;
 
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     Xoroshiro1024StarState *obj = state;
     const int q = obj->p;

@@ -33,7 +33,7 @@ typedef struct {
 /**
  * @brief MWC128 PRNG implementation.
  */
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     static const uint64_t MWC_A1 = 0xffebb71d94fcdaf9;
     MWC128State *obj = state;
@@ -65,7 +65,7 @@ static int run_self_test(const CallerAPI *intf)
     MWC128State obj = {.x = 12345, .c = 67890};
     uint64_t u, u_ref = 0x72BD413ED8304C94;
     for (size_t i = 0; i < 1000000; i++) {
-        u = get_bits(&obj);
+        u = get_bits_raw(&obj);
     }
     intf->printf("Result: %llX; reference value: %llX\n", u, u_ref);
     return u == u_ref;

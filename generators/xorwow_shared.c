@@ -34,7 +34,7 @@ typedef struct {
 } XorWowState;
 
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     const uint32_t d_inc = 362437;
     XorWowState *obj = state;

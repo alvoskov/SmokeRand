@@ -32,7 +32,7 @@ typedef struct {
     int j;
 } RGenState;
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     RGenState *obj = state;
     uint32_t x = obj->x[obj->i] ^ obj->x[obj->j];

@@ -41,9 +41,9 @@ target_include_directories(smokerand PRIVATE include)
 # Examples of plugins, i.e. modules with PRNGs
 foreach(prng_name alfib alfib_mod chacha coveyou64 kiss64 kiss93 kiss99
     lcg69069 lcg64 lcg64prime lcg96 lcg128 minstd mt19937 mulberry32 mwc64 mwc64x mwc128
-    r1279 rc4 rrmxmx pcg32 pcg64 sezgin63 sfc64 shr3 swb swblux swbw
+    r1279 rc4 rrmxmx pcg32 pcg64 philox philox32 sezgin63 sfc64 shr3 swb swblux swbw
     speck128 speck128_avx splitmix32 sqxor sqxor32
-    tinymt32 tinymt64
+    tinymt32 tinymt64 threefry wyrand
     xorwow xoroshiro128p xoroshiro128pp xoroshiro1024st xsh)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c include/smokerand/cinterface.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})

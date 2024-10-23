@@ -12,7 +12,7 @@ typedef struct {
 
 
 // pcg_rxs_m_xs64
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     Pcg64State *obj = state;
     uint64_t word = ((obj->x >> ((obj->x >> 59) + 5)) ^ obj->x) *

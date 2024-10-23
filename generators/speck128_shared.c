@@ -94,7 +94,7 @@ static void *create(const CallerAPI *intf)
 /**
  * @brief Speck128/128 implementation.
  */
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     Speck128State *obj = state;
     if (obj->pos == 2) {

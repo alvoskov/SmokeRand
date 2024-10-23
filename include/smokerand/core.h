@@ -86,6 +86,7 @@ typedef struct {
     uint64_t (*get_bits)(void *state); ///< Return u32/u64 pseudorandom number
     unsigned int nbits; ///< Number of bits returned by the generator (32 or 64)    
     int (*self_test)(const CallerAPI *intf); ///< Run internal self-test
+    uint64_t (*get_sum)(void *state, size_t len); ///< Return sum of `len` elements
 } GeneratorInfo;
 
 

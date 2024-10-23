@@ -18,7 +18,7 @@
 #include <math.h>
 
 
-
+#define SUM_BLOCK_SIZE 1024
 
 /**
  * @brief Keeps PRNG speed measurements results.
@@ -29,20 +29,35 @@ typedef struct
     double ticks_per_call; ///< Processor ticks per call
 } SpeedResults;
 
+typedef enum {
+    speed_uint, ///< Single value (emulates call of PRNG function)
+    speed_sum   ///< Sum of values (emulates usage of inline PRNG)
+} SpeedMeasurementMode;
+
 /**
- * @brief PRNG speed measurement for uint32 output
+ * @brief PRNG speed measurement for uint output.
+ * @details Two modes are supported: measurement of one function call
+ * and measurement of sum computation by PRNG inside the cycle.
  */
-static SpeedResults measure_speed(GeneratorInfo *gen, const CallerAPI *intf)
+static SpeedResults measure_speed(GeneratorInfo *gen, const CallerAPI *intf,
+    SpeedMeasurementMode mode)
 {
     void *state = gen->create(intf);
     SpeedResults results;
     double ns_total = 0.0;
     for (size_t niter = 2; ns_total < 0.5e9; niter <<= 1) {
         clock_t tic = clock();
-        uint64_t tic_proc = cpuclock();
         uint64_t sum = 0;
-        for (size_t i = 0; i < niter; i++) {
-            sum += gen->get_bits(state);
+        uint64_t tic_proc = cpuclock();
+        if (mode == speed_uint) {
+            for (size_t i = 0; i < niter; i++) {
+                sum += gen->get_bits(state);
+            }
+        } else {
+            uint64_t sum = 0;
+            for (size_t i = 0; i < niter; i++) {
+                sum += gen->get_sum(state, SUM_BLOCK_SIZE);
+            }
         }
         uint64_t toc_proc = cpuclock();
         clock_t toc = clock();
@@ -50,7 +65,7 @@ static SpeedResults measure_speed(GeneratorInfo *gen, const CallerAPI *intf)
         results.ns_per_call = ns_total / niter;
         results.ticks_per_call = (double) (toc_proc - tic_proc) / niter;
     }
-    free(state);
+    intf->free(state);
     return results;
 }
 
@@ -66,22 +81,44 @@ static uint64_t dummy_get_bits(void *state)
     return 0;
 }
 
+/**
+ * @brief Sums some predefined elements in the cycle to measure
+ * baseline time for PRNG performance estimation. It intentionally
+ * uses a table with numbers to override optimization of compilers
+ * (exclusion of cycle, even replacement of cycle for arithmetic
+ * progression to formula etc.) Inspired by DOOM PRNG.
+ */
+static uint64_t dummy_get_sum(void *state, size_t len)
+{
+    uint64_t data[] = {9338, 34516, 60623, 45281,
+        9064,   60090,  62764,  5557,
+        44347,  35277,  25712,  20552,
+        50645,  61072,  26719,  21307};
+    uint64_t sum = 0;
+    (void) state;
+    for (size_t i = 0; i < len; i++) {
+        sum += data[i & 0xF];
+    }
+    return sum;
+}
 
-void battery_speed(GeneratorInfo *gen, const CallerAPI *intf)
+
+
+void battery_speed_test(GeneratorInfo *gen, const CallerAPI *intf,
+    SpeedMeasurementMode mode)
 {
     GeneratorInfo dummy_gen = {.name = "dummy", .create = dummy_create,
-        .get_bits = dummy_get_bits, .nbits = gen->nbits,
-        .self_test = NULL};
-    printf("===== Generator speed measurements =====\n");
-    SpeedResults speed_full = measure_speed(gen, intf);
-    SpeedResults speed_dummy = measure_speed(&dummy_gen, intf);
+        .get_bits = dummy_get_bits, .get_sum = dummy_get_sum,
+        .nbits = gen->nbits, .self_test = NULL};
+    SpeedResults speed_full = measure_speed(gen, intf, mode);
+    SpeedResults speed_dummy = measure_speed(&dummy_gen, intf, mode);
+    size_t block_size = (mode == speed_uint) ? 1 : SUM_BLOCK_SIZE;
+    size_t nbytes = block_size * gen->nbits / 8;
     double ns_per_call_corr = speed_full.ns_per_call - speed_dummy.ns_per_call;
     double ticks_per_call_corr = speed_full.ticks_per_call - speed_dummy.ticks_per_call;
-    double cpb_corr = ticks_per_call_corr / (gen->nbits / 8);
-    double gb_per_sec = (double) gen->nbits / 8.0 / (1.0e-9 * ns_per_call_corr) / pow(2.0, 30.0);
+    double cpb_corr = ticks_per_call_corr / nbytes;
+    double gb_per_sec = (double) nbytes / (1.0e-9 * ns_per_call_corr) / pow(2.0, 30.0);
 
-    printf("Generator name:    %s\n", gen->name);
-    printf("Output size, bits: %d\n", (int) gen->nbits);
     printf("Nanoseconds per call:\n");
     printf("  Raw result:                %g\n", speed_full.ns_per_call);
     printf("  For empty 'dummy' PRNG:    %g\n", speed_dummy.ns_per_call);
@@ -92,6 +129,15 @@ void battery_speed(GeneratorInfo *gen, const CallerAPI *intf)
     printf("  For empty 'dummy' PRNG:    %g\n", speed_dummy.ticks_per_call);
     printf("  Corrected result:          %g\n", ticks_per_call_corr);
     printf("  Corrected result (cpB):    %g\n\n", cpb_corr);
+}
+
+void battery_speed(GeneratorInfo *gen, const CallerAPI *intf)
+{
+    printf("===== Generator speed measurements =====\n");
+    printf("----- Speed test for uint generation -----\n");
+    battery_speed_test(gen, intf, speed_uint);
+    printf("----- Speed test for uint sum generation -----\n");
+    battery_speed_test(gen, intf, speed_sum);
 }
 
 

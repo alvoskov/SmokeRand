@@ -21,7 +21,7 @@ typedef struct {
 } SqXorState;
 
 
-static inline uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     const uint64_t s = 0x9E3779B97F4A7C15;
     SqXorState *obj = state;
@@ -40,15 +40,14 @@ static inline uint64_t get_bits(void *state)
 
 /**
  * @brief Self-test to prevent problems during re-implementation
- * in MSVC and other plaforms that don't support int128. It also
- * doesn't initialize i32buf: we don't need them anyway.
+ * in MSVC and other plaforms that don't support int128.
  */
 static int run_self_test(const CallerAPI *intf)
 {
     SqXorState obj = {.w = 1234567890};
     uint64_t u, u_ref = 0xB74C88775DF514;
     for (size_t i = 0; i < 1000000; i++) {
-        u = get_bits(&obj);
+        u = get_bits_raw(&obj);
     }
     intf->printf("Result: %llX; reference value: %llX\n", u, u_ref);
     return u == u_ref;

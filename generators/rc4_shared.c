@@ -33,7 +33,7 @@ typedef struct {
 } RC4State;
 
 
-static inline uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     RC4State *obj = state;
     uint64_t v = 0;
@@ -68,7 +68,7 @@ static void *create(const CallerAPI *intf)
     obj->i = 0;
     obj->j = 0;
     for (size_t k = 0; k < 32; k++) {
-        (void) get_bits(obj);
+        (void) get_bits_raw(obj);
     }
     return (void *) obj;
 }

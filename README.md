@@ -60,7 +60,7 @@ be divided into several groups:
 - Linear congruental: lcg64, lcg64prime, lcg96, lcg128, lcg69069, minstd,
   mwc64, mwc64x, mwc128, mwc128x, randu, seizgin63.
 - Linear congruental with output scrambling: mulberry32, rrmxmx, splitmix32,
-  sqxor, sqxor32.
+  sqxor, sqxor32, wyrand.
 - Subtract with borrow: swb, swblux, swbw
 - LSFR without scrambling: shr3, xsh
 - LSFR with scrambling: xoroshiro128p, xoroshiro128pp, xoroshiro1024st, xorwow.

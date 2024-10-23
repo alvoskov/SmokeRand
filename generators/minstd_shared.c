@@ -27,7 +27,7 @@ typedef struct {
 } MinstdState;
 
 
-static inline uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     static const int32_t m = 2147483647, a = 16807, q = 127773, r = 2836;
     MinstdState *obj = state;
@@ -53,7 +53,7 @@ int run_self_test(const CallerAPI *intf)
     MinstdState obj;
     obj.x = 1;
     for (size_t i = 0; i < 10000; i++) {
-        get_bits(&obj);
+        get_bits_raw(&obj);
     }
     intf->printf("The current state is %d, reference value is %d\n",
         obj.x, x_ref);

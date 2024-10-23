@@ -37,7 +37,7 @@ typedef struct {
     size_t pos;
 } MT19937State;
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     MT19937State *mt = state;
     if (mt->pos == MTWIST_N) {

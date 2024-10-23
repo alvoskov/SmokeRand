@@ -21,7 +21,7 @@ typedef struct {
     uint64_t x;
 } Coveyou64State;
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     Coveyou64State *obj = (Coveyou64State *) state;
     obj->x = (obj->x + 1) * obj->x;

@@ -30,8 +30,10 @@ typedef struct {
     int pos;
 } SwbLuxState;
 
-
-static inline uint64_t get_bits_raw(SwbLuxState *obj)
+/**
+ * @brief SWB implementation without "luxury level".
+ */
+static inline uint64_t get_bits_nolux(SwbLuxState *obj)
 {
     uint32_t x;
     int64_t xj = obj->x[obj->j], xi = obj->x[obj->i];
@@ -49,8 +51,10 @@ static inline uint64_t get_bits_raw(SwbLuxState *obj)
     return x;
 }
 
-
-static uint64_t get_bits(void *state)
+/**
+ * @brief This wrapper implements "luxury levels".
+ */
+static inline uint64_t get_bits_raw(void *state)
 {
     SwbLuxState *obj = state;
     if (++obj->pos == SWB_A) {

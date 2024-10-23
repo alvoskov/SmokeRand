@@ -27,7 +27,7 @@ typedef struct {
 } SqXor32State;
 
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     const uint32_t s = 0x9E3779B9;
     SqXor32State *obj = state;

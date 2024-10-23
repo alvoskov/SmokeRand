@@ -41,7 +41,7 @@ typedef struct {
 } KISS99State;
 
 
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     KISS99State *obj = state;
     // LCG generator
@@ -86,7 +86,7 @@ static int run_self_test(const CallerAPI *intf)
     obj.z   = 12345; obj.w     = 65435;
     obj.jsr = 34221; obj.jcong = 12345; 
     for (long i = 1; i < 1000001 + 256; i++) {
-        val = get_bits(&obj);
+        val = get_bits_raw(&obj);
     }
     intf->printf("Reference value: %u\n", refval);
     intf->printf("Obtained value:  %u\n", val);

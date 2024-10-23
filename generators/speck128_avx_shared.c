@@ -181,7 +181,7 @@ static void *create(const CallerAPI *intf)
 /**
  * @brief Get 64-bit value from Speck128/128.
  */
-static uint64_t get_bits(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     Speck128VecState *obj = state;
     if (obj->pos == 16) {
