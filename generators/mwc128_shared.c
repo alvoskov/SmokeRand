@@ -1,8 +1,8 @@
 /**
- * @file mwc128x_shared.c
- * @brief MWC128X - 128-bit PRNG based on MWC method.
- * @details Multiply-with-carry PRNG with a simple output function x ^ c.
- * Has period about 2^127. Passes SmallCrush, Crush and BigCrush tests.
+ * @file mwc128_shared.c
+ * @brief MWC128 - 128-bit PRNG based on MWC method.
+ * @details Multiply-with-carry PRNG with a period about 2^127.
+ * Passes SmallCrush, Crush and BigCrush tests.
  * The MWC_A1 multiplier was found by S. Vigna.
  *
  * References:
@@ -20,7 +20,7 @@
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief MWC128X state. Cannot be initialized to (0, 0) or to
+ * @brief MWC128 state. Cannot be initialized to (0, 0) or to
  * (2^64 - 1, 2^64 - 1). Default initialization is (seed, 1) as suggested
  * by S. Vigna.
  */
