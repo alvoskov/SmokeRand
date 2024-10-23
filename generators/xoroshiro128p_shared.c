@@ -1,5 +1,5 @@
 /**
- * @file xoroshiro128plus_shared.c
+ * @file xoroshiro128p_shared.c
  * @brief xoroshiro128+ pseurorandom number generator.
  * @details The implementation is based on public domain code by D.Blackman
  * and S.Vigna (vigna@acm.org). This PRNG fails matrixrank and linearcomp tests.

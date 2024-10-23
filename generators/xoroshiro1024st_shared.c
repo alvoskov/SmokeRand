@@ -1,5 +1,5 @@
 /**
- * @file xoroshiro1024star_shared.c
+ * @file xoroshiro1024st_shared.c
  * @brief xoroshiro1024* pseurorandom number generator.
  * @details The implementation is based on public domain code by D.Blackman
  * and S.Vigna. This PRNG fails linearcomp test.

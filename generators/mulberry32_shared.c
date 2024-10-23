@@ -1,9 +1,14 @@
 /**
  * @file sqxor32_shared.c
- * @brief 32-bit modification of SplitMix (mainly for SmokeRand testing)
- * @details 
+ * @brief Mulberry32 generator by Tommy Ettinger
+ * @details Similar to SplitMix: based on 32-bit "discrete Weyl sequence"
+ * scrambled by some output function.
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright The algorithm was suggested by Tommy Ettinger.
+ * 
+ * Adaptation for SmokeRand:
+ *
+ * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * All rights reserved.

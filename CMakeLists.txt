@@ -44,10 +44,18 @@ foreach(prng_name alfib alfib_mod chacha coveyou64 kiss64 kiss93 kiss99
     r1279 rc4 rrmxmx pcg32 pcg64 sezgin63 sfc64 shr3 swb swblux swbw
     speck128 speck128_avx splitmix32 sqxor sqxor32
     tinymt32 tinymt64
-    xorwow xoroshiro128plus xoroshiro128plusplus xoroshiro1024star xsh)
+    xorwow xoroshiro128p xoroshiro128pp xoroshiro1024st xsh)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c include/smokerand/cinterface.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
     set_target_properties(${prng_name}_shared PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
     set_target_properties(${prng_name}_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
     target_include_directories(${prng_name}_shared PRIVATE include)
 endforeach()
+
+# RANLUX++
+add_library(ranluxpp_shared SHARED generators/ranluxpp_shared.c generators/ranluxpp_helpers.h
+    generators/ranluxpp_mulmod.h include/smokerand/cinterface.h)
+set_target_properties(ranluxpp_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
+set_target_properties(ranluxpp_shared PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
+set_target_properties(ranluxpp_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
+target_include_directories(ranluxpp_shared PRIVATE include)
