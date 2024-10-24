@@ -60,10 +60,10 @@ static inline uint64_t get_bits_raw(void *state)
     if (++obj->pos == SWB_A) {
         obj->pos = 0;
         for (int i = 0; i < SWB_A * obj->luxury; i++) {
-            get_bits_raw(obj);
+            get_bits_nolux(obj);
         }
     }
-    return get_bits_raw(obj);
+    return get_bits_nolux(obj);
 }
 
 
