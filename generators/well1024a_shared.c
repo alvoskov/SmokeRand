@@ -1,11 +1,26 @@
-/*
-Improved long-period generators based on linear recurrences modulo 2
-Authors: François Panneton, Pierre L'Ecuyer, Makoto MatsumotoAuthors Info & Claims
-ACM Transactions on Mathematical Software (TOMS), Volume 32, Issue 1
-Pages 1 - 16
-https://doi.org/10.1145/1132973.11329
-*/
-
+/**
+ * @file well1024a_shared.c
+ * @brief WELL1024a generator (Well equidistributed long-period linear).
+ * @details This PRNG passes majority of statistical tests, fails tests based
+ * on matrix ranks and linear complexity.
+ *
+ * References:
+ *
+ * 1. Panneton F., L'Ecuyer P., Matsumoto M. Improved long-period generators
+ * based on linear recurrences modulo 2 // ACM Transactions on Mathematical
+ * Software (TOMS). 2006. V. 32. N 1. P.1-16
+ * https://doi.org/10.1145/1132973.1132974
+ *
+ * @copyright WELL algorithm was developed by Panneton F., L'Ecuyer P.,
+ * Matsumoto M.
+ * 
+ * Implementation for SmokeRand:
+ *
+ * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG

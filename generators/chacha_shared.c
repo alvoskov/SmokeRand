@@ -111,9 +111,11 @@ static inline void qround(uint32_t *x, size_t ai, size_t bi, size_t ci, size_t d
 static inline void ChaCha_inc_counter(ChaChaState *obj)
 {
     // Variant with 32-bit counter for testing purposes
-    obj->x[12]++;
-//    uint64_t *cnt = (uint64_t *) &obj->x[12];
-//    if (++cnt[0] == 0) ++cnt[1];
+    // (will fail gap test!)
+    //obj->x[12]++;
+    // 128-bit counter
+    uint64_t *cnt = (uint64_t *) &obj->x[12];
+    if (++cnt[0] == 0) ++cnt[1];
 }
 
 

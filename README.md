@@ -44,8 +44,8 @@ Implemented tests:
 
 Extra tests:
 
-1. 64-bit birthday test (very slow)
-2. 2d ising model test (very slow)
+1. 64-bit birthday paradox test (very slow)
+2. 2d Ising model test (very slow)
 3. Long runs of chi2 test / monobit freq test
 
 
@@ -54,8 +54,10 @@ Extra tests:
 A lot of pseudorandom number generators are supplied with SmokeRand. They can
 be divided into several groups:
 
-- Cryptographically secure: chacha, speck128, speck128_avx.
+- Cryptographically secure: chacha, isaac64, speck128, speck128_avx.
 - Obsolete CSPRNG: rc4.
+- Counter-based scramblers based on cryptographical primitives: philox,
+  philox32, threefry.
 - Lagged Fibonacci: alfib, alfib_mod, mlfib17_5, r1279
 - Linear congruental: lcg64, lcg64prime, lcg96, lcg128, lcg69069, minstd,
   mwc64, mwc64x, mwc128, mwc128x, randu, seizgin63.
@@ -75,6 +77,7 @@ be divided into several groups:
  alfib_mod         | \f$ LFib(+,2^{64},607,203) \f$ XORed by "Weyl sequence"
  chacha            | ChaCha12 CSPRNG: Cross-platform implementation
  coveyou64         | COVEYOU
+ isaac64           | ISAAC64 64-bit CSPRNG
  kiss93            | KISS93 combined generator by G.Marsaglia
  kiss99            | KISS99 combined generator by G.Marsaglia
  kiss64            | 64-bit version of KISS
@@ -123,57 +126,59 @@ be divided into several groups:
 # Tests results
 
 
- Algoritrhm        | Output | brief | default | full
--------------------|--------|-------|---------|------
- alfib             | u64    | 4     | -       | -
- alfib_mod         | u32    | +     |         |
- chacha            | u32    | +     |         |
- coveyou64         | u32    | 2     |         |
- kiss93            | u32    | 1     |         |
- kiss99            | u32    | +     |         |
- kiss64            | u64    | +     |         |
- lcg64             | u32    | 5     |         |
- lcg64prime        | u64    | 1     |         |
- lcg96             | u32    | +     | +       |
- lcg128            | u64    | +     | +       |
- lcg69069          | u32    | 14    |         |
- minstd            | u32    | 15    |         |
- mlfib17_5         | u32    | +     |         |
- mt19937           | u32    | 3     |         |
- mulberry32        | u32    | 1     |         |
- mwc64             | u32    | 1     |         |
- mwc64x            | u32    |       |         |
- mwc128            | u64    |       |         |
- mwc128x           | u64    |       |         |
- pcg32             | u32    |       |         |
- pcg64             | u64    |       |         |
- philox            | u64    |       |         |
- philox32          | u32    |       |         |
- randu             | u32    |       |         |
- r1279             | u32    | 4     |         |
- rc4               | u32    |       |         |
- rrmxmx            | u64    |       |         |
- seigzin63         | u32    | +     | +       | 3
- speck128          | u64    |       |         |
- speck128_avx      | u64    |       |         |
- splitmix32        | u32    | 1     |         |
- sqxor             | u64    |       |         |
- sqxor32           | u32    |       |         |
- sfc32             | u32    | +     | +       |
- sfc64             | u64    | +     | +       |
- shr3              | u32    | 13    |         |
- swb               | u32    | 3     |         |
- swblux            | u32    |       |         |
- swbw              | u32    |       |         |
- tinymt32          | u32    | 2     |         |
- tinymt64          | u64    | 1     |         |
- threefry          | u64    |       |         |
- well1024a         | u32    | 3     | 5       |
- xoroshiro128p     | u64    | 1     |         |
- xoroshiro128pp    | u64    | +     | +       |
- xoroshiro1024st   | u64    | 1     | 1       |
- xorwow            | u32    | 3     | 7       |
- xsh               | u64    | 6     | 8       |
+ Algoritrhm        | Output | brief | default | full | cpb
+-------------------|--------|-------|---------|------|-----------
+ alfib             | u64    | 4     | -       | -    | 0.23
+ alfib_mod         | u32    | +     |         |      | 0.50
+ chacha            | u32    | +     |         |      | 2.0
+ coveyou64         | u32    | 2     |         |      | 0.62
+ isaac64           | u64    | +     | +       |      | 0.75
+ kiss93            | u32    | 1     | 3       |      | 0.82
+ kiss99            | u32    | +     |         |      | 1.0
+ kiss64            | u64    | +     |         |      | 0.53
+ lcg64             | u32    | 5     | 6       |      | 0.40
+ lcg64prime        | u64    | 1     | 1       |      | 1.5
+ lcg96             | u32    | +     | +       |      | 0.78
+ lcg128            | u64    | +     | +       |      | 0.35
+ lcg69069          | u32    | 14    | 28      |      | 0.38
+ minstd            | u32    | 15    | 28      |      | 2.4
+ mlfib17_5         | u32    | +     |         |      | 0.48
+ mt19937           | u32    | 3     |         |      | 0.91
+ mulberry32        | u32    | 1     |         |      | 0.51
+ mwc64             | u32    | 1     | 2       |      | 0.37
+ mwc64x            | u32    | +     |         |      | 0.53
+ mwc128            | u64    | +     |         |      | 0.30
+ mwc128x           | u64    | +     |         |      | 0.30
+ pcg32             | u32    | +     |         |      | 0.44
+ pcg64             | u64    | +     |         |      | 0.28
+ philox            | u64    | +     |         |      | 0.85
+ philox32          | u32    | +     |         |      | 2.7
+ randu             | u32    | 16    | 29      |      | 0.41
+ r1279             | u32    | 4     | 6       |      | 0.47
+ rc4               | u32    | +     |         |      | 6.0
+ rrmxmx            | u64    | +     | +       |      | 0.14
+ seigzin63         | u32    | +     | +       | 3    | 3.0
+ speck128          | u64    | +     | +       |      | 3.1
+ speck128_avx      | u64    | +     | +       |      | 0.65
+ splitmix32        | u32    | 1     | 1       |      | 0.25
+ sqxor             | u64    | +     | +       |      | 0.13
+ sqxor32           | u32    | 1     | 1       |      | 0.20
+ sfc32             | u32    | +     | +       |      | 0.24 
+ sfc64             | u64    | +     | +       |      | 0.10
+ shr3              | u32    | 13    | 26      |      | 0.76
+ swb               | u32    | 3     | 3       |      | 2.7
+ swblux            | u32    | +     | +       |      | 6.3
+ swbw              | u32    | +     | +       | +    | 2.8
+ tinymt32          | u32    | 2     | 4       |      | 1.5
+ tinymt64          | u64    | 1     | 2       |      | 2.7
+ threefry          | u64    | +     | +       |      | 1.0
+ well1024a         | u32    | 3     | 5       |      | 1.0
+ wyrand            | u64    | +     | +       |      | 0.08
+ xoroshiro128p     | u64    | 1     | 2       |      | 0.16
+ xoroshiro128pp    | u64    | +     | +       |      | 0.20
+ xoroshiro1024st   | u64    | 1     | 1       |      | 0.33
+ xorwow            | u32    | 3     | 7       |      | 0.52
+ xsh               | u64    | 6     | 8       |      | 0.43
 
 
 
