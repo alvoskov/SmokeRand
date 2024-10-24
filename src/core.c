@@ -20,16 +20,16 @@
 
 
 
-static Entropy entropy = {{0, 0, 0, 0}, 0};
+static Entropy entropy = {{0, 0, 0, 0}, 0, NULL, 0, 0};
 
 static uint32_t get_seed32(void)
 {
-    return Entropy_seed64(&entropy) >> 32;
+    return Entropy_seed64(&entropy, 0) >> 32;
 }
 
 static uint64_t get_seed64(void)
 {
-    return Entropy_seed64(&entropy);
+    return Entropy_seed64(&entropy, 0);
 }
 
 CallerAPI CallerAPI_init(void)
@@ -47,25 +47,28 @@ CallerAPI CallerAPI_init(void)
     return intf;
 }
 
-
-static pthread_mutex_t get_seed32_mt_mutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t get_seed64_mt_mutex = PTHREAD_MUTEX_INITIALIZER;
-
-static uint32_t get_seed32_mt(void)
+void CallerAPI_free(void)
 {
-    pthread_mutex_lock(&get_seed32_mt_mutex);
-    uint32_t seed = Entropy_seed64(&entropy) >> 32;
-    pthread_mutex_unlock(&get_seed32_mt_mutex);
-    return seed;
+    Entropy_free(&entropy);
 }
+
+
+static pthread_mutex_t get_seed64_mt_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static uint64_t get_seed64_mt(void)
 {
     pthread_mutex_lock(&get_seed64_mt_mutex);
-    uint64_t seed = Entropy_seed64(&entropy);
+    uint64_t seed = Entropy_seed64(&entropy, pthread_self());
     pthread_mutex_unlock(&get_seed64_mt_mutex);
     return seed;
 }
+
+static uint32_t get_seed32_mt(void)
+{
+    return get_seed64_mt() >> 32;
+}
+
+
 
 
 static pthread_mutex_t printf_mt_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -454,6 +457,7 @@ void *battery_thread(void *data)
         size_t ind = th_data->tests_inds[i];
         th_data->results[ind] = th_data->tests[i].run(&obj);
         th_data->results[ind].name = th_data->tests[i].name;
+        th_data->results[ind].thread_id = (uint64_t) pthread_self();
     }
     th_data->intf->printf("^^^^^^^^^^ Thread %lld finished ^^^^^^^^^^\n", (int) th_data->thrd_id);
     return NULL;
@@ -504,21 +508,42 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
 }
 
 
+static void snprintf_pvalue(char *buf, size_t len, double p, double alpha)
+{
+    if (p != p || alpha != alpha) {
+        snprintf(buf, len, "NAN");
+    } else if (p < 0.0 || p > 1.0) {
+        snprintf(buf, len, "???");
+    } else if (p < DBL_MIN) {
+        snprintf(buf, len, "0");
+    } else if (1.0e-3 <= p && p <= 0.999) {
+        snprintf(buf, len, "%.3f", p);
+    } else if (p < 1.0e-3) {
+        snprintf(buf, len, "%.2e", p);
+    } else if (p > 0.999 && alpha > DBL_MIN) {
+        snprintf(buf, len, "1 - %.2e", alpha);
+    } else {
+        snprintf(buf, len, "1");
+    }
+}
+
 static void TestResults_print_report(const TestResults *results,
     size_t ntests, time_t nseconds_total)
 {
-    printf("  %3s %-20s %10s %10s %10s\n",
-        "#", "Test name", "xemp", "p", "1 - p");
-    for (size_t i = 0; i < 75; i++) {
+    printf("  %3s %-20s %12s %14s %-15s %4s\n",
+        "#", "Test name", "xemp", "p", "Interpretation", "Thr#");
+    for (int i = 0; i < 79; i++) {
         printf("-");
     }
     printf("\n");
     unsigned int npassed = 0, nwarnings = 0, nfailed = 0; 
     for (size_t i = 0; i < ntests; i++) {
-        printf("  %3d %-20s %10.3g %10.3g %10.3g %10s\n",
-            (int) i + 1, results[i].name, results[i].x, results[i].p,
-            results[i].alpha,
-            interpret_pvalue(results[i].p));
+        char pvalue_txt[32];
+        snprintf_pvalue(pvalue_txt, 32, results[i].p, results[i].alpha);
+        printf("  %3d %-20s %12g %14s %-15s %4llu\n",
+            (int) i + 1, results[i].name, results[i].x, pvalue_txt,
+            interpret_pvalue(results[i].p),
+            (unsigned long long) results[i].thread_id);
         switch (get_pvalue_category(results[i].p)) {
         case pvalue_passed:
             npassed++; break;
@@ -528,7 +553,7 @@ static void TestResults_print_report(const TestResults *results,
             nfailed++; break;
         }
     }
-    for (size_t i = 0; i < 75; i++) {
+    for (int i = 0; i < 79; i++) {
         printf("-");
     }
     printf("\n");
@@ -544,17 +569,45 @@ void TestsBattery_run(const TestsBattery *bat,
     unsigned int testid, unsigned int nthreads)
 {
     time_t tic, toc;
-    void *state = gen->create(intf);
-    TestResults *results = NULL;
     size_t ntests = TestsBattery_ntests(bat);
+    size_t nresults = ntests;
+    TestResults *results = NULL;
     printf("===== Starting '%s' battery =====\n", bat->name);
-    GeneratorState obj = {.gi = gen, .state = state, .intf = intf};
-    if (testid >= ntests) {
+    if (testid > ntests) { // testid is 1-based index
         fprintf(stderr, "Invalid test id %u", testid);
         return;
     }
-    size_t nresults = ntests;
+    // Allocate memory for tests
+    if (testid == TESTS_ALL) {
+        results = calloc(ntests, sizeof(TestResults));
+        nresults = ntests;
+    } else {
+        results = calloc(1, sizeof(TestResults));
+        nresults = 1;
+    }
+    // Run the tests
     tic = time(NULL);
+    if (nthreads == 1 || testid != TESTS_ALL) {
+        // One-threaded version
+        void *state = gen->create(intf);
+        GeneratorState obj = {.gi = gen, .state = state, .intf = intf};
+        if (testid == TESTS_ALL) {
+            for (size_t i = 0; i < ntests; i++) {
+                results[i] = bat->tests[i].run(&obj);
+                results[i].name = bat->tests[i].name;
+                results[i].thread_id = 0;
+            }
+        } else {
+            *results = bat->tests[testid - 1].run(&obj);
+            results->name = bat->tests[testid - 1].name;
+        }
+        free(state);
+    } else {
+       // Multithreaded version
+       TestsBattery_run_threads(bat, ntests, gen, intf, nthreads, results);
+    }
+
+/*
     if (testid == TESTS_ALL) {
         results = calloc(ntests, sizeof(TestResults));
         nresults = ntests;
@@ -563,6 +616,7 @@ void TestsBattery_run(const TestsBattery *bat,
             for (size_t i = 0; i < ntests; i++) {
                 results[i] = bat->tests[i].run(&obj);
                 results[i].name = bat->tests[i].name;
+                results[i].thread_id = 0;
             }
         } else {
             // Multithreaded version
@@ -574,8 +628,11 @@ void TestsBattery_run(const TestsBattery *bat,
         *results = bat->tests[testid - 1].run(&obj);
         results->name = bat->tests[testid - 1].name;
     }
+*/
     toc = time(NULL);
     printf("\n");
+    printf("==================== Seeds logger report ====================\n");
+    Entropy_print_seeds_log(&entropy, stdout);
     if (testid == TESTS_ALL) {
         printf("==================== '%s' battery report ====================\n", bat->name);
     } else {
@@ -586,7 +643,6 @@ void TestsBattery_run(const TestsBattery *bat,
     printf("Output size, bits: %d\n\n", (int) gen->nbits);
     TestResults_print_report(results, nresults, toc - tic);
     free(results);
-    free(state);
 }
 
 ////////////////////////////////////////////////////////////////

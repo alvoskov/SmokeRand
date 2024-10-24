@@ -55,7 +55,7 @@ static inline uint64_t get_bits_raw(void *state)
     obj->w += 0x9E3779B97F4A7C15;
     if(--obj->i == 0) obj->i = LFIB_A;
 	if(--obj->j == 0) obj->j = LFIB_A;
-    return x ^ obj->w;
+    return (x ^ obj->w) >> 32;
 }
 
 static void *create(const CallerAPI *intf)
@@ -71,4 +71,4 @@ static void *create(const CallerAPI *intf)
     return (void *) obj;
 }
 
-MAKE_UINT64_PRNG("ALFib_mod", NULL);
+MAKE_UINT32_PRNG("ALFib_mod", NULL);

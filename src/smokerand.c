@@ -247,6 +247,7 @@ int main(int argc, char *argv[])
 
     GeneratorModule mod = GeneratorModule_load(generator_lib);
     if (!mod.valid) {
+        CallerAPI_free();
         return 1;
     }
 
@@ -281,11 +282,12 @@ int main(int argc, char *argv[])
     } else {
         printf("Unknown battery %s\n", battery_name);
         GeneratorModule_unload(&mod);
-        return 0;        
+        CallerAPI_free();
+        return 1;
     }
 
-    
     GeneratorModule_unload(&mod);
+    CallerAPI_free();
     return 0;
 }
            

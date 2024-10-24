@@ -45,7 +45,7 @@ static uint64_t get_bits64_from32(void *state)
 
 static TestResults bspace64_1d_test(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 64, .ndims = 1, .nsamples = 30, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 64, .ndims = 1, .nsamples = 40, .get_lower = 1};
     if (obj->gi->nbits == 64) {
         return bspace_nd_test(obj, &opts);
     } else {
@@ -148,24 +148,24 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
     const TestDescription tests[] = {
-        {"monobit_freq", monobit_freq_test},
-        {"byte_freq", byte_freq_test},
-        {"bspace64_1d", bspace64_1d_test},
-        {"bspace32_1d", bspace32_1d_test},
-        {"bspace32_1d_high", bspace32_1d_hi_test},
-        {"bspace32_2d", bspace32_2d_test},
-        {"bspace21_3d", bspace21_3d_test},
-        {"bspace16_4d", bspace16_4d_test},
-        {"bspace8_8d", bspace8_8d_test},
-        {"collover20_2d", collisionover20_2d},
-        {"collover13_3d", collisionover13_3d},
-        {"collover8_5d", collisionover8_5d},
-        {"collover5_8d", collisionover5_8d},
-        {"gap_inv512", gap_inv512},
-        {"linearcomp_high", linearcomp_high},
-        {"linearcomp_mid", linearcomp_mid},
-        {"linearcomp_low", linearcomp_low},
-        {NULL, NULL}
+        {"monobit_freq", monobit_freq_test, 2},
+        {"byte_freq", byte_freq_test, 2},
+        {"bspace64_1d", bspace64_1d_test, 23},
+        {"bspace32_1d", bspace32_1d_test, 2},
+        {"bspace32_1d_high", bspace32_1d_hi_test, 2},
+        {"bspace32_2d", bspace32_2d_test, 3},
+        {"bspace21_3d", bspace21_3d_test, 2},
+        {"bspace16_4d", bspace16_4d_test, 3},
+        {"bspace8_8d", bspace8_8d_test, 3},
+        {"collover20_2d", collisionover20_2d, 7},
+        {"collover13_3d", collisionover13_3d, 7},
+        {"collover8_5d", collisionover8_5d, 7},
+        {"collover5_8d", collisionover5_8d, 7},
+        {"gap_inv512", gap_inv512, 13},
+        {"linearcomp_high", linearcomp_high, 1},
+        {"linearcomp_mid", linearcomp_mid, 1},
+        {"linearcomp_low", linearcomp_low, 1},
+        {NULL, NULL, 0}
     };
 
     const TestsBattery bat = {

@@ -69,7 +69,7 @@ be divided into several groups:
 - Other: coveyou64, sfc64.
 
 
- Algoritrhm        | Description
+ Algorithm         | Description
 -------------------|-------------------------------------------------------------------------
  alfib             | \f$ LFib(+,2^{64},607,203) \f$
  alfib_mod         | \f$ LFib(+,2^{64},607,203) \f$ XORed by "Weyl sequence"
@@ -93,6 +93,8 @@ be divided into several groups:
  mwc128x           | MWC128X: similar to MWC64X but x and c are 64-bit
  pcg32             | Permuted Congruental Generator (32-bit version, 64-bit state)
  pcg64             | Permuted Congruental Generator (64-bit version, 64-bit state)
+ philox            |
+ philox32          |
  randu             | \f$ LCG(2^{32},65539,1) \f$, returns whole 32 bits
  r1279             | \f$ LFib(XOR, 2^{32}, 1279, 1063) \f$ generator.
  rc4               | RC4 obsolete CSPRNG (doesn't pass PractRand)
@@ -107,14 +109,72 @@ be divided into several groups:
  shr3              | xorshift32 generator by G.Marsaglia
  swb               | 32-bit SWB (Subtract with borrow) generator by G.Marsaglia
  swblux            | Modification of SWB with 'luxury levels' similar to RANLUX
- swbw              | Modification of SWB combined with 'discrete Weyl sequence
+ swbw              | Modification of SWB combined with 'discrete Weyl sequence'
  tinymt32          | "Tiny Mersenne Twister": 32-bit version
  tinymt64          | "Tiny Mersenne Twister": 64-bit version
+ threefry          |
+ well1024a         | WELL1024a: Well equidistributed long-period linear
  xoroshiro128p     |
  xoroshiro128pp    |
  xoroshiro1024st   |
  xorwow            | xorwow
  xsh               | xorshift64 generator by G.Marsaglia
+
+# Tests results
+
+
+ Algoritrhm        | Output | brief | default | full
+-------------------|--------|-------|---------|------
+ alfib             | u64    | 4     | -       | -
+ alfib_mod         | u32    | +     |         |
+ chacha            | u32    | +     |         |
+ coveyou64         | u32    | 2     |         |
+ kiss93            | u32    | 1     |         |
+ kiss99            | u32    | +     |         |
+ kiss64            | u64    | +     |         |
+ lcg64             | u32    | 5     |         |
+ lcg64prime        | u64    | 1     |         |
+ lcg96             | u32    | +     | +       |
+ lcg128            | u64    | +     | +       |
+ lcg69069          | u32    | 14    |         |
+ minstd            | u32    | 15    |         |
+ mlfib17_5         | u32    | +     |         |
+ mt19937           | u32    | 3     |         |
+ mulberry32        | u32    | 1     |         |
+ mwc64             | u32    | 1     |         |
+ mwc64x            | u32    |       |         |
+ mwc128            | u64    |       |         |
+ mwc128x           | u64    |       |         |
+ pcg32             | u32    |       |         |
+ pcg64             | u64    |       |         |
+ philox            | u64    |       |         |
+ philox32          | u32    |       |         |
+ randu             | u32    |       |         |
+ r1279             | u32    | 4     |         |
+ rc4               | u32    |       |         |
+ rrmxmx            | u64    |       |         |
+ seigzin63         | u32    | +     | +       | 3
+ speck128          | u64    |       |         |
+ speck128_avx      | u64    |       |         |
+ splitmix32        | u32    | 1     |         |
+ sqxor             | u64    |       |         |
+ sqxor32           | u32    |       |         |
+ sfc32             | u32    | +     | +       |
+ sfc64             | u64    | +     | +       |
+ shr3              | u32    | 13    |         |
+ swb               | u32    | 3     |         |
+ swblux            | u32    |       |         |
+ swbw              | u32    |       |         |
+ tinymt32          | u32    | 2     |         |
+ tinymt64          | u64    | 1     |         |
+ threefry          | u64    |       |         |
+ well1024a         | u32    | 3     | 5       |
+ xoroshiro128p     | u64    | 1     |         |
+ xoroshiro128pp    | u64    | +     | +       |
+ xoroshiro1024st   | u64    | 1     | 1       |
+ xorwow            | u32    | 3     | 7       |
+ xsh               | u64    | 6     | 8       |
+
 
 
 # Modifications of birthday spacings test

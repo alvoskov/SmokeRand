@@ -97,7 +97,17 @@ void Entropy_init(Entropy *obj)
     obj->key[0] = (uint32_t) seed0; obj->key[1] = seed0 >> 32;
     obj->key[2] = (uint32_t) seed1; obj->key[3] = seed1 >> 32;
     obj->state = time(NULL);
+    obj->slog_len = 1 << 20;
+    obj->slog = calloc(obj->slog_len, sizeof(SeedLogEntry));
+    obj->slog_pos = 0;
 }
+
+void Entropy_free(Entropy *obj)
+{
+    free(obj->slog);
+    obj->slog = NULL;
+}
+
 
 /**
  * @brief Tests 64-bit XXTEA implementation correctness
@@ -118,8 +128,29 @@ int xxtea_test()
     return 1;
 }
 
-uint64_t Entropy_seed64(Entropy *obj)
+/**
+ * @brief Returns 64-bit random seed. Hardware RNG is used
+ * when possible. WARNING! THIS FUNCTION IS NOT THREAD SAFE!
+ */
+uint64_t Entropy_seed64(Entropy *obj, uint64_t thread_id)
 {
-    return xxtea_encrypt(Entropy_nextstate(obj), obj->key);
+    uint64_t seed = xxtea_encrypt(Entropy_nextstate(obj), obj->key);
+    if (obj->slog_pos != obj->slog_len - 1) {
+        SeedLogEntry log_entry = {.seed = seed, .thread_id = thread_id};
+        obj->slog[obj->slog_pos++] = log_entry;
+    }
+    return seed;
+}
+
+void Entropy_print_seeds_log(const Entropy *obj, FILE *fp)
+{
+    fprintf(fp, "Number of seeds: %llu\n", (unsigned long long) obj->slog_pos);
+    fprintf(fp, "%10s %18s %20s\n", "Thread", "Seed(HEX)", "Seed(DEC)");
+    for (size_t i = 0; i < obj->slog_pos; i++) {
+        fprintf(fp, "%10llu 0x%.16llX %.20llu\n",
+            (unsigned long long) obj->slog[i].thread_id,
+            (unsigned long long) obj->slog[i].seed,
+            (unsigned long long) obj->slog[i].seed);
+    }
 }
 

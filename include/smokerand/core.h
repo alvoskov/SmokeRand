@@ -75,6 +75,7 @@ typedef struct {
 
 CallerAPI CallerAPI_init(void);
 CallerAPI CallerAPI_init_mthr(void);
+void CallerAPI_free(void);
 
 /**
  * @brief Keeps the description of pseudorandon number generator.
@@ -121,6 +122,7 @@ typedef struct {
     double p; ///< p-value
     double alpha; ///< 1 - p where p is p-value
     double x; ///< Empirical random value
+    uint64_t thread_id; ///< Thread ID for logging
 } TestResults;
 
 /**
@@ -129,6 +131,7 @@ typedef struct {
 typedef struct {
     const char *name;
     TestResults (*run)(GeneratorState *obj);
+    unsigned int nseconds; ///< Estimated time, seconds
 } TestDescription;
 
 

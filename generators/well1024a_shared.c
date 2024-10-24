@@ -1,0 +1,92 @@
+/*
+Improved long-period generators based on linear recurrences modulo 2
+Authors: François Panneton, Pierre L'Ecuyer, Makoto MatsumotoAuthors Info & Claims
+ACM Transactions on Mathematical Software (TOMS), Volume 32, Issue 1
+Pages 1 - 16
+https://doi.org/10.1145/1132973.11329
+*/
+
+#include "smokerand/cinterface.h"
+
+PRNG_CMODULE_PROLOG
+
+
+#define R 32
+#define POS_MASK ( (unsigned int) (R - 1) )
+
+typedef struct {
+    uint32_t s[R];
+    unsigned int pos;
+} Well1024aState;
+
+#define M3POS(t,v) (v ^ (v >> t))
+#define M3NEG(t,v) (v ^ (v << (-t)))
+#define IND(ind) ( (obj->pos + (ind) ) & POS_MASK )
+
+static void *create(const CallerAPI *intf)
+{
+    Well1024aState *obj = intf->malloc(sizeof(Well1024aState));
+    int is_valid = 0;
+    obj->pos = 0;
+    for (unsigned int i = 0; i < R; i++) {
+        obj->s[i] = intf->get_seed32();
+        if (obj->s[i] != 0) {
+            is_valid = 1;
+        }
+    }
+    if (!is_valid) {
+        obj->s[0] = 0x9E3779B9;
+    }
+    return obj;
+}
+
+static inline uint64_t get_bits_raw(void *state)
+{
+    Well1024aState *obj = state;
+    static const size_t m1 = 3, m2 = 24, m3 = 10;
+    const size_t neg1ind = IND(POS_MASK);
+    uint32_t *s = obj->s;
+    uint32_t z0 = s[neg1ind]; // VRm1
+    uint32_t z1 = s[obj->pos] ^ M3POS(8, s[IND(m1)]);
+    uint32_t z2 = M3NEG(-19, s[IND(m2)]) ^ M3NEG(-14, s[IND(m3)]);
+    s[obj->pos] = z1 ^ z2; // newV1
+    s[neg1ind] = M3NEG(-11, z0) ^ M3NEG(-7, z1) ^ M3NEG(-13, z2); // newV0
+    obj->pos = neg1ind;
+    return s[obj->pos];
+}
+
+static int run_self_test(const CallerAPI *intf)
+{
+    static const uint32_t u_ref[] = {
+        0x00000081, 0x00004001, 0x00204081, 0x10000080,
+        0x10000081, 0x102020C0, 0x10204000, 0x18104081,
+        0x08000081, 0x10302041, 0x18283001, 0x08085081,
+        0x00002001, 0x00187890, 0x0C0C58E0, 0x020868A1,
+        0x061C68C1, 0x1C307C68, 0x102C10D0, 0x012E0C98,
+        0x871C5C59, 0x17165C10, 0x881F4E49, 0x992752D0,
+        0x59857055, 0x98AA53F6, 0x928BF714, 0x52B2D8E3,
+        0xA65700BC, 0x85E02EAD, 0xF1FD6F4A, 0xAF9A8FF0}; 
+
+    Well1024aState obj;
+    int is_ok = 1;
+    for (size_t i = 0; i < R; i++) {
+        obj.s[i] = 0;
+    }
+    obj.s[0] = 1;
+    obj.pos = 0;
+    for (size_t i = 0; i < 32; i++) {
+        uint32_t u = get_bits_raw(&obj);
+        if (i % 4 == 0) {
+            intf->printf("\n");
+        }
+        intf->printf("%.8X|%.8X ", u, u_ref[i]);
+        if (u != u_ref[i]) {
+            is_ok = 0;
+        }
+    }
+    intf->printf("\n");
+    return is_ok;
+
+}
+
+MAKE_UINT32_PRNG("Well1024a", run_self_test);
