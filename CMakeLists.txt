@@ -40,8 +40,12 @@ target_include_directories(smokerand PRIVATE include)
 
 # Examples of plugins, i.e. modules with PRNGs
 foreach(prng_name alfib alfib_mod chacha coveyou64 isaac64 kiss64 kiss93 kiss99
-    lcg69069 lcg64 lcg64prime lcg96 lcg128 minstd mt19937 mlfib17_5 mulberry32 mwc64 mwc64x mwc128 mwc128x
-    r1279 rc4 rrmxmx pcg32 pcg64 philox philox32 randu romutrio sezgin63 sfc32 sfc64 shr3 swb swblux swbw
+    lcg69069 lcg64 lcg64prime lcg96 lcg128
+    lfsr113 lfsr258 minstd mt19937 mlfib17_5 mrg32k3a
+    mulberry32
+    mwc64 mwc64x mwc128 mwc128x
+    r1279 rc4 rrmxmx pcg32 pcg64 philox philox32 randu romutrio sezgin63
+    sfc32 sfc64 shr3 swb swblux swbw
     speck128 speck128_avx splitmix32 sqxor sqxor32
     tinymt32 tinymt64 threefry well1024a wyrand
     xorwow xoroshiro128p xoroshiro128pp xoroshiro1024st xsh)

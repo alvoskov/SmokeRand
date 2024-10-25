@@ -17,25 +17,25 @@ from TestU01 but has several important differences:
 
 Existing solutions:
 
-1. TestU01 https://dl.acm.org/doi/abs/10.1145/3447773
+1. TestU01 https://doi.org/10.1145/3447773
 2. PractRand
-3. Ent
-4. Dieharder
+3. Ent https://www.fourmilab.ch/random/
+4. Dieharder https://webhome.phy.duke.edu/~rgb/General/dieharder.php
 
 Requirements:
 
 - C99 compiler, some PRNGs will require 128-bit integers either through
   `__uint128_t` type (GCC, Clang) or `_umul128`/`_addcarry_u64` intrinsics
   (Microsoft Visual C)
+- GNU make is required, CMake is recommended.
 - pthreads (POSIX threads) library.
 - 64-bit CPU, x86-64 with RDRAND and AVX2 support is recommended.
 - 4GiB of RAM minimal, 16GiB recommended.
-- CMake.
 
 Implemented tests:
 
 1. Monobit frequency test.
-2. Chi2 frequency test for bytes and 16-bit chunks.
+2. Frequency test for bytes and 16-bit chunks.
 3. Birthday spacings test.
 4. Gap test
 5. Matrix rank test.
@@ -44,9 +44,17 @@ Implemented tests:
 
 Extra tests:
 
-1. 64-bit birthday paradox test (very slow)
-2. 2d Ising model test (very slow)
-3. Long runs of chi2 test / monobit freq test
+1. 64-bit birthday paradox test. Requires 8GiB of RAM and about 30 minutes.
+   Allows to detect perfectly uniform 64-bit generators with 64-bit state
+   such as SplitMix, 64-bit LCGs with full 64-bit outputs, some modifications
+   of PCG.
+2. 2d Ising model test: modifications with Wolff and Metropolis algorithms.
+   Rather slow and not very sensitive, but resemble real Monte-Carlo
+   computations.
+3. Long runs of frequency test for 1-bit, 8-bit, 16-bit and 32-bit chunks.
+   This is an adaptive test that will show intermediate results. This is
+   an adaptive test that will show intermediate results. The first results
+   for 32-bit chunks will appear only after analysis of 256 GiB of input data.
 
 
 # Implemented algorithms
@@ -64,11 +72,11 @@ be divided into several groups:
 - Linear congruental with output scrambling: mulberry32, rrmxmx, splitmix32,
   sqxor, sqxor32, wyrand.
 - Subtract with borrow: swb, swblux, swbw
-- LSFR without scrambling: shr3, xsh
+- LSFR without scrambling: shr3, xsh, lfsr113, lfsr258, mt19937
 - LSFR with scrambling: xoroshiro128p, xoroshiro128pp, xoroshiro1024st, xorwow.
 - GSFR: mt19937, tinymt32, tinymt64.
 - Combined generators: kiss93, kiss99, kiss64
-- Other: coveyou64, sfc64.
+- Other: coveyou64, sfc32, sfc64.
 
 
  Algorithm         | Description
@@ -86,8 +94,11 @@ be divided into several groups:
  lcg96             | \f$ LCG(2^{96},a,1) \f$ that returns upper 32 bits
  lcg128            | \f$ LCG(2^{128},18000690696906969069,1) \f$, returns upper 32/64 bits
  lcg69069          | \f$ LCG(2^{32},69069,1)\f$, returns whole 32 bits
+ lfsr113           |
+ lfsr258           |
  minstd            | \f$ LCG(2^{31} - 1, 16807, 0)\f$ "minimial standard" obsolete generator.
  mlfib17_5         | \f$ LFib(x,2^{64},17,5) \f$
+ mrg32k3a          | MRG32k3a
  mt19937           | Mersenne twister.
  mulberry32        | Mulberry32 generator.
  mwc64             | Multiply-with-carry generator with 64-bit state
@@ -127,7 +138,7 @@ be divided into several groups:
 
 
  Algoritrhm        | Output | brief | default | full | cpb
--------------------|--------|-------|---------|------|-----------
+-------------------|--------|-------|---------|------|-------
  alfib             | u64    | 4     | 4       | -    | 0.23
  alfib_mod         | u32    | +     | +       |      | 0.50
  chacha            | u32    | +     |         |      | 2.0
@@ -141,9 +152,12 @@ be divided into several groups:
  lcg96             | u32    | +     | +       |      | 0.78
  lcg128            | u64    | +     | +       |      | 0.35
  lcg69069          | u32    | 14    | 28      |      | 0.38
+ lfsr113           | u32    | 3     | 5       |      | 1.1
+ lfsr258           | u64    | 3     | 5       |      | 0.75
  minstd            | u32    | 15    | 28      |      | 2.4
  mlfib17_5         | u32    | +     |         |      | 0.48
  mt19937           | u32    | 3     | 3       |      | 0.91
+ mrg32k3a          | u32    | +     | +       | +    |
  mulberry32        | u32    | 1     | 1       |      | 0.51
  mwc64             | u32    | 1     | 2       |      | 0.37
  mwc64x            | u32    | +     | +       |      | 0.53
@@ -151,8 +165,8 @@ be divided into several groups:
  mwc128x           | u64    | +     | +       |      | 0.30
  pcg32             | u32    | +     |         |      | 0.44
  pcg64             | u64    | +     |         |      | 0.28
- philox            | u64    | +     |         |      | 0.85
- philox32          | u32    | +     |         |      | 2.7
+ philox            | u64    | +     | +       |      | 0.85
+ philox32          | u32    | +     | +       |      | 2.7
  randu             | u32    | 16    | 29      |      | 0.41
  r1279             | u32    | 4     | 6       |      | 0.47
  rc4               | u32    | +     |         |      | 6.0
@@ -181,8 +195,10 @@ be divided into several groups:
  xsh               | u64    | 6     | 8       |      | 0.43
 
 
+# Tests description
 
-# Modifications of birthday spacings test
+
+## Birthday spacings test
 
 The birthday test generates input values using the next algorithm:
 
@@ -199,7 +215,7 @@ The birthday test generates input values using the next algorithm:
  bspace16_4d | 16    | 4    | 
  bspace8_8d  | 8     | 8    | LCGs with m = 2^{64}
 
-# Modifications of collision over test
+## Collision over test
 
  Name          | nbits | ndim | Detected PRNGs
 ---------------|-------|------|--------------------
@@ -209,7 +225,7 @@ The birthday test generates input values using the next algorithm:
  collover5_8d  | 5     | 8    |
 
 
-# Modifications of linear complexity tests
+## Linear complexity test
 
  Name            | Bit for 32/64-bit PRNG
 -----------------|------------------------
@@ -218,7 +234,7 @@ The birthday test generates input values using the next algorithm:
  linearcomp_low  | 0/0
 
 
-# Modifications of matrix rank test
+## Matrix rank test
 
  Name                 | n      | nbits
 ----------------------|--------|--------
