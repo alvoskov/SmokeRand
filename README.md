@@ -128,14 +128,14 @@ be divided into several groups:
 
  Algoritrhm        | Output | brief | default | full | cpb
 -------------------|--------|-------|---------|------|-----------
- alfib             | u64    | 4     | -       | -    | 0.23
- alfib_mod         | u32    | +     |         |      | 0.50
+ alfib             | u64    | 4     | 4       | -    | 0.23
+ alfib_mod         | u32    | +     | +       |      | 0.50
  chacha            | u32    | +     |         |      | 2.0
- coveyou64         | u32    | 2     |         |      | 0.62
+ coveyou64         | u32    | 2     | 3       |      | 0.62
  isaac64           | u64    | +     | +       |      | 0.75
  kiss93            | u32    | 1     | 3       |      | 0.82
- kiss99            | u32    | +     |         |      | 1.0
- kiss64            | u64    | +     |         |      | 0.53
+ kiss99            | u32    | +     | +       |      | 1.0
+ kiss64            | u64    | +     | +       |      | 0.53
  lcg64             | u32    | 5     | 6       |      | 0.40
  lcg64prime        | u64    | 1     | 1       |      | 1.5
  lcg96             | u32    | +     | +       |      | 0.78
@@ -143,12 +143,12 @@ be divided into several groups:
  lcg69069          | u32    | 14    | 28      |      | 0.38
  minstd            | u32    | 15    | 28      |      | 2.4
  mlfib17_5         | u32    | +     |         |      | 0.48
- mt19937           | u32    | 3     |         |      | 0.91
- mulberry32        | u32    | 1     |         |      | 0.51
+ mt19937           | u32    | 3     | 3       |      | 0.91
+ mulberry32        | u32    | 1     | 1       |      | 0.51
  mwc64             | u32    | 1     | 2       |      | 0.37
- mwc64x            | u32    | +     |         |      | 0.53
- mwc128            | u64    | +     |         |      | 0.30
- mwc128x           | u64    | +     |         |      | 0.30
+ mwc64x            | u32    | +     | +       |      | 0.53
+ mwc128            | u64    | +     | +       |      | 0.30
+ mwc128x           | u64    | +     | +       |      | 0.30
  pcg32             | u32    | +     |         |      | 0.44
  pcg64             | u64    | +     |         |      | 0.28
  philox            | u64    | +     |         |      | 0.85
