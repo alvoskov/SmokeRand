@@ -103,6 +103,20 @@ CallerAPI CallerAPI_init_mthr(void)
     return intf;
 }
 
+/////////////////////////////////////////////
+///// Some platform-dependent functions /////
+/////////////////////////////////////////////
+
+int get_cpu_numcores(void)
+{
+#ifdef USE_LOADLIBRARY
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo(&sysinfo);
+    return sysinfo.dwNumberOfProcessors;
+#else
+    return sysconf(_SC_NPROCESSORS_ONLN);
+#endif
+}
 
 
 /////////////////////////////////////// 
@@ -463,8 +477,40 @@ void *battery_thread(void *data)
     return NULL;
 }
 
+typedef struct {
+    size_t ind; ///< Text index in the array
+    unsigned int nseconds; ///< Estimated time, seconds
+} TestTiming;
 
 
+static int cmp_TestTiming(const void *aptr, const void *bptr)
+{
+    const TestTiming *o1 = aptr, *o2 = bptr;
+    if (o1->nseconds < o2->nseconds) { return 1; }
+    else if (o1->nseconds == o2->nseconds) { return 0; }
+    else { return -1; }
+}
+
+
+/**
+ * @brief Sorts tests by the estimated execution time in the descending order.
+ * It is used to distribute them between threads.
+ */
+static TestTiming *sort_tests_by_time(const TestDescription *descr, size_t ntests)
+{
+    TestTiming *out = calloc(ntests, sizeof(TestTiming));
+    for (size_t i = 0; i < ntests; i++) {
+        out[i].ind = i;
+        out[i].nseconds = descr[i].nseconds;
+    }
+    qsort(out, ntests, sizeof(TestTiming), cmp_TestTiming);
+    return out;
+}
+
+
+/**
+ * @brief Run the test battery in the multithreaded mode.
+ */
 static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
     const GeneratorInfo *gen, const CallerAPI *intf,
     unsigned int nthreads, TestResults *results)
@@ -485,11 +531,14 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
         th[i].results = results;
     }
     // Dispatch tests
+    TestTiming *tt = sort_tests_by_time(bat->tests, ntests);
     for (size_t i = 0; i < ntests; i++) {
-        size_t ind = i % nthreads;
-        th[ind].tests[th_pos[ind]] = bat->tests[i];
-        th[ind].tests_inds[th_pos[ind]++] = i;
+        size_t thr_ind = i % nthreads;
+        size_t test_ind = tt[i].ind;
+        th[thr_ind].tests[th_pos[thr_ind]] = bat->tests[test_ind];
+        th[thr_ind].tests_inds[th_pos[thr_ind]++] = test_ind;
     }
+    free(tt);
     // Run threads
     for (size_t i = 0; i < nthreads; i++) {        
         pthread_create(&th[i].thrd_id, NULL, battery_thread, &th[i]);
@@ -606,29 +655,6 @@ void TestsBattery_run(const TestsBattery *bat,
        // Multithreaded version
        TestsBattery_run_threads(bat, ntests, gen, intf, nthreads, results);
     }
-
-/*
-    if (testid == TESTS_ALL) {
-        results = calloc(ntests, sizeof(TestResults));
-        nresults = ntests;
-        if (nthreads == 1) {
-            // One-threaded version
-            for (size_t i = 0; i < ntests; i++) {
-                results[i] = bat->tests[i].run(&obj);
-                results[i].name = bat->tests[i].name;
-                results[i].thread_id = 0;
-            }
-        } else {
-            // Multithreaded version
-            TestsBattery_run_threads(bat, ntests, gen, intf, nthreads, results);
-        }
-    } else {
-        results = calloc(1, sizeof(TestResults));
-        nresults = 1;
-        *results = bat->tests[testid - 1].run(&obj);
-        results->name = bat->tests[testid - 1].name;
-    }
-*/
     toc = time(NULL);
     printf("\n");
     printf("==================== Seeds logger report ====================\n");

@@ -169,6 +169,92 @@ void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
     (void) ans;
 }
 
+/////////////////////////////////
+///// Blocks frequency test /////
+/////////////////////////////////
+
+typedef struct {
+    unsigned long long *bytefreq;
+    unsigned long long *w16freq;
+    unsigned long long nbytes;
+    unsigned long long nw16;
+} BlockFrequency;
+
+void BlockFrequency_init(BlockFrequency *obj)
+{
+    obj->bytefreq = calloc(256, sizeof(unsigned long long));
+    obj->w16freq = calloc(65536, sizeof(unsigned long long));
+    obj->nbytes = 0;
+    obj->nw16 = 0;
+}
+
+void BlockFrequency_free(BlockFrequency *obj)
+{
+    free(obj->bytefreq);
+    free(obj->w16freq);
+}
+
+static inline void BlockFrequency_count(BlockFrequency *obj,
+    const uint64_t u, const int nbytes)
+{
+    uint64_t tmp = u;
+    // Bytes counter
+    for (int i = 0; i < nbytes; i++) {
+        obj->bytefreq[tmp & 0xFF]++;
+        tmp >>= 8;
+    }
+    obj->nbytes += nbytes;
+    // 16-bit chunks counter
+    tmp = u;
+    for (int i = 0; i < nbytes / 2; i++) {
+        obj->w16freq[tmp & 0xFFFF]++;
+        tmp >>= 16;
+    }    
+    obj->nw16 += nbytes / 2;
+}
+
+void BlockFrequency_calc(BlockFrequency *obj)
+{
+    double chi2_bytes = 0.0, chi2_w16 = 0.0;
+    for (size_t i = 0; i < 256; i++) {        
+        long long Ei = (long long) obj->nbytes / 256;
+        long long dE = (long long) obj->bytefreq[i] - (long long) Ei;
+        chi2_bytes += pow(dE, 2.0) / (double) Ei;
+    }
+    for (size_t i = 0; i < 65536; i++) {
+        long long Ei = (long long) obj->nw16 / 65536;
+        long long dE = (long long) obj->w16freq[i] - (long long) Ei;
+        chi2_w16 += pow(dE, 2.0) / (double) Ei;
+    }
+    printf("2^%g; bytes: chi2_bytes %g p=%g; ", log2(obj->nbytes), chi2_bytes, chi2_pvalue(chi2_bytes, 255));
+    printf("w16: chi2_w16 %g p=%g\n", chi2_w16, chi2_pvalue(chi2_w16, 65536));
+}
+
+void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf)
+{
+    BlockFrequency freq;
+    BlockFrequency_init(&freq);
+    void *state = gen->create(intf);
+    size_t block_size = 1 << 30;
+
+    while (1) {
+        if (gen->nbits == 64) {
+            for (size_t i = 0; i < block_size; i++) {
+                uint64_t u = gen->get_bits(state);
+                BlockFrequency_count(&freq, u, 8);
+            }
+        } else {
+            for (size_t i = 0; i < block_size; i++) {
+                uint64_t u = gen->get_bits(state);
+                BlockFrequency_count(&freq, u, 4);
+            }
+        }
+        BlockFrequency_calc(&freq);
+    }
+    BlockFrequency_free(&freq);
+    intf->free(state);
+}
+
 /////////////////////////////////////
 ///// 2D Ising model based test /////
 /////////////////////////////////////
