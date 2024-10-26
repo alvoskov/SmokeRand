@@ -47,6 +47,7 @@ int DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
 #define SHARED_ENTRYPOINT_CODE
 #endif
 #else
+#include <unistd.h>
 #define EXPORT
 #define SHARED_ENTRYPOINT_CODE
 #endif
@@ -63,6 +64,8 @@ int DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
 #define DLCLOSE_WRAPPER dlclose
 #define MODULE_HANDLE void *
 #endif
+
+int get_cpu_numcores(void);
 
 typedef struct {
     uint32_t (*get_seed32)(void); ///< Get 32-bit seed

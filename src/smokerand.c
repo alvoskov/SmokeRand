@@ -199,6 +199,11 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
         int argval;
         char *eqpos = strchr(argv[i], '=');
         size_t len = strlen(argv[i]);
+        if (!strcmp(argv[i], "--threads")) {
+            obj->nthreads = get_cpu_numcores();
+            printf("%d CPU cores detected\n", obj->nthreads);
+            continue;
+        }
         if (len < 3 || (argv[i][0] != '-' || argv[i][1] != '-') || eqpos == NULL) {
             printf("Argument '%s' should have --argname=argval layout\n", argv[i]);
             return 1;
@@ -275,6 +280,8 @@ int main(int argc, char *argv[])
         battery_self_test(gi, &intf);
     } else if (!strcmp(battery_name, "speed")) {
         battery_speed(gi, &intf);
+    } else if (!strcmp(battery_name, "freq")) {
+        battery_blockfreq(gi, &intf);
     } else if (!strcmp(battery_name, "birthday")) {
         battery_birthday(gi, &intf);
     } else if (!strcmp(battery_name, "ising")) {
