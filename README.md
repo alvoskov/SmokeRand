@@ -37,45 +37,43 @@ Implemented tests:
 1. Monobit frequency test.
 2. Frequency test for bytes and 16-bit chunks.
 3. Birthday spacings test.
-4. Gap test
+4. Gap test.
 5. Matrix rank test.
 6. Linear complexity test.
 7. CollisionOver test.
 
 Extra tests:
 
-1. 64-bit birthday paradox test. Requires 8GiB of RAM and about 30 minutes.
+1. 64-bit birthday paradox test. Requires 8 GiB of RAM and about 30 minutes.
    Allows to detect perfectly uniform 64-bit generators with 64-bit state
    such as SplitMix, 64-bit LCGs with full 64-bit outputs, some modifications
    of PCG.
-2. 2d Ising model test: modifications with Wolff and Metropolis algorithms.
-   Rather slow and not very sensitive, but resemble real Monte-Carlo
-   computations.
-3. Long runs of frequency test for 1-bit, 8-bit, 16-bit and 32-bit chunks.
-   This is an adaptive test that will show intermediate results. This is
-   an adaptive test that will show intermediate results. The first results
-   for 32-bit chunks will appear only after analysis of 256 GiB of input data.
-
+2. 2-dimensional Ising model test: modifications with Wolff and Metropolis
+   algorithms. Rather slow and not very sensitive, but resemble real
+   Monte-Carlo computations.
+3. Long runs of frequency test for 1-bit, 8-bit and 16-bit chunks. This is an
+   adaptive test that will show intermediate results.
 
 # Implemented algorithms
 
 A lot of pseudorandom number generators are supplied with SmokeRand. They can
 be divided into several groups:
 
-- Cryptographically secure: chacha, isaac64, speck128, speck128_avx.
+- Cryptographically secure: chacha, chacha_avx (ChaCha12), isaac64, speck128,
+  speck128_avx (Speck128/128).
 - Obsolete CSPRNG: rc4.
 - Counter-based scramblers based on cryptographical primitives: philox,
   philox32, threefry.
-- Lagged Fibonacci: alfib, alfib_mod, mlfib17_5, r1279
+- Lagged Fibonacci: alfib, alfib_mod, mlfib17_5, r1279.
 - Linear congruental: lcg64, lcg64prime, lcg96, lcg128, lcg69069, minstd,
   mwc64, mwc64x, mwc128, mwc128x, randu, seizgin63.
 - Linear congruental with output scrambling: mulberry32, rrmxmx, splitmix32,
   sqxor, sqxor32, wyrand.
-- Subtract with borrow: swb, swblux, swbw
+- Subtract with borrow: swb, swblux, swbw.
 - LSFR without scrambling: shr3, xsh, lfsr113, lfsr258, mt19937
 - LSFR with scrambling: xoroshiro128p, xoroshiro128pp, xoroshiro1024st, xorwow.
 - GSFR: mt19937, tinymt32, tinymt64.
-- Combined generators: kiss93, kiss99, kiss64
+- Combined generators: kiss93, kiss99, kiss64.
 - Other: coveyou64, sfc32, sfc64.
 
 
@@ -137,62 +135,63 @@ be divided into several groups:
 # Tests results
 
 
- Algoritrhm        | Output | brief | default | full | cpb
--------------------|--------|-------|---------|------|-------
- alfib             | u64    | 4     | 4       | -    | 0.23
- alfib_mod         | u32    | +     | +       |      | 0.50
- chacha            | u32    | +     |         |      | 2.0
- coveyou64         | u32    | 2     | 3       |      | 0.62
- isaac64           | u64    | +     | +       |      | 0.75
- kiss93            | u32    | 1     | 3       |      | 0.82
- kiss99            | u32    | +     | +       |      | 1.0
- kiss64            | u64    | +     | +       |      | 0.53
- lcg64             | u32    | 5     | 6       |      | 0.40
- lcg64prime        | u64    | 1     | 1       |      | 1.5
- lcg96             | u32    | +     | +       |      | 0.78
- lcg128            | u64    | +     | +       |      | 0.35
- lcg69069          | u32    | 14    | 28      |      | 0.38
- lfsr113           | u32    | 3     | 5       |      | 1.1
- lfsr258           | u64    | 3     | 5       |      | 0.75
- minstd            | u32    | 15    | 28      |      | 2.4
- mlfib17_5         | u32    | +     | +       |      | 0.48
- mt19937           | u32    | 3     | 3       |      | 0.91
- mrg32k3a          | u32    | +     | +       | +    | 2.5
- mulberry32        | u32    | 1     | 1       |      | 0.51
- mwc64             | u32    | 1     | 2       |      | 0.37
- mwc64x            | u32    | +     | +       |      | 0.53
- mwc128            | u64    | +     | +       |      | 0.30
- mwc128x           | u64    | +     | +       |      | 0.30
- pcg32             | u32    | +     | +       |      | 0.44
- pcg64             | u64    | +     | +       |      | 0.28
- philox            | u64    | +     | +       |      | 0.85
- philox32          | u32    | +     | +       |      | 2.7
- randu             | u32    | 16    | 29      |      | 0.41
- r1279             | u32    | 4     | 6       |      | 0.47
- rc4               | u32    | +     |         |      | 6.0
- rrmxmx            | u64    | +     | +       |      | 0.14
- seigzin63         | u32    | +     | +       | 3    | 3.0
- speck128          | u64    | +     | +       |      | 3.1
- speck128_avx      | u64    | +     | +       |      | 0.65
- splitmix32        | u32    | 1     | 1       |      | 0.25
- sqxor             | u64    | +     | +       |      | 0.13
- sqxor32           | u32    | 1     | 1       |      | 0.20
- sfc32             | u32    | +     | +       |      | 0.24 
- sfc64             | u64    | +     | +       |      | 0.10
- shr3              | u32    | 13    | 26      |      | 0.76
- swb               | u32    | 3     | 3       |      | 2.7
- swblux            | u32    | +     | +       |      | 6.3
- swbw              | u32    | +     | +       | +    | 2.8
- tinymt32          | u32    | 2     | 4       |      | 1.5
- tinymt64          | u64    | 1     | 2       |      | 2.7
- threefry          | u64    | +     | +       |      | 1.0
- well1024a         | u32    | 3     | 5       |      | 1.0
- wyrand            | u64    | +     | +       |      | 0.08
- xoroshiro128p     | u64    | 1     | 2       |      | 0.16
- xoroshiro128pp    | u64    | +     | +       |      | 0.20
- xoroshiro1024st   | u64    | 1     | 1       |      | 0.33
- xorwow            | u32    | 3     | 7       |      | 0.52
- xsh               | u64    | 6     | 8       |      | 0.43
+ Algoritrhm        | Output | brief | default | full | cpb  | bday64
+-------------------|--------|-------|---------|------|------|--------
+ alfib             | u64    | 4     | 4       | -    | 0.23 |
+ alfib_mod         | u32    | +     | +       | +    | 0.50 | N/A
+ chacha            | u32    | +     | +       |      | 2.0  | N/A
+ coveyou64         | u32    | 2     | 3       |      | 0.62 | N/A
+ isaac64           | u64    | +     | +       |      | 0.75 |
+ kiss93            | u32    | 1     | 3       |      | 0.82 | N/A
+ kiss99            | u32    | +     | +       |      | 1.0  | N/A
+ kiss64            | u64    | +     | +       | +    | 0.53 |
+ lcg64             | u32    | 5     | 6       |      | 0.40 | N/A
+ lcg64prime        | u64    | 1     | 1       |      | 1.5  |
+ lcg96             | u32    | +     | +       |      | 0.78 | N/A
+ lcg128            | u64    | +     | +       |      | 0.35 |
+ lcg69069          | u32    | 14    | 28      |      | 0.38 | N/A
+ lfsr113           | u32    | 3     | 5       |      | 1.1  | N/A
+ lfsr258           | u64    | 3     | 5       |      | 0.75 |
+ minstd            | u32    | 15    | 28      |      | 2.4  | N/A
+ mlfib17_5         | u32    | +     | +       |      | 0.48 | N/A
+ mt19937           | u32    | 3     | 3       |      | 0.91 | N/A
+ mrg32k3a          | u32    | +     | +       | +    | 2.5  | N/A
+ mulberry32        | u32    | 1     | 1       |      | 0.51 | N/A
+ mwc64             | u32    | 1     | 2       |      | 0.37 | N/A
+ mwc64x            | u32    | +     | +       |      | 0.53 | N/A
+ mwc128            | u64    | +     | +       |      | 0.30 |
+ mwc128x           | u64    | +     | +       |      | 0.30 |
+ pcg32             | u32    | +     | +       |      | 0.44 | N/A
+ pcg64             | u64    | +     | +       |      | 0.28 |
+ philox            | u64    | +     | +       |      | 0.85 |
+ philox32          | u32    | +     | +       |      | 2.7  | N/A
+ randu             | u32    | 16    | 29      |      | 0.41 | N/A
+ r1279             | u32    | 4     | 6       |      | 0.47 | N/A
+ rc4               | u32    | +     | +       |      | 6.0  | N/A
+ rrmxmx            | u64    | +     | +       |      | 0.14 | -
+ seigzin63         | u32    | +     | +       | 3    | 3.0  | N/A
+ speck128          | u64    | +     | +       |      | 3.1  | 
+ speck128_avx      | u64    | +     | +       |      | 0.65 |
+ splitmix          | u64    | +     | +       |      | 0.19 |
+ splitmix32        | u32    | 1     | 1       |      | 0.25 | N/A
+ sqxor             | u64    | +     | +       |      | 0.13 | +
+ sqxor32           | u32    | 1     | 1       |      | 0.20 | N/A
+ sfc32             | u32    | +     | +       |      | 0.24 | N/A
+ sfc64             | u64    | +     | +       |      | 0.10 |
+ shr3              | u32    | 13    | 26      |      | 0.76 | N/A
+ swb               | u32    | 3     | 3       |      | 2.7  | N/A
+ swblux            | u32    | +     | +       | +    | 6.3  | N/A
+ swbw              | u32    | +     | +       | +    | 2.8  | N/A
+ tinymt32          | u32    | 2     | 4       | 6    | 1.5  | N/A
+ tinymt64          | u64    | 1     | 2       | 4    | 2.7  |
+ threefry          | u64    | +     | +       |      | 1.0  | 
+ well1024a         | u32    | 3     | 5       |      | 1.0  | N/A
+ wyrand            | u64    | +     | +       |      | 0.08 | +
+ xoroshiro128p     | u64    | 1     | 2       |      | 0.16 |
+ xoroshiro128pp    | u64    | +     | +       |      | 0.20 |
+ xoroshiro1024st   | u64    | 1     | 1       |      | 0.33 |
+ xorwow            | u32    | 3     | 7       | 9    | 0.52 | N/A
+ xsh               | u64    | 6     | 8       |      | 0.43 |
 
 
 # Tests description

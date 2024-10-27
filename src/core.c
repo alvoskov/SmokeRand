@@ -211,8 +211,11 @@ static double gammainc_upper_contfrac(double a, double x)
  * @brief An approximation of lower incomplete gamma function for
  * implementation of Poisson C.D.F. and its p-values computation.
  * @details References:
- * - https://gmd.copernicus.org/articles/3/329/2010/gmd-3-329-2010.pdf
- * - https://functions.wolfram.com/GammaBetaErf/Gamma2/06/02/02/
+ *
+ * 1. U. Blahak. Efficient approximation of the incomplete gamma function
+ *    for use in cloud model applications // Geosci. Model Dev. 2010. V.3,
+ *    P. 329–336. https://doi.org/10.5194/gmd-3-329-2010
+ * 2. https://functions.wolfram.com/GammaBetaErf/Gamma2/06/02/02/
  */
 double gammainc(double a, double x)
 {
@@ -254,34 +257,62 @@ double poisson_pvalue(double x, double lambda)
 
 
 /**
- * @brief Asymptotic approximation for chi-square c.d.f.
- * @details References:
- * - Wilson E.B., Hilferty M.M. The distribution of chi-square // Proceedings
+ * @brief Implementation of chi-square distribution c.d.f.
+ * @details It is based on regularized incomplete gamma function. For very
+ * large numbers of degrees of freedom asymptotic approximation is used.
+ * 
+ * References: 
+ *
+ * 1. Wilson E.B., Hilferty M.M. The distribution of chi-square // Proceedings
  * of the National Academy of Sciences. 1931. Vol. 17. N 12. P. 684-688.
  * https://doi.org/10.1073/pnas.17.12.684
  */
 double chi2_cdf(double x, unsigned long f)
 {
-    double s2 = 2.0 / (9.0 * f);
-    double mu = 1 - s2;
-    double z = (pow(x/f, 1.0/3.0) - mu) / sqrt(s2);
-    return 0.5 + 0.5 * erf(z / sqrt(2));
+    if (f == 1) {
+        return erf(sqrt(0.5 * x));
+    } else if (f == 2) {
+        return -expm1(-0.5 * x);
+    } else if (f < 100000) {
+        return gammainc((double) f / 2.0, x / 2.0);
+    } else {
+        double s2 = 2.0 / (9.0 * f);
+        double mu = 1 - s2;
+        double z = (pow(x/f, 1.0/3.0) - mu) / sqrt(s2);
+        if (z > -3) {
+            return 0.5 + 0.5 * erf(z / sqrt(2));
+        } else {
+            return 0.5 * erfc(-z / sqrt(2));
+        }
+    }
 }
 
 
 /**
- * @brief Asymptotic approximation for p-value of chi-square distribution.
- * @details References:
- * - Wilson E.B., Hilferty M.M. The distribution of chi-square // Proceedings
+ * @brief Implementation of chi-square distribution c.c.d.f. (p-value)
+ * @details It is based on regularized incomplete gamma function. For very
+ * large numbers of degrees of freedom asymptotic approximation is used.
+ * 
+ * References: 
+ *
+ * 1. Wilson E.B., Hilferty M.M. The distribution of chi-square // Proceedings
  * of the National Academy of Sciences. 1931. Vol. 17. N 12. P. 684-688.
  * https://doi.org/10.1073/pnas.17.12.684
  */
 double chi2_pvalue(double x, unsigned long f)
 {
-    double s2 = 2.0 / (9.0 * f);
-    double mu = 1 - s2;
-    double z = (pow(x/f, 1.0/3.0) - mu) / sqrt(s2);
-    return 0.5 * erfc(z / sqrt(2));
+    if (f == 1) {
+        return erfc(sqrt(0.5 * x));
+    } else if (f == 2) {
+        return exp(-0.5 * x);
+    } else if (f < 100000) {
+        return gammainc_upper((double) f / 2.0, x / 2.0);
+    } else {
+        double s2 = 2.0 / (9.0 * f);
+        double mu = 1 - s2;
+        double z = (pow(x/f, 1.0/3.0) - mu) / sqrt(s2);
+        return 0.5 * erfc(z / sqrt(2));
+    }
 }
 
 //////////////////////////////////////////////////
@@ -289,6 +320,10 @@ double chi2_pvalue(double x, unsigned long f)
 //////////////////////////////////////////////////
 
 
+/**
+ * @brief Loads shared library (`.so` or `.dll`) with module that
+ * implements pseudorandom number generator.
+ */
 GeneratorModule GeneratorModule_load(const char *libname)
 {
     GeneratorModule mod = {.valid = 1};
@@ -325,7 +360,10 @@ GeneratorModule GeneratorModule_load(const char *libname)
     return mod;
 }
 
-
+/**
+ * @brief Unloads shared library (`.so` or `.dll`) with module that
+ * implements pseudorandom number generator.
+ */
 void GeneratorModule_unload(GeneratorModule *mod)
 {
     mod->valid = 0;
@@ -469,7 +507,11 @@ void *battery_thread(void *data)
     GeneratorState obj = {.gi = th_data->gi, .state = state, .intf = th_data->intf};
     for (size_t i = 0; i < th_data->ntests; i++) {
         size_t ind = th_data->tests_inds[i];
+        th_data->intf->printf("vvvvv Thread %lld: test %s started vvvvv\n",
+            (int) th_data->thrd_id, th_data->tests[i].name);
         th_data->results[ind] = th_data->tests[i].run(&obj);
+        th_data->intf->printf("^^^^^ Thread %lld: test %s finished ^^^^^\n",
+            (int) th_data->thrd_id, th_data->tests[i].name);
         th_data->results[ind].name = th_data->tests[i].name;
         th_data->results[ind].thread_id = (uint64_t) pthread_self();
     }
@@ -508,6 +550,17 @@ static TestTiming *sort_tests_by_time(const TestDescription *descr, size_t ntest
 }
 
 
+static inline size_t test_pos_to_thread_ind(size_t test_pos, size_t nthreads)
+{
+    size_t thr_ind;
+    if ((test_pos / nthreads) % 2 == 0) {
+        thr_ind = test_pos % nthreads;
+    } else {
+        thr_ind = (nthreads - 1) - test_pos % nthreads;
+    }
+    return thr_ind;
+}
+
 /**
  * @brief Run the test battery in the multithreaded mode.
  */
@@ -520,25 +573,37 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
     size_t *th_pos = calloc(nthreads, sizeof(size_t));
     // Preallocate arrays
     for (size_t i = 0; i < ntests; i++) {
-        size_t ind = i % nthreads;
+        size_t ind = test_pos_to_thread_ind(i, nthreads);
         th[ind].ntests++;
     }
     for (size_t i = 0; i < nthreads; i++) {
-        th[i].tests = calloc(th->ntests, sizeof(TestDescription));
-        th[i].tests_inds = calloc(th->ntests, sizeof(size_t));
+        th[i].tests = calloc(th[i].ntests, sizeof(TestDescription));
+        th[i].tests_inds = calloc(th[i].ntests, sizeof(size_t));
         th[i].gi = gen;
         th[i].intf = intf;
         th[i].results = results;
     }
-    // Dispatch tests
+    // Dispatch tests (and try to balance them between threads
+    // according to estimations of elapsed time)
+    // 0,1,...,(nthreads-1),(nthreads-1),...,2,1,0,0,1,2,....
     TestTiming *tt = sort_tests_by_time(bat->tests, ntests);
     for (size_t i = 0; i < ntests; i++) {
-        size_t thr_ind = i % nthreads;
+        size_t thr_ind = test_pos_to_thread_ind(i, nthreads);
         size_t test_ind = tt[i].ind;
         th[thr_ind].tests[th_pos[thr_ind]] = bat->tests[test_ind];
-        th[thr_ind].tests_inds[th_pos[thr_ind]++] = test_ind;
+        th[thr_ind].tests_inds[th_pos[thr_ind]] = test_ind;
+        th_pos[thr_ind]++;
     }
     free(tt);
+    // Show balance
+    for (size_t i = 0; i < nthreads; i++) {
+        printf("Thread %d: ", (int) (i + 1));
+        for (size_t j = 0; j < th[i].ntests; j++) {
+            size_t test_ind = th[i].tests_inds[j];
+            printf("%d(%s) ", (int) test_ind, bat->tests[test_ind].name);
+        }
+        printf("\n");
+    }
     // Run threads
     for (size_t i = 0; i < nthreads; i++) {        
         pthread_create(&th[i].thrd_id, NULL, battery_thread, &th[i]);

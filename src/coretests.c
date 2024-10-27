@@ -136,6 +136,10 @@ static unsigned long bspace32_nd_test(GeneratorState *obj, const BSpaceNDOptions
     unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
     size_t len = pow(2.0, (nbits_total + 4.0) / 3.0);
     uint32_t *u = calloc(len, sizeof(uint32_t));
+    if (u == NULL) {
+        fprintf(stderr, "***** bspace32_nd_test: not enough memory *****\n");
+        exit(1);
+    }
     unsigned long *ndups = calloc(opts->nsamples, sizeof(unsigned long));
     for (size_t i = 0; i < opts->nsamples; i++) {
         bspace_make_tuples32(opts, obj->gi, obj->state, u, len);
@@ -159,6 +163,10 @@ static size_t bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
     size_t len = pow(2.0, (nbits_total + 4.0) / 3.0);
     uint64_t *u = calloc(len, sizeof(uint64_t));
+    if (u == NULL) {
+        fprintf(stderr, "***** bspace64_nd_test: not enough memory *****\n");
+        exit(1);
+    }
     unsigned long *ndups = calloc(opts->nsamples, sizeof(unsigned long));
     for (size_t i = 0; i < opts->nsamples; i++) {
         bspace_make_tuples64(opts, obj->gi, obj->state, u, len);
@@ -264,6 +272,10 @@ TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
     size_t n = 50000000;
     uint64_t *u = calloc(n, sizeof(uint64_t));
+    if (u == NULL) {
+        fprintf(stderr, "***** collisionover_test: not enough memory *****\n");
+        exit(1);
+    }
     uint64_t Oi[4] = {1ull << opts->ndims * opts->nbits_per_dim, 0, 0, 0};
     double nstates = Oi[0];
     double lambda = (n - opts->ndims + 1.0) / nstates;
