@@ -17,7 +17,6 @@
 #include <time.h>
 #include <math.h>
 
-
 #define SUM_BLOCK_SIZE 1024
 
 /**
@@ -170,12 +169,16 @@ void battery_self_test(GeneratorInfo *gen, const CallerAPI *intf)
     }    
 }
 
+
 void print_help()
 {
     printf("Usage: smokerand battery generator_lib\n");
     printf(" battery: battery name; supported batteries:\n");
+    printf("   - brief\n");
     printf("   - default\n");
+    printf("   - full\n");
     printf("   - selftest\n");
+    printf("   - stdout\n");
     printf("  generator_lib: name of dynamic library with PRNG that export the functions:\n");
     printf("   - int gen_getinfo(GeneratorInfo *gi)\n");
     printf("\n");
@@ -280,6 +283,8 @@ int main(int argc, char *argv[])
         battery_self_test(gi, &intf);
     } else if (!strcmp(battery_name, "speed")) {
         battery_speed(gi, &intf);
+    } else if (!strcmp(battery_name, "stdout")) {
+        GeneratorInfo_bits_to_file(gi, &intf);
     } else if (!strcmp(battery_name, "freq")) {
         battery_blockfreq(gi, &intf);
     } else if (!strcmp(battery_name, "birthday")) {

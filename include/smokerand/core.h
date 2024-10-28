@@ -187,6 +187,10 @@ typedef struct {
 TimeHMS nseconds_to_hms(unsigned long nseconds_total);
 void print_elapsed_time(unsigned long nseconds_total);
 
+void set_bin_stdout();
+void set_bin_stdin();
+void GeneratorInfo_bits_to_file(GeneratorInfo *gen, const CallerAPI *intf);
+
 ////////////////////////////////////////
 ///// Some useful inline functions /////
 ////////////////////////////////////////

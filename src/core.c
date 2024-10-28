@@ -16,9 +16,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <io.h>
+#include <fcntl.h>
 #include <pthread.h>
-
-
 
 static Entropy entropy = {{0, 0, 0, 0}, 0, NULL, 0, 0};
 
@@ -760,4 +760,60 @@ GeneratorInfo reversed_generator_set(const GeneratorInfo *gi)
         .get_bits = (gi->nbits == 32) ? get_bits32_reversed : get_bits64_reversed,
         .nbits = gi->nbits, .self_test = gi->self_test};
     return reversed_gen;
+}
+
+///////////////////////////////////////////////
+///// Implementation of file input/output /////
+///////////////////////////////////////////////
+
+
+/**
+ * @brief Switches stdout to binary mode in MS Windows (needed for
+ * correct output opf binary data)
+ */
+void set_bin_stdout()
+{
+#ifdef USE_LOADLIBRARY
+    _setmode( _fileno(stdout), _O_BINARY);
+#endif
+}
+
+
+/**
+ * @brief Switches stdin to binary mode in MS Windows (needed for
+ * correct output opf binary data)
+ */
+void set_bin_stdin()
+{
+#ifdef USE_LOADLIBRARY
+    _setmode( _fileno(stdin), _O_BINARY); // needed to allow binary stdin on windows
+#endif
+}
+
+
+/**
+ * @brief Dump an output PRNG to the stdout in the format suitable
+ * for PractRand.
+ */
+void GeneratorInfo_bits_to_file(GeneratorInfo *gen, const CallerAPI *intf)
+{
+    set_bin_stdout();
+    void *state = gen->create(intf);
+    if (gen->nbits == 32) {
+        uint32_t buf[256];
+        while (1) {
+            for (size_t i = 0; i < 256; i++) {
+                buf[i] = gen->get_bits(state);
+            }
+            fwrite(buf, sizeof(uint32_t), 256, stdout);
+        }
+    } else {
+        uint64_t buf[256];
+        while (1) {
+            for (size_t i = 0; i < 256; i++) {
+                buf[i] = gen->get_bits(state);
+            }
+            fwrite(buf, sizeof(uint64_t), 256, stdout);
+        }
+    }
 }
