@@ -21,6 +21,7 @@ Existing solutions:
 2. PractRand
 3. Ent https://www.fourmilab.ch/random/
 4. Dieharder https://webhome.phy.duke.edu/~rgb/General/dieharder.php
+5. gjrand
 
 Requirements:
 
@@ -132,70 +133,23 @@ be divided into several groups:
  xorwow            | xorwow
  xsh               | xorshift64 generator by G.Marsaglia
 
-# Tests results
 
+# Batteries
 
- Algoritrhm        | Output | brief | default | full | cpb  | bday64
--------------------|--------|-------|---------|------|------|--------
- alfib             | u64    | 4     | 4       | -    | 0.23 |
- alfib_mod         | u32    | +     | +       | +    | 0.50 | N/A
- chacha            | u32    | +     | +       |      | 2.0  | N/A
- coveyou64         | u32    | 2     | 3       |      | 0.62 | N/A
- isaac64           | u64    | +     | +       |      | 0.75 |
- kiss93            | u32    | 1     | 3       |      | 0.82 | N/A
- kiss99            | u32    | +     | +       |      | 1.0  | N/A
- kiss64            | u64    | +     | +       | +    | 0.53 |
- lcg64             | u32    | 5     | 6       |      | 0.40 | N/A
- lcg64prime        | u64    | 1     | 1       |      | 1.5  |
- lcg96             | u32    | +     | +       |      | 0.78 | N/A
- lcg128            | u64    | +     | +       |      | 0.35 |
- lcg69069          | u32    | 14    | 28      |      | 0.38 | N/A
- lfsr113           | u32    | 3     | 5       |      | 1.1  | N/A
- lfsr258           | u64    | 3     | 5       |      | 0.75 |
- minstd            | u32    | 15    | 28      |      | 2.4  | N/A
- mlfib17_5         | u32    | +     | +       |      | 0.48 | N/A
- mt19937           | u32    | 3     | 3       |      | 0.91 | N/A
- mrg32k3a          | u32    | +     | +       | +    | 2.5  | N/A
- mulberry32        | u32    | 1     | 1       |      | 0.51 | N/A
- mwc64             | u32    | 1     | 2       |      | 0.37 | N/A
- mwc64x            | u32    | +     | +       |      | 0.53 | N/A
- mwc128            | u64    | +     | +       |      | 0.30 |
- mwc128x           | u64    | +     | +       |      | 0.30 |
- pcg32             | u32    | +     | +       |      | 0.44 | N/A
- pcg64             | u64    | +     | +       |      | 0.28 |
- philox            | u64    | +     | +       |      | 0.85 |
- philox32          | u32    | +     | +       |      | 2.7  | N/A
- randu             | u32    | 16    | 29      |      | 0.41 | N/A
- r1279             | u32    | 4     | 6       |      | 0.47 | N/A
- rc4               | u32    | +     | +       |      | 6.0  | N/A
- rrmxmx            | u64    | +     | +       |      | 0.14 | -
- seigzin63         | u32    | +     | +       | 3    | 3.0  | N/A
- speck128          | u64    | +     | +       |      | 3.1  | 
- speck128_avx      | u64    | +     | +       |      | 0.65 |
- splitmix          | u64    | +     | +       |      | 0.19 |
- splitmix32        | u32    | 1     | 1       |      | 0.25 | N/A
- sqxor             | u64    | +     | +       |      | 0.13 | +
- sqxor32           | u32    | 1     | 1       |      | 0.20 | N/A
- sfc32             | u32    | +     | +       |      | 0.24 | N/A
- sfc64             | u64    | +     | +       |      | 0.10 |
- shr3              | u32    | 13    | 26      |      | 0.76 | N/A
- swb               | u32    | 3     | 3       |      | 2.7  | N/A
- swblux            | u32    | +     | +       | +    | 6.3  | N/A
- swbw              | u32    | +     | +       | +    | 2.8  | N/A
- tinymt32          | u32    | 2     | 4       | 6    | 1.5  | N/A
- tinymt64          | u64    | 1     | 2       | 4    | 2.7  |
- threefry          | u64    | +     | +       |      | 1.0  | 
- well1024a         | u32    | 3     | 5       |      | 1.0  | N/A
- wyrand            | u64    | +     | +       |      | 0.08 | +
- xoroshiro128p     | u64    | 1     | 2       |      | 0.16 |
- xoroshiro128pp    | u64    | +     | +       |      | 0.20 |
- xoroshiro1024st   | u64    | 1     | 1       |      | 0.33 |
- xorwow            | u32    | 3     | 7       | 9    | 0.52 | N/A
- xsh               | u64    | 6     | 8       |      | 0.43 |
+Three batteries are implemented in SmokeRand:
+
+- `brief`
+- `default`
+- `full`
 
 
 # Tests description
 
+## Monobit frequency test
+
+## Bytes frequency test
+
+## 16-bit words frequency test
 
 ## Birthday spacings test
 
@@ -241,3 +195,65 @@ The birthday test generates input values using the next algorithm:
  matrixrank_4096_low8 | 4096   | 8
  matrixrank_8192      | 8192   | 32/64
  matrixrank_8192_low8 | 8192   | 8
+
+
+
+# Tests results
+
+ Algoritrhm        | Output | brief | default | full | cpb  | bday64 | TestU01 | PractRand 
+-------------------|--------|-------|---------|------|------|--------|---------|-----------
+ alfib             | u64    | 4     | 4       | -    | 0.23 |        |         | 128 GiB
+ alfib_mod         | u32    | +     | +       | +    | 0.50 | N/A    |         | 1 TiB
+ chacha            | u32    | +     | +       |      | 2.0  | N/A    | +       |
+ coveyou64         | u32    | 2     | 3       |      | 0.62 | N/A    | Small   | 256 KiB
+ isaac64           | u64    | +     | +       | +    | 0.75 |        | +       | >= 1 TiB
+ kiss93            | u32    | 1     | 3       |      | 0.82 | N/A    | Small   | 1 MiB
+ kiss99            | u32    | +     | +       |      | 1.0  | N/A    | +       | >= 8 TiB
+ kiss64            | u64    | +     | +       | +    | 0.53 |        | +       |
+ lcg64             | u32    | 5     | 6       |      | 0.40 | N/A    | Small   | 16 MiB
+ lcg64prime        | u64    | 1     | 1       | 1    | 1.5  |        |         | >= 32 TiB
+ lcg96             | u32    | +     | +       |      | 0.78 | N/A    |         |
+ lcg128            | u64    | +     | +       |      | 0.35 |        |         | 64 GiB
+ lcg69069          | u32    | 14    | 28      |      | 0.38 | N/A    | -       | 2 KiB
+ lfsr113           | u32    | 3     | 5       |      | 1.1  | N/A    |         | 
+ lfsr258           | u64    | 3     | 5       |      | 0.75 |        |         |
+ minstd            | u32    | 15    | 28      |      | 2.4  | N/A    | -       | 1 KiB
+ mlfib17_5         | u32    | +     | +       |      | 0.48 | N/A    | +       | >= 1 TiB
+ mt19937           | u32    | 3     | 3       |      | 0.91 | N/A    | Small   | 128 GiB
+ mrg32k3a          | u32    | +     | +       | +    | 2.5  | N/A    |         |
+ mulberry32        | u32    | 1     | 1       |      | 0.51 | N/A    |         |
+ mwc64             | u32    | 1     | 2       |      | 0.37 | N/A    | Small   | 1 TiB
+ mwc64x            | u32    | +     | +       |      | 0.53 | N/A    | +       | >= 8 TiB
+ mwc128            | u64    | +     | +       |      | 0.30 |        | +       | >= 2 TiB
+ mwc128x           | u64    | +     | +       |      | 0.30 |        | +       | >= 8 TiB
+ pcg32             | u32    | +     | +       |      | 0.44 | N/A    | +       | >= 2 TiB
+ pcg64             | u64    | +     | +       |      | 0.28 |        | +       | >= 2 TiB
+ philox            | u64    | +     | +       |      | 0.85 |        | +       | >= 2 TiB
+ philox32          | u32    | +     | +       |      | 2.7  | N/A    | +       | >= 2 TiB
+ randu             | u32    | 16    | 29      |      | 0.41 | N/A    | -       | 1 KiB
+ r1279             | u32    | 4     | 6       |      | 0.47 | N/A    |         |
+ rc4               | u32    | +     | +       |      | 6.0  | N/A    | +       | 512 GiB
+ rrmxmx            | u64    | +     | +       |      | 0.14 | -      |         | >= 2 TiB
+ seigzin63         | u32    | +     | +       | 3    | 3.0  | N/A    |         | >= 16 TiB
+ speck128          | u64    | +     | +       |      | 3.1  |        |         | >= 2 TiB
+ speck128_avx      | u64    | +     | +       |      | 0.65 |        |         |
+ splitmix          | u64    | +     | +       |      | 0.19 |        |         | >= 2 TiB
+ splitmix32        | u32    | 1     | 1       |      | 0.25 | N/A    | +       |
+ sqxor             | u64    | +     | +       |      | 0.13 | +      |         | >= 2 TiB
+ sqxor32           | u32    | 1     | 1       |      | 0.20 | N/A    | Small   | 16 GiB
+ sfc32             | u32    | +     | +       |      | 0.24 | N/A    |         |
+ sfc64             | u64    | +     | +       |      | 0.10 |        | +       | >= 1 TiB
+ shr3              | u32    | 13    | 26      |      | 0.76 | N/A    | -       | 32 KiB
+ swb               | u32    | 3     | 3       |      | 2.7  | N/A    |         |
+ swblux            | u32    | +     | +       | +    | 6.3  | N/A    |         |
+ swbw              | u32    | +     | +       | +    | 2.8  | N/A    |         |
+ tinymt32          | u32    | 2     | 4       | 6    | 1.5  | N/A    |         |
+ tinymt64          | u64    | 1     | 2       | 4    | 2.7  |        |         |
+ threefry          | u64    | +     | +       |      | 1.0  |        | +       | >= 1 TiB
+ well1024a         | u32    | 3     | 5       |      | 1.0  | N/A    | Small   |
+ wyrand            | u64    | +     | +       |      | 0.08 | +      |         | >= 1 TiB
+ xoroshiro128p     | u64    | 1     | 2       |      | 0.16 |        |         |
+ xoroshiro128pp    | u64    | +     | +       |      | 0.20 |        |         |
+ xoroshiro1024st   | u64    | 1     | 1       |      | 0.33 |        |         |
+ xorwow            | u32    | 3     | 7       | 9    | 0.52 | N/A    | Small   | 128 KiB
+ xsh               | u64    | 6     | 8       |      | 0.43 |        | -       | 32 KiB
