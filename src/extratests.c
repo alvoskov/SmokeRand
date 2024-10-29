@@ -193,18 +193,28 @@ static inline void BlockFrequency_count(BlockFrequency *obj,
 void BlockFrequency_calc(BlockFrequency *obj)
 {
     double chi2_bytes = 0.0, chi2_w16 = 0.0;
+    double zmax_bytes = 0.0, zmax_w16 = 0.0;
     for (size_t i = 0; i < 256; i++) {        
         long long Ei = (long long) obj->nbytes / 256;
         long long dE = (long long) obj->bytefreq[i] - (long long) Ei;
         chi2_bytes += pow(dE, 2.0) / (double) Ei;
+        double z_bytes = fabs((double) dE) / sqrt( obj->nbytes * 255.0 / 65536.0);
+        if (zmax_bytes < z_bytes) {
+            zmax_bytes = z_bytes;
+        }
     }
     for (size_t i = 0; i < 65536; i++) {
         long long Ei = (long long) obj->nw16 / 65536;
         long long dE = (long long) obj->w16freq[i] - (long long) Ei;
         chi2_w16 += pow(dE, 2.0) / (double) Ei;
+        double z_w16 = fabs((double) dE) / sqrt( obj->nw16 * 65535.0 / 65536.0 / 65536.0);
+        if (zmax_w16 < z_w16) {
+            zmax_w16 = z_w16;
+        }
     }
     printf("2^%g; bytes: chi2_bytes %g p=%g; ", log2(obj->nbytes), chi2_bytes, chi2_pvalue(chi2_bytes, 255));
     printf("w16: chi2_w16 %g p=%g\n", chi2_w16, chi2_pvalue(chi2_w16, 65536));
+    printf("  zmax_w8: %g; zmax_w16: %g\n", zmax_bytes, zmax_w16);
 }
 
 void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf)
