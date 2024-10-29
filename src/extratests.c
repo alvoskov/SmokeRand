@@ -345,6 +345,33 @@ void Ising2DLattice_flip(Ising2DLattice *obj, size_t ind, GeneratorState *gs)
     Ising2DLattice_flip_internal(obj, ind, obj->s[ind], gs, p_int);
 }
 
+/*
+void Ising2DLattice_flip_metropolis(Ising2DLattice *obj, GeneratorState *gs)
+{
+    const double jc = log(1 + sqrt(2)) / 2;
+    //const uint64_t p_int = (gs->gi->nbits == 32) ? 2515933592ull : 10806402496730587136ull; // p * 2^nbits
+    const double p_norm = (gs->gi->nbits == 32) ? 2.328306436538696e-10 :  5.421010862427522e-20;
+    for (size_t i = 0; i < obj->N; i++) {
+        int n_same = 0;
+        for (size_t j = 0; j < 4; j++) {
+            if (obj->s[obj->nn[i].inds[j]] == obj->s[i])
+                n_same++;
+        }
+        double dE = -(n_same - 2) * 4;
+        if (dE < 0) {
+            obj->s[i] = -obj->s[i];
+        } else {
+            double p = exp(-dE * jc);
+            if (p > gs->gi->get_bits(gs->state) * p_norm) {
+                printf("%g %g\n", p, dE);
+                obj->s[i] = -obj->s[i];
+            }
+        }
+    }
+}
+*/
+
+
 void Ising2DLattice_free(Ising2DLattice *obj)
 {
     free(obj->s); obj->s = NULL;
@@ -358,7 +385,7 @@ void battery_ising(GeneratorInfo *gen, const CallerAPI *intf)
 {
     Ising2DLattice obj;
     Ising2DLattice_init(&obj, 16);
-    size_t sample_len = 15000000, nsamples = 10;
+    size_t sample_len = 1000000, nsamples = 10;
     const double e_ref = 1.4530649029;
     const double cv_ref = 1.4987048885;
     const double jc = log(1 + sqrt(2)) / 2;
@@ -378,6 +405,7 @@ void battery_ising(GeneratorInfo *gen, const CallerAPI *intf)
         for (size_t i = 0; i < sample_len; i++) {
             int energy = Ising2DLattice_calc_energy(&obj);
             Ising2DLattice_flip(&obj, gs.gi->get_bits(gs.state) % obj.N, &gs);
+            //Ising2DLattice_flip_metropolis(&obj, &gs);
             energy_sum += energy;
             energy_sum2 += energy * energy;
         }

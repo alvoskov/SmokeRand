@@ -208,7 +208,7 @@ The birthday test generates input values using the next algorithm:
  coveyou64         | u32    | 2     | 3       | 3    | 0.62 | N/A    | Small   | 256 KiB
  isaac64           | u64    | +     | +       | +    | 0.75 |        | +       | >= 1 TiB
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | N/A    | Small   | 1 MiB
- kiss99            | u32    | +     | +       |      | 1.0  | N/A    | +       | >= 8 TiB
+ kiss99            | u32    | +     | +       | +    | 1.0  | N/A    | +       | >= 8 TiB
  kiss64            | u64    | +     | +       | +    | 0.53 |        | +       |
  lcg64             | u32    | 5     | 6       |      | 0.40 | N/A    | Small   | 16 MiB
  lcg64prime        | u64    | 1     | 1       | 1    | 1.5  |        |         | >= 32 TiB
@@ -221,7 +221,7 @@ The birthday test generates input values using the next algorithm:
  mlfib17_5         | u32    | +     | +       |      | 0.48 | N/A    | +       | >= 1 TiB
  mt19937           | u32    | 3     | 3       |      | 0.91 | N/A    | Small   | 128 GiB
  mrg32k3a          | u32    | +     | +       | +    | 2.5  | N/A    |         |
- mulberry32        | u32    | 1     | 1       | +    | 0.51 | N/A    |         | 512 MiB
+ mulberry32        | u32    | 1     | 1       |      | 0.51 | N/A    |         | 512 MiB
  mwc64             | u32    | 1     | 2       | 4    | 0.37 | N/A    | Small   | 1 TiB
  mwc64x            | u32    | +     | +       | +    | 0.53 | N/A    | +       | >= 8 TiB
  mwc128            | u64    | +     | +       |      | 0.30 |        | +       | >= 2 TiB
