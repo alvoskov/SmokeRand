@@ -252,7 +252,7 @@ The birthday test generates input values using the next algorithm:
  threefry          | u64    | +     | +       |      | 1.0  |        | +       | >= 1 TiB
  well1024a         | u32    | 3     | 5       |      | 1.0  | N/A    | Small   | 64 MiB
  wyrand            | u64    | +     | +       |      | 0.08 | +      |         | >= 1 TiB
- xoroshiro128p     | u64    | 1     | 2       |      | 0.16 |        |         | 16 MiB
+ xoroshiro128p     | u64    | 1     | 2       | 3    | 0.16 |        |         | 16 MiB
  xoroshiro128pp    | u64    | +     | +       |      | 0.20 |        |         |
  xoroshiro1024st   | u64    | 1     | 1       |      | 0.33 |        |         | 128 GiB
  xorwow            | u32    | 3     | 7       | 9    | 0.52 | N/A    | Small   | 128 KiB
