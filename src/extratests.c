@@ -190,10 +190,16 @@ static inline void BlockFrequency_count(BlockFrequency *obj,
     obj->nw16 += nbytes / 2;
 }
 
+static double halfnormal_pvalue(double x)
+{
+    return erfc(x / sqrt(2.0));
+}
+
 void BlockFrequency_calc(BlockFrequency *obj)
 {
     double chi2_bytes = 0.0, chi2_w16 = 0.0;
     double zmax_bytes = 0.0, zmax_w16 = 0.0;
+    double pcrit = 1.0e-10;
     for (size_t i = 0; i < 256; i++) {        
         long long Ei = (long long) obj->nbytes / 256;
         long long dE = (long long) obj->bytefreq[i] - (long long) Ei;
@@ -212,9 +218,15 @@ void BlockFrequency_calc(BlockFrequency *obj)
             zmax_w16 = z_w16;
         }
     }
-    printf("2^%g; bytes: chi2_bytes %g p=%g; ", log2(obj->nbytes), chi2_bytes, chi2_pvalue(chi2_bytes, 255));
-    printf("w16: chi2_w16 %g p=%g\n", chi2_w16, chi2_pvalue(chi2_w16, 65536));
-    printf("  zmax_w8: %g; zmax_w16: %g\n", zmax_bytes, zmax_w16);
+    printf("2^%g bytes analyzed\n", log2(obj->nbytes));
+    printf("  %10s %10s %10s %10s %10s %10s\n",
+        "Chunk", "chi2emp", "p(chi2)", "zmax", "p(zmax)", "p(crit)");
+    printf("  %10s %10g %10.2g %10.3g %10.2g %10.2g\n",
+        "8 bits", chi2_bytes, chi2_pvalue(chi2_bytes, 255.0),
+        zmax_bytes, halfnormal_pvalue(zmax_bytes), pcrit / 256.0);
+    printf("  %10s %10g %10.2g %10.3g %10.2g %10.2g\n",
+        "16 bits", chi2_w16, chi2_pvalue(chi2_w16, 65536.0),
+        zmax_w16, halfnormal_pvalue(zmax_w16), pcrit / 65536);
 }
 
 void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf)
@@ -223,7 +235,7 @@ void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf)
     BlockFrequency_init(&freq);
     void *state = gen->create(intf);
     size_t block_size = 1 << 30;
-
+    time_t tic = time(NULL);
     while (1) {
         if (gen->nbits == 64) {
             for (size_t i = 0; i < block_size; i++) {
@@ -237,6 +249,8 @@ void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf)
             }
         }
         BlockFrequency_calc(&freq);
+        printf("  Time elapsed: "); print_elapsed_time(time(NULL) - tic);
+        printf("\n\n");
     }
     BlockFrequency_free(&freq);
     intf->free(state);
