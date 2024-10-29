@@ -56,9 +56,10 @@ typedef struct {
 //////////////////////////////
 
 #ifdef CHACHA_VECTOR_INTR
-#include <emmintrin.h>
-#include <tmmintrin.h>
-#include <xopintrin.h>
+//#include <emmintrin.h>
+//#include <tmmintrin.h>
+//#include <xopintrin.h>
+#include <x86intrin.h>
 
 static inline __m128i mm_roti_epi32_def(__m128i in, int r)
 {

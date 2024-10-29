@@ -37,9 +37,16 @@ add_executable(smokerand src/smokerand.c
     src/bat_full.c include/smokerand/bat_full.h
     include/smokerand/cinterface.h)
 target_include_directories(smokerand PRIVATE include)
+if (M_LIB)
+    target_link_libraries(smokerand m)
+endif()
 
 add_executable(test_funcs src/test_funcs.c src/core.c src/entropy.c include/smokerand/core.h include/smokerand/entropy.h)
 target_include_directories(test_funcs PRIVATE include)
+if (M_LIB)
+    target_link_libraries(test_funcs m)
+endif()
+
 
 # Examples of plugins, i.e. modules with PRNGs
 foreach(prng_name alfib alfib_mod chacha coveyou64 isaac64 kiss64 kiss93 kiss99
@@ -56,6 +63,7 @@ foreach(prng_name alfib alfib_mod chacha coveyou64 isaac64 kiss64 kiss93 kiss99
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
     set_target_properties(${prng_name}_shared PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
     set_target_properties(${prng_name}_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
+    set_target_properties(${prng_name}_shared PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
     target_include_directories(${prng_name}_shared PRIVATE include)
     target_compile_options(${prng_name}_shared PRIVATE -ffreestanding) 
 endforeach()

@@ -14,8 +14,10 @@
 #include "smokerand/bat_full.h"
 #include "smokerand/extratests.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <string.h>
 
 #define SUM_BLOCK_SIZE 1024
 

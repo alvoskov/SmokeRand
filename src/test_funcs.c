@@ -1,7 +1,7 @@
 #include "smokerand/core.h"
 #include <time.h>
 #include <stdio.h>
-
+#include <stdlib.h>
 
 int is_array64_sorted(const uint64_t *x, size_t len)
 {
