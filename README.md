@@ -245,7 +245,7 @@ The birthday test generates input values using the next algorithm:
  sfc64             | u64    | +     | +       |      | 0.10 |        | +       | >= 1 TiB
  shr3              | u32    | 13    | 26      |      | 0.76 | N/A    | -       | 32 KiB
  swb               | u32    | 3     | 3       |      | 2.7  | N/A    |         | 128 MiB
- swblux            | u32    | +     | +       | +    | 6.3  | N/A    |         | >= 1 TiB(?)
+ swblux            | u32    | +     | +       | +    | 6.3  | N/A    |         | 4 TiB
  swbw              | u32    | +     | +       | +    | 2.8  | N/A    |         | 4 GiB
  tinymt32          | u32    | 2     | 4       | 6    | 1.5  | N/A    |         | 4 GiB
  tinymt64          | u64    | 1     | 2       | 4    | 2.7  |        |         | 32 GiB
