@@ -216,10 +216,10 @@ The birthday test generates input values using the next algorithm:
  lcg128            | u64    | +     | +       |      | 0.35 |        |         | 64 GiB
  lcg69069          | u32    | 14    | 28      |      | 0.38 | N/A    | -       | 2 KiB
  lfsr113           | u32    | 3     | 5       |      | 1.1  | N/A    |         | 32 KiB 
- lfsr258           | u64    | 3     | 5       |      | 0.75 |        |         | 1 MiB
+ lfsr258           | u64    | 3     | 5       | 7    | 0.75 |        |         | 1 MiB
  minstd            | u32    | 15    | 28      |      | 2.4  | N/A    | -       | 1 KiB
  mlfib17_5         | u32    | +     | +       |      | 0.48 | N/A    | +       | >= 1 TiB
- mt19937           | u32    | 3     | 3       |      | 0.91 | N/A    | Small   | 128 GiB
+ mt19937           | u32    | 3     | 3       | 3    | 0.91 | N/A    | Small   | 128 GiB
  mrg32k3a          | u32    | +     | +       | +    | 2.5  | N/A    |         |
  mulberry32        | u32    | 1     | 1       |      | 0.51 | N/A    |         | 512 MiB
  mwc64             | u32    | 1     | 2       | 4    | 0.37 | N/A    | Small   | 1 TiB
@@ -231,7 +231,7 @@ The birthday test generates input values using the next algorithm:
  philox            | u64    | +     | +       |      | 0.85 |        | +       | >= 2 TiB
  philox32          | u32    | +     | +       |      | 2.7  | N/A    | +       | >= 2 TiB
  randu             | u32    | 16    | 29      | 32   | 0.41 | N/A    | -       | 1 KiB
- r1279             | u32    | 4     | 6       |      | 0.47 | N/A    |         | 64 MiB
+ r1279             | u32    | 4     | 6       | 9    | 0.47 | N/A    |         | 64 MiB
  rc4               | u32    | +     | +       |      | 6.0  | N/A    | +       | 512 GiB
  rrmxmx            | u64    | +     | +       |      | 0.14 | -      |         | >= 2 TiB
  seigzin63         | u32    | +     | +       | 3    | 3.0  | N/A    |         | >= 16 TiB

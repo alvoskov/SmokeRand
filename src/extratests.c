@@ -345,7 +345,6 @@ void Ising2DLattice_flip(Ising2DLattice *obj, size_t ind, GeneratorState *gs)
     Ising2DLattice_flip_internal(obj, ind, obj->s[ind], gs, p_int);
 }
 
-/*
 void Ising2DLattice_flip_metropolis(Ising2DLattice *obj, GeneratorState *gs)
 {
     const double jc = log(1 + sqrt(2)) / 2;
@@ -357,19 +356,19 @@ void Ising2DLattice_flip_metropolis(Ising2DLattice *obj, GeneratorState *gs)
             if (obj->s[obj->nn[i].inds[j]] == obj->s[i])
                 n_same++;
         }
-        double dE = -(n_same - 2) * 4;
+        double dE = (n_same - 2) * 4;
         if (dE < 0) {
             obj->s[i] = -obj->s[i];
         } else {
             double p = exp(-dE * jc);
             if (p > gs->gi->get_bits(gs->state) * p_norm) {
-                printf("%g %g\n", p, dE);
                 obj->s[i] = -obj->s[i];
             }
         }
     }
+//    Ising2DLattice_print(obj);
+//    printf("\n");
 }
-*/
 
 
 void Ising2DLattice_free(Ising2DLattice *obj)
@@ -385,7 +384,7 @@ void battery_ising(GeneratorInfo *gen, const CallerAPI *intf)
 {
     Ising2DLattice obj;
     Ising2DLattice_init(&obj, 16);
-    size_t sample_len = 1000000, nsamples = 10;
+    size_t sample_len = 5000000, nsamples = 10;
     const double e_ref = 1.4530649029;
     const double cv_ref = 1.4987048885;
     const double jc = log(1 + sqrt(2)) / 2;
@@ -401,11 +400,11 @@ void battery_ising(GeneratorInfo *gen, const CallerAPI *intf)
     double *e = calloc(nsamples, sizeof(double));
     double *cv = calloc(nsamples, sizeof(double));
     for (size_t ii = 0; ii < nsamples; ii++) {
-        unsigned long long energy_sum = 0, energy_sum2 = 0;
+        long long energy_sum = 0, energy_sum2 = 0;
         for (size_t i = 0; i < sample_len; i++) {
-            int energy = Ising2DLattice_calc_energy(&obj);
             Ising2DLattice_flip(&obj, gs.gi->get_bits(gs.state) % obj.N, &gs);
             //Ising2DLattice_flip_metropolis(&obj, &gs);
+            int energy = Ising2DLattice_calc_energy(&obj);
             energy_sum += energy;
             energy_sum2 += energy * energy;
         }
