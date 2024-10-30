@@ -210,17 +210,17 @@ The birthday test generates input values using the next algorithm:
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | N/A    | Small   | 1 MiB
  kiss99            | u32    | +     | +       | +    | 1.0  | N/A    | +       | >= 8 TiB
  kiss64            | u64    | +     | +       | +    | 0.53 |        | +       |
- lcg64             | u32    | 5     | 6       |      | 0.40 | N/A    | Small   | 16 MiB
+ lcg64             | u32    | 5     | 6       | 10   | 0.40 | N/A    | Small   | 16 MiB
  lcg64prime        | u64    | 1     | 1       | 1    | 1.5  |        |         | >= 32 TiB
  lcg96             | u32    | +     | +       | +    | 0.78 | N/A    |         | 32 GiB
  lcg128            | u64    | +     | +       |      | 0.35 |        |         | 64 GiB
  lcg69069          | u32    | 14    | 28      |      | 0.38 | N/A    | -       | 2 KiB
- lfsr113           | u32    | 3     | 5       |      | 1.1  | N/A    |         | 32 KiB 
+ lfsr113           | u32    | 3     | 5       | 7    | 1.1  | N/A    |         | 32 KiB 
  lfsr258           | u64    | 3     | 5       | 7    | 0.75 |        |         | 1 MiB
  minstd            | u32    | 15    | 28      |      | 2.4  | N/A    | -       | 1 KiB
  mlfib17_5         | u32    | +     | +       |      | 0.48 | N/A    | +       | >= 1 TiB
  mt19937           | u32    | 3     | 3       | 3    | 0.91 | N/A    | Small   | 128 GiB
- mrg32k3a          | u32    | +     | +       | +    | 2.5  | N/A    |         |
+ mrg32k3a          | u32    | +     | +       | +    | 2.5  | N/A    |         | >= 4 TiB
  mulberry32        | u32    | 1     | 1       |      | 0.51 | N/A    |         | 512 MiB
  mwc64             | u32    | 1     | 2       | 4    | 0.37 | N/A    | Small   | 1 TiB
  mwc64x            | u32    | +     | +       | +    | 0.53 | N/A    | +       | >= 8 TiB
@@ -244,7 +244,7 @@ The birthday test generates input values using the next algorithm:
  sfc32             | u32    | +     | +       |      | 0.24 | N/A    |         |
  sfc64             | u64    | +     | +       |      | 0.10 |        | +       | >= 1 TiB
  shr3              | u32    | 13    | 26      |      | 0.76 | N/A    | -       | 32 KiB
- swb               | u32    | 3     | 3       |      | 2.7  | N/A    |         | 128 MiB
+ swb               | u32    | 3     | 3       | 4    | 2.7  | N/A    |         | 128 MiB
  swblux            | u32    | +     | +       | +    | 6.3  | N/A    |         | 4 TiB
  swbw              | u32    | +     | +       | +    | 2.8  | N/A    |         | 4 GiB
  tinymt32          | u32    | 2     | 4       | 6    | 1.5  | N/A    |         | 4 GiB
@@ -254,6 +254,6 @@ The birthday test generates input values using the next algorithm:
  wyrand            | u64    | +     | +       |      | 0.08 | +      |         | >= 1 TiB
  xoroshiro128p     | u64    | 1     | 2       | 3    | 0.16 |        |         | 16 MiB
  xoroshiro128pp    | u64    | +     | +       |      | 0.20 |        |         |
- xoroshiro1024st   | u64    | 1     | 1       |      | 0.33 |        |         | 128 GiB
+ xoroshiro1024st   | u64    | 1     | 1       | 2    | 0.33 |        |         | 128 GiB
  xorwow            | u32    | 3     | 7       | 9    | 0.52 | N/A    | Small   | 128 KiB
  xsh               | u64    | 6     | 8       |      | 0.43 |        | -       | 32 KiB
