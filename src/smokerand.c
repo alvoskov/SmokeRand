@@ -244,6 +244,7 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
 typedef struct {
     unsigned long long count;
     unsigned long long sum;
+    double p; ///< Probability of the corresponding tuple
 } HammingWeightInfo;
 
 
@@ -275,6 +276,22 @@ inline uint8_t ByteStreamGenerator_getbyte(ByteStreamGenerator *obj)
     obj->bytes_left--;
     return out;
 }
+
+inline uint8_t ByteStreamGenerator_getbyte_low1(ByteStreamGenerator *obj)
+{
+    if (obj->bytes_left == 0) {
+        obj->buffer = 0;
+        for (int i = 0; i < 64; i++) {
+            obj->buffer = (obj->buffer << 1) | (obj->gen->get_bits(obj->state) & 0x1);
+        }
+        obj->bytes_left = 8;
+    }
+    uint8_t out = obj->buffer & 0xFF;
+    obj->buffer >>= 8;
+    obj->bytes_left--;
+    return out;
+}
+
 
 void ByteStreamGenerator_free(ByteStreamGenerator *obj, const CallerAPI *intf)
 {
@@ -391,19 +408,33 @@ void battery_hamming(GeneratorInfo *gen, const CallerAPI *intf)
 */
 
 
+// NOTE: PractRand also uses modifications of the test that works only with 1 or 8 lower bits.
+// And this modification is especially sensitive to SWB, SWBW, Mulberry32 etc. Probably they
+// see longer-range correlations
 void battery_hamming(GeneratorInfo *gen, const CallerAPI *intf)
 {
     // From PractRand
-    //                              0      1      2      3    4    5    6      7      8
-    static uint32_t hw_to_code[] = {0x201, 0x201, 0x201, 0x1, 0x0, 0x0, 0x200, 0x200, 0x201};
-    static uint64_t tuple_mask = 0x1FEFF; // 1 1111 1110 1111 1111
+    // a) Chaotic variant
+    //                                0      1      2      3    4    5    6      7      8
+    //static uint32_t hw_to_code[] = {0x201, 0x201, 0x201, 0x1, 0x0, 0x0, 0x200, 0x200, 0x201};
+    //static uint64_t tuple_mask = 0x1FEFF; // 1 1111 1110 1111 1111
+
+    // b) Simplified arranged variant
+    //                              0  1  2  3  4  5  6  7  8
+    static uint32_t hw_to_code[] = {0, 0, 0, 1, 2, 2, 3, 3, 0};
+    //>> binopdf(0:8,8,0.5) * 256
+    //                              1  8 28 56 70 56 28  8  1
+    static double code_to_prob[] = {38.0/256.0, 56.0/256.0, 126.0/256.0, 36.0/256.0};
+    static const uint64_t tuple_mask = 0x3FFFF, code_mask = 0x3, code_nbits = 2; // For 18-bit tuple
+
+
     int tuple_size = 9;
     size_t ntuples = (size_t) pow(4.0, tuple_size);
     HammingWeightInfo *info = calloc(ntuples, sizeof(HammingWeightInfo)); // 3^9
     uint8_t *hw = calloc(256, sizeof(uint8_t));
     uint64_t tuple = 0; // 9 4-bit Hamming weights + 1 extra Hamming weight
     uint8_t cur_weight; // Current Hamming weight
-    unsigned long long len = 10000000000;
+    unsigned long long len = 500000000;
 
     
 
@@ -418,10 +449,22 @@ void battery_hamming(GeneratorInfo *gen, const CallerAPI *intf)
         }
         printf("%d ", hw[i]);
     }
+    // Calculate probabilities of tuples
+    // (idea is taken from PractRand)
+    for (size_t i = 0; i < ntuples; i++) {
+        uint64_t tmp = i;
+        info[i].p = 1.0;
+        for (int j = 0; j < tuple_size; j++) {
+            info[i].p *= code_to_prob[tmp & code_mask];            
+            tmp >>= code_nbits;
+        }
+        //printf("%d %g\n", (int) i, info[i].p);
+    }
+
     // Pre-fill tuple
-    cur_weight = hw[ByteStreamGenerator_getbyte(&bs)];
+    cur_weight = hw[ByteStreamGenerator_getbyte_low1(&bs)];
     for (int i = 0; i < 9; i++) {
-        tuple = ((tuple & tuple_mask) << 1) | hw_to_code[cur_weight];
+        tuple = ((tuple << code_nbits) | hw_to_code[cur_weight]) & tuple_mask;
         cur_weight = hw[ByteStreamGenerator_getbyte(&bs)];
     }
     // Generate other overlapping tuples
@@ -430,8 +473,8 @@ void battery_hamming(GeneratorInfo *gen, const CallerAPI *intf)
         info[tuple].count++;
         info[tuple].sum += cur_weight;
         // Update tuple
-        tuple = ((tuple & tuple_mask) << 1) | hw_to_code[cur_weight];
-        cur_weight = hw[ByteStreamGenerator_getbyte(&bs)];
+        tuple = ((tuple << code_nbits) | hw_to_code[cur_weight]) & tuple_mask;
+        cur_weight = hw[ByteStreamGenerator_getbyte_low1(&bs)];
         //printf("%llu\n", tuple);
 
         //uint64_t tmp = tuple;
@@ -464,9 +507,27 @@ void battery_hamming(GeneratorInfo *gen, const CallerAPI *intf)
     for (size_t i = 0; i < ntuples; i++) {
         count_total += info[i].count;
     }
+    // chi2 test
+    double chi2emp = 0.0;
+    z_max = 0.0;
     for (size_t i = 0; i < ntuples; i++) {
-        printf("%6lu, %12.10g, %12.10g,\n", (long) i, (double) info[i].count / (double) count_total, z_ary[i]);
+        double Ei = count_total * info[i].p;
+        double Oi = info[i].count;
+        double dE = Oi - Ei;
+        chi2emp += (Oi - Ei) * (Oi - Ei) / Ei;
+
+        double z = fabs(dE) / sqrt( count_total * info[i].p * (1.0 - info[i].p) );
+        if (z > z_max) {
+            z_max = z;
+        }
+
+
+/*
+        printf("%6lu, %12.10g, %12.10g, %12.10g\n",
+            (long) i, (double) info[i].count / (double) count_total, z_ary[i], info[i].p);
+*/
     }
+    printf("chi2emp = %g, p = %g, zmax = %g\n", chi2emp, chi2_pvalue(chi2emp, ntuples - 1), z_max);
 
 
     // Kolmogorov-Smirnov test
