@@ -292,9 +292,10 @@ static int cmp_doubles(const void *aptr, const void *bptr)
 }
 
 
+/*
 void battery_hamming(GeneratorInfo *gen, const CallerAPI *intf)
 {
-    static uint8_t hw_to_triit[] = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    static uint8_t hw_to_triit[] = {0, 0, 0, 0, 1, 2, 2, 2, 2};
     int tuple_size = 9;
     size_t ntuples = (size_t) pow(3.0, tuple_size);
     HammingWeightInfo *info = calloc(ntuples, sizeof(HammingWeightInfo)); // 3^9
@@ -332,15 +333,14 @@ void battery_hamming(GeneratorInfo *gen, const CallerAPI *intf)
         cur_weight = hw[ByteStreamGenerator_getbyte(&bs)];
         //printf("%llu\n", tuple);
 
-        /*
-        uint64_t tmp = tuple;
-        for (size_t j = 0; j < 9; j++) {
-            printf("%llu", tmp % 3);
-            tmp /= 3;
-        }
-        printf("\n");
-        */
+        //uint64_t tmp = tuple;
+        //for (size_t j = 0; j < 9; j++) {
+        //    printf("%llu", tmp % 3);
+        //    tmp /= 3;
+        //}
+        //printf("\n");
     }
+
 
     double z_max = 0;
     double *z_ary = calloc(ntuples, sizeof(double));
@@ -356,6 +356,18 @@ void battery_hamming(GeneratorInfo *gen, const CallerAPI *intf)
 //        printf("%llu|%llu|%g ", info[i].count, info[i].sum, z);
     }
     printf("z_max = %g\n", z_max);
+
+
+    // Dump tuples to the stdout
+    unsigned long long count_total = 0;
+    for (size_t i = 0; i < ntuples; i++) {
+        count_total += info[i].count;
+    }
+    for (size_t i = 0; i < ntuples; i++) {
+        printf("%6lu, %12.10g, %12.10g,\n", (long) i, (double) info[i].count / (double) count_total, z_ary[i]);
+    }
+
+
     // Kolmogorov-Smirnov test
     qsort(z_ary, ntuples, sizeof(double), cmp_doubles);
     double D = 0.0;
@@ -376,7 +388,107 @@ void battery_hamming(GeneratorInfo *gen, const CallerAPI *intf)
     free(info);
     free(hw);
 }
+*/
 
+
+void battery_hamming(GeneratorInfo *gen, const CallerAPI *intf)
+{
+    // From PractRand
+    //                              0      1      2      3    4    5    6      7      8
+    static uint32_t hw_to_code[] = {0x201, 0x201, 0x201, 0x1, 0x0, 0x0, 0x200, 0x200, 0x201};
+    static uint64_t tuple_mask = 0x1FEFF; // 1 1111 1110 1111 1111
+    int tuple_size = 9;
+    size_t ntuples = (size_t) pow(4.0, tuple_size);
+    HammingWeightInfo *info = calloc(ntuples, sizeof(HammingWeightInfo)); // 3^9
+    uint8_t *hw = calloc(256, sizeof(uint8_t));
+    uint64_t tuple = 0; // 9 4-bit Hamming weights + 1 extra Hamming weight
+    uint8_t cur_weight; // Current Hamming weight
+    unsigned long long len = 10000000000;
+
+    
+
+    ByteStreamGenerator bs;
+    ByteStreamGenerator_init(&bs, gen, intf);
+    // Initialize table of Hamming weights
+    for (int i = 0; i < 256; i++) {        
+        for (int j = 0; j < 8; j++) {
+            if (i & (1 << j)) {
+                hw[i]++;
+            }
+        }
+        printf("%d ", hw[i]);
+    }
+    // Pre-fill tuple
+    cur_weight = hw[ByteStreamGenerator_getbyte(&bs)];
+    for (int i = 0; i < 9; i++) {
+        tuple = ((tuple & tuple_mask) << 1) | hw_to_code[cur_weight];
+        cur_weight = hw[ByteStreamGenerator_getbyte(&bs)];
+    }
+    // Generate other overlapping tuples
+    for (unsigned long long i = 0; i < len; i++) {
+        // Process current tuple
+        info[tuple].count++;
+        info[tuple].sum += cur_weight;
+        // Update tuple
+        tuple = ((tuple & tuple_mask) << 1) | hw_to_code[cur_weight];
+        cur_weight = hw[ByteStreamGenerator_getbyte(&bs)];
+        //printf("%llu\n", tuple);
+
+        //uint64_t tmp = tuple;
+        //for (size_t j = 0; j < 9; j++) {
+        //    printf("%llu", tmp % 3);
+        //    tmp /= 3;
+        //}
+        //printf("\n");
+    }
+
+
+    double z_max = 0;
+    double *z_ary = calloc(ntuples, sizeof(double));
+    for (size_t i = 0; i < ntuples; i++) {
+        double std = sqrt(2.0) / sqrt(info[i].count);
+        double mean = info[i].sum / (double) info[i].count;
+        double z = (mean - 4.0) / std;
+        z_ary[i] = z;
+        if (z_max < fabs(z)) {
+            z_max = fabs(z);
+        }
+//        printf("%g\n", z);
+//        printf("%llu|%llu|%g ", info[i].count, info[i].sum, z);
+    }
+    printf("z_max = %g\n", z_max);
+
+
+    // Dump tuples to the stdout
+    unsigned long long count_total = 0;
+    for (size_t i = 0; i < ntuples; i++) {
+        count_total += info[i].count;
+    }
+    for (size_t i = 0; i < ntuples; i++) {
+        printf("%6lu, %12.10g, %12.10g,\n", (long) i, (double) info[i].count / (double) count_total, z_ary[i]);
+    }
+
+
+    // Kolmogorov-Smirnov test
+    qsort(z_ary, ntuples, sizeof(double), cmp_doubles);
+    double D = 0.0;
+    for (size_t i = 0; i < ntuples; i++) {        
+        double f = 0.5 * (1 + erf(z_ary[i] / sqrt(2.0)));
+        double idbl = (double) i;
+        double Dplus = (idbl + 1.0) / ntuples - f;
+        double Dminus = f - idbl / ntuples;
+        if (Dplus > D) D = Dplus;
+        if (Dminus > D) D = Dminus;
+    }
+    double K = sqrt(ntuples) * D + 1.0 / (6.0 * sqrt(ntuples));
+    double p = ks_pvalue(K);
+    printf("K = %g, p = %g\n", K, p);
+
+
+
+    free(info);
+    free(hw);
+}
 
 
 int main(int argc, char *argv[]) 
