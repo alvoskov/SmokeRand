@@ -238,6 +238,146 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
     return 0;
 }
 
+/**
+ * @brief Keeps the sum of Hamming weights
+ */
+typedef struct {
+    unsigned long long count;
+    unsigned long long sum;
+} HammingWeightInfo;
+
+
+typedef struct {
+    GeneratorInfo *gen; ///< Used generator
+    void *state; ///< PRNG state
+    uint64_t buffer; ///< Buffer with PRNG raw data
+    size_t nbytes; ///< Number of bytes returned by the generator
+    size_t bytes_left;
+} ByteStreamGenerator;
+
+
+void ByteStreamGenerator_init(ByteStreamGenerator *obj, GeneratorInfo *gen, const CallerAPI *intf)
+{
+    obj->gen = gen;
+    obj->state = gen->create(intf);
+    obj->nbytes = gen->nbits / 8;
+    obj->bytes_left = 0;
+}
+
+inline uint8_t ByteStreamGenerator_getbyte(ByteStreamGenerator *obj)
+{
+    if (obj->bytes_left == 0) {
+        obj->buffer = obj->gen->get_bits(obj->state);
+        obj->bytes_left = obj->nbytes;
+    }
+    uint8_t out = obj->buffer & 0xFF;
+    obj->buffer >>= 8;
+    obj->bytes_left--;
+    return out;
+}
+
+void ByteStreamGenerator_free(ByteStreamGenerator *obj, const CallerAPI *intf)
+{
+    intf->free(obj->gen);
+}
+
+
+
+static int cmp_doubles(const void *aptr, const void *bptr)
+{
+    double aval = *((double *) aptr), bval = *((double *) bptr);
+    if (aval < bval) return -1;
+    else if (aval == bval) return 0;
+    else return 1;
+}
+
+
+void battery_hamming(GeneratorInfo *gen, const CallerAPI *intf)
+{
+    static uint8_t hw_to_triit[] = {0, 0, 0, 0, 1, 2, 2, 2, 2};
+    int tuple_size = 11;
+    size_t ntuples = (size_t) pow(3.0, tuple_size);
+    HammingWeightInfo *info = calloc(ntuples, sizeof(HammingWeightInfo)); // 3^9
+    uint8_t *hw = calloc(256, sizeof(uint8_t));
+    uint64_t tuple = 0; // 9 4-bit Hamming weights + 1 extra Hamming weight
+    uint8_t cur_weight; // Current Hamming weight
+    unsigned long long len = 20000000000;
+
+    
+
+    ByteStreamGenerator bs;
+    ByteStreamGenerator_init(&bs, gen, intf);
+    // Initialize table of Hamming weights
+    for (int i = 0; i < 256; i++) {        
+        for (int j = 0; j < 8; j++) {
+            if (i & (1 << j)) {
+                hw[i]++;
+            }
+        }
+        printf("%d ", hw[i]);
+    }
+    // Pre-fill tuple
+    cur_weight = hw[ByteStreamGenerator_getbyte(&bs)];
+    for (int i = 0; i < 9; i++) {
+        tuple = ((tuple * 3) + hw_to_triit[cur_weight]) % ntuples;
+        cur_weight = hw[ByteStreamGenerator_getbyte(&bs)];
+    }
+    // Generate other overlapping tuples
+    for (unsigned long long i = 0; i < len; i++) {
+        // Process current tuple
+        info[tuple].count++;
+        info[tuple].sum += cur_weight;
+        // Update tuple
+        tuple = ((tuple * 3) + hw_to_triit[cur_weight]) % ntuples;
+        cur_weight = hw[ByteStreamGenerator_getbyte(&bs)];
+        //printf("%llu\n", tuple);
+
+        /*
+        uint64_t tmp = tuple;
+        for (size_t j = 0; j < 9; j++) {
+            printf("%llu", tmp % 3);
+            tmp /= 3;
+        }
+        printf("\n");
+        */
+    }
+
+    double z_max = 0;
+    double *z_ary = calloc(ntuples, sizeof(double));
+    for (size_t i = 0; i < ntuples; i++) {
+        double std = sqrt(2.0) / sqrt(info[i].count);
+        double mean = info[i].sum / (double) info[i].count;
+        double z = (mean - 4.0) / std;
+        z_ary[i] = z;
+        if (z_max < fabs(z)) {
+            z_max = fabs(z);
+        }
+//        printf("%g\n", z);
+//        printf("%llu|%llu|%g ", info[i].count, info[i].sum, z);
+    }
+    printf("z_max = %g\n", z_max);
+    // Kolmogorov-Smirnov test
+    qsort(z_ary, ntuples, sizeof(double), cmp_doubles);
+    double D = 0.0;
+    for (size_t i = 0; i < ntuples; i++) {        
+        double f = 0.5 * (1 + erf(z_ary[i] / sqrt(2.0)));
+        double idbl = (double) i;
+        double Dplus = (idbl + 1.0) / ntuples - f;
+        double Dminus = f - idbl / ntuples;
+        if (Dplus > D) D = Dplus;
+        if (Dminus > D) D = Dminus;
+    }
+    double K = sqrt(ntuples) * D + 1.0 / (6.0 * sqrt(ntuples));
+    double p = ks_pvalue(K);
+    printf("K = %g, p = %g\n", K, p);
+
+
+
+    free(info);
+    free(hw);
+}
+
+
 
 int main(int argc, char *argv[]) 
 {
@@ -292,6 +432,8 @@ int main(int argc, char *argv[])
         battery_birthday(gi, &intf);
     } else if (!strcmp(battery_name, "ising")) {
         battery_ising(gi, &intf);
+    } else if (!strcmp(battery_name, "hamming")) {
+        battery_hamming(gi, &intf);
     } else {
         printf("Unknown battery %s\n", battery_name);
         GeneratorModule_unload(&mod);
