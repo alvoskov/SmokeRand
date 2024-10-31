@@ -205,6 +205,7 @@ The birthday test generates input values using the next algorithm:
  alfib             | u64    | 4     | 4       | 7    | 0.23 |        |         | 128 GiB
  alfib_mod         | u32    | +     | +       | +    | 0.50 | N/A    |         | 1 TiB
  chacha            | u32    | +     | +       |      | 2.0  | N/A    | +       |
+ chacha_avx        | u32    | +     | +       | +    | 0.7  | N/A    | +       |
  coveyou64         | u32    | 2     | 3       | 3    | 0.62 | N/A    | Small   | 256 KiB
  isaac64           | u64    | +     | +       | +    | 0.75 |        | +       | >= 1 TiB
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | N/A    | Small   | 1 MiB
