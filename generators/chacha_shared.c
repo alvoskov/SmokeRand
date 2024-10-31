@@ -17,12 +17,7 @@
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * All rights reserved.
- *
- * This software is provided under the Apache 2 License.
- *
- * In scientific publications which used this software, a reference to it
- * would be appreciated.
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 
@@ -56,9 +51,6 @@ typedef struct {
 //////////////////////////////
 
 #ifdef CHACHA_VECTOR_INTR
-//#include <emmintrin.h>
-//#include <tmmintrin.h>
-//#include <xopintrin.h>
 #include <x86intrin.h>
 
 static inline __m128i mm_roti_epi32_def(__m128i in, int r)
