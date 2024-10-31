@@ -294,14 +294,14 @@ static int cmp_doubles(const void *aptr, const void *bptr)
 
 void battery_hamming(GeneratorInfo *gen, const CallerAPI *intf)
 {
-    static uint8_t hw_to_triit[] = {0, 0, 0, 0, 1, 2, 2, 2, 2};
-    int tuple_size = 11;
+    static uint8_t hw_to_triit[] = {0, 0, 0, 1, 1, 1, 2, 2, 2};
+    int tuple_size = 9;
     size_t ntuples = (size_t) pow(3.0, tuple_size);
     HammingWeightInfo *info = calloc(ntuples, sizeof(HammingWeightInfo)); // 3^9
     uint8_t *hw = calloc(256, sizeof(uint8_t));
     uint64_t tuple = 0; // 9 4-bit Hamming weights + 1 extra Hamming weight
     uint8_t cur_weight; // Current Hamming weight
-    unsigned long long len = 20000000000;
+    unsigned long long len = 5000000000;
 
     
 
