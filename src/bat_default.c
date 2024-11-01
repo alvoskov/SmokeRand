@@ -221,19 +221,19 @@ static TestResults linearcomp_low(GeneratorState *obj)
 
 static TestResults hamming_dc6_all_test(GeneratorState *obj)
 {
-    HammingDc6Options opts = {.use_bits = use_bits_all, .nsamples = 500000000};
+    HammingDc6Options opts = {.use_bits = use_bits_all, .nsamples = 750000000};
     return hamming_dc6_test(obj, &opts);
 }
 
 static TestResults hamming_dc6_low1_test(GeneratorState *obj)
 {
-    HammingDc6Options opts = {.use_bits = use_bits_low1, .nsamples = 500000000};
+    HammingDc6Options opts = {.use_bits = use_bits_low1, .nsamples = 750000000};
     return hamming_dc6_test(obj, &opts);
 }
 
 static TestResults hamming_dc6_low8_test(GeneratorState *obj)
 {
-    HammingDc6Options opts = {.use_bits = use_bits_low8, .nsamples = 500000000};
+    HammingDc6Options opts = {.use_bits = use_bits_low8, .nsamples = 750000000};
     return hamming_dc6_test(obj, &opts);
 }
 

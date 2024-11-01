@@ -127,11 +127,6 @@ int test_ks()
     return 0;
 }
 
-/*
-double poisson_cdf(double x, double lambda);
-double poisson_pvalue(double x, double lambda);
-*/
-
 
 int main()
 {

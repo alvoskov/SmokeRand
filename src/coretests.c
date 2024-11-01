@@ -689,8 +689,11 @@ TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
         }
     }
     ans.x = chi2_to_stdnorm_approx(ans.x, obj->len - 1);
+    // Recalibration procedure (based on empirical data, very crude)
+    // and computation of p-value
+    ans.x = (ans.x - 0.25) / 1.33;
     ans.p = stdnorm_pvalue(ans.x);
-    ans.alpha = stdnorm_cdf(ans.x);
+    ans.alpha = stdnorm_cdf(ans.x);    
     return ans;
 }
 

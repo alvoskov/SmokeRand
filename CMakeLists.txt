@@ -25,27 +25,42 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # cannot work WITH it, MinGW tolerates both variants
 find_library(M_LIB m)
 
-# Executables
-add_executable(smokerand src/smokerand.c
+add_library(smokerand_core
     src/core.c include/smokerand/core.h
     src/coretests.c include/smokerand/coretests.h
     src/entropy.c include/smokerand/entropy.h
     src/extratests.c include/smokerand/extratests.h
     src/lineardep.c include/smokerand/lineardep.h
+    include/smokerand/cinterface.h
+)
+target_include_directories(smokerand_core PRIVATE include)
+
+# Executables
+add_executable(smokerand src/smokerand.c
     src/bat_default.c include/smokerand/bat_default.h
     src/bat_brief.c include/smokerand/bat_brief.h
-    src/bat_full.c include/smokerand/bat_full.h
-    include/smokerand/cinterface.h)
+    src/bat_full.c include/smokerand/bat_full.h)
 target_include_directories(smokerand PRIVATE include)
+target_link_libraries(smokerand smokerand_core)
 if (M_LIB)
     target_link_libraries(smokerand m)
 endif()
 
-add_executable(test_funcs src/test_funcs.c src/core.c src/entropy.c include/smokerand/core.h include/smokerand/entropy.h)
+add_executable(test_funcs src/test_funcs.c)
 target_include_directories(test_funcs PRIVATE include)
+target_link_libraries(test_funcs smokerand_core)
 if (M_LIB)
-    target_link_libraries(test_funcs m)
+    target_link_libraries(test_funcs m smokerand_core)
 endif()
+
+
+add_executable(calibrate_dc6 src/calibrate_dc6.c)
+target_include_directories(calibrate_dc6 PRIVATE include)
+target_link_libraries(calibrate_dc6 smokerand_core)
+if (M_LIB)
+    target_link_libraries(calibrate_dc6 m smokerand_core)
+endif()
+
 
 
 # Examples of plugins, i.e. modules with PRNGs
