@@ -164,10 +164,14 @@ double ks_pvalue(double x);
 double gammainc(double a, double x);
 double poisson_cdf(double x, double lambda);
 double poisson_pvalue(double x, double lambda);
+double stdnorm_cdf(double x);
+double stdnorm_pvalue(double x);
 double chi2_cdf(double x, unsigned long f);
 double chi2_pvalue(double x, unsigned long f);
+double chi2_to_stdnorm_approx(double x, unsigned long f);
 void radixsort32(uint32_t *x, size_t len);
 void radixsort64(uint64_t *x, size_t len);
+
 
 typedef struct {
     void *original_state;

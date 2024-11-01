@@ -34,11 +34,31 @@ typedef struct {
     unsigned long ngaps; ///< Number of gaps
 } GapOptions;
 
+/**
+ * @brief Sets which bits of random number will be analysed.
+ */
+typedef enum {
+    use_bits_all,
+    use_bits_low8,
+    use_bits_low1
+} UseBitsMode;
+
+/**
+ * @brief Options for "DC6" test based on overlapping tuples
+ * of specially encoded Hamming weights.
+ */
+typedef struct {
+    unsigned long long nsamples; ///< Number of processed pseudorandom numbers.
+    UseBitsMode use_bits; ///< Selector of processed bits subset.
+} HammingDc6Options;
+
 TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts);
 TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts);
 TestResults gap_test(GeneratorState *obj, const GapOptions *opts);
 TestResults monobit_freq_test(GeneratorState *obj);
 TestResults byte_freq_test(GeneratorState *obj);
 TestResults word16_freq_test(GeneratorState *obj);
+TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts);
+
 
 #endif

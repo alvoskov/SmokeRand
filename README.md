@@ -42,6 +42,7 @@ Implemented tests:
 5. Matrix rank test.
 6. Linear complexity test.
 7. CollisionOver test.
+8. Hamming weights based DC6 test from PractRand.
 
 Extra tests:
 
