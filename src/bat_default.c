@@ -215,6 +215,32 @@ static TestResults linearcomp_low(GeneratorState *obj)
     return linearcomp_test(obj, 100000, 0);
 }
 
+///////////////////////////////////////
+///// Hamming weights based tests /////
+///////////////////////////////////////
+
+static TestResults hamming_dc6_all_test(GeneratorState *obj)
+{
+    HammingDc6Options opts = {.use_bits = use_bits_all, .nsamples = 500000000};
+    return hamming_dc6_test(obj, &opts);
+}
+
+static TestResults hamming_dc6_low1_test(GeneratorState *obj)
+{
+    HammingDc6Options opts = {.use_bits = use_bits_low1, .nsamples = 500000000};
+    return hamming_dc6_test(obj, &opts);
+}
+
+static TestResults hamming_dc6_low8_test(GeneratorState *obj)
+{
+    HammingDc6Options opts = {.use_bits = use_bits_low8, .nsamples = 500000000};
+    return hamming_dc6_test(obj, &opts);
+}
+
+
+
+
+
 void battery_default(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
@@ -244,6 +270,9 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf,
         {"collover5_8d", collisionover5_8d, 7},
         {"collover5_8d_high", collisionover5_8d_high, 7},
         {"gap_inv512", gap_inv512, 14},
+        {"hamming_dc6", hamming_dc6_all_test, 5},
+        {"hamming_dc6_low1", hamming_dc6_low1_test, 5},
+        {"hamming_dc6_low8", hamming_dc6_low8_test, 5},
         {"linearcomp_high", linearcomp_high, 1},
         {"linearcomp_mid", linearcomp_mid, 1},
         {"linearcomp_low", linearcomp_low, 1},

@@ -258,15 +258,28 @@ double poisson_pvalue(double x, double lambda)
 
 
 /**
- * @brief Implementation of chi-square distribution c.d.f.
- * @details It is based on regularized incomplete gamma function. For very
- * large numbers of degrees of freedom asymptotic approximation is used.
- * 
+ * @brief Transforms a chi2-distributed variable to the normally distributed value
+ * (standard normal distribution).
+ * @details Based on the asymptotic approximation by Wilson and Hilferty.
  * References: 
  *
  * 1. Wilson E.B., Hilferty M.M. The distribution of chi-square // Proceedings
  * of the National Academy of Sciences. 1931. Vol. 17. N 12. P. 684-688.
  * https://doi.org/10.1073/pnas.17.12.684
+ */
+double chi2_to_stdnorm_approx(double x, unsigned long f)
+{
+    double s2 = 2.0 / (9.0 * f);
+    double mu = 1 - s2;
+    double z = (pow(x/f, 1.0/3.0) - mu) / sqrt(s2);
+    return z;
+}
+
+/**
+ * @brief Implementation of chi-square distribution c.d.f.
+ * @details It is based on regularized incomplete gamma function. For very
+ * large numbers of degrees of freedom asymptotic approximation from
+ * `chi2emp_to_normemp_approx` is used.
  */
 double chi2_cdf(double x, unsigned long f)
 {
@@ -277,9 +290,7 @@ double chi2_cdf(double x, unsigned long f)
     } else if (f < 100000) {
         return gammainc((double) f / 2.0, x / 2.0);
     } else {
-        double s2 = 2.0 / (9.0 * f);
-        double mu = 1 - s2;
-        double z = (pow(x/f, 1.0/3.0) - mu) / sqrt(s2);
+        double z = chi2_to_stdnorm_approx(x, f);
         if (z > -3) {
             return 0.5 + 0.5 * erf(z / sqrt(2));
         } else {
@@ -315,6 +326,32 @@ double chi2_pvalue(double x, unsigned long f)
         return 0.5 * erfc(z / sqrt(2));
     }
 }
+
+
+/**
+ * @brief Implementation of standard normal distribution c.d.f.
+ */
+double stdnorm_cdf(double x)
+{
+    if (x > -3) {
+        return 0.5 + 0.5 * erf(x / sqrt(2));
+    } else {
+        return 0.5 * erfc(-x / sqrt(2));
+    }
+}
+
+/**
+ * @brief Implementation of standard normal distribution c.c.d.f. (p-value)
+ */
+double stdnorm_pvalue(double x)
+{
+    if (x > -3) {
+        return 0.5 * erfc(x / sqrt(2));
+    } else {
+        return 1.0 - 0.5 * erfc(-x / sqrt(2));
+    }
+}
+
 
 //////////////////////////////////////////////////
 ///// Subroutines for working with C modules /////
