@@ -73,7 +73,7 @@ foreach(prng_name alfib alfib_mod chacha chacha_avx coveyou64 isaac64 kiss64 kis
     sfc32 sfc64 shr3 swb swblux swbw
     speck128 speck128_avx splitmix splitmix32 sqxor sqxor32
     tinymt32 tinymt64 threefry well1024a wyrand
-    xorshift128 xorwow xoroshiro128p xoroshiro128pp xoroshiro1024st xsh)
+    xorshift128 xorshift128p xorwow xoroshiro128p xoroshiro128pp xoroshiro1024st xsh)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c include/smokerand/cinterface.h)
     set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
     set_target_properties(${prng_name}_shared PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)

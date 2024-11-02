@@ -14,7 +14,8 @@
 
 static TestResults hamming_dc6_all_test(GeneratorState *obj)
 {
-    HammingDc6Options opts = {.use_bits = use_bits_all, .nsamples = 25000000};
+    HammingDc6Options opts = {.mode = hamming_dc6_bytes, .nbytes = 100000000};
+//    HammingDc6Options opts = {.mode = hamming_dc6_values, .nbytes = 100000000};
     return hamming_dc6_test(obj, &opts);
 }
 
@@ -24,6 +25,7 @@ int main()
     int nsamples = 32768;
     CallerAPI intf = CallerAPI_init();
     GeneratorModule mod = GeneratorModule_load("generators/libspeck128_avx_shared.dll");
+//    GeneratorModule mod = GeneratorModule_load("generators/libchacha_avx_shared.dll");
     if (!mod.valid) {
         CallerAPI_free();
         return 1;
