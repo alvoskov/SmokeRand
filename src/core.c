@@ -256,6 +256,19 @@ double poisson_pvalue(double x, double lambda)
     return gammainc(floor(x) + 1.0, lambda);
 }
 
+/**
+ * @brief Probability function for binomial distribution.
+ * @param k Number of successful attempts.
+ * @param n Total number of attempts.
+ * @param p Probability of success.
+ */
+double binomial_pdf(unsigned long k, unsigned long n, double p)
+{
+    double ln_pdf = lgamma(n + 1) - lgamma(k + 1) - lgamma(n - k + 1) +
+        k * log(p) + (n - k) * log(1.0 - p);
+    return exp(ln_pdf);
+}
+
 
 /**
  * @brief Transforms a chi2-distributed variable to the normally distributed value
@@ -409,6 +422,11 @@ void GeneratorModule_unload(GeneratorModule *mod)
         DLCLOSE_WRAPPER(mod->lib);
     }
 }
+
+///////////////////////////////////////
+///// Hamming weights subroutines /////
+///////////////////////////////////////
+
 
 ///////////////////////////////
 ///// Sorting subroutines /////

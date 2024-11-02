@@ -2,6 +2,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 int is_array64_sorted(const uint64_t *x, size_t len)
 {
@@ -127,11 +128,33 @@ int test_ks()
     return 0;
 }
 
+int test_hamming_weights()
+{
+    uint64_t x = 0xDEADBEEFDEADBEEF;
+    printf("hamming weight = %d (ref.value is 48)\n", (int) get_uint64_hamming_weight(x));
+    return 0;
+}
+
+int test_binopdf()
+{
+    for (int i = 0; i < 8; i++) {
+        printf("%3d %3d %6g\n", i, 8, binomial_pdf(i, 8, 0.5) * 256.0);
+    }
+    printf("\n");
+    for (int i = 0; i < 9; i++) {
+        printf("%3d %3d %6g\n", i, 8, binomial_pdf(i, 9, 0.25) * pow(4.0, 9.0));
+    }
+    printf("\n");
+    return 0;
+}
+
 
 int main()
 {
     test_chi2();
     test_ks();
+    test_binopdf();
+    test_hamming_weights();
     test_radixsort64();
     return 0;
 }

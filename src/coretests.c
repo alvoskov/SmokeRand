@@ -704,23 +704,6 @@ void HammingTuplesTable_free(HammingTuplesTable *obj)
 }
 
 
-/**
- * @brief Creates the table of Hamming weights for bytes.
- */
-uint8_t *create_bytes_hamming_weights()
-{
-    uint8_t *hw = calloc(256, sizeof(uint8_t));
-    for (int i = 0; i < 256; i++) {        
-        for (int j = 0; j < 8; j++) {
-            if (i & (1 << j)) {
-                hw[i]++;
-            }
-        }
-    }
-    return hw;
-}
-
-
 unsigned long long hamming_dc6_nsamples_to_ntuples(unsigned long long nsamples,
     unsigned int nbits, UseBitsMode use_bits)
 {
@@ -801,13 +784,41 @@ TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts)
     static const uint32_t hw_to_code[] = {0, 0, 1, 1, 2, 2, 3, 3, 0};
     // binopdf(0:8,8,0.5) * 256:          1  8 28 56 70 56 28  8  1
     static const double code_to_prob[] = {10.0/256.0, 84.0/256.0, 126.0/256.0, 36.0/256.0};
+
+    // Our custom table of hw->code table for 32-bit words
+/*
+    static const uint8_t hw32_to_code[] = {
+        0, 0, 0, 0, 0, 0, 0, 0, // 0-7
+        0, 0, 0, 0, 0, 0, 1, 1, // 8-15
+        2, 2, 3, 3, 3, 3, 3, 3, // 16-23
+        3, 3, 3, 3, 3, 3, 3, 3,  3}; // 24-32
+    // sum(binopdf(0:14, 32,0.5)) ans = 0.2983
+    // sum(binopdf(14:15,32,0.5)) ans = 0.2415
+    // sum(binopdf(16:17,32,0.5)) ans = 0.2717
+    // sum(binopdf(18:32,32,0.5)) ans = 0.2983
+
+    static const uint8_t hw64_to_code[] = {
+        0, 0, 0, 0, 0, 0, 0, 0, // 0-7
+        0, 0, 0, 0, 0, 0, 0, 0, // 8-15
+        0, 0, 0, 0, 0, 0, 0, 0, // 16-23
+        0, 0, 0, 0, 0, 1, 1, 1, // 24-31
+        2, 2, 2, 2, 3, 3, 3, 3, // 32-39
+        3, 3, 3, 3, 3, 3, 3, 3, // 40-47
+        2, 2, 3, 3, 3, 3, 3, 3, // 48-57
+        3, 3, 3, 3, 3, 3, 3, 3,  3}; // 56-64
+    // sum(binopdf(0:28,64,0.5)) ans = 0.1909
+    // sum(binopdf(29:31,64,0.5)) ans = 0.2595
+    // sum(binopdf(32:35,64,0.5)) ans = 0.3588
+    // sum(binopdf(36:64,64,0.5)) ans = 0.1909
+*/
+
     // Parameters for 18-bit tuple with 2-bit digits
     static const unsigned int code_nbits = 2, tuple_size = 9;
     static const uint64_t tuple_mask = (1ull << code_nbits * tuple_size) - 1;
     //
     HammingTuplesTable table;
     HammingTuplesTable_init(&table, code_nbits, tuple_size, code_to_prob);
-    uint8_t *hw = create_bytes_hamming_weights();
+
     uint64_t tuple = 0; // 9 4-bit Hamming weights + 1 extra Hamming weight
     uint8_t cur_weight; // Current Hamming weight
     unsigned long long ntuples = hamming_dc6_nsamples_to_ntuples(opts->nsamples,
@@ -828,10 +839,10 @@ TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts)
         break;
     }    
     // Pre-fill tuple
-    cur_weight = hw[ByteStreamGenerator_getbyte(&bs)];
+    cur_weight = get_byte_hamming_weight(bs.get_byte(&bs));
     for (unsigned int i = 0; i < tuple_size; i++) {
         tuple = ((tuple << code_nbits) | hw_to_code[cur_weight]) & tuple_mask;
-        cur_weight = hw[bs.get_byte(&bs)];
+        cur_weight = get_byte_hamming_weight(bs.get_byte(&bs));
     }
     // Generate other overlapping tuples
     for (unsigned long long i = 0; i < ntuples; i++) {
@@ -839,13 +850,12 @@ TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts)
         table.tuples[tuple].count++;
         // Update tuple
         tuple = ((tuple << code_nbits) | hw_to_code[cur_weight]) & tuple_mask;
-        cur_weight = hw[bs.get_byte(&bs)];
+        cur_weight = get_byte_hamming_weight(bs.get_byte(&bs));
     }
     // Convert tuples counters to the test results (p-value etc.)
     TestResults res = HammingTuplesTable_get_results(&table);
     obj->intf->printf("  zemp = %g, p = %g\n", res.x, res.p);
     obj->intf->printf("\n");
     HammingTuplesTable_free(&table);
-    free(hw);
     return res;
 }

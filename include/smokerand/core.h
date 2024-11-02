@@ -162,6 +162,7 @@ const char *interpret_pvalue(double pvalue);
 PValueCategory get_pvalue_category(double pvalue);
 double ks_pvalue(double x);
 double gammainc(double a, double x);
+double binomial_pdf(unsigned long k, unsigned long n, double p);
 double poisson_cdf(double x, double lambda);
 double poisson_pvalue(double x, double lambda);
 double stdnorm_cdf(double x);
@@ -198,6 +199,56 @@ void GeneratorInfo_bits_to_file(GeneratorInfo *gen, const CallerAPI *intf);
 ////////////////////////////////////////
 ///// Some useful inline functions /////
 ////////////////////////////////////////
+
+/**
+ * @brief Calculate Hamming weight (number of 1's for byte)
+ * @details The used table can be easily obtained by the next code:
+ *
+ *     uint8_t *create_bytes_hamming_weights()
+ *     {
+ *         uint8_t *hw = calloc(256, sizeof(uint8_t));
+ *         for (int i = 0; i < 256; i++) {        
+ *             for (int j = 0; j < 8; j++) {
+ *                 if (i & (1 << j)) {
+ *                     hw[i]++;
+ *             }
+ *         }
+ *         return hw;
+ *     }
+ */
+static inline uint8_t get_byte_hamming_weight(uint8_t x)
+{
+    static const uint8_t hw[256] = {
+        0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8
+    };
+    return hw[x];
+}
+
+static inline uint8_t get_uint64_hamming_weight(uint64_t x)
+{
+    uint8_t hw = 0;
+    for (int i = 0; i < 8; i++) {
+        hw += get_byte_hamming_weight((uint8_t) (x & 0xFF));
+        x >>= 8;
+    }
+    return hw;
+}
+
 
 static inline uint32_t reverse_bits32(uint32_t x)
 {
