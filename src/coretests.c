@@ -670,10 +670,20 @@ size_t HammingWeightsTuple_reduce_table(HammingWeightsTuple *info, double Ei_min
     return len;
 }
 
+/**
+ * @brief Calculates statistics for Hamming DC6 test using the filled table
+ * of overlapping tuples frequencies. The g-test (refined chi-square test)
+ * is used. Obtained random value is converted to the normal distribution
+ * using asymptotic approximation from the `chi2_to_stdnorm_approx` function.
+ */
 TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
 {
     // Concatenate low-populated bins
-    obj->len = HammingWeightsTuple_reduce_table(obj->tuples, 50.0, obj->len);
+    double Ei_min = 250.0;    
+    do {
+        obj->len = HammingWeightsTuple_reduce_table(obj->tuples, Ei_min, obj->len);
+        Ei_min *= 2;
+    } while (obj->len > 250000);
     // chi2 test (with more accurate g-test statistics)
     // chi2emp = 2\sum_i O_i * ln(O_i / E_i)
     unsigned long long count_total = 0;
@@ -704,26 +714,138 @@ void HammingTuplesTable_free(HammingTuplesTable *obj)
 }
 
 
-unsigned long long hamming_dc6_nsamples_to_ntuples(unsigned long long nsamples,
-    unsigned int nbits, UseBitsMode use_bits)
+/**
+ * @brief Converts number of samples (bytes or words) to number of generated
+ * tuples (not tuples types)
+ */
+unsigned long long hamming_dc6_nbytes_to_ntuples(unsigned long long nbytes,
+    unsigned int nbits, HammingDc6Mode mode)
 {
-    unsigned long long ntuples = nsamples;
-    switch (use_bits) {
-    case use_bits_all:
-        ntuples = nsamples;
+    unsigned long long ntuples = nbytes;
+    // Note: tuples are overlapping, i.e. one new tuple digit means
+    // one new tuple.
+    switch (mode) {
+    case hamming_dc6_values:
+        // Each PRNG output is converted to tuple digits
+        ntuples = nbytes * 8 / nbits;
         break;
-    case use_bits_low8:
-        ntuples = nsamples * 8 / nbits;
+    case hamming_dc6_bytes:
+        // Each byte is converted to tuple digit
+        ntuples = nbytes;
         break;
-    case use_bits_low1:
-        ntuples = nsamples / nbits;
+    case hamming_dc6_bytes_low8:
+        // Only lower bytes of PRNG outputs are converted to tuple digits
+        ntuples = nbytes * 8 / nbits;
+        break;
+    case hamming_dc6_bytes_low1:
+        // Only lower bits of PRNG outputs are converted to tuple digits
+        ntuples = nbytes / nbits;
         break;
     default:
-        ntuples = nsamples;
+        ntuples = nbytes;
         break;
     }
     return ntuples;
 }
+
+/**
+ * @brief Print the information about "Hamming DC6" test settings, especially
+ * about input stream processing mode.
+ */
+static void hamming_dc6_test_print_info(GeneratorState *obj, const HammingDc6Options *opts,
+    unsigned long long ntuples)
+{
+    obj->intf->printf("Hamming weights based tests (DC6)\n");
+    obj->intf->printf("  Sample size, bytes:     %llu\n", opts->nbytes);
+    obj->intf->printf("  Tuples to be generated: %llu\n", ntuples);
+    switch (opts->mode) {
+    case hamming_dc6_values:
+        obj->intf->printf("  Mode: process %d-bit words of PRNG output directly\n",
+            (int) obj->gi->nbits);
+        break;
+    case hamming_dc6_bytes:
+        obj->intf->printf("  Mode: process PRNG output as a stream of bytes\n",
+            (int) obj->gi->nbits);
+        break;
+    case hamming_dc6_bytes_low1:
+        obj->intf->printf("  Mode: byte stream made of lower bits (bit 0) of PRNG values\n");
+        break;
+    case hamming_dc6_bytes_low8:
+        obj->intf->printf("  Mode: byte stream made of 8 lower bits (bit 7..0) of PRNG values\n");
+        break;
+    }
+}
+
+/**
+ * @brief Fills tables for conversion of Hamming weights to its codes (tuple digits)
+ * Takes into account both output size of PRNG (32 or 64 bits) and output stream mode
+ * (bytes or 32/64-bit words).
+ * @param[in]  obj          Information about used PRNG and its state
+ * @param[in]  opts         Hamming DC6 test options.
+ * @param[out] code_to_prob Buffer for probabilities of codes. They are calculated
+ *                          from the binomial distribution. It is supposed that
+ *                          only 4 codes (0, 1, 2, 3) are possible
+ * @return Pointer to the table of codes of Hamming weights.
+ */
+static const uint8_t *hamming_dc6_fill_hw_tables(GeneratorState *obj,
+    const HammingDc6Options *opts, double *code_to_prob)
+{
+    // Select the right table for recoding Hamming weights to codes
+    int nweights = 0;
+    const uint8_t *hw = NULL;
+    if (opts->mode != hamming_dc6_values) {
+        // 2-bit codes for Hamming weights (taken from PractRand)
+        //                                   0  1  2  3  4  5  6  7  8
+        static const uint8_t hw_to_code[] = {0, 0, 1, 1, 2, 2, 3, 3, 0};
+        hw = hw_to_code;
+        nweights = 9;
+        // binopdf(0:8,8,0.5) * 256:          1  8 28 56 70 56 28  8  1
+    } else if (obj->gi->nbits == 32) {
+        // Our custom table of hw->code table for 32-bit words
+        // sum(binopdf(0:13, 32,0.5)) ans = 0.1885
+        // sum(binopdf(14:15,32,0.5)) ans = 0.2415
+        // sum(binopdf(16:17,32,0.5)) ans = 0.2717
+        // sum(binopdf(18:32,32,0.5)) ans = 0.2983
+        static const uint8_t hw32_to_code[] = {
+            0, 0, 0, 0, 0, 0, 0, 0, // 0-7
+            0, 0, 0, 0, 0, 0, 1, 1, // 8-15
+            2, 2, 3, 3, 3, 3, 3, 3, // 16-23
+            3, 3, 3, 3, 3, 3, 3, 3,  3}; // 24-32
+        hw = hw32_to_code;
+        nweights = 33;
+    } else if (obj->gi->nbits == 64) {
+        // Our custom table of hw-code table for 64-bit words
+        // sum(binopdf(0:28,64,0.5)) ans = 0.1909
+        // sum(binopdf(29:31,64,0.5)) ans = 0.2595
+        // sum(binopdf(32:35,64,0.5)) ans = 0.3588
+        // sum(binopdf(36:64,64,0.5)) ans = 0.1909
+        static const uint8_t hw64_to_code[] = {
+            0, 0, 0, 0, 0, 0, 0, 0, // 0-7
+            0, 0, 0, 0, 0, 0, 0, 0, // 8-15
+            0, 0, 0, 0, 0, 0, 0, 0, // 16-23
+            0, 0, 0, 0, 0, 1, 1, 1, // 24-31
+            2, 2, 2, 2, 3, 3, 3, 3, // 32-39
+            3, 3, 3, 3, 3, 3, 3, 3, // 40-47
+            2, 2, 3, 3, 3, 3, 3, 3, // 48-57
+            3, 3, 3, 3, 3, 3, 3, 3,  3}; // 56-64
+        hw = hw64_to_code;
+        nweights = 65;
+    } else {
+        fprintf(stderr, "Internal error");
+        exit(1);
+    }
+    // Calculate probabilities for codes using p.d.f.
+    // for binomial distribution
+    for (int i = 0; i < 4; i++) {
+        code_to_prob[i] = 0.0;
+    }
+    for (int i = 0; i < nweights; i++) {
+        code_to_prob[hw[i]] += binomial_pdf(i, nweights - 1, 0.5);
+    }
+    return hw;        
+}
+
+
 
 /**
  * @brief Hamming weights based test (modification of DC6-9x1Bytes-1
@@ -766,52 +888,27 @@ unsigned long long hamming_dc6_nsamples_to_ntuples(unsigned long long nsamples,
  *    probabilities?)
  * 4. A simpler and less accurate recalibration scheme was developed and used.
  *
- * The test easily detects low-grade PRNGs such as lcg69069, randu, 32-bit
- * and 64-bit xorshift. If only lower bit is analysed - it detects
- * SWB and SWBW (Subtract-with-Borrow + "Weyl sequence"). SWB passes BigCrush
- * but not PractRand. For such detection the ordering of lower bits in
- * the output is very important.
+ * Also a new mode that processes the whole output of PRNG not byte-by-byte
+ * was implemented.
+ *
+ * The test easily detects low-grade PRNGs such as lcg69069, randu, 32-bit,
+ * 64-bit and 128-bit xorshift without output scramblers. If only lower bit is
+ * analysed - it detects SWB and SWBW (Subtract-with-Borrow + "Weyl sequence").
+ * SWBW passes BigCrush but not PractRand. For such detection the ordering of
+ * lower bits in the output is very important.
  * 
  * References:
  *
  * 1. Chris Doty-Humphrey. PractRand https://pracrand.sourceforge.net/
- *
+ * 2. Blackman D., Vigna S. A New Test for Hamming-Weight Dependencies //
+ *    ACM Trans. Model. Comput. Simul. 2022. V. 32, N. 3, Article 19
+ *    https://doi.org/10.1145/3527582
  */
 TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts)
 {
-    // 2-bit codes for Hamming weights (taken from PractRand)
-    //                                    0  1  2  3  4  5  6  7  8
-    static const uint32_t hw_to_code[] = {0, 0, 1, 1, 2, 2, 3, 3, 0};
-    // binopdf(0:8,8,0.5) * 256:          1  8 28 56 70 56 28  8  1
-    static const double code_to_prob[] = {10.0/256.0, 84.0/256.0, 126.0/256.0, 36.0/256.0};
-
     // Our custom table of hw->code table for 32-bit words
-/*
-    static const uint8_t hw32_to_code[] = {
-        0, 0, 0, 0, 0, 0, 0, 0, // 0-7
-        0, 0, 0, 0, 0, 0, 1, 1, // 8-15
-        2, 2, 3, 3, 3, 3, 3, 3, // 16-23
-        3, 3, 3, 3, 3, 3, 3, 3,  3}; // 24-32
-    // sum(binopdf(0:14, 32,0.5)) ans = 0.2983
-    // sum(binopdf(14:15,32,0.5)) ans = 0.2415
-    // sum(binopdf(16:17,32,0.5)) ans = 0.2717
-    // sum(binopdf(18:32,32,0.5)) ans = 0.2983
-
-    static const uint8_t hw64_to_code[] = {
-        0, 0, 0, 0, 0, 0, 0, 0, // 0-7
-        0, 0, 0, 0, 0, 0, 0, 0, // 8-15
-        0, 0, 0, 0, 0, 0, 0, 0, // 16-23
-        0, 0, 0, 0, 0, 1, 1, 1, // 24-31
-        2, 2, 2, 2, 3, 3, 3, 3, // 32-39
-        3, 3, 3, 3, 3, 3, 3, 3, // 40-47
-        2, 2, 3, 3, 3, 3, 3, 3, // 48-57
-        3, 3, 3, 3, 3, 3, 3, 3,  3}; // 56-64
-    // sum(binopdf(0:28,64,0.5)) ans = 0.1909
-    // sum(binopdf(29:31,64,0.5)) ans = 0.2595
-    // sum(binopdf(32:35,64,0.5)) ans = 0.3588
-    // sum(binopdf(36:64,64,0.5)) ans = 0.1909
-*/
-
+    double code_to_prob[4];
+    const uint8_t *hw_to_code = hamming_dc6_fill_hw_tables(obj, opts, code_to_prob);
     // Parameters for 18-bit tuple with 2-bit digits
     static const unsigned int code_nbits = 2, tuple_size = 9;
     static const uint64_t tuple_mask = (1ull << code_nbits * tuple_size) - 1;
@@ -821,39 +918,64 @@ TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts)
 
     uint64_t tuple = 0; // 9 4-bit Hamming weights + 1 extra Hamming weight
     uint8_t cur_weight; // Current Hamming weight
-    unsigned long long ntuples = hamming_dc6_nsamples_to_ntuples(opts->nsamples,
-        obj->gi->nbits, opts->use_bits);
-    ByteStreamGenerator bs;
-    ByteStreamGenerator_init(&bs, obj, opts->use_bits);
-    obj->intf->printf("Hamming weights based tests (DC6)\n");
-    obj->intf->printf("  Sample size, bytes: %llu\n", opts->nsamples);
-    switch (opts->use_bits) {
-    case use_bits_all:
-        obj->intf->printf("  Used bits: all\n");
-        break;
-    case use_bits_low1:
-        obj->intf->printf("  Used bits: bit 0\n");
-        break;
-    case use_bits_low8:
-        obj->intf->printf("  Used bits: bits 7..0\n");
-        break;
-    }    
-    // Pre-fill tuple
-    cur_weight = get_byte_hamming_weight(bs.get_byte(&bs));
-    for (unsigned int i = 0; i < tuple_size; i++) {
-        tuple = ((tuple << code_nbits) | hw_to_code[cur_weight]) & tuple_mask;
-        cur_weight = get_byte_hamming_weight(bs.get_byte(&bs));
+    unsigned long long ntuples = hamming_dc6_nbytes_to_ntuples(opts->nbytes,
+        obj->gi->nbits, opts->mode);
+    hamming_dc6_test_print_info(obj, opts, ntuples);
+    obj->intf->printf("  Used probabilities for codes:\n");
+    for (int i = 0; i < 4; i++) {
+        obj->intf->printf("    p(%d) = %10.8f\n", i, code_to_prob[i]);
     }
-    // Generate other overlapping tuples
-    for (unsigned long long i = 0; i < ntuples; i++) {
-        // Process current tuple
-        table.tuples[tuple].count++;
-        // Update tuple
-        tuple = ((tuple << code_nbits) | hw_to_code[cur_weight]) & tuple_mask;
+    if (opts->mode == hamming_dc6_values) {
+        // Process input as a sequence of 32/64-bit words
+        // Pre-fill tuple
+        cur_weight = get_uint64_hamming_weight(obj->gi->get_bits(obj->state));
+        for (unsigned int i = 0; i < tuple_size; i++) {
+            tuple = ((tuple << code_nbits) | hw_to_code[cur_weight]) & tuple_mask;
+            cur_weight = get_uint64_hamming_weight(obj->gi->get_bits(obj->state));
+        }
+        // Generate other overlapping tuples
+        for (unsigned long long i = 0; i < ntuples; i++) {
+            // Process current tuple
+            table.tuples[tuple].count++;
+            // Update tuple
+            tuple = ((tuple << code_nbits) | hw_to_code[cur_weight]) & tuple_mask;
+            cur_weight = get_uint64_hamming_weight(obj->gi->get_bits(obj->state));
+        }
+    } else {
+        ByteStreamGenerator bs;
+        if (opts->mode == hamming_dc6_bytes) {
+            ByteStreamGenerator_init(&bs, obj, use_bits_all);
+        } else if (opts->mode == hamming_dc6_bytes_low8) {
+            ByteStreamGenerator_init(&bs, obj, use_bits_low8);
+        } else if (opts->mode == hamming_dc6_bytes_low1) {
+            ByteStreamGenerator_init(&bs, obj, use_bits_low1);
+        } else {
+            fprintf(stderr, "Internal error");
+            exit(1);
+        }
+        // Pre-fill tuple
         cur_weight = get_byte_hamming_weight(bs.get_byte(&bs));
+        for (unsigned int i = 0; i < tuple_size; i++) {
+            tuple = ((tuple << code_nbits) | hw_to_code[cur_weight]) & tuple_mask;
+            cur_weight = get_byte_hamming_weight(bs.get_byte(&bs));
+        }
+        // Generate other overlapping tuples
+        for (unsigned long long i = 0; i < ntuples; i++) {
+            // Process current tuple
+            table.tuples[tuple].count++;
+            // Update tuple
+            tuple = ((tuple << code_nbits) | hw_to_code[cur_weight]) & tuple_mask;
+            cur_weight = get_byte_hamming_weight(bs.get_byte(&bs));
+        }
     }
     // Convert tuples counters to the test results (p-value etc.)
+    obj->intf->printf("   Number of tuples types: %llu\n",
+        (unsigned long long) table.len);
     TestResults res = HammingTuplesTable_get_results(&table);
+    obj->intf->printf("   Number of bins after reduction: %llu\n",
+        (unsigned long long) table.len);
+    obj->intf->printf("   Number of bins from Rice rule: %g\n",
+        2.0 * pow(ntuples, 1.0/3.0));
     obj->intf->printf("  zemp = %g, p = %g\n", res.x, res.p);
     obj->intf->printf("\n");
     HammingTuplesTable_free(&table);

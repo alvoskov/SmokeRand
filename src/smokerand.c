@@ -246,6 +246,7 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
  * And this modification is especially sensitive to SWB, SWBW, Mulberry32 etc. Probably they
  * see longer-range correlations
  */
+/*
 void battery_hamming(GeneratorInfo *gen, const CallerAPI *intf)
 {
     void *state = gen->create(intf);    
@@ -254,6 +255,7 @@ void battery_hamming(GeneratorInfo *gen, const CallerAPI *intf)
     hamming_dc6_test(&obj, &opts);
     intf->free(obj.state);
 }
+*/
 
 
 int main(int argc, char *argv[]) 
@@ -309,8 +311,8 @@ int main(int argc, char *argv[])
         battery_birthday(gi, &intf);
     } else if (!strcmp(battery_name, "ising")) {
         battery_ising(gi, &intf);
-    } else if (!strcmp(battery_name, "hamming")) {
-        battery_hamming(gi, &intf);
+//    } else if (!strcmp(battery_name, "hamming")) {
+//        battery_hamming(gi, &intf);
     } else {
         printf("Unknown battery %s\n", battery_name);
         GeneratorModule_unload(&mod);

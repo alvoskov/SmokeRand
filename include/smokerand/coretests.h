@@ -43,13 +43,25 @@ typedef enum {
     use_bits_low1
 } UseBitsMode;
 
+
+/**
+ * @brief Modes of Hamming weights based DC6 test. Each mode corresponds
+ * to the bit chunks that will be used for computation of Hamming weights.
+ */
+typedef enum {
+    hamming_dc6_values, ///< Calculate Hamming weights for whole 32/64-bit values.
+    hamming_dc6_bytes, ///< Process PRNG output as byte sequence.
+    hamming_dc6_bytes_low8, ///< Make byte sequence from lower 8 bits of PRNG output
+    hamming_dc6_bytes_low1 ///< Make byte sequence from lower 1 bit of PRNG output
+} HammingDc6Mode;
+
 /**
  * @brief Options for "DC6" test based on overlapping tuples
  * of specially encoded Hamming weights.
  */
 typedef struct {
-    unsigned long long nsamples; ///< Number of processed pseudorandom numbers.
-    UseBitsMode use_bits; ///< Selector of processed bits subset.
+    unsigned long long nbytes; ///< Number of bytes processed by the test.
+    HammingDc6Mode mode; ///< Selector of processed bits subset.
 } HammingDc6Options;
 
 TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts);
