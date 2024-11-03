@@ -1,7 +1,8 @@
 /**
  * @file coretests.c
  * @brief The key tests for testings PRNGs: frequency tests, Marsaglia's
- * birthday spacings and monkey tests, Knuth's gap test.
+ * birthday spacings and monkey tests, Knuth's gap test. Also includes
+ * Hamming weights based DC6 test from PractRand.
  *
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
@@ -327,6 +328,21 @@ TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 ///// Gap test implementation /////
 ///////////////////////////////////
 
+static int gap_test_guard(GeneratorState *obj, const GapOptions *opts)
+{
+    int is_ok = 0;
+    uint64_t beta = 1ull << (obj->gi->nbits - opts->shl);
+    double p = 1.0 / (1 << opts->shl); // beta in the floating point format
+    unsigned long long nsamples = -20.0 / log10(1.0 - p);
+    for (unsigned long i = 0; i < nsamples; i++) {
+        if (obj->gi->get_bits(obj->state) <= beta) {
+            is_ok = 1;
+            break;
+        }
+    }
+    return is_ok;
+}
+
 /**
  * @brief Knuth's gap test for detecting lagged Fibonacci generators.
  * @details Gap is \f$ [0;\beta) \f$ where $\beta = 1 / (2^{shl}) \f$.
@@ -346,6 +362,13 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     obj->intf->printf("Gap test\n");
     obj->intf->printf("  alpha = 0.0; beta = %g; shl = %u;\n", p, opts->shl);
     obj->intf->printf("  ngaps = %llu; nbins = %llu\n", ngaps, nbins);
+    if (!gap_test_guard(obj, opts)) {
+        obj->intf->printf("  Generator output doesn't hit the gap! p <= 1e-15\n");
+        ans.p = 1.0e-15;
+        ans.alpha = 1.0 - ans.p;
+        ans.x = NAN;
+        return ans;
+    }
     for (size_t i = 0; i < ngaps; i++) {
         size_t gap_len = 0;
         u = obj->gi->get_bits(obj->state);
