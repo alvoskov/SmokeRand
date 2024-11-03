@@ -675,15 +675,23 @@ size_t HammingWeightsTuple_reduce_table(HammingWeightsTuple *info, double Ei_min
  * of overlapping tuples frequencies. The g-test (refined chi-square test)
  * is used. Obtained random value is converted to the normal distribution
  * using asymptotic approximation from the `chi2_to_stdnorm_approx` function.
+ * @details The original DC6 test from PractRand also used recalibration
+ * procedure: correction of obtained \f$z_\mathrm{emp}\f$ using some
+ * corrections based on percentile tables obtained by Monte-Carlo method using
+ * CSPRNG. Experiments showed that increasing \f$E_{i,\mathrm{min}}\f$ from
+ * 25 to 100 makes the output distribution much closer to standard normal.
+ * It is still slightly biased: \f$ \mu \approx -0.15\f$, $\sigma\approx 1.0$.
+ * Q-Q plot shows that it is normal. And this bias was not taken into account.
  */
 TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
 {
     // Concatenate low-populated bins
+    const size_t nbins_max = 250000;
     double Ei_min = 250.0;    
     do {
         obj->len = HammingWeightsTuple_reduce_table(obj->tuples, Ei_min, obj->len);
         Ei_min *= 2;
-    } while (obj->len > 250000);
+    } while (obj->len > nbins_max);
     // chi2 test (with more accurate g-test statistics)
     // chi2emp = 2\sum_i O_i * ln(O_i / E_i)
     unsigned long long count_total = 0;
@@ -699,9 +707,6 @@ TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
         }
     }
     ans.x = chi2_to_stdnorm_approx(ans.x, obj->len - 1);
-    // Recalibration procedure (based on empirical data, very crude)
-    // and computation of p-value
-    ans.x = (ans.x - 0.25) / 1.33;
     ans.p = stdnorm_pvalue(ans.x);
     ans.alpha = stdnorm_cdf(ans.x);    
     return ans;
