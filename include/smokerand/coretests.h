@@ -17,7 +17,7 @@
 typedef struct {
     unsigned int nbits_per_dim; ///< Number of bits per dimension.
     unsigned int ndims; ///< Number of dimensions.
-    unsigned int nsamples; ///< Number of samples.
+    unsigned long nsamples; ///< Number of samples.
     int get_lower; ///< 0/1 - use lower/higher part of PRNG output.
 } BSpaceNDOptions;
 

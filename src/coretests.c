@@ -290,7 +290,7 @@ TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
         opts->nsamples, n, mu);
 
     ans.x = 0;
-    for (size_t i = 0; i < opts->nsamples; i++) {
+    for (unsigned long i = 0; i < opts->nsamples; i++) {
         collisionover_make_tuples(opts, obj->gi, obj->state, u, n);
         // Find collisions by sorting the array
         radixsort64(u, n);
