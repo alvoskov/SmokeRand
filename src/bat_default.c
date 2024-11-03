@@ -291,5 +291,9 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf,
     const TestsBattery bat = {
         "default", tests
     };
-    TestsBattery_run(&bat, gen, intf, testid, nthreads);
+    if (gen != NULL) {
+        TestsBattery_run(&bat, gen, intf, testid, nthreads);
+    } else {
+        TestsBattery_print_info(&bat);
+    }
 }

@@ -31,6 +31,7 @@ add_library(smokerand_core
     src/entropy.c include/smokerand/entropy.h
     src/extratests.c include/smokerand/extratests.h
     src/lineardep.c include/smokerand/lineardep.h
+    src/fileio.c include/smokerand/fileio.h
     include/smokerand/cinterface.h
 )
 target_include_directories(smokerand_core PRIVATE include)

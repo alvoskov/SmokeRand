@@ -13,6 +13,7 @@
 #include "smokerand/bat_brief.h"
 #include "smokerand/bat_full.h"
 #include "smokerand/extratests.h"
+#include "smokerand/fileio.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -20,7 +21,7 @@
 #include <string.h>
 #include <float.h>
 
-#define SUM_BLOCK_SIZE 1024
+#define SUM_BLOCK_SIZE 32768
 
 /**
  * @brief Keeps PRNG speed measurements results.
@@ -239,25 +240,61 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
     return 0;
 }
 
-/**
- * @brief
- * @details
- * NOTE: PractRand also uses modifications of the test that works only with 1 or 8 lower bits.
- * And this modification is especially sensitive to SWB, SWBW, Mulberry32 etc. Probably they
- * see longer-range correlations
- */
-/*
-void battery_hamming(GeneratorInfo *gen, const CallerAPI *intf)
+
+int run_battery(const char *battery_name, GeneratorInfo *gi,
+    CallerAPI *intf, SmokeRandSettings *opts)
 {
-    void *state = gen->create(intf);    
-    GeneratorState obj = {.gi = gen, .state = state, .intf = intf};
-    HammingDc6Options opts = {.use_bits = use_bits_low1, .nsamples = 500*1000*1000};
-    hamming_dc6_test(&obj, &opts);
-    intf->free(obj.state);
+    if (!strcmp(battery_name, "default")) {
+        battery_default(gi, intf, opts->testid, opts->nthreads);
+    } else if (!strcmp(battery_name, "brief")) {
+        battery_brief(gi, intf, opts->testid, opts->nthreads);
+    } else if (!strcmp(battery_name, "full")) {
+        battery_full(gi, intf, opts->testid, opts->nthreads);
+    } else if (!strcmp(battery_name, "selftest")) {
+        battery_self_test(gi, intf);
+    } else if (!strcmp(battery_name, "speed")) {
+        battery_speed(gi, intf);
+    } else if (!strcmp(battery_name, "stdout")) {
+        GeneratorInfo_bits_to_file(gi, intf);
+    } else if (!strcmp(battery_name, "freq")) {
+        battery_blockfreq(gi, intf);
+    } else if (!strcmp(battery_name, "birthday")) {
+        battery_birthday(gi, intf);
+    } else if (!strcmp(battery_name, "ising")) {
+        battery_ising(gi, intf);
+    } else {
+        printf("Unknown battery %s\n", battery_name);
+        return 1;
+    }
+    return 0;
 }
-*/
 
+int print_battery_info(const char *battery_name)
+{
+    if (!strcmp(battery_name, "default")) {
+        battery_default(NULL, NULL, 0, 0);
+    } else if (!strcmp(battery_name, "brief")) {
+        battery_brief(NULL, NULL, 0, 0);
+    } else if (!strcmp(battery_name, "full")) {
+        battery_full(NULL, NULL, 0, 0);
+    } else {
+        printf("Information about battery %s is absent\n", battery_name);
+        return 1;
+    }
+    return 0;
+}
 
+void GeneratorInfo_print(const GeneratorInfo *gi, int to_stderr)
+{
+    if (to_stderr) {
+        fprintf(stderr, "Generator name:    %s\n", gi->name);
+        fprintf(stderr, "Output size, bits: %d\n", gi->nbits);
+    } else {
+        printf("Generator name:    %s\n", gi->name);
+        printf("Output size, bits: %d\n", gi->nbits);
+    }
+}
+                     
 int main(int argc, char *argv[]) 
 {
     if (argc < 3) {
@@ -269,59 +306,57 @@ int main(int argc, char *argv[])
     if (SmokeRandSettings_load(&opts, argc, argv)) {
         return 1;
     }
-    CallerAPI intf = (opts.nthreads == 1) ? CallerAPI_init() : CallerAPI_init_mthr();
     char *battery_name = argv[1];
     char *generator_lib = argv[2];
+    int is_stdin32 = !strcmp(generator_lib, "stdin32");
+    int is_stdin64 = !strcmp(generator_lib, "stdin64");
+    int is_stdout = !strcmp(battery_name, "stdout");
 
-    GeneratorModule mod = GeneratorModule_load(generator_lib);
-    if (!mod.valid) {
-        CallerAPI_free();
+    if (opts.nthreads > 1 && (is_stdin32 || is_stdin64)) {
+        fprintf(stderr, "Multithreading is not supported for stdin32/stdin64");
         return 1;
     }
 
-    printf("Seed generator self-test: %s\n",
-        xxtea_test() ? "PASSED" : "FAILED");
-
-    GeneratorInfo *gi = &mod.gen;
-    if (opts.reverse_bits) {
-        reversed_gen = reversed_generator_set(gi);
-        gi = &reversed_gen;
-        printf("All tests will be run with the reverse bits order\n");
+    if (!xxtea_test()) {
+        fprintf(stderr, "Seed generator self-test failed\n");
+        return 1;
     }
 
-    printf("Generator name:    %s\n", gi->name);
-    printf("Output size, bits: %d\n", gi->nbits);
-
-
-    if (!strcmp(battery_name, "default")) {
-        battery_default(gi, &intf, opts.testid, opts.nthreads);
-    } else if (!strcmp(battery_name, "brief")) {
-        battery_brief(gi, &intf, opts.testid, opts.nthreads);
-    } else if (!strcmp(battery_name, "full")) {
-        battery_full(gi, &intf, opts.testid, opts.nthreads);
-    } else if (!strcmp(battery_name, "selftest")) {
-        battery_self_test(gi, &intf);
-    } else if (!strcmp(battery_name, "speed")) {
-        battery_speed(gi, &intf);
-    } else if (!strcmp(battery_name, "stdout")) {
-        GeneratorInfo_bits_to_file(gi, &intf);
-    } else if (!strcmp(battery_name, "freq")) {
-        battery_blockfreq(gi, &intf);
-    } else if (!strcmp(battery_name, "birthday")) {
-        battery_birthday(gi, &intf);
-    } else if (!strcmp(battery_name, "ising")) {
-        battery_ising(gi, &intf);
-//    } else if (!strcmp(battery_name, "hamming")) {
-//        battery_hamming(gi, &intf);
+    if (!strcmp(generator_lib, "list")) {
+        return print_battery_info(battery_name);
+    }
+        
+    if (is_stdin32 || is_stdin64) {
+        CallerAPI intf = CallerAPI_init();
+        GeneratorInfo stdin_gi;
+        if (is_stdin32) {
+            stdin_gi = StdinCollector_get_info(stdin_collector_32bit);
+        } else {
+            stdin_gi = StdinCollector_get_info(stdin_collector_64bit);
+        }
+        GeneratorInfo_print(&stdin_gi, is_stdout);
+        int ans = run_battery(battery_name, &stdin_gi, &intf, &opts);
+        StdinCollector_print_report();
+        CallerAPI_free();
+        return ans;
     } else {
-        printf("Unknown battery %s\n", battery_name);
+        CallerAPI intf = (opts.nthreads == 1) ? CallerAPI_init() : CallerAPI_init_mthr();
+        GeneratorModule mod = GeneratorModule_load(generator_lib);
+        if (!mod.valid) {
+            CallerAPI_free();
+            return 1;
+        }
+        GeneratorInfo *gi = &mod.gen;
+        if (opts.reverse_bits) {
+            reversed_gen = reversed_generator_set(gi);
+            gi = &reversed_gen;
+            printf("All tests will be run with the reverse bits order\n");
+        }
+        GeneratorInfo_print(gi, is_stdout);
+        int ans = run_battery(battery_name, gi, &intf, &opts);
         GeneratorModule_unload(&mod);
         CallerAPI_free();
-        return 1;
+        return ans;
     }
-
-    GeneratorModule_unload(&mod);
-    CallerAPI_free();
-    return 0;
 }
            

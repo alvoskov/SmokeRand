@@ -147,6 +147,7 @@ typedef struct {
 } TestsBattery;
 
 size_t TestsBattery_ntests(const TestsBattery *obj);
+void TestsBattery_print_info(const TestsBattery *obj);
 void TestsBattery_run(const TestsBattery *bat,
     const GeneratorInfo *gen, const CallerAPI *intf,
     unsigned int testid, unsigned int nthreads);

@@ -191,5 +191,9 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
     const TestsBattery bat = {
         "brief", tests
     };
-    TestsBattery_run(&bat, gen, intf, testid, nthreads);
+    if (gen != NULL) {
+        TestsBattery_run(&bat, gen, intf, testid, nthreads);
+    } else {
+        TestsBattery_print_info(&bat);
+    }
 }

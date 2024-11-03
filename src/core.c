@@ -697,16 +697,22 @@ static void snprintf_pvalue(char *buf, size_t len, double p, double alpha)
     }
 }
 
-static void TestResults_print_report(const TestResults *results,
-    size_t ntests, time_t nseconds_total)
+static void print_bar()
 {
-    printf("  %3s %-20s %12s %14s %-15s %4s\n",
-        "#", "Test name", "xemp", "p", "Interpretation", "Thr#");
     for (int i = 0; i < 79; i++) {
         printf("-");
     }
     printf("\n");
+}
+
+
+static void TestResults_print_report(const TestResults *results,
+    size_t ntests, time_t nseconds_total)
+{
     unsigned int npassed = 0, nwarnings = 0, nfailed = 0; 
+    printf("  %3s %-20s %12s %14s %-15s %4s\n",
+        "#", "Test name", "xemp", "p", "Interpretation", "Thr#");
+    print_bar();
     for (size_t i = 0; i < ntests; i++) {
         char pvalue_txt[32];
         snprintf_pvalue(pvalue_txt, 32, results[i].p, results[i].alpha);
@@ -723,10 +729,7 @@ static void TestResults_print_report(const TestResults *results,
             nfailed++; break;
         }
     }
-    for (int i = 0; i < 79; i++) {
-        printf("-");
-    }
-    printf("\n");
+    print_bar();
     printf("Passed:       %u\n", npassed);
     printf("Suspicious:   %u\n", nwarnings);
     printf("Failed:       %u\n", nfailed);
@@ -734,6 +737,32 @@ static void TestResults_print_report(const TestResults *results,
     printf("\n\n");
 }
 
+/**
+ * @brief Prints a summary about the test battery to stdout.
+ */
+void TestsBattery_print_info(const TestsBattery *obj)
+{
+    size_t ntests = TestsBattery_ntests(obj);
+    unsigned long nseconds_total = 0;
+    printf("===== Battery '%s' summary =====\n", obj->name);
+    printf("  %3s %-20s %-20s\n",
+        "#", "Test name", "Estimated time, sec");
+    print_bar();
+    for (size_t i = 0; i < ntests; i++) {
+        printf("  %3d %-20s %6u\n",
+            (int) i + 1, obj->tests[i].name, obj->tests[i].nseconds);
+        nseconds_total += obj->tests[i].nseconds;
+    }
+    print_bar();
+    printf("Estimated elapsed time (one-threaded): ");
+    print_elapsed_time(nseconds_total);
+    printf("\n\n");
+}
+
+/**
+ * @brief Runs the given battery of the statistical test for the given
+ * pseudorandom number generator.
+ */
 void TestsBattery_run(const TestsBattery *bat,
     const GeneratorInfo *gen, const CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)

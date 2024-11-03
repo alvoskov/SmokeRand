@@ -319,5 +319,9 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
     const TestsBattery bat = {
         "full", tests
     };
-    TestsBattery_run(&bat, gen, intf, testid, nthreads);
+    if (gen != NULL) {
+        TestsBattery_run(&bat, gen, intf, testid, nthreads);
+    } else {
+        TestsBattery_print_info(&bat);
+    }
 }
