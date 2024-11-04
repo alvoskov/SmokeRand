@@ -62,4 +62,4 @@ void *create(const CallerAPI *intf)
     return obj;
 }
 
-MAKE_UINT32_PRNG("SFC32", NULL);
+MAKE_UINT32_PRNG("SFC32", NULL)

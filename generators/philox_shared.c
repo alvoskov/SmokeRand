@@ -187,4 +187,4 @@ static void *create(const CallerAPI *intf)
     return (void *) obj;
 }
 
-MAKE_UINT64_PRNG("Philox4x64x10", run_self_test);
+MAKE_UINT64_PRNG("Philox4x64x10", run_self_test)
