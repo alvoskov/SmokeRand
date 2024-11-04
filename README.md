@@ -68,15 +68,17 @@ be divided into several groups:
   philox32, threefry.
 - Lagged Fibonacci: alfib, alfib_mod, mlfib17_5, r1279.
 - Linear congruental: lcg64, lcg64prime, lcg96, lcg128, lcg69069, minstd,
-  mwc64, mwc64x, mwc128, mwc128x, randu, seizgin63.
-- Linear congruental with output scrambling: mulberry32, rrmxmx, splitmix32,
-  sqxor, sqxor32, wyrand.
+  mwc64, mwc128, randu, seizgin63.
+- Linear congruental with output scrambling: mwc64x, mwc128x, pcg32, pcg64.
+- "Weyl sequence" (LCG with a=1) with output scrambling: mulberry32, rrmxmx,
+  splitmix, splitmix32, sqxor, sqxor32, wyrand.
 - Subtract with borrow: swb, swblux, swbw.
-- LSFR without scrambling: shr3, xsh, lfsr113, lfsr258, mt19937
-- LSFR with scrambling: xoroshiro128p, xoroshiro128pp, xoroshiro1024st, xorwow.
+- LSFR without scrambling: shr3, xsh, xorshift128, lfsr113, lfsr258, well1024a.
+- LSFR with scrambling: xorshift128p, xoroshiro128p, xoroshiro128pp,
+  xoroshiro1024st, xorwow.
 - GSFR: mt19937, tinymt32, tinymt64.
 - Combined generators: kiss93, kiss99, kiss64.
-- Other: coveyou64, sfc32, sfc64.
+- Other: coveyou64, mrg32k3a, sfc32, sfc64.
 
 
  Algorithm         | Description
@@ -107,8 +109,8 @@ be divided into several groups:
  mwc128x           | MWC128X: similar to MWC64X but x and c are 64-bit
  pcg32             | Permuted Congruental Generator (32-bit version, 64-bit state)
  pcg64             | Permuted Congruental Generator (64-bit version, 64-bit state)
- philox            |
- philox32          |
+ philox            | Philox4x64x10 counter-based generator.
+ philox32          | Philox4x32x10 counter-based generator.
  randu             | \f$ LCG(2^{32},65539,1) \f$, returns whole 32 bits
  r1279             | \f$ LFib(XOR, 2^{32}, 1279, 1063) \f$ generator.
  rc4               | RC4 obsolete CSPRNG (doesn't pass PractRand)
@@ -126,8 +128,10 @@ be divided into several groups:
  swbw              | Modification of SWB combined with 'discrete Weyl sequence'
  tinymt32          | "Tiny Mersenne Twister": 32-bit version
  tinymt64          | "Tiny Mersenne Twister": 64-bit version
- threefry          |
+ threefry          | Threefry4x64x20 counter-based generator
  well1024a         | WELL1024a: Well equidistributed long-period linear
+ xorshift128       | xorshift128 LFSR generator by G.Marsaglia
+ xorshift128p      | Based on xorshift128, uses an output scrambler.
  xoroshiro128p     |
  xoroshiro128pp    |
  xoroshiro1024st   |
@@ -204,6 +208,8 @@ The birthday test generates input values using the next algorithm:
  matrixrank_8192      | 8192   | 32/64
  matrixrank_8192_low8 | 8192   | 8
 
+## Hamming weights based "DC6" test
+
 
 
 # Tests results
@@ -222,23 +228,23 @@ The birthday test generates input values using the next algorithm:
  lcg64             | u32    | 5     | 7       | 10   | 0.40 | N/A    | Small   | 16 MiB
  lcg64prime        | u64    | 1     | 1       | 1    | 1.5  |        |         | >= 32 TiB
  lcg96             | u32    | +     | +       | +    | 0.78 | N/A    |         | 32 GiB
- lcg128            | u64    | +     | +       |      | 0.35 |        |         | 64 GiB
+ lcg128            | u64    | +     | +       | +    | 0.35 |        |         | 64 GiB
  lcg69069          | u32    | 16    | 32      | 35   | 0.38 | N/A    | -       | 2 KiB
  lfsr113           | u32    | 3     | 5       | 7    | 1.1  | N/A    |         | 32 KiB 
  lfsr258           | u64    | 3     | 5       | 7    | 0.75 |        |         | 1 MiB
- minstd            | u32    | 17    | 32      |      | 2.4  | N/A    | -       | 1 KiB
- mlfib17_5         | u32    | +     | +       |      | 0.48 | N/A    | +       | >= 1 TiB
+ minstd            | u32    | 17    | 32      | 35   | 2.4  | N/A    | -       | 1 KiB
+ mlfib17_5         | u32    | +     | +       | +    | 0.48 | N/A    | +       | >= 1 TiB
  mt19937           | u32    | 3     | 3       | 3    | 0.91 | N/A    | Small   | 128 GiB
  mrg32k3a          | u32    | +     | +       | +    | 2.5  | N/A    |         | >= 4 TiB
- mulberry32        | u32    | 1     | 1       |      | 0.51 | N/A    |         | 512 MiB
+ mulberry32        | u32    | 1     | 1       | 2    | 0.51 | N/A    |         | 512 MiB
  mwc64             | u32    | 1     | 2       | 4    | 0.37 | N/A    | Small   | 1 TiB
  mwc64x            | u32    | +     | +       | +    | 0.53 | N/A    | +       | >= 8 TiB
- mwc128            | u64    | +     | +       |      | 0.30 |        | +       | >= 2 TiB
+ mwc128            | u64    | +     | +       | +    | 0.30 |        | +       | >= 2 TiB
  mwc128x           | u64    | +     | +       |      | 0.30 |        | +       | >= 8 TiB
  pcg32             | u32    | +     | +       |      | 0.44 | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +     | +       |      | 0.28 |        | +       | >= 2 TiB
- philox            | u64    | +     | +       |      | 0.85 |        | +       | >= 2 TiB
- philox32          | u32    | +     | +       |      | 2.7  | N/A    | +       | >= 2 TiB
+ philox            | u64    | +     | +       | +    | 0.85 |        | +       | >= 2 TiB
+ philox32          | u32    | +     | +       | +    | 2.7  | N/A    | +       | >= 2 TiB
  randu             | u32    | 18    | 33      | 36   | 0.41 | N/A    | -       | 1 KiB
  r1279             | u32    | 4     | 6       | 9    | 0.47 | N/A    |         | 64 MiB
  rc4               | u32    | +     | +       |      | 6.0  | N/A    | +       | 512 GiB
@@ -247,7 +253,7 @@ The birthday test generates input values using the next algorithm:
  speck128          | u64    | +     | +       | +    | 3.1  |        |         | >= 2 TiB
  speck128_avx      | u64    | +     | +       | +    | 0.65 |        |         |
  splitmix          | u64    | +     | +       |      | 0.19 |        |         | >= 2 TiB
- splitmix32        | u32    | 1     | 1       |      | 0.25 | N/A    | +       | 1 GiB
+ splitmix32        | u32    | 1     | 1       | 2    | 0.25 | N/A    | +       | 1 GiB
  sqxor             | u64    | +     | +       |      | 0.13 | +      |         | >= 2 TiB
  sqxor32           | u32    | 1     | 1       |      | 0.20 | N/A    | Small   | 16 GiB
  sfc32             | u32    | +     | +       |      | 0.24 | N/A    |         |
@@ -258,13 +264,13 @@ The birthday test generates input values using the next algorithm:
  swbw              | u32    | 1     | 1       | 1    | 2.8  | N/A    |         | 4 GiB
  tinymt32          | u32    | 2     | 4       | 6    | 1.5  | N/A    |         | 4 GiB
  tinymt64          | u64    | 1     | 2       | 4    | 2.7  |        |         | 32 GiB
- threefry          | u64    | +     | +       |      | 1.0  |        | +       | >= 1 TiB
+ threefry          | u64    | +     | +       | +    | 1.0  |        | +       | >= 1 TiB
  well1024a         | u32    | 3     | 5       | 7    | 1.0  | N/A    | Small   | 64 MiB
  wyrand            | u64    | +     | +       |      | 0.08 | +      |         | >= 1 TiB
  xorshift128       | u32    | 4     | 6       | 8    | 0.41 |        |         | 128 KiB
- xorshift128p      | u64    | 1     | 2       |      | 0.21 |        |         | 32 GiB
+ xorshift128p      | u64    | 1     | 2       | 3    | 0.21 |        |         | 32 GiB
  xoroshiro128p     | u64    | 1     | 2       | 3    | 0.16 |        |         | 16 MiB
- xoroshiro128pp    | u64    | +     | +       |      | 0.20 |        |         |
+ xoroshiro128pp    | u64    | +     | +       | +    | 0.20 |        |         |
  xoroshiro1024st   | u64    | 1     | 1       | 2    | 0.33 |        |         | 128 GiB
  xorwow            | u32    | 3     | 7       | 9    | 0.52 | N/A    | Small   | 128 KiB
  xsh               | u64    | 7     | 10      | 14   | 0.43 |        | -       | 32 KiB
