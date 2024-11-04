@@ -37,4 +37,4 @@ static void *create(const CallerAPI *intf)
     return (void *) obj;
 }
 
-MAKE_UINT64_PRNG("WyRand", NULL);
+MAKE_UINT64_PRNG("WyRand", NULL)

@@ -40,7 +40,7 @@ EXE_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXE_NAMES)))
 # Generators
 GEN_SOURCES = $(wildcard generators/*.c)
 GEN_OBJFILES = $(patsubst %.c,%.o,$(subst generators/,$(BINDIR)/generators/obj/,$(GEN_SOURCES)))
-GEN_SHARED = $(patsubst %.c,%$(SO),$(subst generators/,$(BINDIR)/generators/,$(GEN_SOURCES)))
+GEN_SHARED = $(patsubst %.c,%$(SO),$(subst generators/,$(BINDIR)/generators/lib,$(GEN_SOURCES)))
 GEN_BINDIR = $(BINDIR)/generators
 
 all: $(CORE_LIB) $(addprefix $(BINDIR)/, $(addsuffix $(EXE),$(EXE_NAMES))) generators
@@ -64,10 +64,10 @@ $(LIB_OBJFILES) $(BAT_OBJFILES) $(EXE_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.c $
 
 generators: $(GEN_SHARED)
 
-$(GEN_BINDIR)/crand_shared$(SO): $(GEN_BINDIR)/obj/crand_shared.o
+$(GEN_BINDIR)/libcrand_shared$(SO): $(GEN_BINDIR)/obj/crand_shared.o
 	$(CC) -shared $< -s $(GEN_LFLAGS) -o $@
 
-$(GEN_BINDIR)/%$(SO): $(GEN_BINDIR)/obj/%.o
+$(GEN_BINDIR)/lib%$(SO): $(GEN_BINDIR)/obj/%.o
 	$(CC) -shared $(GEN_CFLAGS) $< -s $(GEN_LFLAGS) -o $@
 
 $(GEN_OBJFILES): $(BINDIR)/generators/obj/%.o : generators/%.c $(INCLUDEDIR)/cinterface.h
@@ -79,8 +79,8 @@ ifeq ($(OS), Windows_NT)
 	del $(OBJDIR)\*.o /q
 	del $(LIBDIR)\*.a /q
 	del $(BINDIR)\generators\*.dll /q
-	del $(BINDIR)\generators\*.a /q
 	del $(BINDIR)\generators\obj\*.o
+	del $(BINDIR)\generators\*.a /q
 else
 	rm $(BINDIR)/smokerand
 	rm $(BINDIR)/calibrate_dc6

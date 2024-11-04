@@ -71,4 +71,4 @@ static void *create(const CallerAPI *intf)
     return (void *) obj;
 }
 
-MAKE_UINT32_PRNG("ALFib_mod", NULL);
+MAKE_UINT32_PRNG("ALFib_mod", NULL)
