@@ -242,6 +242,83 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     return ans;
 }
 
+/**
+ * @brief A specialized version of birthday spacings test designed for
+ * detection of truncated 128-bit and 96-bit LCGs.
+ * @details It is a modification of 8-dimensional 8-bit (lower bits) birthday
+ * spacings test. But only every 1 of `step` values are used for construction
+ * of tuples. The `step` value should be power of 2. Such decimation reduces
+ * an effective period of LCG and allows to detect anomalies in 96-bit
+ * and 128-bit LCGs with module \f$ 2^{96} \f$ or \f$ 2^{128} \f$. Not
+ * sensitive to LCGs with prime modulus.
+ *
+ * An idea of the test was partially inspired by the TMFn test from
+ * PractRand 0.94 test suite by Chris Doty-Humphrey. The TMFn test also uses
+ * decimation and takes only 1 or 2 64-bit values at the beginning of blocks
+ * consisting of 4096 bytes. But they are analyzed by some mysterous bitwise
+ * operations and g-test, not by means of birthday spacings.
+ *
+ * Both TMFn and decimated birthday spacings test have comparable sensitivity
+ * and require about 128 GiB of data to detect 128-bit LCG.
+ */
+TestResults bspace8_8d_decimated_test(GeneratorState *obj, unsigned int step)
+{
+    TestResults ans;
+    const unsigned int nbits_total = 64;
+    size_t len = pow(2.0, (nbits_total + 4.0) / 3.0);
+    double lambda = pow(len, 3.0) / (4 * pow(2.0, nbits_total));
+    // Show information about the test
+    obj->intf->printf("Birthday spacings test with decimation\n");
+    obj->intf->printf("  ndims = 8; nbits_per_dim = 8; step = %u\n", step);
+    obj->intf->printf("  nsamples = 1; len = %lld, lambda = %g\n", len, lambda);
+    // Run the test
+    uint64_t *u = calloc(len, sizeof(uint64_t));
+    uint64_t *u_high = calloc(len, sizeof(uint64_t));
+    if (u == NULL || u_high == NULL) {
+        fprintf(stderr, "***** bspace8_8d_decimated: not enough memory *****\n");
+        free(u); free(u_high);
+        exit(1);
+    }
+
+    for (size_t i = 0; i < len; i++) {
+        for (int j = 0; j < 8; j++) {
+            uint64_t x = obj->gi->get_bits(obj->state);
+            // Take lower 8 bits
+            u[i] <<= 8;
+            u[i] |=  x & 0xFF;
+            // Take higher 8 bits
+            u_high[i] <<= 8;
+            u_high[i] |= reverse_bits8(x >> (obj->gi->nbits - 8));
+            // Decimation
+            for (unsigned int k = 0; k < step - 1; k++) {
+                (void) obj->gi->get_bits(obj->state);
+            }
+        }
+    }
+    // Compute number of duplicates and p-values for lower bits
+    ans.x = (double) bspace_get_ndups64(u, len);
+    ans.p = poisson_pvalue(ans.x, lambda);
+    ans.alpha = poisson_cdf(ans.alpha, lambda);
+    obj->intf->printf("  Lower bits: x = %.0f; p = %g\n", ans.x, ans.p);
+    // Compute the same values for higher bits
+    double x_high = (double) bspace_get_ndups64(u_high, len);
+    double p_high = poisson_pvalue(x_high, lambda);
+    double alpha_high = poisson_cdf(x_high, lambda);
+    obj->intf->printf("  Higher bits: x = %.0f; p = %g\n", x_high, p_high);
+    // Select the worst p-value
+    if (p_high < 1e-10 && p_high < ans.p) {
+        obj->intf->printf("  Problems with higher bits are detected\n");
+        ans.x = x_high;
+        ans.p = p_high;
+        ans.alpha = alpha_high;
+    }
+    obj->intf->printf("  x = %.0f; p = %g\n", ans.x, ans.p);
+    obj->intf->printf("\n");
+    free(u);
+    free(u_high);
+    return ans;
+}
+
 /////////////////////////////////////////////
 ///// CollisionOver test implementation /////
 /////////////////////////////////////////////
@@ -1054,8 +1131,6 @@ TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts)
     TestResults res = HammingTuplesTable_get_results(&table);
     obj->intf->printf("   Number of bins after reduction: %llu\n",
         (unsigned long long) table.len);
-    obj->intf->printf("   Number of bins from Rice rule: %g\n",
-        2.0 * pow(ntuples, 1.0/3.0));
     obj->intf->printf("  zemp = %g, p = %g\n", res.x, res.p);
     obj->intf->printf("\n");
     HammingTuplesTable_free(&table);

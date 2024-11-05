@@ -15,20 +15,32 @@ from TestU01 but has several important differences:
   than 5 minutes and `full` in less than 1 hour.
 - Multithreading support by means of POSIX threads.
 
+Despite relatively small amount of tests SmokeRand can detect flaws in some
+PRNG that pass BigCrush or PractRand:
+
+- 64-bit LCG with prime modulus: passes PractRand, some blips on BigCrush.
+- 96-bit and 128-bit LCGs by modulo 2^{k} and truncation of lower 64 bits.
+  They pass BigCrush but detected by PractRand.
+- SWBW: detected by PractRand but not by BigCrush.
+- Uniformly distributed 64-bit generators with 64-bit state such as
+  SplitMix, PCG64/64, rrmxmx: detected by an extra "birthday paradox" battery.
+- RC4 obsolete CSPRNG: detected by PractRand but not by BigCrush. In SmokeRand
+  extra "freq" battery is required to detect it.
+
 Existing solutions:
 
 1. TestU01 https://doi.org/10.1145/3447773
-2. PractRand
+2. PractRand https://pracrand.sourceforge.net/
 3. Ent https://www.fourmilab.ch/random/
 4. Dieharder https://webhome.phy.duke.edu/~rgb/General/dieharder.php
-5. gjrand
+5. gjrand https://gjrand.sourceforge.net/
 
 Requirements:
 
 - C99 compiler, some PRNGs will require 128-bit integers either through
   `__uint128_t` type (GCC, Clang) or `_umul128`/`_addcarry_u64` intrinsics
   (Microsoft Visual C)
-- GNU make is required, CMake is recommended.
+- GNU make or CMake.
 - pthreads (POSIX threads) library.
 - 64-bit CPU, x86-64 with RDRAND and AVX2 support is recommended.
 - 4GiB of RAM minimal, 16GiB recommended.
@@ -38,11 +50,12 @@ Implemented tests:
 1. Monobit frequency test.
 2. Frequency test for bytes and 16-bit chunks.
 3. Birthday spacings test.
-4. Gap test.
-5. Matrix rank test.
-6. Linear complexity test.
-7. CollisionOver test.
-8. Hamming weights based DC6 test from PractRand.
+4. Birthday spacings test with decimation.
+5. Gap test.
+6. Matrix rank test.
+7. Linear complexity test.
+8. CollisionOver test.
+9. Hamming weights based DC6 test from PractRand.
 
 Extra tests:
 
@@ -151,7 +164,7 @@ Three batteries are implemented in SmokeRand:
  Battery | Number of tests | Bytes (32-bit PRNG) | Bytes (64-bit PRNG)
 ---------|-----------------|---------------------|---------------------
  brief   | 19              | 2^35                | 2^36
- default | 34              | 2^36                | 2^37
+ default | 34              | 2^37                | 2^38
  full    | 37              | 2^40                | 2^41
 
 
@@ -179,6 +192,8 @@ The birthday test generates input values using the next algorithm:
  bspace21_3d | 21    | 3    | 64-bit MWC generators.
  bspace16_4d | 16    | 4    | 
  bspace8_8d  | 8     | 8    | LCGs with m = 2^{64}
+
+## Birthday spacings test with decimation
 
 ## Collision over test
 
@@ -220,23 +235,24 @@ The birthday test generates input values using the next algorithm:
  alfib_mod         | u32    | +     | +       | +    | 0.50 | N/A    |         | 1 TiB
  chacha            | u32    | +     | +       |      | 2.0  | N/A    | +       |
  chacha_avx        | u32    | +     | +       | +    | 0.7  | N/A    | +       |
- coveyou64         | u32    | 2     | 3       | 3    | 0.62 | N/A    | Small   | 256 KiB
+ coveyou64         | u32    | 2     | 4       | 4    | 0.62 | N/A    | Small   | 256 KiB
  isaac64           | u64    | +     | +       | +    | 0.75 |        | +       | >= 1 TiB
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | N/A    | Small   | 1 MiB
  kiss99            | u32    | +     | +       | +    | 1.0  | N/A    | +       | >= 8 TiB
  kiss64            | u64    | +     | +       | +    | 0.53 |        | +       |
- lcg64             | u32    | 5     | 7       | 10   | 0.40 | N/A    | Small   | 16 MiB
+ lcg64             | u32    | 5     | 8       | 11   | 0.40 | N/A    | Small   | 16 MiB
  lcg64prime        | u64    | 1     | 1       | 1    | 1.5  |        |         | >= 32 TiB
- lcg96             | u32    | +     | +       | +    | 0.78 | N/A    |         | 32 GiB
- lcg128            | u64    | +     | +       | +    | 0.35 |        |         | 64 GiB
- lcg69069          | u32    | 16    | 32      | 35   | 0.38 | N/A    | -       | 2 KiB
+ lcg96             | u32    | +     | 1       | 1    | 0.78 | N/A    |         | 32 GiB
+ lcg128            | u64    | +     | 1       | 1    | 0.35 |        |         | 64 GiB
+ lcg128_full       | u64    | +     | 1       | 1    | 0.42 |        |         | 64 GiB
+ lcg69069          | u32    | 16    | 33      | 36   | 0.38 | N/A    | -       | 2 KiB
  lfsr113           | u32    | 3     | 5       | 7    | 1.1  | N/A    |         | 32 KiB 
  lfsr258           | u64    | 3     | 5       | 7    | 0.75 |        |         | 1 MiB
- minstd            | u32    | 17    | 32      | 35   | 2.4  | N/A    | -       | 1 KiB
+ minstd            | u32    | 17    | 33      | 36   | 2.4  | N/A    | -       | 1 KiB
  mlfib17_5         | u32    | +     | +       | +    | 0.48 | N/A    | +       | >= 1 TiB
  mt19937           | u32    | 3     | 3       | 3    | 0.91 | N/A    | Small   | 128 GiB
  mrg32k3a          | u32    | +     | +       | +    | 2.5  | N/A    |         | >= 4 TiB
- mulberry32        | u32    | 1     | 1       | 2    | 0.51 | N/A    |         | 512 MiB
+ mulberry32        | u32    | 1     | 2       | 3    | 0.51 | N/A    |         | 512 MiB
  mwc64             | u32    | 1     | 2       | 4    | 0.37 | N/A    | Small   | 1 TiB
  mwc64x            | u32    | +     | +       | +    | 0.53 | N/A    | +       | >= 8 TiB
  mwc128            | u64    | +     | +       | +    | 0.30 |        | +       | >= 2 TiB
@@ -245,20 +261,20 @@ The birthday test generates input values using the next algorithm:
  pcg64             | u64    | +     | +       |      | 0.28 |        | +       | >= 2 TiB
  philox            | u64    | +     | +       | +    | 0.85 |        | +       | >= 2 TiB
  philox32          | u32    | +     | +       | +    | 2.7  | N/A    | +       | >= 2 TiB
- randu             | u32    | 18    | 33      | 36   | 0.41 | N/A    | -       | 1 KiB
+ randu             | u32    | 18    | 34      | 37   | 0.41 | N/A    | -       | 1 KiB
  r1279             | u32    | 4     | 6       | 9    | 0.47 | N/A    |         | 64 MiB
  rc4               | u32    | +     | +       |      | 6.0  | N/A    | +       | 512 GiB
  rrmxmx            | u64    | +     | +       |      | 0.14 | -      |         | >= 2 TiB
- seigzin63         | u32    | +     | +       | 3    | 3.0  | N/A    |         | >= 16 TiB
+ sezgin63          | u32    | +     | +       | 3    | 3.0  | N/A    |         | >= 16 TiB
  speck128          | u64    | +     | +       | +    | 3.1  |        |         | >= 2 TiB
  speck128_avx      | u64    | +     | +       | +    | 0.65 |        |         |
  splitmix          | u64    | +     | +       |      | 0.19 |        |         | >= 2 TiB
- splitmix32        | u32    | 1     | 1       | 2    | 0.25 | N/A    | +       | 1 GiB
+ splitmix32        | u32    | 1     | 2       | 3    | 0.25 | N/A    | +       | 1 GiB
  sqxor             | u64    | +     | +       |      | 0.13 | +      |         | >= 2 TiB
- sqxor32           | u32    | 1     | 1       |      | 0.20 | N/A    | Small   | 16 GiB
+ sqxor32           | u32    | 1     | 2       |      | 0.20 | N/A    | Small   | 16 GiB
  sfc32             | u32    | +     | +       |      | 0.24 | N/A    |         |
  sfc64             | u64    | +     | +       | +    | 0.10 | +      | +       | >= 1 TiB
- shr3              | u32    | 14    | 29      | 32   | 0.76 | N/A    | -       | 32 KiB
+ shr3              | u32    | 14    | 30      | 33   | 0.76 | N/A    | -       | 32 KiB
  swb               | u32    | 4     | 4       | 5    | 2.7  | N/A    |         | 128 MiB
  swblux            | u32    | +     | +       | +    | 6.3  | N/A    |         | 4 TiB
  swbw              | u32    | 1     | 1       | 1    | 2.8  | N/A    |         | 4 GiB
@@ -266,8 +282,8 @@ The birthday test generates input values using the next algorithm:
  tinymt64          | u64    | 1     | 2       | 4    | 2.7  |        |         | 32 GiB
  threefry          | u64    | +     | +       | +    | 1.0  |        | +       | >= 1 TiB
  well1024a         | u32    | 3     | 5       | 7    | 1.0  | N/A    | Small   | 64 MiB
- wyrand            | u64    | +     | +       |      | 0.08 | +      |         | >= 1 TiB
- xorshift128       | u32    | 4     | 6       | 8    | 0.41 |        |         | 128 KiB
+ wyrand            | u64    | +     | +       | +    | 0.08 | +      |         | >= 1 TiB
+ xorshift128       | u32    | 4     | 6       | 8    | 0.41 | N/A    |         | 128 KiB
  xorshift128p      | u64    | 1     | 2       | 3    | 0.21 |        |         | 32 GiB
  xoroshiro128p     | u64    | 1     | 2       | 3    | 0.16 |        |         | 16 MiB
  xoroshiro128pp    | u64    | +     | +       | +    | 0.20 |        |         |

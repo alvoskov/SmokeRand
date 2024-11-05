@@ -350,7 +350,7 @@ int main(int argc, char *argv[])
         if (opts.reverse_bits) {
             reversed_gen = reversed_generator_set(gi);
             gi = &reversed_gen;
-            printf("All tests will be run with the reverse bits order\n");
+            fprintf(stderr, "All tests will be run with the reverse bits order\n");
         }
         GeneratorInfo_print(gi, is_stdout);
         int ans = run_battery(battery_name, gi, &intf, &opts);
