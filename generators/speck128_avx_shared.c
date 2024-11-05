@@ -88,7 +88,7 @@ static inline void round_avx(__m256i *x, __m256i *y, __m256i *kv)
 /**
  * @brief Round function for key schedule generation (scalar version).
  */
-static inline void round_scalar(uint64_t *x, uint64_t *y, uint64_t k)
+static inline void round_scalar(uint64_t *x, uint64_t *y, const uint64_t k)
 {
     *x = rotr(*x, 8);
     *x += *y;

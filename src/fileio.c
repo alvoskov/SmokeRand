@@ -1,9 +1,17 @@
+/**
+ * @file fileio.c
+ * @brief Implementation of PRNG based on reading binary data from stdin.
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/fileio.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
-#define STDIN_COLLECTOR_BUFFER_SIZE 256
+#define STDIN_COLLECTOR_BUFFER_SIZE 1024
 
 static unsigned long long nbytes_total = 0;
 
@@ -22,16 +30,6 @@ static void StdinCollector_fill_buffer(StdinCollector *obj)
         fprintf(stderr, "Reading from stdin failed");
         exit(1);
     }
-/*
-    for (size_t i = 0; i < STDIN_COLLECTOR_BUFFER_SIZE; i++) {
-        if (obj->buffer[i] >= 32) {
-            fprintf(stderr, "%c ", obj->buffer[i]);
-        } else {
-            fprintf(stderr, ".");
-        }
-    }
-    fprintf(stderr, "\n");
-*/
 }
 
 static void *StdinCollector_create(const CallerAPI *intf)

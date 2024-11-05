@@ -18,9 +18,9 @@
 #include <time.h>
 #include <pthread.h>
 
-/////////////////////////////
-///// Statistical tests /////
-/////////////////////////////
+/////////////////////////////////////////////////
+///// Birthday spacings test implementation /////
+/////////////////////////////////////////////////
 
 
 /**
@@ -186,6 +186,30 @@ static size_t bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 
 /**
  * @brief n-dimensional birthday spacings test.
+ * @details An implementation of classical N-dimensional birthday spacings test
+ * suggested by G. Marsaglia. The number of duplicates in spacings obeys
+ * Poisson distribution with the next mathematical expectance:
+ *
+ * \f[
+ * \lambda = \frac{n^3}{4m}
+ * \f]
+ *
+ * where \f$n\f$ is the number of points in the sample and \f$m\f$ is the
+ * number of "birthdays" (number of possible values per point, if each point
+ * is encoded by \f$ k \f$ bits - then \f$ m = 2^k \f$.
+ *
+ * The \f$n\f$ value is automatically selected to provide \f$ \lambda = 4\f$,
+ * an optimal parameter for Poisson distribution.
+ *
+ * In the case of 1-dimensional test one point is made from 1 pseudorandom
+ * value, in the case of N-dimensional test -- from lower or higher bits of 
+ * N points. These tuples are NOT OVERLAPPING!
+ *
+ * References:
+ *
+ * 1. Marsaglia G., Tsang W. W. Some Difficult-to-pass Tests of Randomness
+ *    // Journal of Statistical Software. 2002. V. 7. N. 3. P.1-9.
+ *    https://doi.org/10.18637/jss.v007.i03
  */
 TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
@@ -218,6 +242,9 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     return ans;
 }
 
+/////////////////////////////////////////////
+///// CollisionOver test implementation /////
+/////////////////////////////////////////////
 
 /**
  * @brief Make overlapping tuples (points in n-dimensional space) for
@@ -268,6 +295,24 @@ static inline void collisionover_make_tuples(const BSpaceNDOptions *opts,
 /**
  * @brief "CollisionOver" modification of "Monkey test". The algorithm was
  * suggested by developers of TestU01.
+ * @details Number of collision obeys the Poisson distribution with the next
+ * mathematical expectance:
+ *
+ * \f[
+ * \mu = d^t \left(\lambda - 1 + e^{-\lambda} \right)
+ * \f]
+ *
+ * where \f$d\f$ is number of states per dimensions, \f$t\f$ is the number
+ * of dimensions and \f$\lambda\f$ is so-called "density":
+ *
+ * \f[
+ * \lambda = \frac{n - t + 1}{d^t}
+ * \f]
+ *
+ * where \f$n\f$ is the number of points in the sample. The formula are correct
+ * only when \f$ n \ll d^t \f$.
+ *
+ * The formula are taken from the TestU01 user manual.
  */
 TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
@@ -286,8 +331,8 @@ TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     obj->intf->printf("CollisionOver test\n");
     obj->intf->printf("  ndims = %d; nbits_per_dim = %d; get_lower = %d\n",
         opts->ndims, opts->nbits_per_dim, opts->get_lower);
-    obj->intf->printf("  nsamples = %lld; len = %lld, mu = %g\n",
-        opts->nsamples, n, mu);
+    obj->intf->printf("  nsamples = %lld; len = %lld, mu = %g * %d\n",
+        opts->nsamples, n, mu, (int) opts->nsamples);
 
     ans.x = 0;
     for (unsigned long i = 0; i < opts->nsamples; i++) {
@@ -309,12 +354,16 @@ TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     ans.p = poisson_pvalue(ans.x, mu * opts->nsamples);
     ans.alpha = poisson_cdf(ans.x, mu * opts->nsamples);
     // Frequency table
-    double Ei = exp(-lambda) * nstates * opts->nsamples;
+    double Ei = exp(-lambda) * nstates;
+    obj->intf->printf("  Frequencies table (average per sample)\n");
+    obj->intf->printf(" -----------------------------------------\n");
     obj->intf->printf("  %5s %16s %16s\n", "Freq", "Oi", "Ei");
     for (int i = 0; i < 4; i++) {
-        obj->intf->printf("  %5d %16lld %16.1f\n", i, Oi[i], Ei);
+        uint64_t Oi_normed = (i == 0) ? Oi[i] : Oi[i] / opts->nsamples;
+        obj->intf->printf("  %5d %16lld %16.1f\n", i, Oi_normed, Ei);
         Ei *= lambda / (i + 1.0);
     }
+    obj->intf->printf(" -----------------------------------------\n");
     // Calculate statistics for p-value
     obj->intf->printf("  lambda = %g, mu = %g * %d\n",
         lambda, mu, (int) opts->nsamples);
@@ -395,6 +444,9 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     return ans;
 }
 
+//////////////////////////////////////////
+///// Frequency tests implementation /////
+//////////////////////////////////////////
 
 /**
  * @brief Monobit frequency test.

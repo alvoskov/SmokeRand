@@ -31,16 +31,6 @@ PRNG_CMODULE_PROLOG
 
 #define NROUNDS 32
 
-static inline uint64_t rotl(uint64_t x, uint64_t r)
-{
-    return (x << r) | (x >> (64 - r));
-}
-
-static inline uint64_t rotr(uint64_t x, uint64_t l)
-{
-    return (x << (64 - l)) | (x >> l);
-}
-
 /**
  * @brief Speck128 state.
  */
@@ -51,7 +41,15 @@ typedef struct {
     unsigned int pos;
 } Speck128State;
 
-#define R(x,y,k) (x=rotr(x,8), x+=y, x^=k, y=rotl(y,3), y^=x)
+
+static inline void speck_round(uint64_t *x, uint64_t *y, const uint64_t k)
+{
+    *x = (*x << (64 - 8)) | (*x >> 8); // rotr(x, 8)
+    *x += *y;
+    *x ^= k;
+    *y = (*y << 3) | (*y >> (64 - 3)); // rotl(y, 3)
+    *y ^= *x;
+}
 
 
 static void Speck128State_init(Speck128State *obj, const uint64_t *key, const CallerAPI *intf)
@@ -68,7 +66,8 @@ static void Speck128State_init(Speck128State *obj, const uint64_t *key, const Ca
     uint64_t a = obj->keys[0], b = obj->keys[1];
     for (size_t i = 0; i < NROUNDS - 1; i++) {
         //intf.printf("%llX\n", obj->keys[i]);
-        R(b, a, i);
+        speck_round(&b, &a, i);
+        //R(b, a, i);
         obj->keys[i + 1] = a;
     }    
     obj->pos = 2;
@@ -79,7 +78,8 @@ static inline void Speck128State_block(Speck128State *obj)
     obj->out[0] = obj->ctr[0];
     obj->out[1] = obj->ctr[1];
     for (size_t i = 0; i < NROUNDS; i++) {
-        R(obj->out[1], obj->out[0], obj->keys[i]);
+        speck_round(&(obj->out[1]), &(obj->out[0]), obj->keys[i]);
+//        R(obj->out[1], obj->out[0], obj->keys[i]);
     }
 }
 
