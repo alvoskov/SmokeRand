@@ -356,19 +356,19 @@ at 1 TiB). This test run requred about 25 min.
  mwc64x            | u32    | +     | +       | +    | 0.53 | N/A    | +       | >= 8 TiB
  mwc128            | u64    | +     | +       | +    | 0.30 |        | +       | >= 2 TiB
  mwc128x           | u64    | +     | +       |      | 0.30 |        | +       | >= 8 TiB
- pcg32             | u32    | +     | +       |      | 0.44 | N/A    | +       | >= 2 TiB
- pcg64             | u64    | +     | +       |      | 0.28 |        | +       | >= 2 TiB
+ pcg32             | u32    | +     | +       | +    | 0.44 | N/A    | +       | >= 2 TiB
+ pcg64             | u64    | +     | +       | +    | 0.28 |        | +       | >= 2 TiB
  philox            | u64    | +     | +       | +    | 0.85 |        | +       | >= 2 TiB
  philox32          | u32    | +     | +       | +    | 2.7  | N/A    | +       | >= 2 TiB
  randu             | u32    | 18    | 34      | 37   | 0.41 | N/A    | -       | 1 KiB
  r1279             | u32    | 4     | 6       | 9    | 0.47 | N/A    |         | 64 MiB
  rc4               | u32    | +     | +       |      | 6.0  | N/A    | +       | 512 GiB
  romutrio          | u64    | +     | +       | +    | 0.15 |        |         |
- rrmxmx            | u64    | +     | +       |      | 0.14 | -      |         | >= 2 TiB
+ rrmxmx            | u64    | +     | +       | +    | 0.14 | -      |         | >= 2 TiB
  sezgin63          | u32    | +     | +       | 3    | 3.0  | N/A    |         | >= 16 TiB
  speck128          | u64    | +     | +       | +    | 3.1  |        |         | >= 2 TiB
  speck128_avx      | u64    | +     | +       | +    | 0.65 |        |         |
- splitmix          | u64    | +     | +       |      | 0.19 |        |         | >= 2 TiB
+ splitmix          | u64    | +     | +       | +    | 0.19 |        |         | >= 2 TiB
  splitmix32        | u32    | 1     | 2       | 3    | 0.25 | N/A    | +       | 1 GiB
  sqxor             | u64    | +     | +       |      | 0.13 | +      |         | >= 2 TiB
  sqxor32           | u32    | 1     | 2       |      | 0.20 | N/A    | Small   | 16 GiB
