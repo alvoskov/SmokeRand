@@ -29,21 +29,32 @@ PRNG that pass BigCrush or PractRand:
 
 Existing solutions:
 
-1. TestU01 https://doi.org/10.1145/3447773
-2. PractRand https://pracrand.sourceforge.net/
-3. Ent https://www.fourmilab.ch/random/
-4. Dieharder https://webhome.phy.duke.edu/~rgb/General/dieharder.php
-5. gjrand https://gjrand.sourceforge.net/
+1. TestU01 (https://doi.org/10.1145/3447773). Has a very comprehensive set of
+   tests and an excellent documentation. Doesn't support 64-bit generator,
+   has issues with analysis of lowest bits.
+2. PractRand (https://pracrand.sourceforge.net/). Very limited number of tests
+   but they are good ones and detect flaws in a lot of PRNGs. Tests are mostly
+   suggested by the PractRand author and is not described in scientific
+   publications. Their advantage -- they accumulate information from a sequence
+   of 1024-byte blocks and can be applied to arbitrary large samples.
+3. Ent (https://www.fourmilab.ch/random/). Only very basic tests, even 64-bit
+   LCG will probably pass them.
+4. Dieharder (https://webhome.phy.duke.edu/~rgb/General/dieharder.php).
+   Resembles DIEHARD, but contains more tests and uses much larger samples.
+   Less sensitive than TestU01.
+5. gjrand (https://gjrand.sourceforge.net/). Have some unique and sensitive
+   tests but documentation is scarce.
 
 Requirements:
 
 - C99 compiler, some PRNGs will require 128-bit integers either through
   `__uint128_t` type (GCC, Clang) or `_umul128`/`_addcarry_u64` intrinsics
-  (Microsoft Visual C)
+  (Microsoft Visual C). C99 was chosen instead of C89 due to mandatory support
+  of 64-bit integers and `inline` keyword.
 - GNU make or CMake.
 - pthreads (POSIX threads) library.
 - 64-bit CPU, x86-64 with RDRAND and AVX2 support is recommended.
-- 4GiB of RAM minimal, 16GiB recommended.
+- 4 GiB of RAM minimal, 16 GiB recommended.
 
 Implemented tests:
 
@@ -51,10 +62,10 @@ Implemented tests:
 2. Frequency test for bytes and 16-bit chunks.
 3. Birthday spacings test.
 4. Birthday spacings test with decimation.
-5. Gap test.
-6. Matrix rank test.
-7. Linear complexity test.
-8. CollisionOver test.
+5. CollisionOver test.
+6. Gap test.
+7. Matrix rank test.
+8. Linear complexity test.
 9. Hamming weights based DC6 test from PractRand.
 
 Extra tests:
@@ -168,13 +179,52 @@ Three batteries are implemented in SmokeRand:
  full    | 37              | 2^40                | 2^41
 
 
+# How to test a pseudorandom number generator
+
+Two ways of PRNG testing are implemented in SmokeRand:
+
+1. Through stdin/stdio pipes. Simple but doesn't support multithreading.
+2. Load PRNG from a shared library. More complex but allows multithreading.
+
 # Tests description
+
+The tests supplied with SmokeRand are mostly well-known, described in scientific
+literature and were already implemented in other test suits. However some its
+modifications are specific to SmokeRand and allow to detect such PRNGs as 
+64-bit LCG with prime modulus, 96-bit and 128-bit LCGs with \f$ m = 2^k \f$
+and truncation of lower 64 bits, "Subtract-with-Borrow + Weyl Sequence" (SWBW)
+and incorrectly configured CSPRNGs with 32-bit counters.
 
 ## Monobit frequency test
 
-## Bytes frequency test
+A classic monobit frequency test that counts frequencies of 0 and 1 in the
+input stream of bits and calculates p-value. The next random value is calculated:
 
-## 16-bit words frequency test
+\f[
+X = \sum_{i=1}^n \left( 1 - 2x_i \right) = n - 2\sum_{i-1}^n x_i
+\f]
+
+i.e. 0 is replaced to -1, 1 is replaced to 1. The X random value has a normal
+distribution (see central limit theorem) with \f$ E(X) = 0\f$, and
+\f$ Var(X) = n \f$. Its absolute value obeys a half-normal distribtion
+and p-value is calculated as:
+
+\f[
+p = 1 - F(|X|) = 2\left(1 - \Phi\left(\frac{|X|}{\sqrt{n}}\right) \right) = 
+\erfc \left(\frac{|X|}{\sqrt{2n}}\right)
+\f]
+
+Most PRNGs pass it, but it may detect bias in hardware generated bits or some
+serious flaws in PRNG implementaton. E.g. multiplicative lagged Fibonacci that
+returns all bits won't pass it.
+
+## Blocks frequency test
+
+The test counts frequencies of not overlapping 8-bit and 16-bit blocks of bits.
+Chi-squared test is applied to the obtained empirical frequencies to check
+if they are uniformly distributed. It may detect some low-grade generators such
+as randu, lcg69069, shr3.
+
 
 ## Birthday spacings test
 
@@ -204,8 +254,23 @@ The birthday test generates input values using the next algorithm:
  collover8_5d  | 8     | 5    |
  collover5_8d  | 5     | 8    |
 
+## Gap test
+
+A classical gap test described in TAOCP (volume 2). Sensitive to additive and
+subtractive lagged Fibonacci and substact-with-borrow generators. Easily 
+detects 32-bit PRNGs that exceeded their periods. Even ChaCha12 with 32-bit
+counter may fail some modifications of the gap test.
+
+The implementation of gap test in SmokeRand is equipped with "guard function"
+that will prevent infinite cycle in the case of constant output from a broken
+generator.
+
 
 ## Linear complexity test
+
+This specialized test calculates linear complexity of selected bit of PRNG
+output. Uses Berlekamp-Massey algorithm. Very sensitive to the generators
+based on LFSR and GFSR such as Mersenne twister and xorshift.
 
  Name            | Bit for 32/64-bit PRNG
 -----------------|------------------------
@@ -216,6 +281,21 @@ The birthday test generates input values using the next algorithm:
 
 ## Matrix rank test
 
+It is a traditional binary matrix rank test implemented for large square binary
+matrices; the matrix size must be a multiple of 256 to make SIMD or `uint64_t`
+based vectorization easier. They can be applied either to the whole PRNG
+output or to its lower 8 bits.
+
+The test generates 64 matrices and calculates number of matrices with
+ranks \f$\le(n - 2)\f$, \f$ (n - 1) \f$ and \f$ n \f$ respectively, then
+chi-squared test with 2 degrees of freedom is applied.
+
+The matrix rank is sensitive to LFSR and GFSR generators. However, it is less
+sensitive than linear complexity tests and won't detect Mersenne twister due to
+its huge state. MT19937 will fail it for \f$32768\times 32768\f$ matrices but
+due to \f$ O(n^3)\f$ time complexity such run will take several hours in
+one-threaded mode. Linear complexity test is much faster in this case.
+
  Name                 | n      | nbits
 ----------------------|--------|--------
  matrixrank_4096      | 4096   | 32/64
@@ -224,6 +304,25 @@ The birthday test generates input values using the next algorithm:
  matrixrank_8192_low8 | 8192   | 8
 
 ## Hamming weights based "DC6" test
+
+
+# Extra tests description
+
+These tests are not included into the `brief`, `default` and `full` batteries
+because they are slow, may require a lot of RAM and are usually aimed on some
+very specific issues.
+
+## 64-bit birthday paradox test
+
+## Extended block frequency test
+
+
+RC4: fails at 16-bit chunks at zmax test at 432 GiB of data (PractRand 0.94 fails
+at 1 TiB). This test run requred about 25 min.
+
+
+## 2D Ising model test
+
 
 
 
@@ -239,7 +338,7 @@ The birthday test generates input values using the next algorithm:
  isaac64           | u64    | +     | +       | +    | 0.75 |        | +       | >= 1 TiB
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | N/A    | Small   | 1 MiB
  kiss99            | u32    | +     | +       | +    | 1.0  | N/A    | +       | >= 8 TiB
- kiss64            | u64    | +     | +       | +    | 0.53 |        | +       |
+ kiss64            | u64    | +     | +       | +    | 0.53 |        | +       | >= 1 TiB
  lcg64             | u32    | 5     | 8       | 11   | 0.40 | N/A    | Small   | 16 MiB
  lcg64prime        | u64    | 1     | 1       | 1    | 1.5  |        |         | >= 32 TiB
  lcg96             | u32    | +     | 1       | 1    | 0.78 | N/A    |         | 32 GiB
@@ -264,6 +363,7 @@ The birthday test generates input values using the next algorithm:
  randu             | u32    | 18    | 34      | 37   | 0.41 | N/A    | -       | 1 KiB
  r1279             | u32    | 4     | 6       | 9    | 0.47 | N/A    |         | 64 MiB
  rc4               | u32    | +     | +       |      | 6.0  | N/A    | +       | 512 GiB
+ romutrio          | u64    | +     | +       | +    | 0.15 |        |         |
  rrmxmx            | u64    | +     | +       |      | 0.14 | -      |         | >= 2 TiB
  sezgin63          | u32    | +     | +       | 3    | 3.0  | N/A    |         | >= 16 TiB
  speck128          | u64    | +     | +       | +    | 3.1  |        |         | >= 2 TiB
@@ -286,7 +386,7 @@ The birthday test generates input values using the next algorithm:
  xorshift128       | u32    | 4     | 6       | 8    | 0.41 | N/A    |         | 128 KiB
  xorshift128p      | u64    | 1     | 2       | 3    | 0.21 |        |         | 32 GiB
  xoroshiro128p     | u64    | 1     | 2       | 3    | 0.16 |        |         | 16 MiB
- xoroshiro128pp    | u64    | +     | +       | +    | 0.20 |        |         |
+ xoroshiro128pp    | u64    | +     | +       | +    | 0.20 |        |         | >= 2 TiB
  xoroshiro1024st   | u64    | 1     | 1       | 2    | 0.33 |        |         | 128 GiB
  xorwow            | u32    | 3     | 7       | 9    | 0.52 | N/A    | Small   | 128 KiB
  xsh               | u64    | 7     | 10      | 14   | 0.43 |        | -       | 32 KiB
