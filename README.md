@@ -144,10 +144,10 @@ be divided into several groups:
  threefry          | Threefry4x64x20 counter-based generator
  well1024a         | WELL1024a: Well equidistributed long-period linear
  xorshift128       | xorshift128 LFSR generator by G.Marsaglia
- xorshift128p      | Based on xorshift128, uses an output scrambler.
- xoroshiro128p     |
- xoroshiro128pp    |
- xoroshiro1024st   |
+ xorshift128p      | xorshift128+, based on xorshift128, uses an output scrambler.
+ xoroshiro128p     | xoroshiro128+
+ xoroshiro128pp    | xoroshiro128++
+ xoroshiro1024st   | xoroshiro1024*
  xorwow            | xorwow
  xsh               | xorshift64 generator by G.Marsaglia
 
@@ -233,7 +233,7 @@ The birthday test generates input values using the next algorithm:
 -------------------|--------|-------|---------|------|------|--------|---------|-----------
  alfib             | u64    | 4     | 4       | 7    | 0.23 |        |         | 128 GiB
  alfib_mod         | u32    | +     | +       | +    | 0.50 | N/A    |         | 1 TiB
- chacha            | u32    | +     | +       |      | 2.0  | N/A    | +       |
+ chacha            | u32    | +     | +       | +    | 2.0  | N/A    | +       |
  chacha_avx        | u32    | +     | +       | +    | 0.7  | N/A    | +       |
  coveyou64         | u32    | 2     | 4       | 4    | 0.62 | N/A    | Small   | 256 KiB
  isaac64           | u64    | +     | +       | +    | 0.75 |        | +       | >= 1 TiB
