@@ -68,6 +68,30 @@ Implemented tests:
 8. Linear complexity test.
 9. Hamming weights based DC6 test from PractRand.
 
+
+Systematic failure of even one test means that PRNG is not suitable as a general
+purpose PRNG. However different tests have different impact on the PRNG quality:
+
+1. Frequency tests failure: the PRNG is either broken or seriously flawed.
+2. Hamming weights based DC6 tests: short-term correlations in bits distribution.
+   Local deviations from uniform distribution are possible.
+3. Gap test failure: the PRNG output has regularities that may disrupt
+   Monte-Carlo simulations (similar to Ising 2D model case).
+4. Birthday spacings and CollisionOver test failure: the PRNG output shows a
+   regular structure (often similar to lattice) that can break generation of
+   identifiers and Monte-Carlo simulations.
+5. Matrix rank and linear complexity tests failure: there is a linear dependence
+   between bits of the PRNG output sequence. Don't work with separate bits of 
+   such PRNG, even `a % n` usage may be risky. However, these flaws are usually
+   irrelevant for Monte-Carlo simulations and MT19937 and WELL1024a are often
+   used as general purpose PRNGs.
+
+Systematic failures in P.1-4 mean that PRNG is seriously flawed and mustn't
+be used for computations. P.5 requires a special consideration for each task
+and each generator. Of course, statistical tests are not sufficient for
+PRNG quality control: state-of-art quality PRNG should satisfy theoretical
+"next bit test" and be cryptographically secure.
+
 Extra tests:
 
 1. 64-bit birthday paradox test. Requires 8 GiB of RAM and about 30 minutes.
@@ -91,8 +115,8 @@ be divided into several groups:
 - Counter-based scramblers based on cryptographical primitives: philox,
   philox32, threefry.
 - Lagged Fibonacci: alfib, alfib_mod, mlfib17_5, r1279.
-- Linear congruental: lcg64, lcg64prime, lcg96, lcg128, lcg69069, minstd,
-  mwc64, mwc128, randu, seizgin63.
+- Linear congruental: drand48, lcg64, lcg64prime, lcg96, lcg128, lcg69069,
+  minstd, mwc64, mwc128, randu, seizgin63.
 - Linear congruental with output scrambling: mwc64x, mwc128x, pcg32, pcg64.
 - "Weyl sequence" (LCG with a=1) with output scrambling: mulberry32, rrmxmx,
   splitmix, splitmix32, sqxor, sqxor32, wyrand.
