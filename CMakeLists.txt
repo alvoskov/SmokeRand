@@ -65,7 +65,8 @@ endif()
 
 
 # Examples of plugins, i.e. modules with PRNGs
-foreach(prng_name alfib alfib_mod chacha chacha_avx coveyou64 isaac64 kiss64 kiss93 kiss99
+foreach(prng_name alfib alfib_mod chacha chacha_avx coveyou64 drand48
+    isaac64 kiss64 kiss93 kiss99
     lcg69069 lcg64 lcg64prime lcg96 lcg128 lcg128_full
     loop_7fff_w64
     lfsr113 lfsr258 minstd mt19937 mlfib17_5 mrg32k3a

@@ -335,6 +335,7 @@ at 1 TiB). This test run requred about 25 min.
  chacha            | u32    | +     | +       | +    | 2.0  | N/A    | +       |
  chacha_avx        | u32    | +     | +       | +    | 0.7  | N/A    | +       |
  coveyou64         | u32    | 2     | 4       | 4    | 0.62 | N/A    | Small   | 256 KiB
+ drand48           | u32    | 11    | 19      | 21   | 0.72 | N/A    | -       | 1 MiB
  isaac64           | u64    | +     | +       | +    | 0.75 |        | +       | >= 1 TiB
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | N/A    | Small   | 1 MiB
  kiss99            | u32    | +     | +       | +    | 1.0  | N/A    | +       | >= 8 TiB
@@ -355,7 +356,7 @@ at 1 TiB). This test run requred about 25 min.
  mwc64             | u32    | 1     | 2       | 4    | 0.37 | N/A    | Small   | 1 TiB
  mwc64x            | u32    | +     | +       | +    | 0.53 | N/A    | +       | >= 8 TiB
  mwc128            | u64    | +     | +       | +    | 0.30 |        | +       | >= 2 TiB
- mwc128x           | u64    | +     | +       |      | 0.30 |        | +       | >= 8 TiB
+ mwc128x           | u64    | +     | +       | +    | 0.30 |        | +       | >= 8 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +     | +       | +    | 0.28 |        | +       | >= 2 TiB
  philox            | u64    | +     | +       | +    | 0.85 |        | +       | >= 2 TiB
@@ -371,8 +372,8 @@ at 1 TiB). This test run requred about 25 min.
  splitmix          | u64    | +     | +       | +    | 0.19 |        |         | >= 2 TiB
  splitmix32        | u32    | 1     | 2       | 3    | 0.25 | N/A    | +       | 1 GiB
  sqxor             | u64    | +     | +       |      | 0.13 | +      |         | >= 2 TiB
- sqxor32           | u32    | 1     | 2       |      | 0.20 | N/A    | Small   | 16 GiB
- sfc32             | u32    | +     | +       |      | 0.24 | N/A    |         |
+ sqxor32           | u32    | 1     | 2       | 3    | 0.20 | N/A    | Small   | 16 GiB
+ sfc32             | u32    | +     | +       | +    | 0.24 | N/A    |         |
  sfc64             | u64    | +     | +       | +    | 0.10 | +      | +       | >= 1 TiB
  shr3              | u32    | 14    | 30      | 33   | 0.76 | N/A    | -       | 32 KiB
  swb               | u32    | 4     | 4       | 5    | 2.7  | N/A    |         | 128 MiB
