@@ -29,7 +29,7 @@
 
 PRNG_CMODULE_PROLOG
 
-#define NROUNDS 32
+#define NROUNDS 12
 
 /**
  * @brief Speck128 state.

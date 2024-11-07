@@ -182,6 +182,7 @@ typedef struct {
 
 
 GeneratorInfo reversed_generator_set(const GeneratorInfo *gi);
+GeneratorInfo interleaved_generator_set(const GeneratorInfo *gi);
 
 typedef struct {
     unsigned int h; ///< Hours

@@ -17,7 +17,6 @@
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
-//#include <io.h>
 #include <fcntl.h>
 #include <pthread.h>
 
@@ -821,11 +820,31 @@ void TestsBattery_run(const TestsBattery *bat,
     free(results);
 }
 
+
+/**
+ * @brief Keeps the original generator for application of different filters to it.
+ */
+static GeneratorInfo original_gen;
+
+/**
+ * @brief Buffer for decomposition of each 64-bit value into a pair
+ * of 32-bit values. Needed for TestU01: its batteries should have
+ * an access to all bits. Used by MAKE_UINT64_INTERLEAVED_PRNG macro.
+ */
+typedef struct {
+    union {
+        uint64_t u64; ///< To be splitted to two 32-bit values.
+        uint32_t u32[2]; ///< 32-bit values.
+    } val; ///< Internal buffer for 32-bit outputs.
+    int pos; ///< Output position for 32-bit output.
+} Interleaved32Buffer;
+
+
+Interleaved32Buffer interleaved_buf;
+
 ////////////////////////////////////////////////////////////////
 ///// Implementation of generator with reversed bits order /////
 ////////////////////////////////////////////////////////////////
-
-static GeneratorInfo original_gen;
 
 static uint64_t get_bits32_reversed(void *state)
 {
@@ -846,6 +865,32 @@ GeneratorInfo reversed_generator_set(const GeneratorInfo *gi)
         .nbits = gi->nbits, .self_test = gi->self_test};
     return reversed_gen;
 }
+
+
+///////////////////////////////////////////////////////////////////
+///// Implementation of generator with interleaved bits order /////
+///////////////////////////////////////////////////////////////////
+
+static uint64_t get_bits32_interleaved(void *state)
+{
+    if (interleaved_buf.pos == 2) {
+        interleaved_buf.val.u64 = original_gen.get_bits(state);
+        interleaved_buf.pos = 0;
+    }
+    return interleaved_buf.val.u32[interleaved_buf.pos++];
+}
+
+GeneratorInfo interleaved_generator_set(const GeneratorInfo *gi)
+{
+    original_gen = *gi;
+    GeneratorInfo interleaved_gen = {.name = gi->name,
+        .create = gi->create,
+        .get_bits = get_bits32_interleaved,
+        .nbits = 32, .self_test = gi->self_test};
+    return interleaved_gen;
+}
+
+
 
 ///////////////////////////////////////////////
 ///// Implementation of file input/output /////

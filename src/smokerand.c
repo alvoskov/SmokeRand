@@ -140,7 +140,11 @@ void battery_speed(GeneratorInfo *gen, const CallerAPI *intf)
     printf("----- Speed test for uint generation -----\n");
     battery_speed_test(gen, intf, speed_uint);
     printf("----- Speed test for uint sum generation -----\n");
-    battery_speed_test(gen, intf, speed_sum);
+    if (gen->get_sum == NULL) {
+        printf("  Not implemented\n");
+    } else {
+        battery_speed_test(gen, intf, speed_sum);
+    }
 }
 
 
@@ -192,6 +196,7 @@ typedef struct {
     int nthreads;
     int testid;
     int reverse_bits;
+    int interleaved32;
 } SmokeRandSettings;
 
 
@@ -200,6 +205,7 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
     obj->nthreads = 1;
     obj->testid = TESTS_ALL;
     obj->reverse_bits = 0;
+    obj->interleaved32 = 0;
     for (int i = 3; i < argc; i++) {
         char argname[32];
         int argval;
@@ -232,6 +238,8 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
             }
         } else if (!strcmp(argname, "reverse-bits")) {
             obj->reverse_bits = argval;
+        } else if (!strcmp(argname, "interleaved")) {
+            obj->interleaved32 = argval;
         } else {
             printf("Unknown argument '%s'\n", argname);
             return 1;
@@ -301,7 +309,7 @@ int main(int argc, char *argv[])
         print_help();
         return 0;
     }
-    GeneratorInfo reversed_gen;
+    GeneratorInfo reversed_gen, interleaved_gen;    
     SmokeRandSettings opts;
     if (SmokeRandSettings_load(&opts, argc, argv)) {
         return 1;
@@ -313,7 +321,12 @@ int main(int argc, char *argv[])
     int is_stdout = !strcmp(battery_name, "stdout");
 
     if (opts.nthreads > 1 && (is_stdin32 || is_stdin64)) {
-        fprintf(stderr, "Multithreading is not supported for stdin32/stdin64");
+        fprintf(stderr, "Multithreading is not supported for stdin32/stdin64\n");
+        return 1;
+    }
+
+    if (opts.reverse_bits == 1 && opts.interleaved32 == 1) {
+        fprintf(stderr, "--reverse-bits=1 and --interleaved=1 are mutually exclusive\n");
         return 1;
     }
 
@@ -351,6 +364,10 @@ int main(int argc, char *argv[])
             reversed_gen = reversed_generator_set(gi);
             gi = &reversed_gen;
             fprintf(stderr, "All tests will be run with the reverse bits order\n");
+        } else if (opts.interleaved32) {
+            interleaved_gen = interleaved_generator_set(gi);
+            gi = &interleaved_gen;
+            fprintf(stderr, "All tests will be run with the interleaved\n");
         }
         GeneratorInfo_print(gi, is_stdout);
         int ans = run_battery(battery_name, gi, &intf, &opts);
