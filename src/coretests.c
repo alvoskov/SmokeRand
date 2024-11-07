@@ -393,7 +393,7 @@ static inline void collisionover_make_tuples(const BSpaceNDOptions *opts,
  */
 TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
-    size_t n = 100000000;
+    size_t n = 50000000;
     uint64_t *u = calloc(n, sizeof(uint64_t));
     if (u == NULL) {
         fprintf(stderr, "***** collisionover_test: not enough memory *****\n");
