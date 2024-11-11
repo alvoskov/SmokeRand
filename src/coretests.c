@@ -16,7 +16,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <pthread.h>
 
 /////////////////////////////////////////////////
 ///// Birthday spacings test implementation /////
@@ -1068,7 +1067,7 @@ TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts)
     const uint8_t *hw_to_code = hamming_dc6_fill_hw_tables(obj, opts, code_to_prob);
     // Parameters for 18-bit tuple with 2-bit digits
     static const unsigned int code_nbits = 2, tuple_size = 9;
-    static const uint64_t tuple_mask = (1ull << code_nbits * tuple_size) - 1;
+    const uint64_t tuple_mask = (1ull << code_nbits * tuple_size) - 1;
     //
     HammingTuplesTable table;
     HammingTuplesTable_init(&table, code_nbits, tuple_size, code_to_prob);

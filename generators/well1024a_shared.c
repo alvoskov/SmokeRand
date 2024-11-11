@@ -34,9 +34,17 @@ typedef struct {
     unsigned int pos;
 } Well1024aState;
 
-#define M3POS(t,v) (v ^ (v >> t))
-#define M3NEG(t,v) (v ^ (v << (-t)))
 #define IND(ind) ( (obj->pos + (ind) ) & POS_MASK )
+
+static inline m3pos(int t, uint32_t v)
+{
+    return v ^ (v >> t);
+}
+
+static inline m3neg(int t, uint32_t v)
+{
+    return v ^ (v << (-t));
+}
 
 static void *create(const CallerAPI *intf)
 {
@@ -62,10 +70,10 @@ static inline uint64_t get_bits_raw(void *state)
     const size_t neg1ind = IND(POS_MASK);
     uint32_t *s = obj->s;
     uint32_t z0 = s[neg1ind]; // VRm1
-    uint32_t z1 = s[obj->pos] ^ M3POS(8, s[IND(m1)]);
-    uint32_t z2 = M3NEG(-19, s[IND(m2)]) ^ M3NEG(-14, s[IND(m3)]);
+    uint32_t z1 = s[obj->pos] ^ m3pos(8, s[IND(m1)]);
+    uint32_t z2 = m3neg(-19, s[IND(m2)]) ^ m3neg(-14, s[IND(m3)]);
     s[obj->pos] = z1 ^ z2; // newV1
-    s[neg1ind] = M3NEG(-11, z0) ^ M3NEG(-7, z1) ^ M3NEG(-13, z2); // newV0
+    s[neg1ind] = m3neg(-11, z0) ^ m3neg(-7, z1) ^ m3neg(-13, z2); // newV0
     obj->pos = neg1ind;
     return s[obj->pos];
 }

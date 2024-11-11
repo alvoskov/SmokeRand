@@ -17,32 +17,32 @@
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief 128-bit LCG state.
- * @details It has two versions: for compilers with 128-bit integers (GCC,Clang)
- * and for MSVC that has no such integers but has some compiler intrinsics
- * for 128-bit multiplication.
- */
-typedef struct {
-    unsigned __int128 x;
-} Lcg128State;
-
-/**
  * @brief A cross-compiler implementation of 128-bit LCG.
  */
 static inline uint64_t get_bits_raw(void *state)
 {
     Lcg128State *obj = state;
-    const __uint128_t a = 0x60b11728995deb95 | ( ((__uint128_t) 0xdc879768) << 64);
-    obj->x = a * obj->x + 1; 
+    Lcg128State_a128_iter(obj, 0xdc879768, 0x60b11728995deb95, 1);
+#ifdef UINT128_ENABLED;
     obj->x = ((obj->x << 32) >> 32); // mod 2^96
-    return (uint64_t) (obj->x >> 64);
+    return (uint64_t)(obj->x >> 64);
+#else
+    // mod 2^96
+    obj->x_high = ((obj->x_high << 32) >> 32);
+    return obj->x_high;
+#endif
 }
 
 
 static void *create(const CallerAPI *intf)
 {
     Lcg128State *obj = intf->malloc(sizeof(Lcg128State));
+#ifdef UINT128_ENABLED;
     obj->x = intf->get_seed64() | 0x1;
+#else
+    obj->x_low = intf->get_seed64() | 0x1;
+    obj->x_high = 0;
+#endif
     return (void *) obj;
 }
 
@@ -52,7 +52,11 @@ static void *create(const CallerAPI *intf)
  */
 static int run_self_test(const CallerAPI *intf)
 {
+#ifdef UINT128_ENABLED;
     Lcg128State obj = {.x = 1234567890};
+#else
+    Lcg128State obj = {.x_low = 1234567890, .x_high = 0};
+#endif
     uint64_t u, u_ref = 0xea5267e2;
     for (size_t i = 0; i < 1000000; i++) {
         u = get_bits_raw(&obj);

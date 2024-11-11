@@ -23,7 +23,11 @@
  * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
+#if defined(_MSC_VER) && !defined(__clang__)
+#include <intrin.h>
+#else
 #include <x86intrin.h>
+#endif
 
 PRNG_CMODULE_PROLOG
 

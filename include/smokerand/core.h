@@ -26,6 +26,7 @@ static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 }
 #else
 #define UINT128_ENABLED
+#define PTHREAD_ENABLED
 static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 {
     __uint128_t mul = ((__uint128_t) a) * b;
@@ -37,6 +38,9 @@ static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
 #include <windows.h>
+#ifndef PTHREAD_ENABLED
+#define USE_WINTHREADS
+#endif
 #define EXPORT __declspec( dllexport )
 #define USE_LOADLIBRARY
 #ifndef __cplusplus

@@ -16,48 +16,18 @@
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief 128-bit LCG state.
- * @details It has two versions: for compilers with 128-bit integers (GCC,Clang)
- * and for MSVC that has no such integers but has some compiler intrinsics
- * for 128-bit multiplication.
- */
-typedef struct {
-#ifdef UINT128_ENABLED
-    unsigned __int128 x;
-#else
-    uint64_t x_low;
-    uint64_t x_high;
-#endif
-} Lcg128State;
-
-/**
  * @brief A cross-compiler implementation of 128-bit LCG.
  */
 static inline uint64_t get_bits_raw(void *state)
 {
-    Lcg128State *obj = state;
-    const unsigned __int128 a = ((unsigned __int128) 0xdb36357734e34abb) << 64 | 0x0050d0761fcdfc15;
-#ifdef UINT128_ENABLED
-    obj->x = a * obj->x + 1;
-    return (uint64_t) (obj->x >> 64);
-#else
-    uint64_t mul0_high;
-    obj->x_low = unsigned_mul128(a, obj->x_low, &mul0_high);
-    obj->x_high = a * obj->x_high + mul0_high;
-    obj->x_high += _addcarry_u64(0, obj->x_low, 1ull, &obj->x_low);
-    return obj->x_high;
-#endif
+    return Lcg128State_a128_iter(state, 0xdb36357734e34abb, 0x0050d0761fcdfc15, 1);
 }
 
 
 static void *create(const CallerAPI *intf)
 {
     Lcg128State *obj = intf->malloc(sizeof(Lcg128State));
-#ifdef UINT128_ENABLED
-    obj->x = intf->get_seed64() | 0x1;
-#else
-    obj->x_low = intf->get_seed64() | 0x1;
-#endif
+    Lcg128State_seed(obj, intf);
     return (void *) obj;
 }
 

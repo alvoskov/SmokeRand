@@ -28,7 +28,7 @@ typedef struct {
 } Lcg64State;
 
 /**
- * @brief A cross-compiler implementation of 128-bit LCG.
+ * @brief A cross-compiler implementation of 64-bit LCG with prime modulus.
  */
 static inline uint64_t get_bits_raw(void *state)
 {
@@ -36,8 +36,9 @@ static inline uint64_t get_bits_raw(void *state)
     const uint64_t a = 13891176665706064842ull;
     const uint64_t m = 18446744073709551557ull;  // 2^64 - 59
     const uint64_t d = 59;
-    __uint128_t prod = (__uint128_t) a * obj->x;
-    uint64_t hi = prod >> 64, lo = prod;
+    uint64_t hi, lo;
+    lo = unsigned_mul128(a, obj->x, &hi);
+#ifdef UINT128_ENABLED
     __uint128_t r = lo + d * (__uint128_t) hi;
     int k = (int) (r >> 64) - 1;
     if (k > 0) {
@@ -47,6 +48,25 @@ static inline uint64_t get_bits_raw(void *state)
         r -= m;
     }
     obj->x = r;
+#else
+    // r = lo + d*hi
+    uint64_t r_lo, r_hi;
+    r_lo = unsigned_mul128(d, hi, &r_hi);
+    r_hi += _addcarry_u64(0, lo, r_lo, &r_lo);
+    int k = ((int) (r_hi)) - 1;
+    if (k > 0) {
+        // r -= (k << 64) - k*d
+        uint64_t kd_hi, kd_lo;
+        kd_lo = unsigned_mul128((uint64_t)k, d, &kd_hi);
+        r_hi = 1;
+        unsigned char c = _addcarry_u64(0, r_lo, kd_lo, &r_lo);
+        r_hi += kd_hi + c;
+    }
+    if (r_hi != 0 || r_lo > m) { // r > m
+        r_lo -= m; // We don't care about r_hi: it will be thrown out
+    }
+    obj->x = r_lo;
+#endif
     return obj->x;
 }
 

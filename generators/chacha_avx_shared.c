@@ -44,10 +44,11 @@ typedef struct {
 } ChaChaAVXState;
 
 
+#if defined(_MSC_VER) && !defined(__clang__)
+#include <intrin.h>
+#else
 #include <x86intrin.h>
-//#include <emmintrin.h>
-//#include <tmmintrin.h>
-//#include <xopintrin.h>
+#endif
 
 static inline __m256i mm256_roti_epi32_def(__m256i in, int r)
 {

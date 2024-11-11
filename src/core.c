@@ -18,9 +18,15 @@
 #include <string.h>
 #include <time.h>
 #include <fcntl.h>
+#ifdef PTHREAD_ENABLED
 #include <pthread.h>
+#endif
 
 static Entropy entropy = {{0, 0, 0, 0}, 0, NULL, 0, 0};
+
+///////////////////////////////
+///// Single-threaded API /////
+///////////////////////////////
 
 static uint32_t get_seed32(void)
 {
@@ -52,14 +58,46 @@ void CallerAPI_free(void)
     Entropy_free(&entropy);
 }
 
+/////////////////////////////
+///// Multithreaded API /////
+/////////////////////////////
 
+#if defined(PTHREAD_ENABLED) || defined(USE_WINTHREADS)
+
+#ifdef PTHREAD_ENABLED
 static pthread_mutex_t get_seed64_mt_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t printf_mt_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static void init_mutexes()
+{
+}
+#else
+static HANDLE get_seed64_mt_mutex = NULL;
+static HANDLE printf_mt_mutex = NULL;
+static void init_mutexes()
+{
+    get_seed64_mt_mutex = CreateMutex(NULL, FALSE, "seed64_mutex");
+    printf_mt_mutex = CreateMutex(NULL, FALSE, "printf_mutex");
+}
+
+#endif
 
 static uint64_t get_seed64_mt(void)
 {
+#ifdef PTHREAD_ENABLED
     pthread_mutex_lock(&get_seed64_mt_mutex);
     uint64_t seed = Entropy_seed64(&entropy, pthread_self());
     pthread_mutex_unlock(&get_seed64_mt_mutex);
+#else
+    DWORD dwResult = WaitForSingleObject(get_seed64_mt_mutex, INFINITE);
+    if (dwResult != WAIT_OBJECT_0) {
+        printf(stderr, "get_seed64_mt internal error");
+        exit(1);
+    }
+    uint64_t seed = Entropy_seed64(&entropy, GetCurrentThread());
+    ReleaseMutex(get_seed64_mt_mutex);
+    return seed;
+#endif
     return seed;
 }
 
@@ -71,10 +109,9 @@ static uint32_t get_seed32_mt(void)
 
 
 
-static pthread_mutex_t printf_mt_mutex = PTHREAD_MUTEX_INITIALIZER;
-
 static int printf_mt(const char *format, ...)
 {
+#ifdef PTHREAD_ENABLED
     pthread_mutex_lock(&printf_mt_mutex);
     va_list args;
     va_start(args, format);
@@ -83,6 +120,20 @@ static int printf_mt(const char *format, ...)
     va_end(args);
     pthread_mutex_unlock(&printf_mt_mutex);
     return ans;
+#else
+    DWORD dwResult = WaitForSingleObject(printf_mt_mutex, INFINITE);
+    if (dwResult != WAIT_OBJECT_0) {
+        printf(stderr, "printf_mt internal error");
+        exit(1);
+    }
+    va_list args;
+    va_start(args, format);
+    printf("=== THREAD #%2d ===> ", (int) GetCurrentThread());
+    int ans = vprintf(format, args);
+    va_end(args);
+    ReleaseMutex(printf_mt_mutex);
+    return ans;
+#endif
 }
 
 /**
@@ -93,6 +144,7 @@ CallerAPI CallerAPI_init_mthr(void)
     CallerAPI intf;    
     if (entropy.state == 0) {
         Entropy_init(&entropy);
+        init_mutexes();
     }
     intf.get_seed32 = get_seed32_mt;
     intf.get_seed64 = get_seed64_mt;
@@ -102,6 +154,16 @@ CallerAPI CallerAPI_init_mthr(void)
     intf.strcmp = strcmp;
     return intf;
 }
+#else
+/**
+ * @brief Return one-threaded version of functions for platforms
+ * that don't support pthread.h
+ */
+CallerAPI CallerAPI_init_mthr(void)
+{
+    return CallerAPI_init();
+}
+#endif
 
 /////////////////////////////////////////////
 ///// Some platform-dependent functions /////
@@ -538,9 +600,12 @@ size_t TestsBattery_ntests(const TestsBattery *obj)
 }
 
 
-
 typedef struct {
+#ifdef PTHREAD_ENABLED
     pthread_t thrd_id;
+#elif defined(USE_WINTHREADS)
+    DWORD thrd_id;
+#endif
     TestDescription *tests;
     size_t *tests_inds;
     size_t ntests;
@@ -549,15 +614,14 @@ typedef struct {
     const CallerAPI *intf;
 } BatteryThread;
 
-
-static pthread_mutex_t battery_mutex = PTHREAD_MUTEX_INITIALIZER;
-
-void *battery_thread(void *data)
+#ifdef USE_WINTHREADS
+static DWORD WINAPI battery_thread(void *data)
+#else
+static void *battery_thread(void *data)
+#endif
 {
     BatteryThread *th_data = data;
-    pthread_mutex_lock(&battery_mutex);
     void *state = th_data->gi->create(th_data->intf);
-    pthread_mutex_unlock(&battery_mutex);
     th_data->intf->printf("vvvvvvvvvv Thread %lld started vvvvvvvvvv\n", (int) th_data->thrd_id);
     GeneratorState obj = {.gi = th_data->gi, .state = state, .intf = th_data->intf};
     for (size_t i = 0; i < th_data->ntests; i++) {
@@ -568,7 +632,11 @@ void *battery_thread(void *data)
         th_data->intf->printf("^^^^^ Thread %lld: test %s finished ^^^^^\n",
             (int) th_data->thrd_id, th_data->tests[i].name);
         th_data->results[ind].name = th_data->tests[i].name;
+#ifdef USE_WINTHREADS
+        th_data->results[ind].thread_id = (uint64_t) GetCurrentThread();
+#else
         th_data->results[ind].thread_id = (uint64_t) pthread_self();
+#endif
     }
     th_data->intf->printf("^^^^^^^^^^ Thread %lld finished ^^^^^^^^^^\n", (int) th_data->thrd_id);
     return NULL;
@@ -596,6 +664,10 @@ static int cmp_TestTiming(const void *aptr, const void *bptr)
 static TestTiming *sort_tests_by_time(const TestDescription *descr, size_t ntests)
 {
     TestTiming *out = calloc(ntests, sizeof(TestTiming));
+    if (out == NULL) {
+        printf(stderr, "sort_tests_by_time: out of memory");
+        exit(1);
+    }
     for (size_t i = 0; i < ntests; i++) {
         out[i].ind = i;
         out[i].nseconds = descr[i].nseconds;
@@ -659,14 +731,26 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
         }
         printf("\n");
     }
+#ifdef PTHREAD_ENABLED
     // Run threads
-    for (size_t i = 0; i < nthreads; i++) {        
+    for (size_t i = 0; i < nthreads; i++) {
         pthread_create(&th[i].thrd_id, NULL, battery_thread, &th[i]);
     }
     // Get data from threads
     for (size_t i = 0; i < nthreads; i++) {
         pthread_join(th[i].thrd_id, NULL);
     }
+#elif defined(USE_WINTHREADS)
+    // Run threads
+    for (size_t i = 0; i < nthreads; i++) {
+        DWORD thrd_id;
+        th[i].thrd_id = (uint64_t) CreateThread(NULL, 0, battery_thread, &th[i], 0, &thrd_id);
+    }
+    // Get data from threads
+    for (size_t i = 0; i < nthreads; i++) {
+        WaitForSingleObject((HANDLE)th[i].thrd_id, INFINITE);
+    }
+#endif
     // Deallocate array
     for (size_t i = 0; i < nthreads; i++) {
         free(th[i].tests);
@@ -674,6 +758,10 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
     }
     free(th);
     free(th_pos);
+
+//    printf("WARNING: multithreading is not supported on this platform\n");
+//    printf("Rerunning in one-threaded mode\n");
+//    TestsBattery_run(bat, gen, intf, TESTS_ALL, 1);
 }
 
 
