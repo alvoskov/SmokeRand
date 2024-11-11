@@ -130,7 +130,7 @@ static inline uint64_t Lcg128State_a128_iter(Lcg128State *obj,
 /**
  * @brier 128-bit LCG seeding procedure, suitable for MCGs (i.e. for c = 0)
  */
-static inline uint64_t Lcg128State_seed(Lcg128State *obj, const CallerAPI *intf)
+static inline void Lcg128State_seed(Lcg128State *obj, const CallerAPI *intf)
 {
 #ifdef UINT128_ENABLED
     obj->x = intf->get_seed64() | 0x1; // For MCG

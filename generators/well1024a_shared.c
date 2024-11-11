@@ -36,12 +36,12 @@ typedef struct {
 
 #define IND(ind) ( (obj->pos + (ind) ) & POS_MASK )
 
-static inline m3pos(int t, uint32_t v)
+static inline uint32_t m3pos(int t, uint32_t v)
 {
     return v ^ (v >> t);
 }
 
-static inline m3neg(int t, uint32_t v)
+static inline uint32_t m3neg(int t, uint32_t v)
 {
     return v ^ (v << (-t));
 }
