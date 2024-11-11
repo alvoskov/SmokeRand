@@ -23,7 +23,7 @@ static inline uint64_t get_bits_raw(void *state)
 {
     Lcg128State *obj = state;
     Lcg128State_a128_iter(obj, 0xdc879768, 0x60b11728995deb95, 1);
-#ifdef UINT128_ENABLED;
+#ifdef UINT128_ENABLED
     obj->x = ((obj->x << 32) >> 32); // mod 2^96
     return (uint64_t)(obj->x >> 64);
 #else
@@ -37,7 +37,7 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Lcg128State *obj = intf->malloc(sizeof(Lcg128State));
-#ifdef UINT128_ENABLED;
+#ifdef UINT128_ENABLED
     obj->x = intf->get_seed64() | 0x1;
 #else
     obj->x_low = intf->get_seed64() | 0x1;
@@ -52,7 +52,7 @@ static void *create(const CallerAPI *intf)
  */
 static int run_self_test(const CallerAPI *intf)
 {
-#ifdef UINT128_ENABLED;
+#ifdef UINT128_ENABLED
     Lcg128State obj = {.x = 1234567890};
 #else
     Lcg128State obj = {.x_low = 1234567890, .x_high = 0};

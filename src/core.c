@@ -665,7 +665,7 @@ static TestTiming *sort_tests_by_time(const TestDescription *descr, size_t ntest
 {
     TestTiming *out = calloc(ntests, sizeof(TestTiming));
     if (out == NULL) {
-        printf(stderr, "sort_tests_by_time: out of memory");
+        fprintf(stderr, "sort_tests_by_time: out of memory");
         exit(1);
     }
     for (size_t i = 0; i < ntests; i++) {
