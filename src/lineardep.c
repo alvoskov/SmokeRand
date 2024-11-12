@@ -245,8 +245,8 @@ TestResults linearcomp_test(GeneratorState *obj, size_t nbits, unsigned int bitp
     double sigma = sqrt(86.0/81.0);
     ans.x = berlekamp_massey(s, nbits);
     double z = (ans.x - mu) / sigma;
-    ans.p = 0.5 * erfc(-z / sqrt(2.0));
-    ans.alpha = 0.5 + 0.5 * erf(-z / sqrt(2.0));
+    ans.p = stdnorm_pvalue(z);
+    ans.alpha = stdnorm_cdf(z);
     obj->intf->printf("  L = %g; z = %g; p = %g\n", ans.x, z, ans.p);
     obj->intf->printf("\n");
     return ans;

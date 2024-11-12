@@ -427,6 +427,12 @@ double stdnorm_pvalue(double x)
 }
 
 
+double halfnormal_pvalue(double x)
+{
+    return erfc(x / sqrt(2.0));
+}
+
+
 //////////////////////////////////////////////////
 ///// Subroutines for working with C modules /////
 //////////////////////////////////////////////////

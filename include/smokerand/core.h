@@ -175,6 +175,7 @@ double poisson_cdf(double x, double lambda);
 double poisson_pvalue(double x, double lambda);
 double stdnorm_cdf(double x);
 double stdnorm_pvalue(double x);
+double halfnormal_pvalue(double x);
 double chi2_cdf(double x, unsigned long f);
 double chi2_pvalue(double x, unsigned long f);
 double chi2_to_stdnorm_approx(double x, unsigned long f);

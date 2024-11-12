@@ -190,10 +190,6 @@ static inline void BlockFrequency_count(BlockFrequency *obj,
     obj->nw16 += nbytes / 2;
 }
 
-static double halfnormal_pvalue(double x)
-{
-    return erfc(x / sqrt(2.0));
-}
 
 int BlockFrequency_calc(BlockFrequency *obj)
 {

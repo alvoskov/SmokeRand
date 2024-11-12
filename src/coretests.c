@@ -554,8 +554,8 @@ TestResults monobit_freq_test(GeneratorState *obj)
         }
     }
     ans.x = fabs((double) bitsum) / sqrt(len * obj->gi->nbits);
-    ans.p = erfc(ans.x / sqrt(2));
-    ans.alpha = erf(ans.x / sqrt(2));
+    ans.p = stdnorm_pvalue(ans.x);
+    ans.alpha = stdnorm_cdf(ans.x);
     obj->intf->printf("Monobit frequency test\n");
     obj->intf->printf("  Number of bits: %llu\n", len * obj->gi->nbits);
     obj->intf->printf("  sum = %lld; x = %g; p = %g\n",
