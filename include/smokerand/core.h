@@ -11,6 +11,7 @@
 #ifndef __SMOKERAND_CORE_H
 #define __SMOKERAND_CORE_H
 #include <stdint.h>
+#include <math.h>
 #ifndef M_PI
 #define M_PI (3.14159265358979323846)
 #endif
@@ -24,7 +25,7 @@ static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 {
     return _umul128(a, b, high);
 }
-#else
+#elif defined(__SIZEOF_INT128__)
 #define UINT128_ENABLED
 #define PTHREAD_ENABLED
 static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
@@ -33,6 +34,8 @@ static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
     *high = mul >> 64;
     return (uint64_t) mul;
 }
+#else
+#pragma message ("128-bit arithmetics is not supported by this compiler")
 #endif
 
 

@@ -12,12 +12,46 @@
 #include "smokerand/entropy.h"
 #include <time.h>
 
+#ifdef NO_X86_EXTENSIONS
+/**
+ * @brief XORs input with output of hardware RNG in CPU (rdseed).
+ */
+static uint64_t mix_rdseed(const uint64_t x)
+{
+    return x;
+}
+
+uint64_t cpuclock(void)
+{
+    return 0;
+}
+#else
 #if (defined(WIN32) || defined(WIN64)) && !defined(__MINGW32__) && !defined(__MINGW64__)
 #include <intrin.h>
 #pragma intrinsic(__rdtsc)
 #else
 #include <x86intrin.h>
 #endif
+/**
+ * @brief XORs input with output of hardware RNG in CPU (rdseed).
+ */
+static uint64_t mix_rdseed(const uint64_t x)
+{
+    long long unsigned int rd;
+    while (!_rdseed64_step(&rd)) {}
+    return x ^ rd;
+}
+
+uint64_t cpuclock(void)
+{
+    return __rdtsc();
+}
+#endif
+
+
+
+
+
 
 
 static inline uint64_t ror64(uint64_t x, uint64_t r)
@@ -70,22 +104,6 @@ static uint64_t mix_hash(uint64_t z)
     return z ^ z >> 28;
 }
 
-
-
-/**
- * @brief XORs input with output of hardware RNG in CPU (rdseed).
- */
-static uint64_t mix_rdseed(const uint64_t x)
-{
-    long long unsigned int rd;
-    while (!_rdseed64_step(&rd)) {}
-    return x ^ rd;
-}
-
-uint64_t cpuclock(void)
-{
-    return __rdtsc();
-}
 
 
 

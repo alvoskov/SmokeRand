@@ -91,10 +91,10 @@ static uint64_t get_seed64_mt(void)
 #else
     DWORD dwResult = WaitForSingleObject(get_seed64_mt_mutex, INFINITE);
     if (dwResult != WAIT_OBJECT_0) {
-        printf(stderr, "get_seed64_mt internal error");
+        fprintf(stderr, "get_seed64_mt internal error");
         exit(1);
     }
-    uint64_t seed = Entropy_seed64(&entropy, GetCurrentThread());
+    uint64_t seed = Entropy_seed64(&entropy, (uint64_t) GetCurrentThread());
     ReleaseMutex(get_seed64_mt_mutex);
     return seed;
 #endif
@@ -123,7 +123,7 @@ static int printf_mt(const char *format, ...)
 #else
     DWORD dwResult = WaitForSingleObject(printf_mt_mutex, INFINITE);
     if (dwResult != WAIT_OBJECT_0) {
-        printf(stderr, "printf_mt internal error");
+        fprintf(stderr, "printf_mt internal error");
         exit(1);
     }
     va_list args;
@@ -639,7 +639,7 @@ static void *battery_thread(void *data)
 #endif
     }
     th_data->intf->printf("^^^^^^^^^^ Thread %lld finished ^^^^^^^^^^\n", (int) th_data->thrd_id);
-    return NULL;
+    return 0;
 }
 
 typedef struct {

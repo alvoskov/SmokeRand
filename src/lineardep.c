@@ -16,7 +16,7 @@
 
 
 #ifdef __AVX2__
-#pragma message "AVX2 version will be compiled"
+#pragma message ("AVX2 version will be compiled")
 #include <x86intrin.h>
 #define VECINT_NBITS 256
 typedef __m256i VECINT;
@@ -30,7 +30,7 @@ static inline void xorbits(VECINT *a_j, const VECINT *a_i, size_t i1, size_t i2)
     }
 }
 #else
-#pragma message "X64-64 version will be compiled"
+#pragma message ("X64-64 version will be compiled")
 #define VECINT_NBITS 64
 typedef uint64_t VECINT;
 static inline void xorbits(VECINT *a_j, const VECINT *a_i, size_t i1, size_t i2)
@@ -99,11 +99,11 @@ static size_t calc_bin_matrix_rank(uint32_t *a, size_t n)
  */
 TestResults matrixrank_test(GeneratorState *obj, size_t n, unsigned int max_nbits)
 {
+    TestResults ans = {.name = "mrank", .p = NAN, .alpha = NAN, .x = 0, .thread_id = 0};
     int nmat = 64, Oi[3] = {0, 0, 0};
     double pi[3] = {0.1284, 0.5776, 0.2888};
     size_t mat_len = n * n / 32;
     size_t min_rank = n + 1;
-    TestResults ans = {.name = "mrank", .x = 0, .p = NAN};
     uint32_t *a = calloc(mat_len, sizeof(uint32_t));
     obj->intf->printf("Matrix rank test\n");
     obj->intf->printf("  n = %d. Number of matrices: %d\n", (int) n, nmat);
