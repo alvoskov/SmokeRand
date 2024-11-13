@@ -108,7 +108,7 @@ static uint64_t get_bits64(void *state)
 void StdinCollector_print_report()
 {
     printf("  Bytes processed: %llu (2^%.2f, 10^%.2f)\n",
-        nbytes_total, log2(nbytes_total), log10(nbytes_total));
+        nbytes_total, sr_log2(nbytes_total), log10(nbytes_total));
 }
 
 

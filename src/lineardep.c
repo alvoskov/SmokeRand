@@ -144,8 +144,8 @@ TestResults matrixrank_test(GeneratorState *obj, size_t n, unsigned int max_nbit
         ans.x += pow(Oi[i] - Ei, 2.0) / Ei;
         obj->intf->printf("  %5d %10d %10.4g\n", i + (int) n - 2, Oi[i], Ei);
     }
-    ans.p = exp(-0.5 * ans.x);
-    ans.alpha = -expm1(-0.5 * ans.x);
+    ans.p = chi2_pvalue(ans.x, 2); /*exp(-0.5 * ans.x);*/
+    ans.alpha = chi2_cdf(ans.x, 2); /*-expm1(-0.5 * ans.x);*/
     obj->intf->printf("  Minimal observed rank: %lu\n", (unsigned long) min_rank);
     obj->intf->printf("  x = %g; p = %g; 1-p = %g\n", ans.x, ans.p, ans.alpha);
     obj->intf->printf("\n");

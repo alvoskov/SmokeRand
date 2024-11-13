@@ -115,7 +115,7 @@ static int printf_mt(const char *format, ...)
     pthread_mutex_lock(&printf_mt_mutex);
     va_list args;
     va_start(args, format);
-    printf("=== THREAD #%2d ===> ", (int) pthread_self());
+    printf("=== THREAD #%2llu ===> ", (unsigned long long) pthread_self());
     int ans = vprintf(format, args);
     va_end(args);
     pthread_mutex_unlock(&printf_mt_mutex);
@@ -128,7 +128,7 @@ static int printf_mt(const char *format, ...)
     }
     va_list args;
     va_start(args, format);
-    printf("=== THREAD #%2d ===> ", (int) GetCurrentThread());
+    printf("=== THREAD #%2llu ===> ", (unsigned long long) GetCurrentThread());
     int ans = vprintf(format, args);
     va_end(args);
     ReleaseMutex(printf_mt_mutex);
@@ -215,6 +215,55 @@ const char *interpret_pvalue(double pvalue)
 }
 
 
+double sr_expm1(double x)
+{
+    if (x < -0.05 || x > 0.05) {
+        return exp(x) - 1.0;
+    } else {
+        long double sum = 0.0, sum_old = 1.0, t = x;
+        int i = 1;
+        while (sum != sum_old) {
+            sum_old = sum;
+            sum += t;
+            t *= x / (++i);
+        }
+        return sum;
+    }
+}
+
+double sr_log2(double x)
+{
+    return log(x) / log(2.0);
+}
+
+/**
+ * @brief Logarithm of gamma function.
+ * @details Based on Lancoz approximation, allows to compile SmokeRand core
+ * in environments with simpilified and not fully C99 consistent math library.
+ */
+double sr_lgamma(double x)
+{
+    static const long double b[] = {
+        1.000000000000000174665L,
+        5716.400188274341378936L,
+        -14815.30426768413909056L,
+        14291.49277657478554016L,
+        -6348.160217641458813453L,
+        1301.608286058321874101L,
+        -108.176705351436963469L,
+        2.605696505611755827694L,
+        -0.007423452510201416131304L,
+        5.384136432507762221912e-08L,
+        -4.023533141267529787103e-09L,
+    };
+    static const long double r = 9.0;
+    long double az = b[0], d = --x + r + 0.5;
+    for (int k = 1; k < 11; k++) {
+        az += b[k] / (x + k);
+    }
+    return log(az) + 0.5 * log(2*M_PI) + (x + 0.5) * log(d) - d;
+}
+
 
 
 
@@ -240,7 +289,7 @@ double ks_pvalue(double x)
 
 static double gammainc_lower_series(double a, double x)
 {
-    double mul = exp(-x + a*log(x) - lgamma(a)), sum = 0.0;
+    double mul = exp(-x + a*log(x) - sr_lgamma(a)), sum = 0.0;
     double t = 1.0 / a;
     for (int i = 1; i < 1000000 && t > DBL_EPSILON; i++) {
         sum += t;
@@ -251,7 +300,7 @@ static double gammainc_lower_series(double a, double x)
 
 static double gammainc_upper_contfrac(double a, double x)
 {
-    double mul = exp(-x + a*log(x) - lgamma(a));
+    double mul = exp(-x + a*log(x) - sr_lgamma(a));
     double b0 = x + 1 - a, b1 = x + 3 - a;
     double p0 = b0, q0 = 1.0;
     double p1 = b1 * b0 + (a - 1.0), q1 = b1;
@@ -317,6 +366,16 @@ double poisson_pvalue(double x, double lambda)
     return gammainc(floor(x) + 1.0, lambda);
 }
 
+
+static double binomial_coeff(unsigned long n, unsigned long k)
+{
+    double c = 1.0;
+    for (unsigned long i = 1; i <= k; i++) {
+        c *= (n + 1.0 - i) / (double) i;
+    }
+    return c;
+}
+
 /**
  * @brief Probability function for binomial distribution.
  * @param k Number of successful attempts.
@@ -325,7 +384,7 @@ double poisson_pvalue(double x, double lambda)
  */
 double binomial_pdf(unsigned long k, unsigned long n, double p)
 {
-    double ln_pdf = lgamma(n + 1) - lgamma(k + 1) - lgamma(n - k + 1) +
+    double ln_pdf = log(binomial_coeff(n, k)) +
         k * log(p) + (n - k) * log(1.0 - p);
     return exp(ln_pdf);
 }
@@ -358,18 +417,14 @@ double chi2_to_stdnorm_approx(double x, unsigned long f)
 double chi2_cdf(double x, unsigned long f)
 {
     if (f == 1) {
-        return erf(sqrt(0.5 * x));
+        return gammainc(0.5, x / 2.0); /* erf(sqrt(0.5 * x)); */
     } else if (f == 2) {
-        return -expm1(-0.5 * x);
+        return -sr_expm1(-0.5 * x);
     } else if (f < 100000) {
         return gammainc((double) f / 2.0, x / 2.0);
     } else {
         double z = chi2_to_stdnorm_approx(x, f);
-        if (z > -3) {
-            return 0.5 + 0.5 * erf(z / sqrt(2));
-        } else {
-            return 0.5 * erfc(-z / sqrt(2));
-        }
+        return stdnorm_cdf(z);
     }
 }
 
@@ -388,48 +443,96 @@ double chi2_cdf(double x, unsigned long f)
 double chi2_pvalue(double x, unsigned long f)
 {
     if (f == 1) {
-        return erfc(sqrt(0.5 * x));
+        return 2.0 * stdnorm_pvalue(sqrt(x));//erfc(sqrt(0.5 * x));
     } else if (f == 2) {
         return exp(-0.5 * x);
     } else if (f < 100000) {
         return gammainc_upper((double) f / 2.0, x / 2.0);
     } else {
-        double s2 = 2.0 / (9.0 * f);
-        double mu = 1 - s2;
-        double z = (pow(x/f, 1.0/3.0) - mu) / sqrt(s2);
-        return 0.5 * erfc(z / sqrt(2));
+        double z = chi2_to_stdnorm_approx(x, f);
+        return stdnorm_pvalue(z);
     }
 }
 
+/**
+ * @brief Implementation of standard normal distribution p.d.f.
+ */
+static double stdnorm_pdf(double x)
+{
+    const double ln_2pi = 1.83787706640934548356; /* OEIS A061444 */
+    return exp(-(x*x + ln_2pi) / 2);
+}
 
 /**
  * @brief Implementation of standard normal distribution c.d.f.
+ * @details Allows to compile SmokeRand in the case of absent erf/erfc
+ * functions in C standard library.
+ *
+ * An alternative implementation for fully C99 compilant compilers:
+ * if (x > -3) {
+ *     return 0.5 + 0.5 * erf(x / sqrt(2));
+ * } else {
+ *     return 0.5 * erfc(-x / sqrt(2));
+ * }
  */
 double stdnorm_cdf(double x)
 {
-    if (x > -3) {
-        return 0.5 + 0.5 * erf(x / sqrt(2));
+    int i;
+    if (x < -2.5) { /* Continued fractions */
+        long double f = x / (x*x + 1), c = x, d = f, f_old = f - 1;
+        for (i = 2; f - f_old != 0; i++) {
+            c = x + i / c;
+            d = 1 / (x + i*d);
+            f_old = f;
+            f *= c * d;
+        }
+        return -f * stdnorm_pdf(x);
+    } else if (x < 2.5) { /* Taylor series */
+        long double q = x * x / 4, a0 = 1, a1 = q, b = a0;
+        for (i = 2; 1 + a0 != 1 || 1 + a1 != 1; i += 2) {
+            a0 = q * (a1 - a0) / i;
+            a1 = q * (a0 - a1) / (i + 1);
+            b += a0 / (i + 1);
+        }
+        return 0.5 + x * stdnorm_pdf(x / 2) * b;
+    } else if (x >= 2.5) {
+        return 1.0 - stdnorm_cdf(-x);
     } else {
-        return 0.5 * erfc(-x / sqrt(2));
+        return NAN;
     }
 }
 
 /**
  * @brief Implementation of standard normal distribution c.c.d.f. (p-value)
+ * @details Allows to compile SmokeRand in the case of absent erf/erfc
+ * functions in C standard library.
+ *
+ * An alternative implementation for fully C99 compilant compilers:
+ *
+ *     if (x > -3) {
+ *         return 0.5 * erfc(x / sqrt(2));
+ *     } else {
+ *         return 1.0 - 0.5 * erfc(-x / sqrt(2));
+ *     }
  */
 double stdnorm_pvalue(double x)
 {
-    if (x > -3) {
-        return 0.5 * erfc(x / sqrt(2));
-    } else {
-        return 1.0 - 0.5 * erfc(-x / sqrt(2));
-    }
+    return stdnorm_cdf(-x);
 }
 
 
+/**
+ * @brief Implementation of half normal distribution c.c.d.f. (p-value)
+ * @details Allows to compile SmokeRand in the case of absent erf/erfc
+ * functions in C standard library.
+ *
+ * An alternative implementation for fully C99 compilant compilers:
+ *
+ *     return erfc(x / sqrt(2.0));
+ */
 double halfnormal_pvalue(double x)
 {
-    return erfc(x / sqrt(2.0));
+    return 2.0 * stdnorm_pvalue(x);
 }
 
 
@@ -465,7 +568,7 @@ GeneratorModule GeneratorModule_load(const char *libname)
     };
 #endif
 
-    GetGenInfoFunc gen_getinfo = (void *) DLSYM_WRAPPER(mod.lib, "gen_getinfo");
+    GetGenInfoFunc gen_getinfo = (GetGenInfoFunc)( (void *) DLSYM_WRAPPER(mod.lib, "gen_getinfo") );
     if (gen_getinfo == NULL) {
         fprintf(stderr, "Cannot find the 'gen_getinfo' function\n");
         mod.valid = 0;
@@ -628,15 +731,16 @@ static void *battery_thread(void *data)
 {
     BatteryThread *th_data = data;
     void *state = th_data->gi->create(th_data->intf);
-    th_data->intf->printf("vvvvvvvvvv Thread %lld started vvvvvvvvvv\n", (int) th_data->thrd_id);
-    GeneratorState obj = {.gi = th_data->gi, .state = state, .intf = th_data->intf};
+    th_data->intf->printf("vvvvvvvvvv Thread %lld started vvvvvvvvvv\n",
+        (unsigned long long) th_data->thrd_id);
+    GeneratorState obj = GeneratorState_create(th_data->gi, state, th_data->intf);
     for (size_t i = 0; i < th_data->ntests; i++) {
         size_t ind = th_data->tests_inds[i];
         th_data->intf->printf("vvvvv Thread %lld: test %s started vvvvv\n",
-            (int) th_data->thrd_id, th_data->tests[i].name);
+            (unsigned long long) th_data->thrd_id, th_data->tests[i].name);
         th_data->results[ind] = th_data->tests[i].run(&obj);
         th_data->intf->printf("^^^^^ Thread %lld: test %s finished ^^^^^\n",
-            (int) th_data->thrd_id, th_data->tests[i].name);
+            (unsigned long long) th_data->thrd_id, th_data->tests[i].name);
         th_data->results[ind].name = th_data->tests[i].name;
 #ifdef USE_WINTHREADS
         th_data->results[ind].thread_id = (uint64_t) GetCurrentThread();
@@ -644,7 +748,8 @@ static void *battery_thread(void *data)
         th_data->results[ind].thread_id = (uint64_t) pthread_self();
 #endif
     }
-    th_data->intf->printf("^^^^^^^^^^ Thread %lld finished ^^^^^^^^^^\n", (int) th_data->thrd_id);
+    th_data->intf->printf("^^^^^^^^^^ Thread %lld finished ^^^^^^^^^^\n",
+        (unsigned long long) th_data->thrd_id);
     return 0;
 }
 
@@ -983,7 +1088,6 @@ GeneratorInfo interleaved_generator_set(const GeneratorInfo *gi)
         .nbits = 32, .self_test = gi->self_test};
     return interleaved_gen;
 }
-
 
 
 ///////////////////////////////////////////////

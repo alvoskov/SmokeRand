@@ -72,7 +72,7 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
     uint64_t *x = calloc(opts->n, sizeof(uint64_t));
     if (x == NULL) {
         obj->intf->printf("  Not enough memory (2^%.0f bytes is required)\n",
-            log2(opts->n * 8.0));
+            sr_log2(opts->n * 8.0));
         return ans;
     }
     for (size_t i = 0; i < opts->n; i++) {
@@ -217,7 +217,7 @@ int BlockFrequency_calc(BlockFrequency *obj)
     }
     double p_bytes = halfnormal_pvalue(zmax_bytes);
     double p_w16 = halfnormal_pvalue(zmax_w16);
-    printf("2^%g bytes analyzed\n", log2(obj->nbytes));
+    printf("2^%g bytes analyzed\n", sr_log2(obj->nbytes));
     printf("  %10s %10s %10s %10s %10s %10s\n",
         "Chunk", "chi2emp", "p(chi2)", "zmax", "p(zmax)", "p(crit)");
     printf("  %10s %10g %10.2g %10.3g %10.2g %10.2g\n",
