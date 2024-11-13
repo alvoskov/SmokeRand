@@ -27,7 +27,7 @@ static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 }
 #elif defined(__SIZEOF_INT128__)
 #define UINT128_ENABLED
-#define PTHREAD_ENABLED
+#define USE_PTHREADS
 static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 {
     __uint128_t mul = ((__uint128_t) a) * b;
@@ -41,7 +41,7 @@ static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
 #include <windows.h>
-#ifndef PTHREAD_ENABLED
+#ifndef USE_PTHREADS
 #define USE_WINTHREADS
 #endif
 #define EXPORT __declspec( dllexport )

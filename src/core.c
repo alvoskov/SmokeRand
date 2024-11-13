@@ -18,7 +18,7 @@
 #include <string.h>
 #include <time.h>
 #include <fcntl.h>
-#ifdef PTHREAD_ENABLED
+#ifdef USE_PTHREADS
 #include <pthread.h>
 #endif
 
@@ -62,16 +62,28 @@ void CallerAPI_free(void)
 ///// Multithreaded API /////
 /////////////////////////////
 
-#if defined(PTHREAD_ENABLED) || defined(USE_WINTHREADS)
+#if defined(USE_PTHREADS) || defined(USE_WINTHREADS)
 
-#ifdef PTHREAD_ENABLED
+#ifdef USE_PTHREADS
+// Begin of pthreads-specific code
 static pthread_mutex_t get_seed64_mt_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t printf_mt_mutex = PTHREAD_MUTEX_INITIALIZER;
-
 static void init_mutexes()
 {
 }
+#define MUTEX_LOCK(mutex) pthread_mutex_lock(&mutex);
+#define MUTEX_UNLOCK(mutex) pthread_mutex_unlock(&mutex);
+static inline uint64_t get_current_thread_id()
+{
+    return (uint64_t) pthread_self();
+}
+static inline uint64_t get_thread_id(pthread_t handle)
+{
+    return (uint64_t) handle;
+}
+// End of pthreads-specific code
 #else
+// Begin of WinAPI-specific code
 static HANDLE get_seed64_mt_mutex = NULL;
 static HANDLE printf_mt_mutex = NULL;
 static void init_mutexes()
@@ -79,25 +91,28 @@ static void init_mutexes()
     get_seed64_mt_mutex = CreateMutex(NULL, FALSE, "seed64_mutex");
     printf_mt_mutex = CreateMutex(NULL, FALSE, "printf_mutex");
 }
-
+#define MUTEX_LOCK(mutex) DWORD dwResult = WaitForSingleObject(mutex, INFINITE); \
+    if (dwResult != WAIT_OBJECT_0) { \
+        fprintf(stderr, "get_seed64_mt internal error"); \
+        exit(1); \
+    }
+#define MUTEX_UNLOCK(mutex) ReleaseMutex(mutex);
+static inline uint64_t get_current_thread_id()
+{
+    return (uint64_t) GetCurrentThreadId();
+}
+static inline uint64_t get_thread_id(HANDLE handle)
+{
+    return (uint64_t) GetThreadId(handle);
+}
+// End of WinAPI-specific code
 #endif
 
 static uint64_t get_seed64_mt(void)
 {
-#ifdef PTHREAD_ENABLED
-    pthread_mutex_lock(&get_seed64_mt_mutex);
-    uint64_t seed = Entropy_seed64(&entropy, pthread_self());
-    pthread_mutex_unlock(&get_seed64_mt_mutex);
-#else
-    DWORD dwResult = WaitForSingleObject(get_seed64_mt_mutex, INFINITE);
-    if (dwResult != WAIT_OBJECT_0) {
-        fprintf(stderr, "get_seed64_mt internal error");
-        exit(1);
-    }
-    uint64_t seed = Entropy_seed64(&entropy, (uint64_t) GetCurrentThread());
-    ReleaseMutex(get_seed64_mt_mutex);
-    return seed;
-#endif
+    MUTEX_LOCK(get_seed64_mt_mutex);
+    uint64_t seed = Entropy_seed64(&entropy, get_current_thread_id());
+    MUTEX_UNLOCK(get_seed64_mt_mutex);
     return seed;
 }
 
@@ -111,29 +126,14 @@ static uint32_t get_seed32_mt(void)
 
 static int printf_mt(const char *format, ...)
 {
-#ifdef PTHREAD_ENABLED
-    pthread_mutex_lock(&printf_mt_mutex);
+    MUTEX_LOCK(printf_mt_mutex);
     va_list args;
     va_start(args, format);
-    printf("=== THREAD #%2llu ===> ", (unsigned long long) pthread_self());
+    printf("=== THREAD #%2llu ===> ", get_current_thread_id());
     int ans = vprintf(format, args);
     va_end(args);
-    pthread_mutex_unlock(&printf_mt_mutex);
+    MUTEX_UNLOCK(printf_mt_mutex);
     return ans;
-#else
-    DWORD dwResult = WaitForSingleObject(printf_mt_mutex, INFINITE);
-    if (dwResult != WAIT_OBJECT_0) {
-        fprintf(stderr, "printf_mt internal error");
-        exit(1);
-    }
-    va_list args;
-    va_start(args, format);
-    printf("=== THREAD #%2llu ===> ", (unsigned long long) GetCurrentThread());
-    int ans = vprintf(format, args);
-    va_end(args);
-    ReleaseMutex(printf_mt_mutex);
-    return ans;
-#endif
 }
 
 /**
@@ -268,10 +268,15 @@ double sr_lgamma(double x)
 
 
 /**
- * @brief A crude approximation for Kolmogorov-Smirnov test p-values.
+ * @brief Computation of p-values for Kolmogorov-Smirnov test.
  * @details Control (x, p) points from scipy.special.kolmogorov:
  * - (5.0, 3.8575e-22), (2.0, 0.0006709), (1.1, 0.1777),
  * - (1.0, 0.2700), (0.9, 0.3927)
+ *
+ * References:
+ * 1. Marsaglia G., Tsang W. W., Wang J.Evaluating Kolmogorov's Distribution
+ *    // Journal of Statistical Software. 2003. V. 8. N 18. P. 1-4.
+ *    https://doi.org/10.18637/jss.v008.i18
  */
 double ks_pvalue(double x)
 {
@@ -279,10 +284,23 @@ double ks_pvalue(double x)
     if (x <= 0.0) {
         return 1.0;
     } else if (x > 1.0) {
-        return 2.0 * (exp(-2.0 * xsq) - exp(-8.0 * xsq));
+        long double sum = 0.0, old_sum = 1.0, i = 1;
+        int s = 1;
+        while (sum != old_sum) {
+            old_sum = sum;
+            sum += s * exp(-2.0 * i * i * xsq);
+            s = -s; i++;
+        }
+        return 2.0 * sum;
     } else {
-        double t = -M_PI * M_PI / (8 * xsq);
-        return 1.0 - sqrt(2 * M_PI) / x * (exp(t) + exp(9*t));
+        long double sum = 0.0, old_sum = 1.0, i = 1;
+        long double t = -M_PI * M_PI / (8 * xsq);
+        while (sum != old_sum) {
+            old_sum = sum;
+            sum += exp((2*i - 1) * (2*i - 1) * t);
+            i++;
+        }
+        return 1.0 - sqrt(2 * M_PI) / x * sum;
     }
 }
 
@@ -710,10 +728,10 @@ size_t TestsBattery_ntests(const TestsBattery *obj)
 
 
 typedef struct {
-#ifdef PTHREAD_ENABLED
+#ifdef USE_PTHREADS
     pthread_t thrd_id;
 #elif defined(USE_WINTHREADS)
-    DWORD thrd_id;
+    HANDLE thrd_id;
 #endif
     TestDescription *tests;
     size_t *tests_inds;
@@ -732,24 +750,20 @@ static void *battery_thread(void *data)
     BatteryThread *th_data = data;
     void *state = th_data->gi->create(th_data->intf);
     th_data->intf->printf("vvvvvvvvvv Thread %lld started vvvvvvvvvv\n",
-        (unsigned long long) th_data->thrd_id);
+        get_thread_id(th_data->thrd_id));
     GeneratorState obj = GeneratorState_create(th_data->gi, state, th_data->intf);
     for (size_t i = 0; i < th_data->ntests; i++) {
         size_t ind = th_data->tests_inds[i];
         th_data->intf->printf("vvvvv Thread %lld: test %s started vvvvv\n",
-            (unsigned long long) th_data->thrd_id, th_data->tests[i].name);
+            get_thread_id(th_data->thrd_id), th_data->tests[i].name);
         th_data->results[ind] = th_data->tests[i].run(&obj);
         th_data->intf->printf("^^^^^ Thread %lld: test %s finished ^^^^^\n",
-            (unsigned long long) th_data->thrd_id, th_data->tests[i].name);
+            get_thread_id(th_data->thrd_id), th_data->tests[i].name);
         th_data->results[ind].name = th_data->tests[i].name;
-#ifdef USE_WINTHREADS
-        th_data->results[ind].thread_id = (uint64_t) GetCurrentThread();
-#else
-        th_data->results[ind].thread_id = (uint64_t) pthread_self();
-#endif
+        th_data->results[ind].thread_id = get_current_thread_id();
     }
     th_data->intf->printf("^^^^^^^^^^ Thread %lld finished ^^^^^^^^^^\n",
-        (unsigned long long) th_data->thrd_id);
+        get_thread_id(th_data->thrd_id));
     return 0;
 }
 
@@ -842,7 +856,7 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
         }
         printf("\n");
     }
-#ifdef PTHREAD_ENABLED
+#ifdef USE_PTHREADS
     // Run threads
     for (size_t i = 0; i < nthreads; i++) {
         pthread_create(&th[i].thrd_id, NULL, battery_thread, &th[i]);
@@ -855,7 +869,7 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
     // Run threads
     for (size_t i = 0; i < nthreads; i++) {
         DWORD thrd_id;
-        th[i].thrd_id = (uint64_t) CreateThread(NULL, 0, battery_thread, &th[i], 0, &thrd_id);
+        th[i].thrd_id = CreateThread(NULL, 0, battery_thread, &th[i], 0, &thrd_id);
     }
     // Get data from threads
     for (size_t i = 0; i < nthreads; i++) {
