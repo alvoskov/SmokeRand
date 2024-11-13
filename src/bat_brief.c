@@ -28,35 +28,10 @@ static TestResults bspace32_1d_hi_test(GeneratorState *obj)
     return bspace_nd_test(obj, &opts);
 }
 
-
-typedef struct {
-    const GeneratorInfo *gen32;
-    void *state;
-} Bits64From32State;
-
-static uint64_t get_bits64_from32(void *state)
-{
-    Bits64From32State *obj = state;
-    uint64_t x = obj->gen32->get_bits(obj->state);
-    uint64_t y = obj->gen32->get_bits(obj->state);
-    return (x << 32) | y;
-}
-
-
 static TestResults bspace64_1d_test(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 64, .ndims = 1, .nsamples = 40, .get_lower = 1};
-    if (obj->gi->nbits == 64) {
-        return bspace_nd_test(obj, &opts);
-    } else {
-        GeneratorInfo gen32dup = *(obj->gi);
-        gen32dup.get_bits = get_bits64_from32;
-        Bits64From32State statedup = {obj->gi, obj->state};
-        GeneratorState objdup = {.gi = &gen32dup, .state = &statedup, .intf = obj->intf};
-        return bspace_nd_test(&objdup, &opts);
-    }
+    return bspace64_1d_ns_test(obj, 40);
 }
-
 
 static TestResults bspace32_2d_test(GeneratorState *obj)
 {
@@ -166,7 +141,7 @@ static TestResults hamming_dc6_low1_test(GeneratorState *obj)
 void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
-    const TestDescription tests[] = {
+    static const TestDescription tests[] = {
         {"monobit_freq", monobit_freq_test, 2},
         {"byte_freq", byte_freq_test, 2},
         {"bspace64_1d", bspace64_1d_test, 23},

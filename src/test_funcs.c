@@ -86,7 +86,7 @@ int test_chi2()
             x, f, x_ref, x_calc, x_calc + xc_calc - 1.0);
     }
 
-    printf("chi2cdf test\n");
+    printf("chi2ccdf test\n");
     printf("%10s %8s %16s %16s %16s\n",
         "x", "f", "xcref", "xccalc", "x+xc-1");
     for (size_t i = 0; ccdf_data[i] != 0; i += 3) {
@@ -117,6 +117,7 @@ int test_ks()
         10.0,   2.767793053473475e-87,
         0.0
     };
+    printf("test_ks\n");
     for (size_t i = 0; k_data[i] != 0.0; i += 2) {
         double k = k_data[i];
         double ccdf_ref = k_data[i + 1];
@@ -148,6 +149,60 @@ int test_binopdf()
     return 0;
 }
 
+int test_expm1()
+{
+    static const double xref[] = {
+        -5.0, -0.5, -0.01, -0.001, -1e-14,
+        1e-14, 0.001, 0.01, 0.5, 5.0
+    };
+    printf("test_expm1\n");
+    for (int i = 0; i < 10; i++) {
+        double x = xref[i];
+        double fref = expm1(x);
+        printf("%7.3f %25.16g %25.16g\n",
+            x, sr_expm1(x), fref);
+    }
+    return 0;
+}
+
+int test_lgamma()
+{
+    printf("test_lgamma\n");
+    for (int i = 0; i < 10; i++) {
+        printf("%25.16g %25.16g\n", sr_lgamma(i), lgamma(i));
+    }
+    printf("\n");
+    return 0;
+}
+
+int test_stdnorm()
+{
+    static const double ref[] = {
+        -36.0,  4.182624065797386e-284,
+        -5.0,   2.866515718791946e-07,
+        -1.0,   1.586552539314571e-01,
+         0.0,   5.000000000000000e-01,
+         1.0,   8.413447460685429e-01,
+         5.0,   9.999997133484281e-01
+    };
+
+    for (int i = 0; i < 5; i++) {
+        double x = ref[2*i], pref = ref[2*i + 1];
+        printf("%7.3f %25.16g %25.16g %8.2e\n",
+            x, stdnorm_cdf(x), pref,
+            stdnorm_cdf(x) + stdnorm_pvalue(x) - 1.0);
+    }
+    return 0;
+}
+
+int test_halfnormal()
+{
+    double x = 2.8;
+    printf("%25.16g %25.16g\n", halfnormal_pvalue(x), erfc(x / sqrt(2.0)));
+        
+    return 0;
+}
+
 
 int main()
 {
@@ -155,6 +210,10 @@ int main()
     test_ks();
     test_binopdf();
     test_hamming_weights();
+    test_expm1();
+    test_lgamma();
+    test_stdnorm();
+    test_halfnormal();
     test_radixsort64();
     return 0;
 }

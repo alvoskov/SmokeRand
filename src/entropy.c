@@ -11,6 +11,7 @@
  */
 #include "smokerand/entropy.h"
 #include <time.h>
+#include <stdlib.h>
 
 #ifdef NO_X86_EXTENSIONS
 /**
@@ -147,13 +148,17 @@ int xxtea_test()
     static const uint64_t OUT1 = 0xc4cc7f1cc007378c;
     uint32_t key[4] = {0, 0, 0, 0};
     // Test 1
-    if (xxtea_encrypt(0, key) != OUT0)
+    if (xxtea_encrypt(0, key) != OUT0) {
+        //fprintf(stderr, "0: %llX %llX", xxtea_encrypt(0, key), OUT0);
         return 0;
+    }
     // Test 2
     key[0] = 0x08040201; key[1] = 0x80402010;
     key[2] = 0xf8fcfeff; key[3] = 0x80c0e0f0; 
-    if (xxtea_encrypt(0x80c0e0f0f8fcfeff, key) != OUT1)
+    if (xxtea_encrypt(0x80c0e0f0f8fcfeff, key) != OUT1) {
+        //fprintf(stderr, "0: %llX %llX", xxtea_encrypt(0x80c0e0f0f8fcfeff, key), OUT1);
         return 0;
+    }
     return 1;
 }
 
@@ -165,7 +170,9 @@ uint64_t Entropy_seed64(Entropy *obj, uint64_t thread_id)
 {
     uint64_t seed = xxtea_encrypt(Entropy_nextstate(obj), obj->key);
     if (obj->slog_pos != obj->slog_len - 1) {
-        SeedLogEntry log_entry = {.seed = seed, .thread_id = thread_id};
+        SeedLogEntry log_entry;
+        log_entry.seed = seed;
+        log_entry.thread_id = thread_id;
         obj->slog[obj->slog_pos++] = log_entry;
     }
     return seed;

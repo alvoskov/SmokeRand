@@ -112,6 +112,17 @@ typedef struct {
     const CallerAPI *intf; ///< Will be used for output
 } GeneratorState;
 
+static inline GeneratorState GeneratorState_create(const GeneratorInfo *gi,
+    void *state, const CallerAPI *intf)
+{
+    GeneratorState obj;
+    obj.gi = gi;
+    obj.state = state;
+    obj.intf = intf;
+    return obj;
+}
+
+
 
 typedef struct
 {
@@ -168,6 +179,9 @@ typedef enum {
 
 const char *interpret_pvalue(double pvalue);
 PValueCategory get_pvalue_category(double pvalue);
+double sr_expm1(double x);
+double sr_log2(double x);
+double sr_lgamma(double x);
 double ks_pvalue(double x);
 double gammainc(double a, double x);
 double binomial_pdf(unsigned long k, unsigned long n, double p);

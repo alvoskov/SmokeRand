@@ -177,7 +177,7 @@ void battery_self_test(GeneratorInfo *gen, const CallerAPI *intf)
     }    
 }
 
-void print_help()
+void print_help(void)
 {
     printf("Usage: smokerand battery generator_lib\n");
     printf(" battery: battery name; supported batteries:\n");

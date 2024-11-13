@@ -218,13 +218,13 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
         return ans;
     }
     unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
-    size_t len = pow(2.0, (nbits_total + 4.0) / 3.0);
+    unsigned long len = pow(2.0, (nbits_total + 4.0) / 3.0);
     double lambda = pow(len, 3.0) / (4 * pow(2.0, nbits_total));
     // Show information about the test
     obj->intf->printf("Birthday spacings test\n");
-    obj->intf->printf("  ndims = %d; nbits_per_dim = %d; get_lower = %d\n",
+    obj->intf->printf("  ndims = %u; nbits_per_dim = %u; get_lower = %d\n",
         opts->ndims, opts->nbits_per_dim, opts->get_lower);
-    obj->intf->printf("  nsamples = %lld; len = %lld, lambda = %g\n",
+    obj->intf->printf("  nsamples = %lu; len = %lu, lambda = %g\n",
         opts->nsamples, len, lambda);
     // Compute number of duplicates
     unsigned long ndups_total = 0;
@@ -240,6 +240,41 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     obj->intf->printf("\n");
     return ans;
 }
+
+static uint64_t get_bits64_from32(void *state)
+{
+    GeneratorState *obj = state;
+    uint64_t x = obj->gi->get_bits(obj->state);
+    uint64_t y = obj->gi->get_bits(obj->state);
+    return (x << 32) | y;
+}
+
+
+/**
+ * @brief One-dimensional 32-bit birthday spacings test.
+ * In the case of 32-bit PRNG it automatically switches to the 2D 32-bit
+ * birthday spacings test.
+ */
+TestResults bspace64_1d_ns_test(GeneratorState *obj, unsigned int nsamples)
+{
+    BSpaceNDOptions opts;
+    opts.nbits_per_dim = 64;
+    opts.ndims = 1;
+    opts.nsamples = nsamples;
+    opts.get_lower = 1;
+    if (obj->gi->nbits == 64) {
+        return bspace_nd_test(obj, &opts);
+    } else {
+        GeneratorInfo genenv_info = *(obj->gi);
+        GeneratorState genenv;
+        genenv_info.get_bits = get_bits64_from32;
+        genenv.gi = &genenv_info;
+        genenv.state = obj; // Enveloped generator
+        genenv.intf = obj->intf;
+        return bspace_nd_test(&genenv, &opts);
+    }
+}
+
 
 /**
  * @brief A specialized version of birthday spacings test designed for
@@ -259,6 +294,10 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
  *
  * Both TMFn and decimated birthday spacings test have comparable sensitivity
  * and require about 128 GiB of data to detect 128-bit LCG.
+ * @param step  Decimation step: only 1 of `step` values will be used by the
+ *              test. 256 is enough to detect 128-bit LCG with truncation of
+ *              lower 64 bits, 8192 is enough to detect the same PRNG with
+ *              truncation of lower 96 bits.
  */
 TestResults bspace8_8d_decimated_test(GeneratorState *obj, unsigned int step)
 {
@@ -407,7 +446,7 @@ TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     obj->intf->printf("CollisionOver test\n");
     obj->intf->printf("  ndims = %d; nbits_per_dim = %d; get_lower = %d\n",
         opts->ndims, opts->nbits_per_dim, opts->get_lower);
-    obj->intf->printf("  nsamples = %lld; len = %lld, mu = %g * %d\n",
+    obj->intf->printf("  nsamples = %lu; len = %lu, mu = %g * %d\n",
         opts->nsamples, n, mu, (int) opts->nsamples);
 
     ans.x = 0;
@@ -486,7 +525,8 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     ans.name = "Gap";
     obj->intf->printf("Gap test\n");
     obj->intf->printf("  alpha = 0.0; beta = %g; shl = %u;\n", p, opts->shl);
-    obj->intf->printf("  ngaps = %llu; nbins = %llu\n", ngaps, nbins);
+    obj->intf->printf("  ngaps = %lu; nbins = %lu\n",
+        (unsigned long) ngaps, (unsigned long) nbins);
     if (!gap_test_guard(obj, opts)) {
         obj->intf->printf("  Generator output doesn't hit the gap! p <= 1e-15\n");
         ans.p = 1.0e-15;
@@ -514,7 +554,8 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     free(Oi);
     ans.p = chi2_pvalue(ans.x, nbins - 1);
     ans.alpha = chi2_cdf(ans.x, nbins - 1);
-    obj->intf->printf("  Values processed: %llu (2^%.1f)\n", nvalues, log2(nvalues));
+    obj->intf->printf("  Values processed: %llu (2^%.1f)\n",
+        nvalues, sr_log2(nvalues));
     obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
     return ans;
@@ -530,7 +571,7 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
 TestResults monobit_freq_test(GeneratorState *obj)
 {
     int sum_per_byte[256];
-    size_t len = 1ull << 28;
+    unsigned long long len = 1ul << 28;
     TestResults ans;
     ans.name = "MonobitFreq";
     for (size_t i = 0; i < 256; i++) {
@@ -546,9 +587,9 @@ TestResults monobit_freq_test(GeneratorState *obj)
     }
     int64_t bitsum = 0;
     unsigned int nbytes = obj->gi->nbits / 8;
-    for (size_t i = 0; i < len; i++) {
+    for (unsigned long long i = 0; i < len; i++) {
         uint64_t u = obj->gi->get_bits(obj->state);
-        for (size_t j = 0; j < nbytes; j++) {
+        for (unsigned int j = 0; j < nbytes; j++) {
             bitsum += sum_per_byte[u & 0xFF];
             u >>= 8;
         }

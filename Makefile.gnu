@@ -3,7 +3,10 @@
 #
 CC = gcc
 # compiling flags here
-CFLAGS = -std=c99 -O2 -Wall -Werror -Wextra -Wno-attributes -march=native
+# -Werror 
+#PLATFORM_FLAGS = -m32
+CFLAGS = -DNO_X86_EXTENSIONS $(PLATFORM_FLAGS) -std=c99 -O2 -Wall -Wextra -Wno-attributes -march=native
+LINKFLAGS = $(PLATFORM_FLAGS)
 GEN_CFLAGS = -fPIC -ffreestanding -nostdlib
 INCLUDE = -Iinclude
 
@@ -49,13 +52,13 @@ $(CORE_LIB): $(LIB_OBJFILES)
 	ar rcu $@ $^
 
 $(BINDIR)/smokerand$(EXE): $(OBJDIR)/smokerand.o $(CORE_LIB) $(BAT_OBJFILES) $(BAT_HEADERS)
-	$(CC) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE) 
+	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE) 
 
 $(BINDIR)/calibrate_dc6$(EXE): $(OBJDIR)/calibrate_dc6.o $(CORE_LIB)
-	$(CC) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE) 
+	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE) 
 
 $(BINDIR)/test_funcs$(EXE): $(OBJDIR)/test_funcs.o $(CORE_LIB)
-	$(CC) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE) 
+	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE) 
 
 $(LIB_OBJFILES) $(BAT_OBJFILES) $(EXE_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.c $(LIB_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
@@ -65,10 +68,10 @@ $(LIB_OBJFILES) $(BAT_OBJFILES) $(EXE_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.c $
 generators: $(GEN_SHARED)
 
 $(GEN_BINDIR)/libcrand_shared$(SO): $(GEN_BINDIR)/obj/crand_shared.o
-	$(CC) -shared $< -s $(GEN_LFLAGS) -o $@
+	$(CC) $(LINKFLAGS) -shared $< -s $(GEN_LFLAGS) -o $@
 
 $(GEN_BINDIR)/lib%$(SO): $(GEN_BINDIR)/obj/%.o
-	$(CC) -shared $(GEN_CFLAGS) $< -s $(GEN_LFLAGS) -o $@
+	$(CC) $(LINKFLAGS) -shared $(GEN_CFLAGS) $< -s $(GEN_LFLAGS) -o $@
 
 $(GEN_OBJFILES): $(BINDIR)/generators/obj/%.o : generators/%.c $(INCLUDEDIR)/cinterface.h
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
