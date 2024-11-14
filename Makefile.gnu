@@ -4,8 +4,9 @@
 CC = gcc
 # compiling flags here
 # -Werror 
-#PLATFORM_FLAGS = -m32
-CFLAGS = -DNO_X86_EXTENSIONS $(PLATFORM_FLAGS) -std=c99 -O2 -Wall -Wextra -Wno-attributes -march=native
+#PLATFORM_FLAGS = -m32 -DNO_X86_EXTENSIONS
+PLATFORM_FLAGS=
+CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O2 -Wall -Wextra -Wno-attributes -march=native
 LINKFLAGS = $(PLATFORM_FLAGS)
 GEN_CFLAGS = -fPIC -ffreestanding -nostdlib
 INCLUDE = -Iinclude

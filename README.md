@@ -363,16 +363,16 @@ at 1 TiB). This test run requred about 25 min.
  isaac64           | u64    | +     | +       | +    | 0.75 |        | +       | >= 1 TiB
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | N/A    | Small   | 1 MiB
  kiss99            | u32    | +     | +       | +    | 1.0  | N/A    | +       | >= 8 TiB
- kiss64            | u64    | +     | +       | +    | 0.53 |        | +       | >= 4 TiB
+ kiss64            | u64    | +     | +       | +    | 0.53 | +      | +       | >= 4 TiB
  lcg64             | u32    | 5     | 8       | 11   | 0.40 | N/A    | Small   | 16 MiB
- lcg64prime        | u64    | 1     | 1       | 1    | 1.5  |        |         | >= 32 TiB
+ lcg64prime        | u64    | 1     | 1       | 1    | 1.5  | -      |         | >= 32 TiB
  lcg96             | u32    | +     | 1       | 1    | 0.78 | N/A    |         | 32 GiB
  lcg128            | u64    | +     | 1       | 1    | 0.35 |        |         | 64 GiB
- lcg128_full       | u64    | +     | 1       | 1    | 0.42 |        |         | 64 GiB
- lcg128_u32_full   | u32    | +     | +       | +    |      | N/A    |         | >= 2 TiB
+ lcg128_full       | u64    | +     | 1       | 1    | 0.42 | +      |         | 64 GiB
+ lcg128_u32_full   | u32    | +     | +       | +    | 0.75 | N/A    |         | >= 2 TiB
  lcg69069          | u32    | 16    | 33      | 36   | 0.38 | N/A    | -       | 2 KiB
  lfsr113           | u32    | 3     | 5       | 7    | 1.1  | N/A    |         | 32 KiB 
- lfsr258           | u64    | 3     | 5       | 7    | 0.75 |        |         | 1 MiB
+ lfsr258           | u64    | 3     | 5       | 7    | 0.75 | +      |         | 1 MiB
  minstd            | u32    | 17    | 33      | 36   | 2.4  | N/A    | -       | 1 KiB
  mlfib17_5         | u32    | +     | +       | +    | 0.48 | N/A    | +       | >= 1 TiB
  mt19937           | u32    | 3     | 3       | 3    | 0.91 | N/A    | Small   | 128 GiB
@@ -414,5 +414,6 @@ at 1 TiB). This test run requred about 25 min.
  xoroshiro128p     | u64    | 1     | 2       | 3    | 0.16 |        |         | 16 MiB
  xoroshiro128pp    | u64    | +     | +       | +    | 0.20 |        |         | >= 2 TiB
  xoroshiro1024st   | u64    | 1     | 1       | 2    | 0.33 |        |         | 128 GiB
+ xoroshiro1024stst | u64    | +     | +       | +    | 0.33 |        |         |
  xorwow            | u32    | 3     | 7       | 9    | 0.52 | N/A    | Small   | 128 KiB
  xsh               | u64    | 7     | 10      | 14   | 0.43 |        | -       | 32 KiB
