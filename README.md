@@ -380,8 +380,8 @@ at 1 TiB). This test run requred about 25 min.
  mulberry32        | u32    | 1     | 2       | 3    | 0.51 | N/A    |         | 512 MiB
  mwc64             | u32    | 1     | 2       | 4    | 0.37 | N/A    | Small   | 1 TiB
  mwc64x            | u32    | +     | +       | +    | 0.53 | N/A    | +       | >= 8 TiB
- mwc128            | u64    | +     | +       | +    | 0.30 |        | +       | >= 2 TiB
- mwc128x           | u64    | +     | +       | +    | 0.30 |        | +       | >= 8 TiB
+ mwc128            | u64    | +     | +       | +    | 0.30 | +      | +       | >= 2 TiB
+ mwc128x           | u64    | +     | +       | +    | 0.30 | +      | +       | >= 8 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +     | +       | +    | 0.28 |        | +       | >= 2 TiB
  philox            | u64    | +     | +       | +    | 0.85 |        | +       | >= 2 TiB
@@ -405,12 +405,12 @@ at 1 TiB). This test run requred about 25 min.
  swblux            | u32    | +     | +       | +    | 6.3  | N/A    |         | 4 TiB
  swbw              | u32    | 1     | 1       | 1    | 2.8  | N/A    |         | 4 GiB
  tinymt32          | u32    | 2     | 4       | 6    | 1.5  | N/A    |         | 4 GiB
- tinymt64          | u64    | 1     | 2       | 4    | 2.7  |        |         | 32 GiB
+ tinymt64          | u64    | 1     | 2       | 4    | 2.7  | +      |         | 32 GiB
  threefry          | u64    | +     | +       | +    | 1.0  |        | +       | >= 1 TiB
  well1024a         | u32    | 3     | 5       | 7    | 1.0  | N/A    | Small   | 64 MiB
  wyrand            | u64    | +     | +       | +    | 0.08 | +      |         | >= 1 TiB
  xorshift128       | u32    | 4     | 6       | 8    | 0.41 | N/A    |         | 128 KiB
- xorshift128p      | u64    | 1     | 2       | 3    | 0.21 |        |         | 32 GiB
+ xorshift128p      | u64    | 1     | 2       | 3    | 0.21 | +      |         | 32 GiB
  xoroshiro128p     | u64    | 1     | 2       | 3    | 0.16 |        |         | 16 MiB
  xoroshiro128pp    | u64    | +     | +       | +    | 0.20 |        |         | >= 2 TiB
  xoroshiro1024st   | u64    | 1     | 1       | 2    | 0.33 |        |         | 128 GiB
