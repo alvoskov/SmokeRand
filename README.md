@@ -369,6 +369,7 @@ at 1 TiB). This test run requred about 25 min.
  lcg96             | u32    | +     | 1       | 1    | 0.78 | N/A    |         | 32 GiB
  lcg128            | u64    | +     | 1       | 1    | 0.35 |        |         | 64 GiB
  lcg128_full       | u64    | +     | 1       | 1    | 0.42 |        |         | 64 GiB
+ lcg128_u32_full   | u32    | +     | +       | +    |      | N/A    |         | >= 2 TiB
  lcg69069          | u32    | 16    | 33      | 36   | 0.38 | N/A    | -       | 2 KiB
  lfsr113           | u32    | 3     | 5       | 7    | 1.1  | N/A    |         | 32 KiB 
  lfsr258           | u64    | 3     | 5       | 7    | 0.75 |        |         | 1 MiB
