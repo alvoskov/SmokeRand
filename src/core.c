@@ -1111,7 +1111,7 @@ GeneratorInfo interleaved_generator_set(const GeneratorInfo *gi)
 
 /**
  * @brief Switches stdout to binary mode in MS Windows (needed for
- * correct output opf binary data)
+ * correct output of binary data)
  */
 void set_bin_stdout()
 {
@@ -1123,12 +1123,12 @@ void set_bin_stdout()
 
 /**
  * @brief Switches stdin to binary mode in MS Windows (needed for
- * correct output opf binary data)
+ * correct input of binary data)
  */
 void set_bin_stdin()
 {
 #ifdef USE_LOADLIBRARY
-    _setmode( _fileno(stdin), _O_BINARY); // needed to allow binary stdin on windows
+    _setmode( _fileno(stdin), _O_BINARY);
 #endif
 }
 

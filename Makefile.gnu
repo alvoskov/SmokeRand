@@ -33,8 +33,8 @@ LIB_SOURCES = $(addprefix $(SRCDIR)/, core.c coretests.c entropy.c extratests.c 
 LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, cinterface.h core.h coretests.h entropy.h extratests.h fileio.h lineardep.h)
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
 # Battery
-BAT_SOURCES = $(addprefix $(SRCDIR)/, bat_brief.c bat_default.c bat_full.c)
-BAT_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_brief.h bat_default.h bat_full.h)
+BAT_SOURCES = $(addprefix $(SRCDIR)/, bat_antilcg.c bat_brief.c bat_default.c bat_full.c)
+BAT_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_antilcg.h bat_brief.h bat_default.h bat_full.h)
 BAT_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(BAT_SOURCES)))
 # Executables
 EXE_NAMES = smokerand calibrate_dc6 test_funcs

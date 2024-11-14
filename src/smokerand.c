@@ -12,6 +12,7 @@
 #include "smokerand/bat_default.h"
 #include "smokerand/bat_brief.h"
 #include "smokerand/bat_full.h"
+#include "smokerand/bat_antilcg.h"
 #include "smokerand/extratests.h"
 #include "smokerand/fileio.h"
 #include <stdio.h>
@@ -258,6 +259,8 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
         battery_brief(gi, intf, opts->testid, opts->nthreads);
     } else if (!strcmp(battery_name, "full")) {
         battery_full(gi, intf, opts->testid, opts->nthreads);
+    } else if (!strcmp(battery_name, "antilcg")) {
+        battery_antilcg(gi, intf, opts->testid, opts->nthreads);
     } else if (!strcmp(battery_name, "selftest")) {
         battery_self_test(gi, intf);
     } else if (!strcmp(battery_name, "speed")) {

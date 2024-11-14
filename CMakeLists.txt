@@ -38,6 +38,7 @@ target_include_directories(smokerand_core PRIVATE include)
 
 # Executables
 add_executable(smokerand src/smokerand.c
+    src/bat_antilcg.c include/smokerand/bat_antilcg.h
     src/bat_default.c include/smokerand/bat_default.h
     src/bat_brief.c include/smokerand/bat_brief.h
     src/bat_full.c include/smokerand/bat_full.h)
@@ -67,7 +68,7 @@ endif()
 # Examples of plugins, i.e. modules with PRNGs
 foreach(prng_name alfib alfib_mod chacha chacha_avx coveyou64 drand48
     isaac64 kiss64 kiss93 kiss99
-    lcg69069 lcg64 lcg64prime lcg96 lcg128 lcg128_full
+    lcg69069 lcg64 lcg64prime lcg96 lcg128 lcg128_full lcg128_u32_full
     loop_7fff_w64
     lfsr113 lfsr258 minstd mt19937 mlfib17_5 mrg32k3a
     mulberry32

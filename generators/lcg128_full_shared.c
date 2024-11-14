@@ -2,9 +2,9 @@
  * @file lcg128_full_shared.c
  * @brief Just 128-bit LCG with 128-bit multiplier. It is taken from:
  *
- * https://doi.org/10.1002/spe.3030
- *
- * TODO: MSVC ADAPTATION!
+ * Steele G.L., Vigna S. Computationally easy, spectrally good multipliers
+ * for congruential pseudorandom number generators // Softw Pract Exper. 2022
+ * V. 52. N. 2. P. 443-458. https://doi.org/10.1002/spe.3030
  *
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
