@@ -354,13 +354,13 @@ at 1 TiB). This test run requred about 25 min.
 
  Algoritrhm        | Output | brief | default | full | cpb  | bday64 | TestU01 | PractRand 
 -------------------|--------|-------|---------|------|------|--------|---------|-----------
- alfib             | u64    | 4     | 4       | 7    | 0.23 |        |         | 128 GiB
- alfib_mod         | u32    | +     | +       | +    | 0.50 | N/A    |         | 1 TiB
+ alfib             | u64    | 4     | 4       | 7    | 0.23 | +      | Small   | 128 GiB
+ alfib_mod         | u32    | +     | +       | +    | 0.50 | N/A    | +       | 1 TiB
  chacha            | u32    | +     | +       | +    | 2.0  | N/A    | +       |
  chacha_avx        | u32    | +     | +       | +    | 0.7  | N/A    | +       |
  coveyou64         | u32    | 2     | 4       | 4    | 0.62 | N/A    | Small   | 256 KiB
  drand48           | u32    | 11    | 19      | 21   | 0.72 | N/A    | -       | 1 MiB
- isaac64           | u64    | +     | +       | +    | 0.75 |        | +       | >= 1 TiB
+ isaac64           | u64    | +     | +       | +    | 0.75 | +      | +       | >= 1 TiB
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | N/A    | Small   | 1 MiB
  kiss99            | u32    | +     | +       | +    | 1.0  | N/A    | +       | >= 8 TiB
  kiss64            | u64    | +     | +       | +    | 0.53 | +      | +       | >= 4 TiB
@@ -369,7 +369,7 @@ at 1 TiB). This test run requred about 25 min.
  lcg96             | u32    | +     | 1       | 1    | 0.78 | N/A    |         | 32 GiB
  lcg128            | u64    | +     | 1       | 1    | 0.35 |        |         | 64 GiB
  lcg128_full       | u64    | +     | 1       | 1    | 0.42 | +      |         | 64 GiB
- lcg128_u32_full   | u32    | +     | +       | +    | 0.75 | N/A    |         | >= 2 TiB
+ lcg128_u32_full   | u32    | +     | +       | +    | 0.75 | N/A    |         | >= 32 TiB
  lcg69069          | u32    | 16    | 33      | 36   | 0.38 | N/A    | -       | 2 KiB
  lfsr113           | u32    | 3     | 5       | 7    | 1.1  | N/A    |         | 32 KiB 
  lfsr258           | u64    | 3     | 5       | 7    | 0.75 | +      |         | 1 MiB
@@ -383,18 +383,18 @@ at 1 TiB). This test run requred about 25 min.
  mwc128            | u64    | +     | +       | +    | 0.30 | +      | +       | >= 2 TiB
  mwc128x           | u64    | +     | +       | +    | 0.30 | +      | +       | >= 8 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | N/A    | +       | >= 2 TiB
- pcg64             | u64    | +     | +       | +    | 0.28 |        | +       | >= 2 TiB
- philox            | u64    | +     | +       | +    | 0.85 |        | +       | >= 2 TiB
+ pcg64             | u64    | +     | +       | +    | 0.28 | -      | +       | >= 2 TiB
+ philox            | u64    | +     | +       | +    | 0.85 | +      | +       | >= 2 TiB
  philox32          | u32    | +     | +       | +    | 2.7  | N/A    | +       | >= 2 TiB
  randu             | u32    | 18    | 34      | 37   | 0.41 | N/A    | -       | 1 KiB
  r1279             | u32    | 4     | 6       | 9    | 0.47 | N/A    |         | 64 MiB
  rc4               | u32    | +     | +       | +    | 6.0  | N/A    | +       | 512 GiB
- romutrio          | u64    | +     | +       | +    | 0.15 |        |         |
+ romutrio          | u64    | +     | +       | +    | 0.15 | +      |         |
  rrmxmx            | u64    | +     | +       | +    | 0.14 | -      |         | >= 2 TiB
  sezgin63          | u32    | +     | +       | 3    | 3.0  | N/A    |         | >= 16 TiB
  speck128          | u64    | +     | +       | +    | 3.1  |        |         | >= 2 TiB
  speck128_avx      | u64    | +     | +       | +    | 0.65 |        |         |
- splitmix          | u64    | +     | +       | +    | 0.19 |        |         | >= 2 TiB
+ splitmix          | u64    | +     | +       | +    | 0.19 | -      |         | >= 2 TiB
  splitmix32        | u32    | 1     | 2       | 3    | 0.25 | N/A    | +       | 1 GiB
  sqxor             | u64    | +     | +       | +    | 0.13 | +      |         | >= 2 TiB
  sqxor32           | u32    | 1     | 2       | 3    | 0.20 | N/A    | Small   | 16 GiB
@@ -411,8 +411,8 @@ at 1 TiB). This test run requred about 25 min.
  wyrand            | u64    | +     | +       | +    | 0.08 | +      |         | >= 1 TiB
  xorshift128       | u32    | 4     | 6       | 8    | 0.41 | N/A    |         | 128 KiB
  xorshift128p      | u64    | 1     | 2       | 3    | 0.21 | +      |         | 32 GiB
- xoroshiro128p     | u64    | 1     | 2       | 3    | 0.16 |        |         | 16 MiB
- xoroshiro128pp    | u64    | +     | +       | +    | 0.20 |        |         | >= 2 TiB
+ xoroshiro128p     | u64    | 1     | 2       | 3    | 0.16 | +      |         | 16 MiB
+ xoroshiro128pp    | u64    | +     | +       | +    | 0.20 | +      |         | >= 2 TiB
  xoroshiro1024st   | u64    | 1     | 1       | 2    | 0.33 |        |         | 128 GiB
  xoroshiro1024stst | u64    | +     | +       | +    | 0.33 |        |         |
  xorwow            | u32    | 3     | 7       | 9    | 0.52 | N/A    | Small   | 128 KiB
