@@ -272,7 +272,7 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
     } else if (!strcmp(battery_name, "birthday")) {
         battery_birthday(gi, intf);
     } else if (!strcmp(battery_name, "ising")) {
-        battery_ising(gi, intf);
+        battery_ising(gi, intf, opts->testid, opts->nthreads);
     } else {
         printf("Unknown battery %s\n", battery_name);
         return 1;

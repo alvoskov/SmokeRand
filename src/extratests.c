@@ -272,11 +272,21 @@ void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf)
 ///// 2D Ising model based test /////
 /////////////////////////////////////
 
+typedef enum {
+    ising_wolff,
+    ising_metropolis
+} IsingAlgorithm;
+
+/**
+ * @brief Lattice cell neighbours description for 2D Ising model.
+ */
 typedef struct {
     unsigned int inds[4];
 } Neighbours2D;
 
-
+/**
+ * @brief Two-dimensional lattice for 2D Ising model.
+ */
 typedef struct {
     unsigned int L; ///< Lattice size
     unsigned int N; ///< Number of elements, LxL
@@ -324,22 +334,15 @@ void Ising2DLattice_print(Ising2DLattice *obj)
     }
 }
 
-
-void Ising2DLattice_flip_internal(Ising2DLattice *obj, size_t ind, int8_t s0,
-    GeneratorState *gs, const uint64_t p_int)
+void Ising2DLattice_free(Ising2DLattice *obj)
 {
-    // Flip spin
-    obj->s[ind] = -s0;
-    // Go to neighbours
-    for (size_t i = 0; i < 4; i++) {
-        size_t nn_ind = obj->nn[ind].inds[i];
-        uint64_t rnd = gs->gi->get_bits(gs->state);
-        if (obj->s[nn_ind] == s0 && rnd <= p_int) {
-            Ising2DLattice_flip_internal(obj, nn_ind, s0, gs, p_int);
-        }
-    }    
+    free(obj->s); obj->s = NULL;
+    free(obj->nn); obj->nn = NULL;    
 }
 
+/**
+ * @brief Calculate energy for 2D lattice in 2D Ising model.
+ */
 int Ising2DLattice_calc_energy(const Ising2DLattice *obj)
 {
     int energy = 0;
@@ -351,18 +354,40 @@ int Ising2DLattice_calc_energy(const Ising2DLattice *obj)
 }
 
 
-void Ising2DLattice_flip(Ising2DLattice *obj, size_t ind, GeneratorState *gs)
+static void Ising2DLattice_flip_wolff_internal(Ising2DLattice *obj, size_t ind, int8_t s0,
+    GeneratorState *gs, const uint64_t p_int)
 {
-    const uint64_t p_int = (gs->gi->nbits == 32) ? 2515933592ull : 10806402496730587136ull; // p * 2^nbits
-    Ising2DLattice_flip_internal(obj, ind, obj->s[ind], gs, p_int);
+    // Flip spin
+    obj->s[ind] = -s0;
+    // Go to neighbours
+    for (size_t i = 0; i < 4; i++) {
+        size_t nn_ind = obj->nn[ind].inds[i];
+        uint64_t rnd = gs->gi->get_bits(gs->state);
+        if (obj->s[nn_ind] == s0 && rnd <= p_int) {
+            Ising2DLattice_flip_wolff_internal(obj, nn_ind, s0, gs, p_int);
+        }
+    }    
 }
 
-void Ising2DLattice_flip_metropolis(Ising2DLattice *obj, GeneratorState *gs)
+/**
+ * @brief Wolff algorithm: one flip based on recursive algorithm.
+ */
+void Ising2DLattice_flip_wolff(Ising2DLattice *obj, size_t ind, GeneratorState *gs)
+{
+    const uint64_t p_int = (gs->gi->nbits == 32) ? 2515933592ull : 10806402496730587136ull; // p * 2^nbits
+    Ising2DLattice_flip_wolff_internal(obj, ind, obj->s[ind], gs, p_int);
+}
+
+/**
+ * @brief Metropolis algorithm: one pass consisting of L^2 flips. Catches
+ * 32-bit linear congruental generators like '69069'. Rather slow.
+ */
+void Ising2DLattice_pass_metropolis(Ising2DLattice *obj, GeneratorState *gs)
 {
     const double jc = log(1 + sqrt(2)) / 2;
-    //const uint64_t p_int = (gs->gi->nbits == 32) ? 2515933592ull : 10806402496730587136ull; // p * 2^nbits
     const double p_norm = (gs->gi->nbits == 32) ? 2.328306436538696e-10 :  5.421010862427522e-20;
-    for (size_t i = 0; i < obj->N; i++) {
+    for (size_t ii = 0; ii < obj->N; ii++) {
+        size_t i = gs->gi->get_bits(gs->state) % obj->N; // Essential for test sensitivity
         int n_same = 0;
         for (size_t j = 0; j < 4; j++) {
             if (obj->s[obj->nn[i].inds[j]] == obj->s[i])
@@ -382,71 +407,153 @@ void Ising2DLattice_flip_metropolis(Ising2DLattice *obj, GeneratorState *gs)
 //    printf("\n");
 }
 
-
-void Ising2DLattice_free(Ising2DLattice *obj)
+void Ising2DLattice_pass(Ising2DLattice *obj, GeneratorState *gs, IsingAlgorithm alg)
 {
-    free(obj->s); obj->s = NULL;
-    free(obj->nn); obj->nn = NULL;    
+    if (alg == ising_wolff) {
+        Ising2DLattice_flip_wolff(obj, gs->gi->get_bits(gs->state) % obj->N, gs);
+    } else if (alg == ising_metropolis) {
+        Ising2DLattice_pass_metropolis(obj, gs);
+    } else {
+        fprintf(stderr, "Ising2DLattice_pass internal error: unknown algorithm\n");
+        exit(1);
+    }
 }
 
+/**
+ * @brief Options for the PRNG test based on 2D Ising model.
+ */
+typedef struct {
+    IsingAlgorithm algorithm; ///< Used algorithm (Metropolis, Wolff etc.)
+    unsigned long sample_len; ///< Number of calls per sample
+    unsigned int nsamples; ///< Number of samples for computation of E and C
+} Ising2DOptions;
 
-// http://dx.doi.org/10.1103/PhysRevLett.69.3382
-// http://dx.doi.org/10.1140/epjst/e2012-01637-8
-void battery_ising(GeneratorInfo *gen, const CallerAPI *intf)
+/**
+ * @brief PRNG test based on Ising 2D model. It calculates internal energy
+ * and heat capacity using Monte-Carlo method: Metropolis algorithm and Wolff
+ * algorithm.
+ * @details Two algorithms have a very different sensitivity:
+ *
+ * 1. Wolff algorithm detects flaws in SWB (subtract with borrow) and
+ *    additive/subtractive lagged Fibonacci generators. But not in 32-bit
+ *    linear congruental generators.
+ * 2. Metropolis algorithm detects flaws in 32-bit LCG (e.g. in `69069`)
+ *    but not in ALFIB or SWB.
+ *
+ * References:
+ *
+ * 1. Ferrenberg A.M., Landau D.P., Wong Y.J. Monte Carlo simulations: Hidden
+ *    errors from 'good' random number generators // Phys. Rev. Lett. 1992.
+ *    V. 69. N 23. P.3382-3384. https://doi.org/10.1103/PhysRevLett.69.3382
+ * 2. Manssen M., Weigel M., Hartmann, A.K. Random number generators for
+ *    massively parallel simulations on GPU // Eur. Phys. J. Spec. Top. 2012.
+ *    V. 210, P. 53-71 https://doi.org/10.1140/epjst/e2012-01637-8 
+ * 3. Coddington P.D. Tests of random number generators using Ising model
+ *    simulations // International Journal of Modern Physics C. 1996. V. 7.
+ *    N 3. P. 295-303. https://doi.org/10.1142/S0129183196000235
+ */
+TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
 {
     Ising2DLattice obj;
     Ising2DLattice_init(&obj, 16);
-    size_t sample_len = 5000000, nsamples = 10;
     const double e_ref = 1.4530649029;
     const double cv_ref = 1.4987048885;
     const double jc = log(1 + sqrt(2)) / 2;
-
-    void *state = gen->create(intf);
-    GeneratorState gs = {.gi = gen, .state = state, .intf = intf};
-
+    TestResults res = {.p = NAN, .alpha = NAN, .x = NAN};
+    if (opts->algorithm == ising_wolff) {
+        res.name = "ising2d_wolff";
+    } else if (opts->algorithm == ising_metropolis) {
+        res.name = "ising2d_metropolis";
+    } else {
+        res.name = "ising2d_unknown";
+        return res;
+    }
+    gs->intf->printf("Ising 2D model test (L = %d, algorithm = %s)\n",
+        (int) obj.L, res.name);
     // Warm-up
-    for (size_t i = 0; i < sample_len; i++) {
-        Ising2DLattice_flip(&obj, gs.gi->get_bits(gs.state) % obj.N, &gs);
+    for (unsigned int i = 0; i < opts->sample_len; i++) {
+        Ising2DLattice_pass(&obj, gs, opts->algorithm);
     }
     // Sampling
-    double *e = calloc(nsamples, sizeof(double));
-    double *cv = calloc(nsamples, sizeof(double));
-    for (size_t ii = 0; ii < nsamples; ii++) {
+    double *e = calloc(opts->nsamples, sizeof(double));
+    double *cv = calloc(opts->nsamples, sizeof(double));
+    for (unsigned long ii = 0; ii < opts->nsamples; ii++) {
         long long energy_sum = 0, energy_sum2 = 0;
-        for (size_t i = 0; i < sample_len; i++) {
-            Ising2DLattice_flip(&obj, gs.gi->get_bits(gs.state) % obj.N, &gs);
-            //Ising2DLattice_flip_metropolis(&obj, &gs);
+        for (unsigned int i = 0; i < opts->sample_len; i++) {
+            Ising2DLattice_pass(&obj, gs, opts->algorithm);
             int energy = Ising2DLattice_calc_energy(&obj);
             energy_sum += energy;
             energy_sum2 += energy * energy;
         }
-        double Emean = (double) energy_sum / sample_len;
-        double E2mean = (double) energy_sum2 / sample_len;
+        double Emean = (double) energy_sum / opts->sample_len;
+        double E2mean = (double) energy_sum2 / opts->sample_len;
         e[ii] = Emean / obj.N;
         cv[ii] = (E2mean - Emean * Emean) / obj.N * jc * jc;
-        printf("e = %.8f, cv = %.8f\n", e[ii], cv[ii]);
+        gs->intf->printf("e = %12.8f, cv = %12.8f\n", e[ii], cv[ii]);
     }
     // Mean and std
     double e_mean = 0.0, e_std = 0.0, cv_mean = 0.0, cv_std = 0.0;
-    for (size_t i = 0; i < nsamples; i++) {
+    for (unsigned int i = 0; i < opts->nsamples; i++) {
         e_mean += e[i];
         cv_mean += cv[i];
     }
-    e_mean /= nsamples;
-    cv_mean /= nsamples;
-    for (size_t i = 0; i < nsamples; i++) {
+    e_mean /= opts->nsamples;
+    cv_mean /= opts->nsamples;
+    for (unsigned int i = 0; i < opts->nsamples; i++) {
         e_std += pow(e[i] - e_mean, 2.0);
         cv_std += pow(cv[i] - cv_mean, 2.0);
     }
-    e_std = sqrt(e_std / (nsamples - 1));
-    cv_std = sqrt(cv_std / (nsamples - 1));
-    printf("e_mean = %g; e_std = %g; z = %g\n", e_mean, e_std,
-        (e_mean - e_ref) / (e_std / sqrt(nsamples)));
-    printf("cv_mean = %g; cv_std = %g; z = %g\n", cv_mean, cv_std,
-        (cv_mean - cv_ref) / (cv_std / sqrt(nsamples)));
+    e_std = sqrt(e_std / (opts->nsamples - 1));
+    cv_std = sqrt(cv_std / (opts->nsamples - 1));
+    double e_z = (e_mean - e_ref) / (e_std / sqrt(opts->nsamples));
+    double cv_z = (cv_mean - cv_ref) / (cv_std / sqrt(opts->nsamples));
+    gs->intf->printf("e_mean  = %12.8g; e_std  = %12.8g; z = %12.8g; p = %.3g\n",
+        e_mean, e_std, e_z, stdnorm_pvalue(e_z));
+    gs->intf->printf("cv_mean = %12.8g; cv_std = %12.8g; z = %12.8g; p = %.3g\n",
+        cv_mean, cv_std, cv_z, stdnorm_pvalue(cv_z));
     free(e);
-
+    free(cv);
     Ising2DLattice_print(&obj);
     Ising2DLattice_free(&obj);
-    intf->free(state);
+    // Fill results
+    if (fabs(cv_z) > fabs(e_z)) {
+        res.x = cv_z;
+        res.p = stdnorm_pvalue(cv_z);
+        res.alpha = stdnorm_cdf(cv_z);
+    } else {
+        res.x = e_z;
+        res.p = stdnorm_pvalue(e_z);
+        res.alpha = stdnorm_cdf(e_z);
+    }
+    return res;
+}
+
+TestResults ising2d_wolff(GeneratorState *gs)
+{
+    Ising2DOptions opts = {.sample_len = 5000000, .nsamples = 10, .algorithm = ising_wolff};
+    return ising2d_test(gs, &opts);
+}
+
+TestResults ising2d_metropolis(GeneratorState *gs)
+{
+    Ising2DOptions opts = {.sample_len = 5000000, .nsamples = 10, .algorithm = ising_metropolis};
+    return ising2d_test(gs, &opts);
+}
+
+void battery_ising(GeneratorInfo *gen, CallerAPI *intf,
+    unsigned int testid, unsigned int nthreads)
+{
+    static const TestDescription tests[] = {
+        {"ising16_metropolis", ising2d_metropolis, 462},
+        {"ising16_wolff", ising2d_wolff, 198},
+        {NULL, NULL, 0}
+    };
+    const TestsBattery bat = {
+        "ising", tests
+    };
+    if (gen != NULL) {
+        TestsBattery_run(&bat, gen, intf, testid, nthreads);
+    } else {
+        TestsBattery_print_info(&bat);
+    }
 }
