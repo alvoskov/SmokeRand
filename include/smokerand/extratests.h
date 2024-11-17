@@ -24,7 +24,8 @@ typedef struct {
 
 TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts);
 void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf);
-void battery_ising(GeneratorInfo *gen, const CallerAPI *intf);
+void battery_ising(GeneratorInfo *gen, CallerAPI *intf,
+    unsigned int testid, unsigned int nthreads);
 void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf);
 
 

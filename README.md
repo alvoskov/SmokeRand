@@ -377,6 +377,7 @@ at 1 TiB). This test run requred about 25 min.
  mlfib17_5         | u32    | +     | +       | +    | 0.48 | N/A    | +       | >= 1 TiB
  mt19937           | u32    | 3     | 3       | 3    | 0.91 | N/A    | Small   | 128 GiB
  mrg32k3a          | u32    | +     | +       | +    | 2.5  | N/A    |         | >= 4 TiB
+ msws              | u32    | +     | +       | +    | 0.72 | N/A    | +       | >= 2 TiB
  mulberry32        | u32    | 1     | 2       | 3    | 0.51 | N/A    |         | 512 MiB
  mwc64             | u32    | 1     | 2       | 4    | 0.37 | N/A    | Small   | 1 TiB
  mwc64x            | u32    | +     | +       | +    | 0.53 | N/A    | +       | >= 8 TiB
