@@ -371,10 +371,19 @@ static void Ising2DLattice_flip_wolff_internal(Ising2DLattice *obj, size_t ind, 
 
 /**
  * @brief Wolff algorithm: one flip based on recursive algorithm.
+ * @details The next probability of flip is used:
+ *
+ * \f[
+ * p = 1 - exp(-2j_c) \approx 0.585786
+ * \f]
+ *
+ * \f[
+ * j_c = \frac{1}{2} \ln\left(1 + \sqrt{2}\right)
+ * \f]
  */
 void Ising2DLattice_flip_wolff(Ising2DLattice *obj, size_t ind, GeneratorState *gs)
 {
-    const uint64_t p_int = (gs->gi->nbits == 32) ? 2515933592ull : 10806402496730587136ull; // p * 2^nbits
+    const uint64_t p_int = (gs->gi->nbits == 32) ? 2515933592ull : 10805852496753538807ull; // p * 2^nbits
     Ising2DLattice_flip_wolff_internal(obj, ind, obj->s[ind], gs, p_int);
 }
 
@@ -385,7 +394,13 @@ void Ising2DLattice_flip_wolff(Ising2DLattice *obj, size_t ind, GeneratorState *
 void Ising2DLattice_pass_metropolis(Ising2DLattice *obj, GeneratorState *gs)
 {
     const double jc = log(1 + sqrt(2)) / 2;
-    const double p_norm = (gs->gi->nbits == 32) ? 2.328306436538696e-10 :  5.421010862427522e-20;
+    const double p_mul = pow(2.0, gs->gi->nbits);
+    uint64_t n_same_to_p_int[5];
+    for (int i = 2; i <= 4; i++) {
+        double dE = (i - 2) * 4;
+        n_same_to_p_int[i] = exp(-dE * jc) * p_mul;
+    }
+
     for (size_t ii = 0; ii < obj->N; ii++) {
         size_t i = gs->gi->get_bits(gs->state) % obj->N; // Essential for test sensitivity
         int n_same = 0;
@@ -397,14 +412,11 @@ void Ising2DLattice_pass_metropolis(Ising2DLattice *obj, GeneratorState *gs)
         if (dE < 0) {
             obj->s[i] = -obj->s[i];
         } else {
-            double p = exp(-dE * jc);
-            if (p > gs->gi->get_bits(gs->state) * p_norm) {
+            if (n_same_to_p_int[n_same] > gs->gi->get_bits(gs->state)) {
                 obj->s[i] = -obj->s[i];
             }
         }
     }
-//    Ising2DLattice_print(obj);
-//    printf("\n");
 }
 
 void Ising2DLattice_pass(Ising2DLattice *obj, GeneratorState *gs, IsingAlgorithm alg)
@@ -489,7 +501,8 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
         double E2mean = (double) energy_sum2 / opts->sample_len;
         e[ii] = Emean / obj.N;
         cv[ii] = (E2mean - Emean * Emean) / obj.N * jc * jc;
-        gs->intf->printf("e = %12.8f, cv = %12.8f\n", e[ii], cv[ii]);
+        gs->intf->printf("%2lu of %2lu: e = %12.8f, cv = %12.8f\n",
+            ii + 1, opts->nsamples, e[ii], cv[ii]);
     }
     // Mean and std
     double e_mean = 0.0, e_std = 0.0, cv_mean = 0.0, cv_std = 0.0;
@@ -513,7 +526,7 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
         cv_mean, cv_std, cv_z, stdnorm_pvalue(cv_z));
     free(e);
     free(cv);
-    Ising2DLattice_print(&obj);
+    // Ising2DLattice_print(&obj);
     Ising2DLattice_free(&obj);
     // Fill results
     if (fabs(cv_z) > fabs(e_z)) {
@@ -544,7 +557,7 @@ void battery_ising(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
     static const TestDescription tests[] = {
-        {"ising16_metropolis", ising2d_metropolis, 462},
+        {"ising16_metropolis", ising2d_metropolis, 125},
         {"ising16_wolff", ising2d_wolff, 198},
         {NULL, NULL, 0}
     };
