@@ -520,10 +520,11 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
     cv_std = sqrt(cv_std / (opts->nsamples - 1));
     double e_z = (e_mean - e_ref) / (e_std / sqrt(opts->nsamples));
     double cv_z = (cv_mean - cv_ref) / (cv_std / sqrt(opts->nsamples));
+    unsigned long df = opts->nsamples - 1;
     gs->intf->printf("e_mean  = %12.8g; e_std  = %12.8g; z = %12.8g; p = %.3g\n",
-        e_mean, e_std, e_z, stdnorm_pvalue(e_z));
+        e_mean, e_std, e_z, t_pvalue(e_z, df));
     gs->intf->printf("cv_mean = %12.8g; cv_std = %12.8g; z = %12.8g; p = %.3g\n",
-        cv_mean, cv_std, cv_z, stdnorm_pvalue(cv_z));
+        cv_mean, cv_std, cv_z, t_pvalue(cv_z, df));
     free(e);
     free(cv);
     // Ising2DLattice_print(&obj);
@@ -531,25 +532,25 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
     // Fill results
     if (fabs(cv_z) > fabs(e_z)) {
         res.x = cv_z;
-        res.p = stdnorm_pvalue(cv_z);
-        res.alpha = stdnorm_cdf(cv_z);
+        res.p = t_pvalue(cv_z, df);
+        res.alpha = t_cdf(cv_z, df);
     } else {
         res.x = e_z;
-        res.p = stdnorm_pvalue(e_z);
-        res.alpha = stdnorm_cdf(e_z);
+        res.p = t_pvalue(e_z, df);
+        res.alpha = t_cdf(e_z, df);
     }
     return res;
 }
 
 TestResults ising2d_wolff(GeneratorState *gs)
 {
-    Ising2DOptions opts = {.sample_len = 5000000, .nsamples = 10, .algorithm = ising_wolff};
+    Ising2DOptions opts = {.sample_len = 5000000, .nsamples = 15, .algorithm = ising_wolff};
     return ising2d_test(gs, &opts);
 }
 
 TestResults ising2d_metropolis(GeneratorState *gs)
 {
-    Ising2DOptions opts = {.sample_len = 5000000, .nsamples = 10, .algorithm = ising_metropolis};
+    Ising2DOptions opts = {.sample_len = 5000000, .nsamples = 15, .algorithm = ising_metropolis};
     return ising2d_test(gs, &opts);
 }
 
