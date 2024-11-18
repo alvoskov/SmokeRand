@@ -544,13 +544,13 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
 
 TestResults ising2d_wolff(GeneratorState *gs)
 {
-    Ising2DOptions opts = {.sample_len = 5000000, .nsamples = 15, .algorithm = ising_wolff};
+    Ising2DOptions opts = {.sample_len = 5000000, .nsamples = 20, .algorithm = ising_wolff};
     return ising2d_test(gs, &opts);
 }
 
 TestResults ising2d_metropolis(GeneratorState *gs)
 {
-    Ising2DOptions opts = {.sample_len = 5000000, .nsamples = 15, .algorithm = ising_metropolis};
+    Ising2DOptions opts = {.sample_len = 5000000, .nsamples = 20, .algorithm = ising_metropolis};
     return ising2d_test(gs, &opts);
 }
 
