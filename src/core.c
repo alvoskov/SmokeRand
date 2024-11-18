@@ -237,25 +237,30 @@ double sr_log2(double x)
 }
 
 /**
- * @brief Logarithm of gamma function.
+ * @brief Natural logarithm of gamma function, \f$ \ln\Gamma z \f$.
  * @details Based on Lancoz approximation, allows to compile SmokeRand core
  * in environments with simpilified and not fully C99 consistent math library.
+ *
+ * Uses Lanczos's approximation with r = 9 and n = 11. It was suggested by
+ * P.Godfrey, the coefficients were recalculated by A.L.Voskov, the accuracy
+ * is comparable to machine epsilon.
+ *
+ * References:
+ *
+ * - Godfrey Paul. Lanczos Implementation of the Gamma Function. 2000.
+ *   http://www.numericana.com/answer/info/godfrey.htm
+ * - Pugh Glendon Ralph. An analysis of the Lanczos gamma approximation.
+ *   University of British Columbia. 2004. https://doi.org/10.14288/1.0080001
  */
 double sr_lgamma(double x)
 {
     static const long double b[] = {
-        1.000000000000000174665L,
-        5716.400188274341378936L,
-        -14815.30426768413909056L,
-        14291.49277657478554016L,
-        -6348.160217641458813453L,
-        1301.608286058321874101L,
-        -108.176705351436963469L,
-        2.605696505611755827694L,
-        -0.007423452510201416131304L,
-        5.384136432507762221912e-08L,
-        -4.023533141267529787103e-09L,
-    };
+        1.000000000000000174665L,     5716.400188274341378936L,
+        -14815.30426768413909056L,    14291.49277657478554016L,
+        -6348.160217641458813453L,    1301.608286058321874101L,
+        -108.176705351436963469L,     2.605696505611755827694L,
+        -0.007423452510201416131304L, 5.384136432507762221912e-08L,
+        -4.023533141267529787103e-09L };
     static const long double r = 9.0;
     long double az = b[0], d = --x + r + 0.5;
     for (int k = 1; k < 11; k++) {
@@ -366,6 +371,138 @@ double gammainc_upper(double a, double x)
         return gammainc_upper_contfrac(a, x);
     }
 }
+
+/**
+ * @brief Natural logarithm of complete beta function: $\ln\Beta(a,b)$.
+ */
+double sr_betaln(double a, double b)
+{
+    return sr_lgamma(a) + sr_lgamma(b) - sr_lgamma(a + b);
+}
+
+/**
+ * @brief Continued fraction for regularized incomplete beta function.
+ * @details For internal use only.
+ */
+static long double betainc_frac(double x, double a, double b)
+{
+    long double f = 1 / (a - a*(a+b)/(a+1) * x); // f=P1/Q1
+    long double c = LDBL_MAX, d = f; // c=P1/P0, d=Q0/Q1
+    if (x != x)
+        return NAN;
+    for (long double f_old = -1, m = 1; f != f_old && m < 1000; m++) {
+        long double abm_s, af, bf, a_2m;
+        abm_s = a + b + m; a_2m = a + 2*m;
+        af = (a + m - 1)*(abm_s - 1)*(b - m)*m / (a_2m - 1) / (a_2m - 1) * x*x;
+        bf = a_2m + ( m*(b-m)/(a_2m - 1) - (a+m)*abm_s/(a_2m+1) ) * x;
+        c = bf + af / c;
+        d = 1 / (bf + af*d);
+        f_old = f;
+        f = f * c * d;
+    }
+    return f;
+}
+
+/**
+ * @brief Regularized incomplete beta function $I_x(a,b)$.
+ * @param x Function argument.
+ * @param a Function argument.
+ * @param b Function argument.
+ * @param cIx_out Pointer to the output buffer for "upper"/"complementary"
+ *        beta function value $1 - I_x(a,b)$.
+ * @return Function value.
+ * @details The implementation is based on continued fractions suggested
+ * by Didonato and Morris. Its accuracy is comparable to machine epsilon.
+ * References:
+ *
+ * 1. Didonato Armido R., Morris Alfred H. Algorithm 708: Significant Digit
+ *    Computation of the Incomplete Beta Function Ratios //
+ *    // ACM Trans. Math. Softw. 1992. V.18. N 3. P.360-373.
+ *    https://doi.org/10.1145/131766.131776.
+ * 2. Cuyt Annie, Petersen Vigdis Brevik et al. Handbook of Continued Fractions
+ *    for Special Functions. 2008. Springer Dordrecht. ISBN 978-1-4020-6949-9.
+ *    https://doi.org/10.1007/978-1-4020-6949-9
+ */
+double sr_betainc(double x, double a, double b, double *cIx_out)
+{
+    double Ix, cIx;
+    if (x < 0 || x > 1) {
+        Ix = NAN; cIx = NAN;
+    } else if (x == 0) {
+        Ix = 0; cIx = 1;
+    } else if (x == 1) {
+        Ix = 1; cIx = 0;
+    } else {
+        double mul = exp(a*log(x) + b*log(1 - x) - sr_betaln(a, b));
+        if (x >= a / (a + b)) {
+            cIx = mul * betainc_frac(1 - x, b, a);
+            Ix = 1 - cIx;
+        } else {
+            Ix = mul * betainc_frac(x, a, b);
+            cIx = 1 - Ix;
+        }
+    }
+    if (cIx_out) *cIx_out = cIx;
+    return Ix;
+}
+
+/**
+ * @brief Asymptotic decomposition for t-distribution.
+ * @details Based on the algoritm AS395 by Hill.
+ * Reference:
+ * Hill G.W. Algorithm 395: Students t-distribution // Communications of the
+ * ACM. 1970. V.13. N 10. PP.617-619. https://doi.org/10.1145/355598.362775
+ */
+static double t_cdf_asymptotic(double x, unsigned long f)
+{
+    double a = (double) f - 0.5;
+    double b = 48 * a * a;
+    double q = x*x / (double) f;
+    double z;
+    if (q > 1e-5) {
+        z = sqrt(a * log(1 + q));
+    } else {
+        z = (1 - (0.5 + (1.0/3 - (0.25 + q*q/5) * q) * q) * q) * q;
+        z = sqrt(a * z);
+    }
+    double zsqr = z * z;
+    double z_corr = z + z * (zsqr + 3) / b -
+        0.4*z*(zsqr*zsqr*zsqr + 3.3*zsqr*zsqr + 24*zsqr + 85.5) /
+        (10*b*(b + 0.8*zsqr*zsqr + 100));
+    return (x >= 0) ? stdnorm_cdf(z_corr) : stdnorm_cdf(-z_corr);
+}
+
+/**
+ * @brief Cumulative t-distribution function
+ * @param x Cumulative distribution function argument
+ * @param f Degrees of freedom
+ * @details Based on incomplete beta function.
+ */
+double t_cdf(double x, unsigned long f)
+{
+    if (f <= 0) { // Invalid value
+        return NAN;
+    } else if (f > 1000) { // Asymptotic formula
+        return t_cdf_asymptotic(x, f);
+    } else {
+        double fdbl = (double) f;
+        long double Ix = sr_betainc(fdbl / (x*x + fdbl), fdbl / 2.0, 0.5, NULL);
+        return (double) ((x < 0) ? (0.5 * Ix) : (1 - 0.5*Ix));
+    }
+}
+
+
+/**
+ * @brief C.c.d.f. (p-value) for t-distribution
+ * @param x Cumulative distribution function argument
+ * @param f Degrees of freedom
+ * @details Based on incomplete beta function.
+ */
+double t_pvalue(double x, unsigned long f)
+{
+    return t_cdf(-x, f);
+}
+
 
 /**
  * @brief Poisson distribution C.D.F. (cumulative distribution function)
