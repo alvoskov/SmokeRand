@@ -197,7 +197,7 @@ typedef struct {
     int nthreads;
     int testid;
     int reverse_bits;
-    int interleaved32;
+    int interleaved32;    
 } SmokeRandSettings;
 
 
@@ -224,6 +224,12 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
         size_t name_len = (eqpos - argv[i]) - 2;
         if (name_len >= 32) name_len = 31;
         memcpy(argname, &argv[i][2], name_len); argname[name_len] = '\0';
+        // Text arguments processing
+        if (!strcmp(argname, "param")) {
+            set_cmd_param(eqpos + 1);
+            continue;
+        }
+        // Numerical arguments processing
         argval = atoi(eqpos + 1);
         if (!strcmp(argname, "nthreads")) {
             obj->nthreads = argval;
@@ -322,6 +328,7 @@ int main(int argc, char *argv[])
     int is_stdin32 = !strcmp(generator_lib, "stdin32");
     int is_stdin64 = !strcmp(generator_lib, "stdin64");
     int is_stdout = !strcmp(battery_name, "stdout");
+    set_use_stderr_for_printf(is_stdout); // Messages mustn't be in PRNG output
 
     if (opts.nthreads > 1 && (is_stdin32 || is_stdin64)) {
         fprintf(stderr, "Multithreading is not supported for stdin32/stdin64\n");

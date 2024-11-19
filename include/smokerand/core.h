@@ -77,6 +77,7 @@ int get_cpu_numcores(void);
 typedef struct {
     uint32_t (*get_seed32)(void); ///< Get 32-bit seed
     uint64_t (*get_seed64)(void); ///< Get 64-bit seed
+    const char *(*get_param)(void); ///< Get command line parameters
     void *(*malloc)(size_t len); ///< Pointer to malloc function
     void (*free)(void *); ///< Pointer to free function
     int (*printf)(const char *format, ... ); ///< Pointer to printf function
@@ -86,6 +87,8 @@ typedef struct {
 CallerAPI CallerAPI_init(void);
 CallerAPI CallerAPI_init_mthr(void);
 void CallerAPI_free(void);
+void set_cmd_param(const char *param);
+void set_use_stderr_for_printf(int val);
 
 /**
  * @brief Keeps the description of pseudorandon number generator.
@@ -98,6 +101,7 @@ typedef struct {
     unsigned int nbits; ///< Number of bits returned by the generator (32 or 64)    
     int (*self_test)(const CallerAPI *intf); ///< Run internal self-test
     uint64_t (*get_sum)(void *state, size_t len); ///< Return sum of `len` elements
+    //const char *get_descr(void *state); ///< Returns human-readable description of state
 } GeneratorInfo;
 
 

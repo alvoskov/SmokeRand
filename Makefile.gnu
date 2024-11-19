@@ -74,7 +74,7 @@ $(GEN_BINDIR)/libcrand_shared$(SO): $(GEN_BINDIR)/obj/crand_shared.o
 $(GEN_BINDIR)/lib%$(SO): $(GEN_BINDIR)/obj/%.o
 	$(CC) $(LINKFLAGS) -shared $(GEN_CFLAGS) $< -s $(GEN_LFLAGS) -o $@
 
-$(GEN_OBJFILES): $(BINDIR)/generators/obj/%.o : generators/%.c $(INCLUDEDIR)/cinterface.h
+$(GEN_OBJFILES): $(BINDIR)/generators/obj/%.o : generators/%.c $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/core.h
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
 
 clean:

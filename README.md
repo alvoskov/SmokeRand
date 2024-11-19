@@ -382,7 +382,7 @@ at 1 TiB). This test run requred about 25 min.
  mulberry32        | u32    | 1     | 2       | 3    | 0.51 | N/A    |         | 512 MiB
  mwc64             | u32    | 1     | 2       | 4    | 0.37 | N/A    | Small   | 1 TiB
  mwc64x            | u32    | +     | +       | +    | 0.53 | N/A    | +       | >= 8 TiB
- mwc128            | u64    | +     | +       | +    | 0.30 | +      | +       | >= 2 TiB
+ mwc128            | u64    | +     | +       | +    | 0.30 | +      | +       | >= 4 TiB
  mwc128x           | u64    | +     | +       | +    | 0.30 | +      | +       | >= 8 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +     | +       | +    | 0.28 | -      | +       | >= 2 TiB

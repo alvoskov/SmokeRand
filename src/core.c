@@ -23,6 +23,24 @@
 #endif
 
 static Entropy entropy = {{0, 0, 0, 0}, 0, NULL, 0, 0};
+static char cmd_param[128] = {0};
+static int use_stderr_for_printf = 0;
+
+static const char *get_cmd_param(void)
+{
+    return cmd_param;
+}
+
+void set_cmd_param(const char *param)
+{
+    strncpy(cmd_param, param, 128);
+    cmd_param[127] = 0;
+}
+
+void set_use_stderr_for_printf(int val)
+{
+    use_stderr_for_printf = val;
+}
 
 ///////////////////////////////
 ///// Single-threaded API /////
@@ -38,6 +56,20 @@ static uint64_t get_seed64(void)
     return Entropy_seed64(&entropy, 0);
 }
 
+static int printf_ser(const char *format, ...)
+{
+    int ans;
+    va_list args;
+    va_start(args, format);
+    if (use_stderr_for_printf) {
+        ans = vfprintf(stderr, format, args);
+    } else {
+        ans = vprintf(format, args);
+    }
+    va_end(args);
+    return ans;
+}
+
 CallerAPI CallerAPI_init(void)
 {
     CallerAPI intf;    
@@ -46,10 +78,11 @@ CallerAPI CallerAPI_init(void)
     }
     intf.get_seed32 = get_seed32;
     intf.get_seed64 = get_seed64;
+    intf.get_param = get_cmd_param;
     intf.malloc = malloc;
     intf.free = free;
-    intf.printf = printf;
-    intf.strcmp = strcmp;
+    intf.printf = printf_ser;
+    intf.strcmp = strcmp;    
     return intf;
 }
 
@@ -126,11 +159,17 @@ static uint32_t get_seed32_mt(void)
 
 static int printf_mt(const char *format, ...)
 {
+    int ans;
     MUTEX_LOCK(printf_mt_mutex);
     va_list args;
     va_start(args, format);
-    printf("=== THREAD #%2llu ===> ", get_current_thread_id());
-    int ans = vprintf(format, args);
+    if (use_stderr_for_printf) {
+        fprintf(stderr, "=== THREAD #%2llu ===> ", get_current_thread_id());
+        ans = vfprintf(stderr, format, args);
+    } else {
+        printf("=== THREAD #%2llu ===> ", get_current_thread_id());
+        ans = vprintf(format, args);
+    }
     va_end(args);
     MUTEX_UNLOCK(printf_mt_mutex);
     return ans;
@@ -148,6 +187,7 @@ CallerAPI CallerAPI_init_mthr(void)
     }
     intf.get_seed32 = get_seed32_mt;
     intf.get_seed64 = get_seed64_mt;
+    intf.get_param = get_cmd_param;
     intf.malloc = malloc;
     intf.free = free;
     intf.printf = printf_mt;
