@@ -162,7 +162,7 @@ void battery_self_test(GeneratorInfo *gen, const CallerAPI *intf)
         intf->printf("Internal self-test passed\n");
     } else {
         intf->printf("Internal self-test failed\n");
-    }    
+    }
 }
 
 void print_help(void)
@@ -184,7 +184,7 @@ typedef struct {
     int nthreads;
     int testid;
     int reverse_bits;
-    int interleaved32;    
+    int interleaved32;
 } SmokeRandSettings;
 
 
@@ -298,14 +298,14 @@ void GeneratorInfo_print(const GeneratorInfo *gi, int to_stderr)
         printf("Output size, bits: %d\n", gi->nbits);
     }
 }
-                     
-int main(int argc, char *argv[]) 
+
+int main(int argc, char *argv[])
 {
     if (argc < 3) {
         print_help();
         return 0;
     }
-    GeneratorInfo reversed_gen, interleaved_gen;    
+    GeneratorInfo reversed_gen, interleaved_gen;
     SmokeRandSettings opts;
     if (SmokeRandSettings_load(&opts, argc, argv)) {
         return 1;
@@ -335,7 +335,7 @@ int main(int argc, char *argv[])
     if (!strcmp(generator_lib, "list")) {
         return print_battery_info(battery_name);
     }
-        
+
     if (is_stdin32 || is_stdin64) {
         CallerAPI intf = CallerAPI_init();
         GeneratorInfo stdin_gi;
@@ -373,4 +373,3 @@ int main(int argc, char *argv[])
         return ans;
     }
 }
-           

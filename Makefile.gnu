@@ -2,21 +2,32 @@
 # Classic makefile for SmokeRand.
 #
 
-# For gcc
-CC = gcc
-AR = ar
-GEN_CFLAGS = -fPIC -ffreestanding -nostdlib
-# For zig cc
-#CC = zig cc
-#AR = zig ar
-#GEN_CFLAGS = -fPIC
-# compiling flags here
-# -Werror 
-PLATFORM_FLAGS=-DNO_X86_EXTENSIONS -DNOTHREADS
-IS_PORTABLE=0
-#PLATFORM_FLAGS = -m32 -DNO_X86_EXTENSIONS
-#IS_PORTABLE=1
-#PLATFORM_FLAGS=-m32
+PLATFORM_NAME=GCC
+ifeq ($(PLATFORM_NAME), GCC)
+    CC = gcc
+    AR = ar
+    GEN_CFLAGS = -fPIC -ffreestanding -nostdlib
+    PLATFORM_FLAGS=
+    IS_PORTABLE=0
+else ifeq ($(PLATFORM_NAME), GCC32)
+    CC = gcc
+    AR = ar
+    GEN_CFLAGS = -fPIC -ffreestanding -nostdlib
+    PLATFORM_FLAGS=-m32
+    IS_PORTABLE=0
+else ifeq ($(PLATFORM_NAME), ZIGCC)
+    CC = zig cc
+    AR = zig ar
+    GEN_CFLAGS = -fPIC
+    PLATFORM_FLAGS=-DNO_X86_EXTENSIONS -DUSE_WINTHREADS
+    IS_PORTABLE=0
+else ifeq ($(PLATFORM_NAME), GENERIC)
+    CC = gcc
+    AR = ar
+    GEN_CFLAGS = -fPIC
+    PLATFORM_FLAGS=-DNO_X86_EXTENSIONS -DNOTHREADS
+    IS_PORTABLE=1
+endif
 #------------------------------------------
 CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O2 -Werror -Wall -Wextra -Wno-attributes -march=native
 LINKFLAGS = $(PLATFORM_FLAGS)
@@ -43,8 +54,9 @@ endif
 # Core library
 CORE_LIB = $(LIBDIR)/libsmokerand_core.a
 LIB_SOURCES = $(addprefix $(SRCDIR)/, core.c coretests.c entropy.c extratests.c fileio.c lineardep.c)
-LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, cinterface.h core.h coretests.h entropy.h extratests.h fileio.h lineardep.h)
+LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, apidefs.h cinterface.h core.h coretests.h entropy.h extratests.h fileio.h lineardep.h)
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
+INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/core.h
 # Battery
 BAT_SOURCES = $(addprefix $(SRCDIR)/, bat_antilcg.c bat_brief.c bat_default.c bat_full.c)
 BAT_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_antilcg.h bat_brief.h bat_default.h bat_full.h)
@@ -97,15 +109,15 @@ $(GEN_BINDIR)/libcrand_shared$(SO): $(GEN_BINDIR)/obj/crand_shared.o
 $(GEN_BINDIR)/lib%$(SO): $(GEN_BINDIR)/obj/%.o
 	$(CC) $(LINKFLAGS) -shared $(GEN_CFLAGS) $< -s $(GEN_LFLAGS) -o $@
 
-$(GEN_OBJFILES): $(BINDIR)/generators/obj/%.o : generators/%.c $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/core.h
+$(GEN_OBJFILES): $(BINDIR)/generators/obj/%.o : generators/%.c $(INTERFACE_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
 
 $(GEN_BINDIR)/obj/superduper64_shared.o : generators/superduper64_shared.c \
-    generators/superduper64_body.h $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/core.h
+    generators/superduper64_body.h $(INTERFACE_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
 
 $(GEN_BINDIR)/obj/superduper64_u32_shared.o : generators/superduper64_u32_shared.c \
-    generators/superduper64_body.h $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/core.h
+    generators/superduper64_body.h $(INTERFACE_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
 
 # TODO: RANLUX!

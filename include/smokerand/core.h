@@ -10,29 +10,13 @@
  */
 #ifndef __SMOKERAND_CORE_H
 #define __SMOKERAND_CORE_H
+#include "apidefs.h"
 #include <stdint.h>
 
 #define TESTS_ALL 0
 
-#if defined(_MSC_VER) && !defined(__clang__)
-#include <intrin.h>
-#define UMUL128_FUNC_ENABLED
-#pragma intrinsic(_umul128)
-static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
-{
-    return _umul128(a, b, high);
-}
-#elif defined(__SIZEOF_INT128__)
-#define UINT128_ENABLED
-#define UMUL128_FUNC_ENABLED
-static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
-{
-    __uint128_t mul = ((__uint128_t) a) * b;
-    *high = mul >> 64;
-    return (uint64_t) mul;
-}
-#else
-#pragma message ("128-bit arithmetics is not supported by this compiler")
+#if !defined(NOTHREADS) && defined(_MSC_VER) && !defined (__clang__)
+#define USE_WINTHREADS
 #endif
 
 #if !defined(NOTHREADS) && (defined(__GNUC__) || defined(__MINGW32__) || defined(__MINGW64__)) && !defined(__clang__)
@@ -41,32 +25,18 @@ static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 #endif
 #endif
 
+
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
 #include <windows.h>
-#if !defined(USE_PTHREADS) && !defined(NOTHREADS)
-#define USE_WINTHREADS
-#endif
-#define EXPORT __declspec( dllexport )
 #define USE_LOADLIBRARY
-#if !defined(__cplusplus) && (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(__clang__)
-#define SHARED_ENTRYPOINT_CODE \
-int DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) { \
-    (void) hinstDLL; (void) fdwReason; (void) lpvReserved; return TRUE; }
-#else
-#define SHARED_ENTRYPOINT_CODE
-#endif
-#else
-#include <unistd.h>
-#define EXPORT
-#define SHARED_ENTRYPOINT_CODE
-#endif
-
-#ifdef USE_LOADLIBRARY
-#include <windows.h>
 #define DLSYM_WRAPPER GetProcAddress
 #define DLCLOSE_WRAPPER FreeLibrary
 #define MODULE_HANDLE HMODULE
+#if !defined(USE_PTHREADS) && !defined(NOTHREADS) && !defined(USE_WINTHREADS)
+#define USE_WINTHREADS
+#endif
 #else
+#include <unistd.h>
 #include <dlfcn.h>
 #define DLSYM_WRAPPER dlsym
 #define DLCLOSE_WRAPPER dlclose
@@ -75,38 +45,11 @@ int DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
 
 int get_cpu_numcores(void);
 
-typedef struct {
-    uint32_t (*get_seed32)(void); ///< Get 32-bit seed
-    uint64_t (*get_seed64)(void); ///< Get 64-bit seed
-    const char *(*get_param)(void); ///< Get command line parameters
-    void *(*malloc)(size_t len); ///< Pointer to malloc function
-    void (*free)(void *); ///< Pointer to free function
-    int (*printf)(const char *format, ... ); ///< Pointer to printf function
-    int (*strcmp)(const char *lhs, const char *rhs); ///< Pointer to strcmp function
-} CallerAPI;
-
 CallerAPI CallerAPI_init(void);
 CallerAPI CallerAPI_init_mthr(void);
 void CallerAPI_free(void);
 void set_cmd_param(const char *param);
 void set_use_stderr_for_printf(int val);
-
-/**
- * @brief Keeps the description of pseudorandon number generator.
- * Either 32-bit or 64-bit PRNGs are supported.
- */
-typedef struct {
-    const char *name; ///< Generator name
-    const char *description; ///< Generator description (optional)
-    void *(*create)(const CallerAPI *intf); ///< Create PRNG example
-    uint64_t (*get_bits)(void *state); ///< Return u32/u64 pseudorandom number
-    unsigned int nbits; ///< Number of bits returned by the generator (32 or 64)    
-    int (*self_test)(const CallerAPI *intf); ///< Run internal self-test
-    uint64_t (*get_sum)(void *state, size_t len); ///< Return sum of `len` elements
-} GeneratorInfo;
-
-
-typedef int (*GetGenInfoFunc)(GeneratorInfo *gi);
 
 /**
  * @brief Input data for generic statistical test, mainly PNG and its state.
@@ -319,21 +262,6 @@ static inline uint64_t reverse_bits64(uint64_t x)
     x = ((x & 0xCCCCCCCCCCCCCCCC) >> 2)  | ((x & 0x3333333333333333) << 2);
     x = ((x & 0xAAAAAAAAAAAAAAAA) >> 1)  | ((x & 0x5555555555555555) << 1);
     return x;
-}
-
-
-
-
-/**
- * @brief pcg_rxs_m_xs64 PRNG that has a good quality and can be used
- * for initialization for other PRNGs such as lagged Fibonacci.
- */
-static inline uint64_t pcg_bits64(uint64_t *state)
-{
-    uint64_t word = ((*state >> ((*state >> 59) + 5)) ^ *state) *
-        12605985483714917081ull;
-    *state = *state * 6364136223846793005ull + 1442695040888963407ull;
-    return (word >> 43) ^ word;
 }
 
 #endif

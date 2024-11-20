@@ -141,6 +141,10 @@ static unsigned long bspace32_nd_test(GeneratorState *obj, const BSpaceNDOptions
         exit(1);
     }
     unsigned long *ndups = calloc(opts->nsamples, sizeof(unsigned long));
+    if (ndups == NULL) {
+        fprintf(stderr, "***** bspace32_nd_test: not enough memory *****\n");
+        exit(1);
+    }
     for (size_t i = 0; i < opts->nsamples; i++) {
         bspace_make_tuples32(opts, obj->gi, obj->state, u, len);
             ndups[i] = bspace_get_ndups32(u, len);
@@ -168,6 +172,10 @@ static size_t bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
         exit(1);
     }
     unsigned long *ndups = calloc(opts->nsamples, sizeof(unsigned long));
+    if (ndups == NULL) {
+        fprintf(stderr, "***** bspace64_nd_test: not enough memory *****\n");
+        exit(1);
+    }
     for (size_t i = 0; i < opts->nsamples; i++) {
         bspace_make_tuples64(opts, obj->gi, obj->state, u, len);
             ndups[i] = bspace_get_ndups64(u, len);
@@ -308,7 +316,8 @@ TestResults bspace8_8d_decimated_test(GeneratorState *obj, unsigned int step)
     // Show information about the test
     obj->intf->printf("Birthday spacings test with decimation\n");
     obj->intf->printf("  ndims = 8; nbits_per_dim = 8; step = %u\n", step);
-    obj->intf->printf("  nsamples = 1; len = %lld, lambda = %g\n", len, lambda);
+    obj->intf->printf("  nsamples = 1; len = %lld, lambda = %g\n",
+        (unsigned long long) len, lambda);
     // Run the test
     uint64_t *u = calloc(len, sizeof(uint64_t));
     uint64_t *u_high = calloc(len, sizeof(uint64_t));
@@ -893,6 +902,7 @@ TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
         count_total += obj->tuples[i].count;
     }
     TestResults ans = TestResults_create("hamming_dc6");
+    ans.x = 0;
     for (size_t i = 0; i < obj->len; i++) {
         double Ei = count_total * obj->tuples[i].p;
         double Oi = obj->tuples[i].count;

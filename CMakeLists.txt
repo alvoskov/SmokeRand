@@ -39,6 +39,7 @@ add_library(smokerand_core
     src/lineardep.c include/smokerand/lineardep.h
     src/fileio.c include/smokerand/fileio.h
     include/smokerand/cinterface.h
+    include/smokerand/apidefs.h
 )
 target_include_directories(smokerand_core PRIVATE include)
 

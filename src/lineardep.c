@@ -139,6 +139,7 @@ TestResults matrixrank_test(GeneratorState *obj, size_t n, unsigned int max_nbit
     free(a);
     // Computation of p-value
     obj->intf->printf("  %5s %10s %10s\n", "rank", "Oi", "Ei");
+    ans.x = 0.0;
     for (int i = 0; i < 3; i++) {
         double Ei = pi[i] * nmat;
         ans.x += pow(Oi[i] - Ei, 2.0) / Ei;

@@ -76,7 +76,7 @@ static int printf_ser(const char *format, ...)
 
 CallerAPI CallerAPI_init(void)
 {
-    CallerAPI intf;    
+    CallerAPI intf;
     if (entropy.state == 0) {
         Entropy_init(&entropy);
     }
@@ -86,7 +86,7 @@ CallerAPI CallerAPI_init(void)
     intf.malloc = malloc;
     intf.free = free;
     intf.printf = printf_ser;
-    intf.strcmp = strcmp;    
+    intf.strcmp = strcmp;
     return intf;
 }
 
@@ -138,9 +138,9 @@ static inline uint64_t get_current_thread_id()
 {
     return (uint64_t) GetCurrentThreadId();
 }
-static inline uint64_t get_thread_id(HANDLE handle)
+static inline uint64_t get_thread_id(DWORD id)
 {
-    return (uint64_t) GetThreadId(handle);
+    return (uint64_t) id;
 }
 // End of WinAPI-specific code
 #endif
@@ -184,7 +184,7 @@ static int printf_mt(const char *format, ...)
  */
 CallerAPI CallerAPI_init_mthr(void)
 {
-    CallerAPI intf;    
+    CallerAPI intf;
     if (entropy.state == 0) {
         Entropy_init(&entropy);
         init_mutexes();
@@ -229,7 +229,7 @@ int get_cpu_numcores(void)
 ////////////////////////////////////////////
 
 TestResults TestResults_create(const char *name)
-{    
+{
     TestResults ans;
     ans.name = name;
     ans.p = NAN;
@@ -240,7 +240,7 @@ TestResults TestResults_create(const char *name)
 }
 
 
-/////////////////////////////////////// 
+///////////////////////////////////////
 ///// Some mathematical functions /////
 ///////////////////////////////////////
 
@@ -276,7 +276,9 @@ const char *interpret_pvalue(double pvalue)
 
 double sr_expm1(double x)
 {
-    if (x < -0.05 || x > 0.05) {
+    if (x != x) {
+        return NAN;
+    } else if (x < -0.05 || x > 0.05) {
         return exp(x) - 1.0;
     } else {
         long double sum = 0.0, sum_old = 1.0, t = x;
@@ -412,7 +414,9 @@ static double gammainc_upper_contfrac(double a, double x)
  */
 double gammainc(double a, double x)
 {
-    if (x < a + 1) {
+    if (x != x) {
+        return NAN;
+    } else if (x < a + 1) {
         return gammainc_lower_series(a, x);
     } else {
         return 1.0 - gammainc_upper_contfrac(a, x);
@@ -424,7 +428,9 @@ double gammainc(double a, double x)
  */
 double gammainc_upper(double a, double x)
 {
-    if (x < a + 1) {
+    if (x != x) {
+        return NAN;
+    } else if (x < a + 1) {
         return 1.0 - gammainc_lower_series(a, x);
     } else {
         return gammainc_upper_contfrac(a, x);
@@ -447,8 +453,9 @@ static long double betainc_frac(double x, double a, double b)
 {
     long double f = 1 / (a - a*(a+b)/(a+1) * x); // f=P1/Q1
     long double c = LDBL_MAX, d = f; // c=P1/P0, d=Q0/Q1
-    if (x != x)
+    if (x != x) {
         return NAN;
+    }
     for (long double f_old = -1, m = 1; f != f_old && m < 1000; m++) {
         long double abm_s, af, bf, a_2m;
         abm_s = a + b + m; a_2m = a + 2*m;
@@ -485,7 +492,7 @@ static long double betainc_frac(double x, double a, double b)
 double sr_betainc(double x, double a, double b, double *cIx_out)
 {
     double Ix, cIx;
-    if (x < 0 || x > 1) {
+    if (x != x || x < 0 || x > 1) {
         Ix = NAN; cIx = NAN;
     } else if (x == 0) {
         Ix = 0; cIx = 1;
@@ -539,7 +546,7 @@ static double t_cdf_asymptotic(double x, unsigned long f)
  */
 double t_cdf(double x, unsigned long f)
 {
-    if (f <= 0) { // Invalid value
+    if (x != x || f == 0) { // Invalid value
         return NAN;
     } else if (f > 1000) { // Asymptotic formula
         return t_cdf_asymptotic(x, f);
@@ -608,7 +615,7 @@ double binomial_pdf(unsigned long k, unsigned long n, double p)
  * @brief Transforms a chi2-distributed variable to the normally distributed value
  * (standard normal distribution).
  * @details Based on the asymptotic approximation by Wilson and Hilferty.
- * References: 
+ * References:
  *
  * 1. Wilson E.B., Hilferty M.M. The distribution of chi-square // Proceedings
  * of the National Academy of Sciences. 1931. Vol. 17. N 12. P. 684-688.
@@ -647,8 +654,8 @@ double chi2_cdf(double x, unsigned long f)
  * @brief Implementation of chi-square distribution c.c.d.f. (p-value)
  * @details It is based on regularized incomplete gamma function. For very
  * large numbers of degrees of freedom asymptotic approximation is used.
- * 
- * References: 
+ *
+ * References:
  *
  * 1. Wilson E.B., Hilferty M.M. The distribution of chi-square // Proceedings
  * of the National Academy of Sciences. 1931. Vol. 17. N 12. P. 684-688.
@@ -786,8 +793,7 @@ GeneratorModule GeneratorModule_load(const char *libname)
     if (gen_getinfo == NULL) {
         fprintf(stderr, "Cannot find the 'gen_getinfo' function\n");
         mod.valid = 0;
-    }
-    if (!gen_getinfo(&mod.gen)) {
+    } else if (!gen_getinfo(&mod.gen)) {
         fprintf(stderr, "'gen_getinfo' function failed\n");
         mod.valid = 0;
     }
@@ -903,7 +909,7 @@ TimeHMS nseconds_to_hms(unsigned long nseconds_total)
  * @param nseconds_total  Number of seconds.
  */
 void print_elapsed_time(unsigned long nseconds_total)
-{    
+{
     TimeHMS hms = nseconds_to_hms(nseconds_total);
     printf("%.2d:%.2d:%.2d", hms.h, hms.m, hms.s);
 }
@@ -928,7 +934,8 @@ typedef struct {
 #ifdef USE_PTHREADS
     pthread_t thrd_id;
 #elif defined(USE_WINTHREADS)
-    HANDLE thrd_id;
+    DWORD thrd_id;
+    HANDLE thrd_handle;
 #endif
     TestDescription *tests;
     size_t *tests_inds;
@@ -1070,12 +1077,11 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
 #elif defined(USE_WINTHREADS)
     // Run threads
     for (size_t i = 0; i < nthreads; i++) {
-        DWORD thrd_id;
-        th[i].thrd_id = CreateThread(NULL, 0, battery_thread, &th[i], 0, &thrd_id);
+        th[i].thrd_handle = CreateThread(NULL, 0, battery_thread, &th[i], 0, &th[i].thrd_id);
     }
     // Get data from threads
     for (size_t i = 0; i < nthreads; i++) {
-        WaitForSingleObject((HANDLE)th[i].thrd_id, INFINITE);
+        WaitForSingleObject(th[i].thrd_handle, INFINITE);
     }
 #endif
     // Deallocate array
@@ -1127,7 +1133,7 @@ static void print_bar()
 static void TestResults_print_report(const TestResults *results,
     size_t ntests, time_t nseconds_total)
 {
-    unsigned int npassed = 0, nwarnings = 0, nfailed = 0; 
+    unsigned int npassed = 0, nwarnings = 0, nfailed = 0;
     printf("  %3s %-20s %12s %14s %-15s %4s\n",
         "#", "Test name", "xemp", "p", "Interpretation", "Thr#");
     print_bar();
