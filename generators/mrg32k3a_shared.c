@@ -89,8 +89,11 @@ static inline int64_t component(uint32_t *s,
 
 inline uint32_t make_seed(const CallerAPI *intf, const uint64_t m)
 {
-    uint32_t seed = intf->get_seed64() % m;
-    return (seed != 0) ? seed : 1;
+    uint32_t seed;
+    do {
+        seed = intf->get_seed32();
+    } while (seed == 0 || seed >= m);
+    return seed;
 }
 
 static void *create(const CallerAPI *intf)

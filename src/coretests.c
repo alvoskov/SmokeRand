@@ -212,7 +212,7 @@ static size_t bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
  */
 TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
-    TestResults ans;
+    TestResults ans = TestResults_create("bspace_nd");
     if (opts->ndims * opts->nbits_per_dim > 64 ||
         (obj->gi->nbits != 32 && obj->gi->nbits != 64)) {
         return ans;
@@ -301,7 +301,7 @@ TestResults bspace64_1d_ns_test(GeneratorState *obj, unsigned int nsamples)
  */
 TestResults bspace8_8d_decimated_test(GeneratorState *obj, unsigned int step)
 {
-    TestResults ans;
+    TestResults ans = TestResults_create("bspace8_8d");
     const unsigned int nbits_total = 64;
     size_t len = pow(2.0, (nbits_total + 4.0) / 3.0);
     double lambda = pow(len, 3.0) / (4 * pow(2.0, nbits_total));
@@ -437,8 +437,10 @@ TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
         fprintf(stderr, "***** collisionover_test: not enough memory *****\n");
         exit(1);
     }
-    uint64_t Oi[4] = {1ull << opts->ndims * opts->nbits_per_dim, 0, 0, 0};
-    double nstates = Oi[0];
+    uint64_t nstates_u64 = 1ull << opts->ndims * opts->nbits_per_dim;
+    uint64_t Oi[4] = {0, 0, 0, 0};
+    Oi[0] = nstates_u64;
+    double nstates = nstates_u64;
     double lambda = (n - opts->ndims + 1.0) / nstates;
     double mu = nstates * (lambda - 1 + exp(-lambda));
     TestResults ans;
@@ -890,7 +892,7 @@ TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
     for (size_t i = 0; i < obj->len; i++) {
         count_total += obj->tuples[i].count;
     }
-    TestResults ans = {.x = 0.0, .p = NAN, .name = "hamming_dc6"};
+    TestResults ans = TestResults_create("hamming_dc6");
     for (size_t i = 0; i < obj->len; i++) {
         double Ei = count_total * obj->tuples[i].p;
         double Oi = obj->tuples[i].count;

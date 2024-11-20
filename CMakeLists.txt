@@ -3,14 +3,20 @@ project (SmokeRand)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Compiler settings
-if (NOT MSVC)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(PROF_FLAGS "")
     set(CMODULE_LINK_FLAGS "-nostdlib")
+    set(FREESTANDING "-ffreestanding")
     #set(PROF_FLAGS "-g -pg")
 # -ffreestanding 
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -std=c99 -O2 -Wall -Werror -Wextra -Wno-attributes -march=native")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "OpenWatcom")
+    set(CMODULE_LINK_FLAGS " ")
+    set(FREESTANDING " ")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -za99 -DNO_X86_EXTENSIONS -DNOTHREADS")
 else()
     set(CMODULE_LINK_FLAGS " ")
+    set(FREESTANDING " ")
 endif()
 
 # Some CMake settings
@@ -86,7 +92,7 @@ foreach(prng_name alfib alfib_mod chacha chacha_avx coveyou64 drand48
         # appication. All other modules don't use standard library and are
         # freestanding.
         set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
-        target_compile_options(${prng_name}_shared PRIVATE -ffreestanding) 
+        target_compile_options(${prng_name}_shared PRIVATE ${FREESTANDING}) 
     endif()
     set_target_properties(${prng_name}_shared PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
     set_target_properties(${prng_name}_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)

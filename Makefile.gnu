@@ -1,14 +1,25 @@
 #
 # Classic makefile for SmokeRand.
 #
+
+# For gcc
 CC = gcc
+AR = ar
+GEN_CFLAGS = -fPIC -ffreestanding -nostdlib
+# For zig cc
+#CC = zig cc
+#AR = zig ar
+#GEN_CFLAGS = -fPIC
 # compiling flags here
 # -Werror 
+PLATFORM_FLAGS=-DNO_X86_EXTENSIONS -DNOTHREADS
+IS_PORTABLE=0
 #PLATFORM_FLAGS = -m32 -DNO_X86_EXTENSIONS
-PLATFORM_FLAGS=
-CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O2 -Wall -Wextra -Wno-attributes -march=native
+#IS_PORTABLE=1
+#PLATFORM_FLAGS=-m32
+#------------------------------------------
+CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O2 -Werror -Wall -Wextra -Wno-attributes -march=native
 LINKFLAGS = $(PLATFORM_FLAGS)
-GEN_CFLAGS = -fPIC -ffreestanding -nostdlib
 INCLUDE = -Iinclude
 
 SRCDIR = src
@@ -18,7 +29,8 @@ LIBDIR = lib
 INCLUDEDIR = include/smokerand
 LFLAGS =  -L$(LIBDIR) -lsmokerand_core -lm
 ifeq ($(OS), Windows_NT)
-GEN_LFLAGS = -Wl,--exclude-all-symbols
+GEN_LFLAGS = 
+#-Wl,--exclude-all-symbols
 EXE = .exe
 SO = .dll
 else
@@ -42,7 +54,18 @@ EXE_NAMES = smokerand calibrate_dc6 test_funcs
 EXE_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXE_NAMES)))
 
 # Generators
+ifeq ($(IS_PORTABLE), 1)
+GEN_SOURCES = $(addsuffix _shared.c,$(addprefix generators/, alfib_mod alfib \
+    chacha coveyou64 crand drand48 isaac64 kiss64 kiss93 kiss99 lcg32prime \
+    lcg64 lcg69069 lfib_par lfsr113 lfsr258 loop_7fff_w64 minstd mlfib17_5 \
+    msws mt19937 mulberry32 mwc64x mwc64 pcg32 pcg64 philox32 r1279 \
+    randu ranluxpp rc4 romutrio rrmxmx sfc32 sfc64 shr3 speck128 \
+    splitmix32 splitmix sqxor32 swblux swbw swb threefry tinymt32 tinymt64 \
+    well1024a xoroshiro1024stst xoroshiro1024st xoroshiro128pp xoroshiro128p \
+    xorshift128p xorshift128 xorwow xsh))
+else
 GEN_SOURCES = $(wildcard generators/*.c)
+endif
 GEN_OBJFILES = $(patsubst %.c,%.o,$(subst generators/,$(BINDIR)/generators/obj/,$(GEN_SOURCES)))
 GEN_SHARED = $(patsubst %.c,%$(SO),$(subst generators/,$(BINDIR)/generators/lib,$(GEN_SOURCES)))
 GEN_BINDIR = $(BINDIR)/generators
@@ -50,7 +73,7 @@ GEN_BINDIR = $(BINDIR)/generators
 all: $(CORE_LIB) $(addprefix $(BINDIR)/, $(addsuffix $(EXE),$(EXE_NAMES))) generators
 
 $(CORE_LIB): $(LIB_OBJFILES)
-	ar rcu $@ $^
+	$(AR) rcu $@ $^
 
 $(BINDIR)/smokerand$(EXE): $(OBJDIR)/smokerand.o $(CORE_LIB) $(BAT_OBJFILES) $(BAT_HEADERS)
 	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE) 
@@ -76,6 +99,17 @@ $(GEN_BINDIR)/lib%$(SO): $(GEN_BINDIR)/obj/%.o
 
 $(GEN_OBJFILES): $(BINDIR)/generators/obj/%.o : generators/%.c $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/core.h
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
+
+$(GEN_BINDIR)/obj/superduper64_shared.o : generators/superduper64_shared.c \
+    generators/superduper64_body.h $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/core.h
+	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
+
+$(GEN_BINDIR)/obj/superduper64_u32_shared.o : generators/superduper64_u32_shared.c \
+    generators/superduper64_body.h $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/core.h
+	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
+
+# TODO: RANLUX!
+
 
 clean:
 ifeq ($(OS), Windows_NT)

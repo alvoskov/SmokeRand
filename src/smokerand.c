@@ -51,17 +51,19 @@ static SpeedResults measure_speed(GeneratorInfo *gen, const CallerAPI *intf,
     double ns_total = 0.0;
     for (size_t niter = 2; ns_total < 0.5e9; niter <<= 1) {
         clock_t tic = clock();
-        uint64_t sum = 0;
         uint64_t tic_proc = cpuclock();
         if (mode == speed_uint) {
+            uint64_t sum = 0;
             for (size_t i = 0; i < niter; i++) {
                 sum += gen->get_bits(state);
             }
+            (void) sum;
         } else {
             uint64_t sum = 0;
             for (size_t i = 0; i < niter; i++) {
                 sum += gen->get_sum(state, SUM_BLOCK_SIZE);
             }
+            (void) sum;
         }
         uint64_t toc_proc = cpuclock();
         clock_t toc = clock();
@@ -113,7 +115,8 @@ void battery_speed_test(GeneratorInfo *gen, const CallerAPI *intf,
 {
     GeneratorInfo dummy_gen = {.name = "dummy", .create = dummy_create,
         .get_bits = dummy_get_bits, .get_sum = dummy_get_sum,
-        .nbits = gen->nbits, .self_test = NULL};
+        .self_test = NULL};
+    dummy_gen.nbits = gen->nbits;
     SpeedResults speed_full = measure_speed(gen, intf, mode);
     SpeedResults speed_dummy = measure_speed(&dummy_gen, intf, mode);
     size_t block_size = (mode == speed_uint) ? 1 : SUM_BLOCK_SIZE;
@@ -147,22 +150,6 @@ void battery_speed(GeneratorInfo *gen, const CallerAPI *intf)
         battery_speed_test(gen, intf, speed_sum);
     }
 }
-
-
-
-
-
-static inline void TestResults_print(const TestResults obj)
-{
-    printf("%s: p = %.3g; xemp = %g", obj.name, obj.p, obj.x);
-    if (obj.p < 1e-10 || obj.p > 1 - 1e-10) {
-        printf(" <<<<< FAIL\n");
-    } else {
-        printf("\n");
-    }
-}
-
-
 
 void battery_self_test(GeneratorInfo *gen, const CallerAPI *intf)
 {

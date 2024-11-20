@@ -24,7 +24,7 @@ static TestResults bspace32_1d(GeneratorState *obj)
 
 static TestResults bspace32_1d_high(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 4096, .get_lower = 0};
+    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 8192, .get_lower = 0};
     return bspace_nd_test(obj, &opts);
 }
 

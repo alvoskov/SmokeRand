@@ -16,6 +16,10 @@
     return sum; \
 }
 
+#ifndef GEN_DESCRIPTION
+#define GEN_DESCRIPTION NULL
+#endif
+
 /**
  * @brief  Some default boilerplate code for scalar PRNG that returns
  * unsigned 32-bit numbers.
@@ -32,6 +36,7 @@ EXPORT uint64_t get_bits(void *state) { return get_bits_raw(state); } \
 GET_SUM_FUNC \
 int EXPORT gen_getinfo(GeneratorInfo *gi) { \
     gi->name = prng_name; \
+    gi->description = GEN_DESCRIPTION; \
     gi->create = create; \
     gi->get_bits = get_bits; \
     gi->get_sum = get_sum; \
@@ -56,6 +61,7 @@ EXPORT uint64_t get_bits(void *state) { return get_bits_raw(state); } \
 GET_SUM_FUNC \
 int EXPORT gen_getinfo(GeneratorInfo *gi) { \
     gi->name = prng_name; \
+    gi->description = GEN_DESCRIPTION; \
     gi->create = create; \
     gi->get_bits = get_bits; \
     gi->get_sum = get_sum; \
@@ -68,6 +74,8 @@ int EXPORT gen_getinfo(GeneratorInfo *gi) { \
 ////////////////////////////////////////////////////////////
 ///// Some useful pre-defined structures and functions /////
 ////////////////////////////////////////////////////////////
+
+#ifdef UMUL128_FUNC_ENABLED
 
 /**
  * @brief 128-bit LCG state.
@@ -140,6 +148,8 @@ static inline void Lcg128State_seed(Lcg128State *obj, const CallerAPI *intf)
 #endif
 }
 
+#endif
+// end of UMUL128_FUNC_ENABLED ifdef
 
 
 #endif

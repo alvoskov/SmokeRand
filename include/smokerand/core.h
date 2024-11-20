@@ -11,15 +11,12 @@
 #ifndef __SMOKERAND_CORE_H
 #define __SMOKERAND_CORE_H
 #include <stdint.h>
-#include <math.h>
-#ifndef M_PI
-#define M_PI (3.14159265358979323846)
-#endif
 
 #define TESTS_ALL 0
 
 #if defined(_MSC_VER) && !defined(__clang__)
 #include <intrin.h>
+#define UMUL128_FUNC_ENABLED
 #pragma intrinsic(_umul128)
 static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 {
@@ -27,7 +24,7 @@ static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 }
 #elif defined(__SIZEOF_INT128__)
 #define UINT128_ENABLED
-#define USE_PTHREADS
+#define UMUL128_FUNC_ENABLED
 static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 {
     __uint128_t mul = ((__uint128_t) a) * b;
@@ -38,15 +35,20 @@ static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 #pragma message ("128-bit arithmetics is not supported by this compiler")
 #endif
 
+#if !defined(NOTHREADS) && (defined(__GNUC__) || defined(__MINGW32__) || defined(__MINGW64__)) && !defined(__clang__)
+#ifndef USE_WINTHREADS
+#define USE_PTHREADS
+#endif
+#endif
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
 #include <windows.h>
-#ifndef USE_PTHREADS
+#if !defined(USE_PTHREADS) && !defined(NOTHREADS)
 #define USE_WINTHREADS
 #endif
 #define EXPORT __declspec( dllexport )
 #define USE_LOADLIBRARY
-#ifndef __cplusplus
+#if !defined(__cplusplus) && (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(__clang__)
 #define SHARED_ENTRYPOINT_CODE \
 int DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) { \
     (void) hinstDLL; (void) fdwReason; (void) lpvReserved; return TRUE; }
@@ -58,7 +60,6 @@ int DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
 #define EXPORT
 #define SHARED_ENTRYPOINT_CODE
 #endif
-
 
 #ifdef USE_LOADLIBRARY
 #include <windows.h>
@@ -96,12 +97,12 @@ void set_use_stderr_for_printf(int val);
  */
 typedef struct {
     const char *name; ///< Generator name
+    const char *description; ///< Generator description (optional)
     void *(*create)(const CallerAPI *intf); ///< Create PRNG example
     uint64_t (*get_bits)(void *state); ///< Return u32/u64 pseudorandom number
     unsigned int nbits; ///< Number of bits returned by the generator (32 or 64)    
     int (*self_test)(const CallerAPI *intf); ///< Run internal self-test
     uint64_t (*get_sum)(void *state, size_t len); ///< Return sum of `len` elements
-    //const char *get_descr(void *state); ///< Returns human-readable description of state
 } GeneratorInfo;
 
 
@@ -117,13 +118,18 @@ typedef struct {
 } GeneratorState;
 
 static inline GeneratorState GeneratorState_create(const GeneratorInfo *gi,
-    void *state, const CallerAPI *intf)
+    const CallerAPI *intf)
 {
     GeneratorState obj;
     obj.gi = gi;
-    obj.state = state;
+    obj.state = gi->create(intf);
     obj.intf = intf;
     return obj;
+}
+
+static inline void GeneratorState_free(GeneratorState *obj, const CallerAPI *intf)
+{
+    intf->free(obj->state);
 }
 
 
@@ -149,6 +155,9 @@ typedef struct {
     double x; ///< Empirical random value
     uint64_t thread_id; ///< Thread ID for logging
 } TestResults;
+
+
+TestResults TestResults_create(const char *name);
 
 /**
  * @brief Test generalized description.

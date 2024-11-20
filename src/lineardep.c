@@ -99,7 +99,7 @@ static size_t calc_bin_matrix_rank(uint32_t *a, size_t n)
  */
 TestResults matrixrank_test(GeneratorState *obj, size_t n, unsigned int max_nbits)
 {
-    TestResults ans = {.name = "mrank", .p = NAN, .alpha = NAN, .x = 0, .thread_id = 0};
+    TestResults ans = TestResults_create("mrank");
     int nmat = 64, Oi[3] = {0, 0, 0};
     double pi[3] = {0.1284, 0.5776, 0.2888};
     size_t mat_len = n * n / 32;
@@ -231,7 +231,7 @@ size_t berlekamp_massey(const uint8_t *s, size_t n)
  */
 TestResults linearcomp_test(GeneratorState *obj, size_t nbits, unsigned int bitpos)
 {
-    TestResults ans = {.name = "linearcomp", .x = NAN, .p = NAN};
+    TestResults ans = TestResults_create("linearcomp");
     uint8_t *s = calloc(nbits, sizeof(uint8_t));
     obj->intf->printf("Linear complexity test\n");
     obj->intf->printf("  nbits: %lld\n", (long long) nbits);

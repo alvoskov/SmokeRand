@@ -38,9 +38,8 @@ int main()
         fprintf(stderr, "Cannot open output file 'dc6.m'\n");
         return 1;
     }
-    void *state = gi->create(&intf);
     double *z_ary = calloc(nsamples, sizeof(double));
-    GeneratorState obj = {.gi = gi, .state = state, .intf = &intf};
+    GeneratorState obj = GeneratorState_create(gi, &intf);
     for (int i = 0; i < nsamples; i++) {
         printf("%d out of %d\n", i + 1, nsamples);
         TestResults res = hamming_dc6_all_test(&obj);
@@ -59,9 +58,8 @@ int main()
     }
     fprintf(fp, "]\n");
     fclose(fp);
-
-    intf.free(obj.state);
     free(z_ary);
+    GeneratorState_free(&obj, &intf);
     GeneratorModule_unload(&mod);
     CallerAPI_free();
     return 0;

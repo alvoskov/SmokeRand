@@ -45,16 +45,26 @@ Existing solutions:
 5. gjrand (https://gjrand.sourceforge.net/). Have some unique and sensitive
    tests but documentation is scarce.
 
-Requirements:
+Minimal requirements:
 
-- C99 compiler, some PRNGs will require 128-bit integers either through
-  `__uint128_t` type (GCC, Clang) or `_umul128`/`_addcarry_u64` intrinsics
-  (Microsoft Visual C). C99 was chosen instead of C89 due to mandatory support
+- C99 compiler; C99 standard was chosen instead of C89 due to mandatory support
   of 64-bit integers and `inline` keyword.
-- GNU make or CMake.
-- pthreads (POSIX threads) library.
-- 64-bit CPU, x86-64 with RDRAND and AVX2 support is recommended.
-- 4 GiB of RAM minimal, 16 GiB recommended.
+- GNU make.
+- 32-bit CPU.
+- 2 GiB of RAM minimal, 16 GiB recommended.
+
+Recommended configuration:
+
+- C99 compiler with 128-bit integers support either through `__uint128_t` type
+  (GCC, Clang) or `_umul128`/`_addcarry_u64` intrinsics (Microsoft Visual C).
+  They are required by some PRNGs such as 128-bit LCGs. In the case of x86-64
+  intrinsics for RDTSC, RDRAND and AVX2 are highly recommended.
+- Multithreading support: pthreads (POSIX threads) library of WinAPI threads.
+- CMake for compilation under MSVC.
+- 64-bit CPU; in the case of x86-64 -- support of RDTSC, RDRAND and AVX2
+  instructions.
+- 16 GiB of RAM (especially for multithreaded mode and/or `birthday` battery)
+
 
 Implemented tests:
 
@@ -210,6 +220,8 @@ Two ways of PRNG testing are implemented in SmokeRand:
 1. Through stdin/stdio pipes. Simple but doesn't support multithreading.
 2. Load PRNG from a shared library. More complex but allows multithreading.
 
+
+
 # Tests description
 
 The tests supplied with SmokeRand are mostly well-known, described in scientific
@@ -254,29 +266,59 @@ as randu, lcg69069, shr3.
 
 The birthday test generates input values using the next algorithm:
 
-1. Get `ndim` pseudorandom values and take the lower `nbits` bits from
-   each value.
-2. Concatenate them as `x_n | x_{n-1} | ... | x_{1}`.
+1. Get `ndim` pseudorandom values and take the lower (or higher) `nbits`
+   bits from each value.
+2. Concatenate them as `x_n | x_{n-1} | ... | x_{1}` ("birthday").
 
- Name        | nbits | ndim | Detected PRNGs
--------------|-------|------|------------------------------------------------------
- bspace64_1d | 64    | 1    | 64-bit LCG with prime modulus
- bspace32_1d | 32    | 1    | Additive LFib PRNGs and LCGs with m = 2^{96}
- bspace32_2d | 32    | 2    | LCGs
- bspace21_3d | 21    | 3    | 64-bit MWC generators.
- bspace16_4d | 16    | 4    | 
- bspace8_8d  | 8     | 8    | LCGs with m = 2^{64}
+This n-dimensional modification is described by P. L'Ecuyer and R.Simard
+(https://doi.org/10.1016/S0378-4754(00)00253-6). Then classic "birthday test"
+is applied, number of "birthdays" is adjusted to \f$ \lambda = 4 \f$ value.
+The test is repeated several times (`nsamples`), the number of duplicates
+from these runs are summed. This sum obeys Poisson distribution.
+
+ Name        | nbits | ndim | `brief` | `default` | `full` 
+-------------|-------|------|---------|-----------|--------
+ bspace64_1d | 64    | 1    | 40      | 50        | 250
+ bspace32_1d | 32    | 1    | 4096    | 8192      | 8192
+ bspace32_2d | 32    | 2    | 5       | 10        | 250
+ bspace21_3d | 21    | 3    | 5       | 10        | 250
+ bspace16_4d | 16    | 4    | 5       | 10        | 250
+ bspace8_8d  | 8     | 8    | 5       | 10        | 250
+
+1-dimensional tests are sensitive to 64-bit LCGs with prime modulus and lagged
+Fibonacci generators, 3-dimensional tests detect 32- and 64-bit MWC
+(multiply-with-carry) PRNGS, 4D and 8D modifications are very sensitive to
+64-bit LCGs with truncated lower 32 bits.
 
 ## Birthday spacings test with decimation
 
 ## Collision over test
 
- Name          | nbits | ndim | Detected PRNGs
----------------|-------|------|--------------------
- collover20_2d | 20    | 2    |
- collover13_3d | 13    | 3    |
- collover8_5d  | 8     | 5    |
- collover5_8d  | 5     | 8    |
+This test is a modification of classic "Monkey test". The algorithm was
+suggested by developers of TestU01. Number of collision obeys the Poisson
+distribution with the next mathematical expectance:
+
+\f[
+\mu = d^t \left(\lambda - 1 + e^{-\lambda} \right)
+\f]
+
+where \f$d\f$ is number of states per dimensions, \f$t\f$ is the number
+of dimensions and \f$\lambda\f$ is so-called "density":
+
+\f[
+\lambda = \frac{n - t + 1}{d^t}
+\f]
+
+where \f$n\f$ is the number of points in the sample. The formula are correct
+only when \f$ n \ll d^t \f$.
+
+
+ Name          | nbits | ndim | `brief` | `default` | `full`
+---------------|-------|------|---------|-----------|--------
+ collover20_2d | 20    | 2    | 3       | 5         | 50
+ collover13_3d | 13    | 3    | 3       | 5         | 50
+ collover8_5d  | 8     | 5    | 3       | 5         | 50
+ collover5_8d  | 5     | 8    | 3       | 5         | 50
 
 ## Gap test
 
@@ -329,6 +371,10 @@ one-threaded mode. Linear complexity test is much faster in this case.
 
 ## Hamming weights based "DC6" test
 
+This test is a modification of `DC6-9x1Bytes-1` test from PractRand by Chris
+Doty-Humphrey. Actually it is a family of algorithms that can analyse bytes,
+16-bit, 32-bit and 64-bit chunks. The DC6-9x1Bytes-1 modification works with
+bytes.
 
 # Extra tests description
 
@@ -368,7 +414,7 @@ at 1 TiB). This test run requred about 25 min.
  lcg64             | u32    | 5     | 8       | 11   | 0.40 | N/A    | Small   | 16 MiB
  lcg64prime        | u64    | 1     | 1       | 1    | 1.5  | -      |         | >= 32 TiB
  lcg96             | u32    | +     | 1       | 1    | 0.78 | N/A    |         | 32 GiB
- lcg128            | u64    | +     | 1       | 1    | 0.35 |        |         | 64 GiB
+ lcg128            | u64    | +     | 1       | 1    | 0.35 | +      |         | 64 GiB
  lcg128_full       | u64    | +     | 1       | 1    | 0.42 | +      |         | 64 GiB
  lcg128_u32_full   | u32    | +     | +       | +    | 0.75 | N/A    |         | >= 32 TiB
  lcg69069          | u32    | 16    | 33      | 36   | 0.38 | N/A    | -       | 2 KiB
@@ -382,7 +428,7 @@ at 1 TiB). This test run requred about 25 min.
  mulberry32        | u32    | 1     | 2       | 3    | 0.51 | N/A    |         | 512 MiB
  mwc64             | u32    | 1     | 2       | 4    | 0.37 | N/A    | Small   | 1 TiB
  mwc64x            | u32    | +     | +       | +    | 0.53 | N/A    | +       | >= 8 TiB
- mwc128            | u64    | +     | +       | +    | 0.30 | +      | +       | >= 4 TiB
+ mwc128            | u64    | +     | +       | +    | 0.30 | +      | +       | >= 16 TiB
  mwc128x           | u64    | +     | +       | +    | 0.30 | +      | +       | >= 8 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +     | +       | +    | 0.28 | -      | +       | >= 2 TiB
@@ -394,14 +440,17 @@ at 1 TiB). This test run requred about 25 min.
  romutrio          | u64    | +     | +       | +    | 0.15 | +      |         |
  rrmxmx            | u64    | +     | +       | +    | 0.14 | -      |         | >= 2 TiB
  sezgin63          | u32    | +     | +       | 3    | 3.0  | N/A    |         | >= 16 TiB
+ sfc32             | u32    | +     | +       | +    | 0.24 | N/A    |         |
+ sfc64             | u64    | +     | +       | +    | 0.10 | +      | +       | >= 1 TiB
  speck128          | u64    | +     | +       | +    | 3.1  |        |         | >= 2 TiB
  speck128_avx      | u64    | +     | +       | +    | 0.65 |        |         |
  splitmix          | u64    | +     | +       | +    | 0.19 | -      |         | >= 2 TiB
  splitmix32        | u32    | 1     | 2       | 3    | 0.25 | N/A    | +       | 1 GiB
  sqxor             | u64    | +     | +       | +    | 0.13 | +      |         | >= 2 TiB
  sqxor32           | u32    | 1     | 2       | 3    | 0.20 | N/A    | Small   | 16 GiB
- sfc32             | u32    | +     | +       | +    | 0.24 | N/A    |         |
- sfc64             | u64    | +     | +       | +    | 0.10 | +      | +       | >= 1 TiB
+ superduper73      | u32    | 9     | 15      | 18   |      | N/A    |         | 32 KiB
+ superduper64      | u64    | 1     | 3       | 5    |      |        |         | 512 KiB
+ superduper64_u32  | u32    | +     | +       |      |      | N/A    |         |
  shr3              | u32    | 14    | 30      | 33   | 0.76 | N/A    | -       | 32 KiB
  swb               | u32    | 4     | 4       | 5    | 2.7  | N/A    |         | 128 MiB
  swblux            | u32    | +     | +       | +    | 6.3  | N/A    |         | 4 TiB
@@ -418,4 +467,4 @@ at 1 TiB). This test run requred about 25 min.
  xoroshiro1024st   | u64    | 1     | 1       | 2    | 0.33 |        |         | 128 GiB
  xoroshiro1024stst | u64    | +     | +       | +    | 0.33 |        |         |
  xorwow            | u32    | 3     | 7       | 9    | 0.52 | N/A    | Small   | 128 KiB
- xsh               | u64    | 7     | 10      | 14   | 0.43 |        | -       | 32 KiB
+ xsh               | u64    | 7     | 10      | 14   | 0.43 | -      | -       | 32 KiB

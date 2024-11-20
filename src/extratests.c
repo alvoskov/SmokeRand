@@ -63,7 +63,7 @@ static inline double BirthdayOptions_calc_lambda(const BirthdayOptions *opts,
  */
 TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
 {
-    TestResults ans = {.x = NAN, .p = NAN, .alpha = NAN};
+    TestResults ans = TestResults_create("birthday");
     double lambda = BirthdayOptions_calc_lambda(opts, obj->gi->nbits);
     obj->intf->printf("  lambda = %g\n", lambda);
     obj->intf->printf("  Filling the array with 'birthdays'\n");
@@ -118,16 +118,23 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
 
 void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
 {
-    size_t n = 1ull << 30;
-    BirthdayOptions opts_small = {.n = n, .e = 7}; // lambda = 4
-    BirthdayOptions opts_large = {.n = n, .e = 9}; // lambda = 20
+#if SIZE_MAX == UINT64_MAX
+    // Settings for 64-bit platform (require 8 GiB of RAM and ~30min)
+    //static const size_t n = 0x40000000; // 2^30 1ull << 30;
+    BirthdayOptions opts_small = {.n = 0x40000000, .e = 7}; // lambda = 4
+    BirthdayOptions opts_large = {.n = 0x40000000, .e = 9}; // lambda = 20
+#else
+    // Settings for 32-bit platforms (require 1 GiB of RAM, very slow)
+    //static const size_t n = 0x8000000; // 2^27; 1ull << 27;
+    BirthdayOptions opts_small = {.n = 0x8000000, .e = 13}; // lambda = 4
+    BirthdayOptions opts_large = {.n = 0x8000000, .e = 15}; // lambda = 20
+#endif
     intf->printf("64-bit birthday paradox test\n");
     if (gen->nbits != 64) {
         intf->printf("  Error: the generator must return 64-bit values\n");
         return;
     }
-    void *state = gen->create(intf);    
-    GeneratorState obj = {.gi = gen, .state = state, .intf = intf};
+    GeneratorState obj = GeneratorState_create(gen, intf);
     TestResults ans = birthday_test(&obj, &opts_small);
     if (ans.x == 0) {
         double x_small = ans.x;
@@ -142,7 +149,7 @@ void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
         ans.alpha = poisson_pvalue(ans.x, lambda);
         intf->printf("  x = %g (ndups); p = %g; 1-p=%g\n", ans.x, ans.p, ans.alpha);
     }
-    free(state);
+    GeneratorState_free(&obj, intf);
     (void) ans;
 }
 
@@ -471,7 +478,7 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
     const double e_ref = 1.4530649029;
     const double cv_ref = 1.4987048885;
     const double jc = log(1 + sqrt(2)) / 2;
-    TestResults res = {.p = NAN, .alpha = NAN, .x = NAN};
+    TestResults res = TestResults_create("ising2d");
     if (opts->algorithm == ising_wolff) {
         res.name = "ising2d_wolff";
     } else if (opts->algorithm == ising_metropolis) {

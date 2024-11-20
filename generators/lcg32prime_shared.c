@@ -23,9 +23,11 @@ static inline uint64_t get_bits_raw(void *state)
     Lcg32State *obj = state;
     const uint64_t a = 1588635695ul;
     const uint64_t m = 4294967291ul; // 2^32 - 5
-//    const uint64_t d = 5;
-    obj->x = (a * obj->x + 123) % m;
-/*
+#if SIZE_MAX == UINT32_MAX
+    // Implementation for 32-bit systems;
+    // 64-bit mod may require runtime library funcions on such platforms
+    // (e.g. 32-bit MinGW). So we use custom implementation.
+    const uint64_t d = 5;
     uint64_t ax = a * obj->x + 123;
     uint64_t lo = ax & 0xFFFFFFFF, hi = ax >> 32;
     uint64_t r = lo + d * hi;
@@ -37,7 +39,10 @@ static inline uint64_t get_bits_raw(void *state)
         r -= m;
     }
     obj->x = r;
-*/
+#else
+    // Implementation for 64-bit systems
+    obj->x = (a * obj->x + 123) % m;
+#endif
     return obj->x;
 }
 

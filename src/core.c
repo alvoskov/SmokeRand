@@ -22,6 +22,10 @@
 #include <pthread.h>
 #endif
 
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
+
 static Entropy entropy = {{0, 0, 0, 0}, 0, NULL, 0, 0};
 static char cmd_param[128] = {0};
 static int use_stderr_for_printf = 0;
@@ -218,6 +222,21 @@ int get_cpu_numcores(void)
 #else
     return sysconf(_SC_NPROCESSORS_ONLN);
 #endif
+}
+
+////////////////////////////////////////////
+///// TestResults class implementation /////
+////////////////////////////////////////////
+
+TestResults TestResults_create(const char *name)
+{    
+    TestResults ans;
+    ans.name = name;
+    ans.p = NAN;
+    ans.alpha = NAN;
+    ans.x = NAN;
+    ans.thread_id = 0;
+    return ans;
 }
 
 
@@ -772,7 +791,6 @@ GeneratorModule GeneratorModule_load(const char *libname)
         fprintf(stderr, "'gen_getinfo' function failed\n");
         mod.valid = 0;
     }
-
     return mod;
 }
 
@@ -904,6 +922,8 @@ size_t TestsBattery_ntests(const TestsBattery *obj)
 }
 
 
+#ifndef NOTHREADS
+
 typedef struct {
 #ifdef USE_PTHREADS
     pthread_t thrd_id;
@@ -925,10 +945,9 @@ static void *battery_thread(void *data)
 #endif
 {
     BatteryThread *th_data = data;
-    void *state = th_data->gi->create(th_data->intf);
     th_data->intf->printf("vvvvvvvvvv Thread %lld started vvvvvvvvvv\n",
         get_thread_id(th_data->thrd_id));
-    GeneratorState obj = GeneratorState_create(th_data->gi, state, th_data->intf);
+    GeneratorState obj = GeneratorState_create(th_data->gi, th_data->intf);
     for (size_t i = 0; i < th_data->ntests; i++) {
         size_t ind = th_data->tests_inds[i];
         th_data->intf->printf("vvvvv Thread %lld: test %s started vvvvv\n",
@@ -941,6 +960,7 @@ static void *battery_thread(void *data)
     }
     th_data->intf->printf("^^^^^^^^^^ Thread %lld finished ^^^^^^^^^^\n",
         get_thread_id(th_data->thrd_id));
+    GeneratorState_free(&obj, th_data->intf);
     return 0;
 }
 
@@ -978,6 +998,10 @@ static TestTiming *sort_tests_by_time(const TestDescription *descr, size_t ntest
     return out;
 }
 
+#endif
+// NOTHREADS
+
+
 
 static inline size_t test_pos_to_thread_ind(size_t test_pos, size_t nthreads)
 {
@@ -997,6 +1021,7 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
     const GeneratorInfo *gen, const CallerAPI *intf,
     unsigned int nthreads, TestResults *results)
 {
+#ifndef NOTHREADS
     // Multithreaded version
     BatteryThread *th = calloc(nthreads, sizeof(BatteryThread));
     size_t *th_pos = calloc(nthreads, sizeof(size_t));
@@ -1060,10 +1085,14 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
     }
     free(th);
     free(th_pos);
-
-//    printf("WARNING: multithreading is not supported on this platform\n");
-//    printf("Rerunning in one-threaded mode\n");
-//    TestsBattery_run(bat, gen, intf, TESTS_ALL, 1);
+#else
+    (void) ntests;
+    (void) nthreads;
+    (void) results;
+    printf("WARNING: multithreading is not supported on this platform\n");
+    printf("Rerunning in one-threaded mode\n");
+    TestsBattery_run(bat, gen, intf, TESTS_ALL, 1);
+#endif
 }
 
 
@@ -1160,6 +1189,9 @@ void TestsBattery_run(const TestsBattery *bat,
     size_t ntests = TestsBattery_ntests(bat);
     size_t nresults = ntests;
     TestResults *results = NULL;
+#ifdef NOTHREADS
+    nthreads = 1;
+#endif
     printf("===== Starting '%s' battery =====\n", bat->name);
     if (testid > ntests) { // testid is 1-based index
         fprintf(stderr, "Invalid test id %u", testid);
@@ -1177,8 +1209,7 @@ void TestsBattery_run(const TestsBattery *bat,
     tic = time(NULL);
     if (nthreads == 1 || testid != TESTS_ALL) {
         // One-threaded version
-        void *state = gen->create(intf);
-        GeneratorState obj = {.gi = gen, .state = state, .intf = intf};
+        GeneratorState obj = GeneratorState_create(gen, intf);
         if (testid == TESTS_ALL) {
             for (size_t i = 0; i < ntests; i++) {
                 results[i] = bat->tests[i].run(&obj);
@@ -1189,7 +1220,7 @@ void TestsBattery_run(const TestsBattery *bat,
             *results = bat->tests[testid - 1].run(&obj);
             results->name = bat->tests[testid - 1].name;
         }
-        free(state);
+        GeneratorState_free(&obj, intf);
     } else {
        // Multithreaded version
        TestsBattery_run_threads(bat, ntests, gen, intf, nthreads, results);
@@ -1248,11 +1279,13 @@ static uint64_t get_bits64_reversed(void *state)
 
 GeneratorInfo reversed_generator_set(const GeneratorInfo *gi)
 {
+    GeneratorInfo reversed_gen = *gi;
+    if (gi->nbits == 32) {
+        reversed_gen.get_bits = get_bits32_reversed;
+    } else {
+        reversed_gen.get_bits = get_bits64_reversed;
+    }
     original_gen = *gi;
-    GeneratorInfo reversed_gen = {.name = gi->name,
-        .create = gi->create,
-        .get_bits = (gi->nbits == 32) ? get_bits32_reversed : get_bits64_reversed,
-        .nbits = gi->nbits, .self_test = gi->self_test};
     return reversed_gen;
 }
 
@@ -1272,11 +1305,9 @@ static uint64_t get_bits32_interleaved(void *state)
 
 GeneratorInfo interleaved_generator_set(const GeneratorInfo *gi)
 {
+    GeneratorInfo interleaved_gen = *gi;
+    interleaved_gen.get_bits = get_bits32_interleaved;
     original_gen = *gi;
-    GeneratorInfo interleaved_gen = {.name = gi->name,
-        .create = gi->create,
-        .get_bits = get_bits32_interleaved,
-        .nbits = 32, .self_test = gi->self_test};
     return interleaved_gen;
 }
 

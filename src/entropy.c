@@ -13,6 +13,7 @@
 #include <time.h>
 #include <stdlib.h>
 
+
 #ifdef NO_X86_EXTENSIONS
 /**
  * @brief XORs input with output of hardware RNG in CPU (rdseed).
@@ -22,9 +23,17 @@ static uint64_t mix_rdseed(const uint64_t x)
     return x;
 }
 
+/**
+ * @brief Emulation of RDTSC instruction: estimates number of CPU tics
+ * from the program start using `clock` function and crude estimation
+ * of CPU frequency as 3 GHz (it is rather close to it since ~2005).
+ */
 uint64_t cpuclock(void)
 {
-    return 0;
+    const uint64_t default_freq = 3000000000; // 3 GHz
+    const uint64_t clocks_to_tics = default_freq / CLOCKS_PER_SEC;
+    uint64_t clk = (uint64_t) clock();
+    return clk * clocks_to_tics;
 }
 #else
 #if (defined(WIN32) || defined(WIN64)) && !defined(__MINGW32__) && !defined(__MINGW64__)
@@ -38,8 +47,17 @@ uint64_t cpuclock(void)
  */
 static uint64_t mix_rdseed(const uint64_t x)
 {
-    long long unsigned int rd;
+    unsigned long long rd;
+#if SIZE_MAX == UINT32_MAX
+    // For 32-bit x86 executables
+    unsigned int rd_hi, rd_lo;
+    while (!_rdseed32_step(&rd_hi)) {}
+    while (!_rdseed32_step(&rd_lo)) {}
+    rd = (((unsigned long long) rd_hi) << 32) | rd_lo;
+#else
+    // For 64-bit x86-64 executables
     while (!_rdseed64_step(&rd)) {}
+#endif
     return x ^ rd;
 }
 
