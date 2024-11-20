@@ -448,9 +448,9 @@ at 1 TiB). This test run requred about 25 min.
  splitmix32        | u32    | 1     | 2       | 3    | 0.25 | N/A    | +       | 1 GiB
  sqxor             | u64    | +     | +       | +    | 0.13 | +      |         | >= 2 TiB
  sqxor32           | u32    | 1     | 2       | 3    | 0.20 | N/A    | Small   | 16 GiB
- superduper73      | u32    | 9     | 15      | 18   |      | N/A    |         | 32 KiB
- superduper64      | u64    | 1     | 3       | 5    |      |        |         | 512 KiB
- superduper64_u32  | u32    | +     | +       |      |      | N/A    |         |
+ superduper73      | u32    | 9     | 15      | 18   | 0.64 | N/A    |         | 32 KiB
+ superduper64      | u64    | 1     | 3       | 5    | 0.35 |        |         | 512 KiB
+ superduper64_u32  | u32    | +     | +       |      | 0.70 | N/A    |         |
  shr3              | u32    | 14    | 30      | 33   | 0.76 | N/A    | -       | 32 KiB
  swb               | u32    | 4     | 4       | 5    | 2.7  | N/A    |         | 128 MiB
  swblux            | u32    | +     | +       | +    | 6.3  | N/A    |         | 4 TiB
