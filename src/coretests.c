@@ -388,60 +388,6 @@ TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step)
     return ans;
 }
 
-
-/**
- * @brief A specialized version of birthday spacings with decimation
- * designed for usage in memory constrained environments.
- */
-/*
-TestResults bspace4_8d_decimated_test(GeneratorState *obj,
-    unsigned int step, unsigned int nsamples)
-{
-    TestResults ans = TestResults_create("bspace4_8d");
-    const unsigned int nbits_total = 32;
-    size_t len = bspace_calc_len(nbits_total);
-    double lambda = bspace_calc_lambda(len, nbits_total) * nsamples;
-    // Show information about the test
-    obj->intf->printf("Birthday spacings test with decimation\n");
-    obj->intf->printf("  ndims = 4; nbits_per_dim = 8; step = %u\n", step);
-    obj->intf->printf("  nsamples = %u; len = %lld, lambda = %g\n",
-        nsamples, (unsigned long long) len, lambda);
-    // Run the test
-    uint32_t *u = calloc(len, sizeof(uint32_t));
-    if (u == NULL) {
-        fprintf(stderr, "***** bspace4_8d_decimated: not enough memory *****\n");
-        exit(1);
-    }
-    ans.x = 0.0; // Reset number of duplicates
-    for (unsigned int ii = 0; ii < nsamples; ii++) {
-        for (size_t i = 0; i < len; i++) {
-            u[i] = 0;
-            for (int j = 0; j < 8; j++) {
-                uint64_t x = obj->gi->get_bits(obj->state);
-                // Take lower 8 bits
-                u[i] <<= 4;
-                u[i] |=  x & 0xF;
-                // Decimation
-                for (unsigned int k = 0; k < step - 1; k++) {
-                    (void) obj->gi->get_bits(obj->state);
-                }
-            }
-        }
-        // Compute number of duplicates
-        ans.x += (double) bspace_get_ndups32(u, len);
-    }
-    // Compute number of duplicates and p-values for lower bits
-    ans.p = poisson_pvalue(ans.x, lambda);
-    ans.alpha = poisson_cdf(ans.x, lambda);
-    obj->intf->printf("  Lower bits: x = %.0f; p = %g\n", ans.x, ans.p);
-    obj->intf->printf("  x = %.0f; p = %g\n", ans.x, ans.p);
-    obj->intf->printf("\n");
-    free(u);
-    return ans;
-}
-*/
-
-
 /////////////////////////////////////////////
 ///// CollisionOver test implementation /////
 /////////////////////////////////////////////
