@@ -233,6 +233,13 @@ static inline uint8_t get_uint64_hamming_weight(uint64_t x)
 }
 
 
+static inline uint8_t reverse_bits4(uint8_t x)
+{
+    x = (x >> 2) | (x << 2);
+    x = ((x & 0xA) >> 1) | ((x & 0x5) << 1);
+    return x;
+}
+
 static inline uint8_t reverse_bits8(uint8_t x)
 {
     x = (x >> 4) | (x << 4);

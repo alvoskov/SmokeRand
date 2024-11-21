@@ -66,7 +66,7 @@ typedef struct {
 
 TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts);
 TestResults bspace64_1d_ns_test(GeneratorState *obj, unsigned int nsamples);
-TestResults bspace8_8d_decimated_test(GeneratorState *obj, unsigned int step);
+TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step);
 TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts);
 TestResults gap_test(GeneratorState *obj, const GapOptions *opts);
 TestResults monobit_freq_test(GeneratorState *obj);

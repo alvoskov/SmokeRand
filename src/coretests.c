@@ -310,27 +310,41 @@ TestResults bspace64_1d_ns_test(GeneratorState *obj, unsigned int nsamples)
  *
  * Both TMFn and decimated birthday spacings test have comparable sensitivity
  * and require about 128 GiB of data to detect 128-bit LCG.
+ *
+ * Sensitivity of 64-bit version for different steps:
+ *
+ * - 256 is enough to detect 128-bit LCG with truncation of lower 64 bits
+ * - 8192 is enough to detect the same PRNG with truncation of lower 96 bits.
+ *
+ * Sensitivity of 32-bit version for different steps:
+ * - 4096 is enough to detect 128-bit LCG with truncation of lower 64 bits
+ * - 262144 is enough to detect the same PRNG with truncation of lower 96 bits.
+ *
+ * But 64-bit version (8_8d) requires 6658042 points instead of 4096, i.e.
+ * 1626 times more. And transition to 32-bit version gives about 20x
+ * performance boost and allows to detect 128-bit LCGs even in fast batteries.
+ *
  * @param step  Decimation step: only 1 of `step` values will be used by the
  *              test. 256 is enough to detect 128-bit LCG with truncation of
  *              lower 64 bits, 8192 is enough to detect the same PRNG with
  *              truncation of lower 96 bits.
  */
-TestResults bspace8_8d_decimated_test(GeneratorState *obj, unsigned int step)
+TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step)
 {
-    TestResults ans = TestResults_create("bspace8_8d");
-    const unsigned int nbits_total = 64;
+    TestResults ans = TestResults_create("bspace4_8d");
+    const unsigned int nbits_total = 32;
     size_t len = bspace_calc_len(nbits_total);
     double lambda = bspace_calc_lambda(len, nbits_total);
     // Show information about the test
     obj->intf->printf("Birthday spacings test with decimation\n");
-    obj->intf->printf("  ndims = 8; nbits_per_dim = 8; step = %u\n", step);
+    obj->intf->printf("  ndims = 8; nbits_per_dim = 4; step = %u\n", step);
     obj->intf->printf("  nsamples = 1; len = %lld, lambda = %g\n",
         (unsigned long long) len, lambda);
     // Run the test
-    uint64_t *u = calloc(len, sizeof(uint64_t));
-    uint64_t *u_high = calloc(len, sizeof(uint64_t));
+    uint32_t *u = calloc(len, sizeof(uint32_t));
+    uint32_t *u_high = calloc(len, sizeof(uint32_t));
     if (u == NULL || u_high == NULL) {
-        fprintf(stderr, "***** bspace8_8d_decimated: not enough memory *****\n");
+        fprintf(stderr, "***** bspace4_8d_decimated: not enough memory *****\n");
         free(u); free(u_high);
         exit(1);
     }
@@ -338,12 +352,12 @@ TestResults bspace8_8d_decimated_test(GeneratorState *obj, unsigned int step)
     for (size_t i = 0; i < len; i++) {
         for (int j = 0; j < 8; j++) {
             uint64_t x = obj->gi->get_bits(obj->state);
-            // Take lower 8 bits
-            u[i] <<= 8;
-            u[i] |=  x & 0xFF;
-            // Take higher 8 bits
-            u_high[i] <<= 8;
-            u_high[i] |= reverse_bits8(x >> (obj->gi->nbits - 8));
+            // Take lower 4 bits
+            u[i] <<= 4;
+            u[i] |=  x & 0xF;
+            // Take higher 4 bits
+            u_high[i] <<= 4;
+            u_high[i] |= reverse_bits4(x >> (obj->gi->nbits - 4));
             // Decimation
             for (unsigned int k = 0; k < step - 1; k++) {
                 (void) obj->gi->get_bits(obj->state);
@@ -351,12 +365,12 @@ TestResults bspace8_8d_decimated_test(GeneratorState *obj, unsigned int step)
         }
     }
     // Compute number of duplicates and p-values for lower bits
-    ans.x = (double) bspace_get_ndups64(u, len);
+    ans.x = (double) bspace_get_ndups32(u, len);
     ans.p = poisson_pvalue(ans.x, lambda);
-    ans.alpha = poisson_cdf(ans.alpha, lambda);
+    ans.alpha = poisson_cdf(ans.x, lambda);
     obj->intf->printf("  Lower bits: x = %.0f; p = %g\n", ans.x, ans.p);
     // Compute the same values for higher bits
-    double x_high = (double) bspace_get_ndups64(u_high, len);
+    double x_high = (double) bspace_get_ndups32(u_high, len);
     double p_high = poisson_pvalue(x_high, lambda);
     double alpha_high = poisson_cdf(x_high, lambda);
     obj->intf->printf("  Higher bits: x = %.0f; p = %g\n", x_high, p_high);
@@ -373,6 +387,60 @@ TestResults bspace8_8d_decimated_test(GeneratorState *obj, unsigned int step)
     free(u_high);
     return ans;
 }
+
+
+/**
+ * @brief A specialized version of birthday spacings with decimation
+ * designed for usage in memory constrained environments.
+ */
+/*
+TestResults bspace4_8d_decimated_test(GeneratorState *obj,
+    unsigned int step, unsigned int nsamples)
+{
+    TestResults ans = TestResults_create("bspace4_8d");
+    const unsigned int nbits_total = 32;
+    size_t len = bspace_calc_len(nbits_total);
+    double lambda = bspace_calc_lambda(len, nbits_total) * nsamples;
+    // Show information about the test
+    obj->intf->printf("Birthday spacings test with decimation\n");
+    obj->intf->printf("  ndims = 4; nbits_per_dim = 8; step = %u\n", step);
+    obj->intf->printf("  nsamples = %u; len = %lld, lambda = %g\n",
+        nsamples, (unsigned long long) len, lambda);
+    // Run the test
+    uint32_t *u = calloc(len, sizeof(uint32_t));
+    if (u == NULL) {
+        fprintf(stderr, "***** bspace4_8d_decimated: not enough memory *****\n");
+        exit(1);
+    }
+    ans.x = 0.0; // Reset number of duplicates
+    for (unsigned int ii = 0; ii < nsamples; ii++) {
+        for (size_t i = 0; i < len; i++) {
+            u[i] = 0;
+            for (int j = 0; j < 8; j++) {
+                uint64_t x = obj->gi->get_bits(obj->state);
+                // Take lower 8 bits
+                u[i] <<= 4;
+                u[i] |=  x & 0xF;
+                // Decimation
+                for (unsigned int k = 0; k < step - 1; k++) {
+                    (void) obj->gi->get_bits(obj->state);
+                }
+            }
+        }
+        // Compute number of duplicates
+        ans.x += (double) bspace_get_ndups32(u, len);
+    }
+    // Compute number of duplicates and p-values for lower bits
+    ans.p = poisson_pvalue(ans.x, lambda);
+    ans.alpha = poisson_cdf(ans.x, lambda);
+    obj->intf->printf("  Lower bits: x = %.0f; p = %g\n", ans.x, ans.p);
+    obj->intf->printf("  x = %.0f; p = %g\n", ans.x, ans.p);
+    obj->intf->printf("\n");
+    free(u);
+    return ans;
+}
+*/
+
 
 /////////////////////////////////////////////
 ///// CollisionOver test implementation /////
