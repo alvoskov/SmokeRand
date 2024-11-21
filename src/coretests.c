@@ -294,7 +294,7 @@ TestResults bspace64_1d_ns_test(GeneratorState *obj, unsigned int nsamples)
 
 /**
  * @brief A specialized version of birthday spacings test designed for
- * detection of truncated 128-bit and 96-bit LCGs.
+ * detection of truncated 128-bit and 96-bit LCGs with modulo \f$ 2^k \f$.
  * @details It is a modification of 8-dimensional 8-bit (lower bits) birthday
  * spacings test. But only every 1 of `step` values are used for construction
  * of tuples. The `step` value should be power of 2. Such decimation reduces
@@ -308,10 +308,8 @@ TestResults bspace64_1d_ns_test(GeneratorState *obj, unsigned int nsamples)
  * consisting of 4096 bytes. But they are analyzed by some mysterous bitwise
  * operations and g-test, not by means of birthday spacings.
  *
- * Both TMFn and decimated birthday spacings test have comparable sensitivity
- * and require about 128 GiB of data to detect 128-bit LCG.
- *
- * Sensitivity of 64-bit version for different steps:
+ * Sensitivity of 64-bit version of decimated birthday spacings test
+ * for different steps:
  *
  * - 256 is enough to detect 128-bit LCG with truncation of lower 64 bits
  * - 8192 is enough to detect the same PRNG with truncation of lower 96 bits.
@@ -324,9 +322,15 @@ TestResults bspace64_1d_ns_test(GeneratorState *obj, unsigned int nsamples)
  * 1626 times more. And transition to 32-bit version gives about 20x
  * performance boost and allows to detect 128-bit LCGs even in fast batteries.
  *
+ * 32-bit decimated birthday spacings test is much more sensitive than TMFn
+ * from PractRand: it requires 1 GiB to detect 128-bit LCG with truncated 64 bits
+ * (PractRand needs 128 GiB) and 32 GiB to detect 128-bit LCG with truncated 96 bits
+ * (PractRand doesn't detect it at 32 TiB sample).
+ *
+ * @param obj   Analyzed generator and its state.
  * @param step  Decimation step: only 1 of `step` values will be used by the
- *              test. 256 is enough to detect 128-bit LCG with truncation of
- *              lower 64 bits, 8192 is enough to detect the same PRNG with
+ *              test. 4096 is enough to detect 128-bit LCG with truncation of
+ *              lower 64 bits, 262144 is enough to detect the same PRNG with
  *              truncation of lower 96 bits.
  */
 TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step)
