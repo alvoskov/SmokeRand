@@ -17,6 +17,39 @@
 #include <string.h>
 #include <time.h>
 
+////////////////////////////////////////////////
+///// BirthdayOptions class implementation /////
+////////////////////////////////////////////////
+
+/**
+ * @brief Fill birthday paradox test settings for the given
+ * PRNG, sample length and lambda.
+ * @details The number of collisions obeys Poisson distribution with
+ * the next mathematical expectation:
+ *
+ * \f[
+ * \lambda = \frac{\left(2^{L}\right)^2}{2\cdot 2^{b-e}}
+ * \f]
+ *
+ * where \f$ 2^L \f$ is the sample lenth, \f$ b \f$ is the number of bits
+ * in the PRNG output (usually 64), \f$ e \f$ is number of truncated (lower)
+ * bits.
+ */
+static inline BirthdayOptions BirthdayOptions_create(GeneratorInfo *gi,
+    const unsigned int log2_len, const unsigned int log2_lambda)
+{
+    BirthdayOptions opts;
+    opts.n = 1ull << log2_len;
+    opts.e = gi->nbits + log2_lambda + 1 - 2*log2_len;
+    return opts;
+}
+
+static inline double BirthdayOptions_calc_lambda(const BirthdayOptions *opts,
+    const unsigned int nbits)
+{
+    double lambda = pow(opts->n, 2.0) / pow(2.0, nbits - opts->e + 1.0);
+    return lambda;
+}
 
 ///////////////////////////////////////////////
 ///// 64-bit birthday test implementation /////
@@ -28,14 +61,6 @@ static int cmp_ints(const void *aptr, const void *bptr)
     if (aval < bval) { return -1; }
     else if (aval == bval) { return 0; }
     else { return 1; }
-}
-
-
-static inline double BirthdayOptions_calc_lambda(const BirthdayOptions *opts,
-    const unsigned int nbits)
-{
-    double lambda = pow(opts->n, 2.0) / pow(2.0, nbits - opts->e + 1.0);
-    return lambda;
 }
 
 /**
@@ -116,19 +141,30 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
     return ans;
 }
 
+
+/**
+ * @brief An implementation of birthday paradox test for 64-bit PRNGS
+ * with adaptive selection of lambda.
+ * @details It consumes a lot of RAM and sample size differs for
+ * different platforms:
+ *
+ * - 64-bit platform: 2^30 (requires 8 GiB of RAM and ~30min)
+ * - 32-bit platform: 2^27 (requires 1 GiB of RAM, very slow)
+ *
+ * The test consists of two stages:
+ *
+ * - Small subtest: \f$ \lambda = 4\f$, usually takes less than 10 min.
+ *   If no duplicates are found - the more sensitive "large" subtest
+ *   is launched. If they are found - p-value is calculated.
+ * - Large subtest: \f$ \lambda = 16\f$, usually takes less than 1 hour.
+ *   Then p-value for sum of duplicates from "small" and "large" subtests
+ *   is calculated.
+ */
 void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
 {
-#if SIZE_MAX == UINT64_MAX
-    // Settings for 64-bit platform (require 8 GiB of RAM and ~30min)
-    //static const size_t n = 0x40000000; // 2^30 1ull << 30;
-    BirthdayOptions opts_small = {.n = 0x40000000, .e = 7}; // lambda = 4
-    BirthdayOptions opts_large = {.n = 0x40000000, .e = 9}; // lambda = 20
-#else
-    // Settings for 32-bit platforms (require 1 GiB of RAM, very slow)
-    //static const size_t n = 0x8000000; // 2^27; 1ull << 27;
-    BirthdayOptions opts_small = {.n = 0x8000000, .e = 13}; // lambda = 4
-    BirthdayOptions opts_large = {.n = 0x8000000, .e = 15}; // lambda = 20
-#endif
+    static const size_t log2_n = (SIZE_MAX == UINT64_MAX) ? 30 : 27;
+    BirthdayOptions opts_small = BirthdayOptions_create(gen, log2_n, 2);
+    BirthdayOptions opts_large = BirthdayOptions_create(gen, log2_n, 4);
     intf->printf("64-bit birthday paradox test\n");
     if (gen->nbits != 64) {
         intf->printf("  Error: the generator must return 64-bit values\n");
