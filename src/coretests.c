@@ -315,6 +315,8 @@ TestResults bspace64_1d_ns_test(GeneratorState *obj, unsigned int nsamples)
  * - 8192 is enough to detect the same PRNG with truncation of lower 96 bits.
  *
  * Sensitivity of 32-bit version for different steps:
+ *
+ * - 64 is enough to detect 64-bit LCG with truncation of lower 32 bits
  * - 4096 is enough to detect 128-bit LCG with truncation of lower 64 bits
  * - 262144 is enough to detect the same PRNG with truncation of lower 96 bits.
  *
