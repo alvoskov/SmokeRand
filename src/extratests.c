@@ -207,7 +207,7 @@ int BlockFrequency_calc(BlockFrequency *obj)
     for (size_t i = 0; i < 256; i++) {        
         long long Ei = (long long) obj->nbytes / 256;
         long long dE = (long long) obj->bytefreq[i] - (long long) Ei;
-        chi2_bytes += pow(dE, 2.0) / (double) Ei;
+        chi2_bytes += pow((double) dE, 2.0) / (double) Ei;
         double z_bytes = fabs((double) dE) / sqrt( obj->nbytes * 255.0 / 65536.0);
         if (zmax_bytes < z_bytes) {
             zmax_bytes = z_bytes;
@@ -216,7 +216,7 @@ int BlockFrequency_calc(BlockFrequency *obj)
     for (size_t i = 0; i < 65536; i++) {
         long long Ei = (long long) obj->nw16 / 65536;
         long long dE = (long long) obj->w16freq[i] - (long long) Ei;
-        chi2_w16 += pow(dE, 2.0) / (double) Ei;
+        chi2_w16 += pow((double) dE, 2.0) / (double) Ei;
         double z_w16 = fabs((double) dE) / sqrt( obj->nw16 * 65535.0 / 65536.0 / 65536.0);
         if (zmax_w16 < z_w16) {
             zmax_w16 = z_w16;
@@ -224,14 +224,14 @@ int BlockFrequency_calc(BlockFrequency *obj)
     }
     double p_bytes = halfnormal_pvalue(zmax_bytes);
     double p_w16 = halfnormal_pvalue(zmax_w16);
-    printf("2^%g bytes analyzed\n", sr_log2(obj->nbytes));
+    printf("2^%g bytes analyzed\n", sr_log2((double) obj->nbytes));
     printf("  %10s %10s %10s %10s %10s %10s\n",
         "Chunk", "chi2emp", "p(chi2)", "zmax", "p(zmax)", "p(crit)");
     printf("  %10s %10g %10.2g %10.3g %10.2g %10.2g\n",
-        "8 bits", chi2_bytes, chi2_pvalue(chi2_bytes, 255.0),
+        "8 bits", chi2_bytes, chi2_pvalue(chi2_bytes, 255),
         zmax_bytes, p_bytes, pcrit_bytes);
     printf("  %10s %10g %10.2g %10.3g %10.2g %10.2g\n",
-        "16 bits", chi2_w16, chi2_pvalue(chi2_w16, 65536.0),
+        "16 bits", chi2_w16, chi2_pvalue(chi2_w16, 65536),
         zmax_w16, p_w16, pcrit_w16);
     // p-values interpretation
     if (p_bytes < pcrit_bytes) {
@@ -319,6 +319,11 @@ void Ising2DLattice_init(Ising2DLattice *obj, unsigned int L)
     obj->N = L * L;
     obj->s = calloc(obj->N, sizeof(int8_t));
     obj->nn = calloc(obj->N, sizeof(Neighbours2D));
+    if (obj->s == NULL || obj->nn == NULL) {
+        fprintf(stderr, "***** Ising2DLattice_init: not enough memory *****");
+        free(obj->s); free(obj->nn);
+        exit(1);
+    }
     // Precalculate neighbours indexes
     for (size_t i = 0; i < obj->N; i++) {
         int ix = i % L, iy = i / L;
@@ -405,7 +410,7 @@ void Ising2DLattice_pass_metropolis(Ising2DLattice *obj, GeneratorState *gs)
     uint64_t n_same_to_p_int[5];
     for (int i = 2; i <= 4; i++) {
         double dE = (i - 2) * 4;
-        n_same_to_p_int[i] = exp(-dE * jc) * p_mul;
+        n_same_to_p_int[i] = (uint64_t) (exp(-dE * jc) * p_mul);
     }
 
     for (size_t ii = 0; ii < obj->N; ii++) {
@@ -496,6 +501,11 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
     // Sampling
     double *e = calloc(opts->nsamples, sizeof(double));
     double *cv = calloc(opts->nsamples, sizeof(double));
+    if (e == NULL || cv == NULL) {
+        fprintf(stderr, "***** ising2d_test: not enough memory *****\n");
+        free(e); free(cv);
+        exit(1);
+    }
     for (unsigned long ii = 0; ii < opts->nsamples; ii++) {
         long long energy_sum = 0, energy_sum2 = 0;
         for (unsigned int i = 0; i < opts->sample_len; i++) {

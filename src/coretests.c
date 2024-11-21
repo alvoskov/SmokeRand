@@ -125,7 +125,15 @@ static unsigned int bspace_get_ndups32(uint32_t *x, size_t len)
     return ndups;
 }
 
+static unsigned long bspace_calc_len(unsigned int nbits_total)
+{
+    return (unsigned long) pow(2.0, (nbits_total + 4.0) / 3.0);
+}
 
+static double bspace_calc_lambda(size_t len, unsigned int nbits_total)
+{
+    return pow((double) len, 3.0) / (4 * pow(2.0, nbits_total));
+}
 
 /**
  * @brief 32-bit version of n-dimensional birthday spacings test.
@@ -134,7 +142,7 @@ static unsigned int bspace_get_ndups32(uint32_t *x, size_t len)
 static unsigned long bspace32_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
     unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
-    size_t len = pow(2.0, (nbits_total + 4.0) / 3.0);
+    size_t len = bspace_calc_len(nbits_total);
     uint32_t *u = calloc(len, sizeof(uint32_t));
     if (u == NULL) {
         fprintf(stderr, "***** bspace32_nd_test: not enough memory *****\n");
@@ -162,10 +170,10 @@ static unsigned long bspace32_nd_test(GeneratorState *obj, const BSpaceNDOptions
  * @brief 64-bit version of n-dimensional birthday spacings test.
  * @return Number of duplicates.
  */
-static size_t bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
+static unsigned long bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
     unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
-    size_t len = pow(2.0, (nbits_total + 4.0) / 3.0);
+    size_t len = bspace_calc_len(nbits_total);
     uint64_t *u = calloc(len, sizeof(uint64_t));
     if (u == NULL) {
         fprintf(stderr, "***** bspace64_nd_test: not enough memory *****\n");
@@ -226,8 +234,8 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
         return ans;
     }
     unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
-    unsigned long len = pow(2.0, (nbits_total + 4.0) / 3.0);
-    double lambda = pow(len, 3.0) / (4 * pow(2.0, nbits_total));
+    unsigned long len = bspace_calc_len(nbits_total);
+    double lambda = bspace_calc_lambda(len, nbits_total);
     // Show information about the test
     obj->intf->printf("Birthday spacings test\n");
     obj->intf->printf("  ndims = %u; nbits_per_dim = %u; get_lower = %d\n",
@@ -311,8 +319,8 @@ TestResults bspace8_8d_decimated_test(GeneratorState *obj, unsigned int step)
 {
     TestResults ans = TestResults_create("bspace8_8d");
     const unsigned int nbits_total = 64;
-    size_t len = pow(2.0, (nbits_total + 4.0) / 3.0);
-    double lambda = pow(len, 3.0) / (4 * pow(2.0, nbits_total));
+    size_t len = bspace_calc_len(nbits_total);
+    double lambda = bspace_calc_lambda(len, nbits_total);
     // Show information about the test
     obj->intf->printf("Birthday spacings test with decimation\n");
     obj->intf->printf("  ndims = 8; nbits_per_dim = 8; step = %u\n", step);
@@ -531,9 +539,12 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     size_t ngaps = opts->ngaps;
     size_t nbins = log(Ei_min / (ngaps * p)) / log(1 - p);
     size_t *Oi = calloc(nbins + 1, sizeof(size_t));
+    if (Oi == NULL) {
+        fprintf(stderr, "***** gap_test: not enough memory *****\n");
+        exit(1);
+    }
     unsigned long long nvalues = 0;
-    TestResults ans;
-    ans.name = "Gap";
+    TestResults ans = TestResults_create("Gap");
     obj->intf->printf("Gap test\n");
     obj->intf->printf("  alpha = 0.0; beta = %g; shl = %u;\n", p, opts->shl);
     obj->intf->printf("  ngaps = %lu; nbins = %lu\n",
@@ -635,7 +646,7 @@ TestResults nbit_words_freq_test(GeneratorState *obj,
     size_t block_len = (1ull << (bits_per_word)) * average_freq;
     size_t nblocks = 4096;
     unsigned int nwords_per_num = obj->gi->nbits / bits_per_word;
-    unsigned int nwords = nwords_per_num * block_len;
+    size_t nwords = nwords_per_num * block_len;
     size_t nbins = 1ull << bits_per_word;
     uint64_t mask = nbins - 1;
     double *chi2 = calloc(nblocks, sizeof(double));
@@ -821,6 +832,10 @@ void HammingTuplesTable_init(HammingTuplesTable *obj,
     const uint64_t code_mask = (1ull << code_nbits) - 1;
     obj->len = 1ull << code_nbits * tuple_size;
     obj->tuples = calloc(obj->len, sizeof(HammingWeightsTuple));
+    if (obj->tuples == NULL) {
+        fprintf(stderr, "***** HammingTuplesTable_init: not enough memory *****\n");
+        exit(1);
+    }
     // Calculate probabilities of tuples
     // (idea is taken from PractRand)
     for (size_t i = 0; i < obj->len; i++) {

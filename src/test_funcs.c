@@ -78,11 +78,12 @@ int test_chi2()
     printf("%10s %10s %16s %16s %16s\n",
         "x", "f", "xref", "xcalc", "x+xc-1");
     for (size_t i = 0; cdf_data[i] != 0; i += 3) {
-        double x = cdf_data[i], f = cdf_data[i + 1];
+        double x = cdf_data[i];
+        unsigned long f = (unsigned long) cdf_data[i + 1];
         double x_ref = cdf_data[i + 2];
         double x_calc = chi2_cdf(x, f);
         double xc_calc = chi2_pvalue(x, f);
-        printf("%10g %10g %16g %16g %16g\n",
+        printf("%10g %10lu %16g %16g %16g\n",
             x, f, x_ref, x_calc, x_calc + xc_calc - 1.0);
     }
 
@@ -90,11 +91,12 @@ int test_chi2()
     printf("%10s %8s %16s %16s %16s\n",
         "x", "f", "xcref", "xccalc", "x+xc-1");
     for (size_t i = 0; ccdf_data[i] != 0; i += 3) {
-        double x = ccdf_data[i], f = ccdf_data[i + 1];
+        double x = ccdf_data[i];
+        unsigned long f = (unsigned long) ccdf_data[i + 1];
         double xc_ref = ccdf_data[i + 2];
         double x_calc = chi2_cdf(x, f);
         double xc_calc = chi2_pvalue(x, f);
-        printf("%10g %10g %16g %16g %16g\n",
+        printf("%10g %10lu %16g %16g %16g\n",
             x, f, xc_ref, xc_calc, x_calc + xc_calc - 1.0);
     }
     return 0;
