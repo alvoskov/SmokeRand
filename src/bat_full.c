@@ -103,9 +103,9 @@ static TestResults bspace4_16d_high(GeneratorState *obj)
     return bspace_nd_test(obj, &opts);
 }
 
-static TestResults bspace8_8d_dec(GeneratorState *obj)
+static TestResults bspace4_8d_dec(GeneratorState *obj)
 {
-    return bspace8_8d_decimated_test(obj, 512);
+    return bspace4_8d_decimated_test(obj, 262144);
 }
 
 ///////////////////////////////
@@ -274,7 +274,7 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         {"bspace16_4d_high", bspace16_4d_high, 97},
         {"bspace8_8d", bspace8_8d, 120},
         {"bspace8_8d_high", bspace8_8d_high, 120},
-        {"bspace8_8d_dec", bspace8_8d_dec, 75},
+        {"bspace4_8d_dec", bspace4_8d_dec, 30},
         {"bspace4_16d", bspace4_16d, 145},
         {"bspace4_16d_high", bspace4_16d_high, 145},
         {"collover20_2d", collisionover20_2d, 73},

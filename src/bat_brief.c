@@ -57,6 +57,11 @@ static TestResults bspace8_8d_test(GeneratorState *obj)
     return bspace_nd_test(obj, &opts);
 }
 
+static TestResults bspace4_8d_dec(GeneratorState *obj)
+{
+    return bspace4_8d_decimated_test(obj, 1 << 12);
+}
+
 ///////////////////////////////
 ///// CollisionOver tests /////
 ///////////////////////////////
@@ -151,6 +156,7 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
         {"bspace21_3d", bspace21_3d_test, 2},
         {"bspace16_4d", bspace16_4d_test, 3},
         {"bspace8_8d", bspace8_8d_test, 3},
+        {"bspace4_8d_dec", bspace4_8d_dec, 3},
         {"collover20_2d", collisionover20_2d, 7},
         {"collover13_3d", collisionover13_3d, 7},
         {"collover8_5d", collisionover8_5d, 7},
