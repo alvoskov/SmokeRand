@@ -18,6 +18,9 @@
 #include <string.h>
 #include <time.h>
 #include <fcntl.h>
+#if defined(_MSC_VER) || defined(__WATCOMC__)
+#include <io.h>
+#endif
 #ifdef USE_PTHREADS
 #include <pthread.h>
 #endif
@@ -828,6 +831,10 @@ void GeneratorModule_unload(GeneratorModule *mod)
 static void countsort64(uint64_t *out, const uint64_t *x, size_t len, unsigned int shr)
 {
     size_t *offsets = (size_t *) calloc(65536, sizeof(size_t));
+    if (offsets == NULL) {
+        fprintf(stderr, "***** countsort64: not enough memory *****\n");
+        exit(1);
+    }
     for (size_t i = 0; i < len; i++) {
         unsigned int pos = ((x[i] >> shr) & 0xFFFF);
         offsets[pos]++;
@@ -850,6 +857,10 @@ static void countsort64(uint64_t *out, const uint64_t *x, size_t len, unsigned i
 static void countsort32(uint32_t *out, const uint32_t *x, size_t len, unsigned int shr)
 {
     size_t *offsets = calloc(65536, sizeof(size_t));
+    if (offsets == NULL) {
+        fprintf(stderr, "***** countsort32: not enough memory *****\n");
+        exit(1);
+    }
     for (size_t i = 0; i < len; i++) {
         unsigned int pos = ((x[i] >> shr) & 0xFFFF);
         offsets[pos]++;
@@ -1211,6 +1222,10 @@ void TestsBattery_run(const TestsBattery *bat,
         results = calloc(1, sizeof(TestResults));
         nresults = 1;
     }
+    if (results == NULL) {
+        fprintf(stderr, "***** TestsBattery_run: not enough memory *****\n");
+        exit(1);
+    }
     // Run the tests
     tic = time(NULL);
     if (nthreads == 1 || testid != TESTS_ALL) {
@@ -1330,7 +1345,7 @@ GeneratorInfo interleaved_generator_set(const GeneratorInfo *gi)
 void set_bin_stdout()
 {
 #ifdef USE_LOADLIBRARY
-    _setmode( _fileno(stdout), _O_BINARY);
+    (void) _setmode( _fileno(stdout), _O_BINARY);
 #endif
 }
 
@@ -1342,7 +1357,7 @@ void set_bin_stdout()
 void set_bin_stdin()
 {
 #ifdef USE_LOADLIBRARY
-    _setmode( _fileno(stdin), _O_BINARY);
+    (void) _setmode( _fileno(stdin), _O_BINARY);
 #endif
 }
 

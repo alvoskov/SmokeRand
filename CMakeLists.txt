@@ -78,14 +78,16 @@ foreach(prng_name alfib alfib_mod chacha chacha_avx coveyou64 drand48
     lcg32prime
     lcg69069 lcg64 lcg64prime lcg96 lcg128 lcg128_full lcg128_u32_full
     loop_7fff_w64
-    lfsr113 lfsr258 minstd mt19937 mlfib17_5 mrg32k3a
+    lfib_par lfsr113 lfsr258 minstd mt19937 mlfib17_5 mrg32k3a
     msws mulberry32
     mwc64 mwc64x mwc128 mwc128x
     r1279 rc4 rrmxmx pcg32 pcg64 philox philox32 randu romutrio sezgin63
-    sfc32 sfc64 shr3 swb swblux swbw
+    sfc32 sfc64 shr3 superduper73 superduper64 superduper64_u32
+    swb swblux swbw
     speck128 speck128_avx splitmix splitmix32 sqxor sqxor32
     tinymt32 tinymt64 threefry well1024a wyrand
-    xorshift128 xorshift128p xorwow xoroshiro128p xoroshiro128pp xoroshiro1024st xoroshiro1024stst xsh
+    xorshift128 xorshift128p xorwow
+    xoroshiro128p xoroshiro128pp xoroshiro1024st xoroshiro1024stst xsh
     crand)
     add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c include/smokerand/cinterface.h)
     if (NOT ${prng_name} STREQUAL "crand")

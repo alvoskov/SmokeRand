@@ -192,9 +192,15 @@ size_t berlekamp_massey(const uint8_t *s, size_t n)
     size_t L = 0; // Complexity
     size_t N = 0; // Current position
     long m = -1;
-    uint8_t *C = calloc(n, sizeof(uint8_t)); C[0] = 1; // Coeffs.
-    uint8_t *B = calloc(n, sizeof(uint8_t)); B[0] = 1; // Prev.coeffs.
+    uint8_t *C = calloc(n, sizeof(uint8_t)); // Coeffs.
+    uint8_t *B = calloc(n, sizeof(uint8_t)); // Prev.coeffs.
     uint8_t *T = calloc(n, sizeof(uint8_t)); // Temp. copy of coeffs.
+    if (C == NULL || B == NULL || T == NULL) {
+        fprintf(stderr, "***** berlekamp_massey: not enough memory *****");
+        free(C); free(B); free(T);
+        exit(1);
+    }
+    C[0] = 1; B[0] = 1;
     while (N < n) {
         char d = s[N];
         for (size_t i = 1; i <= L; i++) {
@@ -234,6 +240,10 @@ TestResults linearcomp_test(GeneratorState *obj, size_t nbits, unsigned int bitp
 {
     TestResults ans = TestResults_create("linearcomp");
     uint8_t *s = calloc(nbits, sizeof(uint8_t));
+    if (s == NULL) {
+        fprintf(stderr, "***** linearcomp_test: not enough memory *****\n");
+        exit(1);
+    }
     obj->intf->printf("Linear complexity test\n");
     obj->intf->printf("  nbits: %lld\n", (long long) nbits);
     uint64_t mask = 1ull << bitpos;
