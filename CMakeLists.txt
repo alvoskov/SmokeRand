@@ -80,7 +80,7 @@ foreach(prng_name alfib alfib_mod chacha chacha_avx coveyou64 drand48
     loop_7fff_w64
     lfib_par lfsr113 lfsr258 minstd mt19937 mlfib17_5 mrg32k3a
     msws mulberry32
-    mwc64 mwc64x mwc128 mwc128x
+    mwc32x mwc64 mwc64x mwc128 mwc128x
     r1279 rc4 rrmxmx pcg32 pcg64 philox philox32 randu romutrio sezgin63
     sfc32 sfc64 shr3 superduper73 superduper64 superduper64_u32
     swb swblux swbw

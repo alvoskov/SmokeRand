@@ -235,6 +235,7 @@ TestResults TestResults_create(const char *name)
 {
     TestResults ans;
     ans.name = name;
+    ans.id = 0;
     ans.p = NAN;
     ans.alpha = NAN;
     ans.x = NAN;
@@ -974,6 +975,7 @@ static void *battery_thread(void *data)
         th_data->intf->printf("^^^^^ Thread %lld: test %s finished ^^^^^\n",
             get_thread_id(th_data->thrd_id), th_data->tests[i].name);
         th_data->results[ind].name = th_data->tests[i].name;
+        th_data->results[ind].id = ind + 1;
         th_data->results[ind].thread_id = get_current_thread_id();
     }
     th_data->intf->printf("^^^^^^^^^^ Thread %lld finished ^^^^^^^^^^\n",
@@ -1151,8 +1153,8 @@ static void TestResults_print_report(const TestResults *results,
     for (size_t i = 0; i < ntests; i++) {
         char pvalue_txt[32];
         snprintf_pvalue(pvalue_txt, 32, results[i].p, results[i].alpha);
-        printf("  %3d %-20s %12g %14s %-15s %4llu\n",
-            (int) i + 1, results[i].name, results[i].x, pvalue_txt,
+        printf("  %3u %-20s %12g %14s %-15s %4llu\n",
+            results[i].id, results[i].name, results[i].x, pvalue_txt,
             interpret_pvalue(results[i].p),
             (unsigned long long) results[i].thread_id);
         switch (get_pvalue_category(results[i].p)) {
@@ -1235,11 +1237,13 @@ void TestsBattery_run(const TestsBattery *bat,
             for (size_t i = 0; i < ntests; i++) {
                 results[i] = bat->tests[i].run(&obj);
                 results[i].name = bat->tests[i].name;
+                results[i].id = i + 1;
                 results[i].thread_id = 0;
             }
         } else {
             *results = bat->tests[testid - 1].run(&obj);
             results->name = bat->tests[testid - 1].name;
+            results->id = testid;
         }
         GeneratorState_free(&obj, intf);
     } else {

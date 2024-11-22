@@ -411,6 +411,7 @@ at 1 TiB). This test run requred about 25 min.
  alfib_mod         | u32    | +     | +       | +    | 0.50 | +     | N/A    | +       | 1 TiB
  chacha            | u32    | +     | +       | +    | 2.0  | +     | N/A    | +       |
  chacha_avx        | u32    | +     | +       | +    | 0.7  | +     | N/A    | +       |
+ chacha_ctr32      | u32    | 
  coveyou64         | u32    | 3     | 4       | 4    | 0.62 | 1     | N/A    | Small   | 256 KiB
  drand48           | u32    | 12    | 19      | 21   | 0.72 | 1     | N/A    | -       | 1 MiB
  isaac64           | u64    | +     | +       | +    | 0.75 | +     | +      | +       | >= 1 TiB
@@ -433,6 +434,7 @@ at 1 TiB). This test run requred about 25 min.
  mrg32k3a          | u32    | +     | +       | +    | 2.5  | +     | N/A    |         | >= 4 TiB
  msws              | u32    | +     | +       | +    | 0.72 | +     | N/A    | +       | >= 2 TiB
  mulberry32        | u32    | 1     | 2       | 3    | 0.51 | +     | N/A    |         | 512 MiB
+ mwc32x            | u32    | 1     | 1       | 5    | 1.5  | +     | N/A    | Small   | 128 MiB
  mwc64             | u32    | 1     | 2       | 4    | 0.37 | +     | N/A    | Small   | 1 TiB
  mwc64x            | u32    | +     | +       | +    | 0.53 | +     | N/A    | +       | >= 8 TiB
  mwc128            | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 16 TiB

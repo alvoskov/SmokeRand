@@ -93,6 +93,7 @@ void GeneratorModule_unload(GeneratorModule *mod);
  */
 typedef struct {
     const char *name; ///< Test name
+    unsigned int id; ///< Test identifier
     double p; ///< p-value
     double alpha; ///< 1 - p where p is p-value
     double x; ///< Empirical random value
