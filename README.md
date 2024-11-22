@@ -13,7 +13,7 @@ from TestU01 but has several important differences:
   enough to detect flaws in a lot of popular PRNGs.
 - High speed: `brief` battery runs in less than 1 minute, `default` in less
   than 5 minutes and `full` in less than 1 hour.
-- Multithreading support by means of POSIX threads.
+- Multithreading support by means of POSIX threads or WinAPI threads.
 
 Despite relatively small amount of tests SmokeRand can detect flaws in some
 PRNG that pass BigCrush or PractRand:
@@ -42,7 +42,7 @@ Existing solutions:
 4. Dieharder (https://webhome.phy.duke.edu/~rgb/General/dieharder.php).
    Resembles DIEHARD, but contains more tests and uses much larger samples.
    Less sensitive than TestU01.
-5. gjrand (https://gjrand.sourceforge.net/). Have some unique and sensitive
+5. gjrand (https://gjrand.sourceforge.net/). Has some unique and sensitive
    tests but documentation is scarce.
 
 Minimal requirements:
@@ -51,7 +51,7 @@ Minimal requirements:
   of 64-bit integers and `inline` keyword.
 - GNU make.
 - 32-bit CPU.
-- 2 GiB of RAM minimal, 16 GiB recommended.
+- 2 GiB of RAM.
 
 Recommended configuration:
 
@@ -63,7 +63,7 @@ Recommended configuration:
 - CMake for compilation under MSVC.
 - 64-bit CPU; in the case of x86-64 -- support of RDTSC, RDRAND and AVX2
   instructions.
-- 16 GiB of RAM (especially for multithreaded mode and/or `birthday` battery)
+- 16 GiB of RAM, especially for multithreaded mode and/or `birthday` battery.
 
 
 Implemented tests:
@@ -235,8 +235,8 @@ The tests supplied with SmokeRand are mostly well-known, described in scientific
 literature and were already implemented in other test suits. However some its
 modifications are specific to SmokeRand and allow to detect such PRNGs as 
 64-bit LCG with prime modulus, 96-bit and 128-bit LCGs with \f$ m = 2^k \f$
-and truncation of lower 64 bits, "Subtract-with-Borrow + Weyl Sequence" (SWBW)
-and incorrectly configured CSPRNGs with 32-bit counters.
+and truncation of lower 64 or even 96 bits, "Subtract-with-Borrow + Weyl
+Sequence" (SWBW) and incorrectly configured CSPRNGs with 32-bit counters.
 
 ## Monobit frequency test
 
@@ -285,7 +285,7 @@ from these runs are summed. This sum obeys Poisson distribution.
 
  Name        | nbits | ndim | `brief` | `default` | `full` 
 -------------|-------|------|---------|-----------|--------
- bspace64_1d | 64    | 1    | 40      | 50        | 250
+ bspace64_1d | 64    | 1    | 40      | 100       | 250
  bspace32_1d | 32    | 1    | 4096    | 8192      | 8192
  bspace32_2d | 32    | 2    | 5       | 10        | 250
  bspace21_3d | 21    | 3    | 5       | 10        | 250
@@ -298,6 +298,13 @@ Fibonacci generators, 3-dimensional tests detect 32- and 64-bit MWC
 64-bit LCGs with truncated lower 32 bits.
 
 ## Birthday spacings test with decimation
+
+This test is a modification of n-dimensional birthday spacings test that throws
+out the majority of values. It has `step` property that means the next: return
+1 (one) value and throw out `step - 1` values. Then `bspace4_8d` is applied to
+the lower and higher bits of values from the obtained decimated sample. It
+makes the test very sensitive to LCGs with \f$m = 2^{k}\f$: even 128-bit LCGs
+can be detected in less than 1 minute on modern CPU.
 
 ## Collision over test
 
@@ -395,7 +402,7 @@ very specific issues.
 
 
 RC4: fails at 16-bit chunks at zmax test at 432 GiB of data (PractRand 0.94 fails
-at 1 TiB). This test run requred about 25 min.
+at 1 TiB). This test run required about 25 min.
 
 
 ## 2D Ising model test
@@ -411,7 +418,7 @@ at 1 TiB). This test run requred about 25 min.
  alfib_mod         | u32    | +     | +       | +    | 0.50 | +     | N/A    | +       | 1 TiB
  chacha            | u32    | +     | +       | +    | 2.0  | +     | N/A    | +       |
  chacha_avx        | u32    | +     | +       | +    | 0.7  | +     | N/A    | +       |
- chacha_ctr32      | u32    | 
+ chacha_ctr32      | u32    | +     | +       | 1    | 2.0  | +     | N/A    |         | 256 GiB
  coveyou64         | u32    | 3     | 4       | 4    | 0.62 | 1     | N/A    | Small   | 256 KiB
  drand48           | u32    | 12    | 19      | 21   | 0.72 | 1     | N/A    | -       | 1 MiB
  isaac64           | u64    | +     | +       | +    | 0.75 | +     | +      | +       | >= 1 TiB
@@ -448,7 +455,8 @@ at 1 TiB). This test run requred about 25 min.
  rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         |
  rrmxmx            | u64    | +     | +       | +    | 0.14 | +     | -      |         | >= 2 TiB
- sezgin63          | u32    | +     | +       | 3    | 3.0  | +     | N/A    |         | >= 16 TiB
+ sezgin63          | u32    | +     | 1       | 3    | 3.0  | +     | N/A    |         | >= 16 TiB
+ sfc8              | u32    | 3     | 7       |      | 2.4  | +     | N/A    |         | 128 MiB
  sfc32             | u32    | +     | +       | +    | 0.24 | +     | N/A    |         |
  sfc64             | u64    | +     | +       | +    | 0.10 | +     | +      | +       | >= 1 TiB
  speck128          | u64    | +     | +       | +    | 3.1  | +     |        |         | >= 2 TiB
@@ -459,10 +467,10 @@ at 1 TiB). This test run requred about 25 min.
  sqxor32           | u32    | 1     | 2       | 3    | 0.20 | +     | N/A    | Small   | 16 GiB
  superduper73      | u32    | 9     | 15      | 18   | 0.64 | 1     | N/A    |         | 32 KiB
  superduper64      | u64    | 1     | 3       | 5    | 0.35 | 1     |        |         | 512 KiB
- superduper64_u32  | u32    | +     | +       |      | 0.70 | +     | N/A    |         | >= 2 TiB
+ superduper64_u32  | u32    | +     | +       | +    | 0.70 | +     | N/A    |         | >= 2 TiB
  shr3              | u32    | 14    | 30      | 33   | 0.76 | 2     | N/A    | -       | 32 KiB
  swb               | u32    | 4     | 4       | 5    | 2.7  | 1     | N/A    |         | 128 MiB
- swblux            | u32    | +     | +       | +    | 6.3  | +     | N/A    |         | 4 TiB
+ swblux[luxury=1]  | u32    | +     | +       | +    | 6.3  | +     | N/A    |         | 4 TiB
  swbw              | u32    | 1     | 1       | 1    | 2.8  | +     | N/A    |         | 4 GiB
  tinymt32          | u32    | 2     | 4       | 6    | 1.5  | 1     | N/A    |         | 4 GiB
  tinymt64          | u64    | 1     | 2       | 4    | 2.7  | 1     | +      |         | 32 GiB
@@ -477,3 +485,9 @@ at 1 TiB). This test run requred about 25 min.
  xoroshiro1024stst | u64    | +     | +       | +    | 0.33 | +     |        |         |
  xorwow            | u32    | 3     | 7       | 9    | 0.52 | 1     | N/A    | Small   | 128 KiB
  xsh               | u64    | 7     | 10      | 14   | 0.43 | 2     | -      | -       | 32 KiB
+
+Sensitivity of dieharder is lower than TestU01 and PractRand
+
+Failed dieharder: lcg69069, lcg32prime, minstd, randu, shr3, xsh, drand48
+
+Passed dieharder: lcg64
