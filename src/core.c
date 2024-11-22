@@ -171,10 +171,12 @@ static int printf_mt(const char *format, ...)
     va_list args;
     va_start(args, format);
     if (use_stderr_for_printf) {
-        fprintf(stderr, "=== THREAD #%2llu ===> ", get_current_thread_id());
+        fprintf(stderr, "=== THREAD #%2llu ===> ",
+            (unsigned long long) get_current_thread_id());
         ans = vfprintf(stderr, format, args);
     } else {
-        printf("=== THREAD #%2llu ===> ", get_current_thread_id());
+        printf("=== THREAD #%2llu ===> ",
+            (unsigned long long) get_current_thread_id());
         ans = vprintf(format, args);
     }
     va_end(args);
