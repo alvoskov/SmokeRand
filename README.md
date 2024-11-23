@@ -446,6 +446,8 @@ at 1 TiB). This test run required about 25 min.
  mwc64x            | u32    | +     | +       | +    | 0.53 | +     | N/A    | +       | >= 8 TiB
  mwc128            | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 16 TiB
  mwc128x           | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 8 TiB
+ mwc1616           | u32    | 8     | 12      |      | 0.48 | +     | N/A    |         | 16 MiB
+ mwc1616x          | u32    | +     | +       | +    | 0.85 | +     | N/A    | +       | >= 2 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | +     | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +     | +       | +    | 0.28 | +     | -      | +       | >= 2 TiB
  philox            | u64    | +     | +       | +    | 0.85 | +     | +      | +       | >= 2 TiB
@@ -453,10 +455,11 @@ at 1 TiB). This test run required about 25 min.
  randu             | u32    | 19    | 34      | 37   | 0.41 | 4     | N/A    | -       | 1 KiB
  r1279             | u32    | 4     | 6       | 9    | 0.47 | 2     | N/A    |         | 64 MiB
  rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
- romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         |
+ romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
  rrmxmx            | u64    | +     | +       | +    | 0.14 | +     | -      |         | >= 2 TiB
  sezgin63          | u32    | +     | 1       | 3    | 3.0  | +     | N/A    |         | >= 16 TiB
- sfc8              | u32    | 3     | 7       |      | 2.4  | +     | N/A    |         | 128 MiB
+ sfc8              | u32    | 3     | 7       | 13   | 1.9  | +     | N/A    |         | 128 MiB
+ sfc16             | u32    | +     | +       | +    | 0.93 | +     | N/A    |         |
  sfc32             | u32    | +     | +       | +    | 0.24 | +     | N/A    |         |
  sfc64             | u64    | +     | +       | +    | 0.10 | +     | +      | +       | >= 1 TiB
  speck128          | u64    | +     | +       | +    | 3.1  | +     |        |         | >= 2 TiB

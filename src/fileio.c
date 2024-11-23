@@ -7,6 +7,7 @@
  * This software is licensed under the MIT license.
  */
 #include "smokerand/fileio.h"
+#include "smokerand/specfuncs.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
