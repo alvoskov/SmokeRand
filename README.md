@@ -427,11 +427,11 @@ at 1 TiB). This test run required about 25 min.
  kiss64            | u64    | +     | +       | +    | 0.53 | +     | +      | +       | >= 4 TiB
  lcg32prime        | u32    | 12    | 23      | 24   | 2.2  | 1     | N/A    |         | 512 MiB
  lcg64             | u32    | 6     | 8       | 11   | 0.40 | 1     | N/A    | Small   | 16 MiB
- lcg64prime        | u64    | 1     | 1       | 1    | 1.5  | +     | -      |         | >= 32 TiB
- lcg96             | u32    | 1     | 1       | 1    | 0.78 | 1     | N/A    |         | 32 GiB
- lcg128            | u64    | 1     | 1       | 1    | 0.35 | 1     | +      |         | 64 GiB
- lcg128_full       | u64    | 1     | 1       | 1    | 0.42 | 1     | +      |         | 64 GiB
- lcg128_u32_full   | u32    | +     | 1       | 1    | 0.75 | +     | N/A    |         | >= 32 TiB
+ lcg64prime        | u64    | 1     | 1       | 1    | 1.5  | +     | -      | +-      | >= 32 TiB
+ lcg96             | u32    | 1     | 1       | 1    | 0.78 | 1     | N/A    | +       | 32 GiB
+ lcg128            | u64    | 1     | 1       | 1    | 0.35 | 1     | +      | +       | 64 GiB
+ lcg128_full       | u64    | 1     | 1       | 1    | 0.42 | 1     | +      | +       | 64 GiB
+ lcg128_u32_full   | u32    | +     | 1       | 1    | 0.75 | +     | N/A    | +       | >= 32 TiB
  lcg69069          | u32    | 17    | 33      | 36   | 0.38 | 4     | N/A    | -       | 2 KiB
  lfsr113           | u32    | 3     | 5       | 7    | 1.1  | 2     | N/A    |         | 32 KiB 
  lfsr258           | u64    | 3     | 5       | 7    | 0.75 | 2     | +      |         | 1 MiB
@@ -447,7 +447,7 @@ at 1 TiB). This test run required about 25 min.
  mwc128            | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 16 TiB
  mwc128x           | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 8 TiB
  mwc1616           | u32    | 8     | 12      |      | 0.48 | +     | N/A    |         | 16 MiB
- mwc1616x          | u32    | +     | +       | +    | 0.85 | +     | N/A    | +       | >= 2 TiB
+ mwc1616x          | u32    | +     | +       | +    | 0.85 | +     | N/A    | +       | >= 8 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | +     | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +     | +       | +    | 0.28 | +     | -      | +       | >= 2 TiB
  philox            | u64    | +     | +       | +    | 0.85 | +     | +      | +       | >= 2 TiB
@@ -463,7 +463,7 @@ at 1 TiB). This test run required about 25 min.
  sfc32             | u32    | +     | +       | +    | 0.24 | +     | N/A    |         |
  sfc64             | u64    | +     | +       | +    | 0.10 | +     | +      | +       | >= 1 TiB
  speck128          | u64    | +     | +       | +    | 3.1  | +     |        |         | >= 2 TiB
- speck128_avx      | u64    | +     | +       | +    | 0.65 | +     |        |         |
+ speck128_avx      | u64    | +     | +       | +    | 0.65 | +     |        |         | >= 2 TiB
  splitmix          | u64    | +     | +       | +    | 0.19 | +     | -      |         | >= 2 TiB
  splitmix32        | u32    | 1     | 2       | 3    | 0.25 | +     | N/A    | +       | 1 GiB
  sqxor             | u64    | +     | +       | +    | 0.13 | +     | +      |         | >= 2 TiB
@@ -475,7 +475,7 @@ at 1 TiB). This test run required about 25 min.
  swb               | u32    | 4     | 4       | 5    | 2.7  | 1     | N/A    |         | 128 MiB
  swblux[luxury=1]  | u32    | +     | +       | +    | 6.3  | +     | N/A    |         | 4 TiB
  swbw              | u32    | 1     | 1       | 1    | 2.8  | +     | N/A    |         | 4 GiB
- tinymt32          | u32    | 2     | 4       | 6    | 1.5  | 1     | N/A    |         | 4 GiB
+ tinymt32          | u32    | 2     | 4       | 6    | 1.5  | 1     | N/A    | +       | 4 GiB
  tinymt64          | u64    | 1     | 2       | 4    | 2.7  | 1     | +      |         | 32 GiB
  threefry          | u64    | +     | +       | +    | 1.0  | +     |        | +       | >= 1 TiB
  well1024a         | u32    | 3     | 5       | 7    | 1.0  | 2     | N/A    | Small   | 64 MiB
@@ -485,9 +485,14 @@ at 1 TiB). This test run required about 25 min.
  xoroshiro128p     | u64    | 1     | 2       | 3    | 0.16 | 1     | +      |         | 16 MiB
  xoroshiro128pp    | u64    | +     | +       | +    | 0.20 | +     | +      |         | >= 2 TiB
  xoroshiro1024st   | u64    | 1     | 1       | 2    | 0.33 | 1     |        |         | 128 GiB
- xoroshiro1024stst | u64    | +     | +       | +    | 0.33 | +     |        |         |
+ xoroshiro1024stst | u64    | +     | +       | +    | 0.33 | +     |        |         | >= 1 TiB
  xorwow            | u32    | 3     | 7       | 9    | 0.52 | 1     | N/A    | Small   | 128 KiB
  xsh               | u64    | 7     | 10      | 14   | 0.43 | 2     | -      | -       | 32 KiB
+
+
+About `lcg64prime`: it passes BigCrush if upper 32 bits are returned, but fails it in interleaved
+mode (fails test N15 `BirthdaySpacings, t = 4`).
+
 
 Sensitivity of dieharder is lower than TestU01 and PractRand
 
