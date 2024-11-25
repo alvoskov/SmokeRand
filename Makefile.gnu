@@ -53,8 +53,8 @@ endif
 
 # Core library
 CORE_LIB = $(LIBDIR)/libsmokerand_core.a
-LIB_SOURCES = $(addprefix $(SRCDIR)/, core.c coretests.c entropy.c extratests.c fileio.c lineardep.c)
-LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, apidefs.h cinterface.h core.h coretests.h entropy.h extratests.h fileio.h lineardep.h)
+LIB_SOURCES = $(addprefix $(SRCDIR)/, core.c coretests.c entropy.c extratests.c fileio.c lineardep.c specfuncs.c)
+LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, apidefs.h cinterface.h core.h coretests.h entropy.h extratests.h fileio.h lineardep.h specfuncs.h)
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
 INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/core.h
 # Battery
@@ -71,8 +71,9 @@ GEN_SOURCES = $(addsuffix _shared.c,$(addprefix generators/, alfib_mod alfib \
     chacha coveyou64 crand drand48 isaac64 kiss64 kiss93 kiss99 lcg32prime \
     lcg64 lcg69069 lfib_par lfsr113 lfsr258 loop_7fff_w64 minstd mlfib17_5 \
     msws mt19937 mulberry32 mwc64x mwc64 pcg32 pcg64 philox32 r1279 \
-    randu ranluxpp rc4 romutrio rrmxmx sfc32 sfc64 shr3 speck128 \
-    splitmix32 splitmix sqxor32 swblux swbw swb threefry tinymt32 tinymt64 \
+    randu ranluxpp rc4 romutrio rrmxmx sfc8 sfc16 sfc32 sfc64 shr3 speck128 \
+    splitmix32 splitmix sqxor32 superduper73 superduper64 superduper64_u32 \
+    swblux swbw swb threefry tinymt32 tinymt64 \
     well1024a xoroshiro1024stst xoroshiro1024st xoroshiro128pp xoroshiro128p \
     xorshift128p xorshift128 xorwow xsh))
 else

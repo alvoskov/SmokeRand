@@ -10,6 +10,7 @@
 #ifndef __SMOKERAND_APIDEFS_H
 #define __SMOKERAND_APIDEFS_H
 #include <stdint.h>
+#include <stddef.h>
 
 ///////////////////////////////
 ///// 128-bit arithmetics /////

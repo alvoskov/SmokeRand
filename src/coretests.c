@@ -10,6 +10,7 @@
  * This software is licensed under the MIT license.
  */
 #include "smokerand/coretests.h"
+#include "smokerand/specfuncs.h"
 #include <math.h>
 #include <float.h>
 #include <stdio.h>
