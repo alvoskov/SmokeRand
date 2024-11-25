@@ -420,6 +420,7 @@ at 1 TiB). This test run required about 25 min.
  chacha_avx        | u32    | +     | +       | +    | 0.7  | +     | N/A    | +       |
  chacha_ctr32      | u32    | +     | +       | 1    | 2.0  | +     | N/A    |         | 256 GiB
  coveyou64         | u32    | 3     | 4       | 4    | 0.62 | 1     | N/A    | Small   | 256 KiB
+ cwg64             | u64    | +     | +       | +    |      | +     | +      |         |
  drand48           | u32    | 12    | 19      | 21   | 0.72 | 1     | N/A    | -       | 1 MiB
  isaac64           | u64    | +     | +       | +    | 0.75 | +     | +      | +       | >= 1 TiB
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | 1     | N/A    | Small   | 1 MiB
@@ -448,7 +449,7 @@ at 1 TiB). This test run required about 25 min.
  mwc128x           | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 8 TiB
  mwc1616           | u32    | 8     | 12      |      | 0.48 | +     | N/A    |         | 16 MiB
  mwc1616x          | u32    | +     | +       | +    | 0.85 | +     | N/A    | +       | >= 8 TiB
- mwc3232x          | u64    | +     | +       | +    | 0.40 | +     |        |         |
+ mwc3232x          | u64    | +     | +       | +    | 0.40 | +     |        |         | >= 4 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | +     | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +     | +       | +    | 0.28 | +     | -      | +       | >= 2 TiB
  philox            | u64    | +     | +       | +    | 0.85 | +     | +      | +       | >= 2 TiB
