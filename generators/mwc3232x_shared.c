@@ -37,21 +37,18 @@ PRNG_CMODULE_PROLOG
  * @brief MWC3232X state.
  */
 typedef struct {
-    uint32_t z_hi;
-    uint32_t z_lo;
-    uint32_t w_hi;
-    uint32_t w_lo;
+    uint64_t z;
+    uint64_t w;
 } Mwc3232xShared;
 
 static inline uint64_t get_bits_raw(void *state)
 {
     Mwc3232xShared *obj = state;
-    uint64_t z_prod = 4294441395 * (obj->z_lo) + (obj->z_hi); // 2^32 - 525901
-    obj->z_hi = z_prod >> 32; obj->z_lo = z_prod & 0xFFFFFFFF;
-    uint64_t w_prod = 4294440669 * (obj->w_lo) + (obj->w_hi);
-    obj->w_hi = w_prod >> 32; obj->w_lo = w_prod & 0xFFFFFFFF; // 2^32 - 526627
-    uint64_t mwc = ((uint64_t) (obj->z_lo ^ obj->w_hi) << 32) | (obj->w_lo ^ obj->z_hi);
-    return mwc;
+    uint32_t z_lo = obj->z & 0xFFFFFFFF, z_hi = obj->z >> 32;
+    uint32_t w_lo = obj->w & 0xFFFFFFFF, w_hi = obj->w >> 32;
+    obj->z = 4294441395 * z_lo + z_hi; // 2^32 - 525901
+    obj->w = 4294440669 * w_lo + w_hi; // 2^32 - 526627    
+    return ((obj->z << 32) | (obj->z >> 32)) ^ obj->w;
 }
 
 
@@ -59,10 +56,8 @@ static void *create(const CallerAPI *intf)
 {
     Mwc3232xShared *obj = intf->malloc(sizeof(Mwc3232xShared));
     uint64_t seed0 = intf->get_seed64();
-    obj->z_hi = 1;
-    obj->z_lo = seed0 >> 32;
-    obj->w_hi = 1;
-    obj->w_lo = seed0;
+    obj->z = (seed0 >> 32) | (1ull << 32ull);
+    obj->w = (seed0 & 0xFFFFFFFF) | (1ull << 32ull);
     return (void *) obj;
 }
 

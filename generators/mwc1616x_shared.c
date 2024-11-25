@@ -36,21 +36,19 @@ PRNG_CMODULE_PROLOG
  * @brief MWC1616X state.
  */
 typedef struct {
-    uint16_t z_hi;
-    uint16_t z_lo;
-    uint16_t w_hi;
-    uint16_t w_lo;
+    uint32_t z;
+    uint32_t w;
 } Mwc1616xShared;
 
 
 static inline uint64_t get_bits_raw(void *state)
 {
     Mwc1616xShared *obj = state;
-    uint32_t z_prod = 61578 * (obj->z_lo) + (obj->z_hi);
-    obj->z_hi = z_prod >> 16; obj->z_lo = z_prod & 0xFFFF;
-    uint32_t w_prod = 63885 * (obj->w_lo) + (obj->w_hi);
-    obj->w_hi = w_prod >> 16; obj->w_lo = w_prod & 0xFFFF;
-    uint32_t mwc = ((uint32_t) (obj->z_lo ^ obj->w_hi) << 16) | (obj->w_lo ^ obj->z_hi);
+    uint16_t z_lo = obj->z & 0xFFFF, z_hi = obj->z >> 16;
+    uint16_t w_lo = obj->w & 0xFFFF, w_hi = obj->w >> 16;
+    obj->z = 61578 * z_lo + z_hi;
+    obj->w = 63885 * w_lo + w_hi;
+    uint32_t mwc = ((obj->z << 16) | (obj->z >> 16)) ^ obj->w;
     return mwc;
 }
 
@@ -59,10 +57,8 @@ static void *create(const CallerAPI *intf)
 {
     Mwc1616xShared *obj = intf->malloc(sizeof(Mwc1616xShared));
     uint32_t seed0 = intf->get_seed32();
-    obj->z_hi = 1;
-    obj->z_lo = seed0 >> 16;
-    obj->w_hi = 1;
-    obj->w_lo = seed0;
+    obj->z = (seed0 & 0xFFFF) | (1ul << 16ul);
+    obj->w = (seed0 >> 16) | (1ul << 16ul);
     return (void *) obj;
 }
 
