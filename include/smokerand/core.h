@@ -93,6 +93,7 @@ void GeneratorModule_unload(GeneratorModule *mod);
  */
 typedef struct {
     const char *name; ///< Test name
+    unsigned int id; ///< Test identifier
     double p; ///< p-value
     double alpha; ///< 1 - p where p is p-value
     double x; ///< Empirical random value
@@ -135,26 +136,8 @@ typedef enum {
 
 const char *interpret_pvalue(double pvalue);
 PValueCategory get_pvalue_category(double pvalue);
-double sr_expm1(double x);
-double sr_log2(double x);
-double sr_lgamma(double x);
-double sr_betainc(double x, double a, double b, double *cIx_out);
-double ks_pvalue(double x);
-double gammainc(double a, double x);
-double binomial_pdf(unsigned long k, unsigned long n, double p);
-double poisson_cdf(double x, double lambda);
-double poisson_pvalue(double x, double lambda);
-double stdnorm_cdf(double x);
-double stdnorm_pvalue(double x);
-double halfnormal_pvalue(double x);
-double t_cdf(double x, unsigned long f);
-double t_pvalue(double x, unsigned long f);
-double chi2_cdf(double x, unsigned long f);
-double chi2_pvalue(double x, unsigned long f);
-double chi2_to_stdnorm_approx(double x, unsigned long f);
 void radixsort32(uint32_t *x, size_t len);
 void radixsort64(uint64_t *x, size_t len);
-
 
 typedef struct {
     void *original_state;

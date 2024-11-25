@@ -31,7 +31,7 @@ static TestResults bspace32_1d_high(GeneratorState *obj)
 
 static TestResults bspace64_1d(GeneratorState *obj)
 {
-    return bspace64_1d_ns_test(obj, 50);
+    return bspace64_1d_ns_test(obj, 100);
 }
 
 static TestResults bspace32_2d(GeneratorState *obj)
@@ -237,7 +237,7 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf,
         {"monobit_freq", monobit_freq_test, 1},
         {"byte_freq", byte_freq_test, 1},
         {"word16_freq", word16_freq_test, 17},
-        {"bspace64_1d", bspace64_1d, 17},
+        {"bspace64_1d", bspace64_1d, 34},
         {"bspace32_1d", bspace32_1d, 2},
         {"bspace32_1d_high", bspace32_1d_high, 2},
         {"bspace32_2d", bspace32_2d, 3},

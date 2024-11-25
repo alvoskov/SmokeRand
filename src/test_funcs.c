@@ -1,4 +1,5 @@
 #include "smokerand/core.h"
+#include "smokerand/specfuncs.h"
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>

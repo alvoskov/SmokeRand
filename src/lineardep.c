@@ -7,6 +7,7 @@
  * This software is licensed under the MIT license.
  */
 #include "smokerand/lineardep.h"
+#include "smokerand/specfuncs.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>

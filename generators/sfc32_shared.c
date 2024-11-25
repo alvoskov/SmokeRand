@@ -1,6 +1,6 @@
 /**
  * @file sfc32_shared.c
- * @brief SFC32 (Small Fast Chaotic 32-bit) PRNG with period at least 2^{64}.
+ * @brief SFC32 (Small Fast Chaotic 32-bit) PRNG with period at least 2^{32}.
  * @details This generator is one of the fastest because it doesn't use
  * multiplications. It slightly remembers LFSR based generators but includes
  * a lot of additions. Addition is non-linear operation in GF(2) that prevents
