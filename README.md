@@ -125,20 +125,25 @@ be divided into several groups:
 - Counter-based scramblers based on cryptographical primitives: philox,
   philox32, threefry.
 - Lagged Fibonacci: alfib, alfib_mod, mlfib17_5, lfib_par, r1279.
-- Linear congruental: drand48, lcg64, lcg64prime, lcg96, lcg128, lcg69069,
-  minstd, mwc1616, mwc64, mwc128, randu, seizgin63.
+- Linear congruental: cmwc4096, drand48, lcg32prime, lcg64, lcg64prime, lcg96,
+  lcg128, lcg128_full, lcg128_u32_full, lcg69069, minstd, mwc1616, mwc64,
+  mwc128, randu, ranluxpp, seizgin63.
 - Linear congruental with output scrambling: mwc64x, mwc128x, mwc1616x,
   mwc3232x, pcg32, pcg64, pcg64_xsl_rr.
 - "Weyl sequence" (LCG with a=1) with output scrambling: mulberry32, rrmxmx,
   splitmix, splitmix32, sqxor, sqxor32, wyrand.
+- "Weyl sequence" injected into reversible nonlinear transformation: sfc8,
+  sfc16, sfc32, sfc64
+- "Weyl sequence" injected into irreversible nonlinear transformation: cwg64,
+  stormdrop, msws.
 - Subtract with borrow: swb, swblux, swbw.
 - LSFR without scrambling: shr3, xsh, xorshift128, lfsr113, lfsr258, well1024a.
 - LSFR with scrambling: xorshift128p, xoroshiro128p, xoroshiro128pp,
-  xoroshiro1024st, xorwow.
+  xoroshiro1024st, xoroshiro1024stst, xorwow.
 - GSFR: mt19937, tinymt32, tinymt64.
 - Combined generators: kiss93, kiss99, kiss64, superduper73, superduper64,
-  superduper64_u32
-- Other: coveyou64, mrg32k3a, sfc8, sfc16, sfc32, sfc64.
+  superduper64_u32.
+- Other: coveyou64, mrg32k3a, romutrio.
 
 
  Algorithm         | Description
@@ -421,8 +426,9 @@ at 1 TiB). This test run required about 25 min.
  chacha            | u32    | +     | +       | +    | 2.0  | +     | N/A    | +       |
  chacha_avx        | u32    | +     | +       | +    | 0.7  | +     | N/A    | +       |
  chacha_ctr32      | u32    | +     | +       | 1    | 2.0  | +     | N/A    |         | 256 GiB
+ cmwc4096          | u32    | +     | +       | +    | 0.43 | +     | N/A    | +       | >= 32 TiB
  coveyou64         | u32    | 3     | 4       | 4    | 0.62 | 1     | N/A    | Small   | 256 KiB
- cwg64             | u64    | +     | +       | +    |      | +     | +      |         |
+ cwg64             | u64    | +     | +       | +    | 0.38 | +     | +      |         | >= 1 TiB
  drand48           | u32    | 12    | 19      | 21   | 0.72 | 1     | N/A    | -       | 1 MiB
  isaac64           | u64    | +     | +       | +    | 0.75 | +     | +      | +       | >= 1 TiB
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | 1     | N/A    | Small   | 1 MiB
@@ -449,15 +455,16 @@ at 1 TiB). This test run required about 25 min.
  mwc64x            | u32    | +     | +       | +    | 0.53 | +     | N/A    | +       | >= 8 TiB
  mwc128            | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 16 TiB
  mwc128x           | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 8 TiB
- mwc1616           | u32    | 8     | 12      |      | 0.48 | +     | N/A    |         | 16 MiB
+ mwc1616           | u32    | 8     | 12      | 14   | 0.48 | +     | N/A    |         | 16 MiB
  mwc1616x          | u32    | +     | +       | +    | 0.67 | +     | N/A    | +       | >= 8 TiB
- mwc3232x          | u64    | +     | +       | +    | 0.22 | +     | +      |         | >= 4 TiB
+ mwc3232x          | u64    | +     | +       | +    | 0.23 | +     | +      |         | >= 4 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | +     | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +     | +       | +    | 0.28 | +     | -      | +       | >= 2 TiB
- pcg64_xsl_rr      | u64    | +     | +       | +    | 0.51 | +     | +      |         |
+ pcg64_xsl_rr      | u64    | +     | +       | +    | 0.43 | +     | +      |         |
  philox            | u64    | +     | +       | +    | 0.85 | +     | +      | +       | >= 2 TiB
  philox32          | u32    | +     | +       | +    | 2.7  | +     | N/A    | +       | >= 2 TiB
  randu             | u32    | 19    | 34      | 37   | 0.41 | 4     | N/A    | -       | 1 KiB
+ ranlux++          | u64    | +     | +       | +    | 3.9  |       |        | +       | >= 1 TiB
  r1279             | u32    | 4     | 6       | 9    | 0.47 | 2     | N/A    |         | 64 MiB
  rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
