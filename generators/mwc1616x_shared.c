@@ -50,7 +50,7 @@ static inline uint64_t get_bits_raw(void *state)
     obj->z_hi = z_prod >> 16; obj->z_lo = z_prod & 0xFFFF;
     uint32_t w_prod = 63885 * (obj->w_lo) + (obj->w_hi);
     obj->w_hi = w_prod >> 16; obj->w_lo = w_prod & 0xFFFF;
-    uint32_t mwc = ((obj->z_lo ^ obj->w_hi) << 16) | (obj->w_lo ^ obj->z_hi);
+    uint32_t mwc = ((uint32_t) (obj->z_lo ^ obj->w_hi) << 16) | (obj->w_lo ^ obj->z_hi);
     return mwc;
 }
 
