@@ -124,10 +124,11 @@ be divided into several groups:
 - Obsolete CSPRNG: rc4.
 - Counter-based scramblers based on cryptographical primitives: philox,
   philox32, threefry.
-- Lagged Fibonacci: alfib, alfib_mod, mlfib17_5, r1279.
+- Lagged Fibonacci: alfib, alfib_mod, mlfib17_5, lfib_par, r1279.
 - Linear congruental: drand48, lcg64, lcg64prime, lcg96, lcg128, lcg69069,
-  minstd, mwc64, mwc128, randu, seizgin63.
-- Linear congruental with output scrambling: mwc64x, mwc128x, pcg32, pcg64.
+  minstd, mwc1616, mwc64, mwc128, randu, seizgin63.
+- Linear congruental with output scrambling: mwc64x, mwc128x, mwc1616x,
+  mwc3232x, pcg32, pcg64, pcg64_xsl_rr.
 - "Weyl sequence" (LCG with a=1) with output scrambling: mulberry32, rrmxmx,
   splitmix, splitmix32, sqxor, sqxor32, wyrand.
 - Subtract with borrow: swb, swblux, swbw.
@@ -135,8 +136,9 @@ be divided into several groups:
 - LSFR with scrambling: xorshift128p, xoroshiro128p, xoroshiro128pp,
   xoroshiro1024st, xorwow.
 - GSFR: mt19937, tinymt32, tinymt64.
-- Combined generators: kiss93, kiss99, kiss64.
-- Other: coveyou64, mrg32k3a, sfc32, sfc64.
+- Combined generators: kiss93, kiss99, kiss64, superduper73, superduper64,
+  superduper64_u32
+- Other: coveyou64, mrg32k3a, sfc8, sfc16, sfc32, sfc64.
 
 
  Algorithm         | Description
@@ -447,10 +449,11 @@ at 1 TiB). This test run required about 25 min.
  mwc128            | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 16 TiB
  mwc128x           | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 8 TiB
  mwc1616           | u32    | 8     | 12      |      | 0.48 | +     | N/A    |         | 16 MiB
- mwc1616x          | u32    | +     | +       | +    | 0.85 | +     | N/A    | +       | >= 8 TiB
- mwc3232x          | u64    | +     | +       | +    | 0.40 | +     |        |         |
+ mwc1616x          | u32    | +     | +       | +    | 0.67 | +     | N/A    | +       | >= 8 TiB
+ mwc3232x          | u64    | +     | +       | +    | 0.22 | +     | +      |         | >= 2 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | +     | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +     | +       | +    | 0.28 | +     | -      | +       | >= 2 TiB
+ pcg64_xsl_rr      | u64    | +     | +       | +    | 0.51 | +     | +      |         |
  philox            | u64    | +     | +       | +    | 0.85 | +     | +      | +       | >= 2 TiB
  philox32          | u32    | +     | +       | +    | 2.7  | +     | N/A    | +       | >= 2 TiB
  randu             | u32    | 19    | 34      | 37   | 0.41 | 4     | N/A    | -       | 1 KiB
@@ -495,8 +498,7 @@ About `lcg64prime`: it passes BigCrush if upper 32 bits are returned, but fails 
 mode (fails test N15 `BirthdaySpacings, t = 4`).
 
 
-Sensitivity of dieharder is lower than TestU01 and PractRand
+Sensitivity of dieharder is lower than TestU01 and PractRand:
 
-Failed dieharder: lcg69069, lcg32prime, minstd, randu, shr3, xsh, drand48
-
-Passed dieharder: lcg64
+- Failed dieharder: lcg69069, lcg32prime, minstd, randu, shr3, xsh, drand48
+- Passed dieharder: lcg64
