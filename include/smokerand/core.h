@@ -65,14 +65,14 @@ static inline GeneratorState GeneratorState_create(const GeneratorInfo *gi,
 {
     GeneratorState obj;
     obj.gi = gi;
-    obj.state = gi->create(intf);
+    obj.state = gi->create(gi, intf);
     obj.intf = intf;
     return obj;
 }
 
 static inline void GeneratorState_free(GeneratorState *obj, const CallerAPI *intf)
 {
-    intf->free(obj->state);
+    obj->gi->free(obj->state, obj->gi, intf);
 }
 
 
@@ -145,8 +145,11 @@ typedef struct {
 } ReversedGen32State;
 
 
-GeneratorInfo reversed_generator_set(const GeneratorInfo *gi);
-GeneratorInfo interleaved_generator_set(const GeneratorInfo *gi);
+GeneratorInfo define_reversed_generator(const GeneratorInfo *gi);
+GeneratorInfo define_interleaved_generator(const GeneratorInfo *gi);
+
+//GeneratorInfo reversed_generator_set(const GeneratorInfo *gi);
+//GeneratorInfo interleaved_generator_set(const GeneratorInfo *gi);
 
 typedef struct {
     unsigned int h; ///< Hours

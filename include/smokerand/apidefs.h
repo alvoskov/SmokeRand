@@ -77,14 +77,16 @@ typedef struct {
  * @brief Keeps the description of pseudorandon number generator.
  * Either 32-bit or 64-bit PRNGs are supported.
  */
-typedef struct {
+typedef struct GeneratorInfo_ {
     const char *name; ///< Generator name
     const char *description; ///< Generator description (optional)
-    void *(*create)(const CallerAPI *intf); ///< Create PRNG example
+    unsigned int nbits; ///< Number of bits returned by the generator (32 or 64)
+    void *(*create)(const struct GeneratorInfo_ *gi, const CallerAPI *intf); ///< Create PRNG example
+    void (*free)(void *state, const struct GeneratorInfo_ *gi, const CallerAPI *intf); ///< Destroy PRNG example
     uint64_t (*get_bits)(void *state); ///< Return u32/u64 pseudorandom number
-    unsigned int nbits; ///< Number of bits returned by the generator (32 or 64)    
     int (*self_test)(const CallerAPI *intf); ///< Run internal self-test
     uint64_t (*get_sum)(void *state, size_t len); ///< Return sum of `len` elements
+    const struct GeneratorInfo_ *parent; ///< Used by create/free functions in enveloped generators.
 } GeneratorInfo;
 
 

@@ -1,5 +1,27 @@
 /**
- * 128-bit LCG with the PCG-XSL-RR output function (`pcg64`)
+ * @file pcg64_xsl_rr_shared.c
+ * @brief PCG64 PRNG implementation with PCG-XSL-RR output function.
+ * @details PCG (permuted congruental generators) is a family of pseudorandom
+ * number generators invented by M.E. O'Neill. This version has 128-bit state
+ * and 64-bit output and its period is \f$2^{128}\f$. It passes all batteries
+ * from SmokeRand test suite.
+ *
+ * This variant of PCG is commonly used in numerical libraries such as NumPy
+ * and SciPy. Its only drawback is dependence on 128-bit integer arithmetics
+ * that is outside of C99 standard and relies on non-portable extensions.
+ *
+ * PCG64 with RCG-XSL-RR output function also passes SmallCrush, Crush and
+ * BigCrush batteries from TestU01.
+ * 
+ * @copyright The PCG algorithm family is suggested by M.E. O'Neill
+ * (https://pcg-random.org).
+ *
+ * Implementation for SmokeRand:
+ *
+ * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 
@@ -28,7 +50,6 @@ static void *create(const CallerAPI *intf)
     Lcg128State_seed(obj, intf);
     return (void *) obj;
 }
-
 
 /**
  * @brief Self-test to prevent problems during re-implementation

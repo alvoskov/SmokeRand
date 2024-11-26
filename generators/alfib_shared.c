@@ -28,19 +28,6 @@ PRNG_CMODULE_PROLOG
 #define LFIB_A 607
 #define LFIB_B 273
 
-
-// Still fails birthday spacings test, gap512 is "suspiciuos"
-//#define LFIB_A 1279
-//#define LFIB_B 418
-
-// Still fails birthday spacings test, gap512 is passed
-//#define LFIB_A 2281
-//#define LFIB_B 1252
-
-//#define LFIB_A 4423
-//#define LFIB_B 2098
-
-
 typedef struct {
     uint64_t U[LFIB_A + 1]; ///< Ring buffer (U[0] is not used)
     int i;

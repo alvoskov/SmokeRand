@@ -781,11 +781,9 @@ void TestsBattery_run(const TestsBattery *bat,
     free(results);
 }
 
-
-/**
- * @brief Keeps the original generator for application of different filters to it.
- */
-static GeneratorInfo original_gen;
+//////////////////////////////////////////////////////////////////
+///// Some generic functions for making enveloped generators /////
+//////////////////////////////////////////////////////////////////
 
 /**
  * @brief Buffer for decomposition of each 64-bit value into a pair
@@ -796,37 +794,68 @@ typedef struct {
     union {
         uint64_t u64; ///< To be splitted to two 32-bit values.
         uint32_t u32[2]; ///< 32-bit values.
-    } val; ///< Internal buffer for 32-bit outputs.
+    } val; ///< Internal buffer for 32-bit outputs.    
     int pos; ///< Output position for 32-bit output.
 } Interleaved32Buffer;
 
 
-Interleaved32Buffer interleaved_buf;
+typedef struct {
+    const GeneratorInfo *parent_gi;
+    void *parent_state;
+    Interleaved32Buffer i32buf;
+} EnvelopedGeneratorState;
+
+
+void *create_enveloped(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    EnvelopedGeneratorState *obj = intf->malloc(sizeof(EnvelopedGeneratorState));
+    obj->parent_gi = gi->parent;
+    obj->parent_state = gi->parent->create(gi->parent, intf);
+    obj->i32buf.pos = 2; // Invalidate buffer for interleaved output
+    return obj;
+}
+
+void free_enveloped(void *state, const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    EnvelopedGeneratorState *obj = state;
+    gi->parent->free(obj->parent_state, gi->parent, intf);
+    intf->free(state);
+}
 
 ////////////////////////////////////////////////////////////////
 ///// Implementation of generator with reversed bits order /////
 ////////////////////////////////////////////////////////////////
 
+
 static uint64_t get_bits32_reversed(void *state)
 {
-    return reverse_bits32((uint32_t) original_gen.get_bits(state));
+    EnvelopedGeneratorState *obj = state;
+    return reverse_bits32((uint32_t) obj->parent_gi->get_bits(obj->parent_state));
 }
 
 static uint64_t get_bits64_reversed(void *state)
 {
-    return reverse_bits64(original_gen.get_bits(state));
+    EnvelopedGeneratorState *obj = state;
+    return reverse_bits64((uint64_t) obj->parent_gi->get_bits(obj->parent_state));
 }
 
-GeneratorInfo reversed_generator_set(const GeneratorInfo *gi)
+/**
+ * @brief Defines the PRNG with reversed bits order.
+ */
+GeneratorInfo define_reversed_generator(const GeneratorInfo *gi)
 {
-    GeneratorInfo reversed_gen = *gi;
+    GeneratorInfo gi_env = *gi;
+    gi_env.name = "ReversedBits";
+    gi_env.parent = gi;
+    gi_env.create = create_enveloped;
+    gi_env.free = free_enveloped;
     if (gi->nbits == 32) {
-        reversed_gen.get_bits = get_bits32_reversed;
+        gi_env.get_bits = get_bits32_reversed;
     } else {
-        reversed_gen.get_bits = get_bits64_reversed;
+        gi_env.get_bits = get_bits64_reversed;
     }
-    original_gen = *gi;
-    return reversed_gen;
+    gi_env.get_sum = NULL;
+    return gi_env;
 }
 
 
@@ -836,19 +865,26 @@ GeneratorInfo reversed_generator_set(const GeneratorInfo *gi)
 
 static uint64_t get_bits32_interleaved(void *state)
 {
-    if (interleaved_buf.pos == 2) {
-        interleaved_buf.val.u64 = original_gen.get_bits(state);
-        interleaved_buf.pos = 0;
+    EnvelopedGeneratorState *obj = state;
+    if (obj->i32buf.pos == 2) {
+        uint64_t u = obj->parent_gi->get_bits(obj->parent_state);
+        obj->i32buf.val.u64 = u;
+        obj->i32buf.pos = 0;
     }
-    return interleaved_buf.val.u32[interleaved_buf.pos++];
+    return obj->i32buf.val.u32[obj->i32buf.pos++];
 }
 
-GeneratorInfo interleaved_generator_set(const GeneratorInfo *gi)
+GeneratorInfo define_interleaved_generator(const GeneratorInfo *gi)
 {
-    GeneratorInfo interleaved_gen = *gi;
-    interleaved_gen.get_bits = get_bits32_interleaved;
-    original_gen = *gi;
-    return interleaved_gen;
+    GeneratorInfo gi_env = *gi;
+    gi_env.name = "Interleaved";
+    gi_env.parent = gi;
+    gi_env.nbits = 32;
+    gi_env.create = create_enveloped;
+    gi_env.free = free_enveloped;
+    gi_env.get_bits = get_bits32_interleaved;
+    gi_env.get_sum = NULL;
+    return gi_env;
 }
 
 
@@ -888,7 +924,7 @@ void set_bin_stdin()
 void GeneratorInfo_bits_to_file(GeneratorInfo *gen, const CallerAPI *intf)
 {
     set_bin_stdout();
-    void *state = gen->create(intf);
+    void *state = gen->create(gen, intf);
     if (gen->nbits == 32) {
         uint32_t buf[256];
         while (1) {

@@ -10,7 +10,8 @@
  *
  * @copyright Based on scientific publication by G.Marsaglia.
  *
- * Implementation for TestU01-threads:
+ * Implementation for SmokeRand:
+ *
  * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *

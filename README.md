@@ -211,12 +211,19 @@ be divided into several groups:
 
 # Batteries
 
-Three batteries are implemented in SmokeRand:
+Four batteries are implemented in SmokeRand:
 
-- `brief`
-- `default`
-- `full`
-- `dos16`
+- `brief` - a fast battery that includes a reduced set of tests, e.g.
+  matrix rank tests and some tests for higher bits of generators
+  are excluded.
+- `default` - a more comprehensive but slower battery with extra tests
+  for higher bits of generators and matrix rank tests. Other tests use
+  larger samples that make them more sensitive.
+- `full` - similar do default but uses larger samples. 
+- `dos16` - simplified battery that consists of 5 tests and can be
+  compiled for 16-bit platforms with 64KiB segments of data and code.
+  Less powerful than `brief` but may be more sensitive than diehard
+  or even dieharder.
 
 
  Battery | Number of tests | Bytes (32-bit PRNG) | Bytes (64-bit PRNG)
@@ -407,9 +414,16 @@ very specific issues.
 
 ## Extended block frequency test
 
+It is very similar to the blocks frequency test from `brief`, `default` and
+`full` battery but it simultaneously processes non-overlapping 8-bit and
+16-bit blocks. Distribution uniformity is controlled by Pearson chi2 test
+and (for all frequencies) by half-normal distribution test (for every frequency).
+Half-normal distribution test (`zmax`) is an approximation of binomial
+distribution; it is used together with Bonferroni correction.
 
-RC4: fails at 16-bit chunks at zmax test at 432 GiB of data (PractRand 0.94 fails
-at 1 TiB). This test run required about 25 min.
+This test is not very sensitive. But RC4, obsolete CSPRNG, fails it at 16-bit
+chunks at zmax test at 432 GiB of data (PractRand 0.94 fails at 1 TiB). This
+test run required about 25 min.
 
 
 ## 2D Ising model test
@@ -457,7 +471,7 @@ at 1 TiB). This test run required about 25 min.
  mwc128x           | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 8 TiB
  mwc1616           | u32    | 8     | 12      | 14   | 0.48 | +     | N/A    |         | 16 MiB
  mwc1616x          | u32    | +     | +       | +    | 0.67 | +     | N/A    | +       | >= 8 TiB
- mwc3232x          | u64    | +     | +       | +    | 0.23 | +     | +      |         | >= 16 TiB
+ mwc3232x          | u64    | +     | +       | +    | 0.23 | +     | +      |         | >= 32 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | +     | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +     | +       | +    | 0.28 | +     | -      | +       | >= 2 TiB
  pcg64_xsl_rr      | u64    | +     | +       | +    | 0.43 | +     | +      |         |
@@ -480,7 +494,7 @@ at 1 TiB). This test run required about 25 min.
  splitmix32        | u32    | 1     | 2       | 3    | 0.25 | +     | N/A    | +       | 1 GiB
  sqxor             | u64    | +     | +       | +    | 0.13 | +     | +      |         | >= 2 TiB
  sqxor32           | u32    | 1     | 2       | 3    | 0.20 | +     | N/A    | Small   | 16 GiB
- stormdrop         | u32    | +     | +       | 1    |      | +     | N/A    |         |
+ stormdrop         | u32    | +     | +       | 1    | 1.2  | +     | N/A    |         | >= 256 GiB
  superduper73      | u32    | 9     | 15      | 18   | 0.64 | 1     | N/A    |         | 32 KiB
  superduper64      | u64    | 1     | 3       | 5    | 0.35 | 1     |        |         | 512 KiB
  superduper64_u32  | u32    | +     | +       | +    | 0.70 | +     | N/A    |         | >= 2 TiB

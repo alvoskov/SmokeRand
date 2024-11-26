@@ -33,12 +33,19 @@ static void StdinCollector_fill_buffer(StdinCollector *obj)
     }
 }
 
-static void *StdinCollector_create(const CallerAPI *intf)
+static void *StdinCollector_create(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     StdinCollector *obj = intf->malloc(sizeof(StdinCollector));
+    (void) *gi;
     obj->pos = STDIN_COLLECTOR_BUFFER_SIZE;
     set_bin_stdin();
     return (void *) obj;
+}
+
+static void StdinCollector_free(void *state, const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+    intf->free(state);
 }
 
 ////////////////////////////////////////
@@ -115,10 +122,10 @@ void StdinCollector_print_report()
 
 GeneratorInfo StdinCollector_get_info(StdinCollectorType type)
 {
-    GeneratorInfo gen = {.name = NULL,
-        .create = StdinCollector_create,
-        .get_bits = NULL, .get_sum = NULL,
-        .nbits = 0, .self_test = NULL};
+    GeneratorInfo gen = {.name = NULL, .description = NULL, .nbits = 0,
+        .create = StdinCollector_create, .free = StdinCollector_free,
+        .get_bits = NULL, .get_sum = NULL, .self_test = NULL,
+        .parent = NULL};
     if (type == stdin_collector_32bit) {
         gen.name = "stdin32";
         gen.get_bits = get_bits32;

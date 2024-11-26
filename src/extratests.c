@@ -286,18 +286,18 @@ void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf)
 {
     BlockFrequency freq;
     BlockFrequency_init(&freq);
-    void *state = gen->create(intf);
+    GeneratorState obj = GeneratorState_create(gen, intf);
     size_t block_size = 1 << 30;
     time_t tic = time(NULL);
     while (1) {
         if (gen->nbits == 64) {
             for (size_t i = 0; i < block_size; i++) {
-                uint64_t u = gen->get_bits(state);
+                uint64_t u = obj.gi->get_bits(obj.state);
                 BlockFrequency_count(&freq, u, 8);
             }
         } else {
             for (size_t i = 0; i < block_size; i++) {
-                uint64_t u = gen->get_bits(state);
+                uint64_t u = obj.gi->get_bits(obj.state);
                 BlockFrequency_count(&freq, u, 4);
             }
         }
@@ -309,7 +309,7 @@ void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf)
         }
     }
     BlockFrequency_free(&freq);
-    intf->free(state);
+    GeneratorState_free(&obj, intf);
 }
 
 /////////////////////////////////////
