@@ -4,6 +4,28 @@
 
 #define PRNG_CMODULE_PROLOG SHARED_ENTRYPOINT_CODE
 
+static void *create(const CallerAPI *intf);
+
+/**
+ * @brief Default create function (constructor) for PRNG. Will call
+ * user-defined constructor.
+ */
+static void *default_create(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+    return create(intf);
+}
+
+/**
+ * @brief Default free function (destructor) for PRNG.
+ */
+static void default_free(void *state, const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+    intf->free(state);
+}
+
+
 /**
  * @brief Defines a function that returns a sum of pseudorandom numbers
  * sample. Useful for performance measurements of fast PRNGs.
@@ -22,7 +44,7 @@
 
 /**
  * @brief  Some default boilerplate code for scalar PRNG that returns
- * unsigned 32-bit numbers.
+ * unsigned integers.
  * @details  Requires the next functions to be defined:
  *
  * - `static uint64_t get_bits(void *state);`
@@ -31,44 +53,35 @@
  * It also relies on default prolog (intf static variable, some exports etc.),
  * see PRNG_CMODULE_PROLOG
  */
-#define MAKE_UINT32_PRNG(prng_name, selftest_func) \
+#define MAKE_UINT_PRNG(prng_name, selftest_func, numofbits) \
 EXPORT uint64_t get_bits(void *state) { return get_bits_raw(state); } \
 GET_SUM_FUNC \
 int EXPORT gen_getinfo(GeneratorInfo *gi) { \
     gi->name = prng_name; \
     gi->description = GEN_DESCRIPTION; \
-    gi->create = create; \
+    gi->nbits = numofbits; \
     gi->get_bits = get_bits; \
+    gi->create = default_create; \
+    gi->free = default_free; \
     gi->get_sum = get_sum; \
-    gi->nbits = 32; \
     gi->self_test = selftest_func; \
+    gi->parent = NULL; \
     return 1; \
 }
 
 /**
- * @brief  Some default boilerplate code for scalar PRNG that returns
+ * @brief Some default boilerplate code for scalar PRNG that returns
  * unsigned 32-bit numbers.
- * @details  Requires the next functions to be defined:
- *
- * - `static uint64_t get_bits(void *state);`
- * - `static void *create(CallerAPI *intf);`
- *
- * It also relies on default prolog (intf static variable, some exports etc.),
- * see PRNG_CMODULE_PROLOG
+ */
+#define MAKE_UINT32_PRNG(prng_name, selftest_func) \
+    MAKE_UINT_PRNG(prng_name, selftest_func, 32)
+
+/**
+ * @brief Some default boilerplate code for scalar PRNG that returns
+ * unsigned 64-bit numbers.
  */
 #define MAKE_UINT64_PRNG(prng_name, selftest_func) \
-EXPORT uint64_t get_bits(void *state) { return get_bits_raw(state); } \
-GET_SUM_FUNC \
-int EXPORT gen_getinfo(GeneratorInfo *gi) { \
-    gi->name = prng_name; \
-    gi->description = GEN_DESCRIPTION; \
-    gi->create = create; \
-    gi->get_bits = get_bits; \
-    gi->get_sum = get_sum; \
-    gi->nbits = 64; \
-    gi->self_test = selftest_func; \
-    return 1; \
-}
+    MAKE_UINT_PRNG(prng_name, selftest_func, 64)
 
 
 ////////////////////////////////////////////////////////////

@@ -3,19 +3,19 @@
  * @brief PCG32 PRNG implementation.
  * @details PCG (permuted congruental generators) is a family of pseudorandom
  * number generators invented by M.E. O'Neill. The PCG32 is a version with
- * 32-bit output and with 64-bit state. It passes SmallCrush, Crush
- * and BigCrush batteries.
+ * 32-bit output and with 64-bit state. It passes all batteries from SmokeRand
+ * test suite. It also passes SmallCrush, Crush and BigCrush batteries from
+ * TestU01.
  * 
- * @copyright The original implementation:
- * (c) 2014 M.E. O'Neill (https://pcg-random.org).
+ * @copyright The PCG32 algorithm is suggested by M.E. O'Neill
+ * (https://pcg-random.org).
  *
- * Adaptation for TestU01-threads:
+ * Implementation for SmokeRand:
+ *
  * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * All rights reserved.
- *
- * This software is provided under the Apache 2 License.
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 
@@ -28,10 +28,10 @@ typedef struct {
 static inline uint64_t get_bits_raw(void *state)
 {
     Pcg32State *obj = state;
-    uint32_t xorshifted = (uint32_t) ( ((obj->x >> 18u) ^ obj->x) >> 27u );
-    uint32_t rot = obj->x >> 59u;
-    obj->x = obj->x * 6364136223846793005ULL + 12345;
-    return (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
+    uint32_t xorshifted = (uint32_t) ( ((obj->x >> 18) ^ obj->x) >> 27 );
+    uint32_t rot = obj->x >> 59;
+    obj->x = obj->x * 6364136223846793005ull + 12345;
+    return (xorshifted << (32 - rot)) | (xorshifted >> rot);
 }
 
 static void *create(const CallerAPI *intf)

@@ -46,7 +46,7 @@ typedef enum {
 static SpeedResults measure_speed(GeneratorInfo *gen, const CallerAPI *intf,
     SpeedMeasurementMode mode)
 {
-    void *state = gen->create(intf);
+    GeneratorState obj = GeneratorState_create(gen, intf);
     SpeedResults results;
     double ns_total = 0.0;
     for (size_t niter = 2; ns_total < 0.5e9; niter <<= 1) {
@@ -55,13 +55,13 @@ static SpeedResults measure_speed(GeneratorInfo *gen, const CallerAPI *intf,
         if (mode == speed_uint) {
             uint64_t sum = 0;
             for (size_t i = 0; i < niter; i++) {
-                sum += gen->get_bits(state);
+                sum += obj.gi->get_bits(obj.state);
             }
             (void) sum;
         } else {
             uint64_t sum = 0;
             for (size_t i = 0; i < niter; i++) {
-                sum += gen->get_sum(state, SUM_BLOCK_SIZE);
+                sum += obj.gi->get_sum(obj.state, SUM_BLOCK_SIZE);
             }
             (void) sum;
         }
@@ -71,14 +71,19 @@ static SpeedResults measure_speed(GeneratorInfo *gen, const CallerAPI *intf,
         results.ns_per_call = ns_total / niter;
         results.ticks_per_call = (double) (toc_proc - tic_proc) / niter;
     }
-    intf->free(state);
+    GeneratorState_free(&obj, intf);
     return results;
 }
 
-static void *dummy_create(const CallerAPI *intf)
+static void *dummy_create(const GeneratorInfo *gi, const CallerAPI *intf)
 {
-    (void) intf;
+    (void) intf; (void) gi;
     return NULL;
+}
+
+static void dummy_free(void *state, const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) state; (void) gi; (void) intf;
 }
 
 static uint64_t dummy_get_bits(void *state)
@@ -113,9 +118,10 @@ static uint64_t dummy_get_sum(void *state, size_t len)
 void battery_speed_test(GeneratorInfo *gen, const CallerAPI *intf,
     SpeedMeasurementMode mode)
 {
-    GeneratorInfo dummy_gen = {.name = "dummy", .create = dummy_create,
+    GeneratorInfo dummy_gen = {.name = "dummy", .description = "DUMMY",
+        .create = dummy_create, .free = dummy_free,
         .get_bits = dummy_get_bits, .get_sum = dummy_get_sum,
-        .self_test = NULL};
+        .self_test = NULL, .parent = NULL};
     dummy_gen.nbits = gen->nbits;
     SpeedResults speed_full = measure_speed(gen, intf, mode);
     SpeedResults speed_dummy = measure_speed(&dummy_gen, intf, mode);
@@ -290,12 +296,13 @@ int print_battery_info(const char *battery_name)
 
 void GeneratorInfo_print(const GeneratorInfo *gi, int to_stderr)
 {
-    if (to_stderr) {
-        fprintf(stderr, "Generator name:    %s\n", gi->name);
-        fprintf(stderr, "Output size, bits: %d\n", gi->nbits);
-    } else {
-        printf("Generator name:    %s\n", gi->name);
-        printf("Output size, bits: %d\n", gi->nbits);
+    FILE *fp = (to_stderr) ? stderr : stdout;
+    fprintf(fp, "Generator name:    %s\n", gi->name);
+    fprintf(fp, "Output size, bits: %d\n", gi->nbits);
+    if (gi->parent != NULL) {
+        fprintf(fp, "Parent generator:\n");
+        fprintf(fp, "  Name:              %s\n", gi->parent->name);
+        fprintf(fp, "  Output size, bits: %d\n", gi->parent->nbits);
     }
 }
 
@@ -358,11 +365,11 @@ int main(int argc, char *argv[])
         }
         GeneratorInfo *gi = &mod.gen;
         if (opts.reverse_bits) {
-            reversed_gen = reversed_generator_set(gi);
+            reversed_gen = define_reversed_generator(gi);
             gi = &reversed_gen;
             fprintf(stderr, "All tests will be run with the reverse bits order\n");
         } else if (opts.interleaved32) {
-            interleaved_gen = interleaved_generator_set(gi);
+            interleaved_gen = define_interleaved_generator(gi);
             gi = &interleaved_gen;
             fprintf(stderr, "All tests will be run with the interleaved\n");
         }
