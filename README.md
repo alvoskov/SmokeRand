@@ -457,7 +457,7 @@ at 1 TiB). This test run required about 25 min.
  mwc128x           | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 8 TiB
  mwc1616           | u32    | 8     | 12      | 14   | 0.48 | +     | N/A    |         | 16 MiB
  mwc1616x          | u32    | +     | +       | +    | 0.67 | +     | N/A    | +       | >= 8 TiB
- mwc3232x          | u64    | +     | +       | +    | 0.23 | +     | +      |         | >= 4 TiB
+ mwc3232x          | u64    | +     | +       | +    | 0.23 | +     | +      |         | >= 16 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | +     | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +     | +       | +    | 0.28 | +     | -      | +       | >= 2 TiB
  pcg64_xsl_rr      | u64    | +     | +       | +    | 0.43 | +     | +      |         |
@@ -480,6 +480,7 @@ at 1 TiB). This test run required about 25 min.
  splitmix32        | u32    | 1     | 2       | 3    | 0.25 | +     | N/A    | +       | 1 GiB
  sqxor             | u64    | +     | +       | +    | 0.13 | +     | +      |         | >= 2 TiB
  sqxor32           | u32    | 1     | 2       | 3    | 0.20 | +     | N/A    | Small   | 16 GiB
+ stormdrop         | u32    | +     | +       | 1    |      | +     | N/A    |         |
  superduper73      | u32    | 9     | 15      | 18   | 0.64 | 1     | N/A    |         | 32 KiB
  superduper64      | u64    | 1     | 3       | 5    | 0.35 | 1     |        |         | 512 KiB
  superduper64_u32  | u32    | +     | +       | +    | 0.70 | +     | N/A    |         | >= 2 TiB
