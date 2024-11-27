@@ -108,6 +108,7 @@ static TestResults bspace4_8d_dec(GeneratorState *obj)
     return bspace4_8d_decimated_test(obj, 262144);
 }
 
+
 ///////////////////////////////
 ///// CollisionOver tests /////
 ///////////////////////////////

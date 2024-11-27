@@ -1,11 +1,18 @@
 /**
  * @file lcg96_shared.c
- * @brief Just 96-bit LCG with \f$ m = 2^{128}\f$ and easy to memorize
- * multiplier 18000 69069 69069 69069 (suggested by A.L. Voskov)
- * @details It passes SmallCrush, Crush and BigCrush. However, its higher
- * 64 bits fail PractRand 0.94 at 128GiB sample. Usage of slightly better
- * (but hard to memorize) multiplier 0xfc0072fa0b15f4fd from 
- * https://doi.org/10.1002/spe.3030 doesn't improve PractRand 0.94 results.
+ * @brief Just 96-bit LCG with \f$ m = 2^{96}\f$ using C extensions for
+ * 128-bit arithmetics.
+ * @details The multipliers can be taken from:
+ *
+ * 1. P. L'Ecuyer. Tables of linear congruential generators of different
+ *    sizes and good lattice structure // Mathematics of Computation. 1999.
+ *    V. 68. N. 225. P. 249-260
+ *    http://dx.doi.org/10.1090/S0025-5718-99-00996-5
+ * 2. https://www.pcg-random.org/posts/does-it-beat-the-minimal-standard.html
+ *
+ * The multiplier from [2] is used. However, both variants fail 32-bit
+ * 8-dimensional decimated birthday spacings test `bspace4_8d_dec`. They also
+ * fail TMFn test from PractRand 0.94.
  *
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com

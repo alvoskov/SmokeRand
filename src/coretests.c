@@ -293,6 +293,21 @@ TestResults bspace64_1d_ns_test(GeneratorState *obj, unsigned int nsamples)
 }
 
 
+static void bspace4_8d_decimated_pvalue(TestResults *ans, const char *name,
+    uint32_t *u, size_t len, double lambda, const CallerAPI *intf)
+{
+    double x = (double) bspace_get_ndups32(u, len);
+    double p = poisson_pvalue(x, lambda);
+    double alpha = poisson_cdf(x, lambda);
+    intf->printf("  %-30s x = %6.0f; p = %g\n", name, x, p);
+    if (p < ans->p && (p < 1e-10 || ans->p > 1.0)) {
+        ans->p = p;
+        ans->x = x;
+        ans->alpha = alpha;
+    }
+}
+
+
 /**
  * @brief A specialized version of birthday spacings test designed for
  * detection of truncated 128-bit and 96-bit LCGs with modulo \f$ 2^k \f$.
@@ -317,9 +332,10 @@ TestResults bspace64_1d_ns_test(GeneratorState *obj, unsigned int nsamples)
  *
  * Sensitivity of 32-bit version for different steps:
  *
- * - 64 is enough to detect 64-bit LCG with truncation of lower 32 bits
- * - 4096 is enough to detect 128-bit LCG with truncation of lower 64 bits
- * - 262144 is enough to detect the same PRNG with truncation of lower 96 bits.
+ * - \f$2^{6}\f$ (64): detects 64-bit LCG with truncation of lower 32 bits.
+ * - \f$2^{12}\f$ (4096): detects 128-bit LCG with truncation of lower 64 bits.
+ * - \f$2^{18}\f$ (262144) detects 128-bit LCG with truncation of lower 96 bits.
+ * - \f$2^{24}\f$: upper 8 bits from 128-bit LCG is detected as not random.
  *
  * But 64-bit version (8_8d) requires 6658042 points instead of 4096, i.e.
  * 1626 times more. And transition to 32-bit version gives about 20x
@@ -349,49 +365,45 @@ TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step)
         (unsigned long long) len, lambda);
     // Run the test
     uint32_t *u = calloc(len, sizeof(uint32_t));
-    uint32_t *u_high = calloc(len, sizeof(uint32_t));
-    if (u == NULL || u_high == NULL) {
+    uint32_t *u_high_rev = calloc(len, sizeof(uint32_t));
+    uint32_t *u_high_norev = calloc(len, sizeof(uint32_t));
+    if (u == NULL || u_high_rev == NULL || u_high_norev == NULL) {
         fprintf(stderr, "***** bspace4_8d_decimated: not enough memory *****\n");
-        free(u); free(u_high);
+        free(u); free(u_high_rev); free(u_high_norev);
         exit(1);
     }
 
     for (size_t i = 0; i < len; i++) {
         for (int j = 0; j < 8; j++) {
             uint64_t x = obj->gi->get_bits(obj->state);
+            uint32_t x_hi4 = x >> (obj->gi->nbits - 4);
             // Take lower 4 bits
             u[i] <<= 4;
             u[i] |=  x & 0xF;
-            // Take higher 4 bits
-            u_high[i] <<= 4;
-            u_high[i] |= reverse_bits4(x >> (obj->gi->nbits - 4));
+            // Take higher 4 bits with reversal
+            u_high_rev[i] <<= 4;
+            u_high_rev[i] |= reverse_bits4(x_hi4);
+            // Take higher 4 bits without reversal
+            u_high_norev[i] <<= 4;
+            u_high_norev[i] |= x_hi4;
             // Decimation
             for (unsigned int k = 0; k < step - 1; k++) {
                 (void) obj->gi->get_bits(obj->state);
             }
         }
     }
-    // Compute number of duplicates and p-values for lower bits
-    ans.x = (double) bspace_get_ndups32(u, len);
-    ans.p = poisson_pvalue(ans.x, lambda);
-    ans.alpha = poisson_cdf(ans.x, lambda);
-    obj->intf->printf("  Lower bits: x = %.0f; p = %g\n", ans.x, ans.p);
-    // Compute the same values for higher bits
-    double x_high = (double) bspace_get_ndups32(u_high, len);
-    double p_high = poisson_pvalue(x_high, lambda);
-    double alpha_high = poisson_cdf(x_high, lambda);
-    obj->intf->printf("  Higher bits: x = %.0f; p = %g\n", x_high, p_high);
-    // Select the worst p-value
-    if (p_high < 1e-10 && p_high < ans.p) {
-        obj->intf->printf("  Problems with higher bits are detected\n");
-        ans.x = x_high;
-        ans.p = p_high;
-        ans.alpha = alpha_high;
-    }
-    obj->intf->printf("  x = %.0f; p = %g\n", ans.x, ans.p);
+    ans.p = 1000.0;
+    bspace4_8d_decimated_pvalue(&ans, "Lower bits:", u, len, lambda, obj->intf);
+    bspace4_8d_decimated_pvalue(&ans, "Higher bits (reversed):",
+        u_high_rev, len, lambda, obj->intf);
+    bspace4_8d_decimated_pvalue(&ans, "Higher bits (no reverse):",
+        u_high_norev, len, lambda, obj->intf);
+    obj->intf->printf("  %-30s x = %6.0f; p = %g\n",
+        "Final result:", ans.x, ans.p);
     obj->intf->printf("\n");
     free(u);
-    free(u_high);
+    free(u_high_rev);
+    free(u_high_norev);
     return ans;
 }
 
