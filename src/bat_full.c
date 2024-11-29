@@ -241,7 +241,7 @@ static TestResults hamming_dc6_all_test(GeneratorState *obj)
 
 static TestResults hamming_dc6_values_test(GeneratorState *obj)
 {
-    HammingDc6Options opts = {.mode = hamming_dc6_values, .nbytes = 1ull << 33};
+    HammingDc6Options opts = {.mode = hamming_dc6_values, .nbytes = 1ull << 37}; //33
     return hamming_dc6_test(obj, &opts);
 }
 
