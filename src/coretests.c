@@ -720,6 +720,45 @@ TestResults gap_nd_test(GeneratorState *obj, const GapNDOptions *opts)
     return ans;
 }
 
+
+TestResults mod3_test(GeneratorState *obj)
+{
+    TestResults ans = TestResults_create("mod3");
+    const size_t ntuples = 19683; // 3^9
+    unsigned long long *Oi = calloc(ntuples, sizeof(unsigned long long));
+    unsigned long long n = 1 << 24;
+    uint32_t tuple = 0;
+    for (int i = 0; i < 9; i++) {
+        int d = obj->gi->get_bits(obj->state) % 3;
+        tuple = (tuple * 3 + d) % ntuples;
+    }
+    for (unsigned long long i = 0; i < n; i++) {
+        Oi[tuple]++;
+        int d = obj->gi->get_bits(obj->state) % 3;
+        tuple = (tuple * 3 + d) % ntuples;
+    }
+/*
+    for (size_t i = 0; i < ntuples; i++) {
+        printf("%lld ", Oi[i]);
+    }
+*/
+    
+    double Ei = (double) n / (double) ntuples;
+    ans.x = 0.0;
+    for (size_t i = 0; i < ntuples; i++) {
+        ans.x += (Oi[i] - Ei) * (Oi[i] - Ei) / Ei;
+        //printf("%g %g | ", (double) Oi[i], Ei);
+    }
+    ans.p = chi2_pvalue(ans.x, ntuples - 1);
+    ans.alpha = chi2_cdf(ans.x, ntuples - 1);
+    obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
+    obj->intf->printf("\n");
+//    printf("\n");
+    
+    
+    return ans;
+}
+
 //////////////////////////////////////////
 ///// Frequency tests implementation /////
 //////////////////////////////////////////
