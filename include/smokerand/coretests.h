@@ -75,6 +75,7 @@ TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step);
 TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts);
 TestResults gap_test(GeneratorState *obj, const GapOptions *opts);
 TestResults gap_nd_test(GeneratorState *obj, const GapNDOptions *opts);
+TestResults mod3_test(GeneratorState *obj);
 TestResults monobit_freq_test(GeneratorState *obj);
 TestResults byte_freq_test(GeneratorState *obj);
 TestResults word16_freq_test(GeneratorState *obj);
