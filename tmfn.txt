@@ -1,0 +1,6 @@
+64:   fails at 64 GiB
+64+1: fails at 64 GiB;64GiB;64GiB
+64+4: fails at 128 GiB;128GiB;128GiB
+64+6: fails at 64 GiB;256GiB;256GiB;256GiB
+64+8: fails at 512 GiB;512GiB
+64+8: fails at 512 GiB;512GiB

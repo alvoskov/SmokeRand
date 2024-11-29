@@ -474,7 +474,7 @@ test run required about 25 min.
  mwc3232x          | u64    | +     | +       | +    | 0.23 | +     | +      |         | >= 32 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | +     | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +     | +       | +    | 0.28 | +     | -      | +       | >= 2 TiB
- pcg64_xsl_rr      | u64    | +     | +       | +    | 0.43 | +     | +      |         | >= 16 TiB
+ pcg64_xsl_rr      | u64    | +     | +       | +    | 0.43 | +     | +      |         | >= 32 TiB
  philox            | u64    | +     | +       | +    | 0.85 | +     | +      | +       | >= 2 TiB
  philox32          | u32    | +     | +       | +    | 2.7  | +     | N/A    | +       | >= 2 TiB
  randu             | u32    | 19    | 34      | 37   | 0.41 | 4     | N/A    | -       | 1 KiB
