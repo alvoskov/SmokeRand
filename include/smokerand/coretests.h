@@ -34,6 +34,11 @@ typedef struct {
     unsigned long ngaps; ///< Number of gaps
 } GapOptions;
 
+
+typedef struct {
+    unsigned long ngaps;
+} GapNDOptions;
+
 /**
  * @brief Sets which bits of random number will be analysed.
  */

@@ -616,6 +616,102 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     return ans;
 }
 
+
+/**
+ * @brief N-dimensional version of Knuth's gap test; the algorithm is taken
+ * from gjrand (`slicerda')
+ * @details Detects 64-bit Coveyou PRNG and variants of SplitMix with
+ * bad gammas.
+ */
+TestResults gap_nd_test(GeneratorState *obj, const GapNDOptions *opts)
+{
+    const double Ei_min = 10.0;
+    double p = 1.0 / 256.0;
+    size_t ngaps = opts->ngaps;
+    size_t nbins = log(Ei_min / (ngaps * p)) / log(1 - p);
+    int nstreams = obj->gi->nbits / 2;
+
+    size_t **O_ary = calloc(nstreams + 1, sizeof(size_t *));
+    size_t *gap_len = calloc(nstreams + 1, sizeof(size_t));
+    if (O_ary == NULL) {
+        fprintf(stderr, "***** gap_nd_test: not enough memory *****\n");
+        exit(1);
+    }
+    for (int i = 0; i < nstreams; i++) {
+        O_ary[i] = calloc(nbins + 1, sizeof(size_t));
+    }
+        
+
+    size_t *Oi = calloc(nbins + 1, sizeof(size_t));
+    unsigned long long nvalues = 0;
+    TestResults ans = TestResults_create("Gap");
+    obj->intf->printf("N-dimensional gap test\n");
+    obj->intf->printf("  alpha = 0.0; beta = %g\n", p);
+    obj->intf->printf("  ngaps = %lu; nbins = %lu\n",
+        (unsigned long) ngaps, (unsigned long) nbins);
+/*
+    if (!gap_test_guard(obj, opts)) {
+        obj->intf->printf("  Generator output doesn't hit the gap! p <= 1e-15\n");
+        ans.p = 1.0e-15;
+        ans.alpha = 1.0 - ans.p;
+        ans.x = NAN;
+        return ans;
+    }
+*/
+    for (size_t i = 0; i < ngaps; i++) {
+        uint64_t u[4];
+        for (int j = 0; j < 4; i++) {
+            u[j] = obj->gi->get_bits(obj->state);
+        }
+        nvalues += 4;
+        for (int j = 0; j < nstreams; j++) {
+            uint8_t byte = (u[0] & 0x3) | ( (u[1] & 0x3) << 2) |
+                ( (u[2] & 0x3) << 4) | ( (u[3] & 0x3) << 6);
+            u[0] >>= 2; u[1] >>= 2; u[2] >>= 2; u[3] >>= 2;
+            if (byte != 0) {
+                gap_len[j]++;                
+            } else {
+                O_ary[j][(gap_len[j] < nbins) ? gap_len[j] : nbins]++;
+                gap_len[j] = 0;
+            }
+        }
+    }
+    for (int i = 0; i < nstreams; i++) {
+        double chi2emp = 0.0, ngaps = 0.0;
+        for (size_t j = 0; j < nbins; j++) {
+            ngaps += O_ary[i][j];
+        }
+        for (size_t j = 0; j < nbins; j++) {
+            double Ei = p * pow(1.0 - p, j) * ngaps;
+            double d = Ei - Oi[i];
+            chi2emp += d * d / Ei;
+        }
+        obj->intf->printf("%d %g\n", i, chi2emp);
+    }
+/*
+    ans.x = 0.0; // chi2emp
+    for (size_t i = 0; i < nbins; i++) {
+        double Ei = p * pow(1.0 - p, i) * ngaps;
+        double d = Ei - Oi[i];
+        ans.x += d * d / Ei;
+    }
+*/
+    for (int i = 0; i < nstreams; i++) {
+        free(O_ary[i]);
+    }
+    free(O_ary);
+    free(gap_len);
+/*
+    ans.p = chi2_pvalue(ans.x, nbins - 1);
+    ans.alpha = chi2_cdf(ans.x, nbins - 1);
+    obj->intf->printf("  Values processed: %llu (2^%.1f)\n",
+        nvalues, sr_log2(nvalues));
+    obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
+    obj->intf->printf("\n");
+*/
+    return ans;
+}
+
 //////////////////////////////////////////
 ///// Frequency tests implementation /////
 //////////////////////////////////////////
