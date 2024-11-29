@@ -466,11 +466,11 @@ test run required about 25 min.
  mulberry32        | u32    | 1     | 2       | 3    | 0.51 | +     | N/A    |         | 512 MiB
  mwc32x            | u32    | 1     | 1       | 5    | 1.5  | +     | N/A    | Small   | 128 MiB
  mwc64             | u32    | 1     | 2       | 4    | 0.37 | +     | N/A    | Small   | 1 TiB
- mwc64x            | u32    | +     | +       | +    | 0.53 | +     | N/A    | +       | >= 8 TiB
+ mwc64x            | u32    | +     | +       | +    | 0.53 | +     | N/A    | +       | >= 16 TiB
  mwc128            | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 16 TiB
  mwc128x           | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 8 TiB
  mwc1616           | u32    | 8     | 12      | 14   | 0.48 | +     | N/A    |         | 16 MiB
- mwc1616x          | u32    | +     | +       | +    | 0.67 | +     | N/A    | +       | >= 8 TiB
+ mwc1616x          | u32    | +     | +       | +    | 0.67 | +     | N/A    | +       | >= 32 TiB(?)
  mwc3232x          | u64    | +     | +       | +    | 0.23 | +     | +      |         | >= 32 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | +     | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +     | +       | +    | 0.28 | +     | -      | +       | >= 2 TiB
@@ -483,6 +483,8 @@ test run required about 25 min.
  rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
  rrmxmx            | u64    | +     | +       | +    | 0.14 | +     | -      |         | >= 2 TiB
+ sapparot          | u32    | 1     | 3       | 4    |      | +     | N/A    |         | 8 MiB
+ sapparot2         | u32    | +     | +       |      |      | +     | N/A    |         | >= 64 GiB
  sezgin63          | u32    | +     | 1       | 3    | 3.0  | +     | N/A    |         | >= 16 TiB
  sfc8              | u32    | 3     | 7       | 13   | 1.9  | +     | N/A    |         | 128 MiB
  sfc16             | u32    | +     | +       | +    | 0.93 | +     | N/A    |         |
@@ -519,6 +521,26 @@ test run required about 25 min.
 
 About `lcg64prime`: it passes BigCrush if upper 32 bits are returned, but fails it in interleaved
 mode (fails test N15 `BirthdaySpacings, t = 4`).
+
+About `mwc1616x`: it passes until 32 TiB but it will probably fail at larger samples. Extra
+testing is required!
+
+    rng=RNG_stdin32, seed=unknown
+    length= 8 terabytes (2^43 bytes), time= 28773 seconds
+      no anomalies in 331 test result(s)
+
+    rng=RNG_stdin32, seed=unknown
+    length= 16 terabytes (2^44 bytes), time= 56248 seconds
+      Test Name                         Raw       Processed     Evaluation
+      [Low1/32]BCFN(2+6,13-0,T)         R=  -9.1  p =1-7.8e-5   unusual
+      ...and 338 test result(s) without anomalies
+
+    rng=RNG_stdin32, seed=unknown
+    length= 32 terabytes (2^45 bytes), time= 120904 seconds
+      Test Name                         Raw       Processed     Evaluation
+      BCFN(2+0,13-0,T)                  R= +10.8  p =  2.6e-5   mildly suspicious
+      FPF-14+6/16:all                   R=  +4.8  p =  5.4e-4   unusual
+      ...and 345 test result(s) without anomalies
 
 
 Sensitivity of dieharder is lower than TestU01 and PractRand:
