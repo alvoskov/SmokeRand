@@ -633,6 +633,7 @@ TestResults gap_nd_test(GeneratorState *obj, const GapNDOptions *opts)
 
     size_t **O_ary = calloc(nstreams + 1, sizeof(size_t *));
     size_t *gap_len = calloc(nstreams + 1, sizeof(size_t));
+    size_t *ngaps_ary = calloc(nstreams + 1, sizeof(size_t));
     if (O_ary == NULL) {
         fprintf(stderr, "***** gap_nd_test: not enough memory *****\n");
         exit(1);
@@ -641,8 +642,6 @@ TestResults gap_nd_test(GeneratorState *obj, const GapNDOptions *opts)
         O_ary[i] = calloc(nbins + 1, sizeof(size_t));
     }
         
-
-    size_t *Oi = calloc(nbins + 1, sizeof(size_t));
     unsigned long long nvalues = 0;
     TestResults ans = TestResults_create("Gap");
     obj->intf->printf("N-dimensional gap test\n");
@@ -658,9 +657,9 @@ TestResults gap_nd_test(GeneratorState *obj, const GapNDOptions *opts)
         return ans;
     }
 */
-    for (size_t i = 0; i < ngaps; i++) {
+    for (size_t ngaps_max = 0; ngaps_max < ngaps; ) {
         uint64_t u[4];
-        for (int j = 0; j < 4; i++) {
+        for (int j = 0; j < 4; j++) {
             u[j] = obj->gi->get_bits(obj->state);
         }
         nvalues += 4;
@@ -668,11 +667,18 @@ TestResults gap_nd_test(GeneratorState *obj, const GapNDOptions *opts)
             uint8_t byte = (u[0] & 0x3) | ( (u[1] & 0x3) << 2) |
                 ( (u[2] & 0x3) << 4) | ( (u[3] & 0x3) << 6);
             u[0] >>= 2; u[1] >>= 2; u[2] >>= 2; u[3] >>= 2;
-            if (byte != 0) {
+            if (byte != 0x00) {
                 gap_len[j]++;                
             } else {
                 O_ary[j][(gap_len[j] < nbins) ? gap_len[j] : nbins]++;
                 gap_len[j] = 0;
+                ngaps_ary[j]++;
+                if (ngaps_max < ngaps_ary[j]) {
+                    ngaps_max = ngaps_ary[j];
+                    if (ngaps_max % 10000 == 0) {
+                        printf("%d\n", (int) ngaps_max);
+                    }
+                }
             }
         }
     }
@@ -683,10 +689,10 @@ TestResults gap_nd_test(GeneratorState *obj, const GapNDOptions *opts)
         }
         for (size_t j = 0; j < nbins; j++) {
             double Ei = p * pow(1.0 - p, j) * ngaps;
-            double d = Ei - Oi[i];
+            double d = Ei - O_ary[i][j];
             chi2emp += d * d / Ei;
         }
-        obj->intf->printf("%d %g\n", i, chi2emp);
+        obj->intf->printf("%d %g | %g %d\n", i, chi2emp, ngaps, (int) ngaps_ary[i]);
     }
 /*
     ans.x = 0.0; // chi2emp
@@ -701,11 +707,13 @@ TestResults gap_nd_test(GeneratorState *obj, const GapNDOptions *opts)
     }
     free(O_ary);
     free(gap_len);
+    free(ngaps_ary);
+    obj->intf->printf("  Values processed: %llu (2^%.1f)\n",
+        nvalues, sr_log2(nvalues));
+
 /*
     ans.p = chi2_pvalue(ans.x, nbins - 1);
     ans.alpha = chi2_cdf(ans.x, nbins - 1);
-    obj->intf->printf("  Values processed: %llu (2^%.1f)\n",
-        nvalues, sr_log2(nvalues));
     obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
 */
