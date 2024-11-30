@@ -102,6 +102,22 @@ static LFibDyn_State parse_parameters(const CallerAPI *intf)
         obj.r = 4423; obj.s = 2098; obj.is_additive = 1;
     } else if (!intf->strcmp("4423-", param)) {
         obj.r = 4423; obj.s = 2098; obj.is_additive = 0;
+    } else if (!intf->strcmp("9689+", param)) {
+        obj.r = 9689; obj.s = 5502; obj.is_additive = 1;
+    } else if (!intf->strcmp("9689-", param)) {
+        obj.r = 9689; obj.s = 5502; obj.is_additive = 0;
+    } else if (!intf->strcmp("19937+", param)) {
+        obj.r = 19937; obj.s = 9842; obj.is_additive = 1;
+    } else if (!intf->strcmp("19937-", param)) {
+        obj.r = 19937; obj.s = 9842; obj.is_additive = 0;
+    } else if (!intf->strcmp("23209+", param)) {
+        obj.r = 23209; obj.s = 13470; obj.is_additive = 1;
+    } else if (!intf->strcmp("23209-", param)) {
+        obj.r = 23209; obj.s = 13470; obj.is_additive = 0;
+    } else if (!intf->strcmp("44497+", param)) {
+        obj.r = 44497; obj.s = 21034; obj.is_additive = 1;
+    } else if (!intf->strcmp("44497-", param)) {
+        obj.r = 44497; obj.s = 21034; obj.is_additive = 0;
     } else {
         obj.r = 0; obj.s = 0; obj.is_additive = 0;
     }
