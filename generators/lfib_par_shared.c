@@ -35,6 +35,11 @@
  * 4. Brent R.P. Uniform Random Number Generators for Vector and Parallel
  *    Computers. Report Report TR-CS-92-02. March 1992.
  *    https://maths-people.anu.edu.au/~brent/pd/rpb132tr.pdf   
+ * 5. Brent, R.P., Zimmermann, P. (2003). Random Number Generators with Period
+ *    Divisible by a Mersenne Prime. In: Kumar, V., Gavrilova, M.L., Tan, C.J.K.,
+ *    L'Ecuyer, P. (eds) Computational Science and Its Applications - ICCSA 2003.
+ *    ICCSA 2003. Lecture Notes in Computer Science, vol 2667. Springer, Berlin, Heidelberg.
+ *    https://doi.org/10.1007/3-540-44839-X_1
  *
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
@@ -118,6 +123,14 @@ static LFibDyn_State parse_parameters(const CallerAPI *intf)
         obj.r = 44497; obj.s = 21034; obj.is_additive = 1;
     } else if (!intf->strcmp("44497-", param)) {
         obj.r = 44497; obj.s = 21034; obj.is_additive = 0;
+    } else if (!intf->strcmp("110503+", param)) {
+        obj.r = 110503; obj.s = 53719; obj.is_additive = 1;
+    } else if (!intf->strcmp("110503-", param)) {
+        obj.r = 110503; obj.s = 53719; obj.is_additive = 0;
+    } else if (!intf->strcmp("756839+", param)) {
+        obj.r = 756839; obj.s = 279695; obj.is_additive = 1;
+    } else if (!intf->strcmp("756839-", param)) {
+        obj.r = 756839; obj.s = 279695; obj.is_additive = 0;
     } else {
         obj.r = 0; obj.s = 0; obj.is_additive = 0;
     }

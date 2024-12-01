@@ -616,11 +616,16 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     return ans;
 }
 
+///////////////////////////////////////////////
+///// Gap16 ('rda16') test implementation /////
+///////////////////////////////////////////////
+
 
 
 typedef struct {
     unsigned long long ngaps_total;
     unsigned long long ngaps_with0;
+    unsigned long long ngaps_withrb;
     double p_total;
     double p_with0;
 } GapFrequency;
@@ -664,7 +669,8 @@ static double GapFrequency_calc_z_with0(const GapFrequency *gf)
     return z_w0;
 }
 
-static double gap16_sumsq_as_norm(const GapFrequency *gapfreq, size_t nbins, unsigned long long ngaps)
+static double gap16_sumsq_as_norm(const GapFrequency *gapfreq,
+    size_t nbins, unsigned long long ngaps)
 {
     double chi2emp = 0.0;
     for (size_t i = 0; i < nbins; i++) {
@@ -675,15 +681,15 @@ static double gap16_sumsq_as_norm(const GapFrequency *gapfreq, size_t nbins, uns
     return chi2_to_stdnorm_approx(chi2emp, nbins - 1);
 }
 
-void gap16_count0_mainloop(GapFrequency *gapfreq, size_t nbins,
-    GeneratorState *obj, long long ngaps)
+void gap16_count0_mainloop(GapFrequency *gapfreq, GapFrequency *gapfreq_rb,
+    size_t nbins, GeneratorState *obj, long long ngaps)
 {
     int w16_per_num = obj->gi->nbits / 16;
     long long mod_mask = w16_per_num - 1, last0_pos = -1;
     uint64_t u = 0;
-    long long *gapbegin = calloc(65536, sizeof(long long));
+    long long *lastw16_pos = calloc(65536, sizeof(long long));
     for (size_t i = 0; i < 65536; i++) {
-        gapbegin[i] = -1;
+        lastw16_pos[i] = -1;
     }
     for (long long pos = 0; pos < ngaps; pos++) {
         // Generate 16-bit word
@@ -696,21 +702,92 @@ void gap16_count0_mainloop(GapFrequency *gapfreq, size_t nbins,
         if (w16 == 0) {
             last0_pos = pos;
         }
-        // Update gaps information
-        if (gapbegin[w16] != -1) {
+        // Update gaps information (symmetric boundaries)
+        if (lastw16_pos[w16] != -1) {
             // a) Get beginning and length
-            long long gap_len = pos - gapbegin[w16] - 1;
+            long long gap_len = pos - lastw16_pos[w16] - 1;
             if (gap_len >= (long long) nbins) gap_len = nbins;    
             // b) Update frequency table
-            if (last0_pos > gapbegin[w16]) {
+            if (last0_pos > lastw16_pos[w16]) {
                 gapfreq[gap_len].ngaps_with0++;
             }
             gapfreq[gap_len].ngaps_total++;
         }
+        // Update gaps information (asymmetric boundaries)
+        if (last0_pos != -1) {
+            // a) Get beginning and length
+            long long gap_len = pos - last0_pos - 1;
+            if (gap_len >= (long long) nbins) gap_len = nbins;
+            // b0 Update frequency table
+            if (lastw16_pos[w16] > last0_pos) {
+                gapfreq_rb[gap_len].ngaps_with0++;
+            }
+            gapfreq_rb[gap_len].ngaps_total++;
+        }
         // c) Update beginning
-        gapbegin[w16] = pos;
+        lastw16_pos[w16] = pos;
     }
-    free(gapbegin);
+    free(lastw16_pos);
+}
+
+
+typedef struct {
+    double z_max_tot;
+    double z_max_w0;
+    size_t ind_tot;
+    size_t ind_w0;
+} GapFrequencyStats;
+
+
+static GapFrequencyStats gap16_count0_calc_zfreq(GapFrequency *gapfreq, size_t nbins, long long ngaps)
+{
+    GapFrequencyStats ans = {.z_max_w0 = 0.0, .z_max_tot = 0.0,
+        .ind_tot = 0, .ind_w0 = 0};
+    // Computation of p-values for all frequencties
+    for (size_t i = 1; i < nbins; i++) {
+        const GapFrequency *gf = &gapfreq[i];
+        // Frequency of gap "with zeros" inside
+        // Convert binomial distribution to normal through p and cdf/inv.cdf
+        double z_w0 = GapFrequency_calc_z_with0(gf);
+        if (fabs(z_w0) > fabs(ans.z_max_w0)) {
+            ans.z_max_w0 = z_w0;
+            ans.ind_w0 = i;
+        }
+        // Frequency of gaps: convert binomial distribution to normal
+        // through central limiting theorem
+        double mu = ngaps * gf->p_total;
+        double s = sqrt(ngaps * gf->p_total * (1.0 - gf->p_total));
+        double z_tot = (gf->ngaps_total - mu) / s;
+        if (fabs(z_tot) > fabs(ans.z_max_tot)) {
+            ans.z_max_tot = z_tot;
+            ans.ind_tot = i;
+        }
+    }
+    return ans;
+}
+
+/**
+ * @brief Bonferroni correction for normally distributed variable
+ * in gap16 test.
+ */
+static double gap16_z_bonferroni(double z, double p_gap)
+{
+    double z_corr;
+    if (z < 0) {
+        double p = stdnorm_cdf(z) / p_gap;
+        z_corr = (p < 0.5) ? stdnorm_inv(p) : 0.0;
+    } else {
+        double p = stdnorm_cdf(-z) / p_gap;
+        z_corr = (p < 0.5) ? -stdnorm_inv(p) : 0.0;
+    }
+    // Filter out possible infinities
+    if (z_corr < -40.0) {
+        return 40.0;
+    } else if (z_corr > 40.0) {
+        return 40.0;
+    } else {
+        return z_corr;
+    }
 }
 
 /**
@@ -727,9 +804,19 @@ void gap16_count0_mainloop(GapFrequency *gapfreq, size_t nbins,
  * table. It can be considered as simultaneously running 65536 gap tests but
  * with shared frequency table for keeping their results.
  *
- * The test has another powerful feature: it calculates number of gaps with zeros
- * inside for each gap length. It allows to detect additive and subtractive lagged
- * Fibonacci generators with huge lags.
+ * It also contains two powerful subtests:
+ *
+ * I. Zeros inside gaps. Calculates number of gaps with zeros  inside for each
+ * gap length. It allows to detect additive and subtractive lagged Fibonacci
+ * generators with huge lags.
+ *
+ * II. Gaps with asymmetric boundaries and right boundary duplicates inside.
+ * These gaps has the next layout:
+ *
+ *     [0; x_1; x_2; ...; x_n; value] 
+ *
+ * Detects additive/subtractive lagged Fibonacci generators and SWB (subtract
+ * with borrow) generators.
  */
 TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
 {
@@ -737,68 +824,55 @@ TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
     if (ngaps < 1000000) {
         return ans;
     }
-    const double Ei_min = 1000.0;
-    double p = 1.0 / 65536.0;
+    const double Ei_min = 1000.0, p = 1.0 / 65536.0;
     size_t nbins = log(Ei_min / (ngaps * p)) / log(1 - p);
     // Initialize frequency and position tables
     GapFrequency *gapfreq = GapFrequency_create_array(nbins, p);
+    GapFrequency *gapfreq_rb = GapFrequency_create_array(nbins, p);
     // Print test info
     obj->intf->printf("gap16_count0 test\n");
     obj->intf->printf("  p = %g; ngaps = %llu; nbins = %lu\n",
         p, ngaps, (unsigned long) nbins);
     // Test main run
-    gap16_count0_mainloop(gapfreq, nbins, obj, ngaps);
+    gap16_count0_mainloop(gapfreq, gapfreq_rb, nbins, obj, ngaps);
     // Computation of p-value for sum of squares
     double z_sumsq_total = gap16_sumsq_as_norm(gapfreq, nbins, ngaps);
     obj->intf->printf("  z from chi2emp: %g; p = %g\n",
         z_sumsq_total, stdnorm_pvalue(z_sumsq_total));
     // Computation of p-values for all frequencties
-    double z_max_w0 = 0.0, z_max_tot = 0.0;
-    size_t ind_w0 = 0, ind_tot = 0;
-    for (size_t i = 1; i < nbins; i++) {
-        const GapFrequency *gf = &gapfreq[i];
-        // Frequency of gap "with zeros" inside
-        // Convert binomial distribution to normal through p and cdf/inv.cdf
-        double z_w0 = GapFrequency_calc_z_with0(gf);
-        if (fabs(z_w0) > fabs(z_max_w0)) {
-            z_max_w0 = z_w0;
-            ind_w0 = i;
-        }
-        // Frequency of gaps: convert binomial distribution to normal
-        // through central limiting theorem
-        double mu = ngaps * gf->p_total;
-        double s = sqrt(ngaps * gf->p_total * (1.0 - gf->p_total));
-        double z_tot = (gf->ngaps_total - mu) / s;
-        if (fabs(z_tot) > fabs(z_max_tot)) {
-            z_max_tot = z_tot;
-            ind_tot = i;
-        }
-    }
-    obj->intf->printf("  Frequency analysis for gaps with '0' inside:\n");
+    GapFrequencyStats gf = gap16_count0_calc_zfreq(gapfreq, nbins, ngaps);
+    GapFrequencyStats gf_rb = gap16_count0_calc_zfreq(gapfreq_rb, nbins, ngaps);
+    obj->intf->printf("  Frequency analysis for [value ... value] gaps with '0' inside:\n");
     obj->intf->printf("    z_max = %g; p = %g; alpha = %g; index = %d\n",
-        z_max_w0, stdnorm_pvalue(z_max_w0), stdnorm_cdf(z_max_w0), (int) ind_w0);
-    obj->intf->printf("  Frequency analysis for all gaps:\n");
+        gf.z_max_w0, stdnorm_pvalue(gf.z_max_w0), stdnorm_cdf(gf.z_max_w0), (int) gf.ind_w0);
+    obj->intf->printf("  Frequency analysis for all [value ... value] gaps:\n");
     obj->intf->printf("    z_max = %g; p = %g; alpha = %g; index = %d\n",
-        z_max_tot, stdnorm_pvalue(z_max_tot), stdnorm_cdf(z_max_tot), (int) ind_tot);
-    obj->intf->printf("  WARNING: remember about Bonferroni correction\n");
+        gf.z_max_tot, stdnorm_pvalue(gf.z_max_tot), stdnorm_cdf(gf.z_max_tot), (int) gf.ind_tot);
+    obj->intf->printf("  Frequency analysis for [0 ... value] gaps with 'value' inside:\n");
+    obj->intf->printf("    z_max = %g; p = %g; alpha = %g; index = %d\n",
+        gf_rb.z_max_w0, stdnorm_pvalue(gf_rb.z_max_w0), stdnorm_cdf(gf_rb.z_max_w0), (int) gf_rb.ind_tot);
+    obj->intf->printf("  Note: remember about Bonferroni correction!\n");
     obj->intf->printf("\n");
-    // Make total p-value
+    // Make total p-value (with Bonferroni correction if required)
     double z_bonferroni = -stdnorm_inv(1e-4 * p);
     ans.x = z_sumsq_total;
-    if (fabs(z_max_w0) > z_bonferroni && fabs(z_max_w0) > fabs(ans.x)) {
-        ans.x = z_max_w0;
+    if (fabs(gf.z_max_w0) > z_bonferroni && fabs(gf.z_max_w0) > fabs(ans.x)) {
+        ans.x = gap16_z_bonferroni(gf.z_max_w0, p);
     }
-    if (fabs(z_max_tot) > z_bonferroni && fabs(z_max_tot) > fabs(ans.x)) {
-        ans.x = z_max_tot;
+    if (fabs(gf.z_max_tot) > z_bonferroni && fabs(gf.z_max_tot) > fabs(ans.x)) {
+        ans.x = gap16_z_bonferroni(gf.z_max_tot, p);
+    }
+    if (fabs(gf_rb.z_max_w0) > z_bonferroni && fabs(gf_rb.z_max_w0) > fabs(ans.x)) {
+        ans.x = gap16_z_bonferroni(gf_rb.z_max_w0, p);
     }
     ans.p = stdnorm_pvalue(ans.x);
     ans.alpha = stdnorm_cdf(ans.x);
-    //TODO: IMPROVE BONFERRONI CORRECTION!
     // Output p-value
     obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
     // Free buffers
     free(gapfreq);
+    free(gapfreq_rb);
     return ans;    
 }
 

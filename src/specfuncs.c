@@ -466,7 +466,11 @@ static double stdnorm_pdf(double x)
 double stdnorm_cdf(double x)
 {
     int i;
-    if (x < -2.5) { /* Continued fractions */
+    if (x < -38.0) {
+        return 0.0;
+    } else if (x > 38.0) {
+        return 1.0;
+    } else if (x < -2.5) { /* Continued fractions */
         long double f = x / (x*x + 1), c = x, d = f, f_old = f - 1;
         for (i = 2; f - f_old != 0; i++) {
             c = x + i / c;

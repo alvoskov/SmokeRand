@@ -209,6 +209,7 @@ be divided into several groups:
  xoroshiro128p     | xoroshiro128+
  xoroshiro128pp    | xoroshiro128++
  xoroshiro1024st   | xoroshiro1024*
+ xoroshiro1024st   | xoroshiro1024**
  xorwow            | xorwow
  xsh               | xorshift64 generator by G.Marsaglia
 
@@ -232,9 +233,9 @@ Four batteries are implemented in SmokeRand:
 
  Battery | Number of tests | Bytes (32-bit PRNG) | Bytes (64-bit PRNG)
 ---------|-----------------|---------------------|---------------------
- brief   | 20              | 2^35                | 2^36
- default | 34              | 2^37                | 2^38
- full    | 37              | 2^40                | 2^41
+ brief   | 21              | 2^35                | 2^36
+ default | 37              | 2^37                | 2^38
+ full    | 40              | 2^40                | 2^41
  dos16   | 5               | 2^31                | 2^32
 
 
@@ -363,6 +364,22 @@ The implementation of gap test in SmokeRand is equipped with "guard function"
 that will prevent infinite cycle in the case of constant output from a broken
 generator.
 
+## Gap test with 16-bit words
+
+A modification of gap test applied to the stream of non-overlapping 16-bit
+words suggested by the gjrand author and known as `rda16`. It simultaneously
+analyses 2^17 gaps. Two kinds of gaps are used:
+
+- `[value ... value]`; also with counting fraction of gaps of a given length
+  that contain 0 between values.
+- `[0 ... value]`; also with counting fraction of gaps of a given length
+  that contain value between 0 and value.
+
+This test easily detects 32-bit and 48-bit LCGs with m=2^k, shr3 (xorshift32),
+splitmix32, mulberry32, mwc4691. However, it is particularly sensitive to
+additive and subtractive lagged Fibonacci generators and SWB (subtract with
+borrow) generators.
+
 
 ## Linear complexity test
 
@@ -439,7 +456,7 @@ test run required about 25 min.
 
  Algoritrhm        | Output | brief | default | full | cpb  | dos16 | bday64 | TestU01 | PractRand 
 -------------------|--------|-------|---------|------|------|-------|--------|---------|-----------
- alfib             | u64    | 4     | 4       | 7    | 0.23 | 2     | +      | Small   | 128 GiB
+ alfib             | u64    | 5     | 6       | 8    | 0.23 | 2     | +      | Small   | 128 MiB
  alfib_mod         | u32    | +     | +       | +    | 0.50 | +     | N/A    | +       | 1 TiB
  chacha            | u32    | +     | +       | +    | 2.0  | +     | N/A    | +       |
  chacha_avx        | u32    | +     | +       | +    | 0.7  | +     | N/A    | +       |
@@ -449,31 +466,46 @@ test run required about 25 min.
  cwg64             | u64    | +     | +       | +    | 0.38 | +     | +      |         | >= 1 TiB
  drand48           | u32    | 12    | 19      | 21   | 0.72 | 1     | N/A    | -       | 1 MiB
  isaac64           | u64    | +     | +       | +    | 0.75 | +     | +      | +       | >= 1 TiB
+ flea32x1          | u32    | +     | 1       | 1    |      | +     | N/A    |         | 4 MiB
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | 1     | N/A    | Small   | 1 MiB
  kiss99            | u32    | +     | +       | +    | 1.0  | +     | N/A    | +       | >= 8 TiB
  kiss64            | u64    | +     | +       | +    | 0.53 | +     | +      | +       | >= 4 TiB
- lcg32prime        | u32    | 12    | 23      | 24   | 2.2  | 1     | N/A    |         | 512 MiB
+ lcg32prime        | u32    | 13    | 24      | 25   | 2.2  | 1     | N/A    |         | 512 MiB
  lcg64             | u32    | 6     | 8       | 11   | 0.40 | 1     | N/A    | Small   | 16 MiB
  lcg64prime        | u64    | 1     | 1       | 1    | 1.5  | +     | -      | +-      | >= 32 TiB
  lcg96             | u32    | 1     | 1       | 1    | 0.78 | 1     | N/A    | +       | 32 GiB
  lcg128            | u64    | 1     | 1       | 1    | 0.35 | 1     | +      | +       | 64 GiB
  lcg128_full       | u64    | 1     | 1       | 1    | 0.42 | 1     | +      | +       | 64 GiB
  lcg128_u32_full   | u32    | +     | 1       | 1    | 0.75 | +     | N/A    | +       | >= 32 TiB
- lcg69069          | u32    | 17    | 33      | 36   | 0.38 | 4     | N/A    | -       | 2 KiB
+ lcg69069          | u32    | 18    | 34      | 37   | 0.38 | 4     | N/A    | -       | 2 KiB
+ lfib_par[607+]    | u32    | 4     | 4       |      |      |       | N/A    |         | 256 GiB
+ lfib_par[607-]    | u32    | 4     | 4       |      |      |       | N/A    |         | 256 GiB
+ lfib_par[2281+]   | u32    | 3     | 3       |      |      |       | N/A    |         |
+ lfib_par[2281-]   | u32    | 3     | 3       |      |      |       | N/A    |         |
+ lfib_par[9689+]   | u32    | 1     | 1       |      |      |       | N/A    |         |
+ lfib_par[9689-]   | u32    | 1     | 1       |      |      |       | N/A    |         |
+ lfib_par[19937+]  | u32    | +     | 1       |      |      |       | N/A    |         |
+ lfib_par[19937-]  | u32    | +     | 1       |      |      |       | N/A    |         |
+ lfib_par[44497+]  | u32    | +     | 1       |      |      |       | N/A    |         |
+ lfib_par[44497-]  | u32    | +     | 1       |      |      |       | N/A    |         |
+ lfib_par[110503+] | u32    | +     | +       |      |      |       | N/A    |         |
+ lfib_par[110503-] | u32    | +     | +       |      |      |       | N/A    |         |
+ lfib4             | u32    | 1     | 3       | 4    |      |       | N/A    |         | 32 MiB
+ lfib4_u64         | u32    | +     | +       | +    |      |       | N/A    |         |
  lfsr113           | u32    | 3     | 5       | 7    | 1.1  | 2     | N/A    |         | 32 KiB 
  lfsr258           | u64    | 3     | 5       | 7    | 0.75 | 2     | +      |         | 1 MiB
- minstd            | u32    | 17    | 33      | 36   | 2.4  | 4     | N/A    | -       | 1 KiB
- mlfib17_5         | u32    | +     | +       | +    | 0.48 | +     | N/A    | +       | >= 4 TiB
+ minstd            | u32    | 18    | 34      | 37   | 2.4  | 4     | N/A    | -       | 1 KiB
+ mlfib17_5         | u32    | +     | +       | +    | 0.48 | +     | N/A    | +       | >= 16 TiB
  mt19937           | u32    | 3     | 3       | 3    | 0.91 | 2     | N/A    | Small   | 128 GiB
  mrg32k3a          | u32    | +     | +       | +    | 2.5  | +     | N/A    |         | >= 4 TiB
  msws              | u32    | +     | +       | +    | 0.72 | +     | N/A    | +       | >= 2 TiB
  mulberry32        | u32    | 1     | 2       | 3    | 0.51 | +     | N/A    |         | 512 MiB
- mwc32x            | u32    | 1     | 1       | 5    | 1.5  | +     | N/A    | Small   | 128 MiB
+ mwc32x            | u32    | 2     | 2       | 6    | 1.5  | +     | N/A    | Small   | 128 MiB
  mwc64             | u32    | 1     | 2       | 4    | 0.37 | +     | N/A    | Small   | 1 TiB
  mwc64x            | u32    | +     | +       | +    | 0.53 | +     | N/A    | +       | >= 16 TiB
  mwc128            | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 16 TiB
  mwc128x           | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 8 TiB
- mwc1616           | u32    | 8     | 12      | 14   | 0.48 | +     | N/A    |         | 16 MiB
+ mwc1616           | u32    | 9     | 13      | 15   | 0.48 | +     | N/A    |         | 16 MiB
  mwc1616x          | u32    | +     | +       | +    | 0.67 | +     | N/A    | +       | >= 32 TiB(?)
  mwc3232x          | u64    | +     | +       | +    | 0.23 | +     | +      |         | >= 32 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | +     | N/A    | +       | >= 2 TiB
@@ -481,9 +513,9 @@ test run required about 25 min.
  pcg64_xsl_rr      | u64    | +     | +       | +    | 0.43 | +     | +      |         | >= 32 TiB
  philox            | u64    | +     | +       | +    | 0.85 | +     | +      | +       | >= 2 TiB
  philox32          | u32    | +     | +       | +    | 2.7  | +     | N/A    | +       | >= 2 TiB
- randu             | u32    | 19    | 34      | 37   | 0.41 | 4     | N/A    | -       | 1 KiB
+ randu             | u32    | 20    | 35      | 38   | 0.41 | 4     | N/A    | -       | 1 KiB
  ranlux++          | u64    | +     | +       | +    | 3.9  |       |        | +       | >= 1 TiB
- r1279             | u32    | 4     | 6       | 9    | 0.47 | 2     | N/A    |         | 64 MiB
+ r1279             | u32    | 5     | 7       | 10   | 0.47 | 2     | N/A    |         | 64 MiB
  rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
  rrmxmx            | u64    | +     | +       | +    | 0.14 | +     | -      |         | >= 2 TiB
@@ -497,15 +529,15 @@ test run required about 25 min.
  speck128          | u64    | +     | +       | +    | 3.1  | +     |        |         | >= 2 TiB
  speck128_avx      | u64    | +     | +       | +    | 0.65 | +     |        |         | >= 2 TiB
  splitmix          | u64    | +     | +       | +    | 0.19 | +     | -      |         | >= 2 TiB
- splitmix32        | u32    | 1     | 2       | 3    | 0.25 | +     | N/A    | +       | 1 GiB
+ splitmix32        | u32    | 2     | 3       | 4    | 0.25 | +     | N/A    | +       | 1 GiB
  sqxor             | u64    | +     | +       | +    | 0.13 | +     | +      |         | >= 2 TiB
  sqxor32           | u32    | 1     | 2       | 3    | 0.20 | +     | N/A    | Small   | 16 GiB
  stormdrop         | u32    | +     | +       | 1    | 1.2  | +     | N/A    |         | >= 256 GiB
  superduper73      | u32    | 9     | 15      | 18   | 0.64 | 1     | N/A    |         | 32 KiB
  superduper64      | u64    | 1     | 3       | 5    | 0.35 | 1     |        |         | 512 KiB
  superduper64_u32  | u32    | +     | +       | +    | 0.70 | +     | N/A    |         | >= 2 TiB
- shr3              | u32    | 14    | 30      | 33   | 0.76 | 2     | N/A    | -       | 32 KiB
- swb               | u32    | 4     | 4       | 5    | 2.7  | 1     | N/A    |         | 128 MiB
+ shr3              | u32    | 15    | 31      | 34   | 0.76 | 2     | N/A    | -       | 32 KiB
+ swb               | u32    | 5     | 5       | 6    | 2.7  | 1     | N/A    |         | 128 MiB
  swblux[luxury=1]  | u32    | +     | +       | +    | 6.3  | +     | N/A    |         | 4 TiB
  swbw              | u32    | 1     | 1       | 1    | 2.8  | +     | N/A    |         | 4 GiB
  tinymt32          | u32    | 2     | 4       | 6    | 1.5  | 1     | N/A    | +       | 4 GiB
@@ -551,3 +583,9 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 
 - Failed dieharder: lcg69069, lcg32prime, minstd, randu, shr3, xsh, drand48
 - Passed dieharder: lcg64
+
+# Versions history
+
+01.12.2024: SmokeRand 0.1, an initial version. Requires some testing, extension
+of documentation, completion of `dos16` battery implementation for 16-bit
+computers. Tests lists for batteries are frozen before 1.0 release.

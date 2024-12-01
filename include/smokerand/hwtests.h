@@ -1,3 +1,11 @@
+/**
+ * @file hwtests.h
+ * @brief Hamming weights bases tests implementation, mainly DC6.
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #ifndef __SMOKERAND_HWTESTS_H
 #define __SMOKERAND_HWTESTS_H
 #include "smokerand/core.h"

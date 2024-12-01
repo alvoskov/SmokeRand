@@ -188,7 +188,7 @@ static TestResults gap_inv1024(GeneratorState *obj)
 
 static TestResults gap16_count0(GeneratorState *obj)
 {
-    return gap16_count0_test(obj, 500000000);
+    return gap16_count0_test(obj, 1000000000);
 }
 
 /////////////////////////////
@@ -294,7 +294,7 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         {"collover5_8d_high", collisionover5_8d_high, 72},
         {"gap_inv512", gap_inv512, 14},
         {"gap_inv1024", gap_inv1024, 284},
-        {"gap16_count0", gap16_count0, 5},
+        {"gap16_count0", gap16_count0, 27},
         {"hamming_dc6", hamming_dc6_all_test, 36},
         {"hamming_dc6_low1", hamming_dc6_low1_test, 4},
         {"hamming_dc6_low8", hamming_dc6_low8_test, 8},
