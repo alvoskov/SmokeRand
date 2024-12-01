@@ -478,6 +478,11 @@ test run required about 25 min.
  lcg128_full       | u64    | 1     | 1       | 1    | 0.42 | 1     | +      | +       | 64 GiB
  lcg128_u32_full   | u32    | +     | 1       | 1    | 0.75 | +     | N/A    | +       | >= 32 TiB
  lcg69069          | u32    | 18    | 34      | 37   | 0.38 | 4     | N/A    | -       | 2 KiB
+ lfib_par[31+]     | u32    | 5     |         |      |      |       | N/A    |         | 32 MiB
+ lfib_par[55+]     | u32    | 4     |         |      |      |       | N/A    |         | 2 GiB
+ lfib_par[55-]     | u32    | 4     |         |      |      |       | N/A    |         | 2 GiB
+ lfib_par[127+]    | u32    |       |         |      |      |       | N/A    |         | 512 MiB
+ lfib_par[127-]    | u32    |       |         |      |      |       | N/A    |         | 512 MiB
  lfib_par[607+]    | u32    | 4     | 4       |      |      |       | N/A    |         | 256 GiB
  lfib_par[607-]    | u32    | 4     | 4       |      |      |       | N/A    |         | 256 GiB
  lfib_par[2281+]   | u32    | 3     | 3       |      |      |       | N/A    |         |
