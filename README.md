@@ -466,7 +466,7 @@ test run required about 25 min.
  cwg64             | u64    | +     | +       | +    | 0.38 | +     | +      |         | >= 1 TiB
  drand48           | u32    | 12    | 19      | 21   | 0.72 | 1     | N/A    | -       | 1 MiB
  isaac64           | u64    | +     | +       | +    | 0.75 | +     | +      | +       | >= 1 TiB
- flea32x1          | u32    | +     | 1       | 1    |      | +     | N/A    |         | 4 MiB
+ flea32x1          | u32    | +     | 1       | 1    | 0.48 | +     | N/A    |         | 4 MiB
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | 1     | N/A    | Small   | 1 MiB
  kiss99            | u32    | +     | +       | +    | 1.0  | +     | N/A    | +       | >= 8 TiB
  kiss64            | u64    | +     | +       | +    | 0.53 | +     | +      | +       | >= 4 TiB
@@ -478,25 +478,27 @@ test run required about 25 min.
  lcg128_full       | u64    | 1     | 1       | 1    | 0.42 | 1     | +      | +       | 64 GiB
  lcg128_u32_full   | u32    | +     | 1       | 1    | 0.75 | +     | N/A    | +       | >= 32 TiB
  lcg69069          | u32    | 18    | 34      | 37   | 0.38 | 4     | N/A    | -       | 2 KiB
- lfib_par[31+]     | u32    | 5     |         |      |      |       | N/A    |         | 32 MiB
- lfib_par[55+]     | u32    | 4     |         |      |      |       | N/A    |         | 2 GiB
- lfib_par[55-]     | u32    | 4     |         |      |      |       | N/A    |         | 2 GiB
- lfib_par[127+]    | u32    |       |         |      |      |       | N/A    |         | 512 MiB
- lfib_par[127-]    | u32    |       |         |      |      |       | N/A    |         | 512 MiB
- lfib_par[607+]    | u32    | 4     | 4       |      |      |       | N/A    |         | 256 GiB
- lfib_par[607-]    | u32    | 4     | 4       |      |      |       | N/A    |         | 256 GiB
- lfib_par[2281+]   | u32    | 3     | 3       |      |      |       | N/A    |         |
- lfib_par[2281-]   | u32    | 3     | 3       |      |      |       | N/A    |         |
- lfib_par[9689+]   | u32    | 1     | 1       |      |      |       | N/A    |         |
- lfib_par[9689-]   | u32    | 1     | 1       |      |      |       | N/A    |         |
- lfib_par[19937+]  | u32    | +     | 1       |      |      |       | N/A    |         |
- lfib_par[19937-]  | u32    | +     | 1       |      |      |       | N/A    |         |
- lfib_par[44497+]  | u32    | +     | 1       |      |      |       | N/A    |         |
- lfib_par[44497-]  | u32    | +     | 1       |      |      |       | N/A    |         |
- lfib_par[110503+] | u32    | +     | +       |      |      |       | N/A    |         |
- lfib_par[110503-] | u32    | +     | +       |      |      |       | N/A    |         |
- lfib4             | u32    | 1     | 3       | 4    |      |       | N/A    |         | 32 MiB
- lfib4_u64         | u32    | +     | +       | +    |      |       | N/A    |         |
+ lfib_par[31+]     | u32    | 5     | 5       |      | 0.76 |       | N/A    |         | 32 MiB
+ lfib_par[55+]     | u32    | 4     | 4       |      | 0.77 |       | N/A    |         | 2 GiB
+ lfib_par[55-]     | u32    | 4     | 4       |      | 0.75 |       | N/A    |         | 2 GiB
+ lfib_par[127+]    | u32    | 4     | 4       |      |      |       | N/A    |         | 512 MiB
+ lfib_par[127-]    | u32    | 4     | 4       |      |      |       | N/A    |         | 512 MiB
+ lfib_par[607+]    | u32    | 4     | 4       | 5    |      |       | N/A    |         | 256 GiB
+ lfib_par[607-]    | u32    | 4     | 4       | 5    |      |       | N/A    |         | 256 GiB
+ lfib_par[1279+]   | u32    | 3/4   | 3/4     | 4/5  |      |       | N/A    |         | 1 TiB
+ lfib_par[1279-]   | u32    | 3/4   | 3/4     | 4/5  |      |       | N/A    |         |
+ lfib_par[2281+]   | u32    | 3     | 3       | 4    |      |       | N/A    |         |
+ lfib_par[2281-]   | u32    | 3     | 3       | 4    |      |       | N/A    |         |
+ lfib_par[9689+]   | u32    | 1     | 1       | 1    |      |       | N/A    |         |
+ lfib_par[9689-]   | u32    | 1     | 1       | 1    |      |       | N/A    |         |
+ lfib_par[19937+]  | u32    | +     | 1       | 1    |      |       | N/A    |         |
+ lfib_par[19937-]  | u32    | +     | 1       | 1    |      |       | N/A    |         |
+ lfib_par[44497+]  | u32    | +     | 1       | 1    | 0.59 |       | N/A    |         |
+ lfib_par[44497-]  | u32    | +     | 1       | 1    | 0.67 |       | N/A    |         |
+ lfib_par[110503+] | u32    | +     | +       | +    | 0.67 |       | N/A    |         |
+ lfib_par[110503-] | u32    | +     | +       | +    | 0.60 |       | N/A    |         |
+ lfib4             | u32    | 1     | 3       | 4    | 0.49 |       | N/A    |         | 32 MiB
+ lfib4_u64         | u32    | +     | +       | +    | 0.57 |       | N/A    |         |
  lfsr113           | u32    | 3     | 5       | 7    | 1.1  | 2     | N/A    |         | 32 KiB 
  lfsr258           | u64    | 3     | 5       | 7    | 0.75 | 2     | +      |         | 1 MiB
  minstd            | u32    | 18    | 34      | 37   | 2.4  | 4     | N/A    | -       | 1 KiB
@@ -524,8 +526,8 @@ test run required about 25 min.
  rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
  rrmxmx            | u64    | +     | +       | +    | 0.14 | +     | -      |         | >= 2 TiB
- sapparot          | u32    | 1     | 3       | 4    |      | +     | N/A    |         | 8 MiB
- sapparot2         | u32    | +     | +       |      |      | +     | N/A    |         | >= 64 GiB
+ sapparot          | u32    | 1     | 3       | 4    | 0.82 | +     | N/A    |         | 8 MiB
+ sapparot2         | u32    | +     | +       |      | 0.42 | +     | N/A    |         | >= 64 GiB
  sezgin63          | u32    | +     | 1       | 3    | 3.0  | +     | N/A    |         | >= 16 TiB
  sfc8              | u32    | 3     | 7       | 13   | 1.9  | +     | N/A    |         | 128 MiB
  sfc16             | u32    | +     | +       | +    | 0.93 | +     | N/A    |         |
