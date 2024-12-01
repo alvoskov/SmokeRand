@@ -79,7 +79,9 @@ static LFibDyn_State parse_parameters(const CallerAPI *intf)
 {
     LFibDyn_State obj;
     const char *param = intf->get_param();
-    if (!intf->strcmp("55+", param)) {
+    if (!intf->strcmp("31+", param)) { // from glibc
+        obj.r = 31; obj.s = 3; obj.is_additive = 1;
+    } else if (!intf->strcmp("55+", param)) {
         obj.r = 55; obj.s = 24; obj.is_additive = 1;
     } else if (!intf->strcmp("55-", param)) {
         obj.r = 55; obj.s = 24; obj.is_additive = 0;
