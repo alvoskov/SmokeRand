@@ -18,9 +18,11 @@ from TestU01 but has several important differences:
 Despite relatively small amount of tests SmokeRand can detect flaws in some
 PRNG that pass BigCrush or PractRand:
 
-- 64-bit LCG with prime modulus: passes PractRand, some blips on BigCrush.
+- 64-bit LCG with prime modulus: passes PractRand, detection by BigCrush
+  requires special settings (interleaved mode).
 - 96-bit and 128-bit LCGs by modulo 2^{k} and truncation of lower 64 bits.
-  They pass BigCrush but detected by PractRand.
+  They pass BigCrush but detected by PractRand. SmokeRand also can detect
+  128-bit LCG with truncated lower 96 bits (they pass BigCrush and PractRand).
 - SWBW: detected by PractRand but not by BigCrush.
 - Uniformly distributed 64-bit generators with 64-bit state such as
   SplitMix, PCG64/64, rrmxmx: detected by an extra "birthday paradox" battery.
@@ -74,9 +76,11 @@ Implemented tests:
 4. Birthday spacings test with decimation.
 5. CollisionOver test.
 6. Gap test.
-7. Matrix rank test.
-8. Linear complexity test.
-9. Hamming weights based DC6 test from PractRand.
+7. Gap test on 16-bit words with zero counting (modified `rda16` from gjrand).
+8. Matrix rank test.
+9. Linear complexity test.
+10. Hamming weights based DC6 test from PractRand.
+11. Simplified `mod3` test from grand.
 
 
 Systematic failure of even one test means that PRNG is not suitable as a general

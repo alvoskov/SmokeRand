@@ -617,116 +617,206 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
 }
 
 
+
+typedef struct {
+    unsigned long long ngaps_total;
+    unsigned long long ngaps_with0;
+    double p_total;
+    double p_with0;
+} GapFrequency;
+
+
 /**
- * @brief N-dimensional version of Knuth's gap test; the algorithm is taken
- * from gjrand (`slicerda')
- * @details Detects 64-bit Coveyou PRNG and variants of SplitMix with
- * bad gammas.
+ * @brief Create array of gaps frequencies and theoretical probabilities.
+ * @param nbins Number of bins (bin 0 for gap with length 0, bin 1 for gap
+ * with length 1 etc.)
+ * @param p Probability of number to be inside interval (e.g. for 16-bit word
+ * to be equal to 0).
  */
-TestResults gap_nd_test(GeneratorState *obj, const GapNDOptions *opts)
+static GapFrequency *GapFrequency_create_array(size_t nbins, double p)
 {
-    const double Ei_min = 10.0;
-    double p = 1.0 / 256.0;
-    size_t ngaps = opts->ngaps;
-    size_t nbins = log(Ei_min / (ngaps * p)) / log(1 - p);
-    int nstreams = obj->gi->nbits / 2;
-
-    size_t **O_ary = calloc(nstreams + 1, sizeof(size_t *));
-    size_t *gap_len = calloc(nstreams + 1, sizeof(size_t));
-    size_t *ngaps_ary = calloc(nstreams + 1, sizeof(size_t));
-    if (O_ary == NULL) {
-        fprintf(stderr, "***** gap_nd_test: not enough memory *****\n");
-        exit(1);
-    }
-    for (int i = 0; i < nstreams; i++) {
-        O_ary[i] = calloc(nbins + 1, sizeof(size_t));
-    }
-        
-    unsigned long long nvalues = 0;
-    TestResults ans = TestResults_create("Gap");
-    obj->intf->printf("N-dimensional gap test\n");
-    obj->intf->printf("  alpha = 0.0; beta = %g\n", p);
-    obj->intf->printf("  ngaps = %lu; nbins = %lu\n",
-        (unsigned long) ngaps, (unsigned long) nbins);
-/*
-    if (!gap_test_guard(obj, opts)) {
-        obj->intf->printf("  Generator output doesn't hit the gap! p <= 1e-15\n");
-        ans.p = 1.0e-15;
-        ans.alpha = 1.0 - ans.p;
-        ans.x = NAN;
-        return ans;
-    }
-*/
-    for (size_t ngaps_max = 0; ngaps_max < ngaps; ) {
-        uint64_t u[4];
-        for (int j = 0; j < 4; j++) {
-            u[j] = obj->gi->get_bits(obj->state);
-        }
-        nvalues += 4;
-        for (int j = 0; j < nstreams; j++) {
-            uint8_t byte = (u[0] & 0x3) | ( (u[1] & 0x3) << 2) |
-                ( (u[2] & 0x3) << 4) | ( (u[3] & 0x3) << 6);
-            u[0] >>= 2; u[1] >>= 2; u[2] >>= 2; u[3] >>= 2;
-            if (byte != 0x00) {
-                gap_len[j]++;                
-            } else {
-                O_ary[j][(gap_len[j] < nbins) ? gap_len[j] : nbins]++;
-                gap_len[j] = 0;
-                ngaps_ary[j]++;
-                if (ngaps_max < ngaps_ary[j]) {
-                    ngaps_max = ngaps_ary[j];
-                    if (ngaps_max % 10000 == 0) {
-                        printf("%d\n", (int) ngaps_max);
-                    }
-                }
-            }
-        }
-    }
-    for (int i = 0; i < nstreams; i++) {
-        double chi2emp = 0.0, ngaps = 0.0;
-        for (size_t j = 0; j < nbins; j++) {
-            ngaps += O_ary[i][j];
-        }
-        for (size_t j = 0; j < nbins; j++) {
-            double Ei = p * pow(1.0 - p, j) * ngaps;
-            double d = Ei - O_ary[i][j];
-            chi2emp += d * d / Ei;
-        }
-        obj->intf->printf("%d %g | %g %d\n", i, chi2emp, ngaps, (int) ngaps_ary[i]);
-    }
-/*
-    ans.x = 0.0; // chi2emp
+    GapFrequency *gapfreq = calloc(nbins + 1, sizeof(GapFrequency));
+    double p_gap = p;
     for (size_t i = 0; i < nbins; i++) {
-        double Ei = p * pow(1.0 - p, i) * ngaps;
-        double d = Ei - Oi[i];
-        ans.x += d * d / Ei;
+        gapfreq[i].p_total = p_gap;
+        p_gap *= 1.0 - p;
+        if (i > 1) {
+            gapfreq[i].p_with0 = 1.0 - binomial_pdf(0, i, p);
+        } else if (i == 1) {
+            gapfreq[i].p_with0 = p;
+        } else if (i == 0) {
+            gapfreq[i].p_with0 = 0.0;
+        }
     }
-*/
-    for (int i = 0; i < nstreams; i++) {
-        free(O_ary[i]);
-    }
-    free(O_ary);
-    free(gap_len);
-    free(ngaps_ary);
-    obj->intf->printf("  Values processed: %llu (2^%.1f)\n",
-        nvalues, sr_log2(nvalues));
-
-/*
-    ans.p = chi2_pvalue(ans.x, nbins - 1);
-    ans.alpha = chi2_cdf(ans.x, nbins - 1);
-    obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
-    obj->intf->printf("\n");
-*/
-    return ans;
+    return gapfreq;
 }
 
+static double GapFrequency_calc_z_with0(const GapFrequency *gf)
+{
+    double alpha = binomial_cdf(gf->ngaps_with0, gf->ngaps_total, gf->p_with0);
+    double pvalue = binomial_pvalue(gf->ngaps_with0, gf->ngaps_total, gf->p_with0);
+    double z_w0 = (pvalue < 0.5) ? -stdnorm_inv(pvalue) : stdnorm_inv(alpha);
+    if (z_w0 < -40.0) {
+        z_w0 = -40.0;
+    } else if (z_w0 > 40.0) {
+        z_w0 = 40.0;
+    }
+    return z_w0;
+}
 
+static double gap16_sumsq_as_norm(const GapFrequency *gapfreq, size_t nbins, unsigned long long ngaps)
+{
+    double chi2emp = 0.0;
+    for (size_t i = 0; i < nbins; i++) {
+        double Oi = gapfreq[i].ngaps_total;
+        double Ei = ngaps * gapfreq[i].p_total;
+        chi2emp += pow(Oi - Ei, 2.0) / Ei;
+    }
+    return chi2_to_stdnorm_approx(chi2emp, nbins - 1);
+}
+
+void gap16_count0_mainloop(GapFrequency *gapfreq, size_t nbins,
+    GeneratorState *obj, long long ngaps)
+{
+    int w16_per_num = obj->gi->nbits / 16;
+    long long mod_mask = w16_per_num - 1, last0_pos = -1;
+    uint64_t u = 0;
+    long long *gapbegin = calloc(65536, sizeof(long long));
+    for (size_t i = 0; i < 65536; i++) {
+        gapbegin[i] = -1;
+    }
+    for (long long pos = 0; pos < ngaps; pos++) {
+        // Generate 16-bit word
+        if ((pos & mod_mask) == 0) {
+            u = obj->gi->get_bits(obj->state);
+        }
+        uint64_t w16 = u & 0xFFFF;
+        u >>= 16;
+        // Update "last seen 0" position
+        if (w16 == 0) {
+            last0_pos = pos;
+        }
+        // Update gaps information
+        if (gapbegin[w16] != -1) {
+            // a) Get beginning and length
+            long long gap_len = pos - gapbegin[w16] - 1;
+            if (gap_len >= (long long) nbins) gap_len = nbins;    
+            // b) Update frequency table
+            if (last0_pos > gapbegin[w16]) {
+                gapfreq[gap_len].ngaps_with0++;
+            }
+            gapfreq[gap_len].ngaps_total++;
+        }
+        // c) Update beginning
+        gapbegin[w16] = pos;
+    }
+    free(gapbegin);
+}
+
+/**
+ * @brief Similar to rda16 ("repeat distance analysis") from gjrand, very sensitive
+ * to additive and subtractive lagged Fibonacci generators.
+ * @details Resembles classic gap test but analyses all possible (and equal length)
+ * intervals simultaneously. It processes input as a sequence of 16-bit words and
+ * uses 2^16 = 65536 intervals. The gap with length n looks like as:
+ *
+ *     [value; x_1; x_2; ...; x_n; value]
+ *
+ * Of course, gaps (subsequences) with different values at ends may be overlapping.
+ * But just as in classic gap test their lengths are collected in one frequency
+ * table. It can be considered as simultaneously running 65536 gap tests but
+ * with shared frequency table for keeping their results.
+ *
+ * The test has another powerful feature: it calculates number of gaps with zeros
+ * inside for each gap length. It allows to detect additive and subtractive lagged
+ * Fibonacci generators with huge lags.
+ */
+TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
+{
+    TestResults ans = TestResults_create("gap16_count0");
+    if (ngaps < 1000000) {
+        return ans;
+    }
+    const double Ei_min = 1000.0;
+    double p = 1.0 / 65536.0;
+    size_t nbins = log(Ei_min / (ngaps * p)) / log(1 - p);
+    // Initialize frequency and position tables
+    GapFrequency *gapfreq = GapFrequency_create_array(nbins, p);
+    // Print test info
+    obj->intf->printf("gap16_count0 test\n");
+    obj->intf->printf("  p = %g; ngaps = %llu; nbins = %lu\n",
+        p, ngaps, (unsigned long) nbins);
+    // Test main run
+    gap16_count0_mainloop(gapfreq, nbins, obj, ngaps);
+    // Computation of p-value for sum of squares
+    double z_sumsq_total = gap16_sumsq_as_norm(gapfreq, nbins, ngaps);
+    obj->intf->printf("  z from chi2emp: %g; p = %g\n",
+        z_sumsq_total, stdnorm_pvalue(z_sumsq_total));
+    // Computation of p-values for all frequencties
+    double z_max_w0 = 0.0, z_max_tot = 0.0;
+    size_t ind_w0 = 0, ind_tot = 0;
+    for (size_t i = 1; i < nbins; i++) {
+        const GapFrequency *gf = &gapfreq[i];
+        // Frequency of gap "with zeros" inside
+        // Convert binomial distribution to normal through p and cdf/inv.cdf
+        double z_w0 = GapFrequency_calc_z_with0(gf);
+        if (fabs(z_w0) > fabs(z_max_w0)) {
+            z_max_w0 = z_w0;
+            ind_w0 = i;
+        }
+        // Frequency of gaps: convert binomial distribution to normal
+        // through central limiting theorem
+        double mu = ngaps * gf->p_total;
+        double s = sqrt(ngaps * gf->p_total * (1.0 - gf->p_total));
+        double z_tot = (gf->ngaps_total - mu) / s;
+        if (fabs(z_tot) > fabs(z_max_tot)) {
+            z_max_tot = z_tot;
+            ind_tot = i;
+        }
+    }
+    obj->intf->printf("  Frequency analysis for gaps with '0' inside:\n");
+    obj->intf->printf("    z_max = %g; p = %g; alpha = %g; index = %d\n",
+        z_max_w0, stdnorm_pvalue(z_max_w0), stdnorm_cdf(z_max_w0), (int) ind_w0);
+    obj->intf->printf("  Frequency analysis for all gaps:\n");
+    obj->intf->printf("    z_max = %g; p = %g; alpha = %g; index = %d\n",
+        z_max_tot, stdnorm_pvalue(z_max_tot), stdnorm_cdf(z_max_tot), (int) ind_tot);
+    obj->intf->printf("  WARNING: remember about Bonferroni correction\n");
+    obj->intf->printf("\n");
+    // Make total p-value
+    double z_bonferroni = -stdnorm_inv(1e-4 * p);
+    ans.x = z_sumsq_total;
+    if (fabs(z_max_w0) > z_bonferroni && fabs(z_max_w0) > fabs(ans.x)) {
+        ans.x = z_max_w0;
+    }
+    if (fabs(z_max_tot) > z_bonferroni && fabs(z_max_tot) > fabs(ans.x)) {
+        ans.x = z_max_tot;
+    }
+    ans.p = stdnorm_pvalue(ans.x);
+    ans.alpha = stdnorm_cdf(ans.x);
+    //TODO: IMPROVE BONFERRONI CORRECTION!
+    // Output p-value
+    obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
+    obj->intf->printf("\n");
+    // Free buffers
+    free(gapfreq);
+    return ans;    
+}
+
+///////////////////////
+///// Other tests /////
+///////////////////////
+
+/**
+ * @brief A simplified version of `mod3` test from gjrand.
+ * @details Detects some generators with nonlinear mappings, e.g. `flea32x1`
+ * by Bob Jenkins.
+ */
 TestResults mod3_test(GeneratorState *obj)
 {
     TestResults ans = TestResults_create("mod3");
     const size_t ntuples = 19683; // 3^9
     unsigned long long *Oi = calloc(ntuples, sizeof(unsigned long long));
-    unsigned long long n = 1 << 24;
+    unsigned long long n = 1 << 27;
     uint32_t tuple = 0;
     for (int i = 0; i < 9; i++) {
         int d = obj->gi->get_bits(obj->state) % 3;
@@ -737,25 +827,15 @@ TestResults mod3_test(GeneratorState *obj)
         int d = obj->gi->get_bits(obj->state) % 3;
         tuple = (tuple * 3 + d) % ntuples;
     }
-/*
-    for (size_t i = 0; i < ntuples; i++) {
-        printf("%lld ", Oi[i]);
-    }
-*/
-    
     double Ei = (double) n / (double) ntuples;
     ans.x = 0.0;
     for (size_t i = 0; i < ntuples; i++) {
         ans.x += (Oi[i] - Ei) * (Oi[i] - Ei) / Ei;
-        //printf("%g %g | ", (double) Oi[i], Ei);
     }
     ans.p = chi2_pvalue(ans.x, ntuples - 1);
     ans.alpha = chi2_cdf(ans.x, ntuples - 1);
     obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
-//    printf("\n");
-    
-    
     return ans;
 }
 
@@ -893,489 +973,4 @@ TestResults byte_freq_test(GeneratorState *obj)
 TestResults word16_freq_test(GeneratorState *obj)
 {
     return nbit_words_freq_test(obj, 16, 16);
-}
-
-////////////////////////////////////////////////////
-///// Hamming weight (DC6) test implementation /////
-////////////////////////////////////////////////////
-
-
-typedef struct _ByteStreamGenerator {
-    const GeneratorInfo *gen; ///< Used generator
-    void *state; ///< PRNG state
-    uint64_t buffer; ///< Buffer with PRNG raw data
-    size_t nbytes; ///< Number of bytes returned by the generator
-    size_t bytes_left; ///< Number of bytes left in the buffer
-    uint8_t (*get_byte)(struct _ByteStreamGenerator *obj);
-} ByteStreamGenerator;
-
-
-uint8_t ByteStreamGenerator_getbyte(ByteStreamGenerator *obj)
-{
-    if (obj->bytes_left == 0) {
-        obj->buffer = obj->gen->get_bits(obj->state);
-        obj->bytes_left = obj->nbytes;
-    }
-    uint8_t out = obj->buffer & 0xFF;
-    obj->buffer >>= 8;
-    obj->bytes_left--;
-    return out;
-}
-
-uint8_t ByteStreamGenerator_getbyte_low1(ByteStreamGenerator *obj)
-{
-    if (obj->bytes_left == 0) {
-        obj->buffer = 0;
-        for (int i = 0; i < 64; i++) {
-            obj->buffer = (obj->buffer >> 1) | (obj->gen->get_bits(obj->state) << 63);
-        }
-        obj->bytes_left = 8;
-    }
-    uint8_t out = obj->buffer & 0xFF;
-    obj->buffer >>= 8;
-    obj->bytes_left--;
-    return out;
-}
-
-uint8_t ByteStreamGenerator_getbyte_low8(ByteStreamGenerator *obj)
-{
-    if (obj->bytes_left == 0) {
-        obj->buffer = 0;
-        for (int i = 0; i < 8; i++) {
-            obj->buffer = (obj->buffer >> 8) | (obj->gen->get_bits(obj->state) << 56);
-        }
-        obj->bytes_left = 8;
-    }
-    uint8_t out = obj->buffer & 0xFF;
-    obj->buffer >>= 8;
-    obj->bytes_left--;
-    return out;
-}
-
-
-
-/**
- * @details It DOESN'T OWN the PRNG state kept in gs->state!
- */
-void ByteStreamGenerator_init(ByteStreamGenerator *obj,
-    GeneratorState *gs, UseBitsMode use_bits)
-{
-    obj->gen = gs->gi;
-    obj->state = gs->state;
-    obj->nbytes = gs->gi->nbits / 8;
-    obj->bytes_left = 0;
-    switch (use_bits) {
-    case use_bits_all:
-        obj->get_byte = ByteStreamGenerator_getbyte;
-        break;
-
-    case use_bits_low8:
-        obj->get_byte = ByteStreamGenerator_getbyte_low8;
-        break;
-
-    case use_bits_low1:
-        obj->get_byte = ByteStreamGenerator_getbyte_low1;
-        break;
-
-    default:
-        obj->get_byte = ByteStreamGenerator_getbyte;
-        break;
-    }
-}
-
-
-
-
-/**
- * @brief Keeps the Hamming weight tuple counter and theoretical probability
- */
-typedef struct {
-    unsigned long long count; ///< Empirical frequency (counter)
-    double p; ///< Probability of the corresponding tuple
-} HammingWeightsTuple;
-
-
-typedef struct {
-    HammingWeightsTuple *tuples;
-    size_t len;
-} HammingTuplesTable;
-
-
-void HammingTuplesTable_init(HammingTuplesTable *obj,
-    unsigned int code_nbits, unsigned int tuple_size,
-    const double *code_to_prob)
-{
-    const uint64_t code_mask = (1ull << code_nbits) - 1;
-    obj->len = 1ull << code_nbits * tuple_size;
-    obj->tuples = calloc(obj->len, sizeof(HammingWeightsTuple));
-    if (obj->tuples == NULL) {
-        fprintf(stderr, "***** HammingTuplesTable_init: not enough memory *****\n");
-        exit(1);
-    }
-    // Calculate probabilities of tuples
-    // (idea is taken from PractRand)
-    for (size_t i = 0; i < obj->len; i++) {
-        uint64_t tmp = i;
-        obj->tuples[i].p = 1.0;
-        for (unsigned int j = 0; j < tuple_size; j++) {
-            obj->tuples[i].p *= code_to_prob[tmp & code_mask];
-            tmp >>= code_nbits;
-        }
-    }
-}
-
-size_t HammingWeightsTuple_reduce_table(HammingWeightsTuple *info, double Ei_min, size_t len)
-{
-    // Calculate minimal probability for the bin
-    unsigned long long count_total = 0;
-    for (size_t i = 0; i < len; i++) {
-        count_total += info[i].count;
-    }
-    double p_min = Ei_min / (double) count_total;
-    // Bins reduction
-    int reduced = 0;
-    while (!reduced) {
-        size_t out_len = 0, inp_pos = 0;
-        reduced = 1;
-        while (inp_pos < len) {
-            if (info[inp_pos].p >= p_min) {
-                // Good bin
-                info[out_len++] = info[inp_pos++];
-            } else if (inp_pos != len - 1 &&
-                (out_len == 0 || info[out_len - 1].p > info[inp_pos + 1].p)) {
-                // Bin with low p: attach to the neighbour from the right
-                // E.g.: 26 27 | 5* 2 50 => 27 27 7 | ? 50*
-                info[out_len] = info[inp_pos++];
-                info[out_len].p += info[inp_pos].p;
-                info[out_len].count += info[inp_pos].count;
-                out_len++; inp_pos++;
-                reduced = 0;
-            } else {
-                // Bin with low p: attach to the neighbour from the left
-                // E.g.: 26 27 | 5* 130 50 => 26 32 | ? 130* 50
-                info[out_len - 1].p += info[inp_pos].p;
-                info[out_len - 1].count += info[inp_pos].count;
-                inp_pos++;
-                reduced = 0;
-            }
-        }
-        len = out_len;
-    }
-    return len;
-}
-
-/**
- * @brief Calculates statistics for Hamming DC6 test using the filled table
- * of overlapping tuples frequencies. The g-test (refined chi-square test)
- * is used. Obtained random value is converted to the normal distribution
- * using asymptotic approximation from the `chi2_to_stdnorm_approx` function.
- * @details The original DC6 test from PractRand also used recalibration
- * procedure: correction of obtained \f$z_\mathrm{emp}\f$ using some
- * corrections based on percentile tables obtained by Monte-Carlo method using
- * CSPRNG. Experiments showed that increasing \f$E_{i,\mathrm{min}}\f$ from
- * 25 to 100 makes the output distribution much closer to standard normal.
- * It is still slightly biased: \f$ \mu \approx -0.15\f$, $\sigma\approx 1.0$.
- * Q-Q plot shows that it is normal. And this bias was not taken into account.
- */
-TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
-{
-    // Concatenate low-populated bins
-    const size_t nbins_max = 250000;
-    double Ei_min = 250.0;    
-    do {
-        obj->len = HammingWeightsTuple_reduce_table(obj->tuples, Ei_min, obj->len);
-        Ei_min *= 2;
-    } while (obj->len > nbins_max);
-    // chi2 test (with more accurate g-test statistics)
-    // chi2emp = 2\sum_i O_i * ln(O_i / E_i)
-    unsigned long long count_total = 0;
-    for (size_t i = 0; i < obj->len; i++) {
-        count_total += obj->tuples[i].count;
-    }
-    TestResults ans = TestResults_create("hamming_dc6");
-    ans.x = 0;
-    for (size_t i = 0; i < obj->len; i++) {
-        double Ei = count_total * obj->tuples[i].p;
-        double Oi = obj->tuples[i].count;
-        if (Oi > DBL_EPSILON) {
-            ans.x += 2.0 * Oi * log(Oi / Ei);
-        }
-    }
-    ans.x = chi2_to_stdnorm_approx(ans.x, obj->len - 1);
-    ans.p = stdnorm_pvalue(ans.x);
-    ans.alpha = stdnorm_cdf(ans.x);    
-    return ans;
-}
-
-void HammingTuplesTable_free(HammingTuplesTable *obj)
-{
-    free(obj->tuples);
-    obj->tuples = NULL;
-}
-
-
-/**
- * @brief Converts number of samples (bytes or words) to number of generated
- * tuples (not tuples types)
- */
-unsigned long long hamming_dc6_nbytes_to_ntuples(unsigned long long nbytes,
-    unsigned int nbits, HammingDc6Mode mode)
-{
-    unsigned long long ntuples = nbytes;
-    // Note: tuples are overlapping, i.e. one new tuple digit means
-    // one new tuple.
-    switch (mode) {
-    case hamming_dc6_values:
-        // Each PRNG output is converted to tuple digits
-        ntuples = nbytes * 8 / nbits;
-        break;
-    case hamming_dc6_bytes:
-        // Each byte is converted to tuple digit
-        ntuples = nbytes;
-        break;
-    case hamming_dc6_bytes_low8:
-        // Only lower bytes of PRNG outputs are converted to tuple digits
-        ntuples = nbytes * 8 / nbits;
-        break;
-    case hamming_dc6_bytes_low1:
-        // Only lower bits of PRNG outputs are converted to tuple digits
-        ntuples = nbytes / nbits;
-        break;
-    default:
-        ntuples = nbytes;
-        break;
-    }
-    return ntuples;
-}
-
-/**
- * @brief Print the information about "Hamming DC6" test settings, especially
- * about input stream processing mode.
- */
-static void hamming_dc6_test_print_info(GeneratorState *obj, const HammingDc6Options *opts,
-    unsigned long long ntuples)
-{
-    obj->intf->printf("Hamming weights based tests (DC6)\n");
-    obj->intf->printf("  Sample size, bytes:     %llu\n", opts->nbytes);
-    obj->intf->printf("  Tuples to be generated: %llu\n", ntuples);
-    switch (opts->mode) {
-    case hamming_dc6_values:
-        obj->intf->printf("  Mode: process %d-bit words of PRNG output directly\n",
-            (int) obj->gi->nbits);
-        break;
-    case hamming_dc6_bytes:
-        obj->intf->printf("  Mode: process PRNG output as a stream of bytes\n",
-            (int) obj->gi->nbits);
-        break;
-    case hamming_dc6_bytes_low1:
-        obj->intf->printf("  Mode: byte stream made of lower bits (bit 0) of PRNG values\n");
-        break;
-    case hamming_dc6_bytes_low8:
-        obj->intf->printf("  Mode: byte stream made of 8 lower bits (bit 7..0) of PRNG values\n");
-        break;
-    }
-}
-
-/**
- * @brief Fills tables for conversion of Hamming weights to its codes (tuple digits)
- * Takes into account both output size of PRNG (32 or 64 bits) and output stream mode
- * (bytes or 32/64-bit words).
- * @param[in]  obj          Information about used PRNG and its state
- * @param[in]  opts         Hamming DC6 test options.
- * @param[out] code_to_prob Buffer for probabilities of codes. They are calculated
- *                          from the binomial distribution. It is supposed that
- *                          only 4 codes (0, 1, 2, 3) are possible
- * @return Pointer to the table of codes of Hamming weights.
- */
-static const uint8_t *hamming_dc6_fill_hw_tables(GeneratorState *obj,
-    const HammingDc6Options *opts, double *code_to_prob)
-{
-    // Select the right table for recoding Hamming weights to codes
-    int nweights = 0;
-    const uint8_t *hw = NULL;
-    if (opts->mode != hamming_dc6_values) {
-        // 2-bit codes for Hamming weights (taken from PractRand)
-        //                                   0  1  2  3  4  5  6  7  8
-        static const uint8_t hw_to_code[] = {0, 0, 1, 1, 2, 2, 3, 3, 0};
-        hw = hw_to_code;
-        nweights = 9;
-        // binopdf(0:8,8,0.5) * 256:          1  8 28 56 70 56 28  8  1
-    } else if (obj->gi->nbits == 32) {
-        // Our custom table of hw->code table for 32-bit words
-        // sum(binopdf(0:13, 32,0.5)) ans = 0.1885
-        // sum(binopdf(14:15,32,0.5)) ans = 0.2415
-        // sum(binopdf(16:17,32,0.5)) ans = 0.2717
-        // sum(binopdf(18:32,32,0.5)) ans = 0.2983
-        static const uint8_t hw32_to_code[] = {
-            0, 0, 0, 0, 0, 0, 0, 0, // 0-7
-            0, 0, 0, 0, 0, 0, 1, 1, // 8-15
-            2, 2, 3, 3, 3, 3, 3, 3, // 16-23
-            3, 3, 3, 3, 3, 3, 3, 3,  3}; // 24-32
-        hw = hw32_to_code;
-        nweights = 33;
-    } else if (obj->gi->nbits == 64) {
-        // Our custom table of hw-code table for 64-bit words
-        // sum(binopdf(0:28,64,0.5)) ans = 0.1909
-        // sum(binopdf(29:31,64,0.5)) ans = 0.2595
-        // sum(binopdf(32:35,64,0.5)) ans = 0.3588
-        // sum(binopdf(36:64,64,0.5)) ans = 0.1909
-        static const uint8_t hw64_to_code[] = {
-            0, 0, 0, 0, 0, 0, 0, 0, // 0-7
-            0, 0, 0, 0, 0, 0, 0, 0, // 8-15
-            0, 0, 0, 0, 0, 0, 0, 0, // 16-23
-            0, 0, 0, 0, 0, 1, 1, 1, // 24-31
-            2, 2, 2, 2, 3, 3, 3, 3, // 32-39
-            3, 3, 3, 3, 3, 3, 3, 3, // 40-47
-            2, 2, 3, 3, 3, 3, 3, 3, // 48-57
-            3, 3, 3, 3, 3, 3, 3, 3,  3}; // 56-64
-        hw = hw64_to_code;
-        nweights = 65;
-    } else {
-        fprintf(stderr, "Internal error");
-        exit(1);
-    }
-    // Calculate probabilities for codes using p.d.f.
-    // for binomial distribution
-    for (int i = 0; i < 4; i++) {
-        code_to_prob[i] = 0.0;
-    }
-    for (int i = 0; i < nweights; i++) {
-        code_to_prob[hw[i]] += binomial_pdf(i, nweights - 1, 0.5);
-    }
-    return hw;        
-}
-
-
-
-/**
- * @brief Hamming weights based test (modification of DC6-9x1Bytes-1
- * from PractRand by Chris Doty-Humphrey).
- * @details The test was suggested by Chris Doty-Humphrey, the developer
- * of PractRand test suite. Actually it is a family of algorithms that
- * can analyse bytes, 16-bit, 32-bit and 64-bit chunks. The DC6-9x1Bytes-1
- * modification works with bytes and includes the next steps:
- *
- * 1. Input stream is analysed as a sequence of bytes.
- * 2. Each byte is converted to its Hamming weight (number of 1's).
- * 3. Hamming weight is transformed two-bit binary code using a pre-defined
- *    table. The default settings are tuples from 9 codes.
- *    (number of tuple types: `ntuples = 4^9 = 262144`)
- * 4. A set of overlapping tuples (nsamples, much greater than ntuples) is
- *    formed from the stream, the principle is similar to G.Marsaglia
- *    "monkey tests". Number of tuples of each type is counted, histogram,
- *    i.e. Ei values, are formed. The histogram has `ntuples` bins.
- * 5. The obtained histogram is analysed for bins with small amounts of
- *    elements (<= Ei_min = 25). Such bins are concatenated with neighbours.
- * 6. g-test (slightly more accurate modification of chi-square test) is
- *    appled to the obtained histogram. Then the obtained chi2emp is
- *    transformed to the zemp (standard normal distribution) by some
- *    asymptotic formula.
- * 7. The obtained zemp is recalibrated by some empirical data to improve
- *    the p-values accuracy. The inaccuracy is caused by possible dependencies
- *    between different frequencies (just as in "monkey test"). But the step
- *    with bins concatenation makes theoretical approach problematic. So
- *    Monte-Carlo approach with CSPRNG (HC-256?) was used.
- * 8. p-value is calculated for the obtained zemp.
- *
- * WARNING! This description is reverse engineered from the PractrRand source
- * code by A.L.Voskov and may be inaccurate. Some simplifications were made:
- *
- * 1. Codes reordering was excluded.
- * 2. All generalizations for different shifts/settings were excluded (they
- *    are not used in the default PractRand tests battery).
- * 3. Sophisticated scheme with bits mixing during tuples formation was
- *    excluded (probably the author had some ideas about sorting by
- *    probabilities?)
- * 4. A simpler and less accurate recalibration scheme was developed and used.
- *
- * Also a new mode that processes the whole output of PRNG not byte-by-byte
- * was implemented.
- *
- * The test easily detects low-grade PRNGs such as lcg69069, randu, 32-bit,
- * 64-bit and 128-bit xorshift without output scramblers. If only lower bit is
- * analysed - it detects SWB and SWBW (Subtract-with-Borrow + "Weyl sequence").
- * SWBW passes BigCrush but not PractRand. For such detection the ordering of
- * lower bits in the output is very important.
- * 
- * References:
- *
- * 1. Chris Doty-Humphrey. PractRand https://pracrand.sourceforge.net/
- * 2. Blackman D., Vigna S. A New Test for Hamming-Weight Dependencies //
- *    ACM Trans. Model. Comput. Simul. 2022. V. 32, N. 3, Article 19
- *    https://doi.org/10.1145/3527582
- */
-TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts)
-{
-    // Our custom table of hw->code table for 32-bit words
-    double code_to_prob[4];
-    const uint8_t *hw_to_code = hamming_dc6_fill_hw_tables(obj, opts, code_to_prob);
-    // Parameters for 18-bit tuple with 2-bit digits
-    static const unsigned int code_nbits = 2, tuple_size = 9;
-    const uint64_t tuple_mask = (1ull << code_nbits * tuple_size) - 1;
-    //
-    HammingTuplesTable table;
-    HammingTuplesTable_init(&table, code_nbits, tuple_size, code_to_prob);
-
-    uint64_t tuple = 0; // 9 4-bit Hamming weights + 1 extra Hamming weight
-    uint8_t cur_weight; // Current Hamming weight
-    unsigned long long ntuples = hamming_dc6_nbytes_to_ntuples(opts->nbytes,
-        obj->gi->nbits, opts->mode);
-    hamming_dc6_test_print_info(obj, opts, ntuples);
-    obj->intf->printf("  Used probabilities for codes:\n");
-    for (int i = 0; i < 4; i++) {
-        obj->intf->printf("    p(%d) = %10.8f\n", i, code_to_prob[i]);
-    }
-    if (opts->mode == hamming_dc6_values) {
-        // Process input as a sequence of 32/64-bit words
-        // Pre-fill tuple
-        cur_weight = get_uint64_hamming_weight(obj->gi->get_bits(obj->state));
-        for (unsigned int i = 0; i < tuple_size; i++) {
-            tuple = ((tuple << code_nbits) | hw_to_code[cur_weight]) & tuple_mask;
-            cur_weight = get_uint64_hamming_weight(obj->gi->get_bits(obj->state));
-        }
-        // Generate other overlapping tuples
-        for (unsigned long long i = 0; i < ntuples; i++) {
-            // Process current tuple
-            table.tuples[tuple].count++;
-            // Update tuple
-            tuple = ((tuple << code_nbits) | hw_to_code[cur_weight]) & tuple_mask;
-            cur_weight = get_uint64_hamming_weight(obj->gi->get_bits(obj->state));
-        }
-    } else {
-        ByteStreamGenerator bs;
-        if (opts->mode == hamming_dc6_bytes) {
-            ByteStreamGenerator_init(&bs, obj, use_bits_all);
-        } else if (opts->mode == hamming_dc6_bytes_low8) {
-            ByteStreamGenerator_init(&bs, obj, use_bits_low8);
-        } else if (opts->mode == hamming_dc6_bytes_low1) {
-            ByteStreamGenerator_init(&bs, obj, use_bits_low1);
-        } else {
-            fprintf(stderr, "Internal error");
-            exit(1);
-        }
-        // Pre-fill tuple
-        cur_weight = get_byte_hamming_weight(bs.get_byte(&bs));
-        for (unsigned int i = 0; i < tuple_size; i++) {
-            tuple = ((tuple << code_nbits) | hw_to_code[cur_weight]) & tuple_mask;
-            cur_weight = get_byte_hamming_weight(bs.get_byte(&bs));
-        }
-        // Generate other overlapping tuples
-        for (unsigned long long i = 0; i < ntuples; i++) {
-            // Process current tuple
-            table.tuples[tuple].count++;
-            // Update tuple
-            tuple = ((tuple << code_nbits) | hw_to_code[cur_weight]) & tuple_mask;
-            cur_weight = get_byte_hamming_weight(bs.get_byte(&bs));
-        }
-    }
-    // Convert tuples counters to the test results (p-value etc.)
-    obj->intf->printf("   Number of tuples types: %llu\n",
-        (unsigned long long) table.len);
-    TestResults res = HammingTuplesTable_get_results(&table);
-    obj->intf->printf("   Number of bins after reduction: %llu\n",
-        (unsigned long long) table.len);
-    obj->intf->printf("  zemp = %g, p = %g\n", res.x, res.p);
-    obj->intf->printf("\n");
-    HammingTuplesTable_free(&table);
-    return res;
 }

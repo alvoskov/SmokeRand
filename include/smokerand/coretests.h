@@ -35,51 +35,16 @@ typedef struct {
 } GapOptions;
 
 
-typedef struct {
-    unsigned long ngaps;
-} GapNDOptions;
-
-/**
- * @brief Sets which bits of random number will be analysed.
- */
-typedef enum {
-    use_bits_all,
-    use_bits_low8,
-    use_bits_low1
-} UseBitsMode;
-
-
-/**
- * @brief Modes of Hamming weights based DC6 test. Each mode corresponds
- * to the bit chunks that will be used for computation of Hamming weights.
- */
-typedef enum {
-    hamming_dc6_values, ///< Calculate Hamming weights for whole 32/64-bit values.
-    hamming_dc6_bytes, ///< Process PRNG output as byte sequence.
-    hamming_dc6_bytes_low8, ///< Make byte sequence from lower 8 bits of PRNG output
-    hamming_dc6_bytes_low1 ///< Make byte sequence from lower 1 bit of PRNG output
-} HammingDc6Mode;
-
-/**
- * @brief Options for "DC6" test based on overlapping tuples
- * of specially encoded Hamming weights.
- */
-typedef struct {
-    unsigned long long nbytes; ///< Number of bytes processed by the test.
-    HammingDc6Mode mode; ///< Selector of processed bits subset.
-} HammingDc6Options;
-
 TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts);
 TestResults bspace64_1d_ns_test(GeneratorState *obj, unsigned int nsamples);
 TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step);
 TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts);
 TestResults gap_test(GeneratorState *obj, const GapOptions *opts);
-TestResults gap_nd_test(GeneratorState *obj, const GapNDOptions *opts);
+TestResults gap16_count0_test(GeneratorState *obj, long long ngaps);
 TestResults mod3_test(GeneratorState *obj);
 TestResults monobit_freq_test(GeneratorState *obj);
 TestResults byte_freq_test(GeneratorState *obj);
 TestResults word16_freq_test(GeneratorState *obj);
-TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts);
 
 
 #endif

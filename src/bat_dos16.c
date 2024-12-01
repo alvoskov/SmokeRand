@@ -15,6 +15,7 @@
 #include "smokerand/bat_dos16.h"
 #include "smokerand/coretests.h"
 #include "smokerand/lineardep.h"
+#include "smokerand/hwtests.h"
 #include "smokerand/entropy.h"
 
 static TestResults bspace32_1d_test(GeneratorState *obj)
@@ -39,11 +40,6 @@ static TestResults linearcomp_low(GeneratorState *obj)
     return linearcomp_test(obj, 50000, 0);
 }
 
-static TestResults gap_ndnd(GeneratorState *obj)
-{
-    GapNDOptions opts = {.ngaps = 1000000};
-    return gap_nd_test(obj, &opts );
-}
 
 
 void battery_dos16(GeneratorInfo *gen, CallerAPI *intf,
@@ -51,7 +47,7 @@ void battery_dos16(GeneratorInfo *gen, CallerAPI *intf,
 {
     static const TestDescription tests[] = {
 //        {"mod3", mod3_test, 2},
-        {"gap_nd", gap_ndnd, 2},
+//        {"gap16", gap16_count0, 2},
         {"byte_freq", byte_freq_test, 2},
         {"bspace32_1d", bspace32_1d_test, 2},
         {"bspace4_8d_dec", bspace4_8d_dec_test, 3},

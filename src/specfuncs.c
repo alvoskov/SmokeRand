@@ -360,6 +360,23 @@ double binomial_pdf(unsigned long k, unsigned long n, double p)
     return exp(ln_pdf);
 }
 
+/**
+ * @brief Cumulative distribution function for binomial distribution.
+ */
+double binomial_cdf(unsigned long k, unsigned long n, double p)
+{
+    return sr_betainc(1 - p, n - k, 1 + k, NULL);
+}
+
+/**
+ * @brief C.c.d.f. (p-value) for binomial distribution.
+ */
+double binomial_pvalue(unsigned long k, unsigned long n, double p)
+{
+    double cf;
+    (void) sr_betainc(1 - p, n - k, 1 + k, &cf);
+    return cf;
+}
 
 /**
  * @brief Transforms a chi2-distributed variable to the normally distributed value
@@ -490,6 +507,70 @@ double stdnorm_pvalue(double x)
 {
     return stdnorm_cdf(-x);
 }
+
+
+
+/**
+ * @brief (Phi(x) - p) / p(x) relationship for standard normal distriubtion;
+ * it is used in Newton method.
+ * @param x P.d.f. and c.d.f. argument
+ */
+static double stdnorm_cdf_pdf_rel(double x, double p)
+{
+    double pdf = stdnorm_pdf(x);
+    if (x >= 0.0) {
+        return (1 - p) / pdf - stdnorm_pvalue(x) / pdf;
+    } else {
+        return stdnorm_pvalue(-x) / pdf - p / pdf;
+    }
+}
+
+
+
+/**
+ * @brief Inverse cumulative distribution function for the standard normal
+ * distribution.
+ * @details For p close to 0.5 Taylor series are used. For all other values
+ * it begins with an initial approximation by Soranzo et al. and then
+ * refines it by Newton method using the (1 - PHI(x))/p(x) function by
+ * Marsaglia.
+ *   [1] Soranzo A., Epure E. Practical explicitly invertible approxmation
+ *   to 4 decimals of normal cumulative distribution function modifying
+ *   Winitzki's approximation of erf. https://doi.org/10.48550/arXiv.1211.6403
+ *   [2] Marsaglia G. Evaluating the Normal Distribution. // Journal of
+ *   Statisical Software. 2004. V. 11. N 4.
+ *   https://doi.org/10.18637/jss.v011.i04
+ */
+double stdnorm_inv(double p)
+{
+    // Check input arguments
+    if (p < 0 || p > 1) {
+        return NAN;
+    } else if (p < DBL_MIN) {
+        return -HUGE_VAL;
+    } else if (p > 1 - 1e-16) {
+        return +HUGE_VAL;
+    }
+    // Taylor series expansion for p close to 0.5
+    if (fabs(p - 0.5) < 1e-5) {
+        double pp = 2*p - 1;
+        return sqrt(0.5*M_PI) * pp * (1 + M_PI / 12 * pp * pp);
+    }
+    // Soranzo initial approximation 
+    double pp = 4*p*(1 - p);
+    double a = log((pp < DBL_MIN) ? DBL_MIN : pp);
+    double b = 8.5 + a;
+    double z = sqrt(-b + sqrt(b * b - 26.694*a));
+    if (p < 0.5) z = -z;
+    // Newton method iterations
+    double znew = z - stdnorm_cdf_pdf_rel(z, p);
+    for (int i = 0; i < 10 && fabs(znew - z) > DBL_EPSILON; i++) {
+        z = znew;
+        znew -= stdnorm_cdf_pdf_rel(z, p);
+    }
+    return z;
+}
+
 
 
 /**

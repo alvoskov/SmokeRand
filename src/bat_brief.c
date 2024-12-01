@@ -9,6 +9,7 @@
  */
 #include "smokerand/bat_default.h"
 #include "smokerand/coretests.h"
+#include "smokerand/hwtests.h"
 #include "smokerand/lineardep.h"
 #include "smokerand/entropy.h"
 
@@ -105,6 +106,11 @@ static TestResults gap_inv512(GeneratorState *obj)
     return gap_test(obj, &opts );
 }
 
+static TestResults gap16_count0(GeneratorState *obj)
+{
+    return gap16_count0_test(obj, 100000000);
+}
+
 ///////////////////////////////////
 ///// Linear complexity tests /////
 ///////////////////////////////////
@@ -162,6 +168,7 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
         {"collover8_5d", collisionover8_5d, 7},
         {"collover5_8d", collisionover5_8d, 7},
         {"gap_inv512", gap_inv512, 13},
+        {"gap16_count0", gap16_count0, 1},
         {"hamming_dc6_values", hamming_dc6_values_test, 1},
         {"hamming_dc6_low1", hamming_dc6_low1_test, 1},
         {"linearcomp_high", linearcomp_high, 1},

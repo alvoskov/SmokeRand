@@ -10,6 +10,7 @@
 #include "smokerand/bat_full.h"
 #include "smokerand/coretests.h"
 #include "smokerand/lineardep.h"
+#include "smokerand/hwtests.h"
 #include "smokerand/entropy.h"
 
 ///////////////////////////////////
@@ -185,6 +186,11 @@ static TestResults gap_inv1024(GeneratorState *obj)
 }
 
 
+static TestResults gap16_count0(GeneratorState *obj)
+{
+    return gap16_count0_test(obj, 500000000);
+}
+
 /////////////////////////////
 ///// Matrix rank tests /////
 /////////////////////////////
@@ -288,6 +294,7 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         {"collover5_8d_high", collisionover5_8d_high, 72},
         {"gap_inv512", gap_inv512, 14},
         {"gap_inv1024", gap_inv1024, 284},
+        {"gap16_count0", gap16_count0, 5},
         {"hamming_dc6", hamming_dc6_all_test, 36},
         {"hamming_dc6_low1", hamming_dc6_low1_test, 4},
         {"hamming_dc6_low8", hamming_dc6_low8_test, 8},
@@ -299,6 +306,7 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         {"matrixrank_4096_low8", matrixrank_4096_low8, 5},
         {"matrixrank_8192", matrixrank_8192, 36},
         {"matrixrank_8192_low8", matrixrank_8192_low8, 36},
+        {"mod3", mod3_test, 1},
         {NULL, NULL, 0}
     };
 

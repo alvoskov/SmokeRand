@@ -1,5 +1,6 @@
 #include "smokerand/coretests.h"
 #include "smokerand/lineardep.h"
+#include "smokerand/hwtests.h"
 #include "smokerand/entropy.h"
 #include "smokerand/bat_default.h"
 #include "smokerand/bat_brief.h"

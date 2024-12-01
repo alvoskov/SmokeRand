@@ -257,6 +257,29 @@ int test_halfnormal()
     return 0;
 }
 
+int test_binocdf()
+{
+    printf("----- test_binocdf -----\n");
+    printf("%g %g %g\n", binomial_cdf(5,10,0.45), 0.738437299245508,
+        binomial_cdf(5,10,0.45) + binomial_pvalue(5,10,0.45));
+    printf("%g %g %g\n", binomial_cdf(95,100000,1e-3), 0.331101644198284,
+        binomial_cdf(95,100000,1e-3) + binomial_pvalue(95,100000,1e-3));
+    return 0;
+}
+
+int test_norminv()
+{
+    printf("----- test_norminv -----\n");
+    printf("%.15g %.15g\n", stdnorm_inv(0.5 - 1e-8), stdnorm_inv(0.5 + 1e-8));
+    printf("%.15g %.15g\n", stdnorm_inv(0.5 - 1e-4), stdnorm_inv(0.5 + 1e-4));
+    printf("%.15g %.15g\n", stdnorm_inv(0.25), stdnorm_inv(0.75));
+    printf("%.15g %.15g\n", stdnorm_inv(1e-10), stdnorm_inv(1 - 1e-10));
+
+    printf("%.15g\n", stdnorm_inv(1e-50));
+
+    return 0;
+
+}
 
 int main()
 {
@@ -269,6 +292,8 @@ int main()
     test_stdnorm();
     test_halfnormal();
     test_tdistr_cdf();
+    test_binocdf();
+    test_norminv();
     test_radixsort64();
     return 0;
 }
