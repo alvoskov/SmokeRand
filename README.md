@@ -458,6 +458,7 @@ test run required about 25 min.
 -------------------|--------|-------|---------|------|------|-------|--------|---------|-----------
  alfib             | u64    | 5     | 6       | 8    | 0.23 | 2     | +      | Small   | 128 MiB
  alfib_mod         | u32    | +     | +       | +    | 0.50 | +     | N/A    | +       | 1 TiB
+ ara32             | u32    | +     | 1       |      | 0.96 |       |        |         | 512 MiB
  chacha            | u32    | +     | +       | +    | 2.0  | +     | N/A    | +       |
  chacha_avx        | u32    | +     | +       | +    | 0.7  | +     | N/A    | +       |
  chacha_ctr32      | u32    | +     | +       | 1    | 2.0  | +     | N/A    |         | 256 GiB
@@ -479,7 +480,7 @@ test run required about 25 min.
  lcg128_u32_full   | u32    | +     | 1       | 1    | 0.75 | +     | N/A    | +       | >= 32 TiB
  lcg69069          | u32    | 18    | 35      | 38   | 0.38 | 4     | N/A    | -       | 2 KiB
  lfib_par[31+]     | u32    | 5     | 6       |      | 0.59 |       | N/A    | -       | 32 MiB
- lfib_par[55+]     | u32    | 4     | 5       |      | 0.59 |       | N/A    | -       | 2 GiB
+ lfib_par[55+]     | u32    | 4     | 5       | 6    | 0.59 |       | N/A    | -       | 2 GiB
  lfib_par[55-]     | u32    | 4     | 5       |      | 0.57 |       | N/A    |         | 2 GiB
  lfib_par[127+]    | u32    | 4     | 4       |      | 0.57 |       | N/A    | -       | 512 MiB
  lfib_par[127-]    | u32    | 4     | 4       |      | 0.55 |       | N/A    |         | 512 MiB
@@ -522,7 +523,7 @@ test run required about 25 min.
  philox32          | u32    | +     | +       | +    | 2.7  | +     | N/A    | +       | >= 2 TiB
  randu             | u32    | 20    | 36      | 39   | 0.41 | 4     | N/A    | -       | 1 KiB
  ranlux++          | u64    | +     | +       | +    | 3.9  |       |        | +       | >= 1 TiB
- ranrot32          | u32    | +     | 1       | 1    |      | +     | N/A    |         | 1 GiB
+ ranrot32          | u32    | +     | 1       | 1    | 0.68 | +     | N/A    |         | 1 GiB
  r1279             | u32    | 5     | 7       | 10   | 0.47 | 2     | N/A    |         | 64 MiB
  rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
