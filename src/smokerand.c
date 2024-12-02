@@ -207,11 +207,11 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
         size_t len = strlen(argv[i]);
         if (!strcmp(argv[i], "--threads")) {
             obj->nthreads = get_cpu_numcores();
-            printf("%d CPU cores detected\n", obj->nthreads);
+            fprintf(stderr, "%d CPU cores detected\n", obj->nthreads);
             continue;
         }
         if (len < 3 || (argv[i][0] != '-' || argv[i][1] != '-') || eqpos == NULL) {
-            printf("Argument '%s' should have --argname=argval layout\n", argv[i]);
+            fprintf(stderr, "Argument '%s' should have --argname=argval layout\n", argv[i]);
             return 1;
         }
         size_t name_len = (eqpos - argv[i]) - 2;
@@ -227,13 +227,13 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
         if (!strcmp(argname, "nthreads")) {
             obj->nthreads = argval;
             if (argval <= 0) {
-                printf("Invalid value of argument '%s'\n", argname);
+                fprintf(stderr, "Invalid value of argument '%s'\n", argname);
                 return 1;
             }
         } else if (!strcmp(argname, "testid")) {
             obj->testid = argval;
             if (argval <= 0) {
-                printf("Invalid value of argument '%s'\n", argname);
+                fprintf(stderr, "Invalid value of argument '%s'\n", argname);
                 return 1;
             }
         } else if (!strcmp(argname, "reverse-bits")) {
@@ -241,7 +241,7 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
         } else if (!strcmp(argname, "interleaved")) {
             obj->interleaved32 = argval;
         } else {
-            printf("Unknown argument '%s'\n", argname);
+            fprintf(stderr, "Unknown argument '%s'\n", argname);
             return 1;
         }
     }
@@ -273,7 +273,7 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
     } else if (!strcmp(battery_name, "ising")) {
         battery_ising(gi, intf, opts->testid, opts->nthreads);
     } else {
-        printf("Unknown battery %s\n", battery_name);
+        fprintf(stderr, "Unknown battery %s\n", battery_name);
         return 1;
     }
     return 0;
@@ -288,7 +288,8 @@ int print_battery_info(const char *battery_name)
     } else if (!strcmp(battery_name, "full")) {
         battery_full(NULL, NULL, 0, 0);
     } else {
-        printf("Information about battery %s is absent\n", battery_name);
+        fprintf(stderr, "Information about battery %s is absent\n",
+            battery_name);
         return 1;
     }
     return 0;
