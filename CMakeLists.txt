@@ -75,7 +75,7 @@ endif()
 
 
 # Examples of plugins, i.e. modules with PRNGs
-foreach(prng_name alfib alfib_mod chacha chacha_avx coveyou64 cmwc4096 cwg64 drand48
+foreach(prng_name alfib alfib_mod chacha chacha_avx coveyou64 cmwc4096 cwg64 drand48 flea32x1
     isaac64 kiss64 kiss93 kiss99
     lcg32prime
     lcg69069 lcg64 lcg64prime lcg96 lcg96_portable lcg128 lcg128_full lcg128_u32_full
@@ -83,7 +83,7 @@ foreach(prng_name alfib alfib_mod chacha chacha_avx coveyou64 cmwc4096 cwg64 dra
     lfib_par lfsr113 lfsr258 minstd mt19937 mlfib17_5 mrg32k3a
     msws mulberry32
     mwc32x mwc64 mwc64x mwc128 mwc128x mwc1616 mwc1616x mwc3232x
-    r1279 rc4 rrmxmx pcg32 pcg64 pcg64_64 pcg64_xsl_rr philox philox32 randu romutrio sezgin63
+    ranrot32 r1279 rc4 rrmxmx pcg32 pcg64 pcg64_64 pcg64_xsl_rr philox philox32 randu romutrio sezgin63
     sapparot sapparot2
     sfc8 sfc16 sfc32 sfc64 shr3 superduper73 superduper64 superduper64_u32
     swb swblux swbw

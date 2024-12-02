@@ -46,8 +46,6 @@ void battery_dos16(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
     static const TestDescription tests[] = {
-//        {"mod3", mod3_test, 2},
-//        {"gap16", gap16_count0, 2},
         {"byte_freq", byte_freq_test, 2},
         {"bspace32_1d", bspace32_1d_test, 2},
         {"bspace4_8d_dec", bspace4_8d_dec_test, 3},

@@ -234,8 +234,8 @@ Four batteries are implemented in SmokeRand:
  Battery | Number of tests | Bytes (32-bit PRNG) | Bytes (64-bit PRNG)
 ---------|-----------------|---------------------|---------------------
  brief   | 21              | 2^35                | 2^36
- default | 37              | 2^37                | 2^38
- full    | 40              | 2^40                | 2^41
+ default | 38              | 2^37                | 2^38
+ full    | 41              | 2^40                | 2^41
  dos16   | 5               | 2^31                | 2^32
 
 
@@ -477,10 +477,10 @@ test run required about 25 min.
  lcg128            | u64    | 1     | 1       | 1    | 0.35 | 1     | +      | +       | 64 GiB
  lcg128_full       | u64    | 1     | 1       | 1    | 0.42 | 1     | +      | +       | 64 GiB
  lcg128_u32_full   | u32    | +     | 1       | 1    | 0.75 | +     | N/A    | +       | >= 32 TiB
- lcg69069          | u32    | 18    | 34      | 37   | 0.38 | 4     | N/A    | -       | 2 KiB
- lfib_par[31+]     | u32    | 5     | 5       |      | 0.59 |       | N/A    | -       | 32 MiB
- lfib_par[55+]     | u32    | 4     | 4       |      | 0.59 |       | N/A    | -       | 2 GiB
- lfib_par[55-]     | u32    | 4     | 4       |      | 0.57 |       | N/A    |         | 2 GiB
+ lcg69069          | u32    | 18    | 35      | 38   | 0.38 | 4     | N/A    | -       | 2 KiB
+ lfib_par[31+]     | u32    | 5     | 6       |      | 0.59 |       | N/A    | -       | 32 MiB
+ lfib_par[55+]     | u32    | 4     | 5       |      | 0.59 |       | N/A    | -       | 2 GiB
+ lfib_par[55-]     | u32    | 4     | 5       |      | 0.57 |       | N/A    |         | 2 GiB
  lfib_par[127+]    | u32    | 4     | 4       |      | 0.57 |       | N/A    | -       | 512 MiB
  lfib_par[127-]    | u32    | 4     | 4       |      | 0.55 |       | N/A    |         | 512 MiB
  lfib_par[607+]    | u32    | 4     | 4       | 5    | 0.51 |       | N/A    | Small   | 256 GiB
@@ -512,7 +512,7 @@ test run required about 25 min.
  mwc64x            | u32    | +     | +       | +    | 0.53 | +     | N/A    | +       | >= 16 TiB
  mwc128            | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 16 TiB
  mwc128x           | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 8 TiB
- mwc1616           | u32    | 9     | 13      | 15   | 0.48 | +     | N/A    |         | 16 MiB
+ mwc1616           | u32    | 9     | 13      | 16   | 0.48 | +     | N/A    |         | 16 MiB
  mwc1616x          | u32    | +     | +       | +    | 0.67 | +     | N/A    | +       | >= 32 TiB(?)
  mwc3232x          | u64    | +     | +       | +    | 0.23 | +     | +      |         | >= 32 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | +     | N/A    | +       | >= 2 TiB
@@ -520,8 +520,9 @@ test run required about 25 min.
  pcg64_xsl_rr      | u64    | +     | +       | +    | 0.43 | +     | +      |         | >= 32 TiB
  philox            | u64    | +     | +       | +    | 0.85 | +     | +      | +       | >= 2 TiB
  philox32          | u32    | +     | +       | +    | 2.7  | +     | N/A    | +       | >= 2 TiB
- randu             | u32    | 20    | 35      | 38   | 0.41 | 4     | N/A    | -       | 1 KiB
+ randu             | u32    | 20    | 36      | 39   | 0.41 | 4     | N/A    | -       | 1 KiB
  ranlux++          | u64    | +     | +       | +    | 3.9  |       |        | +       | >= 1 TiB
+ ranrot32          | u32    | +     | 1       | 1    |      | +     | N/A    |         | 1 GiB
  r1279             | u32    | 5     | 7       | 10   | 0.47 | 2     | N/A    |         | 64 MiB
  rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
@@ -543,8 +544,8 @@ test run required about 25 min.
  superduper73      | u32    | 9     | 15      | 18   | 0.64 | 1     | N/A    |         | 32 KiB
  superduper64      | u64    | 1     | 3       | 5    | 0.35 | 1     |        |         | 512 KiB
  superduper64_u32  | u32    | +     | +       | +    | 0.70 | +     | N/A    |         | >= 2 TiB
- shr3              | u32    | 15    | 31      | 34   | 0.76 | 2     | N/A    | -       | 32 KiB
- swb               | u32    | 5     | 5       | 6    | 2.7  | 1     | N/A    |         | 128 MiB
+ shr3              | u32    | 15    | 32      | 35   | 0.76 | 2     | N/A    | -       | 32 KiB
+ swb               | u32    | 5     | 6       | 7    | 2.7  | 1     | N/A    |         | 128 MiB
  swblux[luxury=1]  | u32    | +     | +       | +    | 6.3  | +     | N/A    |         | 4 TiB
  swbw              | u32    | 1     | 1       | 1    | 2.8  | +     | N/A    |         | 4 GiB
  tinymt32          | u32    | 2     | 4       | 6    | 1.5  | 1     | N/A    | +       | 4 GiB
@@ -559,7 +560,7 @@ test run required about 25 min.
  xoroshiro1024st   | u64    | 1     | 1       | 2    | 0.33 | 1     |        |         | 128 GiB
  xoroshiro1024stst | u64    | +     | +       | +    | 0.33 | +     |        |         | >= 1 TiB
  xorwow            | u32    | 3     | 7       | 9    | 0.52 | 1     | N/A    | Small   | 128 KiB
- xsh               | u64    | 7     | 10      | 14   | 0.43 | 2     | -      | -       | 32 KiB
+ xsh               | u64    | 7     | 11      | 15   | 0.43 | 2     | -      | -       | 32 KiB
 
 
 About `lcg64prime`: it passes BigCrush if upper 32 bits are returned, but fails it in interleaved
@@ -592,6 +593,11 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 - Passed dieharder: lcg64
 
 # Versions history
+
+02.12.2024: SmokeRand 0.11, ranrot32 PRNG was added. Also a new modification
+of Hamming weights based test was added to `default` and `full` battery (uses
+256-bit words, allows to find longer-range correlations and detect lagged
+Fibonacci generators and RANROT).
 
 01.12.2024: SmokeRand 0.1, an initial version. Requires some testing, extension
 of documentation, completion of `dos16` battery implementation for 16-bit

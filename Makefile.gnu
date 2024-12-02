@@ -68,12 +68,13 @@ EXE_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXE_NAMES)))
 # Generators
 ifeq ($(IS_PORTABLE), 1)
 GEN_SOURCES = $(addsuffix _shared.c,$(addprefix generators/, alfib_mod alfib \
-    chacha coveyou64 crand drand48 isaac64 kiss64 kiss93 kiss99 lcg32prime \
-    lcg64 lcg96_portable lcg128_u32_portable lcg69069 lfib_par lfsr113 lfsr258 \
-    loop_7fff_w64 minstd mlfib17_5 msws mt19937 mulberry32 mwc64x mwc64 pcg32 \
-    pcg64 philox32 r1279 randu ranluxpp rc4 romutrio rrmxmx sapparot sapparot2
-    sfc8 sfc16 sfc32 sfc64 shr3 speck128 splitmix32 splitmix sqxor32 \
-    superduper73 superduper64 superduper64_u32 swblux swbw swb threefry \
+    chacha coveyou64 crand cmwc4096 drand48 isaac64 flea32x1 kiss64 kiss93 \
+    kiss99 lcg32prime lcg64 lcg96_portable lcg128_u32_portable lcg69069 \
+    lfib_par lfsr113 lfsr258 loop_7fff_w64 minstd mlfib17_5 msws mt19937 \
+    mulberry32 mwc64x mwc64 mwc4691 pcg32 pcg64_64 philox32 r1279 randu \
+    ranluxpp ranrot32 rc4 romutrio rrmxmx sapparot sapparot2 \
+    sfc8 sfc16 sfc32 sfc64 shr3 speck128 splitmix32 splitmix sqxor32 stormdrop \
+    superduper73 superduper64 superduper64_u32 swb swblarge swblux swbw threefry \
     tinymt32 tinymt64 well1024a xoroshiro1024stst xoroshiro1024st \
     xoroshiro128pp xoroshiro128p xorshift128p xorshift128 xorwow xsh))
 else

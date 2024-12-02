@@ -263,6 +263,13 @@ static TestResults hamming_dc6_low8_test(GeneratorState *obj)
     return hamming_dc6_test(obj, &opts);
 }
 
+static TestResults hamming_dc6_long256_test(GeneratorState *obj)
+{
+    HammingDc6LongOptions opts = {.nvalues = 1ull << 32};
+    return hamming_dc6_long_test(obj, &opts);
+}
+
+
 void battery_full(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
@@ -296,6 +303,7 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         {"gap_inv1024", gap_inv1024, 284},
         {"gap16_count0", gap16_count0, 27},
         {"hamming_dc6", hamming_dc6_all_test, 36},
+        {"hamming_dc6_long256", hamming_dc6_long256_test, 28},
         {"hamming_dc6_low1", hamming_dc6_low1_test, 4},
         {"hamming_dc6_low8", hamming_dc6_low8_test, 8},
         {"hamming_dc6_values", hamming_dc6_values_test, 16},

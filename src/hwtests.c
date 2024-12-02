@@ -492,3 +492,105 @@ TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts)
     HammingTuplesTable_free(&table);
     return res;
 }
+
+
+
+static const uint8_t *hamming_dc6long_fill_hw_tables(double *code_to_prob)
+{
+    static const int nweights = 257;
+    static uint8_t hw_to_code[257] = {255};
+
+    if (hw_to_code[0] == 255) {
+        for (int i = 0;   i <= 122; i++) hw_to_code[i] = 0;
+        for (int i = 123; i <= 127; i++) hw_to_code[i] = 1;
+        for (int i = 128; i <= 133; i++) hw_to_code[i] = 2;
+        for (int i = 134; i <= 256; i++) hw_to_code[i] = 3;
+    
+    }
+    // Calculate probabilities for codes using p.d.f.
+    // for binomial distribution
+    for (int i = 0; i < 4; i++) {
+        code_to_prob[i] = 0.0;
+    }
+    for (int i = 0; i < nweights; i++) {
+        code_to_prob[hw_to_code[i]] += binomial_pdf(i, nweights - 1, 0.5);
+    }
+    return hw_to_code;        
+}
+
+
+static inline unsigned short get_wlong_hamming_weight(GeneratorState *obj,
+    unsigned int values_per_word)
+{
+    unsigned short hw = 0;
+    for (unsigned int i = 0; i < values_per_word; i++) {
+        hw += get_uint64_hamming_weight(obj->gi->get_bits(obj->state));
+    }
+    return hw;
+}
+
+/**
+ * @brief This version of `hamming_dc6_test` tries to find longer-range
+ * correlations by computation of Hamming weights for 256-bit words.
+ * @details It can be considered as a modification of DC6-9x1Bytes-1 test
+ * from PractRand by Chris Doty-Humphrey. But it also resembles BCFN test
+ * from the same program and z9 test from gjrand by G. Jones.
+ *
+ * Detects additive/subtractive lagged Fibonacci with small lags; its
+ * strong side is detection or RANROT32 generator: it is an additive
+ * lagged Fibonacci PRNG that uses rotations to bypass birthday spacings
+ * and gap tests.
+ * 
+ */
+TestResults hamming_dc6_long_test(GeneratorState *obj, const HammingDc6LongOptions *opts)
+{
+    // Table for conversion of Hamming weight codes to probabilities
+    // 0:122 | 123:127 | 128:133 | 134:256
+    const unsigned int bits_per_word = 256;
+    double code_to_prob[4];
+    const uint8_t *hw_to_code = hamming_dc6long_fill_hw_tables(code_to_prob);
+    // Parameters for 18-bit tuple with 2-bit digits
+    static const unsigned int code_nbits = 2, tuple_size = 9;
+    const uint64_t tuple_mask = (1ull << code_nbits * tuple_size) - 1;
+    //
+    HammingTuplesTable table;
+    HammingTuplesTable_init(&table, code_nbits, tuple_size, code_to_prob);
+
+    uint64_t tuple = 0; // 9 4-bit Hamming weights + 1 extra Hamming weight
+    uint8_t cur_weight; // Current Hamming weight
+    unsigned int values_per_word = bits_per_word / obj->gi->nbits;
+    unsigned long long ntuples = opts->nvalues / values_per_word;
+    obj->intf->printf("Hamming weights based test (DC6), long version\n");
+    obj->intf->printf("  Sample size, values:     %llu\n", opts->nvalues);
+    obj->intf->printf("  Word size, bits:         %u\n", bits_per_word);
+    obj->intf->printf("  Used probabilities for codes:\n");
+    for (int i = 0; i < 4; i++) {
+        obj->intf->printf("    p(%d) = %10.8f\n", i, code_to_prob[i]);
+    }
+    // Process input as a sequence of 256-bit words
+    // Pre-fill tuple
+    cur_weight = get_wlong_hamming_weight(obj, values_per_word);
+    for (unsigned int i = 0; i < tuple_size; i++) {
+        tuple = ((tuple << code_nbits) | hw_to_code[cur_weight]) & tuple_mask;
+        cur_weight = get_wlong_hamming_weight(obj, values_per_word);
+    }
+    // Generate other overlapping tuples
+    for (unsigned long long i = 0; i < ntuples; i++) {
+        // Process current tuple
+        table.tuples[tuple].count++;
+        // Update tuple
+        tuple = ((tuple << code_nbits) | hw_to_code[cur_weight]) & tuple_mask;
+        cur_weight = get_wlong_hamming_weight(obj, values_per_word);
+    }
+    // Convert tuples counters to the test results (p-value etc.)
+    obj->intf->printf("   Number of tuples types: %llu\n",
+        (unsigned long long) table.len);
+    TestResults res = HammingTuplesTable_get_results(&table);
+    obj->intf->printf("   Number of bins after reduction: %llu\n",
+        (unsigned long long) table.len);
+    obj->intf->printf("  zemp = %g, p = %g\n", res.x, res.p);
+    obj->intf->printf("\n");
+    HammingTuplesTable_free(&table);
+    return res;
+}
+

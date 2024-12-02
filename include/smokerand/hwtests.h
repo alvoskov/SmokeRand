@@ -39,7 +39,18 @@ typedef struct {
     HammingDc6Mode mode; ///< Selector of processed bits subset.
 } HammingDc6Options;
 
+
+/**
+ * @brief Options for "DC6" test based on overlapping tuples
+ * of specially encoded Hamming weights.
+ */
+typedef struct {
+    unsigned long long nvalues; ///< Number of bytes processed by the test.
+} HammingDc6LongOptions;
+
+
 TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts);
+TestResults hamming_dc6_long_test(GeneratorState *obj, const HammingDc6LongOptions *opts);
 
 #endif
 
