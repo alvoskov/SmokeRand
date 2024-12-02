@@ -1,5 +1,13 @@
 /**
- * @details https://www.thecodingforums.com/threads/kiss4691-a-potentially-top-ranked-rng.729111/
+ * @file mwc4961_shared.c
+ * @brief MWC4961 generator by G. Marsaglia.
+ * @details A part of combined KISS4691 generator. Passes BigCrush but
+ * not PractRand or gjrand.
+ *
+ * References:
+ * 
+ * 1. G. Marsaglia. KISS4691, a potentially top-ranked RNG.
+ * https://www.thecodingforums.com/threads/kiss4691-a-potentially-top-ranked-rng.729111/
  */
 #include "smokerand/cinterface.h"
 
@@ -20,7 +28,7 @@ static inline uint64_t get_bits_raw(void *state)
     Mwc4691State *obj = state;
     obj->j = (obj->j < 4690) ? obj->j + 1 : 0;
     x = obj->Q[obj->j];
-    t = (x << 13) + obj-> c + x;
+    t = (x << 13) + obj->c + x;
     obj->c = (t < x) + (x >> 19);
     obj->Q[obj->j] = t;
     return obj->Q[obj->j];
@@ -65,13 +73,3 @@ static int run_self_test(const CallerAPI *intf)
 
 MAKE_UINT32_PRNG("Mwc4691", run_self_test)
 
-/*
-int main()
-{unsigned long i,x;
-for(i=0;i<4691;i++) Q=CNG+XS;
-for(i=0;i<1000000000;i++) x=MWC();
-printf(" MWC result=3740121002 ?\n%22u\n",x);
-for(i=0;i<1000000000;i++) x=KISS;
-printf("KISS result=2224631993 ?\n%22u\n",x);
-}
-*/
