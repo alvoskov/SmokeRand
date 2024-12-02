@@ -527,7 +527,7 @@ test run required about 25 min.
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
  rrmxmx            | u64    | +     | +       | +    | 0.14 | +     | -      |         | >= 2 TiB
  sapparot          | u32    | 1     | 3       | 4    | 0.70 | +     | N/A    |         | 8 MiB
- sapparot2         | u32    | +     | +       |      | 0.42 | +     | N/A    |         | >= 64 GiB
+ sapparot2         | u32    | +     | +       | +    | 0.42 | +     | N/A    |         | >= 64 GiB
  sezgin63          | u32    | +     | 1       | 3    | 3.0  | +     | N/A    |         | >= 16 TiB
  sfc8              | u32    | 3     | 7       | 13   | 1.9  | +     | N/A    |         | 128 MiB
  sfc16             | u32    | +     | +       | +    | 0.93 | +     | N/A    |         |
