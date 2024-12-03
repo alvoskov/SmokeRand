@@ -6,10 +6,11 @@
  * \f[
  * X_{n} = X_{n - 607} + X_{n - 273}
  * \f]
- * and returns higher 32 bits. The initial values in the ring buffer
- * are filled by the 64-bit PCG generator.
+ * and returns ALL 64 bits. The initial values in the ring buffer are filled
+ * by the 64-bit PCG generator.
  *
- * Fails bspace32_1d and gap_inv512 tests.
+ * Fails birthday spacings and gap tests, the lowest bit has low linear
+ * complexity.
  * 
  * Sources of parameters:
  *
@@ -24,7 +25,6 @@
 
 PRNG_CMODULE_PROLOG
 
-// Fails both birthday spacings and gap512 tests
 #define LFIB_A 607
 #define LFIB_B 273
 

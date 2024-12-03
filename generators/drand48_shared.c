@@ -3,7 +3,7 @@
  * @brief Classical 48-bit LCG that returns the upper 32 bits.
  * The easy to remember multiplier is suggested by George Marsaglia.
  * Slightly better multipliers are present in https://doi.org/10.1002/spe.303.
- * @details References>:
+ * @details References:
  *
  * 1. https://pubs.opengroup.org/onlinepubs/7908799/xsh/drand48.html
  *

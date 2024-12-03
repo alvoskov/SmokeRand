@@ -12,7 +12,7 @@
  *
  * The PRNG parameters are taken from PractRand source code.
  *
- * WARNING! MINIMAL PERIOD OF RANROT IS UNKNOWN! It was added mainly for
+ * WARNING! THE MINIMAL PERIOD OF RANROT IS UNKNOWN! It was added mainly for
  * testing the `dc6_long` test and shouldn't be used in practice!
  *
  * References:
@@ -23,7 +23,7 @@
  *  3. https://pracrand.sourceforge.net/
  *
  * @copyright RANROT algorithm was developed by Agner Fog, the used parameters
- * were suggested by Chris Doty-Humphrey, the PractRand author.
+ * were taken from PractRand 0.94 by Chris Doty-Humphrey.
  *
  * Implementation for SmokeRand:
  *

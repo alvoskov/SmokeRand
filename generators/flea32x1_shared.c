@@ -1,7 +1,32 @@
+/**
+ * @file flea32x1_shared.c
+ * @brief Implementation of flea32x1 PRNG suggested by Bob Jenkins.
+ * @details A simple non-linear PRNG that passes almost all statistical tests
+ * except `mod3n`. There were several modifications of flea, the implemented
+ * variant is from PractRand 0.94 by Chris Doty-Humphrey.
+ *
+ * WARNING! THE MINIMAL PERIOD OF FLEA32x1 IS UNKNOWN! It was added mainly for
+ * testing the `mod3` test and shouldn't be used in practice!
+ *
+ * References:
+ *
+ * 1. Bob Jenkins. The testing and design of small state noncryptographic
+ *    pseudorandom number generators
+ *    https://burtleburtle.net/bob/rand/talksmall.html
+ * 2. https://pracrand.sourceforge.net/
+ *
+ * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 
+/**
+ * @brief flea32x1 PRNG state.
+ */
 typedef struct {
     uint32_t a;
     uint32_t b;
