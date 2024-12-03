@@ -2,7 +2,8 @@
  * @file rc4_shared.c
  * @brief Implementation of RC4 CSPRNG (obsolete algorithm). 
  * @details This algorithm passes TestU01 BigCrush but fails practrand
- * on 1 TB of data.
+ * on 1 TB of data. It also fails frequency tests for 16-bit words at
+ * large samples (about 0.5 TB).
  *
  * 1. Press W.H., Teukolsky S.A., Vetterling W.T., Flannery B.P.
  *    Numerical recipes. The Art of Scientific Computing. Third Edition.

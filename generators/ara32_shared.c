@@ -4,6 +4,19 @@
  * from PractRand 0.94. It has no lower boundary on its period and
  * fails mod3 test (but passes the vast majority of other statistical
  * tests). Useful for checking mod3 test.
+ *
+ * WARNING! THE MINIMAL PERIOD OF ARA32 IS UNKNOWN! It was added mainly for
+ * testing the `mod3` test and shouldn't be used in practice!
+ *
+ * @copyright The ara32 algorithm was found in the sources of PractRand 0.94
+ * that was developed by Chris Doty-Humphrey.
+ *
+ * Implementation for SmokeRand:
+ *
+ * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 

@@ -2,6 +2,11 @@
  * @file ranshi_shared.c
  * @brief
  * @details
+ *
+ * It seems that `boost_result` variable that is used for making lower
+ * bits of `double` output in the original PRNG has a lower quality
+ * than the `blk_spin` variable for the upper 32 bits.
+ *
  * 1. https://doi.org/10.1016/0010-4655(95)00005-Z
  * 2. https://geant4.kek.jp/lxr-dev/source/externals/clhep/src/RanshiEngine.cc
  * @copyright 

@@ -479,10 +479,10 @@ test run required about 25 min.
  lcg128_full       | u64    | 1     | 1       | 1    | 0.42 | 1     | +      | +       | 64 GiB
  lcg128_u32_full   | u32    | +     | 1       | 1    | 0.75 | +     | N/A    | +       | >= 32 TiB
  lcg69069          | u32    | 18    | 35      | 38   | 0.38 | 4     | N/A    | -       | 2 KiB
- lfib_par[31+]     | u32    | 5     | 6       |      | 0.59 |       | N/A    | -       | 32 MiB
+ lfib_par[31+]     | u32    | 5     | 6       | 7    | 0.59 |       | N/A    | -       | 32 MiB
  lfib_par[55+]     | u32    | 4     | 5       | 6    | 0.59 |       | N/A    | -       | 2 GiB
  lfib_par[55-]     | u32    | 4     | 5       |      | 0.57 |       | N/A    |         | 2 GiB
- lfib_par[127+]    | u32    | 4     | 4       |      | 0.57 |       | N/A    | -       | 512 MiB
+ lfib_par[127+]    | u32    | 4     | 4       | 5    | 0.57 |       | N/A    | -       | 512 MiB
  lfib_par[127-]    | u32    | 4     | 4       |      | 0.55 |       | N/A    |         | 512 MiB
  lfib_par[607+]    | u32    | 4     | 4       | 5    | 0.51 |       | N/A    | Small   | 256 GiB
  lfib_par[607-]    | u32    | 4     | 4       | 5    | 0.51 |       | N/A    |         | 256 GiB
@@ -524,6 +524,7 @@ test run required about 25 min.
  randu             | u32    | 20    | 36      | 39   | 0.41 | 4     | N/A    | -       | 1 KiB
  ranlux++          | u64    | +     | +       | +    | 3.9  |       |        | +       | >= 1 TiB
  ranrot32          | u32    | +     | 1       | 1    | 0.68 | +     | N/A    |         | 1 GiB
+ ranval            | u32    | +     | +       |      | 0.31 |       | N/A    |         |
  r1279             | u32    | 5     | 7       | 10   | 0.47 | 2     | N/A    |         | 64 MiB
  rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
