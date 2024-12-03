@@ -89,6 +89,14 @@ static LFibDyn_State parse_parameters(const CallerAPI *intf)
         obj.r = 127; obj.s = 97; obj.is_additive = 1;
     } else if (!intf->strcmp("127-", param)) {
         obj.r = 127; obj.s = 97; obj.is_additive = 0;
+    } else if (!intf->strcmp("258+", param)) {
+        obj.r = 258; obj.s = 83; obj.is_additive = 1;
+    } else if (!intf->strcmp("258-", param)) {
+        obj.r = 258; obj.s = 83; obj.is_additive = 0;
+    } else if (!intf->strcmp("378+", param)) {
+        obj.r = 378; obj.s = 107; obj.is_additive = 1;
+    } else if (!intf->strcmp("378-", param)) {
+        obj.r = 378; obj.s = 107; obj.is_additive = 0;
     } else if (!intf->strcmp("607+", param) || !intf->strcmp("", param)) {
         obj.r = 607; obj.s = 273; obj.is_additive = 1;
     } else if (!intf->strcmp("607-", param)) {

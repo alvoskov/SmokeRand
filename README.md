@@ -458,7 +458,7 @@ test run required about 25 min.
 -------------------|--------|-------|---------|------|------|-------|--------|---------|-----------
  alfib             | u64    | 5     | 6       | 8    | 0.23 | 2     | +      | Small   | 128 MiB
  alfib_mod         | u32    | +     | +       | +    | 0.50 | +     | N/A    | +       | 1 TiB
- ara32             | u32    | +     | 1       |      | 0.96 |       |        |         | 512 MiB
+ ara32             | u32    | +     | 1       | 1    | 0.96 |       |        |         | 512 MiB
  chacha            | u32    | +     | +       | +    | 2.0  | +     | N/A    | +       |
  chacha_avx        | u32    | +     | +       | +    | 0.7  | +     | N/A    | +       |
  chacha_ctr32      | u32    | +     | +       | 1    | 2.0  | +     | N/A    |         | 256 GiB
@@ -484,11 +484,15 @@ test run required about 25 min.
  lfib_par[55-]     | u32    | 4     | 5       |      | 0.57 |       | N/A    |         | 2 GiB
  lfib_par[127+]    | u32    | 4     | 4       | 5    | 0.57 |       | N/A    | -       | 512 MiB
  lfib_par[127-]    | u32    | 4     | 4       |      | 0.55 |       | N/A    |         | 512 MiB
+ lfib_par[258+]    | u32    |       |         |      |      |       | N/A    |         | 8 GiB
+ lfib_par[258-]    | u32    |       |         |      |      |       | N/A    |         | 8 GiB
+ lfib_par[378+]    | u32    |       |         |      |      |       | N/A    |         | 32 GiB
+ lfib_par[378-]    | u32    |       |         |      |      |       | N/A    |         | 32 GiB
  lfib_par[607+]    | u32    | 4     | 4       | 5    | 0.51 |       | N/A    | Small   | 256 GiB
  lfib_par[607-]    | u32    | 4     | 4       | 5    | 0.51 |       | N/A    |         | 256 GiB
  lfib_par[1279+]   | u32    | 3/4   | 3/4     | 4/5  | 0.52 |       | N/A    | >=Crush | 1 TiB
  lfib_par[1279-]   | u32    | 3/4   | 3/4     | 4/5  | 0.50 |       | N/A    |         |
- lfib_par[2281+]   | u32    | 3     | 3       | 4    | 0.50 |       | N/A    |         |
+ lfib_par[2281+]   | u32    | 3     | 3       | 4    | 0.50 |       | N/A    |         | 8 TiB
  lfib_par[2281-]   | u32    | 3     | 3       | 4    | 0.50 |       | N/A    |         |
  lfib_par[9689+]   | u32    | 1     | 1       | 1    | 0.50 |       | N/A    |         |
  lfib_par[9689-]   | u32    | 1     | 1       | 1    | 0.50 |       | N/A    |         |
@@ -524,7 +528,7 @@ test run required about 25 min.
  randu             | u32    | 20    | 36      | 39   | 0.41 | 4     | N/A    | -       | 1 KiB
  ranlux++          | u64    | +     | +       | +    | 3.9  |       |        | +       | >= 1 TiB
  ranrot32          | u32    | +     | 1       | 1    | 0.68 | +     | N/A    |         | 1 GiB
- ranval            | u32    | +     | +       |      | 0.31 |       | N/A    |         |
+ ranval            | u32    | +     | +       |      | 0.31 |       | N/A    |         | >= 2 TiB
  r1279             | u32    | 5     | 7       | 10   | 0.47 | 2     | N/A    |         | 64 MiB
  rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
