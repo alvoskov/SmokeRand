@@ -2,7 +2,7 @@
  * @file coretests.c
  * @brief The key tests for testings PRNGs: frequency tests, Marsaglia's
  * birthday spacings and monkey tests, Knuth's gap test. Also includes
- * Hamming weights based DC6 test from PractRand.
+ * the mod3 test from gjrand.
  *
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
@@ -883,32 +883,40 @@ TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
 /**
  * @brief A simplified version of `mod3` test from gjrand.
  * @details Detects some generators with nonlinear mappings, e.g. `flea32x1`
- * by Bob Jenkins.
+ * by Bob Jenkins or `ara32` from PractRand 0.94. These transformations are
+ * based on combinations of additions and cyclic rotations; and multiplication
+ * by 3 can be represented as a combination of left shift and addition.
+ *
+ * At larger samples (about 2^30 values) it catches 32-bit LCGs with (even
+ * with prime modulus and shr3 (xorshift32).
+ * @param nvalues Sample size, number of values (at least 2^27 is recommended).
  */
-TestResults mod3_test(GeneratorState *obj)
+TestResults mod3_test(GeneratorState *obj, unsigned long long nvalues)
 {
     TestResults ans = TestResults_create("mod3");
     const size_t ntuples = 19683; // 3^9
     unsigned long long *Oi = calloc(ntuples, sizeof(unsigned long long));
-    unsigned long long n = 1 << 27;
     uint32_t tuple = 0;
+    obj->intf->printf("mod3 test\n");
+    obj->intf->printf("  Sample size: %llu values\n", nvalues);
     for (int i = 0; i < 9; i++) {
         int d = obj->gi->get_bits(obj->state) % 3;
         tuple = (tuple * 3 + d) % ntuples;
     }
-    for (unsigned long long i = 0; i < n; i++) {
+    for (unsigned long long i = 0; i < nvalues; i++) {
         Oi[tuple]++;
         int d = obj->gi->get_bits(obj->state) % 3;
         tuple = (tuple * 3 + d) % ntuples;
     }
-    double Ei = (double) n / (double) ntuples;
+    double Ei = (double) nvalues / (double) ntuples;
     ans.x = 0.0;
     for (size_t i = 0; i < ntuples; i++) {
         ans.x += (Oi[i] - Ei) * (Oi[i] - Ei) / Ei;
     }
-    ans.p = chi2_pvalue(ans.x, ntuples - 1);
-    ans.alpha = chi2_cdf(ans.x, ntuples - 1);
-    obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
+    ans.x = chi2_to_stdnorm_approx(ans.x, ntuples - 1);
+    ans.p = stdnorm_pvalue(ans.x);
+    ans.alpha = stdnorm_cdf(ans.x);    
+    obj->intf->printf("  z = %g; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
     return ans;
 }

@@ -494,18 +494,37 @@ TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts)
 }
 
 
-
-static const uint8_t *hamming_dc6long_fill_hw_tables(double *code_to_prob)
+/**
+ * @brief Fill tables for conversion of Hamming weights to codes; and
+ * codes - to probabilities.
+ */
+static void hamming_dc6_long_fill_hw_tables(unsigned short *hw_to_code,
+    double *code_to_prob, int bits_per_word)
 {
-    static const int nweights = 257;
-    static uint8_t hw_to_code[257] = {255};
-
-    if (hw_to_code[0] == 255) {
+    const int nweights = bits_per_word + 1;
+    if (bits_per_word == 128) {
+        // 0:59 | 60:64 | 65:68 | 69:128 
+        for (int i = 0;  i <= 59; i++)  hw_to_code[i] = 0;
+        for (int i = 60; i <= 64; i++)  hw_to_code[i] = 1;
+        for (int i = 65; i <= 68; i++)  hw_to_code[i] = 2;
+        for (int i = 69; i <= 128; i++) hw_to_code[i] = 3;
+    } else if (bits_per_word == 256) {
+        // 0:122 | 123:127 | 128:133 | 134:256
         for (int i = 0;   i <= 122; i++) hw_to_code[i] = 0;
         for (int i = 123; i <= 127; i++) hw_to_code[i] = 1;
         for (int i = 128; i <= 133; i++) hw_to_code[i] = 2;
         for (int i = 134; i <= 256; i++) hw_to_code[i] = 3;
-    
+    } else if (bits_per_word == 512) {
+        // 0:247 | 248:255 | 256:264 | 265:512 
+        for (int i = 0;   i <= 247; i++) hw_to_code[i] = 0;
+        for (int i = 248; i <= 255; i++) hw_to_code[i] = 1;
+        for (int i = 256; i <= 264; i++) hw_to_code[i] = 2;
+        for (int i = 265; i <= 512; i++) hw_to_code[i] = 3;
+    } else {
+        // Unknown word size: do something that will cause failure
+        for (int i = 0; i < nweights; i++) {
+            hw_to_code[0] = 0;
+        }
     }
     // Calculate probabilities for codes using p.d.f.
     // for binomial distribution
@@ -515,7 +534,6 @@ static const uint8_t *hamming_dc6long_fill_hw_tables(double *code_to_prob)
     for (int i = 0; i < nweights; i++) {
         code_to_prob[hw_to_code[i]] += binomial_pdf(i, nweights - 1, 0.5);
     }
-    return hw_to_code;        
 }
 
 
@@ -544,11 +562,10 @@ static inline unsigned short get_wlong_hamming_weight(GeneratorState *obj,
  */
 TestResults hamming_dc6_long_test(GeneratorState *obj, const HammingDc6LongOptions *opts)
 {
-    // Table for conversion of Hamming weight codes to probabilities
-    // 0:122 | 123:127 | 128:133 | 134:256
-    const unsigned int bits_per_word = 256;
+    const unsigned int bits_per_word = opts->wordsize;
     double code_to_prob[4];
-    const uint8_t *hw_to_code = hamming_dc6long_fill_hw_tables(code_to_prob);
+    unsigned short *hw_to_code = calloc(bits_per_word + 1, sizeof(unsigned short));
+    hamming_dc6_long_fill_hw_tables(hw_to_code, code_to_prob, bits_per_word);
     // Parameters for 18-bit tuple with 2-bit digits
     static const unsigned int code_nbits = 2, tuple_size = 9;
     const uint64_t tuple_mask = (1ull << code_nbits * tuple_size) - 1;
@@ -557,7 +574,7 @@ TestResults hamming_dc6_long_test(GeneratorState *obj, const HammingDc6LongOptio
     HammingTuplesTable_init(&table, code_nbits, tuple_size, code_to_prob);
 
     uint64_t tuple = 0; // 9 4-bit Hamming weights + 1 extra Hamming weight
-    uint8_t cur_weight; // Current Hamming weight
+    unsigned short cur_weight; // Current Hamming weight
     unsigned int values_per_word = bits_per_word / obj->gi->nbits;
     unsigned long long ntuples = opts->nvalues / values_per_word;
     obj->intf->printf("Hamming weights based test (DC6), long version\n");
@@ -591,6 +608,7 @@ TestResults hamming_dc6_long_test(GeneratorState *obj, const HammingDc6LongOptio
     obj->intf->printf("  zemp = %g, p = %g\n", res.x, res.p);
     obj->intf->printf("\n");
     HammingTuplesTable_free(&table);
+    free(hw_to_code);
     return res;
 }
 

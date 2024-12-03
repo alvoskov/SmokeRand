@@ -40,12 +40,19 @@ typedef struct {
 } HammingDc6Options;
 
 
+typedef enum {
+    hamming_dc6_w128 = 128,
+    hamming_dc6_w256 = 256,
+    hamming_dc6_w512 = 512
+} HammingDc6WordSize;
+
 /**
  * @brief Options for "DC6" test based on overlapping tuples
  * of specially encoded Hamming weights.
  */
 typedef struct {
     unsigned long long nvalues; ///< Number of bytes processed by the test.
+    HammingDc6WordSize wordsize; ///< Word size (128, 256 or 512 bits).
 } HammingDc6LongOptions;
 
 

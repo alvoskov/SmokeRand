@@ -233,10 +233,25 @@ static TestResults hamming_dc6_low8_test(GeneratorState *obj)
     return hamming_dc6_test(obj, &opts);
 }
 
+static TestResults hamming_dc6_long128_test(GeneratorState *obj)
+{
+    HammingDc6LongOptions opts = {.nvalues = 1ull << 30, .wordsize = hamming_dc6_w128};
+    return hamming_dc6_long_test(obj, &opts);
+}
+
 static TestResults hamming_dc6_long256_test(GeneratorState *obj)
 {
-    HammingDc6LongOptions opts = {.nvalues = 1ull << 30};
+    HammingDc6LongOptions opts = {.nvalues = 1ull << 30, .wordsize = hamming_dc6_w256};
     return hamming_dc6_long_test(obj, &opts);
+}
+
+///////////////////////
+///// Other tests /////
+///////////////////////
+
+static TestResults mod3_short_test(GeneratorState *obj)
+{
+    return mod3_test(obj, 1ull << 28);
 }
 
 
@@ -272,6 +287,7 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf,
         {"gap_inv512", gap_inv512, 14},
         {"gap16_count0", gap16_count0, 10},
         {"hamming_dc6", hamming_dc6_all_test, 5},
+        {"hamming_dc6_long128", hamming_dc6_long128_test, 7},
         {"hamming_dc6_long256", hamming_dc6_long256_test, 7},
         {"hamming_dc6_low1", hamming_dc6_low1_test, 5},
         {"hamming_dc6_low8", hamming_dc6_low8_test, 5},
@@ -281,7 +297,7 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf,
         {"linearcomp_low", linearcomp_low, 1},
         {"matrixrank_4096", matrixrank_4096, 4},
         {"matrixrank_4096_low8", matrixrank_4096_low8, 5},
-        {"mod3", mod3_test, 1},
+        {"mod3", mod3_short_test, 1},
         {NULL, NULL, 0}
     };
 

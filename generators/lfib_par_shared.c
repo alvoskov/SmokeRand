@@ -59,6 +59,49 @@ typedef struct {
     uint64_t *u; ///< Ring buffer (u[0] is not used)
 } LFibDyn_State;
 
+typedef struct {
+    const char *name;
+    int is_additive;
+    int r;
+    int s;
+} LFibDynDescr;
+
+
+static const LFibDynDescr generators[] = {
+    {.name = "31+",     .r = 31,     .s = 3,      .is_additive = 1}, // from glibc
+    {.name = "55+",     .r = 55,     .s = 24,     .is_additive = 1},
+    {.name = "55-",     .r = 55,     .s = 24,     .is_additive = 0},
+    {.name = "127+",    .r = 127,    .s = 97,     .is_additive = 1},
+    {.name = "127-",    .r = 127,    .s = 97,     .is_additive = 0},
+    {.name = "258+",    .r = 258,    .s = 83,     .is_additive = 1},
+    {.name = "258-",    .r = 258,    .s = 83,     .is_additive = 0},
+    {.name = "378+",    .r = 378,    .s = 107,    .is_additive = 1},
+    {.name = "378-",    .r = 378,    .s = 107,    .is_additive = 0},
+    {.name = "607+",    .r = 607,    .s = 273,    .is_additive = 1}, // from golang
+    {.name = "607-",    .r = 607,    .s = 273,    .is_additive = 0},
+    {.name = "1279+",   .r = 1279,   .s = 418,    .is_additive = 1},
+    {.name = "1279-",   .r = 1279,   .s = 418,    .is_additive = 0},
+    {.name = "2281+",   .r = 2281,   .s = 1252,   .is_additive = 1},
+    {.name = "2281-",   .r = 2281,   .s = 1252,   .is_additive = 0},
+    {.name = "3217+",   .r = 3217,   .s = 576,    .is_additive = 1},
+    {.name = "3217-",   .r = 3217,   .s = 576,    .is_additive = 0},
+    {.name = "4423+",   .r = 4423,   .s = 2098,   .is_additive = 1},
+    {.name = "4423-",   .r = 4423,   .s = 2098,   .is_additive = 0},
+    {.name = "9689+",   .r = 9689,   .s = 5502,   .is_additive = 1},
+    {.name = "9689-",   .r = 9689,   .s = 5502,   .is_additive = 0},
+    {.name = "19937+",  .r = 19937,  .s = 9842,   .is_additive = 1},
+    {.name = "19937-",  .r = 19937,  .s = 9842,   .is_additive = 0},
+    {.name = "23209+",  .r = 23209,  .s = 13470,  .is_additive = 1},
+    {.name = "23209-",  .r = 23209,  .s = 13470,  .is_additive = 0},
+    {.name = "44497+",  .r = 44497,  .s = 21034,  .is_additive = 1},
+    {.name = "44497-",  .r = 44497,  .s = 21034,  .is_additive = 0},
+    {.name = "110503+", .r = 110503, .s = 53719,  .is_additive = 1},
+    {.name = "110503-", .r = 110503, .s = 53719,  .is_additive = 0},
+    {.name = "756839+", .r = 756839, .s = 279695, .is_additive = 1},
+    {.name = "756839-", .r = 756839, .s = 279695, .is_additive = 0},
+    {.name = NULL,      .r = 0,      .s = 0,      .is_additive = 0}
+};
+
 static inline uint64_t get_bits_raw(void *state)
 {
     LFibDyn_State *obj = state;
@@ -77,72 +120,13 @@ static inline uint64_t get_bits_raw(void *state)
 
 static LFibDyn_State parse_parameters(const CallerAPI *intf)
 {
-    LFibDyn_State obj;
+    LFibDyn_State obj = {.r = 0, .s = 0, .is_additive = 0};
     const char *param = intf->get_param();
-    if (!intf->strcmp("31+", param)) { // from glibc
-        obj.r = 31; obj.s = 3; obj.is_additive = 1;
-    } else if (!intf->strcmp("55+", param)) {
-        obj.r = 55; obj.s = 24; obj.is_additive = 1;
-    } else if (!intf->strcmp("55-", param)) {
-        obj.r = 55; obj.s = 24; obj.is_additive = 0;
-    } else if (!intf->strcmp("127+", param)) {
-        obj.r = 127; obj.s = 97; obj.is_additive = 1;
-    } else if (!intf->strcmp("127-", param)) {
-        obj.r = 127; obj.s = 97; obj.is_additive = 0;
-    } else if (!intf->strcmp("258+", param)) {
-        obj.r = 258; obj.s = 83; obj.is_additive = 1;
-    } else if (!intf->strcmp("258-", param)) {
-        obj.r = 258; obj.s = 83; obj.is_additive = 0;
-    } else if (!intf->strcmp("378+", param)) {
-        obj.r = 378; obj.s = 107; obj.is_additive = 1;
-    } else if (!intf->strcmp("378-", param)) {
-        obj.r = 378; obj.s = 107; obj.is_additive = 0;
-    } else if (!intf->strcmp("607+", param) || !intf->strcmp("", param)) {
-        obj.r = 607; obj.s = 273; obj.is_additive = 1;
-    } else if (!intf->strcmp("607-", param)) {
-        obj.r = 607; obj.s = 273; obj.is_additive = 0;
-    } else if (!intf->strcmp("1279+", param)) {
-        obj.r = 1279; obj.s = 418; obj.is_additive = 1;
-    } else if (!intf->strcmp("1279-", param)) {
-        obj.r = 1279; obj.s = 418; obj.is_additive = 0;
-    } else if (!intf->strcmp("2281+", param)) {
-        obj.r = 2281; obj.s = 1252; obj.is_additive = 1;
-    } else if (!intf->strcmp("2281-", param)) {
-        obj.r = 2281; obj.s = 1252; obj.is_additive = 0;
-    } else if (!intf->strcmp("3217+", param)) {
-        obj.r = 3217; obj.s = 576; obj.is_additive = 1;
-    } else if (!intf->strcmp("3217-", param)) {
-        obj.r = 3217; obj.s = 576; obj.is_additive = 0;
-    } else if (!intf->strcmp("4423+", param)) {
-        obj.r = 4423; obj.s = 2098; obj.is_additive = 1;
-    } else if (!intf->strcmp("4423-", param)) {
-        obj.r = 4423; obj.s = 2098; obj.is_additive = 0;
-    } else if (!intf->strcmp("9689+", param)) {
-        obj.r = 9689; obj.s = 5502; obj.is_additive = 1;
-    } else if (!intf->strcmp("9689-", param)) {
-        obj.r = 9689; obj.s = 5502; obj.is_additive = 0;
-    } else if (!intf->strcmp("19937+", param)) {
-        obj.r = 19937; obj.s = 9842; obj.is_additive = 1;
-    } else if (!intf->strcmp("19937-", param)) {
-        obj.r = 19937; obj.s = 9842; obj.is_additive = 0;
-    } else if (!intf->strcmp("23209+", param)) {
-        obj.r = 23209; obj.s = 13470; obj.is_additive = 1;
-    } else if (!intf->strcmp("23209-", param)) {
-        obj.r = 23209; obj.s = 13470; obj.is_additive = 0;
-    } else if (!intf->strcmp("44497+", param)) {
-        obj.r = 44497; obj.s = 21034; obj.is_additive = 1;
-    } else if (!intf->strcmp("44497-", param)) {
-        obj.r = 44497; obj.s = 21034; obj.is_additive = 0;
-    } else if (!intf->strcmp("110503+", param)) {
-        obj.r = 110503; obj.s = 53719; obj.is_additive = 1;
-    } else if (!intf->strcmp("110503-", param)) {
-        obj.r = 110503; obj.s = 53719; obj.is_additive = 0;
-    } else if (!intf->strcmp("756839+", param)) {
-        obj.r = 756839; obj.s = 279695; obj.is_additive = 1;
-    } else if (!intf->strcmp("756839-", param)) {
-        obj.r = 756839; obj.s = 279695; obj.is_additive = 0;
-    } else {
-        obj.r = 0; obj.s = 0; obj.is_additive = 0;
+    for (const LFibDynDescr *ptr = generators; ptr->name != NULL; ptr++) {
+        if (!intf->strcmp(ptr->name, param)) { // from glibc
+            obj.r = ptr->r; obj.s = ptr->s;
+            obj.is_additive = ptr->is_additive;
+        }        
     }
     obj.i = obj.r; obj.j = obj.s;
     return obj;
