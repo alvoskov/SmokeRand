@@ -103,6 +103,13 @@ typedef struct {
 
 TestResults TestResults_create(const char *name);
 
+typedef enum {
+    ram_lo = 0,
+    ram_med = 1,
+    ram_hi = 2
+} RamLoad;
+
+
 /**
  * @brief Test generalized description.
  */
@@ -110,6 +117,7 @@ typedef struct {
     const char *name;
     TestResults (*run)(GeneratorState *obj);
     unsigned int nseconds; ///< Estimated time, seconds
+    int ram_load; ///< Intensity of RAM usage (0, 1, 2)
 } TestDescription;
 
 
@@ -148,8 +156,6 @@ typedef struct {
 GeneratorInfo define_reversed_generator(const GeneratorInfo *gi);
 GeneratorInfo define_interleaved_generator(const GeneratorInfo *gi);
 
-//GeneratorInfo reversed_generator_set(const GeneratorInfo *gi);
-//GeneratorInfo interleaved_generator_set(const GeneratorInfo *gi);
 
 typedef struct {
     unsigned int h; ///< Hours

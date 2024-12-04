@@ -46,12 +46,12 @@ void battery_dos16(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
     static const TestDescription tests[] = {
-        {"byte_freq", byte_freq_test, 2},
-        {"bspace32_1d", bspace32_1d_test, 2},
-        {"bspace4_8d_dec", bspace4_8d_dec_test, 3},
-        {"linearcomp_high", linearcomp_high, 1},
-        {"linearcomp_low", linearcomp_low, 1},
-        {NULL, NULL, 0}
+        {"byte_freq", byte_freq_test, 2, ram_lo},
+        {"bspace32_1d", bspace32_1d_test, 2, ram_hi},
+        {"bspace4_8d_dec", bspace4_8d_dec_test, 3, ram_lo},
+        {"linearcomp_high", linearcomp_high, 1, ram_lo},
+        {"linearcomp_low", linearcomp_low, 1, ram_lo},
+        {NULL, NULL, 0, 0}
     };
 
     const TestsBattery bat = {
