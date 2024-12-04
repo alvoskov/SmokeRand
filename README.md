@@ -79,7 +79,8 @@ Implemented tests:
 7. Gap test on 16-bit words with zero counting (modified `rda16` from gjrand).
 8. Matrix rank test.
 9. Linear complexity test.
-10. Hamming weights based DC6 test from PractRand.
+10. Hamming weights tests based on overlapping tuples (similar to DC6 test
+    from PractRand 0.94).
 11. Simplified `mod3` test from grand.
 
 
@@ -233,9 +234,9 @@ Four batteries are implemented in SmokeRand:
 
  Battery | Number of tests | Bytes (32-bit PRNG) | Bytes (64-bit PRNG)
 ---------|-----------------|---------------------|---------------------
- brief   | 21              | 2^35                | 2^36
- default | 39              | 2^37                | 2^38
- full    | 42              | 2^40                | 2^41
+ brief   | 22              | 2^35                | 2^36
+ default | 40              | 2^37                | 2^38
+ full    | 43              | 2^40                | 2^41
  dos16   | 5               | 2^31                | 2^32
 
 
@@ -418,12 +419,14 @@ one-threaded mode. Linear complexity test is much faster in this case.
  matrixrank_8192      | 8192   | 32/64
  matrixrank_8192_low8 | 8192   | 8
 
-## Hamming weights based "DC6" test
+## Hamming weights tests based on overlapping tuples.
 
 This test is a modification of `DC6-9x1Bytes-1` test from PractRand by Chris
 Doty-Humphrey. Actually it is a family of algorithms that can analyse bytes,
 16-bit, 32-bit and 64-bit chunks. The DC6-9x1Bytes-1 modification works with
-bytes.
+bytes. SmokeRand `hamming_ot` tests also can process longer 128-bit, 256-bit
+and 512-bit chunks that are especially useful for detection of RANROT and
+additive/subtractive lagged Fibonacci generators.
 
 # Extra tests description
 
@@ -465,7 +468,7 @@ test run required about 25 min.
  cmwc4096          | u32    | +     | +       | +    | 0.43 | +     | N/A    | +       | >= 32 TiB
  coveyou64         | u32    | 3     | 4       | 4    | 0.62 | 1     | N/A    | Small   | 256 KiB
  cwg64             | u64    | +     | +       | +    | 0.30 | +     | +      |         | >= 1 TiB
- drand48           | u32    | 12    | 19      | 21   | 0.72 | 1     | N/A    | -       | 1 MiB
+ drand48           | u32    | 12    | 20      | >=21 | 0.72 | 1     | N/A    | -       | 1 MiB
  isaac64           | u64    | +     | +       | +    | 0.75 | +     | +      | +       | >= 1 TiB
  flea32x1          | u32    | +     | 1       | 1    | 0.48 | +     | N/A    |         | 4 MiB
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | 1     | N/A    | Small   | 1 MiB
@@ -478,9 +481,9 @@ test run required about 25 min.
  lcg128            | u64    | 1     | 1       | 1    | 0.35 | 1     | +      | +       | 64 GiB
  lcg128_full       | u64    | 1     | 1       | 1    | 0.42 | 1     | +      | +       | 64 GiB
  lcg128_u32_full   | u32    | +     | 1       | 1    | 0.75 | +     | N/A    | +       | >= 32 TiB
- lcg69069          | u32    | 18    | 35      | 38   | 0.38 | 4     | N/A    | -       | 2 KiB
- lfib_par[31+]     | u32    | 5     | 6       | 7    | 0.59 |       | N/A    | -       | 32 MiB
- lfib_par[55+]     | u32    | 4     | 5       | 6    | 0.59 |       | N/A    | -       | 2 GiB
+ lcg69069          | u32    | 19    | 37/38   | >=38 | 0.38 | 4     | N/A    | -       | 2 KiB
+ lfib_par[31+]     | u32    | 5/6   | 6/7     | >=7  | 0.59 |       | N/A    | -       | 32 MiB
+ lfib_par[55+]     | u32    | 4     | 5       | >=6  | 0.59 |       | N/A    | -       | 2 GiB
  lfib_par[55-]     | u32    | 4     | 5       |      | 0.57 |       | N/A    |         | 2 GiB
  lfib_par[127+]    | u32    | 4     | 4       | 5    | 0.57 |       | N/A    | -       | 512 MiB
  lfib_par[127-]    | u32    | 4     | 4       |      | 0.55 |       | N/A    |         | 512 MiB
@@ -517,7 +520,7 @@ test run required about 25 min.
  mwc64x            | u32    | +     | +       | +    | 0.53 | +     | N/A    | +       | >= 16 TiB
  mwc128            | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 16 TiB
  mwc128x           | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 8 TiB
- mwc1616           | u32    | 9     | 13      | 16   | 0.48 | +     | N/A    |         | 16 MiB
+ mwc1616           | u32    | 9     | 12/18   | >=16 | 0.48 | +     | N/A    |         | 16 MiB
  mwc1616x          | u32    | +     | +       | +    | 0.67 | +     | N/A    | +       | >= 32 TiB(?)
  mwc3232x          | u64    | +     | +       | +    | 0.23 | +     | +      |         | >= 32 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | +     | N/A    | +       | >= 2 TiB
@@ -525,10 +528,12 @@ test run required about 25 min.
  pcg64_xsl_rr      | u64    | +     | +       | +    | 0.43 | +     | +      |         | >= 32 TiB
  philox            | u64    | +     | +       | +    | 0.85 | +     | +      | +       | >= 2 TiB
  philox32          | u32    | +     | +       | +    | 2.7  | +     | N/A    | +       | >= 2 TiB
- randu             | u32    | 20    | 36      | 39   | 0.41 | 4     | N/A    | -       | 1 KiB
+ randu             | u32    | 21    | 39      | >=39 | 0.41 | 4     | N/A    | -       | 1 KiB
  ranlux++          | u64    | +     | +       | +    | 3.9  |       |        | +       | >= 1 TiB
- ranrot32          | u32    | +     | 1       | 1    | 0.68 | +     | N/A    |         | 1 GiB
- ranval            | u32    | +     | +       |      | 0.31 |       | N/A    |         | >= 2 TiB
+ ranrot32[7/3]     | u32    | 1/2   | 4/5     | 5    |      | +     | N/A    |         | 128 MiB
+ ranrot32[17/9]    | u32    | 1     | 2       | 3    | 0.68 | +     | N/A    |         | 1 GiB
+ ranrot32[57/13]   | u32    | +     | +       | 1    |      | +     | N/A    |         | 8 GiB
+ ranval            | u32    | +     | +       |      | 0.31 |       | N/A    |         | >= 4 TiB
  r1279             | u32    | 5     | 7       | 10   | 0.47 | 2     | N/A    |         | 64 MiB
  rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
@@ -559,14 +564,14 @@ test run required about 25 min.
  threefry          | u64    | +     | +       | +    | 1.0  | +     |        | +       | >= 1 TiB
  well1024a         | u32    | 3     | 5       | 7    | 1.0  | 2     | N/A    | Small   | 64 MiB
  wyrand            | u64    | +     | +       | +    | 0.08 | +     | +      |         | >= 1 TiB
- xorshift128       | u32    | 4     | 6       | 8    | 0.41 | 2     | N/A    |         | 128 KiB
+ xorshift128       | u32    | 4     | 6/7     | 8    | 0.41 | 2     | N/A    |         | 128 KiB
  xorshift128p      | u64    | 1     | 2       | 3    | 0.21 | 1     | +      |         | 32 GiB
  xoroshiro128p     | u64    | 1     | 2       | 3    | 0.16 | 1     | +      |         | 16 MiB
  xoroshiro128pp    | u64    | +     | +       | +    | 0.20 | +     | +      |         | >= 2 TiB
  xoroshiro1024st   | u64    | 1     | 1       | 2    | 0.33 | 1     |        |         | 128 GiB
  xoroshiro1024stst | u64    | +     | +       | +    | 0.33 | +     |        |         | >= 1 TiB
  xorwow            | u32    | 3     | 7       | 9    | 0.52 | 1     | N/A    | Small   | 128 KiB
- xsh               | u64    | 7     | 11      | 15   | 0.43 | 2     | -      | -       | 32 KiB
+ xsh               | u64    | 8     | 13      | 17   | 0.43 | 2     | -      | -       | 32 KiB
 
 
 About `lcg64prime`: it passes BigCrush if upper 32 bits are returned, but fails it in interleaved

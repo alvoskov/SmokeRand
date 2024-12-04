@@ -34,16 +34,16 @@
  */
 #include "smokerand/cinterface.h"
 
-#define LAG1 17
-#define LAG2 9
 #define ROT1 9
 #define ROT2 13
 
 PRNG_CMODULE_PROLOG
 
 typedef struct {
-    uint32_t x[LAG1];
-    size_t pos;
+    int pos;
+    int lag1;
+    int lag2;
+    uint32_t *x;
 } RanRot32State;
 
 
@@ -52,7 +52,16 @@ static inline uint32_t rotl32(uint32_t x, unsigned int r)
     return (x << r) | (x >> (32 - r));
 }
 
-
+/**
+ * @brief An optimized implementation of lagged Fibonacci style PRNG.
+ * @details The buffer before refilling looks like:
+ *
+ *     [x_{-r} x_{-(r-1)} ... x_{-1}]
+ *
+ * The first cycle works goes until the x_{n-s} will hit the right
+ * boundary. The second cycle processes the rest of the array and
+ * works in its opposite sides.
+ */
 static inline uint64_t get_bits_raw(void *state)
 {
     RanRot32State *obj = state;
@@ -60,23 +69,39 @@ static inline uint64_t get_bits_raw(void *state)
     if (obj->pos != 0) {
         return x[--obj->pos];
     }
-    for (size_t i = 0; i < LAG2; i++) {
-        x[i] = rotl32(x[i + LAG1 - LAG1], ROT1) + rotl32(x[i + LAG1 - LAG2], ROT2);
+    int dlag = obj->lag1 - obj->lag2;
+    for (int i = 0; i < obj->lag2; i++) {
+        x[i] = rotl32(x[i], ROT1) + rotl32(x[i + dlag], ROT2);
     }
-    for (size_t i = LAG2; i < LAG1; i++) {
-        x[i] = rotl32(x[i - 0], ROT1) + rotl32(x[i - LAG2], ROT2);
+    for (int i = obj->lag2; i < obj->lag1; i++) {
+        x[i] = rotl32(x[i], ROT1) + rotl32(x[i - obj->lag2], ROT2);
     }
-    obj->pos = LAG1;
+    obj->pos = obj->lag1;
     return x[--obj->pos];
 }
 
 
 static void *create(const CallerAPI *intf)
 {
-    RanRot32State *obj = intf->malloc(sizeof(RanRot32State));
+    int lag1 = 17, lag2 = 9;
+    const char *param = intf->get_param();
+    if (!intf->strcmp("7_3", param)) {
+        lag1 = 7; lag2 = 3;
+    } else if (!intf->strcmp("17_9", param) || !intf->strcmp("", param)) {
+        lag1 = 17; lag2 = 9;
+    } else if (!intf->strcmp("57_13", param)) {
+        lag1 = 57; lag2 = 13;
+    } else {
+        intf->printf("Unknown parameter %s\n", param);
+        return NULL;
+    }
+    intf->printf("RANROT32(%d,%d)\n", lag1, lag2);
+    RanRot32State *obj = intf->malloc(sizeof(RanRot32State) + lag1 * sizeof(uint32_t));   
+    obj->x = (uint32_t *) ( (char *) obj + sizeof(RanRot32State) );
     // pcg_rxs_m_xs64 for initialization
     uint64_t state = intf->get_seed64();
-    for (int i = 0; i < LAG1; i++) {
+    obj->lag1 = lag1; obj->lag2 = lag2;
+    for (int i = 0; i < obj->lag2; i++) {
         obj->x[i] = pcg_bits64(&state) >> 32;
     }
     obj->pos = 0; // Mark buffer uninitialized

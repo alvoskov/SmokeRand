@@ -205,7 +205,7 @@ TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
     for (size_t i = 0; i < obj->len; i++) {
         count_total += obj->tuples[i].count;
     }
-    TestResults ans = TestResults_create("hamming_dc6");
+    TestResults ans = TestResults_create("hamming_ot");
     ans.x = 0;
     for (size_t i = 0; i < obj->len; i++) {
         double Ei = count_total * obj->tuples[i].p;
@@ -231,26 +231,26 @@ void HammingTuplesTable_free(HammingTuplesTable *obj)
  * @brief Converts number of samples (bytes or words) to number of generated
  * tuples (not tuples types)
  */
-unsigned long long hamming_dc6_nbytes_to_ntuples(unsigned long long nbytes,
-    unsigned int nbits, HammingDc6Mode mode)
+unsigned long long hamming_ot_nbytes_to_ntuples(unsigned long long nbytes,
+    unsigned int nbits, HammingOtMode mode)
 {
     unsigned long long ntuples = nbytes;
     // Note: tuples are overlapping, i.e. one new tuple digit means
     // one new tuple.
     switch (mode) {
-    case hamming_dc6_values:
+    case hamming_ot_values:
         // Each PRNG output is converted to tuple digits
         ntuples = nbytes * 8 / nbits;
         break;
-    case hamming_dc6_bytes:
+    case hamming_ot_bytes:
         // Each byte is converted to tuple digit
         ntuples = nbytes;
         break;
-    case hamming_dc6_bytes_low8:
+    case hamming_ot_bytes_low8:
         // Only lower bytes of PRNG outputs are converted to tuple digits
         ntuples = nbytes * 8 / nbits;
         break;
-    case hamming_dc6_bytes_low1:
+    case hamming_ot_bytes_low1:
         // Only lower bits of PRNG outputs are converted to tuple digits
         ntuples = nbytes / nbits;
         break;
@@ -265,25 +265,25 @@ unsigned long long hamming_dc6_nbytes_to_ntuples(unsigned long long nbytes,
  * @brief Print the information about "Hamming DC6" test settings, especially
  * about input stream processing mode.
  */
-static void hamming_dc6_test_print_info(GeneratorState *obj, const HammingDc6Options *opts,
+static void hamming_ot_test_print_info(GeneratorState *obj, const HammingOtOptions *opts,
     unsigned long long ntuples)
 {
-    obj->intf->printf("Hamming weights based tests (DC6)\n");
+    obj->intf->printf("Hamming weights based tests (overlapping tuples)\n");
     obj->intf->printf("  Sample size, bytes:     %llu\n", opts->nbytes);
     obj->intf->printf("  Tuples to be generated: %llu\n", ntuples);
     switch (opts->mode) {
-    case hamming_dc6_values:
+    case hamming_ot_values:
         obj->intf->printf("  Mode: process %d-bit words of PRNG output directly\n",
             (int) obj->gi->nbits);
         break;
-    case hamming_dc6_bytes:
+    case hamming_ot_bytes:
         obj->intf->printf("  Mode: process PRNG output as a stream of bytes\n",
             (int) obj->gi->nbits);
         break;
-    case hamming_dc6_bytes_low1:
+    case hamming_ot_bytes_low1:
         obj->intf->printf("  Mode: byte stream made of lower bits (bit 0) of PRNG values\n");
         break;
-    case hamming_dc6_bytes_low8:
+    case hamming_ot_bytes_low8:
         obj->intf->printf("  Mode: byte stream made of 8 lower bits (bit 7..0) of PRNG values\n");
         break;
     }
@@ -294,19 +294,19 @@ static void hamming_dc6_test_print_info(GeneratorState *obj, const HammingDc6Opt
  * Takes into account both output size of PRNG (32 or 64 bits) and output stream mode
  * (bytes or 32/64-bit words).
  * @param[in]  obj          Information about used PRNG and its state
- * @param[in]  opts         Hamming DC6 test options.
+ * @param[in]  opts         Hamming overlapping tuples test options.
  * @param[out] code_to_prob Buffer for probabilities of codes. They are calculated
  *                          from the binomial distribution. It is supposed that
  *                          only 4 codes (0, 1, 2, 3) are possible
  * @return Pointer to the table of codes of Hamming weights.
  */
-static const uint8_t *hamming_dc6_fill_hw_tables(GeneratorState *obj,
-    const HammingDc6Options *opts, double *code_to_prob)
+static const uint8_t *hamming_ot_fill_hw_tables(GeneratorState *obj,
+    const HammingOtOptions *opts, double *code_to_prob)
 {
     // Select the right table for recoding Hamming weights to codes
     int nweights = 0;
     const uint8_t *hw = NULL;
-    if (opts->mode != hamming_dc6_values) {
+    if (opts->mode != hamming_ot_values) {
         // 2-bit codes for Hamming weights (taken from PractRand)
         //                                   0  1  2  3  4  5  6  7  8
         static const uint8_t hw_to_code[] = {0, 0, 1, 1, 2, 2, 3, 3, 0};
@@ -361,8 +361,8 @@ static const uint8_t *hamming_dc6_fill_hw_tables(GeneratorState *obj,
 
 
 /**
- * @brief Hamming weights based test (modification of DC6-9x1Bytes-1
- * from PractRand by Chris Doty-Humphrey).
+ * @brief Hamming weights based test that uses overlapping tuple; it is
+ * a modification of DC6-9x1Bytes-1 from PractRand by Chris Doty-Humphrey.
  * @details The test was suggested by Chris Doty-Humphrey, the developer
  * of PractRand test suite. Actually it is a family of algorithms that
  * can analyse bytes, 16-bit, 32-bit and 64-bit chunks. The DC6-9x1Bytes-1
@@ -402,7 +402,9 @@ static const uint8_t *hamming_dc6_fill_hw_tables(GeneratorState *obj,
  * 4. A simpler and less accurate recalibration scheme was developed and used.
  *
  * Also a new mode that processes the whole output of PRNG not byte-by-byte
- * was implemented.
+ * was implemented. So the name was changed from "DC6" to "ot" (overlapping
+ * tuples): it is not a reimplementation of DC6 from PractRand but similar
+ * test based on ideas from it.
  *
  * The test easily detects low-grade PRNGs such as lcg69069, randu, 32-bit,
  * 64-bit and 128-bit xorshift without output scramblers. If only lower bit is
@@ -417,11 +419,11 @@ static const uint8_t *hamming_dc6_fill_hw_tables(GeneratorState *obj,
  *    ACM Trans. Model. Comput. Simul. 2022. V. 32, N. 3, Article 19
  *    https://doi.org/10.1145/3527582
  */
-TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts)
+TestResults hamming_ot_test(GeneratorState *obj, const HammingOtOptions *opts)
 {
     // Our custom table of hw->code table for 32-bit words
     double code_to_prob[4];
-    const uint8_t *hw_to_code = hamming_dc6_fill_hw_tables(obj, opts, code_to_prob);
+    const uint8_t *hw_to_code = hamming_ot_fill_hw_tables(obj, opts, code_to_prob);
     // Parameters for 18-bit tuple with 2-bit digits
     static const unsigned int code_nbits = 2, tuple_size = 9;
     const uint64_t tuple_mask = (1ull << code_nbits * tuple_size) - 1;
@@ -431,14 +433,14 @@ TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts)
 
     uint64_t tuple = 0; // 9 4-bit Hamming weights + 1 extra Hamming weight
     uint8_t cur_weight; // Current Hamming weight
-    unsigned long long ntuples = hamming_dc6_nbytes_to_ntuples(opts->nbytes,
+    unsigned long long ntuples = hamming_ot_nbytes_to_ntuples(opts->nbytes,
         obj->gi->nbits, opts->mode);
-    hamming_dc6_test_print_info(obj, opts, ntuples);
+    hamming_ot_test_print_info(obj, opts, ntuples);
     obj->intf->printf("  Used probabilities for codes:\n");
     for (int i = 0; i < 4; i++) {
         obj->intf->printf("    p(%d) = %10.8f\n", i, code_to_prob[i]);
     }
-    if (opts->mode == hamming_dc6_values) {
+    if (opts->mode == hamming_ot_values) {
         // Process input as a sequence of 32/64-bit words
         // Pre-fill tuple
         cur_weight = get_uint64_hamming_weight(obj->gi->get_bits(obj->state));
@@ -456,11 +458,11 @@ TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts)
         }
     } else {
         ByteStreamGenerator bs;
-        if (opts->mode == hamming_dc6_bytes) {
+        if (opts->mode == hamming_ot_bytes) {
             ByteStreamGenerator_init(&bs, obj, use_bits_all);
-        } else if (opts->mode == hamming_dc6_bytes_low8) {
+        } else if (opts->mode == hamming_ot_bytes_low8) {
             ByteStreamGenerator_init(&bs, obj, use_bits_low8);
-        } else if (opts->mode == hamming_dc6_bytes_low1) {
+        } else if (opts->mode == hamming_ot_bytes_low1) {
             ByteStreamGenerator_init(&bs, obj, use_bits_low1);
         } else {
             fprintf(stderr, "Internal error");
@@ -498,7 +500,7 @@ TestResults hamming_dc6_test(GeneratorState *obj, const HammingDc6Options *opts)
  * @brief Fill tables for conversion of Hamming weights to codes; and
  * codes - to probabilities.
  */
-static void hamming_dc6_long_fill_hw_tables(unsigned short *hw_to_code,
+static void hamming_ot_long_fill_hw_tables(unsigned short *hw_to_code,
     double *code_to_prob, int bits_per_word)
 {
     const int nweights = bits_per_word + 1;
@@ -520,6 +522,12 @@ static void hamming_dc6_long_fill_hw_tables(unsigned short *hw_to_code,
         for (int i = 248; i <= 255; i++) hw_to_code[i] = 1;
         for (int i = 256; i <= 264; i++) hw_to_code[i] = 2;
         for (int i = 265; i <= 512; i++) hw_to_code[i] = 3;
+    } else if (bits_per_word == 1024) {
+        // 0:500 | 501:511 | 512:523 | 524:1024 
+        for (int i = 0;   i <= 500; i++)  hw_to_code[i] = 0;
+        for (int i = 501; i <= 511; i++)  hw_to_code[i] = 1;
+        for (int i = 512; i <= 523; i++)  hw_to_code[i] = 2;
+        for (int i = 524; i <= 1024; i++) hw_to_code[i] = 3;
     } else {
         // Unknown word size: do something that will cause failure
         for (int i = 0; i < nweights; i++) {
@@ -548,7 +556,7 @@ static inline unsigned short get_wlong_hamming_weight(GeneratorState *obj,
 }
 
 /**
- * @brief This version of `hamming_dc6_test` tries to find longer-range
+ * @brief This version of `hamming_ot_test` tries to find longer-range
  * correlations by computation of Hamming weights for 256-bit words.
  * @details It can be considered as a modification of DC6-9x1Bytes-1 test
  * from PractRand by Chris Doty-Humphrey. But it also resembles BCFN test
@@ -560,12 +568,12 @@ static inline unsigned short get_wlong_hamming_weight(GeneratorState *obj,
  * and gap tests.
  * 
  */
-TestResults hamming_dc6_long_test(GeneratorState *obj, const HammingDc6LongOptions *opts)
+TestResults hamming_ot_long_test(GeneratorState *obj, const HammingOtLongOptions *opts)
 {
     const unsigned int bits_per_word = opts->wordsize;
     double code_to_prob[4];
     unsigned short *hw_to_code = calloc(bits_per_word + 1, sizeof(unsigned short));
-    hamming_dc6_long_fill_hw_tables(hw_to_code, code_to_prob, bits_per_word);
+    hamming_ot_long_fill_hw_tables(hw_to_code, code_to_prob, bits_per_word);
     // Parameters for 18-bit tuple with 2-bit digits
     static const unsigned int code_nbits = 2, tuple_size = 9;
     const uint64_t tuple_mask = (1ull << code_nbits * tuple_size) - 1;
@@ -577,7 +585,7 @@ TestResults hamming_dc6_long_test(GeneratorState *obj, const HammingDc6LongOptio
     unsigned short cur_weight; // Current Hamming weight
     unsigned int values_per_word = bits_per_word / obj->gi->nbits;
     unsigned long long ntuples = opts->nvalues / values_per_word;
-    obj->intf->printf("Hamming weights based test (DC6), long version\n");
+    obj->intf->printf("Hamming weights based test (overlapping tuples), long version\n");
     obj->intf->printf("  Sample size, values:     %llu\n", opts->nvalues);
     obj->intf->printf("  Word size, bits:         %u\n", bits_per_word);
     obj->intf->printf("  Used probabilities for codes:\n");

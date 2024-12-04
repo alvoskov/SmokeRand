@@ -58,49 +58,49 @@ static TestResults bspace32_2d_high(GeneratorState *obj)
 
 static TestResults bspace21_3d(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 21, .ndims = 3, .nsamples = 250, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 21, .ndims = 3, .nsamples = 200, .get_lower = 1};
     return bspace_nd_test(obj, &opts);
 }
 
 static TestResults bspace21_3d_high(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 21, .ndims = 3, .nsamples = 250, .get_lower = 0};
+    BSpaceNDOptions opts = {.nbits_per_dim = 21, .ndims = 3, .nsamples = 200, .get_lower = 0};
     return bspace_nd_test(obj, &opts);
 }
 
 static TestResults bspace16_4d(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 16, .ndims = 4, .nsamples = 250, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 16, .ndims = 4, .nsamples = 200, .get_lower = 1};
     return bspace_nd_test(obj, &opts);
 }
 
 static TestResults bspace16_4d_high(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 16, .ndims = 4, .nsamples = 250, .get_lower = 0};
+    BSpaceNDOptions opts = {.nbits_per_dim = 16, .ndims = 4, .nsamples = 200, .get_lower = 0};
     return bspace_nd_test(obj, &opts);
 }
 
 static TestResults bspace8_8d(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 8, .ndims = 8, .nsamples = 250, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 8, .ndims = 8, .nsamples = 200, .get_lower = 1};
     return bspace_nd_test(obj, &opts);
 }
 
 static TestResults bspace8_8d_high(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 8, .ndims = 8, .nsamples = 250, .get_lower = 0};
+    BSpaceNDOptions opts = {.nbits_per_dim = 8, .ndims = 8, .nsamples = 200, .get_lower = 0};
     return bspace_nd_test(obj, &opts);
 }
 
 static TestResults bspace4_16d(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 4, .ndims = 16, .nsamples = 250, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 4, .ndims = 16, .nsamples = 200, .get_lower = 1};
     return bspace_nd_test(obj, &opts);
 }
 
 static TestResults bspace4_16d_high(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 4, .ndims = 16, .nsamples = 250, .get_lower = 0};
+    BSpaceNDOptions opts = {.nbits_per_dim = 4, .ndims = 16, .nsamples = 200, .get_lower = 0};
     return bspace_nd_test(obj, &opts);
 }
 
@@ -239,40 +239,46 @@ static TestResults linearcomp_low(GeneratorState *obj)
 ///// Hamming weights based tests /////
 ///////////////////////////////////////
 
-static TestResults hamming_dc6_all_test(GeneratorState *obj)
+static TestResults hamming_ot_all_test(GeneratorState *obj)
 {
-    HammingDc6Options opts = {.mode = hamming_dc6_bytes, .nbytes = 1ull << 33};
-    return hamming_dc6_test(obj, &opts);
+    HammingOtOptions opts = {.mode = hamming_ot_bytes, .nbytes = 1ull << 33};
+    return hamming_ot_test(obj, &opts);
 }
 
-static TestResults hamming_dc6_values_test(GeneratorState *obj)
+static TestResults hamming_ot_values_test(GeneratorState *obj)
 {
-    HammingDc6Options opts = {.mode = hamming_dc6_values, .nbytes = 1ull << 33};
-    return hamming_dc6_test(obj, &opts);
+    HammingOtOptions opts = {.mode = hamming_ot_values, .nbytes = 1ull << 33};
+    return hamming_ot_test(obj, &opts);
 }
 
-static TestResults hamming_dc6_low1_test(GeneratorState *obj)
+static TestResults hamming_ot_low1_test(GeneratorState *obj)
 {
-    HammingDc6Options opts = {.mode = hamming_dc6_bytes_low1, .nbytes = 1ull << 32};
-    return hamming_dc6_test(obj, &opts);
+    HammingOtOptions opts = {.mode = hamming_ot_bytes_low1, .nbytes = 1ull << 32};
+    return hamming_ot_test(obj, &opts);
 }
 
-static TestResults hamming_dc6_low8_test(GeneratorState *obj)
+static TestResults hamming_ot_low8_test(GeneratorState *obj)
 {
-    HammingDc6Options opts = {.mode = hamming_dc6_bytes_low8, .nbytes = 1ull << 32};
-    return hamming_dc6_test(obj, &opts);
+    HammingOtOptions opts = {.mode = hamming_ot_bytes_low8, .nbytes = 1ull << 32};
+    return hamming_ot_test(obj, &opts);
 }
 
-static TestResults hamming_dc6_long128_test(GeneratorState *obj)
+static TestResults hamming_ot_long128_test(GeneratorState *obj)
 {
-    HammingDc6LongOptions opts = {.nvalues = 1ull << 32, .wordsize = hamming_dc6_w128};
-    return hamming_dc6_long_test(obj, &opts);
+    HammingOtLongOptions opts = {.nvalues = 1ull << 33, .wordsize = hamming_ot_w128};
+    return hamming_ot_long_test(obj, &opts);
 }
 
-static TestResults hamming_dc6_long256_test(GeneratorState *obj)
+static TestResults hamming_ot_long256_test(GeneratorState *obj)
 {
-    HammingDc6LongOptions opts = {.nvalues = 1ull << 32, .wordsize = hamming_dc6_w256};
-    return hamming_dc6_long_test(obj, &opts);
+    HammingOtLongOptions opts = {.nvalues = 1ull << 33, .wordsize = hamming_ot_w256};
+    return hamming_ot_long_test(obj, &opts);
+}
+
+static TestResults hamming_ot_long512_test(GeneratorState *obj)
+{
+    HammingOtLongOptions opts = {.nvalues = 1ull << 33, .wordsize = hamming_ot_w512};
+    return hamming_ot_long_test(obj, &opts);
 }
 
 ///////////////////////
@@ -298,15 +304,15 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         {"bspace32_1d_high", bspace32_1d_high, 2},
         {"bspace32_2d", bspace32_2d, 90},
         {"bspace32_2d_high", bspace32_2d_high, 90},
-        {"bspace21_3d", bspace21_3d, 77},
-        {"bspace21_3d_high", bspace21_3d_high, 77},
-        {"bspace16_4d", bspace16_4d, 97},
-        {"bspace16_4d_high", bspace16_4d_high, 97},
-        {"bspace8_8d", bspace8_8d, 120},
-        {"bspace8_8d_high", bspace8_8d_high, 120},
+        {"bspace21_3d", bspace21_3d, 62},
+        {"bspace21_3d_high", bspace21_3d_high, 62},
+        {"bspace16_4d", bspace16_4d, 78},
+        {"bspace16_4d_high", bspace16_4d_high, 78},
+        {"bspace8_8d", bspace8_8d, 96},
+        {"bspace8_8d_high", bspace8_8d_high, 96},
         {"bspace4_8d_dec", bspace4_8d_dec, 30},
-        {"bspace4_16d", bspace4_16d, 145},
-        {"bspace4_16d_high", bspace4_16d_high, 145},
+        {"bspace4_16d", bspace4_16d, 116},
+        {"bspace4_16d_high", bspace4_16d_high, 116},
         {"collover20_2d", collisionover20_2d, 73},
         {"collover20_2d_high", collisionover20_2d_high, 73},
         {"collover13_3d", collisionover13_3d, 73},
@@ -318,12 +324,13 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         {"gap_inv512", gap_inv512, 14},
         {"gap_inv1024", gap_inv1024, 284},
         {"gap16_count0", gap16_count0, 27},
-        {"hamming_dc6", hamming_dc6_all_test, 36},
-        {"hamming_dc6_long128", hamming_dc6_long128_test, 28},
-        {"hamming_dc6_long256", hamming_dc6_long256_test, 28},
-        {"hamming_dc6_low1", hamming_dc6_low1_test, 4},
-        {"hamming_dc6_low8", hamming_dc6_low8_test, 8},
-        {"hamming_dc6_values", hamming_dc6_values_test, 16},
+        {"hamming_ot", hamming_ot_all_test, 36},
+        {"hamming_ot_long128", hamming_ot_long128_test, 55},
+        {"hamming_ot_long256", hamming_ot_long256_test, 55},
+        {"hamming_ot_long512", hamming_ot_long512_test, 55},
+        {"hamming_ot_low1", hamming_ot_low1_test, 4},
+        {"hamming_ot_low8", hamming_ot_low8_test, 8},
+        {"hamming_ot_values", hamming_ot_values_test, 16},
         {"linearcomp_high", linearcomp_high, 35},
         {"linearcomp_mid", linearcomp_mid, 35},
         {"linearcomp_low", linearcomp_low, 35},

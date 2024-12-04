@@ -136,18 +136,23 @@ static TestResults linearcomp_low(GeneratorState *obj)
 ///// Hamming weights based tests /////
 ///////////////////////////////////////
 
-static TestResults hamming_dc6_values_test(GeneratorState *obj)
+static TestResults hamming_ot_values_test(GeneratorState *obj)
 {
-    HammingDc6Options opts = {.mode = hamming_dc6_values, .nbytes = 1ull << 28};
-    return hamming_dc6_test(obj, &opts);
+    HammingOtOptions opts = {.mode = hamming_ot_values, .nbytes = 1ull << 28};
+    return hamming_ot_test(obj, &opts);
 }
 
-static TestResults hamming_dc6_low1_test(GeneratorState *obj)
+static TestResults hamming_ot_low1_test(GeneratorState *obj)
 {
-    HammingDc6Options opts = {.mode = hamming_dc6_bytes_low1, .nbytes = 1ull << 30};
-    return hamming_dc6_test(obj, &opts);
+    HammingOtOptions opts = {.mode = hamming_ot_bytes_low1, .nbytes = 1ull << 30};
+    return hamming_ot_test(obj, &opts);
 }
 
+static TestResults hamming_ot_long128_test(GeneratorState *obj)
+{
+    HammingOtLongOptions opts = {.nvalues = 1ull << 28, .wordsize = hamming_ot_w128};
+    return hamming_ot_long_test(obj, &opts);
+}
 
 void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
@@ -169,8 +174,9 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
         {"collover5_8d", collisionover5_8d, 7},
         {"gap_inv512", gap_inv512, 13},
         {"gap16_count0", gap16_count0, 2},
-        {"hamming_dc6_values", hamming_dc6_values_test, 1},
-        {"hamming_dc6_low1", hamming_dc6_low1_test, 1},
+        {"hamming_ot_low1", hamming_ot_low1_test, 1},
+        {"hamming_ot_values", hamming_ot_values_test, 1},
+        {"hamming_ot_u128", hamming_ot_long128_test, 2},
         {"linearcomp_high", linearcomp_high, 1},
         {"linearcomp_mid", linearcomp_mid, 1},
         {"linearcomp_low", linearcomp_low, 1},

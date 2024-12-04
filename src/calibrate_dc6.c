@@ -13,11 +13,11 @@
 #include <string.h>
 #include <float.h>
 
-static TestResults hamming_dc6_all_test(GeneratorState *obj)
+static TestResults hamming_ot_all_test(GeneratorState *obj)
 {
-    HammingDc6Options opts = {.mode = hamming_dc6_bytes, .nbytes = 100000000};
+    HammingOtOptions opts = {.mode = hamming_ot_bytes, .nbytes = 100000000};
 //    HammingDc6Options opts = {.mode = hamming_dc6_values, .nbytes = 100000000};
-    return hamming_dc6_test(obj, &opts);
+    return hamming_ot_test(obj, &opts);
 }
 
 
@@ -43,7 +43,7 @@ int main()
     GeneratorState obj = GeneratorState_create(gi, &intf);
     for (int i = 0; i < nsamples; i++) {
         printf("%d out of %d\n", i + 1, nsamples);
-        TestResults res = hamming_dc6_all_test(&obj);
+        TestResults res = hamming_ot_all_test(&obj);
         z_ary[i] = res.x;
     }
     fprintf(fp, "z = [");
