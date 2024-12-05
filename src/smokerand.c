@@ -186,11 +186,35 @@ void print_help(void)
 }
 
 
+typedef enum {
+    filter_none,
+    filter_reverse_bits,
+    filter_interleaved32,
+    filter_high32,
+    filter_low32,
+    filter_unknown
+} GeneratorFilter;
+
+
+GeneratorFilter GeneratorFilter_from_name(const char *name)
+{
+    if (!strcmp("reverse-bits", name)) {
+        return filter_reverse_bits;
+    } else if (!strcmp("interleaved32", name)) {
+        return filter_interleaved32;
+    } else if (!strcmp("high32", name)) {
+        return filter_high32;
+    } else if (!strcmp("low32", name)) {
+        return filter_low32;
+    } else {
+        return filter_unknown;
+    }
+}
+
 typedef struct {
     int nthreads;
     int testid;
-    int reverse_bits;
-    int interleaved32;
+    GeneratorFilter filter;
 } SmokeRandSettings;
 
 
@@ -198,8 +222,7 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
 {
     obj->nthreads = 1;
     obj->testid = TESTS_ALL;
-    obj->reverse_bits = 0;
-    obj->interleaved32 = 0;
+    obj->filter = filter_none;
     for (int i = 3; i < argc; i++) {
         char argname[32];
         int argval;
@@ -221,6 +244,13 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
         if (!strcmp(argname, "param")) {
             set_cmd_param(eqpos + 1);
             continue;
+        } else if (!strcmp(argname, "filter")) {
+            obj->filter = GeneratorFilter_from_name(eqpos + 1);
+            if (obj->filter == filter_unknown) {
+                fprintf(stderr, "Unknown filter %s\n", eqpos + 1);
+                return 1;
+            }
+            continue;
         }
         // Numerical arguments processing
         argval = atoi(eqpos + 1);
@@ -236,10 +266,6 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
                 fprintf(stderr, "Invalid value of argument '%s'\n", argname);
                 return 1;
             }
-        } else if (!strcmp(argname, "reverse-bits")) {
-            obj->reverse_bits = argval;
-        } else if (!strcmp(argname, "interleaved")) {
-            obj->interleaved32 = argval;
         } else {
             fprintf(stderr, "Unknown argument '%s'\n", argname);
             return 1;
@@ -313,7 +339,7 @@ int main(int argc, char *argv[])
         print_help();
         return 0;
     }
-    GeneratorInfo reversed_gen, interleaved_gen;
+    GeneratorInfo filter_gen;
     SmokeRandSettings opts;
     if (SmokeRandSettings_load(&opts, argc, argv)) {
         return 1;
@@ -327,11 +353,6 @@ int main(int argc, char *argv[])
 
     if (opts.nthreads > 1 && (is_stdin32 || is_stdin64)) {
         fprintf(stderr, "Multithreading is not supported for stdin32/stdin64\n");
-        return 1;
-    }
-
-    if (opts.reverse_bits == 1 && opts.interleaved32 == 1) {
-        fprintf(stderr, "--reverse-bits=1 and --interleaved=1 are mutually exclusive\n");
         return 1;
     }
 
@@ -358,23 +379,47 @@ int main(int argc, char *argv[])
         CallerAPI_free();
         return ans;
     } else {
-        CallerAPI intf = (opts.nthreads == 1) ? CallerAPI_init() : CallerAPI_init_mthr();
         GeneratorModule mod = GeneratorModule_load(generator_lib);
         if (!mod.valid) {
-            CallerAPI_free();
             return 1;
         }
         GeneratorInfo *gi = &mod.gen;
-        if (opts.reverse_bits) {
-            reversed_gen = define_reversed_generator(gi);
-            gi = &reversed_gen;
+        if (gi->nbits != 64 && (opts.filter == filter_interleaved32 ||
+            opts.filter == filter_high32 || opts.filter == filter_low32)) {
+            fprintf(stderr, "This filter is supported only for 64-bit generators\n");
+            return 1;
+        }
+        switch (opts.filter) {
+        case filter_reverse_bits:
+            filter_gen = define_reversed_generator(gi);
+            gi = &filter_gen;
             fprintf(stderr, "All tests will be run with the reverse bits order\n");
-        } else if (opts.interleaved32) {
-            interleaved_gen = define_interleaved_generator(gi);
-            gi = &interleaved_gen;
+            break;
+
+        case filter_interleaved32:
+            filter_gen = define_interleaved_generator(gi);
+            gi = &filter_gen;
             fprintf(stderr, "All tests will be run with the interleaved\n");
+            break;
+
+        case filter_high32:
+            filter_gen = define_high32_generator(gi);
+            gi = &filter_gen;
+            fprintf(stderr, "All tests will be applied to the higher 32 bits only\n");
+            break;
+
+        case filter_low32:
+            filter_gen = define_low32_generator(gi);
+            gi = &filter_gen;
+            fprintf(stderr, "All tests will be applied to the lower 32 bits only\n");
+            break;
+
+        case filter_none:
+        case filter_unknown:
+            break;
         }
         GeneratorInfo_print(gi, is_stdout);
+        CallerAPI intf = (opts.nthreads == 1) ? CallerAPI_init() : CallerAPI_init_mthr();
         int ans = run_battery(battery_name, gi, &intf, &opts);
         GeneratorModule_unload(&mod);
         CallerAPI_free();

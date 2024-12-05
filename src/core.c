@@ -887,6 +887,55 @@ GeneratorInfo define_interleaved_generator(const GeneratorInfo *gi)
     return gi_env;
 }
 
+/////////////////////////////////////////////////////////////////
+///// Implementationof generator that returns upper 32 bits /////
+/////////////////////////////////////////////////////////////////
+
+static uint64_t get_bits64_high32(void *state)
+{
+    EnvelopedGeneratorState *obj = state;
+    uint64_t x = obj->parent_gi->get_bits(obj->parent_state);
+    return x >> 32;
+}
+
+
+GeneratorInfo define_high32_generator(const GeneratorInfo *gi)
+{
+    GeneratorInfo gi_env = *gi;
+    gi_env.name = "High32";
+    gi_env.parent = gi;
+    gi_env.nbits = 32;
+    gi_env.create = create_enveloped;
+    gi_env.free = free_enveloped;
+    gi_env.get_bits = get_bits64_high32;
+    gi_env.get_sum = NULL;
+    return gi_env;
+}
+
+/////////////////////////////////////////////////////////////////
+///// Implementationof generator that returns lower 32 bits /////
+/////////////////////////////////////////////////////////////////
+
+static uint64_t get_bits64_low32(void *state)
+{
+    EnvelopedGeneratorState *obj = state;
+    uint64_t x = obj->parent_gi->get_bits(obj->parent_state);
+    return x & 0xFFFFFFFF;
+}
+
+
+GeneratorInfo define_low32_generator(const GeneratorInfo *gi)
+{
+    GeneratorInfo gi_env = *gi;
+    gi_env.name = "Low32";
+    gi_env.parent = gi;
+    gi_env.nbits = 32;
+    gi_env.create = create_enveloped;
+    gi_env.free = free_enveloped;
+    gi_env.get_bits = get_bits64_low32;
+    gi_env.get_sum = NULL;
+    return gi_env;
+}
 
 ///////////////////////////////////////////////
 ///// Implementation of file input/output /////

@@ -155,6 +155,8 @@ typedef struct {
 
 GeneratorInfo define_reversed_generator(const GeneratorInfo *gi);
 GeneratorInfo define_interleaved_generator(const GeneratorInfo *gi);
+GeneratorInfo define_high32_generator(const GeneratorInfo *gi);
+GeneratorInfo define_low32_generator(const GeneratorInfo *gi);
 
 
 typedef struct {
@@ -216,12 +218,18 @@ static inline uint8_t get_byte_hamming_weight(uint8_t x)
 
 static inline uint8_t get_uint64_hamming_weight(uint64_t x)
 {
+#if defined(__GNUC__)
+    // GCC specific extension (may use a single CPU instruction)
+    return __builtin_popcountll(x);
+#else
+    // Portable implementation of Hamming weights computation
     uint8_t hw = 0;
     for (int i = 0; i < 8; i++) {
         hw += get_byte_hamming_weight((uint8_t) (x & 0xFF));
         x >>= 8;
     }
     return hw;
+#endif
 }
 
 

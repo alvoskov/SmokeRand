@@ -26,6 +26,8 @@ PRNG that pass BigCrush or PractRand:
 - SWBW: detected by PractRand but not by BigCrush.
 - Uniformly distributed 64-bit generators with 64-bit state such as
   SplitMix, PCG64/64, rrmxmx: detected by an extra "birthday paradox" battery.
+- Additive and subtractive lagged Fibonacci generators with large lags, e.g.
+  LFib(19937,9842+): the `gap16` (`rda16`) test is taken from gjrand.
 - RC4 obsolete CSPRNG: detected by PractRand but not by BigCrush. In SmokeRand
   extra "freq" battery is required to detect it.
 
@@ -88,8 +90,8 @@ Systematic failure of even one test means that PRNG is not suitable as a general
 purpose PRNG. However different tests have different impact on the PRNG quality:
 
 1. Frequency tests failure: the PRNG is either broken or seriously flawed.
-2. Hamming weights based DC6 tests: short-term correlations in bits distribution.
-   Local deviations from uniform distribution are possible.
+2. Hamming weights based tests: short-term correlations in bits distribution.
+   Local deviations from the uniform distribution are possible.
 3. Gap test failure: the PRNG output has regularities that may disrupt
    Monte-Carlo simulations (similar to Ising 2D model case).
 4. Birthday spacings and CollisionOver test failure: the PRNG output shows a
@@ -468,9 +470,10 @@ test run required about 25 min.
  cmwc4096          | u32    | +     | +       | +    | 0.43 | +     | N/A    | +       | >= 32 TiB
  coveyou64         | u32    | 3     | 4       | 4    | 0.62 | 1     | N/A    | Small   | 256 KiB
  cwg64             | u64    | +     | +       | +    | 0.30 | +     | +      |         | >= 1 TiB
- drand48           | u32    | 12    | 20      | >=21 | 0.72 | 1     | N/A    | -       | 1 MiB
+ drand48           | u32    | 12    | 20      | 22/23| 0.72 | 1     | N/A    | -       | 1 MiB
  isaac64           | u64    | +     | +       | +    | 0.75 | +     | +      | +       | >= 1 TiB
  flea32x1          | u32    | +     | 1       | 1    | 0.48 | +     | N/A    |         | 4 MiB
+ hc256             | u32    | +     | +       | +    |      |       | N/A    |         |
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | 1     | N/A    | Small   | 1 MiB
  kiss99            | u32    | +     | +       | +    | 1.0  | +     | N/A    | +       | >= 8 TiB
  kiss64            | u64    | +     | +       | +    | 0.53 | +     | +      | +       | >= 4 TiB
@@ -482,21 +485,23 @@ test run required about 25 min.
  lcg128_full       | u64    | 1     | 1       | 1    | 0.42 | 1     | +      | +       | 64 GiB
  lcg128_u32_full   | u32    | +     | 1       | 1    | 0.75 | +     | N/A    | +       | >= 32 TiB
  lcg69069          | u32    | 19    | 37/38   | >=38 | 0.38 | 4     | N/A    | -       | 2 KiB
- lfib_par[31+]     | u32    | 5/6   | 6/7     | >=7  | 0.59 |       | N/A    | -       | 32 MiB
+ lfib_par[31+]     | u32    | 5/6   | 6/7     | 9    | 0.59 |       | N/A    | -       | 32 MiB
  lfib_par[55+]     | u32    | 4     | 5       | >=6  | 0.59 |       | N/A    | -       | 2 GiB
- lfib_par[55-]     | u32    | 4     | 5       |      | 0.57 |       | N/A    |         | 2 GiB
+ lfib_par[55-]     | u32    | 4     | 5       | 7    | 0.57 |       | N/A    |         | 2 GiB
  lfib_par[127+]    | u32    | 4     | 4       | 5    | 0.57 |       | N/A    | -       | 512 MiB
  lfib_par[127-]    | u32    | 4     | 4       |      | 0.55 |       | N/A    |         | 512 MiB
- lfib_par[258+]    | u32    |       |         |      |      |       | N/A    |         | 8 GiB
- lfib_par[258-]    | u32    |       |         |      |      |       | N/A    |         | 8 GiB
- lfib_par[378+]    | u32    |       |         |      |      |       | N/A    |         | 32 GiB
- lfib_par[378-]    | u32    |       |         |      |      |       | N/A    |         | 32 GiB
+ lfib_par[258+]    | u32    | 4     | 4       |      |      |       | N/A    |         | 8 GiB
+ lfib_par[258-]    | u32    | 4     | 4       |      |      |       | N/A    |         | 8 GiB
+ lfib_par[378+]    | u32    | 4     | 4       |      |      |       | N/A    |         | 32 GiB
+ lfib_par[378-]    | u32    | 4     | 4       |      |      |       | N/A    |         | 32 GiB
  lfib_par[607+]    | u32    | 4     | 4       | 5    | 0.51 |       | N/A    | Small   | 256 GiB
  lfib_par[607-]    | u32    | 4     | 4       | 5    | 0.51 |       | N/A    |         | 256 GiB
  lfib_par[1279+]   | u32    | 3/4   | 3/4     | 4/5  | 0.52 |       | N/A    | >=Crush | 1 TiB
  lfib_par[1279-]   | u32    | 3/4   | 3/4     | 4/5  | 0.50 |       | N/A    |         |
  lfib_par[2281+]   | u32    | 3     | 3       | 4    | 0.50 |       | N/A    |         | 8 TiB
  lfib_par[2281-]   | u32    | 3     | 3       | 4    | 0.50 |       | N/A    |         |
+ lfib_par[3217+]   | u32    | 1     | 1       | 1/2  | 0.50 |       | N/A    |         |
+ lfib_par[3217-]   | u32    | 1     | 1       |      | 0.50 |       | N/A    |         |
  lfib_par[9689+]   | u32    | 1     | 1       | 1    | 0.50 |       | N/A    |         |
  lfib_par[9689-]   | u32    | 1     | 1       | 1    | 0.50 |       | N/A    |         |
  lfib_par[19937+]  | u32    | +     | 1       | 1    | 0.50 |       | N/A    |         |
@@ -509,7 +514,7 @@ test run required about 25 min.
  lfib4_u64         | u32    | +     | +       | +    | 0.34 |       | N/A    |         |
  lfsr113           | u32    | 3     | 5       | 7    | 1.1  | 2     | N/A    |         | 32 KiB 
  lfsr258           | u64    | 3     | 5       | 7    | 0.75 | 2     | +      |         | 1 MiB
- minstd            | u32    | 18    | 34      | 37   | 2.4  | 4     | N/A    | -       | 1 KiB
+ minstd            | u32    | 20    | 38      | >=37 | 2.4  | 4     | N/A    | -       | 1 KiB
  mlfib17_5         | u32    | +     | +       | +    | 0.48 | +     | N/A    | +       | >= 32 TiB
  mt19937           | u32    | 3     | 3       | 3    | 0.91 | 2     | N/A    | Small   | 128 GiB
  mrg32k3a          | u32    | +     | +       | +    | 2.5  | +     | N/A    |         | >= 4 TiB
@@ -533,7 +538,7 @@ test run required about 25 min.
  ranrot32[7/3]     | u32    | 1/2   | 4/5     | 5    |      | +     | N/A    |         | 128 MiB
  ranrot32[17/9]    | u32    | 1     | 2       | 3    | 0.68 | +     | N/A    |         | 1 GiB
  ranrot32[57/13]   | u32    | +     | +       | 1    |      | +     | N/A    |         | 8 GiB
- ranval            | u32    | +     | +       |      | 0.31 |       | N/A    |         | >= 4 TiB
+ ranval            | u32    | +     | +       | +    | 0.31 |       | N/A    |         | >= 4 TiB
  r1279             | u32    | 5     | 7       | 10   | 0.47 | 2     | N/A    |         | 64 MiB
  rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
@@ -549,7 +554,7 @@ test run required about 25 min.
  speck128_avx      | u64    | +     | +       | +    | 0.65 | +     |        |         | >= 2 TiB
  splitmix          | u64    | +     | +       | +    | 0.19 | +     | -      |         | >= 2 TiB
  splitmix32        | u32    | 2     | 3       | 4    | 0.25 | +     | N/A    | +       | 1 GiB
- sqxor             | u64    | +     | +       | +    | 0.13 | +     | +      |         | >= 2 TiB
+ sqxor             | u64    | +     | +       | +    | 0.13 | +     | +      |         | >= 16 TiB
  sqxor32           | u32    | 1     | 2       | 3    | 0.20 | +     | N/A    | Small   | 16 GiB
  stormdrop         | u32    | +     | +       | 1    | 1.2  | +     | N/A    |         | >= 256 GiB
  superduper73      | u32    | 9     | 15      | 18   | 0.64 | 1     | N/A    |         | 32 KiB
