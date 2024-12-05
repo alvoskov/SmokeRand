@@ -535,9 +535,11 @@ test run required about 25 min.
  philox32          | u32    | +     | +       | +    | 2.7  | +     | N/A    | +       | >= 2 TiB
  randu             | u32    | 21    | 39      | >=39 | 0.41 | 4     | N/A    | -       | 1 KiB
  ranlux++          | u64    | +     | +       | +    | 3.9  |       |        | +       | >= 1 TiB
- ranrot32[7/3]     | u32    | 1/2   | 4/5     | 5    |      | +     | N/A    |         | 128 MiB
+ ranrot32[7/3]     | u32    | 1/2   | 4/5     | 5    | 0.58 | +     | N/A    |         | 128 MiB
  ranrot32[17/9]    | u32    | 1     | 2       | 3    | 0.68 | +     | N/A    |         | 1 GiB
- ranrot32[57/13]   | u32    | +     | +       | 1    |      | +     | N/A    |         | 8 GiB
+ ranrot32[57/13]   | u32    | +     | +       | 1    | 0.74 | +     | N/A    |         | 8 GiB
+ ranshi            | u64    | 1     | 6       | 7    | 0.43 |       |        |         | 32 KiB
+ ranshi_upper32    | u32    | +     | +       | +    | 0.86 |       | N/A    |         | >= 256 GiB
  ranval            | u32    | +     | +       | +    | 0.31 |       | N/A    |         | >= 4 TiB
  r1279             | u32    | 5     | 7       | 10   | 0.47 | 2     | N/A    |         | 64 MiB
  rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
@@ -556,7 +558,7 @@ test run required about 25 min.
  splitmix32        | u32    | 2     | 3       | 4    | 0.25 | +     | N/A    | +       | 1 GiB
  sqxor             | u64    | +     | +       | +    | 0.13 | +     | +      |         | >= 16 TiB
  sqxor32           | u32    | 1     | 2       | 3    | 0.20 | +     | N/A    | Small   | 16 GiB
- stormdrop         | u32    | +     | +       | 1    | 1.2  | +     | N/A    |         | >= 256 GiB
+ stormdrop         | u32    | +     | +       | 1    | 1.2  | +     | N/A    |         | >= 1 TiB
  superduper73      | u32    | 9     | 15      | 18   | 0.64 | 1     | N/A    |         | 32 KiB
  superduper64      | u64    | 1     | 3       | 5    | 0.35 | 1     |        |         | 512 KiB
  superduper64_u32  | u32    | +     | +       | +    | 0.70 | +     | N/A    |         | >= 2 TiB

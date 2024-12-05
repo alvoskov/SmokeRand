@@ -53,15 +53,16 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     RanshiState *obj = intf->malloc(sizeof(RanshiState));
-    uint32_t seed = intf->get_seed32();
+    uint64_t seed = intf->get_seed64();
     obj->half_buff = 0;
-    obj->red_spin = seed;
-    obj->counter = 0;
+    obj->red_spin = seed & 0xFFFFFFFF;
+    obj->counter = 0;    
     for (int i = 0; i < NUMBUFF; i++) {
-        obj->buffer[i] = seed;
+        seed = 6906969069 * seed + 12345;
+        obj->buffer[i] = seed >> 32;
     }
     // Generator warm-up
-    for (int i = 0; i < NUMBUFF * 32; i++) {
+    for (unsigned long long i = 0; i < NUMBUFF * 128; i++) {
         (void) get_bits_raw(obj);
     }
     return (void *) obj;
