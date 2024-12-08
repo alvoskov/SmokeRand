@@ -20,27 +20,25 @@
 
 static TestResults bspace32_1d_test(GeneratorState *obj)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 4096, .get_lower = 1};
+    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 512, .get_lower = 1};
     return bspace_nd_test(obj, &opts);
 }
 
 static TestResults bspace4_8d_dec_test(GeneratorState *obj)
 {
-    return bspace4_8d_decimated_test(obj, 1<<12);
+    return bspace4_8d_decimated_test(obj, 1<<6);
 }
 
 
 static TestResults linearcomp_high(GeneratorState *obj)
 {
-    return linearcomp_test(obj, 50000, obj->gi->nbits - 1);
+    return linearcomp_test(obj, 10000, obj->gi->nbits - 1);
 }
 
 static TestResults linearcomp_low(GeneratorState *obj)
 {
-    return linearcomp_test(obj, 50000, 0);
+    return linearcomp_test(obj, 10000, 0);
 }
-
-
 
 void battery_dos16(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)

@@ -264,6 +264,11 @@ int test_binocdf()
         binomial_cdf(5,10,0.45) + binomial_pvalue(5,10,0.45));
     printf("%g %g %g\n", binomial_cdf(95,100000,1e-3), 0.331101644198284,
         binomial_cdf(95,100000,1e-3) + binomial_pvalue(95,100000,1e-3));
+
+    printf("----- test_binopdf -----\n");
+    printf("%g %g\n", binomial_pdf(971, 1493, 0.036356), 0.0);
+    printf("%g %g\n", binomial_pdf(128, 256, 0.45), 0.013763);
+
     return 0;
 }
 
@@ -280,6 +285,7 @@ int test_norminv()
     return 0;
 
 }
+
 
 int main()
 {

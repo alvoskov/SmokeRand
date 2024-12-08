@@ -660,6 +660,18 @@ static double GapFrequency_calc_z_with0(const GapFrequency *gf)
 {
     double alpha = binomial_cdf(gf->ngaps_with0, gf->ngaps_total, gf->p_with0);
     double pvalue = binomial_pvalue(gf->ngaps_with0, gf->ngaps_total, gf->p_with0);
+    // Check if discretization error is big enough to take it into account
+    // It can be e.g. rather sensitive in the case of binopdf(1085, 1085, 0.992085)
+    // when mathematical expectance is 1076.4 and standard deviation is 2.91.
+    // It means that 1085 will give p-value 1 but is still inside 4sigma
+    if (pvalue < 1e-10 || alpha < 1e-10) {        
+        double p_discrete = binomial_pdf(gf->ngaps_with0, gf->ngaps_total, gf->p_with0);
+        if (p_discrete > 1e-10) {
+            pvalue = p_discrete;
+            alpha = 1 - pvalue;
+        }
+    }
+    // Convert to normal distribution
     double z_w0 = (pvalue < 0.5) ? -stdnorm_inv(pvalue) : stdnorm_inv(alpha);
     if (z_w0 < -40.0) {
         z_w0 = -40.0;
@@ -743,7 +755,7 @@ static GapFrequencyStats gap16_count0_calc_zfreq(GapFrequency *gapfreq, size_t n
 {
     GapFrequencyStats ans = {.z_max_w0 = 0.0, .z_max_tot = 0.0,
         .ind_tot = 0, .ind_w0 = 0};
-    // Computation of p-values for all frequencties
+    // Computation of p-values for all frequencies
     for (size_t i = 1; i < nbins; i++) {
         const GapFrequency *gf = &gapfreq[i];
         // Frequency of gap "with zeros" inside
@@ -845,12 +857,20 @@ TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
     obj->intf->printf("  Frequency analysis for [value ... value] gaps with '0' inside:\n");
     obj->intf->printf("    z_max = %g; p = %g; alpha = %g; index = %d\n",
         gf.z_max_w0, stdnorm_pvalue(gf.z_max_w0), stdnorm_cdf(gf.z_max_w0), (int) gf.ind_w0);
+    obj->intf->printf("    ngaps_total = %llu; ngaps_with0 = %llu\n",
+        gapfreq[gf.ind_w0].ngaps_total, gapfreq[gf.ind_w0].ngaps_with0);
+    obj->intf->printf("    p_total = %g; p_with0 = %g\n",
+        gapfreq[gf.ind_w0].p_total, gapfreq[gf.ind_w0].p_with0);
     obj->intf->printf("  Frequency analysis for all [value ... value] gaps:\n");
     obj->intf->printf("    z_max = %g; p = %g; alpha = %g; index = %d\n",
         gf.z_max_tot, stdnorm_pvalue(gf.z_max_tot), stdnorm_cdf(gf.z_max_tot), (int) gf.ind_tot);
     obj->intf->printf("  Frequency analysis for [0 ... value] gaps with 'value' inside:\n");
     obj->intf->printf("    z_max = %g; p = %g; alpha = %g; index = %d\n",
         gf_rb.z_max_w0, stdnorm_pvalue(gf_rb.z_max_w0), stdnorm_cdf(gf_rb.z_max_w0), (int) gf_rb.ind_tot);
+    obj->intf->printf("    ngaps_total = %llu; ngaps_with0 = %llu\n",
+        gapfreq_rb[gf_rb.ind_w0].ngaps_total, gapfreq_rb[gf_rb.ind_w0].ngaps_with0);
+    obj->intf->printf("    p_total = %g; p_with0 = %g\n",
+        gapfreq_rb[gf_rb.ind_w0].p_total, gapfreq_rb[gf_rb.ind_w0].p_with0);
     obj->intf->printf("  Note: remember about Bonferroni correction!\n");
     obj->intf->printf("\n");
     // Make total p-value (with Bonferroni correction if required)
@@ -879,6 +899,101 @@ TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
 ///////////////////////
 ///// Other tests /////
 ///////////////////////
+
+
+static void sumcollector_calc_p(double *p, const int g, const int nmax)
+{
+    long double *g_mat = calloc((g + 1) * (nmax + 1), sizeof(long double));
+    // g0(n) = d_{0n}
+    g_mat[0] = 1.0;
+    for (int i = 1; i <= nmax; i++) {
+        g_mat[i] = 0.0;
+    }
+    // g_g(n) = 1 / factorial(g + 1)
+    for (int i = 1; i <= g; i++) {
+        g_mat[(nmax + 1) * i + i] = 1.0 / exp(sr_lgamma(i + 2));
+    }
+    // Recurrent formula
+    for (int gi = 1; gi <= g; gi++) {
+        for (int ni = gi + 1; ni <= nmax; ni++) {
+            g_mat[(nmax + 1) * gi + ni] = (long double) (ni - gi + 1) / (ni + 1) * (
+                g_mat[(nmax + 1) * (gi - 1) + (ni - 1)] +
+                (long double) gi / (ni - gi) * g_mat[(nmax + 1) * gi + (ni - 1)]
+            );
+        }
+    }
+    for (int i = 0; i <= nmax; i++) {
+        p[i] = g_mat[(nmax + 1) * g + i];
+    }
+    free(g_mat);
+}
+
+/**
+ * @brief SumCollector test from TestU01 test suite.
+ * @details Sensitive to the SWB (subtract with borrow) algorithm, in some cases
+ * - even to its versions with lower "luxury levels".
+ *
+ * References:
+ * 1. D. Ugrin-Sparac. On a distribution encountered in the renewal process based
+ *    on uniform distribution // Glasnik Matematicki. 1990. V. 25. N 1. P.221-233.
+ *    https://web.math.pmf.unizg.hr/glasnik/Vol/vol25no1.html
+ * 2. Ugrin-Sparac G. Stochastic investigations of pseudo-random number
+ *    generators // Computing. 1991. V. 46. P. 53-65.
+ *    https://doi.org/10.1007/BF02239011
+ */
+TestResults sumcollector_test(GeneratorState *obj, unsigned long long nvalues)
+{
+    TestResults ans = TestResults_create("sumcollector");
+    const unsigned int g = 10, nmax = 49;
+    size_t y_cur = 0;
+    uint64_t sum = 0, sum_max = (1ull << 32) * g;
+    unsigned int shr = (obj->gi->nbits == 32) ? 0 : 32;
+    unsigned long long *Oi_vec = calloc(nmax + 1, sizeof(unsigned long long));
+    double *p_vec = calloc(nmax + 1, sizeof(double));    
+    obj->intf->printf("SumCollector test\n");
+    obj->intf->printf("  Number of values: %llu (2^%g)\n", nvalues, sr_log2(nvalues));
+    sumcollector_calc_p(p_vec, g, nmax);
+
+    for (unsigned long long i = 0; i < nvalues; i++) {
+        uint64_t u = obj->gi->get_bits(obj->state) >> shr;
+        uint64_t sum_new = u + sum;
+        if (sum_new <= sum_max) {
+            sum = sum_new;
+            y_cur++;
+        } else {
+            if (y_cur > nmax) y_cur = nmax;
+            Oi_vec[y_cur]++;
+            sum = obj->gi->get_bits(obj->state) >> shr;
+            y_cur = 1;
+        }
+    }
+    unsigned long long Oi_sum = 0;
+    for (int i = 0; i < 50; i++) {
+        Oi_sum += Oi_vec[i];
+    }
+
+    unsigned long df = 0;
+    ans.x = 0.0;
+    for (size_t i = 0; i < 50; i++) {
+        double Ei = p_vec[i] * Oi_sum;
+        if (Ei >= 10.0) {
+            double d = (Ei - Oi_vec[i]) * (Ei - Oi_vec[i]) / Ei;
+            ans.x += d;
+            df++;
+        }
+    }
+    df--;
+    ans.p = chi2_pvalue(ans.x, df);
+    ans.alpha = chi2_cdf(ans.x, df);
+    // Output p-value
+    obj->intf->printf("  Number of sums: %llu (2^%g)\n", Oi_sum, sr_log2(Oi_sum));
+    obj->intf->printf("  x = %g; p = %g; df = %lu\n", ans.x, ans.p, df);
+    obj->intf->printf("\n");
+    // Free buffers
+    free(Oi_vec);
+    free(p_vec);
+    return ans;
+}
 
 /**
  * @brief A simplified version of `mod3` test from gjrand.
@@ -1009,7 +1124,7 @@ TestResults nbit_words_freq_test(GeneratorState *obj,
             uint64_t u = obj->gi->get_bits(obj->state);        
             for (size_t j = 0; j < nwords_per_num; j++) {
                 wfreq[u & mask]++;
-                u >>= 8;
+                u >>= bits_per_word;
             }
         }
         chi2[ii] = 0;

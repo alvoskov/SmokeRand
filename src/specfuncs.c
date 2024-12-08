@@ -337,15 +337,16 @@ double poisson_pvalue(double x, double lambda)
 }
 
 
-static double binomial_coeff(unsigned long n, unsigned long k)
+static double ln_binomial_coeff(unsigned long n, unsigned long k)
 {
-    double c = 1.0;
+    double lnc = 0.0;
     unsigned long i;
     for (i = 1; i <= k; i++) {
-        c *= (n + 1.0 - i) / (double) i;
+        lnc += log(n + 1.0 - i) - log((double) i);
     }
-    return c;
+    return lnc;
 }
+
 
 /**
  * @brief Probability function for binomial distribution.
@@ -355,7 +356,7 @@ static double binomial_coeff(unsigned long n, unsigned long k)
  */
 double binomial_pdf(unsigned long k, unsigned long n, double p)
 {
-    double ln_pdf = log(binomial_coeff(n, k)) +
+    double ln_pdf = ln_binomial_coeff(n, k) +
         k * log(p) + (n - k) * log(1.0 - p);
     return exp(ln_pdf);
 }

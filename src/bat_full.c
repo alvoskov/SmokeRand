@@ -291,6 +291,11 @@ static TestResults mod3_long_test(GeneratorState *obj)
 }
 
 
+static TestResults sumcollector_long_test(GeneratorState *obj)
+{
+    return sumcollector_test(obj, 20000000000);
+}
+
 
 void battery_full(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
@@ -339,6 +344,7 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         {"matrixrank_8192", matrixrank_8192, 36, ram_med},
         {"matrixrank_8192_low8", matrixrank_8192_low8, 36, ram_med},
         {"mod3", mod3_long_test, 1, ram_med},
+        {"sumcollector", sumcollector_long_test, 60, ram_med},
         {NULL, NULL, 0, 0}
     };
 
