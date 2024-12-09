@@ -1094,29 +1094,28 @@ static int cmp_doubles(const void *aptr, const void *bptr)
  * @brief Frequencies of n-bit words.
  */
 TestResults nbit_words_freq_test(GeneratorState *obj,
-    const unsigned int bits_per_word, const unsigned int average_freq)
+    const NBitWordsFreqOptions *opts)
 {
-    size_t block_len = (1ull << (bits_per_word)) * average_freq;
-    size_t nblocks = 4096;
-    unsigned int nwords_per_num = obj->gi->nbits / bits_per_word;
+    size_t nbins = 1ull << opts->bits_per_word;
+    unsigned int nwords_per_num = obj->gi->nbits / opts->bits_per_word;
+    unsigned long long block_len = (1ull << (opts->bits_per_word)) * opts->average_freq / nwords_per_num;
     size_t nwords = nwords_per_num * block_len;
-    size_t nbins = 1ull << bits_per_word;
     uint64_t mask = nbins - 1;
-    double *chi2 = calloc(nblocks, sizeof(double));
-    size_t *wfreq = calloc(nwords, sizeof(size_t));
+    double *chi2 = calloc(opts->nblocks, sizeof(double));
+    size_t *wfreq = calloc(nbins, sizeof(size_t));
     
     TestResults ans;
-    if (bits_per_word == 8) {
+    if (opts->bits_per_word == 8) {
         ans.name = "BytesFreq";
         obj->intf->printf("Byte frequency test\n");
     } else {
         ans.name = "WordsFreq";
-        obj->intf->printf("%u-bit words frequency test\n", bits_per_word);
+        obj->intf->printf("%u-bit words frequency test\n", opts->bits_per_word);
     }
     obj->intf->printf("  nblocks = %lld; block_len = %lld\n",
-            (unsigned long long) nblocks,
+            (unsigned long long) opts->nblocks,
             (unsigned long long) block_len);
-    for (size_t ii = 0; ii < nblocks; ii++) {
+    for (size_t ii = 0; ii < opts->nblocks; ii++) {
         for (size_t i = 0; i < nbins; i++) {
             wfreq[i] = 0;
         }
@@ -1124,7 +1123,7 @@ TestResults nbit_words_freq_test(GeneratorState *obj,
             uint64_t u = obj->gi->get_bits(obj->state);        
             for (size_t j = 0; j < nwords_per_num; j++) {
                 wfreq[u & mask]++;
-                u >>= bits_per_word;
+                u >>= opts->bits_per_word;
             }
         }
         chi2[ii] = 0;
@@ -1134,17 +1133,17 @@ TestResults nbit_words_freq_test(GeneratorState *obj,
         }
     }
     // Kolmogorov-Smirnov test
-    qsort(chi2, nblocks, sizeof(double), cmp_doubles);
+    qsort(chi2, opts->nblocks, sizeof(double), cmp_doubles);
     double D = 0.0;
-    for (size_t i = 0; i < nblocks; i++) {
+    for (size_t i = 0; i < opts->nblocks; i++) {
         double f = chi2_cdf(chi2[i], nbins - 1);
         double idbl = (double) i;
-        double Dplus = (idbl + 1.0) / nblocks - f;
-        double Dminus = f - idbl / nblocks;
+        double Dplus = (idbl + 1.0) / opts->nblocks - f;
+        double Dminus = f - idbl / opts->nblocks;
         if (Dplus > D) D = Dplus;
         if (Dminus > D) D = Dminus;
     }
-    double K = sqrt(nblocks) * D + 1.0 / (6.0 * sqrt(nblocks));
+    double K = sqrt(opts->nblocks) * D + 1.0 / (6.0 * sqrt(opts->nblocks));
     ans.x = K;
     ans.p = ks_pvalue(K);
     ans.alpha = 1.0 - ans.p;
@@ -1161,7 +1160,9 @@ TestResults nbit_words_freq_test(GeneratorState *obj,
  */
 TestResults byte_freq_test(GeneratorState *obj)
 {
-    return nbit_words_freq_test(obj, 8, 256);
+    NBitWordsFreqOptions opts = {.bits_per_word = 8, .average_freq = 1024,
+        .nblocks = 4096};
+    return nbit_words_freq_test(obj, &opts);
 }
 
 /**
@@ -1169,5 +1170,7 @@ TestResults byte_freq_test(GeneratorState *obj)
  */
 TestResults word16_freq_test(GeneratorState *obj)
 {
-    return nbit_words_freq_test(obj, 16, 16);
+    NBitWordsFreqOptions opts = {.bits_per_word = 16, .average_freq = 32,
+        .nblocks = 4096};
+    return nbit_words_freq_test(obj, &opts);
 }

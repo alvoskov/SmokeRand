@@ -9,9 +9,6 @@
  * and returns ALL 32 bits. The initial values in the ring buffer are filled
  * by the 64-bit PCG generator.
  *
- * Fails birthday spacings and gap tests, the lowest bit has low linear
- * complexity.
- * 
  * Sources of parameters:
  *
  * 1. TAOCP2
