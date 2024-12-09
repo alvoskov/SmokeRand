@@ -632,7 +632,7 @@ samples. Extra testing is required!
 
 Sensitivity of dieharder is lower than TestU01 and PractRand:
 
-- Failed dieharder: lcg69069, lcg32prime, minstd, randu, shr3, xsh, drand48
+- Failed dieharder: lcg69069, lcg32prime, minstd, randu, shr3, xsh, drand48, lfib31
 - Passed dieharder: lcg64
 
 # Versions history
