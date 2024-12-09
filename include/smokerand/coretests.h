@@ -34,6 +34,18 @@ typedef struct {
     unsigned long ngaps; ///< Number of gaps
 } GapOptions;
 
+/**
+ * @brief Settings for frequencies of n-bit words test.
+ * @details Recommended settings:
+ *
+ * - for bytes: {8, 256, 4096}
+ * - for 16-bit words: {16, 16, 4096}
+ */
+typedef struct {
+    unsigned int bits_per_word; ///< Bits per word
+    unsigned int average_freq; ///< Average frequency for a bin
+    size_t nblocks; ///< Number of blocks for K.-S. criterion
+} NBitWordsFreqOptions;
 
 TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts);
 TestResults bspace64_1d_ns_test(GeneratorState *obj, unsigned int nsamples);
@@ -44,6 +56,8 @@ TestResults gap16_count0_test(GeneratorState *obj, long long ngaps);
 TestResults sumcollector_test(GeneratorState *obj, unsigned long long nvalues);
 TestResults mod3_test(GeneratorState *obj, unsigned long long nvalues);
 TestResults monobit_freq_test(GeneratorState *obj);
+TestResults nbit_words_freq_test(GeneratorState *obj,
+    const NBitWordsFreqOptions *opts);
 TestResults byte_freq_test(GeneratorState *obj);
 TestResults word16_freq_test(GeneratorState *obj);
 
