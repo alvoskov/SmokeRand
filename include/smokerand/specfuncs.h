@@ -2,6 +2,8 @@
  * @file specfuncs.h
  * @brief Some special functions required for computation of p-values for
  * different statistical criteria.
+ * @details This file is designed for C89 (ANSI C)! Don't use features
+ * from C99 and later!
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *

@@ -2,6 +2,8 @@
  * @file specfuncs.h
  * @brief Some special functions required for computation of p-values for
  * different statistical criteria.
+ * @details This file is designed for C89 (ANSI C)! Don't use features
+ * from C99 and later!
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
@@ -548,7 +550,8 @@ static double stdnorm_cdf_pdf_rel(double x, double p)
  */
 double stdnorm_inv(double p)
 {
-    // Check input arguments
+    int i;
+    /* Check input arguments */
     if (p < 0 || p > 1) {
         return NAN;
     } else if (p < DBL_MIN) {
@@ -556,20 +559,20 @@ double stdnorm_inv(double p)
     } else if (p > 1 - 1e-16) {
         return +HUGE_VAL;
     }
-    // Taylor series expansion for p close to 0.5
+    /* Taylor series expansion for p close to 0.5 */
     if (fabs(p - 0.5) < 1e-5) {
         double pp = 2*p - 1;
         return sqrt(0.5*M_PI) * pp * (1 + M_PI / 12 * pp * pp);
     }
-    // Soranzo initial approximation 
+    /* Soranzo initial approximation */
     double pp = 4*p*(1 - p);
     double a = log((pp < DBL_MIN) ? DBL_MIN : pp);
     double b = 8.5 + a;
     double z = sqrt(-b + sqrt(b * b - 26.694*a));
     if (p < 0.5) z = -z;
-    // Newton method iterations
+    /* Newton method iterations */
     double znew = z - stdnorm_cdf_pdf_rel(z, p);
-    for (int i = 0; i < 10 && fabs(znew - z) > DBL_EPSILON; i++) {
+    for (i = 0; i < 10 && fabs(znew - z) > DBL_EPSILON; i++) {
         z = znew;
         znew -= stdnorm_cdf_pdf_rel(z, p);
     }

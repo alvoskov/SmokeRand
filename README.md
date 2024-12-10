@@ -500,7 +500,7 @@ test run required about 25 min.
  lfib_par[1279+]   | u32    | 3/4   | 3/4     | 4/5  | 0.52 | 1     | N/A    | Crush   | 1 TiB
  lfib_par[1279-]   | u32    | 3/4   | 3/4     | 4/5  | 0.50 | 1     | N/A    | Crush   |
  lfib_par[2281+]   | u32    | 3     | 3       | 4    | 0.50 | +     | N/A    | +       | 8 TiB
- lfib_par[2281-]   | u32    | 3     | 3       | 4    | 0.50 | 0/1   | N/A    |         |
+ lfib_par[2281-]   | u32    | 3     | 3       | 4    | 0.50 | 0/1   | N/A    |         | 8 TiB
  lfib_par[3217+]   | u32    | 1     | 1       | 1/2  | 0.50 | +     | N/A    |         |
  lfib_par[3217-]   | u32    | 1     | 1       | 2/4  | 0.50 | +     | N/A    |         |
  lfib_par[9689+]   | u32    | 1     | 1       | 1    | 0.50 | +     | N/A    |         |

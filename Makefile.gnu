@@ -30,6 +30,7 @@ else ifeq ($(PLATFORM_NAME), GENERIC)
 endif
 #------------------------------------------
 CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O2 -Werror -Wall -Wextra -Wno-attributes -march=native
+CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O2 -Werror -Wall -Wextra -Wno-attributes -march=native
 LINKFLAGS = $(PLATFORM_FLAGS)
 INCLUDE = -Iinclude
 
@@ -62,7 +63,7 @@ BAT_SOURCES = $(addprefix $(SRCDIR)/, bat_dos16.c bat_brief.c bat_default.c bat_
 BAT_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_dos16.h bat_brief.h bat_default.h bat_full.h)
 BAT_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(BAT_SOURCES)))
 # Executables
-EXE_NAMES = smokerand calibrate_dc6 test_funcs
+EXE_NAMES = smokerand sr_tiny calibrate_dc6 test_funcs
 EXE_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXE_NAMES)))
 
 # Generators
@@ -88,6 +89,9 @@ all: $(CORE_LIB) $(addprefix $(BINDIR)/, $(addsuffix $(EXE),$(EXE_NAMES))) gener
 
 $(CORE_LIB): $(LIB_OBJFILES)
 	$(AR) rcu $@ $^
+
+$(BINDIR)/sr_tiny$(EXE): $(SRCDIR)/sr_tiny.c $(SRCDIR)/specfuncs.c include/smokerand/specfuncs.h
+	$(CC) $(CFLAGS89) $(LINKFLAGS) $(SRCDIR)/sr_tiny.c $(SRCDIR)/specfuncs.c -o $@ -lm $(INCLUDE) 
 
 $(BINDIR)/smokerand$(EXE): $(OBJDIR)/smokerand.o $(CORE_LIB) $(BAT_OBJFILES) $(BAT_HEADERS)
 	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE) 

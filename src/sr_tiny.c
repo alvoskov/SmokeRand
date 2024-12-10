@@ -1,16 +1,44 @@
-/*
-32-bit pseudorandom number generators tests for 16-bit computers
-and ANSI C compilers.
-
-Compilation with Digital Mars C:
-
-set path=%path%;c:\c_prog\dm\bin
-path
-dmc sr_tiny.c -c -2 -o -ms -I../include -osr_tiny.obj
-dmc specfuncs.c -c -2 -o -ms -I../include -ospecfuncs.obj
-dmc sr_tiny.obj specfuncs.obj -osr_tiny.exe
-
-*/
+/**
+ * @file sr_tiny.c
+ * @brief A minimalistic 32-bit PRNG tests suite for 16-bit computers;
+ * it is compatible with ANSI C compilers.
+ * @details This tests suite includes only 5 tests:
+ *
+ * - 1D 32-bit birthday spacings
+ * - 8D 32-bit birthday spacings test with decimation
+ * - Byte frequency test
+ * - Linear complexity (lowest bit)
+ * - Linear complexity (highest bit)
+ *
+ * Can be compiled by any ANSI C compiler for 16-bit, 32-bit and 64-bit
+ * platforms. On modern computers (2024) it will run in less than 2 seconds,
+ * in DosBOX 0.74 with 3000 cycles (~80286 16 MHz) it will run about 15-20
+ * minutes.
+ *
+ * The next generators are implemented here:
+ *
+ * - alfib: x_{n} = {x_{n-55}} + {x_{n-24}} mod 2^{32}, fails 2 of 5.
+ * - lcg32: x_{n+1} = 69069 x_{n} + 12345, fails 4 of 5.
+ * - lcg64: x_{n+1} = 6906969069 x_{n} + 12345 [returns upper 32 bits], fails
+ *   1 of 5.
+ * - mwc1616x: a combination of two 16-bit MWC generators that has a period
+ *   about 2^{62}, passes all tests.
+ * - xorshift32: fails 2 of 5, i.e. linear complexity tests
+ * 
+ *
+ * Compilation with Digital Mars C:
+ *
+ *     set path=%path%;c:\c_prog\dm\bin
+ *     path
+ *     dmc sr_tiny.c -c -2 -o -ms -I../include -osr_tiny.obj
+ *     dmc specfuncs.c -c -2 -o -ms -I../include -ospecfuncs.obj
+ *     dmc sr_tiny.obj specfuncs.obj -osr_tiny.exe
+ *
+ * WARNING! This file is designed for C89 (ANSI C)! Don't use features
+ * from C99 and later! It should be compilable with Turbo C 2.0,
+ * Digital Mars C, Open Watcom 11.0 and other ancient compilers!
+ */
+#define _STRICT_STDC
 #include "smokerand/specfuncs.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,11 +70,18 @@ typedef struct {
     void *state;
 } Generator32State;
 
-
-/*----------------------------------------------------------*/
+/*------------------------------------------------------------------------
+  ----- MWC1616X generator implementation (a high-quality generator) -----
+  ------------------------------------------------------------------------*/
 
 /**
  * @brief MWC1616X state.
+ * @details MWC1616X pseudorandom number generator is a combination of two
+ * multiply-with-carry generators that use base 2^{16}. It has a period about
+ * 2^{62} and good quality. It can be compiled for platforms without 64-bit
+ * data types, e.g. for 16-bit x86 processors.
+ *
+ * Its quality is much better than quality of MWC1616.
  */
 typedef struct {
     u32 z;
@@ -71,6 +106,146 @@ void Mwc1616xState_init(Mwc1616xState *obj, u32 seed)
 }
 
 
+
+/*--------------------------------------------------------------
+  ----- Additive lagged Fibonacci generator implementation -----
+  --------------------------------------------------------------*/
+
+#define ALFIB_A 55
+#define ALFIB_B 24
+
+/**
+ * @brief Additive lagged Fibonacci generator state.
+ * @details This generator was popular several decades ago but fails 1D
+ * 32-bit birthday spacings tests and its lowest bit has low linear
+ * complexity. It also can cause problems with 
+ */
+typedef struct {
+    u32 x[ALFIB_A];
+    int i;
+    int j;
+} ALFibState;
+
+static u32 alfib_func(void *state)
+{
+    ALFibState *obj = state;
+    u32 x = obj->x[obj->i] + obj->x[obj->j];
+    obj->x[obj->i] = x;
+    if (++obj->i == ALFIB_A) obj->i = 0;
+	if (++obj->j == ALFIB_A) obj->j = 0;
+    return x;
+}
+
+/**
+ * @brief Additive lagged Fibonacci initialization.
+ * @details It uses MWC1616X generator because bias in Hamming weights
+ * and linear complexity during initialization may preserve in output
+ * and cause failures of byte frequency and linear complexity tests.
+ */
+static void ALFibState_init(ALFibState *obj, u32 seed)
+{
+    int i;
+    Mwc1616xState mwc;
+    Mwc1616xState_init(&mwc, seed);
+    for (i = 0; i < ALFIB_A; i++) {
+        obj->x[i] = mwc1616x_func(&mwc);
+    }
+    obj->i = 0;
+    obj->j = ALFIB_A - ALFIB_B;
+}
+
+
+/*----------------------------------------------------------*/
+
+u32 lcg69069func(void *state)
+{
+    u32 *x = (u32 *) state;
+    *x = 69069 * (*x) + 12345;
+    return *x;
+}
+
+
+
+
+/*---------------------------------------------------------------------
+  ----- 64-bit LCG (linear congruentual) generator implementation -----
+  ---------------------------------------------------------------------*/
+
+#define HI32(x) ((x) >> 16)
+#define LO32(x) ((x) & 0xFFFF)
+#define MUL32(x,y) ((u32)(x) * (u32)(y))
+#define SUM32(x,y) ((u32)(x) + (u32)(y))
+
+
+/**
+ * @brief A portable (compatible with ANSI C and 16-bit platforms)
+ * version of 64-bit linear congruential generator.
+ * @details Passes all tests except 8D 32-bit birthday spacings test
+ * with decimation. Python 3.x program for testing:
+ *
+ *     x = 12345678
+ *     for i in range(0, 10000):
+ *         x = (6906969069 * x + 12345) % 2**64
+ *     print(x >> 32)
+ */
+typedef struct {
+    u16 x[4];
+} Lcg64x16State;
+
+void Lcg64x16State_init(Lcg64x16State *obj, u32 seed)
+{
+    obj->x[0] = seed & 0xFFFF;
+    obj->x[1] = seed >> 16;
+    obj->x[2] = 0;
+    obj->x[3] = 0;
+}
+
+
+u32 lcg64x16_func(void *state)
+{
+    /* Made for multiplier 69069'69069 = 0x1'9BAF'FBED */
+    /*                      lower   higher */
+    static const u16 a[] = {0xFBED, 0x9BAF};
+    static const u16 c = 12345;
+    Lcg64x16State *obj = state;
+    u16 row0[4], row1[3];
+    u32 mul, sum, x0 = obj->x[0], x1 = obj->x[1];
+    /* Row 0 */
+    mul = MUL32(a[0], obj->x[0]); row0[0] = LO32(mul);
+    mul = MUL32(a[0], obj->x[1]) + HI32(mul); row0[1] = LO32(mul);
+    mul = MUL32(a[0], obj->x[2]) + HI32(mul); row0[2] = LO32(mul);
+    mul = MUL32(a[0], obj->x[3]) + HI32(mul); row0[3] = LO32(mul);
+    /* Row 1 */
+    mul = MUL32(a[1], obj->x[0]); row1[0] = LO32(mul);
+    mul = MUL32(a[1], obj->x[1]) + HI32(mul); row1[1] = LO32(mul);
+    mul = MUL32(a[1], obj->x[2]) + HI32(mul); row1[2] = LO32(mul);
+    /* Sum rows (update state) */
+    sum = SUM32(row0[0], c);                   obj->x[0] = LO32(sum);
+    sum = SUM32(row0[1], row1[0]) + HI32(sum); obj->x[1] = LO32(sum);
+    sum = SUM32(row0[2], row1[1]) + HI32(sum); obj->x[2] = LO32(sum);
+    sum = SUM32(row0[3], row1[2]) + HI32(sum); obj->x[3] = LO32(sum);
+    /* Row 2 */
+    sum = SUM32(obj->x[2], x0);             obj->x[2] = LO32(sum);
+    sum = SUM32(obj->x[3], x1) + HI32(sum); obj->x[3] = LO32(sum);
+    /* Return upper 32 bits */
+    return ((u32) obj->x[3] << 16) | obj->x[2];
+
+}
+
+/*------------------------------------------------------
+  ----- xorshift32 (shr3) generator implementation -----
+  ------------------------------------------------------*/
+
+u32 xorshift32_func(void *state)
+{
+    u32 *x = state;
+    *x ^= (*x << 17);
+    *x ^= (*x >> 13);
+    *x ^= (*x << 5);
+    return *x;
+}
+
+
 /*----------------------------------------------------------*/
 
 
@@ -80,7 +255,7 @@ void Mwc1616xState_init(Mwc1616xState *obj, u32 seed)
  * @param b    This vector (b) will not be modified.
  * @param len  Vectors lengths.
  */
-static inline void xorbytes(u8 *a, const u8 *b, size_t len)
+static void xorbytes(u8 *a, const u8 *b, size_t len)
 {
     size_t i;
     for (i = 0; i < len; i++) {
@@ -168,38 +343,18 @@ void linearcomp_test(Generator32State *obj, size_t nbits, unsigned int bitpos)
         double z = (x - mu) / sigma;
         double p = stdnorm_pvalue(z);
         double alpha = stdnorm_cdf(z);
-        printf("  L = %g; z = %g; p = %g\n\n", x, z, p);
+        printf("  L = %g; z = %g; p = %g; 1 - p = %g\n\n", x, z, p, alpha);
     }
 }
 
 
 
-/*----------------------------------------------------------*/
-
-u32 lcg69069func(void *state)
-{
-    u32 *x = (u32 *) state;
-    *x = 69069 * (*x) + 12345;
-    return *x;
-}
-
-
 /*---------------------------------------------------------*/
-
-/*
-static int cmp_u32(const void *aptr, const void *bptr)
-{
-    u32 aval = *((u32 *) aptr), bval = *((u32 *) bptr);
-    if (aval < bval) { return -1; }
-    else if (aval == bval) { return 0; }
-    else { return 1; }
-}
-*/
-
 
 void insertsort(u32 *x, int begin, int end)
 {
-    for (int i = begin + 1; i <= end; i++) {
+    int i;
+    for (i = begin + 1; i <= end; i++) {
         u32 xi = x[i];
         int j = i;
         while (j > begin && x[j - 1] > xi) {
@@ -245,22 +400,11 @@ void quicksort(u32 *v, int begin, int end)
 int get_ndups(u32 *x, int n)
 {
     int i, ndups = 0;
-    /*qsort(x, n, sizeof(u32), cmp_u32);*/
     quicksort(x, 0, n - 1);
-/*
-    for (i = 1; i < n - 1; i++) {
-        if (x[i] < x[i - 1]) {
-            printf("!!!!!!!!!!!!! %d\n", i);
-        }
-    }
-*/
-
     for (i = 0; i < n - 1; i++) {
         x[i] = x[i + 1] - x[i];
     }
-    /*qsort(x, n - 1, sizeof(u32), cmp_u32);*/
     quicksort(x, 0, n - 2);
-
     for (i = 0; i < n - 2; i++) {
         if (x[i] == x[i + 1])
             ndups++;
@@ -289,7 +433,7 @@ double bytefreq_to_chi2emp(const u32 *bytefreq)
 void gen_tests(Generator32State *obj)
 {
     const double lambda = 4.0;
-    int n = 4096, i, ii, ndups = 0, ndups_dec, nsamples = 512;
+    int n = 4096, i, ii, ndups = 0, ndups_dec, nsamples = 1024;
     int pos_dec = 0;
     double chi2emp = 0.0;
     u32 u_dec = 0;
@@ -339,23 +483,58 @@ void gen_tests(Generator32State *obj)
 }
 
 
+void print_help()
+{
+    printf("Test suite for 32-bit pseudorandom numbers generators.\n");
+    printf("It is minimalistic and can be compiled even for 16-bit DOS.\n");
+    printf("(C) 2024 Alexey L. Voskov\n\n");
+    printf("Usage: sr_tiny gen_name\n");
+    printf("  gen_name = alfib, lcg32, lcg64, mwc1616x, xorshift32\n");
+}
+
+
 int main(int argc, char *argv[])
 {
     u32 x = time(NULL), tic, toc;
-    Generator32State gen;
-    Mwc1616xState mwc1616x;
+    static Generator32State gen;
+    static Mwc1616xState mwc1616x;
+    static ALFibState alfib;
+    static Lcg64x16State lcg64;
     if (argc < 2) {
-        printf("Usage: sr_tiny gen_name\n");
-        printf("  gen_name = lcg69069, mwc1616x\n");
+        print_help();
         return 0;
     }
-    if (!strcmp("lcg69069", argv[1])) {
+    if (!strcmp("alfib", argv[1])) {
+        ALFibState_init(&alfib, x);
+        gen.state = &alfib;
+        gen.get_bits32 = alfib_func;
+    } else if (!strcmp("lcg32", argv[1])) {
         gen.state = &x;
         gen.get_bits32 = lcg69069func;
+    } else if (!strcmp("lcg64", argv[1])) {
+        int i;
+        u32 u, u_ref = 3675123773ul;
+        Lcg64x16State_init(&lcg64, 12345678);
+        for (i = 0; i < 10000; i++) {
+            u = lcg64x16_func(&lcg64);
+        }
+        printf("LCG64 self-test: %lu (ref = %lu)\n",
+            (unsigned long) u, (unsigned long) u_ref);
+        if (u != u_ref) {
+            fprintf(stderr, "FAILED!\n");
+            return 1;
+        }
+        Lcg64x16State_init(&lcg64, x);
+        gen.state = &lcg64;
+        gen.get_bits32 = lcg64x16_func;
     } else if (!strcmp("mwc1616x", argv[1])) {
         Mwc1616xState_init(&mwc1616x, x);
         gen.state = &mwc1616x;
         gen.get_bits32 = mwc1616x_func;
+    } else if (!strcmp("xorshift32", argv[1])) {
+        x |= 0x1; /* Cannot be initialized with 0 */
+        gen.state = &x;
+        gen.get_bits32 = xorshift32_func;
     } else {
         fprintf(stderr, "Unknown generator %s\n", argv[1]);
         return 1;
@@ -367,9 +546,6 @@ int main(int argc, char *argv[])
     linearcomp_test(&gen, 10000, 0);
 
     toc = time(NULL);
-    printf("::%d::\n", toc - tic);
-
-    printf("%d\n", (int) sizeof(u32));
-    printf("%d\n", (int) sizeof(i32));
-
+    printf("Elaplsed time: %d sec\n", toc - tic);
+    return 0;
 }
