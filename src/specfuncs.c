@@ -123,7 +123,7 @@ static double gammainc_lower_series(double a, double x)
 {
     double mul = exp(-x + a*log(x) - sr_lgamma(a)), sum = 0.0;
     double t = 1.0 / a;
-    int i;
+    long i;
     for (i = 1; i < 1000000 && t > DBL_EPSILON; i++) {
         sum += t;
         t *= x / (a + i);
@@ -139,11 +139,11 @@ static double gammainc_upper_contfrac(double a, double x)
     double p1 = b1 * b0 + (a - 1.0), q1 = b1;
     double f = p1/q1, f_old = p0/q0;
     double c = p1/p0, d = q0 / q1;
-    int i;
+    long i;
     for (i = 2; i < 1000000 && fabs(f - f_old) > DBL_EPSILON; i++) {
-        f_old = f;
         double bk = x + 2*i + 1 - a;
         double ak = i * (a - i);
+        f_old = f;
         if (c < 1e-30) c = 1e-30;
         c = bk + ak / c;
         d = 1.0 / (bk + ak * d);
@@ -275,15 +275,15 @@ static double t_cdf_asymptotic(double x, unsigned long f)
     double a = (double) f - 0.5;
     double b = 48 * a * a;
     double q = x*x / (double) f;
-    double z;
+    double z, zsqr, z_corr;
     if (q > 1e-5) {
         z = sqrt(a * log(1 + q));
     } else {
         z = (1 - (0.5 + (1.0/3 - (0.25 + q*q/5) * q) * q) * q) * q;
         z = sqrt(a * z);
     }
-    double zsqr = z * z;
-    double z_corr = z + z * (zsqr + 3) / b -
+    zsqr = z * z;
+    z_corr = z + z * (zsqr + 3) / b -
         0.4*z*(zsqr*zsqr*zsqr + 3.3*zsqr*zsqr + 24*zsqr + 85.5) /
         (10*b*(b + 0.8*zsqr*zsqr + 100));
     return (x >= 0) ? stdnorm_cdf(z_corr) : stdnorm_cdf(-z_corr);
@@ -551,6 +551,7 @@ static double stdnorm_cdf_pdf_rel(double x, double p)
 double stdnorm_inv(double p)
 {
     int i;
+    double pp, a, b, z, znew;
     /* Check input arguments */
     if (p < 0 || p > 1) {
         return NAN;
@@ -565,13 +566,13 @@ double stdnorm_inv(double p)
         return sqrt(0.5*M_PI) * pp * (1 + M_PI / 12 * pp * pp);
     }
     /* Soranzo initial approximation */
-    double pp = 4*p*(1 - p);
-    double a = log((pp < DBL_MIN) ? DBL_MIN : pp);
-    double b = 8.5 + a;
-    double z = sqrt(-b + sqrt(b * b - 26.694*a));
+    pp = 4*p*(1 - p);
+    a = log((pp < DBL_MIN) ? DBL_MIN : pp);
+    b = 8.5 + a;
+    z = sqrt(-b + sqrt(b * b - 26.694*a));
     if (p < 0.5) z = -z;
     /* Newton method iterations */
-    double znew = z - stdnorm_cdf_pdf_rel(z, p);
+    znew = z - stdnorm_cdf_pdf_rel(z, p);
     for (i = 0; i < 10 && fabs(znew - z) > DBL_EPSILON; i++) {
         z = znew;
         znew -= stdnorm_cdf_pdf_rel(z, p);

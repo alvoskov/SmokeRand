@@ -488,64 +488,116 @@ void print_help()
     printf("Test suite for 32-bit pseudorandom numbers generators.\n");
     printf("It is minimalistic and can be compiled even for 16-bit DOS.\n");
     printf("(C) 2024 Alexey L. Voskov\n\n");
-    printf("Usage: sr_tiny gen_name\n");
+    printf("Usage: sr_tiny gen_name [speed]\n");
     printf("  gen_name = alfib, lcg32, lcg64, mwc1616x, xorshift32\n");
+    printf("    alfib = LFib(55,24,+,2^32): additive lagged Fibonacci\n");
+    printf("    lcg69069 - 32-bit LCG; x_n = 69069x_{n-1} + 12345 mod 2^32\n");
+    printf("    lcg64 - 64-bit LCG, returns upper 32 bits\n");
+    printf("    mwc1616x - a combination of 2 MWC generators, gives high\n");
+    printf("      quality sequence that passes all tests\n");
+    printf("    xorshift32 - classical 'shr3' LFSR PRNG\n\n");
+    printf("  speed - optional argument, enables speed measurement mode.\n");
 }
 
 
-int main(int argc, char *argv[])
+Generator32State create_generator(const char *name)
 {
-    u32 x = time(NULL), tic, toc;
-    static Generator32State gen;
-    static Mwc1616xState mwc1616x;
-    static ALFibState alfib;
-    static Lcg64x16State lcg64;
-    if (argc < 2) {
-        print_help();
-        return 0;
-    }
-    if (!strcmp("alfib", argv[1])) {
-        ALFibState_init(&alfib, x);
-        gen.state = &alfib;
+    static Generator32State gen = {NULL, NULL};
+    u32 x = time(NULL);
+    if (!strcmp("alfib", name)) {
+        gen.state = malloc(sizeof(ALFibState));
         gen.get_bits32 = alfib_func;
-    } else if (!strcmp("lcg32", argv[1])) {
-        gen.state = &x;
+        ALFibState_init(gen.state, x);
+    } else if (!strcmp("lcg32", name)) {
+        gen.state = malloc(sizeof(u32));
         gen.get_bits32 = lcg69069func;
-    } else if (!strcmp("lcg64", argv[1])) {
+        *((u32 *) gen.state) = x;
+    } else if (!strcmp("lcg64", name)) {
         int i;
         u32 u, u_ref = 3675123773ul;
-        Lcg64x16State_init(&lcg64, 12345678);
+        gen.state = malloc(sizeof(Lcg64x16State));
+        gen.get_bits32 = lcg64x16_func;
+        Lcg64x16State_init(gen.state, 12345678);
         for (i = 0; i < 10000; i++) {
-            u = lcg64x16_func(&lcg64);
+            u = lcg64x16_func(gen.state);
         }
         printf("LCG64 self-test: %lu (ref = %lu)\n",
             (unsigned long) u, (unsigned long) u_ref);
         if (u != u_ref) {
+            free(gen.state);
             fprintf(stderr, "FAILED!\n");
-            return 1;
+            exit(1);
         }
-        Lcg64x16State_init(&lcg64, x);
-        gen.state = &lcg64;
-        gen.get_bits32 = lcg64x16_func;
-    } else if (!strcmp("mwc1616x", argv[1])) {
-        Mwc1616xState_init(&mwc1616x, x);
-        gen.state = &mwc1616x;
+        Lcg64x16State_init(gen.state, x);
+    } else if (!strcmp("mwc1616x", name)) {
+        gen.state = malloc(sizeof(Mwc1616xState));
         gen.get_bits32 = mwc1616x_func;
-    } else if (!strcmp("xorshift32", argv[1])) {
-        x |= 0x1; /* Cannot be initialized with 0 */
-        gen.state = &x;
+        Mwc1616xState_init(gen.state, x);
+    } else if (!strcmp("xorshift32", name)) {
+        gen.state = malloc(sizeof(u32));
         gen.get_bits32 = xorshift32_func;
+        *((u32 *) gen.state) = x | 0x1; /* Cannot be initialized with 0 */
+    }
+    return gen;
+}
+
+
+
+void measure_speed(Generator32State *gen)
+{
+    double nsec, kib_sec;
+    long nblocks = 2, nblocks_total = 0;
+    clock_t tic, toc;
+    printf("Generator speed measurement\n");
+    tic = clock();
+    do {
+        long i;
+        int j;
+        u32 sum = 0;
+        for (i = 0; i < nblocks; i++) {
+            for (j = 0; j < 16384; j++) { /* 64K block */
+                sum += gen->get_bits32(gen->state);
+            }
+        }
+        nblocks_total += nblocks;
+        nblocks *= 2;
+        toc = clock();
+    } while (toc - tic < 2*CLOCKS_PER_SEC);
+    nsec = ((double) (toc - tic) / CLOCKS_PER_SEC);
+    kib_sec = (double) (nblocks_total << 6) / nsec;
+    if (kib_sec < 1000.0) {
+        printf("  Generator speed: %g KiB/sec", kib_sec);
     } else {
+        printf("  Generator speed: %g MiB/sec", kib_sec / 1024);
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    clock_t tic, toc;
+    Generator32State gen;
+    if (argc < 2) {
+        print_help();
+        return 0;
+    }
+
+    gen = create_generator(argv[1]);
+    if (gen.state == NULL) {
         fprintf(stderr, "Unknown generator %s\n", argv[1]);
         return 1;
     }
 
-    tic = time(NULL);
-    gen_tests(&gen);
-    linearcomp_test(&gen, 10000, 31);
-    linearcomp_test(&gen, 10000, 0);
+    if (argc == 3 && !strcmp(argv[2], "speed")) {
+        measure_speed(&gen);
+    } else {
+        tic = clock();
+        gen_tests(&gen);
+        linearcomp_test(&gen, 10000, 31);
+        linearcomp_test(&gen, 10000, 0);
+        toc = clock();
+        printf("Elaplsed time: %g sec\n", ((double) (toc - tic) / CLOCKS_PER_SEC));
+    }
 
-    toc = time(NULL);
-    printf("Elaplsed time: %d sec\n", toc - tic);
+    free(gen.state);
     return 0;
 }
