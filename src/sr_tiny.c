@@ -46,6 +46,7 @@
 #include <math.h>
 #include <limits.h>
 #include <time.h>
+#include <float.h>
 
 
 /*----------------------------------------------------------*/
@@ -69,6 +70,86 @@ typedef struct {
     GetBits32Func get_bits32;
     void *state;
 } Generator32State;
+
+typedef struct TestResultEntry_ {
+    char name[32];
+    double x;
+    double p;
+    double alpha;
+    struct TestResultEntry_ *next;
+} TestResultEntry;
+
+
+typedef struct {
+    TestResultEntry *first;
+    TestResultEntry *top;
+} ResultsList;
+
+
+void ResultsList_init(ResultsList *obj)
+{
+    obj->first = NULL;
+    obj->top = NULL;
+}
+
+void ResultsList_add(ResultsList *obj, const TestResultEntry *entry)
+{
+    if (obj->first == NULL) {
+        obj->first = malloc(sizeof(TestResultEntry));
+        *(obj->first) = *entry;
+        obj->first->next = NULL;
+        obj->top = obj->first;
+    } else {
+        obj->top->next = malloc(sizeof(TestResultEntry));
+        *(obj->top->next) = *entry;
+        obj->top->next->next = NULL;
+        obj->top = obj->top->next;
+    }
+}
+
+static void sprintf_pvalue(char *buf, double p, double alpha)
+{
+    if (p != p || alpha != alpha) {
+        sprintf(buf, "NAN");
+    } else if (p < 0.0 || p > 1.0) {
+        sprintf(buf, "???");
+    } else if (p < DBL_MIN) {
+        sprintf(buf, "0");
+    } else if (1.0e-3 <= p && p <= 0.999) {
+        sprintf(buf, "%.3f", p);
+    } else if (p < 1.0e-3) {
+        sprintf(buf, "%.2e", p);
+    } else if (p > 0.999 && alpha > DBL_MIN) {
+        sprintf(buf, "1 - %.2e", alpha);
+    } else {
+        sprintf(buf, "1");
+    }
+}
+
+
+void ResultsList_print(const ResultsList *obj)
+{
+    TestResultEntry *entry;
+    int i = 1;
+    for (entry = obj->first; entry != NULL; entry = entry->next) {
+        char pbuf[32];
+        sprintf_pvalue(pbuf, entry->p, entry->alpha);
+        printf("%2d %-15s %12g %20s\n", i++, entry->name, entry->x, pbuf);
+    }
+}
+
+
+void ResultsList_free(ResultsList *obj)
+{
+    TestResultEntry *entry = obj->first;
+    while (entry != NULL) {
+        TestResultEntry *next = entry->next;
+        free(entry);
+        entry = next;
+    }    
+}
+
+
 
 /*------------------------------------------------------------------------
   ----- MWC1616X generator implementation (a high-quality generator) -----
@@ -257,10 +338,23 @@ u32 xorshift32_func(void *state)
  */
 static void xorbytes(u8 *a, const u8 *b, size_t len)
 {
+/*
     size_t i;
     for (i = 0; i < len; i++) {
         a[i] ^= b[i];
     }
+*/
+
+    u32 *av = (u32 *) a, *bv = (u32 *) b;
+    size_t nwords = len / 4, i;
+    for (i = 0; i < nwords; i++) {
+        av[i] ^= bv[i];
+    }
+    a += nwords * 4;
+    b += nwords * 4;
+    for (i = 0; i < len % 4; i++) {
+        a[i] ^= b[i];
+    }    
 }
 
 /**
@@ -320,9 +414,12 @@ size_t berlekamp_massey(const u8 *s, size_t n)
  * @param nbits Number of bits.
  * @param bitpos Bit position (0 is the lowest).
  */
-void linearcomp_test(Generator32State *obj, size_t nbits, unsigned int bitpos)
+void linearcomp_test(ResultsList *out, Generator32State *obj,
+    size_t nbits, unsigned int bitpos)
 {
+    TestResultEntry tres;
     size_t i;
+    double parity, mu, sigma, L;
     u8 *s = calloc(nbits, sizeof(u8));
     u32 mask = 1ul << bitpos;
     if (s == NULL) {
@@ -335,16 +432,18 @@ void linearcomp_test(Generator32State *obj, size_t nbits, unsigned int bitpos)
         if (obj->get_bits32(obj->state) & mask)
             s[i] = 1;
     }
-    {
-        double parity = nbits & 1;
-        double mu = nbits / 2.0 + (9.0 - parity) / 36.0;
-        double sigma = sqrt(86.0/81.0);
-        double x = berlekamp_massey(s, nbits);
-        double z = (x - mu) / sigma;
-        double p = stdnorm_pvalue(z);
-        double alpha = stdnorm_cdf(z);
-        printf("  L = %g; z = %g; p = %g; 1 - p = %g\n\n", x, z, p, alpha);
-    }
+    parity = nbits & 1;
+    mu = nbits / 2.0 + (9.0 - parity) / 36.0;
+    sigma = sqrt(86.0 / 81.0);
+    L = berlekamp_massey(s, nbits);
+    sprintf(tres.name, "linearcomp:%u", bitpos);
+    tres.x = (L - mu) / sigma;
+    tres.p = stdnorm_pvalue(tres.x);
+    tres.alpha = stdnorm_cdf(tres.x);
+    printf("  L = %g; z = %g; p = %g; 1 - p = %g\n\n",
+        L, tres.x, tres.p, tres.alpha);
+    ResultsList_add(out, &tres);
+    free(s);
 }
 
 
@@ -430,16 +529,18 @@ double bytefreq_to_chi2emp(const u32 *bytefreq)
     return chi2emp;
 }
 
-void gen_tests(Generator32State *obj)
+void gen_tests(ResultsList *out, Generator32State *obj)
 {
     const double lambda = 4.0;
     int n = 4096, i, ii, ndups = 0, ndups_dec, nsamples = 1024;
     int pos_dec = 0;
     double chi2emp = 0.0;
+    TestResultEntry tres;
     u32 u_dec = 0;
     u32 *x = calloc(n, sizeof(u32));
     u32 *x_dec = calloc(n, sizeof(u32));
     u32 *bytefreq = calloc(256, sizeof(u32));
+    printf("Processing pseudorandom numbers blocks...\n");
     for (ii = 0; ii < nsamples; ii++) {
         for (i = 0; i < n; i++) {
             u32 u = obj->get_bits32(obj->state);
@@ -463,20 +564,33 @@ void gen_tests(Generator32State *obj)
             bytefreq[u & 0xFF]++;            
         }
         ndups += get_ndups(x, n);
-        printf("%d of %d\r", ii, nsamples);
+        printf("  %d of %d\r", ii + 1, nsamples);
     }
     chi2emp = bytefreq_to_chi2emp(bytefreq);
     ndups_dec = get_ndups(x_dec, n);
     printf("\n");
-    printf("  bspace32_1d\n");
-    printf("    %d\n", ndups);
-    printf("    %g\n", poisson_pvalue(ndups, nsamples * lambda));
-    printf("  bspace4_8d_dec\n");
-    printf("    %d\n", ndups_dec);
-    printf("    %g\n", poisson_pvalue(ndups_dec, lambda));
-    printf("  bytefreq\n");
-    printf("    %g\n", chi2emp);
-    printf("    %g\n", chi2_pvalue(chi2emp, 255));
+    /* Analysis of 1-dimensional birthday spacings test */
+    strcpy(tres.name, "bspace32_1d");
+    tres.x = ndups;
+    tres.p = poisson_pvalue(tres.x, nsamples * lambda);
+    tres.alpha = poisson_cdf(tres.x, nsamples * lambda);
+    ResultsList_add(out, &tres);
+    printf("  bspace32_1d: x = %g, p = %g\n", tres.x, tres.p);
+    /* Analysis of 3D birthday spacings test with decimation */
+    strcpy(tres.name, "bspace4_8_dec");
+    tres.x = ndups_dec;
+    tres.p = poisson_pvalue(tres.x, lambda);
+    tres.alpha = poisson_cdf(tres.x, lambda);
+    ResultsList_add(out, &tres);
+    printf("  bspace4_8d_dec: x = %g, p = %g\n", tres.x, tres.p);
+    /* Analysis of byte frequency test */
+    strcpy(tres.name, "bytefreq");
+    tres.x = chi2emp;
+    tres.p = chi2_pvalue(chi2emp, 255);
+    tres.alpha = chi2_cdf(chi2emp, 255);
+    ResultsList_add(out, &tres);
+    printf("  bytefreq: x = %g, p = %g\n", tres.x, tres.p);
+    /* Free all buffers */
     free(x);
     free(x_dec);
     free(bytefreq);
@@ -491,7 +605,7 @@ void print_help()
     printf("Usage: sr_tiny gen_name [speed]\n");
     printf("  gen_name = alfib, lcg32, lcg64, mwc1616x, xorshift32\n");
     printf("    alfib = LFib(55,24,+,2^32): additive lagged Fibonacci\n");
-    printf("    lcg69069 - 32-bit LCG; x_n = 69069x_{n-1} + 12345 mod 2^32\n");
+    printf("    lcg32 - 32-bit LCG; x_n = 69069x_{n-1} + 12345 mod 2^32\n");
     printf("    lcg64 - 64-bit LCG, returns upper 32 bits\n");
     printf("    mwc1616x - a combination of 2 MWC generators, gives high\n");
     printf("      quality sequence that passes all tests\n");
@@ -574,7 +688,6 @@ void measure_speed(Generator32State *gen)
 
 int main(int argc, char *argv[])
 {
-    clock_t tic, toc;
     Generator32State gen;
     if (argc < 2) {
         print_help();
@@ -590,11 +703,17 @@ int main(int argc, char *argv[])
     if (argc == 3 && !strcmp(argv[2], "speed")) {
         measure_speed(&gen);
     } else {
+        ResultsList results;
+        clock_t tic, toc;
+        ResultsList_init(&results);
         tic = clock();
-        gen_tests(&gen);
-        linearcomp_test(&gen, 10000, 31);
-        linearcomp_test(&gen, 10000, 0);
+        gen_tests(&results, &gen);
+        linearcomp_test(&results, &gen, 10000, 31);
+        linearcomp_test(&results, &gen, 10000, 0);
         toc = clock();
+
+        ResultsList_print(&results);
+        ResultsList_free(&results);
         printf("Elaplsed time: %g sec\n", ((double) (toc - tic) / CLOCKS_PER_SEC));
     }
 

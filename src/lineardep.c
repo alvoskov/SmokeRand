@@ -261,5 +261,6 @@ TestResults linearcomp_test(GeneratorState *obj, size_t nbits, unsigned int bitp
     ans.alpha = stdnorm_cdf(z);
     obj->intf->printf("  L = %g; z = %g; p = %g\n", ans.x, z, ans.p);
     obj->intf->printf("\n");
+    free(s);
     return ans;
 }
