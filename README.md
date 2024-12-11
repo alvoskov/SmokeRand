@@ -534,9 +534,9 @@ test run required about 25 min.
  pcg64_xsl_rr      | u64    | +     | +       | +    | 0.43 | +     | +      |         | >= 32 TiB
  philox            | u64    | +     | +       | +    | 0.85 | +     | +      | +       | >= 2 TiB
  philox32          | u32    | +     | +       | +    | 2.7  | +     | N/A    | +       | >= 2 TiB
- ran               | u64    | +     | +       |      |      | +     |        |         | 
- ranq1             | u64    | 1     | 3       |      |      | 1     | -      |         | 512 KiB
- ranq2             | u64    | +     | 1       | 2    |      | +     | +      |         | 2 MiB
+ ran               | u64    | +     | +       | +    | 0.43 | +     | +      |         | >= 1 TiB
+ ranq1             | u64    | 1     | 3       | 6    | 0.32 | 1     | -      |         | 512 KiB
+ ranq2             | u64    | +     | 1       | 2    | 0.33 | +     | +      |         | 2 MiB
  randu             | u32    | 21    | 39      | 43   | 0.41 | 4     | N/A    | -       | 1 KiB
  ranlux++          | u64    | +     | +       | +    | 3.9  | +     |        | +       | >= 1 TiB
  ranrot32[7/3]     | u32    | 1/2   | 4/5     | 5    | 0.58 | +     | N/A    | Small   | 128 MiB
