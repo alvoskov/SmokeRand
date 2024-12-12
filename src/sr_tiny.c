@@ -130,12 +130,21 @@ static void sprintf_pvalue(char *buf, double p, double alpha)
 void ResultsList_print(const ResultsList *obj)
 {
     TestResultEntry *entry;
-    int i = 1;
+    int i, id = 1;
+    printf("  %2s %-15s %12s %20s\n", "#", "Test name", "xemp", "p-value");
+    for (i = 0; i < 60; i++) {
+        printf("-");
+    }
+    printf("\n");
     for (entry = obj->first; entry != NULL; entry = entry->next) {
         char pbuf[32];
         sprintf_pvalue(pbuf, entry->p, entry->alpha);
-        printf("%2d %-15s %12g %20s\n", i++, entry->name, entry->x, pbuf);
+        printf("  %2d %-15s %12g %20s\n", id++, entry->name, entry->x, pbuf);
     }
+    for (i = 0; i < 60; i++) {
+        printf("-");
+    }
+    printf("\n");
 }
 
 
@@ -568,7 +577,7 @@ void gen_tests(ResultsList *out, Generator32State *obj)
     }
     chi2emp = bytefreq_to_chi2emp(bytefreq);
     ndups_dec = get_ndups(x_dec, n);
-    printf("\n");
+    printf("\nBirthday spacings and byte frequency tests results\n");
     /* Analysis of 1-dimensional birthday spacings test */
     strcpy(tres.name, "bspace32_1d");
     tres.x = ndups;
@@ -686,6 +695,16 @@ void measure_speed(Generator32State *gen)
     }
 }
 
+void print_elapsed_time(double sec_total)
+{
+    unsigned long sec_total_int = sec_total;
+    int ms = (sec_total - sec_total_int) * 1000.0;
+    int seconds = sec_total_int % 60;
+    int minutes = (sec_total_int / 60) % 60;
+    int hours = (sec_total_int / 3600);
+    printf("%.2d:%.2d:%.2d.%.3d\n", hours, minutes, seconds, ms);
+}
+
 int main(int argc, char *argv[])
 {
     Generator32State gen;
@@ -693,13 +712,11 @@ int main(int argc, char *argv[])
         print_help();
         return 0;
     }
-
     gen = create_generator(argv[1]);
     if (gen.state == NULL) {
         fprintf(stderr, "Unknown generator %s\n", argv[1]);
         return 1;
     }
-
     if (argc == 3 && !strcmp(argv[2], "speed")) {
         measure_speed(&gen);
     } else {
@@ -711,12 +728,12 @@ int main(int argc, char *argv[])
         linearcomp_test(&results, &gen, 10000, 31);
         linearcomp_test(&results, &gen, 10000, 0);
         toc = clock();
-
         ResultsList_print(&results);
         ResultsList_free(&results);
-        printf("Elaplsed time: %g sec\n", ((double) (toc - tic) / CLOCKS_PER_SEC));
+        printf("Elaplsed time: ");
+        print_elapsed_time(((double) (toc - tic) / CLOCKS_PER_SEC));
+        printf("\n");
     }
-
     free(gen.state);
     return 0;
 }

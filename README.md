@@ -544,7 +544,7 @@ test run required about 25 min.
  ranrot32[57/13]   | u32    | +     | +       | 1    | 0.74 | +     | N/A    | +       | 8 GiB
  ranshi            | u64    | 1     | 6       | 7    | 0.43 | +     |        |         | 32 KiB
  ranshi_upper32    | u32    | +     | +       | +    | 0.86 | +     | N/A    |         | >= 2 TiB
- ranshi_lower32    | u32    | +     | +       | +    | 0.86 | +     | N/A    |         |
+ ranshi_lower32    | u32    | +     | +       | +    | 0.86 | +     | N/A    |         | >= 1 TiB
  ranval            | u32    | +     | +       | +    | 0.31 | +     | N/A    |         | >= 4 TiB
  r1279             | u32    | 5     | 7       | 10   | 0.47 | 2     | N/A    |         | 64 MiB
  ranlux[0]         | u32    | 6     | 9       | 12   | 6.8  | 1     | N/A    |         | 4 MiB
