@@ -461,6 +461,7 @@ test run required about 25 min.
 
  Algoritrhm        | Output | brief | default | full | cpb  | dos16 | bday64 | TestU01 | PractRand 
 -------------------|--------|-------|---------|------|------|-------|--------|---------|-----------
+ aesni128          | u64    | +     | +       | +    |      | +     |        |         |
  alfib             | u64    | 5     | 6       | 8    | 0.23 | 2     | +      | Small   | 128 MiB
  alfib_lux         | u32    | 1     | 1       | 1    |      | +     | N/A    |         | 4 GiB
  alfib_mod         | u32    | +     | +       | +    | 0.50 | +     | N/A    | +       | 1 TiB
@@ -639,6 +640,13 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 - Passed dieharder: lcg64
 
 # Versions history
+
+12.12.2024: SmokeRand 0.14.
+
+- AES-128 based PRNG added (only for x86-64 processors with AESNI support).
+- Bugfix in linearcomp test (memory leak).
+- An improved report in `sr_tiny.c` --- compact version of `dos16` battery for
+  16-bit computers.
 
 09.12.2024: SmokeRand 0.13.
 
