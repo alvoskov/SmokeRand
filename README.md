@@ -461,9 +461,9 @@ test run required about 25 min.
 
  Algoritrhm        | Output | brief | default | full | cpb  | dos16 | bday64 | TestU01 | PractRand 
 -------------------|--------|-------|---------|------|------|-------|--------|---------|-----------
- aesni128          | u64    | +     | +       | +    |      | +     |        |         |
+ aesni128          | u64    | +     | +       | +    | 0.89 | +     | +      |         | >= 1 TiB
  alfib             | u64    | 5     | 6       | 8    | 0.23 | 2     | +      | Small   | 128 MiB
- alfib_lux         | u32    | 1     | 1       | 1    |      | +     | N/A    |         | 4 GiB
+ alfib_lux         | u32    | 1     | 1       | 1    | 6.1  | +     | N/A    |         | 4 GiB
  alfib_mod         | u32    | +     | +       | +    | 0.50 | +     | N/A    | +       | 1 TiB
  ara32             | u32    | +     | 1       | 1    | 0.96 | +     | N/A    |         | 512 MiB
  chacha            | u32    | +     | +       | +    | 2.0  | +     | N/A    | +       |
@@ -555,7 +555,7 @@ test run required about 25 min.
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
  rrmxmx            | u64    | +     | +       | +    | 0.14 | +     | -      |         | >= 2 TiB
  sapparot          | u32    | 1     | 3       | 4    | 0.70 | +     | N/A    |         | 8 MiB
- sapparot2         | u32    | +     | +       | +    | 0.42 | +     | N/A    |         | >= 64 GiB
+ sapparot2         | u32    | +     | +       | +    | 0.42 | +     | N/A    |         | >= 1 TiB(?)
  sezgin63          | u32    | +     | 1       | 3    | 3.0  | +     | N/A    |         | >= 16 TiB
  sfc8              | u32    | 3     | 7       | 14   | 1.9  | +     | N/A    |         | 128 MiB
  sfc16             | u32    | +     | +       | +    | 0.93 | +     | N/A    |         | 128 GiB(stdin32)*
@@ -584,7 +584,7 @@ test run required about 25 min.
  xorshift128p      | u64    | 1     | 2       | 3    | 0.21 | 1     | +      |         | 32 GiB
  xoroshiro128p     | u64    | 1     | 2       | 3    | 0.16 | 1     | +      |         | 16 MiB
  xoroshiro128pp    | u64    | +     | +       | +    | 0.20 | +     | +      |         | >= 2 TiB
- xoroshiro1024st   | u64    | 1     | 1       | 2    | 0.33 | 1     |        |         | 128 GiB
+ xoroshiro1024st   | u64    | 1     | 1       | 2    | 0.33 | 1     | +      |         | 128 GiB
  xoroshiro1024stst | u64    | +     | +       | +    | 0.33 | +     |        |         | >= 1 TiB
  xorwow            | u32    | 3     | 7       | 9    | 0.52 | 1     | N/A    | Small   | 128 KiB
  xsh               | u64    | 8     | 13      | 17   | 0.43 | 2     | -      | -       | 32 KiB
