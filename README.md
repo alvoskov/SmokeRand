@@ -539,7 +539,7 @@ test run required about 25 min.
  ranq1             | u64    | 1     | 3       | 6    | 0.32 | 1     | -      |         | 512 KiB
  ranq2             | u64    | +     | 1       | 2    | 0.33 | +     | +      |         | 2 MiB
  randu             | u32    | 21    | 39      | 43   | 0.41 | 4     | N/A    | -       | 1 KiB
- ranlux++          | u64    | +     | +       | +    | 3.9  | +     |        | +       | >= 1 TiB
+ ranlux++          | u64    | +     | +       | +    | 3.9  | +     | +      | +       | >= 1 TiB
  ranrot32[7/3]     | u32    | 1/2   | 4/5     | 5    | 0.58 | +     | N/A    | Small   | 128 MiB
  ranrot32[17/9]    | u32    | 1     | 2       | 3    | 0.68 | +     | N/A    | +       | 1 GiB
  ranrot32[57/13]   | u32    | +     | +       | 1    | 0.74 | +     | N/A    | +       | 8 GiB
@@ -561,7 +561,7 @@ test run required about 25 min.
  sfc16             | u32    | +     | +       | +    | 0.93 | +     | N/A    |         | 128 GiB(stdin32)*
  sfc32             | u32    | +     | +       | +    | 0.24 | +     | N/A    |         | >= 4 TiB
  sfc64             | u64    | +     | +       | +    | 0.10 | +     | +      | +       | >= 1 TiB
- speck128          | u64    | +     | +       | +    | 3.1  | +     |        |         | >= 2 TiB
+ speck128          | u64    | +     | +       | +    | 3.1  | +     | +      |         | >= 2 TiB
  speck128_avx      | u64    | +     | +       | +    | 0.65 | +     | +      |         | >= 2 TiB
  splitmix          | u64    | +     | +       | +    | 0.19 | +     | -      |         | >= 2 TiB
  splitmix32        | u32    | 2     | 3       | 4/5  | 0.25 | +     | N/A    | +       | 1 GiB
@@ -577,7 +577,7 @@ test run required about 25 min.
  swbw              | u32    | 1     | 1       | 1    | 2.8  | +     | N/A    | +       | 4 GiB
  tinymt32          | u32    | 2     | 4       | 6    | 1.5  | 1     | N/A    | +       | 4 GiB
  tinymt64          | u64    | 1     | 2       | 4    | 2.7  | 1     | +      |         | 32 GiB
- threefry          | u64    | +     | +       | +    | 1.0  | +     |        | +       | >= 1 TiB
+ threefry          | u64    | +     | +       | +    | 1.0  | +     | +      | +       | >= 1 TiB
  well1024a         | u32    | 3     | 5       | 7    | 1.0  | 2     | N/A    | Small   | 64 MiB
  wyrand            | u64    | +     | +       | +    | 0.08 | +     | +      |         | >= 1 TiB
  xorshift128       | u32    | 4     | 6/7     | 8    | 0.41 | 2     | N/A    |         | 128 KiB
@@ -585,7 +585,7 @@ test run required about 25 min.
  xoroshiro128p     | u64    | 1     | 2       | 3    | 0.16 | 1     | +      |         | 16 MiB
  xoroshiro128pp    | u64    | +     | +       | +    | 0.20 | +     | +      |         | >= 2 TiB
  xoroshiro1024st   | u64    | 1     | 1       | 2    | 0.33 | 1     | +      |         | 128 GiB
- xoroshiro1024stst | u64    | +     | +       | +    | 0.33 | +     |        |         | >= 1 TiB
+ xoroshiro1024stst | u64    | +     | +       | +    | 0.33 | +     | +      |         | >= 1 TiB
  xorwow            | u32    | 3     | 7       | 9    | 0.52 | 1     | N/A    | Small   | 128 KiB
  xsh               | u64    | 8     | 13      | 17   | 0.43 | 2     | -      | -       | 32 KiB
 
