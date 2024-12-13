@@ -112,11 +112,19 @@ generators: $(GEN_SHARED)
 $(GEN_BINDIR)/libcrand_shared$(SO): $(GEN_BINDIR)/obj/crand_shared.o
 	$(CC) $(LINKFLAGS) -shared $< -s $(GEN_LFLAGS) -o $@
 
+#$(GEN_BINDIR)/libmixmax_shared$(SO): $(GEN_BINDIR)/obj/mixmax_shared.o $(GEN_BINDIR)/obj/mixmax/mixmax.o
+#	$(CC) $(LINKFLAGS) -shared $< $(GEN_BINDIR)/obj/mixmax/mixmax.o -s $(GEN_LFLAGS) -o $@
+
+
 $(GEN_BINDIR)/lib%$(SO): $(GEN_BINDIR)/obj/%.o
 	$(CC) $(LINKFLAGS) -shared $(GEN_CFLAGS) $< -s $(GEN_LFLAGS) -o $@
 
 $(GEN_OBJFILES): $(BINDIR)/generators/obj/%.o : generators/%.c $(INTERFACE_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
+
+$(BINDIR)/generators/obj/mixmax/mixmax.o : generators/mixmax/mixmax.c $(INTERFACE_HEADERS)
+	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
+
 
 $(GEN_BINDIR)/obj/superduper64_shared.o : generators/superduper64_shared.c \
     generators/superduper64_body.h $(INTERFACE_HEADERS)

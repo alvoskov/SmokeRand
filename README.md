@@ -475,7 +475,7 @@ test run required about 25 min.
  drand48           | u32    | 12    | 20      | 22/23| 0.72 | 1     | N/A    | -       | 1 MiB
  isaac64           | u64    | +     | +       | +    | 0.75 | +     | +      | +       | >= 1 TiB
  flea32x1          | u32    | +     | 1       | 1    | 0.48 | +     | N/A    |         | 4 MiB
- hc256             | u32    | +     | +       | +    |      | +     | N/A    |         | >= 1 TiB
+ hc256             | u32    | +     | +       | +    | 1.1  | +     | N/A    |         | >= 1 TiB
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | 1     | N/A    | Small   | 1 MiB
  kiss99            | u32    | +     | +       | +    | 1.0  | +     | N/A    | +       | >= 8 TiB
  kiss64            | u64    | +     | +       | +    | 0.53 | +     | +      | +       | >= 4 TiB
@@ -517,6 +517,7 @@ test run required about 25 min.
  lfsr113           | u32    | 3     | 5       | 7    | 1.1  | 2     | N/A    |         | 32 KiB 
  lfsr258           | u64    | 3     | 5       | 7    | 0.75 | 2     | +      |         | 1 MiB
  minstd            | u32    | 20    | 38      | 42   | 2.4  | 4     | N/A    | -       | 1 KiB
+ mixmax_low32      | u32    | +     | +       | +    | 1.7  | +     | N/A    |         |
  mlfib17_5         | u32    | +     | +       | +    | 0.48 | +     | N/A    | +       | >= 32 TiB
  mt19937           | u32    | 3     | 3       | 3    | 0.91 | +     | N/A    | Small   | 128 GiB
  mrg32k3a          | u32    | +     | +       | +    | 2.5  | +     | N/A    |         | >= 4 TiB
