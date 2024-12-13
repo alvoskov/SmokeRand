@@ -29,6 +29,7 @@ static TestResults bspace32_1d_test(GeneratorState *obj)
     return bspace_nd_test(obj, &opts);
 }
 
+
 static TestResults bspace4_8d_dec_test(GeneratorState *obj)
 {
     return bspace4_8d_decimated_test(obj, 1<<7);
