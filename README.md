@@ -465,7 +465,7 @@ test run required about 25 min.
  alfib             | u64    | 5     | 6       | 8    | 0.23 | 2     | +      | Small   | 128 MiB
  alfib_lux         | u32    | 1     | 1       | 1    | 6.1  | +     | N/A    |         | 4 GiB
  alfib_mod         | u32    | +     | +       | +    | 0.50 | +     | N/A    | +       | 1 TiB
- ara32             | u32    | +     | 1       | 1    | 0.96 | +     | N/A    |         | 512 MiB
+ ara32             | u32    | +     | 1       | 1    | 0.96 | +     | N/A    | +       | 512 MiB
  chacha            | u32    | +     | +       | +    | 2.0  | +     | N/A    | +       |
  chacha_avx        | u32    | +     | +       | +    | 0.7  | +     | N/A    | +       |
  chacha_ctr32      | u32    | +     | +       | 1    | 2.0  | +     | N/A    |         | 256 GiB
@@ -490,8 +490,8 @@ test run required about 25 min.
  lfib_par[31+]     | u32    | 5/6   | 6/7     | 10   | 0.59 | 1     | N/A    | -       | 32 MiB
  lfib_par[55+]     | u32    | 4     | 5       | 7    | 0.59 | 1     | N/A    | -       | 2 GiB
  lfib_par[55-]     | u32    | 4     | 5       | 7    | 0.57 | 1     | N/A    | -       | 2 GiB
- lfib_par[127+]    | u32    | 4     | 4       | 5    | 0.57 | 1     | N/A    | -/+     | 512 MiB
- lfib_par[127-]    | u32    | 4     | 4       | 5    | 0.55 | 1     | N/A    | -/+     | 512 MiB
+ lfib_par[127+]    | u32    | 4     | 4       | 5    | 0.57 | 1     | N/A    | -/Small | 512 MiB
+ lfib_par[127-]    | u32    | 4     | 4       | 5    | 0.55 | 1     | N/A    | -/Small | 512 MiB
  lfib_par[258+]    | u32    | 4     | 4       | 5    |      | 1     | N/A    | Small   | 8 GiB
  lfib_par[258-]    | u32    | 4     | 4       | 5    |      | 1     | N/A    | Small   | 8 GiB
  lfib_par[378+]    | u32    | 4     | 4       | 5    |      | 1     | N/A    | Small   | 32 GiB
@@ -516,7 +516,7 @@ test run required about 25 min.
  lfib4_u64         | u32    | +     | +       | +    | 0.34 | +     | N/A    |         | >= 2 TiB
  lfsr113           | u32    | 3     | 5       | 7    | 1.1  | 2     | N/A    |         | 32 KiB 
  lfsr258           | u64    | 3     | 5       | 7    | 0.75 | 2     | +      |         | 1 MiB
- minstd            | u32    | 20    | 38      | >=37 | 2.4  | 4     | N/A    | -       | 1 KiB
+ minstd            | u32    | 20    | 38      | 42   | 2.4  | 4     | N/A    | -       | 1 KiB
  mlfib17_5         | u32    | +     | +       | +    | 0.48 | +     | N/A    | +       | >= 32 TiB
  mt19937           | u32    | 3     | 3       | 3    | 0.91 | +     | N/A    | Small   | 128 GiB
  mrg32k3a          | u32    | +     | +       | +    | 2.5  | +     | N/A    |         | >= 4 TiB
@@ -527,7 +527,7 @@ test run required about 25 min.
  mwc64x            | u32    | +     | +       | +    | 0.53 | +     | N/A    | +       | >= 16 TiB
  mwc128            | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 16 TiB
  mwc128x           | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 8 TiB
- mwc1616           | u32    | 10/11 | 12/18   | >=16 | 0.48 | +     | N/A    |         | 16 MiB
+ mwc1616           | u32    | 10/11 | 12/18   | 19   | 0.48 | +     | N/A    |         | 16 MiB
  mwc1616x          | u32    | +     | +       | +    | 0.67 | +     | N/A    | +       | >= 32 TiB(?)
  mwc3232x          | u64    | +     | +       | +    | 0.23 | +     | +      |         | >= 32 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | +     | N/A    | +       | >= 2 TiB
@@ -555,7 +555,7 @@ test run required about 25 min.
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
  rrmxmx            | u64    | +     | +       | +    | 0.14 | +     | -      |         | >= 2 TiB
  sapparot          | u32    | 1     | 3       | 4    | 0.70 | +     | N/A    |         | 8 MiB
- sapparot2         | u32    | +     | +       | +    | 0.42 | +     | N/A    |         | >= 1 TiB(?)
+ sapparot2         | u32    | +     | +       | +    | 0.42 | +     | N/A    |         | 2 TiB
  sezgin63          | u32    | +     | 1       | 3    | 3.0  | +     | N/A    |         | >= 16 TiB
  sfc8              | u32    | 3     | 7       | 14   | 1.9  | +     | N/A    |         | 128 MiB
  sfc16             | u32    | +     | +       | +    | 0.93 | +     | N/A    |         | 128 GiB(stdin32)*
@@ -563,13 +563,13 @@ test run required about 25 min.
  sfc64             | u64    | +     | +       | +    | 0.10 | +     | +      | +       | >= 1 TiB
  speck128          | u64    | +     | +       | +    | 3.1  | +     | +      |         | >= 2 TiB
  speck128_avx      | u64    | +     | +       | +    | 0.65 | +     | +      |         | >= 2 TiB
- splitmix          | u64    | +     | +       | +    | 0.19 | +     | -      |         | >= 2 TiB
+ splitmix          | u64    | +     | +       | +    | 0.19 | +     | -      | +       | >= 2 TiB
  splitmix32        | u32    | 2     | 3       | 4/5  | 0.25 | +     | N/A    | +       | 1 GiB
- sqxor             | u64    | +     | +       | +    | 0.13 | +     | +      |         | >= 16 TiB
+ sqxor             | u64    | +     | +       | +    | 0.13 | +     | +      | +       | >= 16 TiB
  sqxor32           | u32    | 1     | 2       | 4    | 0.20 | +     | N/A    | Small   | 16 GiB
  stormdrop         | u32    | +     | +       | 1    | 1.2  | +     | N/A    |         | >= 1 TiB
  superduper73      | u32    | 9     | 15      | 18   | 0.64 | 1     | N/A    |         | 32 KiB
- superduper64      | u64    | 1     | 3       | 5    | 0.35 | 1     |        |         | 512 KiB
+ superduper64      | u64    | 1     | 3       | 5    | 0.35 | 1     | +      |         | 512 KiB
  superduper64_u32  | u32    | +     | +       | +    | 0.70 | +     | N/A    |         | >= 2 TiB
  shr3              | u32    | 15    | 32      | 36   | 0.76 | 2     | N/A    | -       | 32 KiB
  swb               | u32    | 5     | 6       | 8    | 2.7  | 1     | N/A    | Small   | 128 MiB
@@ -585,7 +585,7 @@ test run required about 25 min.
  xoroshiro128p     | u64    | 1     | 2       | 3    | 0.16 | 1     | +      |         | 16 MiB
  xoroshiro128pp    | u64    | +     | +       | +    | 0.20 | +     | +      |         | >= 2 TiB
  xoroshiro1024st   | u64    | 1     | 1       | 2    | 0.33 | 1     | +      |         | 128 GiB
- xoroshiro1024stst | u64    | +     | +       | +    | 0.33 | +     | +      |         | >= 1 TiB
+ xoroshiro1024stst | u64    | +     | +       | +    | 0.33 | +     | +      | +       | >= 1 TiB
  xorwow            | u32    | 3     | 7       | 9    | 0.52 | 1     | N/A    | Small   | 128 KiB
  xsh               | u64    | 8     | 13      | 17   | 0.43 | 2     | -      | -       | 32 KiB
 
