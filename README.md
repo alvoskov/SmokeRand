@@ -449,7 +449,8 @@ distribution; it is used together with Bonferroni correction.
 
 This test is not very sensitive. But RC4, obsolete CSPRNG, fails it at 16-bit
 chunks at zmax test at 432 GiB of data (PractRand 0.94 fails at 1 TiB). This
-test run required about 25 min.
+test run required about 25 min. Its RC4OK modification doesn't have such
+statistical bias and passes this frequency test at least for 1 TiB sample.
 
 
 ## 2D Ising model test
@@ -474,7 +475,7 @@ test run required about 25 min.
  cwg64             | u64    | +     | +       | +    | 0.30 | +     | +      |         | >= 1 TiB
  drand48           | u32    | 12    | 20      | 22/23| 0.72 | 1     | N/A    | -       | 1 MiB
  isaac64           | u64    | +     | +       | +    | 0.75 | +     | +      | +       | >= 1 TiB
- flea32x1          | u32    | +     | 1       | 1    | 0.48 | +     | N/A    |         | 4 MiB
+ flea32x1          | u32    | +     | 1       | 1    | 0.48 | +     | N/A    | +       | 4 MiB
  hc256             | u32    | +     | +       | +    | 1.1  | +     | N/A    |         | >= 1 TiB
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | 1     | N/A    | Small   | 1 MiB
  kiss99            | u32    | +     | +       | +    | 1.0  | +     | N/A    | +       | >= 8 TiB
@@ -499,7 +500,7 @@ test run required about 25 min.
  lfib_par[607+]    | u32    | 4     | 4       | 5    | 0.51 | 1     | N/A    | Small   | 256 GiB
  lfib_par[607-]    | u32    | 4     | 4       | 5    | 0.51 | 1     | N/A    | Small   | 256 GiB
  lfib_par[1279+]   | u32    | 3/4   | 3/4     | 4/5  | 0.52 | 1     | N/A    | Crush   | 1 TiB
- lfib_par[1279-]   | u32    | 3/4   | 3/4     | 4/5  | 0.50 | 1     | N/A    | Crush   |
+ lfib_par[1279-]   | u32    | 3/4   | 3/4     | 4/5  | 0.50 | 1     | N/A    | Crush   | 1 TiB
  lfib_par[2281+]   | u32    | 3     | 3       | 4    | 0.50 | +     | N/A    | +       | 8 TiB
  lfib_par[2281-]   | u32    | 3     | 3       | 4    | 0.50 | 0/1   | N/A    |         | 8 TiB
  lfib_par[3217+]   | u32    | 1     | 1       | 1/2  | 0.50 | +     | N/A    |         |
@@ -553,6 +554,7 @@ test run required about 25 min.
  ranlux[1]         | u32    | +     | 2       | 3    | 13   | +     | N/A    |         | 4 GiB
  ranlux[2]         | u32    | +     | +       | +    | 27   | +     | N/A    |         | >= 128 GiB
  rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
+ rc4ok             | u32    | +     | +       | +    | 6.6  | +     | N/A    |         |
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
  rrmxmx            | u64    | +     | +       | +    | 0.14 | +     | -      |         | >= 2 TiB
  sapparot          | u32    | 1     | 3       | 4    | 0.70 | +     | N/A    |         | 8 MiB
