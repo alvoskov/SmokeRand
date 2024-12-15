@@ -12,21 +12,6 @@
  * and returns higher 32 bits. The initial values in the ring buffer
  * are filled by the 64-bit PCG generator.
  *
- *                   | brief | default | full | PractRand
- * ------------------|-------|---------|------|-----------
- * LFib(55,24,+)     | 3     | 3       |      | 2 GiB
- * LFib(55,24,-)     | 3     |         |      | 2 GiB
- * LFib(127,97,+)    | 3     |         |      | 512 MiB
- * LFib(127,97,-)    | 3     |         |      | 512 MiB
- * LFib(607,207,+)   | 3     |         |      | 128 GiB
- * LFib(607,207,-)   | 3     |         |      | 256 GiB
- * LFib(1279,418,+)  | 2     | 2       |      |
- * LFib(1279,418,-)  | 2     | 2       |      |
- * LFib(2281,1252,+) | 2     | 2       |      |
- * LFib(2281,1252,-) | 1     | 2       |      |
- * LFib(3217,576,+)  | +     | +       |      |
- * LFib(3217,576,-)  | +     |         |      |
- *
  * Sources of parameters:
  *
  * 1. D. Knuth. TAOCP Vol. 2 (Chapter 3.2.2)
@@ -54,8 +39,7 @@ typedef struct {
     int is_additive; ///< 0/1 - subtractive/additive
     int r; ///< Larger lag
     int s; ///< Smaller lag
-    int i;
-    int j;
+    int pos;
     uint64_t *u; ///< Ring buffer (u[0] is not used)
 } LFibDyn_State;
 
@@ -102,19 +86,39 @@ static const LFibDynDescr generators[] = {
     {.name = NULL,      .r = 0,      .s = 0,      .is_additive = 0}
 };
 
+/**
+ * @brief A bufferized implementation of lagged Fibonacci generator.
+ * @details It is sligtly (20%) faster than "naive" implementation
+ * for moderate lags. For small lags it may be slower, for large --
+ * has very similar speed.
+ */
 static inline uint64_t get_bits_raw(void *state)
 {
     LFibDyn_State *obj = state;
-    uint64_t x;
-    if (obj->is_additive) {
-        x = obj->u[obj->i] + obj->u[obj->j];
-    } else {
-        x = obj->u[obj->i] - obj->u[obj->j];
+    uint64_t *x = obj->u;
+    if (obj->pos < obj->r) {
+        return x[obj->pos++] >> 32;
     }
-    obj->u[obj->i] = x;
-    if(--obj->i == 0) obj->i = obj->r;
-	if(--obj->j == 0) obj->j = obj->r;
-    return x >> 32;
+    int dlag = obj->r - obj->s;
+    if (obj->is_additive) {
+        // Additive generator
+        for (int i = 0; i < obj->s; i++) {
+            x[i] = x[i] + x[i + dlag];
+        }
+        for (int i = obj->s; i < obj->r; i++) {
+            x[i] = x[i] + x[i - obj->s];
+        }
+    } else {
+        // Subtractive generator
+        for (int i = 0; i < obj->s; i++) {
+            x[i] = x[i] - x[i + dlag];
+        }
+        for (int i = obj->s; i < obj->r; i++) {
+            x[i] = x[i] - x[i - obj->s];
+        }
+    }
+    obj->pos = 0;
+    return x[obj->pos++] >> 32;
 }
 
 
@@ -128,7 +132,7 @@ static LFibDyn_State parse_parameters(const CallerAPI *intf)
             obj.is_additive = ptr->is_additive;
         }        
     }
-    obj.i = obj.r; obj.j = obj.s;
+    /*obj.i = obj.r; obj.j = obj.s;*/ obj.pos = obj.r;
     return obj;
 }
 
@@ -148,7 +152,7 @@ static void *create(const CallerAPI *intf)
     obj->u = (uint64_t *) ( (char *) obj + sizeof(LFibDyn_State) );
     // pcg_rxs_m_xs64 for initialization
     uint64_t state = intf->get_seed64();
-    for (int k = 1; k <= obj->r; k++) {
+    for (int k = 0; k <= obj->r; k++) {
         obj->u[k] = pcg_bits64(&state);
     }
     return (void *) obj;

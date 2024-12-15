@@ -17,8 +17,11 @@
  *
  * Rounds:
  *
+ * - 8 rounds: passes `brief`, `default`, fails `full` (mainly `hamming_ot_long`)
+ * - 9 rounds: passes `full` battery.
+ *
  * - 8 rounds: passes SmallCrush, fails PractRand at 8 GiB
- * - 9 rounds: passes Crush, fails PractRand at ???
+ * - 9 rounds: passes Crush and BigCrush, fails PractRand at ???
  *
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
@@ -29,7 +32,7 @@
 
 PRNG_CMODULE_PROLOG
 
-#define NROUNDS 12
+#define NROUNDS 32
 
 /**
  * @brief Speck128 state.

@@ -29,8 +29,8 @@ else ifeq ($(PLATFORM_NAME), GENERIC)
     IS_PORTABLE=1
 endif
 #------------------------------------------
-CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O2 -Werror -Wall -Wextra -Wno-attributes -march=native
-CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O2 -Werror -Wall -Wextra -Wno-attributes -march=native
+CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native
+CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native
 LINKFLAGS = $(PLATFORM_FLAGS)
 INCLUDE = -Iinclude
 

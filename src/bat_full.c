@@ -253,13 +253,13 @@ static TestResults hamming_ot_values_test(GeneratorState *obj)
 
 static TestResults hamming_ot_low1_test(GeneratorState *obj)
 {
-    HammingOtOptions opts = {.mode = hamming_ot_bytes_low1, .nbytes = 1ull << 32};
+    HammingOtOptions opts = {.mode = hamming_ot_bytes_low1, .nbytes = 1ull << 33};
     return hamming_ot_test(obj, &opts);
 }
 
 static TestResults hamming_ot_low8_test(GeneratorState *obj)
 {
-    HammingOtOptions opts = {.mode = hamming_ot_bytes_low8, .nbytes = 1ull << 32};
+    HammingOtOptions opts = {.mode = hamming_ot_bytes_low8, .nbytes = 1ull << 33};
     return hamming_ot_test(obj, &opts);
 }
 
@@ -333,8 +333,8 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         {"hamming_ot_long128", hamming_ot_long128_test, 55, ram_med},
         {"hamming_ot_long256", hamming_ot_long256_test, 55, ram_med},
         {"hamming_ot_long512", hamming_ot_long512_test, 55, ram_med},
-        {"hamming_ot_low1", hamming_ot_low1_test, 4, ram_med},
-        {"hamming_ot_low8", hamming_ot_low8_test, 8, ram_med},
+        {"hamming_ot_low1", hamming_ot_low1_test, 8, ram_med},
+        {"hamming_ot_low8", hamming_ot_low8_test, 16, ram_med},
         {"hamming_ot_values", hamming_ot_values_test, 16, ram_med},
         {"linearcomp_high", linearcomp_high, 35, ram_lo},
         {"linearcomp_mid", linearcomp_mid, 35, ram_lo},

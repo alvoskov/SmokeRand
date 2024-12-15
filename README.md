@@ -488,60 +488,60 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  lcg128_full       | u64    | 1     | 1       | 1    | 0.42 | +     | +      | +       | 64 GiB
  lcg128_u32_full   | u32    | +     | 1       | 1    | 0.75 | +     | N/A    | +       | >= 32 TiB
  lcg69069          | u32    | 19    | 37/38   | 42   | 0.38 | 4     | N/A    | -       | 2 KiB
- lfib_par[31+]     | u32    | 5/6   | 6/7     | 10   | 0.59 | 1     | N/A    | -       | 32 MiB
- lfib_par[55+]     | u32    | 4     | 5       | 7    | 0.59 | 1     | N/A    | -       | 2 GiB
- lfib_par[55-]     | u32    | 4     | 5       | 7    | 0.57 | 1     | N/A    | -       | 2 GiB
- lfib_par[127+]    | u32    | 4     | 4       | 5    | 0.57 | 1     | N/A    | -/Small | 512 MiB
- lfib_par[127-]    | u32    | 4     | 4       | 5    | 0.55 | 1     | N/A    | -/Small | 512 MiB
- lfib_par[258+]    | u32    | 4     | 4       | 5    |      | 1     | N/A    | Small   | 8 GiB
- lfib_par[258-]    | u32    | 4     | 4       | 5    |      | 1     | N/A    | Small   | 8 GiB
- lfib_par[378+]    | u32    | 4     | 4       | 5    |      | 1     | N/A    | Small   | 32 GiB
- lfib_par[378-]    | u32    | 4     | 4       | 5    |      | 1     | N/A    | Small   | 32 GiB
- lfib_par[607+]    | u32    | 4     | 4       | 5    | 0.51 | 1     | N/A    | Small   | 256 GiB
- lfib_par[607-]    | u32    | 4     | 4       | 5    | 0.51 | 1     | N/A    | Small   | 256 GiB
- lfib_par[1279+]   | u32    | 3/4   | 3/4     | 4/5  | 0.52 | 1     | N/A    | Crush   | 1 TiB
- lfib_par[1279-]   | u32    | 3/4   | 3/4     | 4/5  | 0.50 | 1     | N/A    | Crush   | 1 TiB
- lfib_par[2281+]   | u32    | 3     | 3       | 4    | 0.50 | +     | N/A    | +       | 8 TiB
- lfib_par[2281-]   | u32    | 3     | 3       | 4    | 0.50 | 0/1   | N/A    |         | 8 TiB
- lfib_par[3217+]   | u32    | 1     | 1       | 1/2  | 0.50 | +     | N/A    |         |
- lfib_par[3217-]   | u32    | 1     | 1       | 2/4  | 0.50 | +     | N/A    |         |
- lfib_par[9689+]   | u32    | 1     | 1       | 1    | 0.50 | +     | N/A    |         |
- lfib_par[9689-]   | u32    | 1     | 1       | 1    | 0.50 | +     | N/A    |         |
- lfib_par[19937+]  | u32    | +     | 1       | 1    | 0.50 | +     | N/A    |         |
- lfib_par[19937-]  | u32    | +     | 1       | 1    | 0.50 | +     | N/A    |         |
- lfib_par[44497+]  | u32    | +     | 1       | 1    | 0.50 | +     | N/A    |         |
- lfib_par[44497-]  | u32    | +     | 1       | 1    | 0.50 | +     | N/A    |         |
- lfib_par[110503+] | u32    | +     | +       | +    | 0.50 | +     | N/A    |         |
- lfib_par[110503-] | u32    | +     | +       | +    | 0.50 | +     | N/A    |         |
+ lfib_par[31+]     | u32    | 5/6   | 6/7     | 10   | 0.70 | 1     | N/A    | -       | 32 MiB
+ lfib_par[55+]     | u32    | 4     | 5       | 7    | 0.51 | 1     | N/A    | -       | 2 GiB
+ lfib_par[55-]     | u32    | 4     | 5       | 7    | 0.51 | 1     | N/A    | -       | 2 GiB
+ lfib_par[127+]    | u32    | 4     | 4       | 5    | 0.48 | 1     | N/A    | -/Small | 512 MiB
+ lfib_par[127-]    | u32    | 4     | 4       | 5    | 0.48 | 1     | N/A    | -/Small | 512 MiB
+ lfib_par[258+]    | u32    | 4     | 4       | 5    | 0.44 | 1     | N/A    | Small   | 8 GiB
+ lfib_par[258-]    | u32    | 4     | 4       | 5    | 0.46 | 1     | N/A    | Small   | 8 GiB
+ lfib_par[378+]    | u32    | 4     | 4       | 5    | 0.46 | 1     | N/A    | Small   | 32 GiB
+ lfib_par[378-]    | u32    | 4     | 4       | 5    | 0.45 | 1     | N/A    | Small   | 32 GiB
+ lfib_par[607+]    | u32    | 4     | 4       | 5    | 0.41 | 1     | N/A    | Small   | 256 GiB
+ lfib_par[607-]    | u32    | 4     | 4       | 5    | 0.40 | 1     | N/A    | Small   | 256 GiB
+ lfib_par[1279+]   | u32    | 3/4   | 3/4     | 4/5  | 0.40 | 1     | N/A    | Crush   | 1 TiB
+ lfib_par[1279-]   | u32    | 3/4   | 3/4     | 4/5  | 0.40 | 1     | N/A    | Crush   | 1 TiB
+ lfib_par[2281+]   | u32    | 3     | 3       | 4    | 0.38 | +     | N/A    | +       | 8 TiB
+ lfib_par[2281-]   | u32    | 3     | 3       | 4    | 0.38 | 0/1   | N/A    | +       | 8 TiB
+ lfib_par[3217+]   | u32    | 1     | 1       | 1/2  | 0.39 | +     | N/A    | +       |
+ lfib_par[3217-]   | u32    | 1     | 1       | 2/4  | 0.39 | +     | N/A    | +       |
+ lfib_par[9689+]   | u32    | 1     | 1       | 1    | 0.47 | +     | N/A    | +       |
+ lfib_par[9689-]   | u32    | 1     | 1       | 1    | 0.47 | +     | N/A    | +       |
+ lfib_par[19937+]  | u32    | +     | 1       | 1    | 0.46 | +     | N/A    | +       |
+ lfib_par[19937-]  | u32    | +     | 1       | 1    | 0.48 | +     | N/A    | +       |
+ lfib_par[44497+]  | u32    | +     | 1       | 1    | 0.49 | +     | N/A    | +       |
+ lfib_par[44497-]  | u32    | +     | 1       | 1    | 0.49 | +     | N/A    | +       |
+ lfib_par[110503+] | u32    | +     | +       | +    | 0.52 | +     | N/A    | +       |
+ lfib_par[110503-] | u32    | +     | +       | +    | 0.50 | +     | N/A    | +       |
  lfib4             | u32    | 1     | 3       | 4    | 0.37 | 1     | N/A    |         | 32 MiB
  lfib4_u64         | u32    | +     | +       | +    | 0.34 | +     | N/A    |         | >= 2 TiB
  lfsr113           | u32    | 3     | 5       | 7    | 1.1  | 2     | N/A    |         | 32 KiB 
  lfsr258           | u64    | 3     | 5       | 7    | 0.75 | 2     | +      |         | 1 MiB
  minstd            | u32    | 20    | 38      | 42   | 2.4  | 4     | N/A    | -       | 1 KiB
- mixmax_low32      | u32    | +     | +       | +    | 1.7  | +     | N/A    |         |
+ mixmax_low32      | u32    | +     | +       | +    | 1.7  | +     | N/A    |         | >= 2 TiB
  mlfib17_5         | u32    | +     | +       | +    | 0.48 | +     | N/A    | +       | >= 32 TiB
- mt19937           | u32    | 3     | 3       | 3    | 0.91 | +     | N/A    | Small   | 128 GiB
+ mt19937           | u32    | 3     | 3       | 3    | 0.50 | +     | N/A    | Small   | 128 GiB
  mrg32k3a          | u32    | +     | +       | +    | 2.5  | +     | N/A    |         | >= 4 TiB
  msws              | u32    | +     | +       | +    | 0.72 | +     | N/A    | +       | >= 2 TiB
- mulberry32        | u32    | 1     | 2       | 4    | 0.51 | +     | N/A    |         | 512 MiB
+ mulberry32        | u32    | 1     | 2       | 4    | 0.51 | +     | N/A    | Small   | 512 MiB
  mwc32x            | u32    | 2     | 2       | 7    | 1.5  | +     | N/A    | Small   | 128 MiB
  mwc64             | u32    | 1     | 2       | 4    | 0.37 | +     | N/A    | Small   | 1 TiB
  mwc64x            | u32    | +     | +       | +    | 0.53 | +     | N/A    | +       | >= 16 TiB
  mwc128            | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 16 TiB
  mwc128x           | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 8 TiB
  mwc1616           | u32    | 10/11 | 12/18   | 19   | 0.48 | +     | N/A    |         | 16 MiB
- mwc1616x          | u32    | +     | +       | +    | 0.67 | +     | N/A    | +       | >= 32 TiB(?)
- mwc3232x          | u64    | +     | +       | +    | 0.23 | +     | +      |         | >= 32 TiB
+ mwc1616x          | u32    | +     | +       | +    | 1.2  | +     | N/A    | +       | >= 32 TiB(?)
+ mwc3232x          | u64    | +     | +       | +    | 0.30 | +     | +      |         | >= 32 TiB
  pcg32             | u32    | +     | +       | +    | 0.44 | +     | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +     | +       | +    | 0.28 | +     | -      | +       | >= 2 TiB
  pcg64_xsl_rr      | u64    | +     | +       | +    | 0.43 | +     | +      |         | >= 32 TiB
- philox            | u64    | +     | +       | +    | 0.85 | +     | +      | +       | >= 2 TiB
+ philox            | u64    | +     | +       | +    | 1.7  | +     | +      | +       | >= 2 TiB
  philox32          | u32    | +     | +       | +    | 2.7  | +     | N/A    | +       | >= 2 TiB
  ran               | u64    | +     | +       | +    | 0.43 | +     | +      |         | >= 1 TiB
  ranq1             | u64    | 1     | 3       | 6    | 0.32 | 1     | -      |         | 512 KiB
  ranq2             | u64    | +     | 1       | 2    | 0.33 | +     | +      |         | 2 MiB
  randu             | u32    | 21    | 39      | 43   | 0.41 | 4     | N/A    | -       | 1 KiB
- ranlux++          | u64    | +     | +       | +    | 3.9  | +     | +      | +       | >= 1 TiB
+ ranlux++          | u64    | +     | +       | +    | 2.4  | +     | +      | +       | >= 1 TiB
  ranrot32[7/3]     | u32    | 1/2   | 4/5     | 5    | 0.58 | +     | N/A    | Small   | 128 MiB
  ranrot32[17/9]    | u32    | 1     | 2       | 3    | 0.68 | +     | N/A    | +       | 1 GiB
  ranrot32[57/13]   | u32    | +     | +       | 1    | 0.74 | +     | N/A    | +       | 8 GiB
@@ -567,7 +567,7 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  speck128          | u64    | +     | +       | +    | 3.1  | +     | +      |         | >= 2 TiB
  speck128_avx      | u64    | +     | +       | +    | 0.65 | +     | +      |         | >= 2 TiB
  splitmix          | u64    | +     | +       | +    | 0.19 | +     | -      | +       | >= 2 TiB
- splitmix32        | u32    | 2     | 3       | 4/5  | 0.25 | +     | N/A    | +       | 1 GiB
+ splitmix32        | u32    | 2     | 3       | 4/5  | 0.25 | +     | N/A    | Small   | 1 GiB
  sqxor             | u64    | +     | +       | +    | 0.13 | +     | +      | +       | >= 16 TiB
  sqxor32           | u32    | 1     | 2       | 4    | 0.20 | +     | N/A    | Small   | 16 GiB
  stormdrop         | u32    | +     | +       | 1    | 1.2  | +     | N/A    |         | >= 1 TiB
@@ -583,7 +583,7 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  threefry          | u64    | +     | +       | +    | 1.0  | +     | +      | +       | >= 1 TiB
  well1024a         | u32    | 3     | 5       | 7    | 1.0  | 2     | N/A    | Small   | 64 MiB
  wyrand            | u64    | +     | +       | +    | 0.08 | +     | +      |         | >= 1 TiB
- xorshift128       | u32    | 4     | 6/7     | 8    | 0.41 | 2     | N/A    |         | 128 KiB
+ xorshift128       | u32    | 4     | 6/7     | 8    | 0.41 | 2     | N/A    | -       | 128 KiB
  xorshift128p      | u64    | 1     | 2       | 3    | 0.21 | 1     | +      |         | 32 GiB
  xoroshiro128p     | u64    | 1     | 2       | 3    | 0.16 | 1     | +      |         | 16 MiB
  xoroshiro128pp    | u64    | +     | +       | +    | 0.20 | +     | +      |         | >= 2 TiB
@@ -591,6 +591,9 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  xoroshiro1024stst | u64    | +     | +       | +    | 0.33 | +     | +      | +       | >= 1 TiB
  xorwow            | u32    | 3     | 7       | 9    | 0.52 | 1     | N/A    | Small   | 128 KiB
  xsh               | u64    | 8     | 13      | 17   | 0.43 | 2     | -      | -       | 32 KiB
+
+Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
+e.g. changing `-O2` to `-O3` speeds up `mt19937` but slows down `philox`; gcc 10.3.0 (tdm64-1).
 
 Note about `sfc16`: if its output is processed as `stdin16` by PractRand 0.94
 then it passes it at >= 1 TiB. But if it is tested as 32-bit PRNG in `stdin32`
