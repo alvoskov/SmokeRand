@@ -647,6 +647,14 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 
 # Versions history
 
+16.12.2024: SmokeRand 0.15.
+
+- RC4OK generator was added.
+- Fine tuning of some `hamming_ot_low` tests in `full` battery: samples sizes
+  are doubled.
+- Added results of several tests.
+- `-O3` key in `Makefile.gnu`.
+
 12.12.2024: SmokeRand 0.14.
 
 - AES-128 based PRNG added (only for x86-64 processors with AESNI support).
@@ -674,3 +682,75 @@ Fibonacci generators and RANROT).
 01.12.2024: SmokeRand 0.1, an initial version. Requires some testing, extension
 of documentation, completion of `dos16` battery implementation for 16-bit
 computers. Tests lists for batteries are frozen before 1.0 release.
+
+
+# Notes about TMFn test from PractRand 0.94
+
+It is used in PractRand and catches LCGs with power of 2 modulo, i.e.
+\f$ m = 2^{32}\f$, \f$ m = 2^{64}\f$, \f$ m = 2^{128}\f$. It is sensitive
+enough to detect 128-bit LCG with truncated lower 64 bits but doesn't detect
+96-bit PRNG.
+
+ Truncated bits | Fails at
+----------------|------------------------------------
+ 32             | 32 MiB
+ 40             | 256 MiB
+ 48             | 2 GiB
+ 50             | 2 GiB
+ 52             | 4 GiB
+ 54             | 8 GiB
+ 56             | 8 GiB
+ 58             | 16 GiB
+ 60             | 16 GiB
+ 64             | 64 GiB
+ 65 = 64 + 1    | 64 GiB; 64 GiB; 64 GiB
+ 66 = 64 + 2    | 128 GiB; 128 GiB
+ 67 = 64 + 3    | 128 GiB
+ 68 = 64 + 4    | 128 GiB; 128 GiB; 128 GiB
+ 69 = 64 + 5    | 256 GiB; 256 GiB
+ 70 = 64 + 6    | 256 GiB; 256 GiB; 256 GiB
+ 71 = 64 + 7    | 256 GiB
+ 72 = 64 + 8    | 512 GiB; 512 GiB; 512 GiB; 512 GiB
+ 73 = 54 + 10   | 512 GiB; 512 GiB
+ 74 = 54 + 12   | 1 TiB
+ 75 = 54 + 14   | NOTE: doesn't fail at 4 TiB!
+
+Notes from PractRand 0.94 author:
+
+https://sourceforge.net/p/pracrand/discussion/366935/thread/eb8d7f3e06/
+
+TMFn is tripple-mirror-frequency, n-level, I think. I'm not thrilled with it,
+but LCGs were doing entirely too well on my other tests, so I decided to use
+something that could do a reasonable job of spotting power-of-2-modulus LCGs
+without wasting too many cycles. It looks for really obvious patterns in three
+symmetrically spaced small sets of bits (that is, it draws a set of N bits,
+and another set of N bits from M bits later in the stream, and then a third set
+from 2xM bits later in the stream, concatonates those sets of bits, and does
+a chi-squared test directly on the distribution of those values... where N is
+like 3 and M varies, but IIRC is generally rather large and probably a power
+of 2), at a variety of different spacings (powers of 2 IIRC... large ones I
+think). It skips most of the data IIRC, on a very simple hardwired scheme
+(I think it only looks at the first 64 bits out of each kilobyte or something
+like that) to avoid wasting too many cycles on this. Hopefully someday I'll get
+rid of this when I have a test I like better that does a reasonable job on p2m
+LCGs. 2+2 is... the log2 of the number of kilobytes of spacing it's looking at
+I think? Mostly it catches LCGs, though some other stuff shows up once
+in a while.
+
+Birthday spacings test with decimation is much more sensitive. If there is no
+decimation it consumes 4096 * 4 * 8 = 131072 bytes = 2^17 bytes for generator
+with 32-bit output. Samples sizes in the case of decimation:
+
+ Decimation            | Sample size* | Detects
+-----------------------|--------------|-----------------------------------------------
+ \f$2^{6}\f$  (64)     | 8 MiB        | 64-bit LCG with truncation of lower 32 bits.
+ \f$2^{12}\f$ (4096)   | 512 MiB      | 128-bit LCG with truncation of lower 64 bits.
+ \f$2^{18}\f$ (262144) | 32 GiB       | 128-bit LCG with truncation of lower 96 bits.
+ \f$2^{24}\f$          | 2 TiB        | Upper 8 bits from 128-bit LCG.
+
+* For 32-bit output; for 64-bit output it is doubled
+
+It means that `bspace4_8d_dec` is about 100-1000 times more sensitive than TMFn
+test from PractRand 0.94 at least for 128-bit LCGs. It is especially true if at
+least lower 64 bits are truncated.
+

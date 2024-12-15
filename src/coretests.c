@@ -335,7 +335,7 @@ static void bspace4_8d_decimated_pvalue(TestResults *ans, const char *name,
  * - \f$2^{6}\f$ (64): detects 64-bit LCG with truncation of lower 32 bits.
  * - \f$2^{12}\f$ (4096): detects 128-bit LCG with truncation of lower 64 bits.
  * - \f$2^{18}\f$ (262144) detects 128-bit LCG with truncation of lower 96 bits.
- * - \f$2^{24}\f$: upper 8 bits from 128-bit LCG is detected as not random.
+ * - \f$2^{24}\f$: upper 8 bits from 128-bit LCG are detected as not random.
  *
  * But 64-bit version (8_8d) requires 6658042 points instead of 4096, i.e.
  * 1626 times more. And transition to 32-bit version gives about 20x
