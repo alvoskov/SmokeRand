@@ -15,12 +15,14 @@
  * - https://groups.google.com/group/sci.stat.math/msg/b555f463a2959bb7/
  * - http://www0.cs.ucl.ac.uk/staff/d.jones/GoodPracticeRNG.pdf
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright The KISS99 algorithm is developed by George Marsaglia.
+ *
+ * Implementation for SmokeRand:
+ *
+ * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
- *
- * The KISS99 algorithm is developed by George Marsaglia.
  */
 #include "smokerand/cinterface.h"
 

@@ -1,6 +1,6 @@
 /**
  * @file swb_shared.c
- * @brief Subtract with borrow PRNG
+ * @brief Subtract with borrow PRNG.
  *
  * 1. https://doi.org/10.18637/jss.v007.i03
  * 2. https://doi.org/10.1103/PhysRevLett.69.3382
