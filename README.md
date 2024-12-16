@@ -239,7 +239,7 @@ Four batteries are implemented in SmokeRand:
  brief   | 22              | 2^35                | 2^36
  default | 40              | 2^37                | 2^38
  full    | 44              | 2^40                | 2^41
- dos16   | 5               | 2^31                | 2^32
+ dos16   | 5               | 2^25                | 2^26
 
 
 # How to test a pseudorandom number generator
@@ -480,7 +480,7 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  kiss93            | u32    | 1     | 3       | 5    | 0.82 | 1     | N/A    | Small   | 1 MiB
  kiss99            | u32    | +     | +       | +    | 1.0  | +     | N/A    | +       | >= 8 TiB
  kiss64            | u64    | +     | +       | +    | 0.53 | +     | +      | +       | >= 4 TiB
- lcg32prime        | u32    | 13    | 24      | 25/26| 2.2  | 0/1   | N/A    |         | 512 MiB
+ lcg32prime        | u32    | 13    | 24      | 25/26| 2.2  | 0/1   | N/A    | -       | 512 MiB
  lcg64             | u32    | 6     | 8       | 11   | 0.40 | 1     | N/A    | Small   | 16 MiB
  lcg64prime        | u64    | 1     | 1       | 1    | 1.5  | +     | -      | +-      | >= 32 TiB
  lcg96             | u32    | 1     | 1       | 1    | 0.78 | +     | N/A    | +       | 32 GiB
@@ -549,12 +549,12 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  ranshi_upper32    | u32    | +     | +       | +    | 0.86 | +     | N/A    |         | >= 2 TiB
  ranshi_lower32    | u32    | +     | +       | +    | 0.86 | +     | N/A    |         | >= 1 TiB
  ranval            | u32    | +     | +       | +    | 0.31 | +     | N/A    |         | >= 4 TiB
- r1279             | u32    | 5     | 7       | 10   | 0.47 | 2     | N/A    |         | 64 MiB
+ r1279             | u32    | 5     | 7       | 10   | 0.47 | 2     | N/A    | Small   | 64 MiB
  ranlux[0]         | u32    | 6     | 9       | 12   | 6.8  | 1     | N/A    |         | 4 MiB
  ranlux[1]         | u32    | +     | 2       | 3    | 13   | +     | N/A    |         | 4 GiB
  ranlux[2]         | u32    | +     | +       | +    | 27   | +     | N/A    |         | >= 128 GiB
  rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
- rc4ok             | u32    | +     | +       | +    | 6.6  | +     | N/A    |         |
+ rc4ok             | u32    | +     | +       | +    | 6.2  | +     | N/A    |         |
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
  rrmxmx            | u64    | +     | +       | +    | 0.14 | +     | -      |         | >= 2 TiB
  sapparot          | u32    | 1     | 3       | 4    | 0.70 | +     | N/A    |         | 8 MiB
