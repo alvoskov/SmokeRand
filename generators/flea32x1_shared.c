@@ -2,7 +2,7 @@
  * @file flea32x1_shared.c
  * @brief Implementation of flea32x1 PRNG suggested by Bob Jenkins.
  * @details A simple non-linear PRNG that passes almost all statistical tests
- * except `mod3n`. There were several modifications of flea, the implemented
+ * except `mod3`. There were several modifications of flea, the implemented
  * variant is from PractRand 0.94 by Chris Doty-Humphrey.
  *
  * WARNING! THE MINIMAL PERIOD OF FLEA32x1 IS UNKNOWN! It was added mainly for

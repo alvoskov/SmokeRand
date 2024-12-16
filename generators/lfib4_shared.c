@@ -1,6 +1,11 @@
-//http://www.cse.yorku.ca/~oz/marsaglia-rng.html
-
-
+/**
+ * @file lfib4_shared.c 
+ * @brief An implementation of LFIB4 generator by G.Marsaglia.
+ * Fails some statistical tests due to low quality of lower bits. 
+ * @details References:
+ *
+ * 1. http://www.cse.yorku.ca/~oz/marsaglia-rng.html
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG

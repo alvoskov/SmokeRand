@@ -6,10 +6,14 @@
  * \f[
  * X_{n} = X_{n - 1279} XOR X_{n - 1063}
  * \f]
+ *
+ * This generator fails gap test, linear complexity and matrix rank tests.
+ * Similar generators caused problems in 2D Ising model computation by
+ * Monte-Carlo method. So it mustn't be used as a general purpose generator.
  * 
  * References:
  *
- * 1. 10.1016/j.cpc.2007.10.002
+ * 1. https://doi.org/10.1016/j.cpc.2007.10.002
  * 2. https://doi.org/10.1103/PhysRevLett.69.3382
  * 3. https://doi.org/10.1103/PhysRevE.52.3205
  *

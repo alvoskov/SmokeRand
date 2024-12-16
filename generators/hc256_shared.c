@@ -1,5 +1,5 @@
 /**
- * @file hc256_shared
+ * @file hc256_shared.c
  * @brief HC256 cipher based 32-bit CSPRNG.
  * @details References:
  *

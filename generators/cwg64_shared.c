@@ -1,7 +1,13 @@
 /**
  * @file cwg64_shared.c
  * @brief "Collatz-Weyl" generator.
- * @details https://arxiv.org/pdf/2312.17043
+ * @details A fast 64-bit generator with period not less than 2^{64}
+ *
+ * References:
+ * 
+ * 1. T.R. Dziala. Collatz-Weyl Generators: High Quality and High Throughput
+ *    Parameterized Pseudorandom Number Generators
+ *    https://arxiv.org/abs/2312.17043
  *
  * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com

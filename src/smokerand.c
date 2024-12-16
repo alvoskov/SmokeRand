@@ -173,16 +173,38 @@ void battery_self_test(GeneratorInfo *gen, const CallerAPI *intf)
 
 void print_help(void)
 {
-    printf("Usage: smokerand battery generator_lib\n");
-    printf(" battery: battery name; supported batteries:\n");
-    printf("   - brief\n");
-    printf("   - default\n");
-    printf("   - full\n");
-    printf("   - selftest\n");
-    printf("   - stdout\n");
-    printf("  generator_lib: name of dynamic library with PRNG that export the functions:\n");
-    printf("   - int gen_getinfo(GeneratorInfo *gi)\n");
-    printf("\n");
+    static const char help_str[] = 
+    "SmokeRand: a test suite for pseudorandom number generators\n"
+    "(C) 2024 Alexey L. Voskov\n\n"
+    "Usage: smokerand battery generator_lib [keys]\n"
+    "battery: battery name; supported batteries:\n"
+    "  General purpose batteries\n"
+    "  - brief    Fast battery (64-128 GiB of data)\n"
+    "  - default  Slower but more sensitive battery (128-256 GiB of data)\n"
+    "  - full     The slowest battery (1-2 TiB of data)\n"
+    "  - dos16    Express battery (32-64 MiB of data)\n"
+    "  Special batteries\n"
+    "  - birthday 64-bit birthday paradox based test.\n"
+    "  - ising    Ising model based tests: Wolff and Metropolis algorithms.\n"
+    "  - freq     8-bit and 16-bit words frequency adaptive tests.\n"
+    "  Special modes\n"
+    "  - selftest Runs PRNG internal self-test (if available).\n"
+    "  - speed    Measure speed of the generator\n"
+    "  - stdout   Sends PRNG output to stdout in the binary form.\n"
+    "generator_lib: name of dynamic library with PRNG or special mode name.\n"
+    "  Special modes names:\n"
+    "  - stdin32, stdin64  Get random sequence from stdin\n"
+    "  - list              Print list of tests in the battery\n"
+    "Optional keys\n"
+    "  --threads=n Run battery in multithreaded mode using n threads\n"
+    "  --nthreads  Run battery in multithreaded mode (default number of threads\n"
+    "  --filter=name Apply pre-defined filter to the generator output\n"
+    "    reverse-bits   Reverse bits in the generator output\n"
+    "    interleaved32  Process 64-bit generator output as interleaving 32-bit words\n"
+    "    high32, low32  Analyse higher/lower 32 bits of 64-bit generator\n"
+    "\n";
+
+    printf(help_str);
 }
 
 

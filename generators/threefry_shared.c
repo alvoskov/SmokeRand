@@ -1,4 +1,5 @@
 /**
+ * @file threefry_shared.c
  * @brief An implementation of Threefry4x64x72 and Threefry4x64x20 PRNGs.
  * They are based on Threefish cipher/CSPRNG, this cipher is almost identical
  * to the Threefry4x64x72 PRNG.
@@ -22,7 +23,7 @@
  * 3. https://www.schneier.com/academic/skein/threefish/
  * 4. https://pdebuyl.be/blog/2016/threefry-rng.html
  *
- * @copyright Philox algorithm is proposed by J. K. Salmon, M. A. Moraes,
+ * @copyright Threefry algorithm is proposed by J. K. Salmon, M. A. Moraes,
  * R. O. Dror and D. E. Shaw.
  *
  * Implementation for SmokeRand:

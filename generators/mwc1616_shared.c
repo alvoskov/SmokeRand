@@ -30,8 +30,8 @@ PRNG_CMODULE_PROLOG
  * @brief MWC1616 PRNG state.
  */
 typedef struct {
-    uint32_t z;     ///< MWC state 1: c - upper half, x - lower half
-    uint32_t w;     ///< MWC state 2: c - upper half, x - lower half
+    uint32_t z; ///< MWC state 1: c - upper half, x - lower half
+    uint32_t w; ///< MWC state 2: c - upper half, x - lower half
 } Mwc1616State;
 
 

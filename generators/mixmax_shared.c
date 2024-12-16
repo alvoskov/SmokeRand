@@ -1,24 +1,33 @@
-/*
- *  mixmax.c
- *  A Pseudo-Random Number Generator
+/**
+ * @file mixmax_shared.c
+ * @brief A simplified modification of MIXMAX generator.
+ * @details The MIXMAX algorithm was suggested by K.Savidy and G.K. Savidy.
+ * The modern C implementation is created by Konstantin Savvidy.
  *
- *  Created by Konstantin Savvidy.
+ * References:
  *
- *  The code is released under GNU Lesser General Public License v3
+ * 1. https://www.gnu.org/software/gsl/
+ * 2. https://mixmax.hepforge.org/
+ * 3. G.K.Savvidy and N.G.Ter-Arutyunian. On the Monte Carlo simulation
+ *    of physical systems. J.Comput.Phys. 97, 566 (1991);
+ *    Preprint EPI-865-16-86, Yerevan, Jan. 1986
+ * 4. K.Savvidy The MIXMAX random number generator. Comp. Phys. Commun.
+ *    196 (2015), pp 161–165 http://dx.doi.org/10.1016/j.cpc.2015.06.003
  *
- *  https://www.gnu.org/software/gsl/
- *  https://mixmax.hepforge.org/
+ * This modification returns lower 32 bits of its 61-bit output. It also
+ * contains an internal self-test that is based on the values obtained
+ * from not modified code by K.Savvidy. The latest versions of MIXMAX are
+ * released under proprietary licenses. This modification is based on
+ * the plugin for GSL released under GNU LGPL v3.
+ *
+ * @copyright The original code is created by Konstantin Savvidy
  * 
- *	G.K.Savvidy and N.G.Ter-Arutyunian,
- *  On the Monte Carlo simulation of physical systems,
- *	J.Comput.Phys. 97, 566 (1991);
- *  Preprint EPI-865-16-86, Yerevan, Jan. 1986
+ * Simplified modification for SmokeRand:
  *
- *  K.Savvidy
- *  The MIXMAX random number generator
- *  Comp. Phys. Commun. 196 (2015), pp 161–165
- *  http://dx.doi.org/10.1016/j.cpc.2015.06.003
+ * (C) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
  *
+ * The code is released under GNU Lesser General Public License v3.
  */
 
 #include "smokerand/cinterface.h"

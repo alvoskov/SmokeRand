@@ -1,5 +1,12 @@
-//http://www.cse.yorku.ca/~oz/marsaglia-rng.html
-
+/**
+ * @file lfib4_u6_shared.c 
+ * @brief A modification LFIB4 generator by G.Marsaglia that uses 64-bit values
+ * and returns only upper 32 bits of these values. Has much higher quality than
+ * the original 32-bit generator.
+ * @details References:
+ *
+ * 1. http://www.cse.yorku.ca/~oz/marsaglia-rng.html
+ */
 
 #include "smokerand/cinterface.h"
 
