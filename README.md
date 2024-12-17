@@ -467,7 +467,7 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  alfib_lux         | u32    | 1     | 1       | 1    | 6.1  | +     | N/A    |         | 4 GiB
  alfib_mod         | u32    | +     | +       | +    | 0.50 | +     | N/A    | +       | 1 TiB
  ara32             | u32    | +     | 1       | 1    | 0.96 | +     | N/A    | +       | 512 MiB
- chacha            | u32    | +     | +       | +    | 2.0  | +     | N/A    | +       |
+ chacha            | u32    | +     | +       | +    | 2.0  | +     | N/A    | +       | >= 1 TiB
  chacha_avx        | u32    | +     | +       | +    | 0.7  | +     | N/A    | +       |
  chacha_ctr32      | u32    | +     | +       | 1    | 2.0  | +     | N/A    |         | 256 GiB
  cmwc4096          | u32    | +     | +       | +    | 0.43 | +     | N/A    | +       | >= 32 TiB
@@ -554,7 +554,7 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  ranlux[1]         | u32    | +     | 2       | 3    | 13   | +     | N/A    |         | 4 GiB
  ranlux[2]         | u32    | +     | +       | +    | 27   | +     | N/A    |         | >= 128 GiB
  rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
- rc4ok             | u32    | +     | +       | +    | 6.2  | +     | N/A    |         |
+ rc4ok             | u32    | +     | +       | +    | 6.2  | +     | N/A    |         | >= 1 TiB
  romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
  rrmxmx            | u64    | +     | +       | +    | 0.14 | +     | -      |         | >= 2 TiB
  sapparot          | u32    | 1     | 3       | 4    | 0.70 | +     | N/A    |         | 8 MiB
