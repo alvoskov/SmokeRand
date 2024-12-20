@@ -25,7 +25,7 @@ static inline uint64_t get_bits_raw(void *state)
 //    return (Lcg128State_a128_iter(state, 0xdb36357734e34abb, 0x0050d0761fcdfc15, 1) >> 7) & 0xFFFFFFFF;
     Lcg128State_a128_iter(state, 0xdb36357734e34abb, 0x0050d0761fcdfc15, 1);
     Lcg128State *obj = state;
-    return (obj->x >> (64+15)) & 0xFFFFFFFF;
+    return (obj->x >> (64+14)) & 0xFFFFFFFF;
 }
 
 

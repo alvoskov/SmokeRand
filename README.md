@@ -714,8 +714,8 @@ enough to detect 128-bit LCG with truncated lower 64 bits but doesn't detect
  74 = 64 + 10   | 512 GiB; 512 GiB
  76 = 64 + 12   | 1 TiB
  77 = 64 + 13   | 1 TiB
- 78 = 64 + 14   | NOTE: doesn't fail at 4 TiB; 8 TiB!
- 79 = 64 + 15   | NOTE: doesn't fail at 1 TiB;
+ 78 = 64 + 14   | NOTE: doesn't fail at 32 TiB!
+ 79 = 64 + 15   | NOTE: doesn't fail at 1 TiB!
 
 Notes from PractRand 0.94 author:
 
