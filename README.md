@@ -566,6 +566,7 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  sfc64             | u64    | +     | +       | +    | 0.10 | +     | +      | +       | >= 1 TiB
  speck128          | u64    | +     | +       | +    | 3.1  | +     | +      |         | >= 2 TiB
  speck128_avx      | u64    | +     | +       | +    | 0.65 | +     | +      |         | >= 2 TiB
+ speck128_r16_avx  | u64    | +     | +       |      | 0.33 | +     |        |         |
  splitmix          | u64    | +     | +       | +    | 0.19 | +     | -      | +       | >= 2 TiB
  splitmix32        | u32    | 2     | 3       | 4/5  | 0.25 | +     | N/A    | Small   | 1 GiB
  sqxor             | u64    | +     | +       | +    | 0.13 | +     | +      | +       | >= 16 TiB
