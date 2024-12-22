@@ -566,7 +566,7 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  sfc64             | u64    | +     | +       | +    | 0.10 | +     | +      | +       | >= 1 TiB
  speck128          | u64    | +     | +       | +    | 3.1  | +     | +      |         | >= 2 TiB
  speck128_avx      | u64    | +     | +       | +    | 0.65 | +     | +      |         | >= 2 TiB
- speck128_r16_avx  | u64    | +     | +       |      | 0.33 | +     |        |         |
+ speck128_r16_avx  | u64    | +     | +       | +    | 0.33 | +     | +      |         | >= 32 TiB
  splitmix          | u64    | +     | +       | +    | 0.19 | +     | -      | +       | >= 2 TiB
  splitmix32        | u32    | 2     | 3       | 4/5  | 0.25 | +     | N/A    | Small   | 1 GiB
  sqxor             | u64    | +     | +       | +    | 0.13 | +     | +      | +       | >= 16 TiB
@@ -578,6 +578,7 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  shr3              | u32    | 15    | 32      | 36   | 0.76 | 2     | N/A    | -       | 32 KiB
  swb               | u32    | 5     | 6       | 8    | 2.7  | 1     | N/A    | Small   | 128 MiB
  swblux[luxury=1]  | u32    | +     | +       | 0/1  | 6.3  | +     | N/A    | Crush   | 4 TiB
+ swblux[luxury=2]  | u32    | +     | +       | +    | 9.1  | +     | N/A    |         |
  swbw              | u32    | 1     | 1       | 1    | 2.8  | +     | N/A    | +       | 4 GiB
  tinymt32          | u32    | 2     | 4       | 6    | 1.5  | 1     | N/A    | +       | 4 GiB
  tinymt64          | u64    | 1     | 2       | 4    | 2.7  | 1     | +      |         | 32 GiB
