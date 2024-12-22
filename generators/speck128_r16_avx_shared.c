@@ -1,10 +1,15 @@
 /**
- * @file speck128_avx_shared.c
- * @brief Speck128/128 CSPRNG vectorized implementation for AVX2
- * instruction set for modern x86-64 processors. Its period is \f$ 2^{129} \f$.
- * Allows to achieve performance better than 1 cpb (about 0.74 cpb) on
- * Intel(R) Core(TM) i5-11400H 2.70GHz. It is slightly faster than ChaCha12
- * and ISAAC64 CSPRNG.
+ * @file speck128_r16_avx_shared.c
+ * @brief Speck128/128 version with reduced (halved) number of rounds and
+ * simplified 64-bit counters. It is optimized for AVX2 instructions set for
+ * modern x86-64 processors. Its period is \f$ 2^{68} \f$. Allows to achieve
+ * performance better than 1 cpb (about 0.35 cpb) on Intel(R) Core(TM) i5-11400H
+ * 2.70GHz. It is comparable to MWC or PCG generators.
+ *
+ * WARNING! It is not CSPRNG. However, it is faster than the original
+ * Speck128/128 and probably is good enough to be used as a general purpose PRNG.
+ * In [3] it is reported than 12 rounds is enough to pass BigCrush and PractRand,
+ * this version uses 16.
  *
  * References:
  *
@@ -197,6 +202,9 @@ static inline uint64_t get_bits_raw(void *state)
 
 /**
  * @brief Internal self-test based on test vectors.
+ * @details These vectors are taken from the original Speck128/128 with
+ * 32 rounds. But block encryption procedure is called two times with
+ * additional code for updating round keys, copying output to counters etc.
  */
 int run_self_test(const CallerAPI *intf)
 {
@@ -206,11 +214,26 @@ int run_self_test(const CallerAPI *intf)
     int is_ok = 1;
     Speck128VecState *obj = intf->malloc(sizeof(Speck128VecState));
     Speck128VecState_init(obj, key, intf);
-    for (size_t i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) {
         obj->ctr[i] = ctr[0]; obj->ctr[i + 8] = ctr[0];
         obj->ctr[i + 4] = ctr[1]; obj->ctr[i + 12] = ctr[1];
     }
+    // Rounds 0..15
     Speck128VecState_block(obj);
+    // Rounds 16..32
+    for (int i = 0; i < 16; i++) {
+        obj->ctr[i] = obj->out[i];
+    }
+    uint64_t a = key[0], b = key[1];
+    for (int i = 0; i < 2*NROUNDS - 1; i++) {
+        round_scalar(&b, &a, i);
+        if (i >= 15) {
+            obj->keys[i - 15] = a;
+        }
+    }
+    // Rounds 16..31
+    Speck128VecState_block(obj);
+    // Print results
     intf->printf("%16s %16s\n", "Output", "Reference");
     for (size_t i = 0; i < 16; i++) {
         size_t ind = i / 4;
