@@ -532,7 +532,7 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  mwc1616           | u32    | +       | 10/11 | 12/18   | 19   | 0.48 | N/A    | -+      | 16 MiB
  mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | N/A    | +       | >= 32 TiB(?)
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 32 TiB
- mwc4691           | u32    | +       | 1     | 1       | 1    |      | N/A    |         | 1 GiB
+ mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | N/A    | +       | 1 GiB
  pcg32             | u32    | +       | +     | +       | +    | 0.44 | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | +       | >= 2 TiB
  pcg64_xsl_rr      | u64    | +       | +     | +       | +    | 0.43 | +      |         | >= 32 TiB
@@ -558,7 +558,7 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  rc4ok             | u32    | +       | +     | +       | +    | 6.2  | N/A    |         | >= 1 TiB
  romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      |         | >= 1 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      |         | >= 2 TiB
- sapparot          | u32    | +       | 1     | 3       | 4    | 0.70 | N/A    |         | 8 MiB
+ sapparot          | u32    | +       | 1     | 3       | 4    | 0.70 | N/A    | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | N/A    |         | 2 TiB
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | N/A    |         | >= 16 TiB
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | N/A    |         | 128 MiB
@@ -580,7 +580,7 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  swb               | u32    | 1       | 5     | 6       | 8    | 2.7  | N/A    | Small   | 128 MiB
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | Crush   | 4 TiB
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | +       |
- swblarge          | u32    | 1       | 4     | 5       | 8    |      | N/A    |         | 512 GiB
+ swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | N/A    |         | 512 GiB
  swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | N/A    | +       | 4 GiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | N/A    | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      |         | 32 GiB
