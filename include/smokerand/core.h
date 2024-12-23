@@ -60,22 +60,9 @@ typedef struct {
     const CallerAPI *intf; ///< Will be used for output
 } GeneratorState;
 
-static inline GeneratorState GeneratorState_create(const GeneratorInfo *gi,
-    const CallerAPI *intf)
-{
-    GeneratorState obj;
-    obj.gi = gi;
-    obj.state = gi->create(gi, intf);
-    obj.intf = intf;
-    return obj;
-}
-
-static inline void GeneratorState_free(GeneratorState *obj, const CallerAPI *intf)
-{
-    obj->gi->free(obj->state, obj->gi, intf);
-}
-
-
+GeneratorState GeneratorState_create(const GeneratorInfo *gi,
+    const CallerAPI *intf);
+void GeneratorState_free(GeneratorState *obj, const CallerAPI *intf);
 
 typedef struct
 {

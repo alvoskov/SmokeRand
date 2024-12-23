@@ -54,9 +54,13 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     SwbState *obj = intf->malloc(sizeof(SwbState));
-    for (size_t i = 1; i <= SWB_A; i++) {
-        obj->x[i] = intf->get_seed32();
+
+    // pcg_rxs_m_xs64 for initialization
+    uint64_t state = intf->get_seed64();
+    for (int i = 0; i <= SWB_A; i++) {
+        obj->x[i] = pcg_bits64(&state);
     }
+    // Ensure state validity
     obj->c = 1;
     obj->x[1] |= 1;
     obj->x[2] = (obj->x[2] >> 1) << 1;

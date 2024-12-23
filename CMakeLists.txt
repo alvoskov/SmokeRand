@@ -47,7 +47,7 @@ target_include_directories(smokerand_core PRIVATE include)
 
 # Executables
 add_executable(smokerand src/smokerand.c
-    src/bat_dos16.c include/smokerand/bat_dos16.h
+    src/bat_express.c include/smokerand/bat_express.h
     src/bat_default.c include/smokerand/bat_default.h
     src/bat_brief.c include/smokerand/bat_brief.h
     src/bat_full.c include/smokerand/bat_full.h)
