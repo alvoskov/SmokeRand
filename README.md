@@ -221,6 +221,10 @@ be divided into several groups:
 
 Four batteries are implemented in SmokeRand:
 
+- `express` - simplified battery that consists of 5 tests and can be
+  rewritten for 16-bit platforms with 64KiB segments of data and code.
+  Less powerful than `brief` but may be more sensitive than diehard
+  or even dieharder.
 - `brief` - a fast battery that includes a reduced set of tests, e.g.
   matrix rank tests and some tests for higher bits of generators
   are excluded.
@@ -228,18 +232,14 @@ Four batteries are implemented in SmokeRand:
   for higher bits of generators and matrix rank tests. Other tests use
   larger samples that make them more sensitive.
 - `full` - similar do default but uses larger samples. 
-- `dos16` - simplified battery that consists of 5 tests and can be
-  compiled for 16-bit platforms with 64KiB segments of data and code.
-  Less powerful than `brief` but may be more sensitive than diehard
-  or even dieharder.
 
 
  Battery | Number of tests | Bytes (32-bit PRNG) | Bytes (64-bit PRNG)
 ---------|-----------------|---------------------|---------------------
+ express | 5               | 2^25                | 2^26
  brief   | 22              | 2^35                | 2^36
  default | 40              | 2^37                | 2^38
  full    | 44              | 2^40                | 2^41
- dos16   | 5               | 2^25                | 2^26
 
 
 # How to test a pseudorandom number generator
@@ -460,139 +460,141 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
 
 # Tests results
 
- Algoritrhm        | Output | brief | default | full | cpb  | dos16 | bday64 | TestU01 | PractRand 
--------------------|--------|-------|---------|------|------|-------|--------|---------|-----------
- aesni128          | u64    | +     | +       | +    | 0.89 | +     | +      |         | >= 1 TiB
- alfib             | u64    | 5     | 6       | 8    | 0.23 | 2     | +      | Small   | 128 MiB
- alfib_lux         | u32    | 1     | 1       | 1    | 6.1  | +     | N/A    |         | 4 GiB
- alfib_mod         | u32    | +     | +       | +    | 0.50 | +     | N/A    | +       | 1 TiB
- ara32             | u32    | +     | 1       | 1    | 0.96 | +     | N/A    | +       | 512 MiB
- chacha            | u32    | +     | +       | +    | 2.0  | +     | N/A    | +       | >= 1 TiB
- chacha_avx        | u32    | +     | +       | +    | 0.7  | +     | N/A    | +       |
- chacha_ctr32      | u32    | +     | +       | 1    | 2.0  | +     | N/A    |         | 256 GiB
- cmwc4096          | u32    | +     | +       | +    | 0.43 | +     | N/A    | +       | >= 32 TiB
- coveyou64         | u32    | 3     | 4       | 4    | 0.62 | 1     | N/A    | Small   | 256 KiB
- cwg64             | u64    | +     | +       | +    | 0.30 | +     | +      |         | >= 1 TiB
- drand48           | u32    | 12    | 20      | 22/23| 0.72 | 1     | N/A    | -       | 1 MiB
- isaac64           | u64    | +     | +       | +    | 0.75 | +     | +      | +       | >= 1 TiB
- flea32x1          | u32    | +     | 1       | 1    | 0.48 | +     | N/A    | +       | 4 MiB
- hc256             | u32    | +     | +       | +    | 1.1  | +     | N/A    |         | >= 1 TiB
- kiss93            | u32    | 1     | 3       | 5    | 0.82 | 1     | N/A    | Small   | 1 MiB
- kiss99            | u32    | +     | +       | +    | 1.0  | +     | N/A    | +       | >= 8 TiB
- kiss64            | u64    | +     | +       | +    | 0.53 | +     | +      | +       | >= 4 TiB
- lcg32prime        | u32    | 13    | 24      | 25/26| 2.2  | 0/1   | N/A    | -       | 512 MiB
- lcg64             | u32    | 6     | 8       | 11   | 0.40 | 1     | N/A    | Small   | 16 MiB
- lcg64prime        | u64    | 1     | 1       | 1    | 1.5  | +     | -      | +-      | >= 32 TiB
- lcg96             | u32    | 1     | 1       | 1    | 0.78 | +     | N/A    | +       | 32 GiB
- lcg128            | u64    | 1     | 1       | 1    | 0.35 | +     | +      | +       | 64 GiB
- lcg128_full       | u64    | 1     | 1       | 1    | 0.42 | +     | +      | +       | 64 GiB
- lcg128_u32_full   | u32    | +     | 1       | 1    | 0.75 | +     | N/A    | +       | >= 32 TiB
- lcg69069          | u32    | 19    | 37/38   | 42   | 0.38 | 4     | N/A    | -       | 2 KiB
- lfib_par[31+]     | u32    | 5/6   | 6/7     | 10   | 0.70 | 1     | N/A    | -       | 32 MiB
- lfib_par[55+]     | u32    | 4     | 5       | 7    | 0.51 | 1     | N/A    | -       | 2 GiB
- lfib_par[55-]     | u32    | 4     | 5       | 7    | 0.51 | 1     | N/A    | -       | 2 GiB
- lfib_par[127+]    | u32    | 4     | 4       | 5    | 0.48 | 1     | N/A    | -/Small | 512 MiB
- lfib_par[127-]    | u32    | 4     | 4       | 5    | 0.48 | 1     | N/A    | -/Small | 512 MiB
- lfib_par[258+]    | u32    | 4     | 4       | 5    | 0.44 | 1     | N/A    | Small   | 8 GiB
- lfib_par[258-]    | u32    | 4     | 4       | 5    | 0.46 | 1     | N/A    | Small   | 8 GiB
- lfib_par[378+]    | u32    | 4     | 4       | 5    | 0.46 | 1     | N/A    | Small   | 32 GiB
- lfib_par[378-]    | u32    | 4     | 4       | 5    | 0.45 | 1     | N/A    | Small   | 32 GiB
- lfib_par[607+]    | u32    | 4     | 4       | 5    | 0.41 | 1     | N/A    | Small   | 256 GiB
- lfib_par[607-]    | u32    | 4     | 4       | 5    | 0.40 | 1     | N/A    | Small   | 256 GiB
- lfib_par[1279+]   | u32    | 3/4   | 3/4     | 4/5  | 0.40 | 1     | N/A    | Crush   | 1 TiB
- lfib_par[1279-]   | u32    | 3/4   | 3/4     | 4/5  | 0.40 | 1     | N/A    | Crush   | 1 TiB
- lfib_par[2281+]   | u32    | 3     | 3       | 4    | 0.38 | +     | N/A    | +       | 8 TiB
- lfib_par[2281-]   | u32    | 3     | 3       | 4    | 0.38 | 0/1   | N/A    | +       | 8 TiB
- lfib_par[3217+]   | u32    | 1     | 1       | 1/2  | 0.39 | +     | N/A    | +       |
- lfib_par[3217-]   | u32    | 1     | 1       | 2/4  | 0.39 | +     | N/A    | +       |
- lfib_par[9689+]   | u32    | 1     | 1       | 1    | 0.47 | +     | N/A    | +       |
- lfib_par[9689-]   | u32    | 1     | 1       | 1    | 0.47 | +     | N/A    | +       |
- lfib_par[19937+]  | u32    | +     | 1       | 1    | 0.46 | +     | N/A    | +       |
- lfib_par[19937-]  | u32    | +     | 1       | 1    | 0.48 | +     | N/A    | +       |
- lfib_par[44497+]  | u32    | +     | 1       | 1    | 0.49 | +     | N/A    | +       |
- lfib_par[44497-]  | u32    | +     | 1       | 1    | 0.49 | +     | N/A    | +       |
- lfib_par[110503+] | u32    | +     | +       | +    | 0.52 | +     | N/A    | +       |
- lfib_par[110503-] | u32    | +     | +       | +    | 0.50 | +     | N/A    | +       |
- lfib4             | u32    | 1     | 3       | 4    | 0.37 | 1     | N/A    |         | 32 MiB
- lfib4_u64         | u32    | +     | +       | +    | 0.34 | +     | N/A    |         | >= 2 TiB
- lfsr113           | u32    | 3     | 5       | 7    | 1.1  | 2     | N/A    |         | 32 KiB 
- lfsr258           | u64    | 3     | 5       | 7    | 0.75 | 2     | +      |         | 1 MiB
- minstd            | u32    | 20    | 38      | 42   | 2.4  | 4     | N/A    | -       | 1 KiB
- mixmax_low32      | u32    | +     | +       | +    | 1.7  | +     | N/A    |         | >= 2 TiB
- mlfib17_5         | u32    | +     | +       | +    | 0.48 | +     | N/A    | +       | >= 32 TiB
- mt19937           | u32    | 3     | 3       | 3    | 0.50 | +     | N/A    | Small   | 128 GiB
- mrg32k3a          | u32    | +     | +       | +    | 2.5  | +     | N/A    |         | >= 4 TiB
- msws              | u32    | +     | +       | +    | 0.72 | +     | N/A    | +       | >= 2 TiB
- mulberry32        | u32    | 1     | 2       | 4    | 0.51 | +     | N/A    | Small   | 512 MiB
- mwc32x            | u32    | 2     | 2       | 7    | 1.5  | +     | N/A    | Small   | 128 MiB
- mwc64             | u32    | 1     | 2       | 4    | 0.37 | +     | N/A    | Small   | 1 TiB
- mwc64x            | u32    | +     | +       | +    | 0.53 | +     | N/A    | +       | >= 16 TiB
- mwc128            | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 16 TiB
- mwc128x           | u64    | +     | +       | +    | 0.30 | +     | +      | +       | >= 8 TiB
- mwc1616           | u32    | 10/11 | 12/18   | 19   | 0.48 | +     | N/A    |         | 16 MiB
- mwc1616x          | u32    | +     | +       | +    | 1.2  | +     | N/A    | +       | >= 32 TiB(?)
- mwc3232x          | u64    | +     | +       | +    | 0.30 | +     | +      |         | >= 32 TiB
- pcg32             | u32    | +     | +       | +    | 0.44 | +     | N/A    | +       | >= 2 TiB
- pcg64             | u64    | +     | +       | +    | 0.28 | +     | -      | +       | >= 2 TiB
- pcg64_xsl_rr      | u64    | +     | +       | +    | 0.43 | +     | +      |         | >= 32 TiB
- philox            | u64    | +     | +       | +    | 1.7  | +     | +      | +       | >= 2 TiB
- philox32          | u32    | +     | +       | +    | 2.7  | +     | N/A    | +       | >= 2 TiB
- ran               | u64    | +     | +       | +    | 0.43 | +     | +      |         | >= 1 TiB
- ranq1             | u64    | 1     | 3       | 6    | 0.32 | 1     | -      |         | 512 KiB
- ranq2             | u64    | +     | 1       | 2    | 0.33 | +     | +      |         | 2 MiB
- randu             | u32    | 21    | 39      | 43   | 0.41 | 4     | N/A    | -       | 1 KiB
- ranlux++          | u64    | +     | +       | +    | 2.4  | +     | +      | +       | >= 1 TiB
- ranrot32[7/3]     | u32    | 1/2   | 4/5     | 5    | 0.58 | +     | N/A    | Small   | 128 MiB
- ranrot32[17/9]    | u32    | 1     | 2       | 3    | 0.68 | +     | N/A    | +       | 1 GiB
- ranrot32[57/13]   | u32    | +     | +       | 1    | 0.74 | +     | N/A    | +       | 8 GiB
- ranshi            | u64    | 1     | 6       | 7    | 0.43 | +     |        |         | 32 KiB
- ranshi_upper32    | u32    | +     | +       | +    | 0.86 | +     | N/A    |         | >= 2 TiB
- ranshi_lower32    | u32    | +     | +       | +    | 0.86 | +     | N/A    |         | >= 1 TiB
- ranval            | u32    | +     | +       | +    | 0.31 | +     | N/A    |         | >= 4 TiB
- r1279             | u32    | 5     | 7       | 10   | 0.47 | 2     | N/A    | Small   | 64 MiB
- ranlux[0]         | u32    | 6     | 9       | 12   | 6.8  | 1     | N/A    |         | 4 MiB
- ranlux[1]         | u32    | +     | 2       | 3    | 13   | +     | N/A    |         | 4 GiB
- ranlux[2]         | u32    | +     | +       | +    | 27   | +     | N/A    |         | >= 128 GiB
- rc4               | u32    | +     | +       | +    | 6.0  | +     | N/A    | +       | 512 GiB
- rc4ok             | u32    | +     | +       | +    | 6.2  | +     | N/A    |         | >= 1 TiB
- romutrio          | u64    | +     | +       | +    | 0.15 | +     | +      |         | >= 1 TiB
- rrmxmx            | u64    | +     | +       | +    | 0.14 | +     | -      |         | >= 2 TiB
- sapparot          | u32    | 1     | 3       | 4    | 0.70 | +     | N/A    |         | 8 MiB
- sapparot2         | u32    | +     | +       | +    | 0.42 | +     | N/A    |         | 2 TiB
- sezgin63          | u32    | +     | 1       | 3    | 3.0  | +     | N/A    |         | >= 16 TiB
- sfc8              | u32    | 3     | 7       | 14   | 1.9  | +     | N/A    |         | 128 MiB
- sfc16             | u32    | +     | +       | +    | 0.93 | +     | N/A    |         | 128 GiB(stdin32)*
- sfc32             | u32    | +     | +       | +    | 0.24 | +     | N/A    |         | >= 4 TiB
- sfc64             | u64    | +     | +       | +    | 0.10 | +     | +      | +       | >= 1 TiB
- speck128          | u64    | +     | +       | +    | 3.1  | +     | +      |         | >= 2 TiB
- speck128_avx      | u64    | +     | +       | +    | 0.65 | +     | +      |         | >= 2 TiB
- speck128_r16_avx  | u64    | +     | +       | +    | 0.33 | +     | +      |         | >= 32 TiB
- splitmix          | u64    | +     | +       | +    | 0.19 | +     | -      | +       | >= 2 TiB
- splitmix32        | u32    | 2     | 3       | 4/5  | 0.25 | +     | N/A    | Small   | 1 GiB
- sqxor             | u64    | +     | +       | +    | 0.13 | +     | +      | +       | >= 16 TiB
- sqxor32           | u32    | 1     | 2       | 4    | 0.20 | +     | N/A    | Small   | 16 GiB
- stormdrop         | u32    | +     | +       | 1    | 1.2  | +     | N/A    |         | >= 1 TiB
- superduper73      | u32    | 9     | 15      | 18   | 0.64 | 1     | N/A    |         | 32 KiB
- superduper64      | u64    | 1     | 3       | 5    | 0.35 | 1     | +      |         | 512 KiB
- superduper64_u32  | u32    | +     | +       | +    | 0.70 | +     | N/A    |         | >= 2 TiB
- shr3              | u32    | 15    | 32      | 36   | 0.76 | 2     | N/A    | -       | 32 KiB
- swb               | u32    | 5     | 6       | 8    | 2.7  | 1     | N/A    | Small   | 128 MiB
- swblux[luxury=1]  | u32    | +     | +       | 0/1  | 6.3  | +     | N/A    | Crush   | 4 TiB
- swblux[luxury=2]  | u32    | +     | +       | +    | 9.1  | +     | N/A    |         |
- swbw              | u32    | 1     | 1       | 1    | 2.8  | +     | N/A    | +       | 4 GiB
- tinymt32          | u32    | 2     | 4       | 6    | 1.5  | 1     | N/A    | +       | 4 GiB
- tinymt64          | u64    | 1     | 2       | 4    | 2.7  | 1     | +      |         | 32 GiB
- threefry          | u64    | +     | +       | +    | 1.0  | +     | +      | +       | >= 1 TiB
- well1024a         | u32    | 3     | 5       | 7    | 1.0  | 2     | N/A    | Small   | 64 MiB
- wyrand            | u64    | +     | +       | +    | 0.08 | +     | +      |         | >= 1 TiB
- xorshift128       | u32    | 4     | 6/7     | 8    | 0.41 | 2     | N/A    | -       | 128 KiB
- xorshift128p      | u64    | 1     | 2       | 3    | 0.21 | 1     | +      |         | 32 GiB
- xoroshiro128p     | u64    | 1     | 2       | 3    | 0.16 | 1     | +      |         | 16 MiB
- xoroshiro128pp    | u64    | +     | +       | +    | 0.20 | +     | +      |         | >= 2 TiB
- xoroshiro1024st   | u64    | 1     | 1       | 2    | 0.33 | 1     | +      |         | 128 GiB
- xoroshiro1024stst | u64    | +     | +       | +    | 0.33 | +     | +      | +       | >= 1 TiB
- xorwow            | u32    | 3     | 7       | 9    | 0.52 | 1     | N/A    | Small   | 128 KiB
- xsh               | u64    | 8     | 13      | 17   | 0.43 | 2     | -      | -       | 32 KiB
+ Algoritrhm        | Output | express | brief | default | full | cpb  | bday64 | TestU01 | PractRand 
+-------------------|--------|---------|-------|---------|------|------|--------|---------|-----------
+ aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      |         | >= 1 TiB
+ alfib             | u64    | 2       | 5     | 6       | 8    | 0.23 | +      | Small   | 128 MiB
+ alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    |         | 4 GiB
+ alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | N/A    | +       | 1 TiB
+ ara32             | u32    | +       | +     | 1       | 1    | 0.96 | N/A    | +       | 512 MiB
+ chacha            | u32    | +       | +     | +       | +    | 2.0  | N/A    | +       | >= 1 TiB
+ chacha_avx        | u32    | +       | +     | +       | +    | 0.7  | N/A    | +       |
+ chacha_ctr32      | u32    | +       | +     | +       | 1    | 2.0  | N/A    |         | 256 GiB
+ cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | N/A    | +       | >= 32 TiB
+ coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | N/A    | Small   | 256 KiB
+ cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 1 TiB
+ drand48           | u32    | 1       | 12    | 20      | 22/23| 0.72 | N/A    | -       | 1 MiB
+ isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | +       | >= 1 TiB
+ flea32x1          | u32    | +       | +     | 1       | 1    | 0.48 | N/A    | +       | 4 MiB
+ hc256             | u32    | +       | +     | +       | +    | 1.1  | N/A    |         | >= 1 TiB
+ kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | N/A    | Small   | 1 MiB
+ kiss99            | u32    | +       | +     | +       | +    | 1.0  | N/A    | +       | >= 8 TiB
+ kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | +       | >= 4 TiB
+ lcg32prime        | u32    | 0/1     | 13    | 24      | 25/26| 2.2  | N/A    | -       | 512 MiB
+ lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | N/A    | Small   | 16 MiB
+ lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | +-      | >= 32 TiB
+ lcg96             | u32    | +       | 1     | 1       | 1    | 0.78 | N/A    | +       | 32 GiB
+ lcg128            | u64    | +       | 1     | 1       | 1    | 0.35 | +      | +       | 64 GiB
+ lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | +       | 64 GiB
+ lcg128_u32_full   | u32    | +       | +     | 1       | 1    | 0.75 | N/A    | +       | >= 32 TiB
+ lcg69069          | u32    | 4       | 19    | 37/38   | 42   | 0.38 | N/A    | -       | 2 KiB
+ lfib_par[31+]     | u32    | 1       | 5/6   | 6/7     | 10   | 0.70 | N/A    | -       | 32 MiB
+ lfib_par[55+]     | u32    | 1       | 4     | 5       | 7    | 0.51 | N/A    | -       | 2 GiB
+ lfib_par[55-]     | u32    | 1       | 4     | 5       | 7    | 0.51 | N/A    | -       | 2 GiB
+ lfib_par[127+]    | u32    | 1       | 4     | 4       | 5    | 0.48 | N/A    | -/Small | 512 MiB
+ lfib_par[127-]    | u32    | 1       | 4     | 4       | 5    | 0.48 | N/A    | -/Small | 512 MiB
+ lfib_par[258+]    | u32    | 1       | 4     | 4       | 5    | 0.44 | N/A    | Small   | 8 GiB
+ lfib_par[258-]    | u32    | 1       | 4     | 4       | 5    | 0.46 | N/A    | Small   | 8 GiB
+ lfib_par[378+]    | u32    | 1       | 4     | 4       | 5    | 0.46 | N/A    | Small   | 32 GiB
+ lfib_par[378-]    | u32    | 1       | 4     | 4       | 5    | 0.45 | N/A    | Small   | 32 GiB
+ lfib_par[607+]    | u32    | 1       | 4     | 4       | 5    | 0.41 | N/A    | Small   | 256 GiB
+ lfib_par[607-]    | u32    | 1       | 4     | 4       | 5    | 0.40 | N/A    | Small   | 256 GiB
+ lfib_par[1279+]   | u32    | 1       | 3/4   | 3/4     | 4/5  | 0.40 | N/A    | Crush   | 1 TiB
+ lfib_par[1279-]   | u32    | 1       | 3/4   | 3/4     | 4/5  | 0.40 | N/A    | Crush   | 1 TiB
+ lfib_par[2281+]   | u32    | +       | 3     | 3       | 4    | 0.38 | N/A    | +       | 8 TiB
+ lfib_par[2281-]   | u32    | 0/1     | 3     | 3       | 4    | 0.38 | N/A    | +       | 8 TiB
+ lfib_par[3217+]   | u32    | +       | 1     | 1       | 1/2  | 0.39 | N/A    | +       |
+ lfib_par[3217-]   | u32    | +       | 1     | 1       | 2/4  | 0.39 | N/A    | +       |
+ lfib_par[9689+]   | u32    | +       | 1     | 1       | 1    | 0.47 | N/A    | +       |
+ lfib_par[9689-]   | u32    | +       | 1     | 1       | 1    | 0.47 | N/A    | +       |
+ lfib_par[19937+]  | u32    | +       | +     | 1       | 1    | 0.46 | N/A    | +       |
+ lfib_par[19937-]  | u32    | +       | +     | 1       | 1    | 0.48 | N/A    | +       |
+ lfib_par[44497+]  | u32    | +       | +     | 1       | 1    | 0.49 | N/A    | +       |
+ lfib_par[44497-]  | u32    | +       | +     | 1       | 1    | 0.49 | N/A    | +       |
+ lfib_par[110503+] | u32    | +       | +     | +       | +    | 0.52 | N/A    | +       |
+ lfib_par[110503-] | u32    | +       | +     | +       | +    | 0.50 | N/A    | +       |
+ lfib4             | u32    | 1       | 1     | 3       | 4    | 0.37 | N/A    |         | 32 MiB
+ lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | N/A    |         | >= 2 TiB
+ lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | N/A    | Small   | 32 KiB 
+ lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | Small   | 1 MiB
+ minstd            | u32    | 4       | 20    | 38      | 42   | 2.4  | N/A    | -       | 1 KiB
+ mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | N/A    |         | >= 2 TiB
+ mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | N/A    | +       | >= 32 TiB
+ mt19937           | u32    | +       | 3     | 3       | 3    | 0.50 | N/A    | Small   | 128 GiB
+ mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | N/A    | +       | >= 4 TiB
+ msws              | u32    | +       | +     | +       | +    | 0.72 | N/A    | +       | >= 2 TiB
+ mulberry32        | u32    | +       | 1     | 2       | 4    | 0.51 | N/A    | Small   | 512 MiB
+ mwc32x            | u32    | +       | 2     | 2       | 7    | 1.5  | N/A    | Small   | 128 MiB
+ mwc64             | u32    | +       | 1     | 2       | 4    | 0.37 | N/A    | Small   | 1 TiB
+ mwc64x            | u32    | +       | +     | +       | +    | 0.53 | N/A    | +       | >= 16 TiB
+ mwc128            | u64    | +       | +     | +       | +    | 0.30 | +      | +       | >= 16 TiB
+ mwc128x           | u64    | +       | +     | +       | +    | 0.30 | +      | +       | >= 8 TiB
+ mwc1616           | u32    | +       | 10/11 | 12/18   | 19   | 0.48 | N/A    | -+      | 16 MiB
+ mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | N/A    | +       | >= 32 TiB(?)
+ mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 32 TiB
+ mwc4691           | u32    | +       | 1     | 1       | 1    |      | N/A    |         | 1 GiB
+ pcg32             | u32    | +       | +     | +       | +    | 0.44 | N/A    | +       | >= 2 TiB
+ pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | +       | >= 2 TiB
+ pcg64_xsl_rr      | u64    | +       | +     | +       | +    | 0.43 | +      |         | >= 32 TiB
+ philox            | u64    | +       | +     | +       | +    | 1.7  | +      | +       | >= 2 TiB
+ philox32          | u32    | +       | +     | +       | +    | 2.7  | N/A    | +       | >= 2 TiB
+ ran               | u64    | +       | +     | +       | +    | 0.43 | +      |         | >= 1 TiB
+ ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      |         | 512 KiB
+ ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      |         | 2 MiB
+ randu             | u32    | 4       | 21    | 39      | 43   | 0.41 | N/A    | -       | 1 KiB
+ ranlux++          | u64    | +       | +     | +       | +    | 2.4  | +      | +       | >= 1 TiB
+ ranrot32[7/3]     | u32    | +       | 1/2   | 4/5     | 5    | 0.58 | N/A    | Small   | 128 MiB
+ ranrot32[17/9]    | u32    | +       | 1     | 2       | 3    | 0.68 | N/A    | +       | 1 GiB
+ ranrot32[57/13]   | u32    | +       | +     | +       | 1    | 0.74 | N/A    | +       | 8 GiB
+ ranshi            | u64    | +       | 1     | 6       | 7    | 0.43 |        |         | 32 KiB
+ ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | N/A    |         | >= 2 TiB
+ ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | N/A    |         | >= 1 TiB
+ ranval            | u32    | +       | +     | +       | +    | 0.31 | N/A    |         | >= 4 TiB
+ r1279             | u32    | 2       | 5     | 7       | 10   | 0.47 | N/A    | Small   | 64 MiB
+ ranlux[0]         | u32    | 1       | 6     | 9       | 12   | 6.8  | N/A    |         | 4 MiB
+ ranlux[1]         | u32    | +       | +     | 2       | 3    | 13   | N/A    |         | 4 GiB
+ ranlux[2]         | u32    | +       | +     | +       | +    | 27   | N/A    |         | >= 128 GiB
+ rc4               | u32    | +       | +     | +       | +    | 6.0  | N/A    | +       | 512 GiB
+ rc4ok             | u32    | +       | +     | +       | +    | 6.2  | N/A    |         | >= 1 TiB
+ romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      |         | >= 1 TiB
+ rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      |         | >= 2 TiB
+ sapparot          | u32    | +       | 1     | 3       | 4    | 0.70 | N/A    |         | 8 MiB
+ sapparot2         | u32    | +       | +     | +       | +    | 0.42 | N/A    |         | 2 TiB
+ sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | N/A    |         | >= 16 TiB
+ sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | N/A    |         | 128 MiB
+ sfc16             | u32    | +       | +     | +       | +    | 0.93 | N/A    |         | 128 GiB(stdin32)*
+ sfc32             | u32    | +       | +     | +       | +    | 0.24 | N/A    |         | >= 4 TiB
+ sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | +       | >= 1 TiB
+ speck128          | u64    | +       | +     | +       | +    | 3.1  | +      |         | >= 2 TiB
+ speck128_avx      | u64    | +       | +     | +       | +    | 0.65 | +      |         | >= 2 TiB
+ speck128_r16_avx  | u64    | +       | +     | +       | +    | 0.33 | +      |         | >= 32 TiB
+ splitmix          | u64    | +       | +     | +       | +    | 0.19 | -      | +       | >= 2 TiB
+ splitmix32        | u32    | +       | 2     | 3       | 4/5  | 0.25 | N/A    | Small   | 1 GiB
+ sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | +       | >= 16 TiB
+ sqxor32           | u32    | +       | 1     | 2       | 4    | 0.20 | N/A    | Small   | 16 GiB
+ stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | N/A    |         | >= 1 TiB
+ superduper73      | u32    | 1       | 9     | 15      | 18   | 0.64 | N/A    |         | 32 KiB
+ superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      |         | 512 KiB
+ superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | N/A    |         | >= 2 TiB
+ shr3              | u32    | 2       | 15    | 32      | 36   | 0.76 | N/A    | -       | 32 KiB
+ swb               | u32    | 1       | 5     | 6       | 8    | 2.7  | N/A    | Small   | 128 MiB
+ swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | Crush   | 4 TiB
+ swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | +       |
+ swblarge          | u32    | 1       | 4     | 5       | 8    |      | N/A    |         | 512 GiB
+ swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | N/A    | +       | 4 GiB
+ tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | N/A    | +       | 4 GiB
+ tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      |         | 32 GiB
+ threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | +       | >= 1 TiB
+ well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | N/A    | Small   | 64 MiB
+ wyrand            | u64    | +       | +     | +       | +    | 0.08 | +      |         | >= 1 TiB
+ xorshift128       | u32    | 2       | 4     | 6/7     | 8    | 0.41 | N/A    | -       | 128 KiB
+ xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.21 | +      |         | 32 GiB
+ xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      |         | 16 MiB
+ xoroshiro128pp    | u64    | +       | +     | +       | +    | 0.20 | +      |         | >= 2 TiB
+ xoroshiro1024st   | u64    | 1       | 1     | 1       | 2    | 0.33 | +      |         | 128 GiB
+ xoroshiro1024stst | u64    | +       | +     | +       | +    | 0.33 | +      | +       | >= 1 TiB
+ xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | N/A    | Small   | 128 KiB
+ xsh               | u64    | 2       | 8     | 13      | 17   | 0.43 | -      | -       | 32 KiB
 
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
 e.g. changing `-O2` to `-O3` speeds up `mt19937` but slows down `philox`; gcc 10.3.0 (tdm64-1).
@@ -648,6 +650,13 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 - Passed dieharder: lcg64
 
 # Versions history
+
+23.12.2024: SmokeRand 0.16.
+
+- Speck128/128 with reduced number of rounds.
+- `dos16` renamed to `express`.
+- Correct program termination in the case of PRNG example allocation failure.
+  It may occur in the case of incorrect optional parameter.
 
 16.12.2024: SmokeRand 0.15.
 

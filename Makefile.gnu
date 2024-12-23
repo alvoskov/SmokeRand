@@ -59,8 +59,8 @@ LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, apidefs.h cinterface.h core.h coretest
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
 INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/core.h
 # Battery
-BAT_SOURCES = $(addprefix $(SRCDIR)/, bat_dos16.c bat_brief.c bat_default.c bat_full.c)
-BAT_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_dos16.h bat_brief.h bat_default.h bat_full.h)
+BAT_SOURCES = $(addprefix $(SRCDIR)/, bat_express.c bat_brief.c bat_default.c bat_full.c)
+BAT_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_express.h bat_brief.h bat_default.h bat_full.h)
 BAT_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(BAT_SOURCES)))
 # Executables
 EXE_NAMES = smokerand sr_tiny calibrate_dc6 test_funcs

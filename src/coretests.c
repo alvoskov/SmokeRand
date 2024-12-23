@@ -147,12 +147,12 @@ static unsigned long bspace32_nd_test(GeneratorState *obj, const BSpaceNDOptions
     uint32_t *u = calloc(len, sizeof(uint32_t));
     if (u == NULL) {
         fprintf(stderr, "***** bspace32_nd_test: not enough memory *****\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     unsigned long *ndups = calloc(opts->nsamples, sizeof(unsigned long));
     if (ndups == NULL) {
         fprintf(stderr, "***** bspace32_nd_test: not enough memory *****\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     for (size_t i = 0; i < opts->nsamples; i++) {
         bspace_make_tuples32(opts, obj->gi, obj->state, u, len);
@@ -178,12 +178,12 @@ static unsigned long bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions
     uint64_t *u = calloc(len, sizeof(uint64_t));
     if (u == NULL) {
         fprintf(stderr, "***** bspace64_nd_test: not enough memory *****\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     unsigned long *ndups = calloc(opts->nsamples, sizeof(unsigned long));
     if (ndups == NULL) {
         fprintf(stderr, "***** bspace64_nd_test: not enough memory *****\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     for (size_t i = 0; i < opts->nsamples; i++) {
         bspace_make_tuples64(opts, obj->gi, obj->state, u, len);
@@ -370,7 +370,7 @@ TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step)
     if (u == NULL || u_high_rev == NULL || u_high_norev == NULL) {
         fprintf(stderr, "***** bspace4_8d_decimated: not enough memory *****\n");
         free(u); free(u_high_rev); free(u_high_norev);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     for (size_t i = 0; i < len; i++) {
@@ -485,7 +485,7 @@ TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     uint64_t *u = calloc(n, sizeof(uint64_t));
     if (u == NULL) {
         fprintf(stderr, "***** collisionover_test: not enough memory *****\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     uint64_t nstates_u64 = 1ull << opts->ndims * opts->nbits_per_dim;
     uint64_t Oi[4] = {0, 0, 0, 0};
@@ -574,7 +574,7 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     size_t *Oi = calloc(nbins + 1, sizeof(size_t));
     if (Oi == NULL) {
         fprintf(stderr, "***** gap_test: not enough memory *****\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     unsigned long long nvalues = 0;
     TestResults ans = TestResults_create("Gap");

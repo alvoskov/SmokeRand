@@ -12,7 +12,7 @@
 #include "smokerand/bat_default.h"
 #include "smokerand/bat_brief.h"
 #include "smokerand/bat_full.h"
-#include "smokerand/bat_dos16.h"
+#include "smokerand/bat_express.h"
 #include "smokerand/extratests.h"
 #include "smokerand/fileio.h"
 #include <stdio.h>
@@ -33,6 +33,9 @@ typedef struct
     double ticks_per_call; ///< Processor ticks per call
 } SpeedResults;
 
+/**
+ * @brief Speed measurement mode.
+ */
 typedef enum {
     speed_uint, ///< Single value (emulates call of PRNG function)
     speed_sum   ///< Sum of values (emulates usage of inline PRNG)
@@ -179,10 +182,10 @@ void print_help(void)
     "Usage: smokerand battery generator_lib [keys]\n"
     "battery: battery name; supported batteries:\n"
     "  General purpose batteries\n"
+    "  - express  Express battery (32-64 MiB of data)\n"
     "  - brief    Fast battery (64-128 GiB of data)\n"
     "  - default  Slower but more sensitive battery (128-256 GiB of data)\n"
     "  - full     The slowest battery (1-2 TiB of data)\n"
-    "  - dos16    Express battery (32-64 MiB of data)\n"
     "  Special batteries\n"
     "  - birthday 64-bit birthday paradox based test.\n"
     "  - ising    Ising model based tests: Wolff and Metropolis algorithms.\n"
@@ -240,6 +243,12 @@ typedef struct {
 } SmokeRandSettings;
 
 
+/**
+ * @brief Process command line arguments to extract settings.
+ * @param[out] obj  Output buffer for parsed settings.
+ * @param[in]  argc Number of command line arguments (from `main` function).
+ * @arapm[in]  argv Values of command line arguments (from `main` function).
+ */
 int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
 {
     obj->nthreads = 1;
@@ -297,6 +306,14 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
 }
 
 
+/**
+ * @brief Run a battery of statistical test for a given generator.
+ * @param battery_name  Name of tests battery: `default`, \express`, `brief`,
+ * `full`, `selftest`, `speed`, `stdout`, `freq`, 'birthday`, `ising`.
+ * @param gi   PRNG to be tested.
+ * @param intf Pointers to API functions.
+ * @param opts Pre-parsed command line options.
+ */
 int run_battery(const char *battery_name, GeneratorInfo *gi,
     CallerAPI *intf, SmokeRandSettings *opts)
 {
@@ -306,8 +323,8 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
         battery_brief(gi, intf, opts->testid, opts->nthreads);
     } else if (!strcmp(battery_name, "full")) {
         battery_full(gi, intf, opts->testid, opts->nthreads);
-    } else if (!strcmp(battery_name, "dos16")) {
-        battery_dos16(gi, intf, opts->testid, opts->nthreads);
+    } else if (!strcmp(battery_name, "express")) {
+        battery_express(gi, intf, opts->testid, opts->nthreads);
     } else if (!strcmp(battery_name, "selftest")) {
         battery_self_test(gi, intf);
     } else if (!strcmp(battery_name, "speed")) {

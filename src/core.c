@@ -131,7 +131,7 @@ static void init_mutexes()
 #define MUTEX_LOCK(mutex) DWORD dwResult = WaitForSingleObject(mutex, INFINITE); \
     if (dwResult != WAIT_OBJECT_0) { \
         fprintf(stderr, "get_seed64_mt internal error"); \
-        exit(1); \
+        exit(EXIT_FAILURE); \
     }
 #define MUTEX_UNLOCK(mutex) ReleaseMutex(mutex);
 static inline uint64_t get_current_thread_id()
@@ -276,6 +276,33 @@ const char *interpret_pvalue(double pvalue)
     }
 }
 
+
+///////////////////////////////////////////////
+///// GeneratorState class implementation /////
+///////////////////////////////////////////////
+
+GeneratorState GeneratorState_create(const GeneratorInfo *gi,
+    const CallerAPI *intf)
+{
+    GeneratorState obj;
+    obj.gi = gi;
+    obj.state = gi->create(gi, intf);
+    obj.intf = intf;
+    if (obj.state == NULL) {
+        fprintf(stderr,
+            "Cannot create an example of generator '%s' with parameter '%s'\n",
+            gi->name, intf->get_param());
+        exit(EXIT_FAILURE);
+    }
+    return obj;
+}
+
+void GeneratorState_free(GeneratorState *obj, const CallerAPI *intf)
+{
+    obj->gi->free(obj->state, obj->gi, intf);
+}
+
+
 //////////////////////////////////////////////////
 ///// Subroutines for working with C modules /////
 //////////////////////////////////////////////////
@@ -349,7 +376,7 @@ static void countsort64(uint64_t *out, const uint64_t *x, size_t len, unsigned i
     size_t *offsets = (size_t *) calloc(65536, sizeof(size_t));
     if (offsets == NULL) {
         fprintf(stderr, "***** countsort64: not enough memory *****\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     for (size_t i = 0; i < len; i++) {
         unsigned int pos = ((x[i] >> shr) & 0xFFFF);
@@ -375,7 +402,7 @@ static void countsort32(uint32_t *out, const uint32_t *x, size_t len, unsigned i
     size_t *offsets = calloc(65536, sizeof(size_t));
     if (offsets == NULL) {
         fprintf(stderr, "***** countsort32: not enough memory *****\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     for (size_t i = 0; i < len; i++) {
         unsigned int pos = ((x[i] >> shr) & 0xFFFF);
@@ -523,7 +550,7 @@ static TestTiming *sort_tests_by_time(const TestDescription *descr, size_t ntest
     TestTiming *out = calloc(ntests, sizeof(TestTiming));
     if (out == NULL) {
         fprintf(stderr, "sort_tests_by_time: out of memory");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     for (size_t i = 0; i < ntests; i++) {
         out[i].ind = i;
@@ -741,7 +768,7 @@ void TestsBattery_run(const TestsBattery *bat,
     }
     if (results == NULL) {
         fprintf(stderr, "***** TestsBattery_run: not enough memory *****\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     // Run the tests
     tic = time(NULL);

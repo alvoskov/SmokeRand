@@ -1,6 +1,6 @@
 /**
- * @file bat_dos16.h
- * @brief The `dos16` battery designed for memory constrained situations such
+ * @file bat_express.c
+ * @brief The `express` battery designed for memory constrained situations such
  * as 16-bit data segments (64 KiB of RAM per data and 64 KiB of RAM per code)
  * and absence of 64-bit arithmetics.
  * @details This battery is very fast but not very sensitive. Consumes 48 MiB
@@ -17,7 +17,7 @@
  *
  * This software is licensed under the MIT license.
  */
-#include "smokerand/bat_dos16.h"
+#include "smokerand/bat_express.h"
 #include "smokerand/coretests.h"
 #include "smokerand/lineardep.h"
 #include "smokerand/hwtests.h"
@@ -54,7 +54,7 @@ TestResults byte_freq_short_test(GeneratorState *obj)
 }
 
 
-void battery_dos16(GeneratorInfo *gen, CallerAPI *intf,
+void battery_express(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
     static const TestDescription tests[] = {
@@ -67,7 +67,7 @@ void battery_dos16(GeneratorInfo *gen, CallerAPI *intf,
     };
 
     const TestsBattery bat = {
-        "dos16", tests
+        "express", tests
     };
     if (gen != NULL) {
         TestsBattery_run(&bat, gen, intf, testid, nthreads);

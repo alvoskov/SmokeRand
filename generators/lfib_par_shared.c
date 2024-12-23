@@ -63,6 +63,7 @@ static const LFibDynDescr generators[] = {
     {.name = "378-",    .r = 378,    .s = 107,    .is_additive = 0},
     {.name = "607+",    .r = 607,    .s = 273,    .is_additive = 1}, // from golang
     {.name = "607-",    .r = 607,    .s = 273,    .is_additive = 0},
+    {.name = "",        .r = 607,    .s = 273,    .is_additive = 1},
     {.name = "1279+",   .r = 1279,   .s = 418,    .is_additive = 1},
     {.name = "1279-",   .r = 1279,   .s = 418,    .is_additive = 0},
     {.name = "2281+",   .r = 2281,   .s = 1252,   .is_additive = 1},
@@ -132,7 +133,7 @@ static LFibDyn_State parse_parameters(const CallerAPI *intf)
             obj.is_additive = ptr->is_additive;
         }        
     }
-    /*obj.i = obj.r; obj.j = obj.s;*/ obj.pos = obj.r;
+    obj.pos = obj.r;
     return obj;
 }
 
