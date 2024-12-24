@@ -8,8 +8,8 @@
  * is not clear.
  *
  * WARNING! MINIMAL PERIOD IS 2^{16}! IT IS NOT ENOUGH FOR RELIABLE PRACTICAL
- * USAGE! SFC16 with 16-bit counter usually passes 32TiB PractRand; but bad
- * seeds are possible).
+ * USAGE! It also fails PractRand 0.94 only at 256 GiB of data, but only if its
+ * output is processed as a sequence of 32-bit words (`stdin32`).
  *
  * @copyright SFC16 algorithm is developed by Chris Doty-Humphrey,
  * the author of PractRand (https://sourceforge.net/projects/pracrand/).
