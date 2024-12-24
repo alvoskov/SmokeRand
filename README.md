@@ -580,7 +580,7 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  swb               | u32    | 1       | 5     | 6       | 8    | 2.7  | N/A    | Small   | 128 MiB
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | Crush   | 4 TiB
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | +       |
- swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | N/A    |         | 512 GiB
+ swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | N/A    | Crush   | 512 GiB
  swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | N/A    | +       | 4 GiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | N/A    | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      |         | 32 GiB
