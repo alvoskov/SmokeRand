@@ -242,6 +242,17 @@ Four batteries are implemented in SmokeRand:
  full    | 44              | 2^40                | 2^41
 
 
+Batteries from TestU01 use the next number of values:
+
+- SmallCrush --- 2^26 values (comparable to `express` battery)
+- Crush --- 2^35 values (comparable to `default` battery)
+- BigCrush -- 2^38 values (comparable to `full` battery)
+
+However SmokeRand tests are about 5-10 times faster than tests from TestU01
+due to optimized implementations that don't use floating point values and
+multiplications whenever possible. Birthday spacings tests use radix sort
+instead of QuickSort.
+
 # How to test a pseudorandom number generator
 
 Two ways of PRNG testing are implemented in SmokeRand:
@@ -438,6 +449,32 @@ very specific issues.
 
 ## 64-bit birthday paradox test
 
+This test detects uniform generators with 64-bit output and 64-bit state. Such
+generators never repeat themselves during the entire period and it can be
+easily detected by means of "birthday paradox": number of duplicates in the
+sample of n values that have m bits size each obeys Poisson distribution with
+the next mathematical expectance:
+
+\f[
+\lambda = \frac{n^2}{2\cdot 2^m}
+\f]
+
+For a 64-bit generator m=64; to achieve p-value less than 1e-10 for absence of
+duplicates we need n around 2^35 that correspond to 256 GiB of data; such
+sample is too large for RAM of most personal computers in 2024. SmokeRand uses
+the decimation strategy suggested by M.E. O'Neill, the author of PCG generators.
+In this case only outputs with lower \f$ e \f$ bits equal to 0 are used, all
+other values are thrown out. And \f$ e = 7 \f$ allows to use only 8 GiB of RAM
+for \f$\lambda = 4\f$. If no duplicates are found for this \f$e\f$ then another
+attempt with \f$e = 9\f$ and \f$\lambda = 16\f$ is made. Then number of
+duplicates from both runs are summed and p-value is calculated.
+
+- https://www.pcg-random.org/posts/birthday-test.html
+
+32-bit version of this test consumes less RAM, uses larger e and is much
+slower. However, it is made as a rarely used backup variant: ordinary x86 based
+workstations in 2024 usually 64-bit and have at least 16 GiB of RAM.
+
 ## Extended block frequency test
 
 It is very similar to the blocks frequency test from `brief`, `default` and
@@ -455,8 +492,14 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
 
 ## 2D Ising model test
 
-
-
+These tests are based on heat capacity and internal energy computation for 2D
+16x16 Ising model using Wolff and Metropolis algorithms. Computations based on
+Wolff algorithm are approximately equivalent to gap test and give a significant
+bias for additive/subtractive lagged Fibonacci generators and subtract with
+borrow generators without luxury levels. Metropolis algorithm may detect LCGs
+with small state size. Of course, they are slower and less sensitive tha
+specialized statistical tests from `express`, `brief`, `default` and `full`
+batteries and have mainly historical and educational interest.
 
 # Tests results
 
@@ -464,12 +507,12 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
 -------------------|--------|---------|-------|---------|------|------|--------|---------|-----------
  aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      |         | >= 1 TiB
  alfib             | u64    | 2       | 5     | 6       | 8    | 0.23 | +      | Small   | 128 MiB
- alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    |         | 4 GiB
+ alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    | +       | 4 GiB
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | N/A    | +       | 1 TiB
  ara32             | u32    | +       | +     | 1       | 1    | 0.96 | N/A    | +       | 512 MiB
  chacha            | u32    | +       | +     | +       | +    | 2.0  | N/A    | +       | >= 1 TiB
  chacha_avx        | u32    | +       | +     | +       | +    | 0.7  | N/A    | +       |
- chacha_ctr32      | u32    | +       | +     | +       | 1    | 2.0  | N/A    |         | 256 GiB
+ chacha_ctr32      | u32    | +       | +     | +       | 1    | 2.0  | N/A    | +       | 256 GiB
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | N/A    | +       | >= 32 TiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | N/A    | Small   | 256 KiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 1 TiB
@@ -513,7 +556,7 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  lfib_par[44497-]  | u32    | +       | +     | 1       | 1    | 0.49 | N/A    | +       |
  lfib_par[110503+] | u32    | +       | +     | +       | +    | 0.52 | N/A    | +       |
  lfib_par[110503-] | u32    | +       | +     | +       | +    | 0.50 | N/A    | +       |
- lfib4             | u32    | 1       | 1     | 3       | 4    | 0.37 | N/A    |         | 32 MiB
+ lfib4             | u32    | 1       | 1     | 3       | 4    | 0.37 | N/A    | +       | 32 MiB
  lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | N/A    |         | >= 2 TiB
  lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | N/A    | Small   | 32 KiB 
  lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | Small   | 1 MiB
@@ -529,7 +572,7 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  mwc64x            | u32    | +       | +     | +       | +    | 0.53 | N/A    | +       | >= 16 TiB
  mwc128            | u64    | +       | +     | +       | +    | 0.30 | +      | +       | >= 16 TiB
  mwc128x           | u64    | +       | +     | +       | +    | 0.30 | +      | +       | >= 8 TiB
- mwc1616           | u32    | +       | 10/11 | 12/18   | 19   | 0.48 | N/A    | -+      | 16 MiB
+ mwc1616           | u32    | +       | 10/11 | 12/18   | 19   | 0.48 | N/A    | -/Small | 16 MiB
  mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | N/A    | +       | >= 32 TiB(?)
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | N/A    | +       | 1 GiB
@@ -546,7 +589,7 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  ranrot32[7/3]     | u32    | +       | 1/2   | 4/5     | 5    | 0.58 | N/A    | Small   | 128 MiB
  ranrot32[17/9]    | u32    | +       | 1     | 2       | 3    | 0.68 | N/A    | +       | 1 GiB
  ranrot32[57/13]   | u32    | +       | +     | +       | 1    | 0.74 | N/A    | +       | 8 GiB
- ranshi            | u64    | +       | 1     | 6       | 7    | 0.43 |        |         | 32 KiB
+ ranshi            | u64    | +       | 1     | 6       | 7    | 0.43 | +      |         | 32 KiB
  ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | N/A    |         | >= 2 TiB
  ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | N/A    |         | >= 1 TiB
  ranval            | u32    | +       | +     | +       | +    | 0.31 | N/A    |         | >= 4 TiB
@@ -559,8 +602,8 @@ statistical bias and passes this frequency test at least for 1 TiB sample.
  romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      |         | >= 1 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      |         | >= 2 TiB
  sapparot          | u32    | +       | 1     | 3       | 4    | 0.70 | N/A    | Crush   | 8 MiB
- sapparot2         | u32    | +       | +     | +       | +    | 0.42 | N/A    |         | 2 TiB
- sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | N/A    |         | >= 16 TiB
+ sapparot2         | u32    | +       | +     | +       | +    | 0.42 | N/A    | +       | 2 TiB
+ sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | N/A    | Crush   | >= 16 TiB
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | N/A    |         | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | N/A    |         | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | N/A    |         | >= 4 TiB
@@ -766,4 +809,21 @@ with 32-bit output. Samples sizes in the case of decimation:
 It means that `bspace4_8d_dec` is about 100-1000 times more sensitive than TMFn
 test from PractRand 0.94 at least for 128-bit LCGs. It is especially true if at
 least lower 64 bits are truncated.
+
+Approximation in GNU Octave:
+
+    tr = [32 64 96 128]'
+    s = [8*2^20 512*2^20 32*2^30 2*2^40]'
+    y = log2(s)
+    b = X \ y
+
+The obtained approximation for sample size (32-bit output) n and number of
+truncated bits t:
+
+    n = 2^(17 + 3*t/16) => t = (log2(n) - 17) * 16 / 3
+
+So for 1 PiB t = 176, for 8 PiB t = 192 that correspond to the 256-bit LCG that
+retuns upper 64 bits. Of course, 1 PiB is only a minimalistic lower boundary
+for a general purpose PRNG that is used to draw a border between seriously
+flawed and barely usable LCGs with \f$ m = 2 ^ k \f$ modulo.
 
