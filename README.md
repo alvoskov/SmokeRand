@@ -546,7 +546,7 @@ batteries and have mainly historical and educational interest.
  lfib_par[1279-]   | u32    | 1       | 3/4   | 3/4     | 4/5  | 0.40 | N/A    | Crush   | 1 TiB
  lfib_par[2281+]   | u32    | +       | 3     | 3       | 4    | 0.38 | N/A    | +       | 8 TiB
  lfib_par[2281-]   | u32    | 0/1     | 3     | 3       | 4    | 0.38 | N/A    | +       | 8 TiB
- lfib_par[3217+]   | u32    | +       | 1     | 1       | 1/2  | 0.39 | N/A    | +       |
+ lfib_par[3217+]   | u32    | +       | 1     | 1       | 1/2  | 0.39 | N/A    | +       | 16 TiB
  lfib_par[3217-]   | u32    | +       | 1     | 1       | 2/4  | 0.39 | N/A    | +       |
  lfib_par[9689+]   | u32    | +       | 1     | 1       | 1    | 0.47 | N/A    | +       |
  lfib_par[9689-]   | u32    | +       | 1     | 1       | 1    | 0.47 | N/A    | +       |
