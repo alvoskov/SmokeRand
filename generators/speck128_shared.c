@@ -47,11 +47,8 @@ typedef struct {
 
 static inline void speck_round(uint64_t *x, uint64_t *y, const uint64_t k)
 {
-    *x = (*x << (64 - 8)) | (*x >> 8); // rotr(x, 8)
-    *x += *y;
-    *x ^= k;
-    *y = (*y << 3) | (*y >> (64 - 3)); // rotl(y, 3)
-    *y ^= *x;
+    *x = (rotr64(*x, 8) + *y) ^ k;
+    *y = rotl64(*y, 3) ^ *x;
 }
 
 

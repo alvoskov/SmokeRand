@@ -18,11 +18,6 @@ typedef struct {
     uint32_t c;
 } Sapparot2State;
 
-static inline uint32_t rotl32(uint32_t x, int r)
-{
-    return (x << r) | (x >> (32 - r));
-}
-
 #define C_RTR 7
 #define C_SH 27
 #define PHI 0x9e3779b9

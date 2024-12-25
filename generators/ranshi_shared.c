@@ -32,11 +32,6 @@ typedef struct {
 } RanshiState;
 
 
-static inline uint32_t rotl32(uint32_t x, unsigned int r)
-{
-    return (x << r) | (x >> (32 - r));
-}
-
 static inline uint64_t get_bits_raw(void *state)
 {
     RanshiState *obj = state;

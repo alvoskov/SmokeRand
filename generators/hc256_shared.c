@@ -23,8 +23,6 @@ typedef struct {
     uint32_t pos; ///< Position in output buffer
 } Hc256State;
 
-#define rotr(x,n) (((x)>>(n))|((x)<<(32-(n))))
-
 #define hx(V,x,y) { \
     uint8_t a = (uint8_t) (x); \
     uint8_t b = (uint8_t) ((x) >> 8); \
@@ -35,8 +33,8 @@ typedef struct {
 
 #define step_AB(V,u,v,a,b,c,d,m) { \
     uint32_t tem0, tem1, tem2, tem3; \
-    tem0 = rotr((v), 23); \
-    tem1 = rotr((c), 10); \
+    tem0 = rotr32((v), 23); \
+    tem1 = rotr32((c), 10); \
     tem2 = ((v) ^ (c)) & 0x3ff; \
     (u) += (b) + (tem0 ^ tem1) + V[tem2]; \
     (a) = (u); \
@@ -94,11 +92,11 @@ void Hc256State_encrypt(Hc256State *obj)
 }
 
 //The following defines the initialization functions
-#define f1(x) (rotr((x),7) ^ rotr((x),18) ^ ((x) >> 3))
-#define f2(x) (rotr((x),17) ^ rotr((x),19) ^ ((x) >> 10))
+#define f1(x) (rotr32((x),7) ^ rotr32((x),18) ^ ((x) >> 3))
+#define f2(x) (rotr32((x),17) ^ rotr32((x),19) ^ ((x) >> 10))
 #define f(a,b,c,d) (f2((a)) + (b) + f1((c)) + (d))
 #define feedback_12(V,u,v,b,c) { \
-    uint32_t tem0 = rotr((v),23), tem1 = rotr((c),10); \
+    uint32_t tem0 = rotr32((v),23), tem1 = rotr32((c),10); \
     uint32_t tem2 = ((v) ^ (c)) & 0x3ff; \
     (u) += (b) + (tem0 ^ tem1) + V[tem2]; \
 }

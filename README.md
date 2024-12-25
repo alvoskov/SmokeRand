@@ -598,7 +598,7 @@ batteries and have mainly historical and educational interest.
  ranlux[1]         | u32    | +       | +     | 2       | 3    | 13   | N/A    |         | 4 GiB
  ranlux[2]         | u32    | +       | +     | +       | +    | 27   | N/A    |         | >= 128 GiB
  rc4               | u32    | +       | +     | +       | +    | 6.0  | N/A    | +       | 512 GiB
- rc4ok             | u32    | +       | +     | +       | +    | 6.2  | N/A    |         | >= 1 TiB
+ rc4ok             | u32    | +       | +     | +       | +    | 6.2  | N/A    | +       | >= 1 TiB
  romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      |         | >= 1 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      |         | >= 2 TiB
  sapparot          | u32    | +       | 1     | 3       | 4    | 0.70 | N/A    | Crush   | 8 MiB

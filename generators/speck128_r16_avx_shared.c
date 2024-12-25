@@ -38,16 +38,6 @@ PRNG_CMODULE_PROLOG
 
 #define NROUNDS 16
 
-static inline uint64_t rotl(uint64_t x, uint64_t r)
-{
-    return (x << r) | (x >> (64 - r));
-}
-
-static inline uint64_t rotr(uint64_t x, uint64_t l)
-{
-    return (x << (64 - l)) | (x >> l);
-}
-
 /**
  * @brief Vectorized "rotate left" instruction for vector of 64-bit values.
  */
@@ -99,11 +89,8 @@ static inline void round_avx(__m256i *x, __m256i *y, __m256i *kv)
  */
 static inline void round_scalar(uint64_t *x, uint64_t *y, const uint64_t k)
 {
-    *x = rotr(*x, 8);
-    *x += *y;
-    *x ^= k;
-    *y = rotl(*y, 3);
-    *y ^= *x;
+    *x = (rotr64(*x, 8) + *y) ^ k;
+    *y = rotl64(*y, 3) ^ *x;
 }
 
 /**
@@ -247,5 +234,4 @@ int run_self_test(const CallerAPI *intf)
     return is_ok;
 }
 
-
-MAKE_UINT64_PRNG("Speck128AVX", run_self_test)
+MAKE_UINT64_PRNG("Speck128_R16_AVX", run_self_test)

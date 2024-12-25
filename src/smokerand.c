@@ -80,13 +80,14 @@ static SpeedResults measure_speed(GeneratorInfo *gen, const CallerAPI *intf,
 
 static void *dummy_create(const GeneratorInfo *gi, const CallerAPI *intf)
 {
-    (void) intf; (void) gi;
-    return NULL;
+    (void) gi;
+    return intf->malloc(1);
 }
 
 static void dummy_free(void *state, const GeneratorInfo *gi, const CallerAPI *intf)
 {
-    (void) state; (void) gi; (void) intf;
+    (void) gi;
+    intf->free(state);
 }
 
 static uint64_t dummy_get_bits(void *state)
