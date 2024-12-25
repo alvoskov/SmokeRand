@@ -31,11 +31,6 @@ typedef struct {
     uint32_t c;
 } Ara32State;
 
-static inline uint32_t rotl32(uint32_t x, unsigned int r)
-{
-    return (x << r) | (x >> (32 - r));
-}
-
 static inline uint64_t get_bits_raw(void *state)
 {
     Ara32State *obj = state;

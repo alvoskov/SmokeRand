@@ -40,8 +40,8 @@ static inline uint64_t get_bits_raw(void *state)
     enum { SHIFT1 = 15, SHIFT2 = 27 };
     Flea32x1State *obj = state;
     uint32_t e = obj->a;
-    obj->a = (obj->b << SHIFT1) | (obj->b >> (32 - SHIFT1));
-    obj->b = obj->c + ((obj->d << SHIFT2) | (obj->d >> (32 - SHIFT2)));
+    obj->a = rotl32(obj->b, SHIFT1);
+    obj->b = obj->c + rotl32(obj->d, SHIFT2);
     obj->c = obj->d + obj->a;
     obj->d = e + obj->c;
     return obj->c;

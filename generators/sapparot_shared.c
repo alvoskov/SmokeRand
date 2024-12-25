@@ -60,9 +60,3 @@ static int run_self_test(const CallerAPI *intf)
 }
 
 MAKE_UINT32_PRNG("sapparot", run_self_test)
-
-
-
-
-/*
-*/
