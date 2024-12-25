@@ -519,7 +519,7 @@ batteries and have mainly historical and educational interest.
  drand48           | u32    | 1       | 12    | 20      | 22/23| 0.72 | N/A    | -       | 1 MiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | +       | >= 1 TiB
  flea32x1          | u32    | +       | +     | 1       | 1    | 0.48 | N/A    | +       | 4 MiB
- hc256             | u32    | +       | +     | +       | +    | 1.1  | N/A    |         | >= 1 TiB
+ hc256             | u32    | +       | +     | +       | +    | 1.1  | N/A    | +       | >= 1 TiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | N/A    | Small   | 1 MiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | N/A    | +       | >= 8 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | +       | >= 4 TiB
@@ -616,7 +616,8 @@ batteries and have mainly historical and educational interest.
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | +       | >= 16 TiB
  sqxor32           | u32    | +       | 1     | 2       | 4    | 0.20 | N/A    | Small   | 16 GiB
  stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | N/A    |         | >= 1 TiB
- superduper73      | u32    | 1       | 9     | 15      | 18   | 0.64 | N/A    |         | 32 KiB
+ stormdrop_old     | u32    | +       | +     | 1       | 2    |      | N/A    | Small   | 1 MiB
+ superduper73      | u32    | 1       | 9     | 15      | 18   | 0.64 | N/A    | -       | 32 KiB
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      |         | 512 KiB
  superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | N/A    |         | >= 2 TiB
  shr3              | u32    | 2       | 15    | 32      | 36   | 0.76 | N/A    | -       | 32 KiB
