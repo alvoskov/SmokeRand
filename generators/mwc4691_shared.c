@@ -2,7 +2,24 @@
  * @file mwc4961_shared.c
  * @brief MWC4961 generator by G. Marsaglia.
  * @details A part of combined KISS4691 generator. Passes BigCrush but
- * not PractRand or gjrand.
+ * not PractRand or gjrand. It also fails `gap16_count0` test from SmokeRand
+ * `brief`, `default` and `full` tests batteries (taken from gjrand).
+ *
+ * Description from G.Marsaglia:
+ *
+ *     The MWC4691 sequence x[n]=8193*x[n-4691]+carry mod b=2^32
+ *     is based on p=8193*b^4691-1, period ~ 2^150124 or 10^45192
+ *     For the MWC (Multiply-With-Carry) process, given a current
+ *     x and c, the new x is (8193*x+c) mod b,
+ *     the new c is the integer part of (8193*x+c)/b.
+ *
+ * Marsaglia initalizes MWC4691 with some modification of SuperDuper PRNG, its
+ * replacement to TRNG doesn't influence on `gap16_count0` test failure.
+ * The 8193 multiplier is 0x2001 in hexadecimal representation, that allows
+ * to replace the multiplication and modulo operators into some bit hacks.
+ *
+ * This generator is rather useful for testing the `gap16_count0` because it
+ * is the only test from SmokeRand batteries that it fails.
  *
  * References:
  * 
