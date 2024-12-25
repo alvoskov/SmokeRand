@@ -2,11 +2,12 @@
  * @file ranval_shared.c
  * @brief Implementation of ranval PRNG suggested by Bob Jenkins.
  * @details A simple non-linear PRNG that passes almost all statistical tests
- * except `mod3n`. There were several modifications of flea, the implemented
- * variant is from PractRand 0.94 by Chris Doty-Humphrey.
+ * from SmokeRand, TestU01 and PractRand batteries. There were several
+ * modifications of ranval, the implemented variant is from PractRand 0.94
+ * by Chris Doty-Humphrey.
  *
- * WARNING! THE MINIMAL PERIOD OF RANVAL IS UNKNOWN! It was added mainly for
- * testing the `mod3` test and shouldn't be used in practice!
+ * WARNING! THE MINIMAL PERIOD OF RANVAL IS UNKNOWN! Don't use it as a general
+ * purpose pseudorandom number generator!
  *
  * References:
  *

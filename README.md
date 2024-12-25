@@ -561,7 +561,7 @@ batteries and have mainly historical and educational interest.
  lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | N/A    | Small   | 32 KiB 
  lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | Small   | 1 MiB
  minstd            | u32    | 4       | 20    | 38      | 42   | 2.4  | N/A    | -       | 1 KiB
- mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | N/A    |         | >= 2 TiB
+ mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | N/A    | +       | >= 2 TiB
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | N/A    | +       | >= 32 TiB
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.50 | N/A    | Small   | 128 GiB
  mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | N/A    | +       | >= 4 TiB
@@ -592,7 +592,7 @@ batteries and have mainly historical and educational interest.
  ranshi            | u64    | +       | 1     | 6       | 7    | 0.43 | +      |         | 32 KiB
  ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | N/A    |         | >= 2 TiB
  ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | N/A    |         | >= 1 TiB
- ranval            | u32    | +       | +     | +       | +    | 0.31 | N/A    |         | >= 4 TiB
+ ranval            | u32    | +       | +     | +       | +    | 0.31 | N/A    | +       | >= 4 TiB
  r1279             | u32    | 2       | 5     | 7       | 10   | 0.47 | N/A    | Small   | 64 MiB
  ranlux[0]         | u32    | 1       | 6     | 9       | 12   | 6.8  | N/A    |         | 4 MiB
  ranlux[1]         | u32    | +       | +     | 2       | 3    | 13   | N/A    |         | 4 GiB
