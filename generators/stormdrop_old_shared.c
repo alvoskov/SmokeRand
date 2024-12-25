@@ -1,8 +1,8 @@
 /**
  * @file stormdrop_shared.c
  * @brief StormDrop pseudorandom number generator.
- * @details It has at least two versions. This is the newer one
- * that fails `bspace16_4d` test from `full` battery.
+ * @details It has at least two versions. This is the older one that fails
+ * matrix rank tests but not linear complexity tests.
  *
  * References:
  * 1. Wil Parsons. StormDrop is a New 32-Bit PRNG That Passes Statistical Tests
@@ -25,9 +25,10 @@ typedef struct {
 static inline uint64_t get_bits_raw(void *state)
 {
     StormDropState *obj = state;
-    // This variant fails `bspace16_4d` from `full` battery
-    obj->entropy += obj->entropy << 16;
-    obj->state[0] += obj->state[1] ^ obj->entropy;
+    // This variant fails MatrixRank (but not LinearComp) tests
+    obj->entropy ^= obj->entropy << 16;            
+    obj->state[0] ^= obj->entropy;                 
+    obj->entropy ^= (obj->state[1] ^ obj->entropy) >> 5;
     // End of variable part
     obj->state[1]++;                        
     obj->state[2] ^= obj->entropy;                 
