@@ -521,7 +521,7 @@ batteries and have mainly historical and educational interest.
  flea32x1          | u32    | +       | +     | 1       | 1    | 0.48 | N/A    | +       | 4 MiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | N/A    | +       | >= 1 TiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | N/A    | Small   | 1 MiB
- kiss99            | u32    | +       | +     | +       | +    | 1.0  | N/A    | +       | >= 8 TiB
+ kiss99            | u32    | +       | +     | +       | +    | 1.0  | N/A    | +       | >= 16 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | +       | >= 4 TiB
  lcg32prime        | u32    | 0/1     | 13    | 24      | 25/26| 2.2  | N/A    | -       | 512 MiB
  lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | N/A    | Small   | 16 MiB
@@ -548,6 +548,8 @@ batteries and have mainly historical and educational interest.
  lfib_par[2281-]   | u32    | 0/1     | 3     | 3       | 4    | 0.38 | N/A    | +       | 8 TiB
  lfib_par[3217+]   | u32    | +       | 1     | 1       | 1/2  | 0.39 | N/A    | +       | 16 TiB
  lfib_par[3217-]   | u32    | +       | 1     | 1       | 2/4  | 0.39 | N/A    | +       | 16 TiB
+ lfib_par[4423+]   | u32    | +       | 1     | 1       | 1    |      | N/A    | +       |
+ lfib_par[4423-]   | u32    | +       | 1     | 1       | 1    |      | N/A    | +       |
  lfib_par[9689+]   | u32    | +       | 1     | 1       | 1    | 0.47 | N/A    | +       |
  lfib_par[9689-]   | u32    | +       | 1     | 1       | 1    | 0.47 | N/A    | +       |
  lfib_par[19937+]  | u32    | +       | +     | 1       | 1    | 0.46 | N/A    | +       |
