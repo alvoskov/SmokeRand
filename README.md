@@ -566,7 +566,7 @@ batteries and have mainly historical and educational interest.
  mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | N/A    | +       | >= 2 TiB
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | N/A    | +       | >= 32 TiB
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.50 | N/A    | Small   | 128 GiB
- mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | N/A    | +       | >= 4 TiB
+ mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | N/A    | +       | 2 TiB
  msws              | u32    | +       | +     | +       | +    | 0.72 | N/A    | +       | >= 2 TiB
  mulberry32        | u32    | +       | 1     | 2       | 4    | 0.51 | N/A    | Small   | 512 MiB
  mwc32x            | u32    | +       | 2     | 2       | 7    | 1.5  | N/A    | Small   | 128 MiB
@@ -644,6 +644,9 @@ batteries and have mainly historical and educational interest.
 
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
 e.g. changing `-O2` to `-O3` speeds up `mt19937` but slows down `philox`; gcc 10.3.0 (tdm64-1).
+
+Note about `mrg32k3a`: it fails the `FPF-14+6/16:cross` test from PractRand at 4 TiB sample.
+The failure is systematic and reproducible.
 
 Note about `sfc16`: if its output is processed as `stdin16` by PractRand 0.94
 then it passes it at >= 1 TiB. But if it is tested as 32-bit PRNG in `stdin32`
