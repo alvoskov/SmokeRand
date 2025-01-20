@@ -588,6 +588,7 @@ batteries and have mainly historical and educational interest.
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      |         | 2 MiB
  randu             | u32    | 4       | 21    | 39      | 43   | 0.41 | N/A    | -       | 1 KiB
  ranlux++          | u64    | +       | +     | +       | +    | 2.4  | +      | +       | >= 1 TiB
+ ranrot_bi         | u32    | +       | +     | +       | 1/3  |      |        |         | 8 GiB
  ranrot32[7/3]     | u32    | +       | 1/2   | 4/5     | 5    | 0.58 | N/A    | Small   | 128 MiB
  ranrot32[17/9]    | u32    | +       | 1     | 2       | 3    | 0.68 | N/A    | +       | 1 GiB
  ranrot32[57/13]   | u32    | +       | +     | +       | 1    | 0.74 | N/A    | +       | 8 GiB
