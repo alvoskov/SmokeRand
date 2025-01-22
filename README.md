@@ -559,7 +559,7 @@ batteries and have mainly historical and educational interest.
  lfib_par[110503+] | u32    | +       | +     | +       | +    | 0.52 | N/A    | +       |
  lfib_par[110503-] | u32    | +       | +     | +       | +    | 0.50 | N/A    | +       |
  lfib4             | u32    | 1       | 1     | 3       | 4    | 0.37 | N/A    | +       | 32 MiB
- lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | N/A    |         | >= 2 TiB
+ lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | N/A    |         | >= 32 TiB
  lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | N/A    | Small   | 32 KiB 
  lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | Small   | 1 MiB
  minstd            | u32    | 4       | 20    | 38      | 42   | 2.4  | N/A    | -       | 1 KiB
