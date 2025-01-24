@@ -581,7 +581,7 @@ batteries and have mainly historical and educational interest.
  pcg32             | u32    | +       | +     | +       | +    | 0.44 | N/A    | +       | >= 2 TiB
  pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | +       | >= 2 TiB
  pcg64_xsl_rr      | u64    | +       | +     | +       | +    | 0.43 | +      |         | >= 32 TiB
- philox            | u64    | +       | +     | +       | +    | 1.7  | +      | +       | >= 2 TiB
+ philox            | u64    | +       | +     | +       | +    | 1.7  | +      | +       | >= 32 TiB
  philox32          | u32    | +       | +     | +       | +    | 2.7  | N/A    | +       | >= 2 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      |         | >= 32 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      |         | 512 KiB
@@ -618,7 +618,7 @@ batteries and have mainly historical and educational interest.
  splitmix32        | u32    | +       | 2     | 3       | 4/5  | 0.25 | N/A    | Small   | 1 GiB
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | +       | >= 16 TiB
  sqxor32           | u32    | +       | 1     | 2       | 4    | 0.20 | N/A    | Small   | 16 GiB
- stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | N/A    |         | >= 1 TiB
+ stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | N/A    |         | >= 8 TiB
  stormdrop_old     | u32    | +       | +     | 1       | 2    |      | N/A    | Small   | 1 MiB
  superduper73      | u32    | 1       | 9     | 15      | 18   | 0.64 | N/A    | -       | 32 KiB
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      |         | 512 KiB
