@@ -548,8 +548,8 @@ batteries and have mainly historical and educational interest.
  lfib_par[2281-]   | u32    | 0/1     | 3     | 3       | 4    | 0.38 | N/A    | +       | 8 TiB
  lfib_par[3217+]   | u32    | +       | 1     | 1       | 1/2  | 0.39 | N/A    | +       | 16 TiB
  lfib_par[3217-]   | u32    | +       | 1     | 1       | 2/4  | 0.39 | N/A    | +       | 16 TiB
- lfib_par[4423+]   | u32    | +       | 1     | 1       | 1    |      | N/A    | +       |
- lfib_par[4423-]   | u32    | +       | 1     | 1       | 1    |      | N/A    | +       |
+ lfib_par[4423+]   | u32    | +       | 1     | 1       | 1    | 0.45 | N/A    | +       |
+ lfib_par[4423-]   | u32    | +       | 1     | 1       | 1    | 0.45 | N/A    | +       |
  lfib_par[9689+]   | u32    | +       | 1     | 1       | 1    | 0.47 | N/A    | +       |
  lfib_par[9689-]   | u32    | +       | 1     | 1       | 1    | 0.47 | N/A    | +       |
  lfib_par[19937+]  | u32    | +       | +     | 1       | 1    | 0.46 | N/A    | +       |
@@ -579,6 +579,7 @@ batteries and have mainly historical and educational interest.
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | N/A    | +       | 1 GiB
  pcg32             | u32    | +       | +     | +       | +    | 0.44 | N/A    | +       | >= 2 TiB
+ pcg32_xsl_rr      | u32    | +       | +     | +       | +    | 0.58 | N/A    |         | 256 GiB
  pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | +       | >= 2 TiB
  pcg64_xsl_rr      | u64    | +       | +     | +       | +    | 0.43 | +      |         | >= 32 TiB
  philox            | u64    | +       | +     | +       | +    | 1.7  | +      | +       | >= 32 TiB
@@ -588,7 +589,7 @@ batteries and have mainly historical and educational interest.
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      |         | 2 MiB
  randu             | u32    | 4       | 21    | 39      | 43   | 0.41 | N/A    | -       | 1 KiB
  ranlux++          | u64    | +       | +     | +       | +    | 2.4  | +      | +       | >= 1 TiB
- ranrot_bi         | u32    | +       | +     | +       | 1/3  |      |        |         | 8 GiB
+ ranrot_bi         | u64    | +       | +     | +       | 1/3  | 0.33 |        |         | 8 GiB
  ranrot32[7/3]     | u32    | +       | 1/2   | 4/5     | 5    | 0.58 | N/A    | Small   | 128 MiB
  ranrot32[17/9]    | u32    | +       | 1     | 2       | 3    | 0.68 | N/A    | +       | 1 GiB
  ranrot32[57/13]   | u32    | +       | +     | +       | 1    | 0.74 | N/A    | +       | 8 GiB
@@ -619,14 +620,14 @@ batteries and have mainly historical and educational interest.
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | +       | >= 16 TiB
  sqxor32           | u32    | +       | 1     | 2       | 4    | 0.20 | N/A    | Small   | 16 GiB
  stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | N/A    |         | >= 8 TiB
- stormdrop_old     | u32    | +       | +     | 1       | 2    |      | N/A    | Small   | 1 MiB
+ stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | N/A    | Small   | 1 MiB
  superduper73      | u32    | 1       | 9     | 15      | 18   | 0.64 | N/A    | -       | 32 KiB
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      |         | 512 KiB
  superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | N/A    |         | >= 2 TiB
  shr3              | u32    | 2       | 15    | 32      | 36   | 0.76 | N/A    | -       | 32 KiB
  swb               | u32    | 1       | 5     | 6       | 8    | 2.7  | N/A    | Small   | 128 MiB
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | Crush   | 4 TiB
- swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | +       |
+ swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | +       | >= 2 TiB
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | N/A    | Crush   | 512 GiB
  swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | N/A    | +       | 4 GiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | N/A    | +       | 4 GiB
