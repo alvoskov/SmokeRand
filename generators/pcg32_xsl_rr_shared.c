@@ -19,7 +19,7 @@ static inline uint64_t get_bits_raw(void *state)
 {
     Lcg64State *obj = state;
     obj->x = obj->x * 6906969069 + 1;
-    return rotl32((obj->x >> 32) ^ (obj->x & 0xFFFFFFFF), obj->x >> 58);
+    return rotr32((obj->x >> 32) ^ (obj->x & 0xFFFFFFFF), obj->x >> 58);
 }
 
 static void *create(const CallerAPI *intf)
