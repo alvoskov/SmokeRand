@@ -522,7 +522,7 @@ batteries and have mainly historical and educational interest.
  hc256             | u32    | +       | +     | +       | +    | 1.1  | N/A    | +       | >= 1 TiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | N/A    | Small   | 1 MiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | N/A    | +       | >= 16 TiB
- kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | +       | >= 4 TiB
+ kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | +       | >= 32 TiB
  lcg32prime        | u32    | 0/1     | 13    | 24      | 25/26| 2.2  | N/A    | -       | 512 MiB
  lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | N/A    | Small   | 16 MiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | +-      | >= 32 TiB
