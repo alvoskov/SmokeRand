@@ -31,15 +31,15 @@
 
 PRNG_CMODULE_PROLOG
 
-/////////////////////////////////
-///// Philox implementation /////
-/////////////////////////////////
+///////////////////////////////////
+///// Philox32 implementation /////
+///////////////////////////////////
 
 
 typedef struct {
-    uint32_t key[Nw]; // Key (+ extra word)
-    uint32_t ctr[Nw]; // Counter ("plain text")
-    uint32_t out[Nw]; // Output buffer
+    uint32_t key[Nw / 2]; ///< Key
+    uint32_t ctr[Nw]; ///< Counter ("plain text")
+    uint32_t out[Nw]; ///< Output buffer
     size_t pos;
 } Philox32State;
 
@@ -47,8 +47,10 @@ typedef struct {
 static void Philox32State_init(Philox32State *obj, const uint32_t *key)
 {
     for (size_t i = 0; i < Nw; i++) {
-        obj->key[i] = key[i];
         obj->ctr[i] = 0;
+    }
+    for (size_t i = 0; i < Nw / 2; i++) {
+        obj->key[i] = key[i];
     }
 }
 
@@ -73,8 +75,10 @@ EXPORT void Philox32State_block10(Philox32State *obj)
 {
     uint32_t key[Nw], out[Nw];
     for (size_t i = 0; i < Nw; i++) {
-        key[i] = obj->key[i];
         out[i] = obj->ctr[i];
+    }
+    for (size_t i = 0; i < Nw / 2; i++) {
+        key[i] = obj->key[i];
     }
 
     {                      philox_round(out, key); } // Round 0
@@ -129,9 +133,9 @@ static int self_test_compare(const CallerAPI *intf,
 static int run_self_test(const CallerAPI *intf)
 {
     Philox32State obj;
-    const uint32_t k0_m1[4] = {-1, -1, -1, -1};
+    const uint32_t k0_m1[2] = {-1, -1};
     const uint32_t ref_m1[4] = {0x408f276d, 0x41c83b0e, 0xa20bc7c6, 0x6d5451fd};
-    const uint32_t k0_pi[4]  = {0xa4093822, 0x299f31d0, 0x082efa98, 0xec4e6c89};
+    const uint32_t k0_pi[2]  = {0xa4093822, 0x299f31d0};
     const uint32_t ref_pi[4] = {0xd16cfe09, 0x94fdcceb, 0x5001e420, 0x24126ea1};
 
     Philox32State_init(&obj, k0_m1);
@@ -173,9 +177,9 @@ static inline uint64_t get_bits_raw(void *state)
 
 static void *create(const CallerAPI *intf)
 {
-    uint32_t k[Nw];
+    uint32_t k[Nw / 2];
     Philox32State *obj = intf->malloc(sizeof(Philox32State));
-    for (size_t i = 0; i < Nw; i += 2) {
+    for (size_t i = 0; i < Nw / 2; i += 2) {
         uint64_t seed = intf->get_seed64();
         k[i] = (uint32_t) (seed);
         k[i + 1] = seed >> 32;

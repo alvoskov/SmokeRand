@@ -37,7 +37,7 @@ PRNG_CMODULE_PROLOG
 
 
 typedef struct {
-    uint64_t key[Nw]; ///< Key (+ extra word)
+    uint64_t key[Nw / 2]; ///< Key
     uint64_t ctr[Nw]; ///< Counter ("plain text")
     uint64_t out[Nw]; ///< Output buffer
     size_t pos;
@@ -46,8 +46,10 @@ typedef struct {
 
 static void PhiloxState_init(PhiloxState *obj, const uint64_t *key)
 {
-    for (size_t i = 0; i < Nw; i++) {
+    for (size_t i = 0; i < Nw / 2; i++) {
         obj->key[i] = key[i];
+    }    
+    for (size_t i = 0; i < Nw; i++) {
         obj->ctr[i] = 0;
     }
 }
@@ -74,9 +76,12 @@ EXPORT void PhiloxState_block10(PhiloxState *obj)
 {
     uint64_t key[Nw], out[Nw];
     for (size_t i = 0; i < Nw; i++) {
-        key[i] = obj->key[i];
         out[i] = obj->ctr[i];
     }
+    for (size_t i = 0; i < Nw / 2; i++) {
+        key[i] = obj->key[i];
+    }
+
 
     {                      philox_round(out, key); } // Round 0
     { philox_bumpkey(key); philox_round(out, key); } // Round 1
@@ -129,12 +134,12 @@ static int self_test_compare(const CallerAPI *intf,
 static int run_self_test(const CallerAPI *intf)
 {
     PhiloxState obj;
-    static const uint64_t k0_m1[4] = {-1, -1, -1, -1};
+    static const uint64_t k0_m1[2] = {-1, -1};
     static const uint64_t ref_m1[4] = {0x87b092c3013fe90bull,
         0x438c3c67be8d0224ull, 0x9cc7d7c69cd777b6ull, 0xa09caebf594f0ba0ull};
 
-    static const uint64_t k0_pi[4] = {0x452821e638d01377ull,
-        0xbe5466cf34e90c6cull, 0xbe5466cf34e90c6cull, 0xc0ac29b7c97c50ddull};
+    static const uint64_t k0_pi[2] = {
+        0x452821e638d01377ull, 0xbe5466cf34e90c6cull};
     static const uint64_t ref_pi[4] = {0xa528f45403e61d95ull,
         0x38c72dbd566e9788ull, 0xa5a1610e72fd18b5ull, 0x57bd43b5e52b7fe6ull};
 
@@ -178,9 +183,9 @@ static inline uint64_t get_bits_raw(void *state)
 
 static void *create(const CallerAPI *intf)
 {
-    uint64_t k[Nw];
+    uint64_t k[Nw / 2];
     PhiloxState *obj = intf->malloc(sizeof(PhiloxState));
-    for (size_t i = 0; i < Nw; i++) {
+    for (size_t i = 0; i < Nw / 2; i++) {
         k[i] = intf->get_seed64();
     }
     PhiloxState_init(obj, k);
