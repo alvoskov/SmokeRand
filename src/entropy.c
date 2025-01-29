@@ -30,6 +30,12 @@
  *
  * This software is licensed under the MIT license.
  */
+#if __STDC_VERSION__ >= 199901L
+#define _XOPEN_SOURCE 600
+#else
+#define _XOPEN_SOURCE 500
+#endif
+
 #include "smokerand/entropy.h"
 #include <time.h>
 #include <stdlib.h>
@@ -188,8 +194,8 @@ void Entropy_init(Entropy *obj)
     uint64_t seed0 = mix_rdseed(mix_hash(time(NULL) ^ get_tick_count()));
     uint64_t seed1 = mix_rdseed(mix_hash(get_current_process_id()));
     seed1 ^= mix_rdseed(mix_hash(cpuclock()));
-    fprintf(stderr, "Entropy seed0: 0x%16.16llX\n", seed0);
-    fprintf(stderr, "Entropy seed1: 0x%16.16llX\n", seed1);
+    fprintf(stderr, "Entropy seed0: 0x%16.16llX\n", (unsigned long long) seed0);
+    fprintf(stderr, "Entropy seed1: 0x%16.16llX\n", (unsigned long long) seed1);
     obj->key[0] = (uint32_t) seed0; obj->key[1] = seed0 >> 32;
     obj->key[2] = (uint32_t) seed1; obj->key[3] = seed1 >> 32;
     obj->state = time(NULL);
