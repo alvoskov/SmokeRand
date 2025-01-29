@@ -14,6 +14,21 @@
 #include <stdlib.h>
 
 
+#if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
+#include <windows.h>
+uint32_t get_current_process_id()
+{
+    return (uint32_t) GetCurrentProcessId();
+}
+#else
+#include <unistd.h>
+uint32_t get_current_process_id()
+{
+    return (uint32_t) getpid();
+}
+#endif
+
+
 #ifdef NO_X86_EXTENSIONS
 /**
  * @brief XORs input with output of hardware RNG in CPU (rdseed).
@@ -140,7 +155,7 @@ static uint64_t Entropy_nextstate(Entropy *obj)
 void Entropy_init(Entropy *obj)
 {
     uint64_t seed0 = mix_rdseed(mix_hash(time(NULL)));
-    uint64_t seed1 = mix_rdseed(mix_hash(~seed0));
+    uint64_t seed1 = mix_rdseed(mix_hash(get_current_process_id()));
     seed1 ^= mix_rdseed(mix_hash(cpuclock()));
     obj->key[0] = (uint32_t) seed0; obj->key[1] = seed0 >> 32;
     obj->key[2] = (uint32_t) seed1; obj->key[3] = seed1 >> 32;

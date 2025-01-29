@@ -22,6 +22,11 @@
 ///// BirthdayOptions class implementation /////
 ////////////////////////////////////////////////
 
+static unsigned int birthday_get_nbits_per_value(const GeneratorInfo *gi)
+{
+    return (gi->nbits == 32) ? 64 : gi->nbits;
+}
+
 /**
  * @brief Fill birthday paradox test settings for the given
  * PRNG, sample length and lambda.
@@ -40,8 +45,9 @@ static inline BirthdayOptions BirthdayOptions_create(GeneratorInfo *gi,
     const unsigned int log2_len, const unsigned int log2_lambda)
 {
     BirthdayOptions opts;
+    unsigned int nbits_per_value = birthday_get_nbits_per_value(gi);
     opts.n = 1ull << log2_len;
-    opts.e = gi->nbits + log2_lambda + 1 - 2*log2_len;
+    opts.e = nbits_per_value + log2_lambda + 1 - 2*log2_len;
     return opts;
 }
 
@@ -64,6 +70,7 @@ static int cmp_ints(const void *aptr, const void *bptr)
     else { return 1; }
 }
 
+
 /**
  * @brief Birthday paradox (not birthday spacings!) test for 64-bit pseudorandom
  * number generators. Detects 64-bit uniformly distributed PRNGS with 64-bit state.
@@ -82,6 +89,9 @@ static int cmp_ints(const void *aptr, const void *bptr)
  * workstations in 2024. To overcome this problem the vast majority of PRNG output
  * is thrown out; only numbers with lower \f$ e \f$ bits equal to 0 are used.
  *
+ * In the case of 32-bit generators it makes 64-integers by two subsequent calls
+ * of the 32-bit PRNG.
+ *
  * References:
  *
  * 1. M.E. O'Neill. A Birthday Test: Quickly Failing Some Popular PRNGs
@@ -90,7 +100,8 @@ static int cmp_ints(const void *aptr, const void *bptr)
 TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
 {
     TestResults ans = TestResults_create("birthday");
-    double lambda = BirthdayOptions_calc_lambda(opts, obj->gi->nbits);
+    unsigned int nbits_per_value = birthday_get_nbits_per_value(obj->gi);
+    double lambda = BirthdayOptions_calc_lambda(opts, nbits_per_value);
     obj->intf->printf("  lambda = %g\n", lambda);
     obj->intf->printf("  Filling the array with 'birthdays'\n");
     uint64_t mask = (1ull << opts->e) - 1;
@@ -103,9 +114,17 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
     }
     for (size_t i = 0; i < opts->n; i++) {
         uint64_t u;
-        do {            
-            u = obj->gi->get_bits(obj->state);
-        } while ((u & mask) != 0);
+        if (obj->gi->nbits == 64) {
+            do {            
+                u = obj->gi->get_bits(obj->state);
+            } while ((u & mask) != 0);
+        } else {
+            do {
+                uint64_t lo = obj->gi->get_bits(obj->state);
+                uint64_t hi = obj->gi->get_bits(obj->state);
+                u = (hi << 32) | lo;
+            } while ((u & mask) != 0);
+        }
         x[i] = u;
         if (i % (opts->n / 1000) == 0) {
             unsigned long nseconds_total, nseconds_left;            
@@ -164,19 +183,19 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
 void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
 {
     static const size_t log2_n = (SIZE_MAX == UINT64_MAX) ? 30 : 27;
+    unsigned int nbits_per_value = birthday_get_nbits_per_value(gen);
     BirthdayOptions opts_small = BirthdayOptions_create(gen, log2_n, 2);
     BirthdayOptions opts_large = BirthdayOptions_create(gen, log2_n, 4);
     intf->printf("64-bit birthday paradox test\n");
     if (gen->nbits != 64) {
-        intf->printf("  Error: the generator must return 64-bit values\n");
-        return;
+        intf->printf("  Output from 32-bit generator: concatenation will be used\n");
     }
     GeneratorState obj = GeneratorState_create(gen, intf);
     TestResults ans = birthday_test(&obj, &opts_small);
     if (ans.x == 0) {
         double x_small = ans.x;
-        double lambda = BirthdayOptions_calc_lambda(&opts_small, gen->nbits) +
-            BirthdayOptions_calc_lambda(&opts_large, gen->nbits);
+        double lambda = BirthdayOptions_calc_lambda(&opts_small, nbits_per_value) +
+            BirthdayOptions_calc_lambda(&opts_large, nbits_per_value);
         intf->printf("  No duplicates found: more sensitive test required\n");
         intf->printf("  Running the variant with larger lambda\n");
         ans = birthday_test(&obj, &opts_large);

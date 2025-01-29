@@ -60,6 +60,7 @@ static void Tf256State_init(Tf256State *obj, const uint64_t *k)
         obj->p[i] = 0;
         obj->k[Nw] ^= obj->k[i];
     }
+    obj->pos = Nw;
 }
 
 

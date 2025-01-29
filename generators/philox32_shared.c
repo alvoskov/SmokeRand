@@ -52,6 +52,7 @@ static void Philox32State_init(Philox32State *obj, const uint32_t *key)
     for (size_t i = 0; i < Nw / 2; i++) {
         obj->key[i] = key[i];
     }
+    obj->pos = Nw;
 }
 
 static inline void philox_bumpkey(uint32_t *key)
