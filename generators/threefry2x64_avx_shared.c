@@ -1,11 +1,16 @@
 /**
  * @file threefry2x64_avx_shared.c
  * @brief An implementation of Threefry2x64x20 PRNGs that uses x86-64 AVX2
- * instructions to improve performance. It is a simplified version of Threefish
- * with reduced size of blocks and rounds. The "2x64x20" version was selected
- * intentionally to simplify adaptation to SIMD instructions.
+ * instructions to improve performance. 
  *
- * @details Differences from Threefish:
+ * @details It is a simplified version of Threefish with reduced size of blocks
+ * and rounds. The "2x64x20" version was selected intentionally to simplify
+ * adaptation to SIMD instructions.
+ *
+ * Usage of AVX2 instruction makes it very fast, its performance is comparable
+ * to the lagged Fibonacci generator or 128-bit LCG.
+ *
+ * Differences from Threefish:
  *
  * 1. Reduced number of rounds (20 instead of 72).
  * 2. Reduced block size: only 128 bit.
@@ -44,35 +49,63 @@
 
 PRNG_CMODULE_PROLOG
 
-#define Nw 2
-#define Ncopies 16
-#define Nregs (Ncopies / 4)
+/////////////////////////////////////////////////////////
+///// Threefry2x64x20 (AVX2 version) implementation /////
+/////////////////////////////////////////////////////////
 
-///////////////////////////////////
-///// Threefry implementation /////
-///////////////////////////////////
+/**
+ * @brief Number of 64-bit words per state of one copy of ThreeFry.
+ * DON'T CHANGE!
+ */
+#define NWORDS 2
 
+/**
+ * @brief Number of ThreeFry copies per vectorized version.
+ * @details It can be set to 4, 8 or 16. Measurements show that
+ * 8 and 16 are slightly faster than 4. Performance of 8 and 16
+ * is almost identical, so 8 was selected as a default value to
+ * consume less memory per PNG state.
+ */
+#define NCOPIES 8
+
+/**
+ * @brief Number of 256-bit AVX registers required to save x0 or x1
+ * vectors (upper or lower halves of PRNG state).
+ */
+#define NREGS (NCOPIES / 4)
+
+/**
+ * @brief Threefry 2x64x20 (AVX2 version) state.
+ * @details The PRNG state is vectorized and uses the next layout
+ * for the `ctr` (counter) vector:
+ *
+ *     [x0(0) x0(1) ... x0(NCOPIES-1) x1(0) x1(1) x1(NCOPIES-1)]
+ */
 typedef struct {
-    uint64_t k[Nw + 1]; ///< Key schedule
-    uint64_t ctr[Ncopies * Nw]; ///< [x0 x0 x0 x0 x1 x1 x1 x1]
-    uint64_t out[Ncopies * Nw];
+    uint64_t k[NWORDS + 1]; ///< Key schedule
+    uint64_t ctr[NCOPIES * NWORDS]; ///< Vectorized counters
+    uint64_t out[NCOPIES * NWORDS]; ///< Vectorized output buffer
     size_t pos;
-} Threefry2x64State;
+} Threefry2x64AVXState;
 
 
-static void Threefry2x64State_init(Threefry2x64State *obj, const uint64_t *k)
+/**
+ * @brief Initializes the PRNG state: fills the key schedule
+ * and resets counters.
+ */
+static void Threefry2x64AVXState_init(Threefry2x64AVXState *obj, const uint64_t *k)
 {
     static const uint64_t C240 = 0x1BD11BDAA9FC1A22ULL;
-    obj->k[Nw] = C240;
-    for (size_t i = 0; i < Nw; i++) {
+    obj->k[NWORDS] = C240;
+    for (size_t i = 0; i < NWORDS; i++) {
         obj->k[i] = k[i];
-        obj->k[Nw] ^= obj->k[i];
+        obj->k[NWORDS] ^= obj->k[i];
     }
-    for (size_t i = 0; i < Ncopies; i++) {
+    for (size_t i = 0; i < NCOPIES; i++) {
         obj->ctr[i] = 0;
-        obj->ctr[i + Ncopies] = i;
+        obj->ctr[i + NCOPIES] = i;
     }
-    obj->pos = Nw * Ncopies;
+    obj->pos = NWORDS * NCOPIES;
 }
 
 
@@ -93,7 +126,7 @@ static inline __m256i mm256_rotl_epi64_def(__m256i in, int r)
  */
 static inline void mix2v(__m256i *x0v, __m256i *x1v, int d)
 {
-    for (int i = 0; i < Nregs; i++) {
+    for (int i = 0; i < NREGS; i++) {
         x0v[i] = _mm256_add_epi64(x0v[i], x1v[i]); // x[0] += x[1];
         x1v[i] = mm256_rotl_epi64_def(x1v[i], d); // x[1] = rotl64(x[1], d);
         x1v[i] = _mm256_xor_si256(x1v[i], x0v[i]); // x[1] ^= x[0];
@@ -106,7 +139,7 @@ static inline void inject_key(__m256i *x0v, __m256i *x1v, const uint64_t *ks,
 {
     __m256i ks0 = _mm256_set1_epi64x(ks[i0]);
     __m256i ks1 = _mm256_set1_epi64x(ks[i1] + n);
-    for (int i = 0; i < Nregs; i++) {
+    for (int i = 0; i < NREGS; i++) {
         x0v[i] = _mm256_add_epi64(x0v[i], ks0);
         x1v[i] = _mm256_add_epi64(x1v[i], ks1);
     }
@@ -134,16 +167,18 @@ static inline void make_block(__m256i *x0v, __m256i *x1v, const uint64_t *k)
     MIX2_ROT_0_3(5,  2, 0); // Rounds 16-19
 }
 
-EXPORT void Threefry2x64State_block20(Threefry2x64State *obj)
+EXPORT void Threefry2x64AVXState_block20(Threefry2x64AVXState *obj)
 {
-//#if Ncopies == 8
-    __m256i x0v[Nregs], x1v[Nregs];
-#if Ncopies == 8
+    __m256i x0v[NREGS], x1v[NREGS];
+#if NCOPIES == 4
+    x0v[0] = _mm256_loadu_si256((__m256i *) obj->ctr);
+    x1v[0] = _mm256_loadu_si256((__m256i *) (obj->ctr + 4));
+#elif NCOPIES == 8
     x0v[0] = _mm256_loadu_si256((__m256i *) obj->ctr);
     x0v[1] = _mm256_loadu_si256((__m256i *) (obj->ctr + 4));
     x1v[0] = _mm256_loadu_si256((__m256i *) (obj->ctr + 8));
     x1v[1] = _mm256_loadu_si256((__m256i *) (obj->ctr + 12));
-#elif Ncopies == 16
+#elif NCOPIES == 16
     x0v[0] = _mm256_loadu_si256((__m256i *) obj->ctr);
     x0v[1] = _mm256_loadu_si256((__m256i *) (obj->ctr + 4));
     x0v[2] = _mm256_loadu_si256((__m256i *) (obj->ctr + 8));
@@ -157,12 +192,15 @@ EXPORT void Threefry2x64State_block20(Threefry2x64State *obj)
 #endif
     make_block(x0v, x1v, obj->k);
 
-#if Ncopies == 8
+#if NCOPIES == 4
+    _mm256_storeu_si256((__m256i *) obj->out, x0v[0]);
+    _mm256_storeu_si256((__m256i *) (obj->out + 4), x1v[0]);
+#elif NCOPIES == 8
     _mm256_storeu_si256((__m256i *) obj->out, x0v[0]);
     _mm256_storeu_si256((__m256i *) (obj->out + 4), x0v[1]);
     _mm256_storeu_si256((__m256i *) (obj->out + 8), x1v[0]);
     _mm256_storeu_si256((__m256i *) (obj->out + 12), x1v[1]);
-#elif Ncopies == 16
+#elif NCOPIES == 16
     _mm256_storeu_si256((__m256i *) obj->out, x0v[0]);
     _mm256_storeu_si256((__m256i *) (obj->out + 4), x0v[1]);
     _mm256_storeu_si256((__m256i *) (obj->out + 8), x0v[2]);
@@ -178,9 +216,9 @@ EXPORT void Threefry2x64State_block20(Threefry2x64State *obj)
 
 
 
-static inline void Threefry2x64State_inc_counter(Threefry2x64State *obj)
+static inline void Threefry2x64AVXState_inc_counter(Threefry2x64AVXState *obj)
 {
-    for (int i = 0; i < Ncopies; i++) {
+    for (int i = 0; i < NCOPIES; i++) {
         obj->ctr[i]++;
     }
 }
@@ -198,19 +236,19 @@ static int self_test_compare(const CallerAPI *intf,
 {
     intf->printf("OUT: ");
     int is_ok = 1;
-    for (size_t i = 0; i < Nw * Ncopies; i++) {
+    for (size_t i = 0; i < NWORDS * NCOPIES; i++) {
         intf->printf("%llX ", out[i]);
-        if (out[i] != ref[i / Ncopies])
+        if (out[i] != ref[i / NCOPIES])
             is_ok = 0;
-        if ((i + 1) % Nw == 0) {
+        if ((i + 1) % NWORDS == 0) {
             intf->printf("\n");
         }
     }
     intf->printf("\n");
     intf->printf("REF: ");
-    for (size_t i = 0; i < Nw * Ncopies; i++) {
-        intf->printf("%llX ", ref[i / Ncopies]);
-        if ((i + 1) % Nw == 0) {
+    for (size_t i = 0; i < NWORDS * NCOPIES; i++) {
+        intf->printf("%llX ", ref[i / NCOPIES]);
+        if ((i + 1) % NWORDS == 0) {
             intf->printf("\n");
         }
     }
@@ -223,7 +261,7 @@ static int self_test_compare(const CallerAPI *intf,
  */
 static int run_self_test(const CallerAPI *intf)
 {
-    Threefry2x64State obj;
+    Threefry2x64AVXState obj;
     static const uint64_t k0_m1[4] = {-1, -1}, ctr_m1[4] = {-1, -1},
         ref20_m1[4] = {0xe02cb7c4d95d277aull, 0xd06633d0893b8b68ull},
         ctr_pi[4]   = {0x243f6a8885a308d3ull, 0x13198a2e03707344ull},
@@ -231,21 +269,21 @@ static int run_self_test(const CallerAPI *intf)
         ref20_pi[4] = {0x263c7d30bb0f0af1ull, 0x56be8361d3311526ull};
 
     intf->printf("Threefry2x64x20 ('-1' example)\n");
-    Threefry2x64State_init(&obj, k0_m1);
-    for (int i = 0; i < Ncopies; i++) {
-        obj.ctr[i] = ctr_m1[0]; obj.ctr[i + Ncopies] = ctr_m1[1];
+    Threefry2x64AVXState_init(&obj, k0_m1);
+    for (int i = 0; i < NCOPIES; i++) {
+        obj.ctr[i] = ctr_m1[0]; obj.ctr[i + NCOPIES] = ctr_m1[1];
     }
-    Threefry2x64State_block20(&obj);
+    Threefry2x64AVXState_block20(&obj);
     if (!self_test_compare(intf, obj.out, ref20_m1)) {
         return 0;
     }
 
     intf->printf("Threefry2x64x20 ('pi' example)\n");
-    Threefry2x64State_init(&obj, k0_pi);
-    for (int i = 0; i < Ncopies; i++) {
-        obj.ctr[i] = ctr_pi[0]; obj.ctr[i + Ncopies] = ctr_pi[1];
+    Threefry2x64AVXState_init(&obj, k0_pi);
+    for (int i = 0; i < NCOPIES; i++) {
+        obj.ctr[i] = ctr_pi[0]; obj.ctr[i + NCOPIES] = ctr_pi[1];
     }
-    Threefry2x64State_block20(&obj);
+    Threefry2x64AVXState_block20(&obj);
     if (!self_test_compare(intf, obj.out, ref20_pi)) {
         return 0;
     }
@@ -259,10 +297,10 @@ static int run_self_test(const CallerAPI *intf)
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    Threefry2x64State *obj = state;
-    if (obj->pos >= Ncopies * Nw) {
-        Threefry2x64State_inc_counter(obj);
-        Threefry2x64State_block20(obj);
+    Threefry2x64AVXState *obj = state;
+    if (obj->pos >= NCOPIES * NWORDS) {
+        Threefry2x64AVXState_inc_counter(obj);
+        Threefry2x64AVXState_block20(obj);
         obj->pos = 0;
     }
     return obj->out[obj->pos++];
@@ -271,14 +309,14 @@ static inline uint64_t get_bits_raw(void *state)
 
 static void *create(const CallerAPI *intf)
 {
-    uint64_t k[Nw];
-    Threefry2x64State *obj = intf->malloc(sizeof(Threefry2x64State));
-    for (int i = 0; i < Nw; i++) {
+    uint64_t k[NWORDS];
+    Threefry2x64AVXState *obj = intf->malloc(sizeof(Threefry2x64AVXState));
+    for (int i = 0; i < NWORDS; i++) {
         k[i] = intf->get_seed64();
     }
-    Threefry2x64State_init(obj, k);
+    Threefry2x64AVXState_init(obj, k);
     return (void *) obj;
 }
 
 
-MAKE_UINT64_PRNG("Threefry2x64x20", run_self_test)
+MAKE_UINT64_PRNG("Threefry2x64x20_AVX", run_self_test)

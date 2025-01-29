@@ -338,6 +338,8 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
         battery_birthday(gi, intf);
     } else if (!strcmp(battery_name, "ising")) {
         battery_ising(gi, intf, opts->testid, opts->nthreads);
+    } else if (!strcmp(battery_name, "dummy")) {
+        fprintf(stderr, "Battery 'dummy': do nothing\n");
     } else {
         fprintf(stderr, "Unknown battery %s\n", battery_name);
         return 1;
@@ -347,7 +349,9 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
 
 int print_battery_info(const char *battery_name)
 {
-    if (!strcmp(battery_name, "default")) {
+    if (!strcmp(battery_name, "express")) {
+        battery_express(NULL, NULL, 0, 0);
+    } else if (!strcmp(battery_name, "default")) {
         battery_default(NULL, NULL, 0, 0);
     } else if (!strcmp(battery_name, "brief")) {
         battery_brief(NULL, NULL, 0, 0);

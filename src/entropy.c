@@ -1,10 +1,31 @@
 /**
  * @file entropy.c
- * @brief Seeds generator that uses hardware random number generator (RDSEED)
- * when possible. These values are balanced by means of XXTEA block cipher.
- * If no hardware RNG is accessible then the PRNG output is encrypted.
+ * @brief Seeds generator based on XXTEA block cipher and TRNG from CPU.
+ * @details It uses hardware random number generator (RDSEED) when possible.
+ * The algorithm is based on XXTEA block cipher (with 64-bit blocks) that
+ * processes an output from a simple 64-bit PRNG. If RDSEED instruction is
+ * available then its output is injected by XORing with:
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * - 64-bit PRNG (before encryption with XXTEA).
+ * - 128-bit key for XXTEA.
+ *
+ * This seeds generator is resistant to the RDSEED failure. It uses
+ * the next backup entropy sources:
+ *
+ * - RDTSC instruction (built-in CPU clocks)
+ * - `time` function (from C99 standard).
+ * - Current process ID.
+ * - Tick count from system clock.
+ *
+ * DON'T USE IT FOR CRYPTOGRAPHY!
+ *
+ * Examples of RDRAND failure on some CPUs:
+ *
+ * - https://github.com/systemd/systemd/issues/11810#issuecomment-489727505
+ * - https://github.com/rust-random/getrandom/issues/228
+ * - https://news.ycombinator.com/item?id=19848953
+ *
+ * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -20,12 +41,26 @@ uint32_t get_current_process_id()
 {
     return (uint32_t) GetCurrentProcessId();
 }
+
+uint32_t get_tick_count()
+{
+    return (uint32_t) GetTickCount();
+}
+
 #else
 #include <unistd.h>
 uint32_t get_current_process_id()
 {
     return (uint32_t) getpid();
 }
+
+uint32_t get_tick_count()
+{
+    struct timespec t;
+    clock_gettime(CLOCK_REALTIME, &t);
+    return (uint32_t) t.tv_nsec;
+}
+
 #endif
 
 
@@ -81,10 +116,6 @@ uint64_t cpuclock(void)
     return __rdtsc();
 }
 #endif
-
-
-
-
 
 
 
@@ -154,9 +185,11 @@ static uint64_t Entropy_nextstate(Entropy *obj)
 
 void Entropy_init(Entropy *obj)
 {
-    uint64_t seed0 = mix_rdseed(mix_hash(time(NULL)));
+    uint64_t seed0 = mix_rdseed(mix_hash(time(NULL) ^ get_tick_count()));
     uint64_t seed1 = mix_rdseed(mix_hash(get_current_process_id()));
     seed1 ^= mix_rdseed(mix_hash(cpuclock()));
+    fprintf(stderr, "Entropy seed0: 0x%16.16llX\n", seed0);
+    fprintf(stderr, "Entropy seed1: 0x%16.16llX\n", seed1);
     obj->key[0] = (uint32_t) seed0; obj->key[1] = seed0 >> 32;
     obj->key[2] = (uint32_t) seed1; obj->key[3] = seed1 >> 32;
     obj->state = time(NULL);

@@ -1,7 +1,27 @@
+/**
+ * @file ran_shared.c
+ * @brief `Ran` pseudorandom number generator from "Numerical Recipes.
+ * The Art of Scientific Computation" (3rd edition). It is a combined
+ * generator resembling KISS and passes SmokeRand test batteries and
+ * PractRand 0.94 up to 32 TiB.
+ * @copyright The algorithm is suggested by the authors of "Numerical
+ * Recipes".
+ *
+ * Thread-safe reimplementation for SmokeRand:
+ *
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 
+/**
+ * @brief Ran PRNG state. The generator is taken from
+ * "Numerical Recipes" (3rd edition).
+ */
 typedef struct {
     uint64_t u; ///< 64-bit LCG state
     uint64_t v; ///< xorshift state

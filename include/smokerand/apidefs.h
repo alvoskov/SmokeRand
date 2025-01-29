@@ -69,9 +69,15 @@ static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 
 #if !defined(__cplusplus) && (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(__clang__)
 #include <windows.h>
+
+#ifndef NO_CUSTOM_DLLENTRY
 #define SHARED_ENTRYPOINT_CODE \
 int DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) { \
     (void) hinstDLL; (void) fdwReason; (void) lpvReserved; return TRUE; }
+#else
+#define SHARED_ENTRYPOINT_CODE
+#endif
+
 #else
 #define SHARED_ENTRYPOINT_CODE
 #endif
