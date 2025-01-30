@@ -52,4 +52,21 @@ static void *create(const CallerAPI *intf)
     return (void *) obj;    
 }
 
-MAKE_UINT64_PRNG("xoroshiro128++", NULL)
+
+static int run_self_test(const CallerAPI *intf)
+{
+    static const uint64_t u_ref = 0x3488CF8769131D5B;
+    Xoroshiro128PlusPlusState gen;
+    gen.s[0] = 0x0123456789ABCDEF;
+    gen.s[1] = 0xDEADBEEFDEADBEEF;
+    uint64_t u;
+    for (int i = 0; i < 100000; i++) {
+        u = get_bits_raw(&gen);
+    }
+    intf->printf("Output: 0x%16.16llX; refernce value: 0x%16.16llX\n",
+        u, u_ref);
+    return (u == u_ref);
+}
+
+
+MAKE_UINT64_PRNG("xoroshiro128++", run_self_test)

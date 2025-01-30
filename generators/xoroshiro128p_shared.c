@@ -44,6 +44,7 @@ static inline uint64_t get_bits_raw(void *state)
 	return result;
 }
 
+
 static void *create(const CallerAPI *intf)
 {
     Xoroshiro128PlusState *obj = intf->malloc(sizeof(Xoroshiro128PlusState));
@@ -51,5 +52,6 @@ static void *create(const CallerAPI *intf)
     obj->s[1] = intf->get_seed64() | 0x1;
     return (void *) obj;    
 }
+
 
 MAKE_UINT64_PRNG("xoroshiro128+", NULL)
