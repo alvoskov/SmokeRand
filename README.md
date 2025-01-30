@@ -633,16 +633,16 @@ batteries and have mainly historical and educational interest.
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | N/A    | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      |         | 32 GiB
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | +       | >= 8 TiB
- threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      |         |
+ threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      |         | >= 1 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.40 | +      |         | >= 1 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | N/A    | Small   | 64 MiB
  wyrand            | u64    | +       | +     | +       | +    | 0.08 | +      |         | >= 1 TiB
  xorshift128       | u32    | 2       | 4     | 6/7     | 8    | 0.41 | N/A    | -       | 128 KiB
- xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.21 | +      |         | 32 GiB
- xorshift128pp_avx | u64    | +       | +     | +       | +    |      | +      |         | >= 1 TiB
+ xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      |         | 32 GiB
+ xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.19 | +      |         | >= 1 TiB
  xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      |         | 16 MiB
- xoroshiro128pp    | u64    | +       | +     | +       | +    | 0.20 | +      |         | >= 2 TiB
- xoroshiro128pp_avx| u64    | +       | +     | +       | +    |      | +      |         | >= 1 TiB
+ xoroshiro128pp    | u64    | +       | +     | +       | +    | 0.26 | +      |         | >= 2 TiB
+ xoroshiro128pp_avx| u64    | +       | +     | +       | +    | 0.16 | +      |         | >= 1 TiB
  xoroshiro1024st   | u64    | 1       | 1     | 1       | 2    | 0.33 | +      |         | 128 GiB
  xoroshiro1024stst | u64    | +       | +     | +       | +    | 0.33 | +      | +       | >= 1 TiB
  xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | N/A    | Small   | 128 KiB
