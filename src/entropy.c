@@ -15,9 +15,12 @@
  * - RDTSC instruction (built-in CPU clocks)
  * - `time` function (from C99 standard).
  * - Current process ID.
- * - Tick count from system clock.
+ * - Tick count from the system clock.
+ * - Machine ID (an attempt to make unique seeds even RDSEED and RDTSC
+ *   are broken or unaccessible).
  *
- * DON'T USE IT FOR CRYPTOGRAPHY!
+ * DON'T USE IT FOR CRYPTOGRAPHY AND SECURITY PURPOSES! IT IS DESIGNED JUST
+ * TO MAKE GOOD RANDOM SEEDS FOR PRNG EMPIRICAL TESTING!
  *
  * Examples of RDRAND failure on some CPUs:
  *
@@ -41,34 +44,119 @@
 #include <stdlib.h>
 
 
+static inline uint64_t ror64(uint64_t x, uint64_t r)
+{
+    return (x << r) | (x >> (64 - r));
+}
+
+
+/**
+ * @brief rrmxmx hash from modified SplitMix PRNG.
+ */
+static uint64_t mix_hash(uint64_t z)
+{
+    static uint64_t const M = 0x9fb21c651e98df25ULL;    
+    z ^= ror64(z, 49) ^ ror64(z, 24);
+    z *= M;
+    z ^= z >> 28;
+    z *= M;
+    return z ^ z >> 28;
+}
+
+
+/**
+ * @brief A simple non-cryptographic hash for ASCIIZ strings.
+ * @details It is a modification of DJB2 algorithm.
+ */
+uint64_t str_hash(const char *str)
+{
+    uint64_t hash = 0xB7E151628AED2A6B;
+    for (unsigned char c = *str; c != 0; c = *str++) {
+        hash = (6906969069 * hash + 12345) ^ c;
+    }
+    return mix_hash(hash);
+}
+
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
 #include <windows.h>
-uint32_t get_current_process_id()
-{
-    return (uint32_t) GetCurrentProcessId();
-}
-
-uint32_t get_tick_count()
-{
-    return (uint32_t) GetTickCount();
-}
-
+#define WINDOWS_PLATFORM
 #else
 #include <unistd.h>
+#endif
+
+////////////////////////////////////////////////////////////////////
+///// Functions for collecting entropy from system information /////
+////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief Returns current process id.
+ */
 uint32_t get_current_process_id()
 {
+#ifdef WINDOWS_PLATFORM
+    return (uint32_t) GetCurrentProcessId();
+#else
     return (uint32_t) getpid();
+#endif
 }
 
+/**
+ * @brief Returns ticks count from a system clock.
+ */
 uint32_t get_tick_count()
 {
+#ifdef WINDOWS_PLATFORM
+    return (uint32_t) GetTickCount();
+#else
     struct timespec t;
     clock_gettime(CLOCK_REALTIME, &t);
     return (uint32_t) t.tv_nsec;
+#endif
 }
 
+/**
+ * @brief Returns a hash made from an unique machine ID.
+ */
+uint64_t get_machine_id()
+{
+    uint64_t machine_id = 0;
+    char value[64];
+#ifdef WINDOWS_PLATFORM
+    DWORD size = 64, type = REG_SZ;
+    HKEY key;
+    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Cryptography",
+        0, KEY_READ | KEY_WOW64_64KEY, &key) != ERROR_SUCCESS) {
+        return machine_id;
+    }
+    if (RegQueryValueExA(key, "MachineGuid",
+        NULL, &type, (LPBYTE)value, &size) == ERROR_SUCCESS) {
+        machine_id = str_hash(value);
+    }
+    //for (int i = 0; value[i] != 0; i++) {
+    //    printf("%c", (unsigned char) value[i]);
+    //}
+    RegCloseKey(key);
+#else
+    // Try to find a file with machine ID
+    FILE *fp = fopen("/etc/lib/dbus/machine-id", "r");
+    if (fp == NULL) {
+        fp = fopen("/etc/machine-id", "r");
+        if (fp == NULL) {
+            fclose(fp);
+            return machine_id;
+        }
+    }
+    // Read the line with machine ID
+    fgets(value, 64, fp);
+    machine_id = str_hash(value);
+    fclose(fp);
 #endif
+    return machine_id;
+}
 
+////////////////////////////////////////////////
+///// CPU architecture dependent functions /////
+////////////////////////////////////////////////
 
 #ifdef NO_X86_EXTENSIONS
 /**
@@ -123,12 +211,9 @@ uint64_t cpuclock(void)
 }
 #endif
 
-
-
-static inline uint64_t ror64(uint64_t x, uint64_t r)
-{
-    return (x << r) | (x >> (64 - r));
-}
+/////////////////////////////////////////////
+///// XXTEA block cipher implementation /////
+/////////////////////////////////////////////
 
 /**
  * @brief XXTEA mixing function.
@@ -162,20 +247,6 @@ uint64_t xxtea_encrypt(const uint64_t inp, const uint32_t *key)
 }
 
 
-/**
- * @brief rrmxmx hash from modified SplitMix PRNG.
- */
-static uint64_t mix_hash(uint64_t z)
-{
-    static uint64_t const M = 0x9fb21c651e98df25ULL;    
-    z ^= ror64(z, 49) ^ ror64(z, 24);
-    z *= M;
-    z ^= z >> 28;
-    z *= M;
-    return z ^ z >> 28;
-}
-
-
 
 
 /**
@@ -188,20 +259,24 @@ static uint64_t Entropy_nextstate(Entropy *obj)
     return mix_rdseed(mix_hash(obj->state));
 }
 
-
 void Entropy_init(Entropy *obj)
 {
-    uint64_t seed0 = mix_rdseed(mix_hash(time(NULL) ^ get_tick_count()));
+    uint64_t mid = get_machine_id();
+    uint64_t seed0 = mix_rdseed(mix_hash(time(NULL)) ^ mix_hash(get_tick_count()));
     uint64_t seed1 = mix_rdseed(mix_hash(get_current_process_id()));
     seed1 ^= mix_rdseed(mix_hash(cpuclock()));
-    fprintf(stderr, "Entropy seed0: 0x%16.16llX\n", (unsigned long long) seed0);
-    fprintf(stderr, "Entropy seed1: 0x%16.16llX\n", (unsigned long long) seed1);
+    seed0 ^= mid; seed1 ^= mid;
     obj->key[0] = (uint32_t) seed0; obj->key[1] = seed0 >> 32;
     obj->key[2] = (uint32_t) seed1; obj->key[3] = seed1 >> 32;
-    obj->state = time(NULL);
+    obj->state = mix_hash(time(NULL) ^ mid);
     obj->slog_len = 1 << 20;
     obj->slog = calloc(obj->slog_len, sizeof(SeedLogEntry));
     obj->slog_pos = 0;
+    fprintf(stderr, "Entropy pool (seed generator) initialized\n");
+    fprintf(stderr, "  machine_id: 0x%16.16llX\n", (unsigned long long) mid);
+    fprintf(stderr, "  seed0:      0x%16.16llX\n", (unsigned long long) seed0);
+    fprintf(stderr, "  seed1:      0x%16.16llX\n", (unsigned long long) seed1);
+    fprintf(stderr, "  state:      0x%16.16llX\n", (unsigned long long) obj->state);
 }
 
 void Entropy_free(Entropy *obj)
