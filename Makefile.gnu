@@ -7,7 +7,7 @@ ifeq ($(PLATFORM_NAME), GCC)
     CC = gcc
     AR = ar
     GEN_CFLAGS = -fPIC -ffreestanding -nostdlib
-    PLATFORM_FLAGS=
+    PLATFORM_FLAGS=-g
     IS_PORTABLE=0
 else ifeq ($(PLATFORM_NAME), GCC32)
     CC = gcc
