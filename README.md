@@ -516,7 +516,7 @@ batteries and have mainly historical and educational interest.
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | N/A    | +       | >= 32 TiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | N/A    | Small   | 256 KiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 1 TiB
- drand48           | u32    | 1       | 12    | 20      | 22/23| 0.72 | N/A    | -       | 1 MiB
+ drand48           | u32    | 1       | 12    | 20      | 22/23| 0.72 | -      | -       | 1 MiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | +       | >= 1 TiB
  flea32x1          | u32    | +       | +     | 1       | 1    | 0.48 | N/A    | +       | 4 MiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | N/A    | +       | >= 1 TiB
