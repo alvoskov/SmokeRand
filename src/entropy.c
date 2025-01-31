@@ -147,8 +147,7 @@ uint64_t get_machine_id()
         }
     }
     // Read the line with machine ID
-    fgets(value, 64, fp);
-    machine_id = str_hash(value);
+    machine_id = fgets(value, 64, fp) ? str_hash(value) : 0;
     fclose(fp);
 #endif
     return machine_id;
