@@ -562,6 +562,7 @@ batteries and have mainly historical and educational interest.
  lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | N/A    |         | >= 32 TiB
  lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | N/A    | Small   | 32 KiB 
  lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | Small   | 1 MiB
+ macmarsa          | u32    | 2       | 12    | 18      | 19   |      |        |         | 128 KiB
  minstd            | u32    | 4       | 20    | 38      | 42   | 2.4  | N/A    | -       | 1 KiB
  mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | N/A    | +       | >= 16 TiB
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | N/A    | +       | >= 32 TiB
@@ -616,12 +617,12 @@ batteries and have mainly historical and educational interest.
  speck128_avx      | u64    | +       | +     | +       | +    | 0.65 | +      |         | >= 2 TiB
  speck128_r16_avx  | u64    | +       | +     | +       | +    | 0.33 | +      |         | >= 32 TiB
  splitmix          | u64    | +       | +     | +       | +    | 0.19 | -      | +       | >= 2 TiB
- splitmix32        | u32    | +       | 2     | 3       | 4/5  | 0.25 | N/A    | Small   | 1 GiB
+ splitmix32        | u32    | +       | 2     | 3       | 4/5  | 0.25 | -      | Small   | 1 GiB
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | +       | >= 16 TiB
  sqxor32           | u32    | +       | 1     | 2       | 4    | 0.20 | N/A    | Small   | 16 GiB
  stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | N/A    |         | >= 8 TiB
  stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | N/A    | Small   | 1 MiB
- superduper73      | u32    | 1       | 9     | 15      | 18   | 0.64 | N/A    | -       | 32 KiB
+ superduper73      | u32    | 1       | 9     | 15      | 18   | 0.64 | +      | -       | 32 KiB
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      |         | 512 KiB
  superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | N/A    |         | >= 2 TiB
  shr3              | u32    | 2       | 15    | 32      | 36   | 0.76 | N/A    | -       | 32 KiB
@@ -637,7 +638,7 @@ batteries and have mainly historical and educational interest.
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.40 | +      |         | >= 1 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | N/A    | Small   | 64 MiB
  wyrand            | u64    | +       | +     | +       | +    | 0.08 | +      |         | >= 1 TiB
- xorshift128       | u32    | 2       | 4     | 6/7     | 8    | 0.41 | N/A    | -       | 128 KiB
+ xorshift128       | u32    | 2       | 4     | 6/7     | 8    | 0.41 | +      | -       | 128 KiB
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      |         | 32 GiB
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.19 | +      |         | >= 1 TiB
  xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      |         | 16 MiB
@@ -645,7 +646,7 @@ batteries and have mainly historical and educational interest.
  xoroshiro128pp_avx| u64    | +       | +     | +       | +    | 0.16 | +      |         | >= 1 TiB
  xoroshiro1024st   | u64    | 1       | 1     | 1       | 2    | 0.33 | +      |         | 128 GiB
  xoroshiro1024stst | u64    | +       | +     | +       | +    | 0.33 | +      | +       | >= 1 TiB
- xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | N/A    | Small   | 128 KiB
+ xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | +      | Small   | 128 KiB
  xsh               | u64    | 2       | 8     | 13      | 17   | 0.43 | -      | -       | 32 KiB
 
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
@@ -705,6 +706,14 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 - Passed dieharder: lcg64
 
 # Versions history
+
+31.01.2025: SmokeRand 0.18.
+
+- segfault was fixed in the `gap16_count0` test and memory leaks --- in
+  the `nbit_words_freq_test` test.
+- Small refactoring of the `gap16_count0` test.
+- AVX2 versions of xoroshiro128++ and xorshift128+ (new PRNG)
+- Improved seed generator, uses more entropy sources and machine ID.
 
 29.01.2025: SmokeRand 0.17.
 
