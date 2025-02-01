@@ -518,13 +518,13 @@ batteries and have mainly historical and educational interest.
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 1 TiB
  drand48           | u32    | 1       | 12    | 20      | 22/23| 0.72 | -      | -       | 1 MiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | +       | >= 1 TiB
- flea32x1          | u32    | +       | +     | 1       | 1    | 0.48 | N/A    | +       | 4 MiB
+ flea32x1          | u32    | +       | +     | 1       | 1    | 0.48 | +      | +       | 4 MiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | N/A    | +       | >= 1 TiB
- kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | N/A    | Small   | 1 MiB
- kiss99            | u32    | +       | +     | +       | +    | 1.0  | N/A    | +       | >= 16 TiB
+ kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | Small   | 1 MiB
+ kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | +       | >= 16 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | +       | >= 32 TiB
  lcg32prime        | u32    | 0/1     | 13    | 24      | 25/26| 2.2  | N/A    | -       | 512 MiB
- lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | N/A    | Small   | 16 MiB
+ lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | +      | Small   | 16 MiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | +-      | >= 32 TiB
  lcg96             | u32    | +       | 1     | 1       | 1    | 0.78 | N/A    | +       | 32 GiB
  lcg128            | u64    | +       | 1     | 1       | 1    | 0.35 | +      | +       | 64 GiB
@@ -576,7 +576,7 @@ batteries and have mainly historical and educational interest.
  mwc128            | u64    | +       | +     | +       | +    | 0.30 | +      | +       | >= 16 TiB
  mwc128x           | u64    | +       | +     | +       | +    | 0.30 | +      | +       | >= 16 TiB
  mwc1616           | u32    | +       | 10/11 | 12/18   | 19   | 0.48 | N/A    | -/Small | 16 MiB
- mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | N/A    | +       | >= 32 TiB(?)
+ mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | +      | +       | >= 32 TiB(?)
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | N/A    | +       | 1 GiB
  pcg32             | u32    | +       | +     | +       | +    | 0.44 | N/A    | +       | >= 2 TiB
