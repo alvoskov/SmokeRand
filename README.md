@@ -562,7 +562,9 @@ batteries and have mainly historical and educational interest.
  lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | N/A    |         | >= 32 TiB
  lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | N/A    | Small   | 32 KiB 
  lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | Small   | 1 MiB
- macmarsa          | u32    | 2       | 12    | 18      | 19   |      |        |         | 128 KiB
+ macmarsa          | u32    | 2       | 12    | 18      | 19   | 0.67 |        |         | 128 KiB
+ magma             | u64    | +       | +     | +       | +    | 25   |        |         |
+ magma_avx         | u64    | +       | +     | +       | +    | 7.1  |        |         |
  minstd            | u32    | 4       | 20    | 38      | 42   | 2.4  | N/A    | -       | 1 KiB
  mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | N/A    | +       | >= 16 TiB
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | N/A    | +       | >= 32 TiB
@@ -706,6 +708,10 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 - Passed dieharder: lcg64
 
 # Versions history
+
+02.01.2025: SmokeRand 0.19.
+
+- CSPRNG based on Magma GOST R 34.12-2015 block cipher (CTR mode).
 
 31.01.2025: SmokeRand 0.18.
 
