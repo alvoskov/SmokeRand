@@ -31,6 +31,7 @@ typedef struct
 {
     double ns_per_call; ///< Nanoseconds per call
     double ticks_per_call; ///< Processor ticks per call
+    double cpb; ///< cpb (cycles/CPU ticks per byte)
 } SpeedResults;
 
 /**
@@ -73,6 +74,10 @@ static SpeedResults measure_speed(GeneratorInfo *gen, const CallerAPI *intf,
         ns_total = 1.0e9 * (toc - tic) / CLOCKS_PER_SEC;
         results.ns_per_call = ns_total / niter;
         results.ticks_per_call = (double) (toc_proc - tic_proc) / niter;
+        // Convert to cpb
+        size_t block_size = (mode == speed_uint) ? 1 : SUM_BLOCK_SIZE;
+        size_t nbytes = block_size * gen->nbits / 8;
+        results.cpb = results.ticks_per_call / nbytes;
     }
     GeneratorState_free(&obj, intf);
     return results;
@@ -119,7 +124,7 @@ static uint64_t dummy_get_sum(void *state, size_t len)
 
 
 
-void battery_speed_test(GeneratorInfo *gen, const CallerAPI *intf,
+SpeedResults battery_speed_test(GeneratorInfo *gen, const CallerAPI *intf,
     SpeedMeasurementMode mode)
 {
     GeneratorInfo dummy_gen = {.name = "dummy", .description = "DUMMY",
@@ -129,35 +134,52 @@ void battery_speed_test(GeneratorInfo *gen, const CallerAPI *intf,
     dummy_gen.nbits = gen->nbits;
     SpeedResults speed_full = measure_speed(gen, intf, mode);
     SpeedResults speed_dummy = measure_speed(&dummy_gen, intf, mode);
+    SpeedResults speed_corr;
     size_t block_size = (mode == speed_uint) ? 1 : SUM_BLOCK_SIZE;
     size_t nbytes = block_size * gen->nbits / 8;
-    double ns_per_call_corr = speed_full.ns_per_call - speed_dummy.ns_per_call;
-    double ticks_per_call_corr = speed_full.ticks_per_call - speed_dummy.ticks_per_call;
-    double cpb_corr = ticks_per_call_corr / nbytes;
-    double gb_per_sec = (double) nbytes / (1.0e-9 * ns_per_call_corr) / pow(2.0, 30.0);
+    speed_corr.ns_per_call = speed_full.ns_per_call - speed_dummy.ns_per_call;
+    speed_corr.ticks_per_call = speed_full.ticks_per_call - speed_dummy.ticks_per_call;
+    speed_corr.cpb = speed_full.cpb - speed_dummy.cpb;
+    if (speed_corr.cpb <= 0.0) {
+        speed_corr.cpb = NAN;
+    }
 
+    //double cpb_corr = ticks_per_call_corr / nbytes;
+    double gb_per_sec = (double) nbytes / (1.0e-9 * speed_corr.ns_per_call) / pow(2.0, 30.0);
+    // Print report
     printf("Nanoseconds per call:\n");
-    printf("  Raw result:                %g\n", speed_full.ns_per_call);
-    printf("  For empty 'dummy' PRNG:    %g\n", speed_dummy.ns_per_call);
-    printf("  Corrected result:          %g\n", ns_per_call_corr);
-    printf("  Corrected result (GB/sec): %g\n", gb_per_sec);
+    printf("  Raw result:                 %g\n", speed_full.ns_per_call);
+    printf("  For empty 'dummy' PRNG:     %g\n", speed_dummy.ns_per_call);
+    printf("  Corrected result:           %g\n", speed_corr.ns_per_call);
+    printf("  Corrected result (GiB/sec): %g\n", gb_per_sec);
     printf("CPU ticks per call:\n");
-    printf("  Raw result:                %g\n", speed_full.ticks_per_call);
-    printf("  For empty 'dummy' PRNG:    %g\n", speed_dummy.ticks_per_call);
-    printf("  Corrected result:          %g\n", ticks_per_call_corr);
-    printf("  Corrected result (cpB):    %g\n\n", cpb_corr);
+    printf("  Raw result:                 %g\n", speed_full.ticks_per_call);
+    printf("  For empty 'dummy' PRNG:     %g\n", speed_dummy.ticks_per_call);
+    printf("  Corrected result:           %g\n", speed_corr.ticks_per_call);
+    printf("  Corrected result (cpB):     %g\n\n", speed_corr.cpb);
+    // Corrected results
+    return speed_corr;    
 }
 
 void battery_speed(GeneratorInfo *gen, const CallerAPI *intf)
 {
     printf("===== Generator speed measurements =====\n");
     printf("----- Speed test for uint generation -----\n");
-    battery_speed_test(gen, intf, speed_uint);
+    SpeedResults res_uint = battery_speed_test(gen, intf, speed_uint);
     printf("----- Speed test for uint sum generation -----\n");
     if (gen->get_sum == NULL) {
         printf("  Not implemented\n");
     } else {
-        battery_speed_test(gen, intf, speed_sum);
+        SpeedResults res_sum = battery_speed_test(gen, intf, speed_sum);
+        double cpb_mean;
+        if (res_uint.cpb < 0.25 && res_sum.cpb > 0.0 &&
+            res_sum.cpb > res_uint.cpb) {
+            cpb_mean = res_sum.cpb;
+        } else {
+            cpb_mean = (res_uint.cpb + res_sum.cpb) / 2.0;
+        }
+        printf("Average results:\n");
+        printf("  Corrected result (cpB):     %g\n\n", cpb_mean);
     }
 }
 

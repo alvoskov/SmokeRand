@@ -511,7 +511,7 @@ batteries and have mainly historical and educational interest.
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | N/A    | +       | 1 TiB
  ara32             | u32    | +       | +     | 1       | 1    | 0.96 | N/A    | +       | 512 MiB
  chacha            | u32    | +       | +     | +       | +    | 2.0  | N/A    | +       | >= 1 TiB
- chacha_avx        | u32    | +       | +     | +       | +    | 0.7  | N/A    | +       |
+ chacha_avx        | u32    | +       | +     | +       | +    | 0.7  | N/A    | +       | >= 2 TiB
  chacha_ctr32      | u32    | +       | +     | +       | 1    | 2.0  | N/A    | +       | 256 GiB
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | N/A    | +       | >= 32 TiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | N/A    | Small   | 256 KiB
@@ -564,8 +564,8 @@ batteries and have mainly historical and educational interest.
  lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | Small   | 1 MiB
  macmarsa          | u32    | 2       | 12    | 18      | 19   | 0.67 |        |         | 128 KiB
  magma             | u64    | +       | +     | +       | +    | 25   |        |         |
- magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      |         |
- magma_avx-cbc     | u64    | +       | +     | +       | +    | 7.1  | +      |         |
+ magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      |         | >= 2 TiB
+ magma_avx-cbc     | u64    | +       | +     | +       | +    | 7.1  | +      |         | >= 2 TiB
  minstd            | u32    | 4       | 20    | 38      | 42   | 2.4  | N/A    | -       | 1 KiB
  mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | N/A    | +       | >= 16 TiB
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | N/A    | +       | >= 32 TiB
@@ -587,7 +587,7 @@ batteries and have mainly historical and educational interest.
  pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | +       | >= 2 TiB
  pcg64_xsl_rr      | u64    | +       | +     | +       | +    | 0.43 | +      |         | >= 32 TiB
  philox            | u64    | +       | +     | +       | +    | 1.7  | +      | +       | >= 32 TiB
- philox32          | u32    | +       | +     | +       | +    | 2.7  | N/A    | +       | >= 2 TiB
+ philox32          | u32    | +       | +     | +       | +    | 2.7  | N/A    | +       | >= 8 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      |         | >= 32 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      |         | 512 KiB
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      |         | 2 MiB
