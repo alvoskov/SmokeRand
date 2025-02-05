@@ -586,8 +586,9 @@ batteries and have mainly historical and educational interest.
  pcg32_xsl_rr      | u32    | +       | +     | +       | +    | 0.58 | N/A    |         | 256 GiB
  pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | +       | >= 2 TiB
  pcg64_xsl_rr      | u64    | +       | +     | +       | +    | 0.43 | +      |         | >= 32 TiB
- philox            | u64    | +       | +     | +       | +    | 1.7  | +      | +       | >= 32 TiB
- philox32          | u32    | +       | +     | +       | +    | 2.7  | N/A    | +       | >= 8 TiB
+ philox            | u64    | +       | +     | +       | +    | 1.0  | +      | +       | >= 32 TiB
+ philox2x32        | u32    | +       | +     | +       | +    | 1.6  | -      |         | >= 8 TiB
+ philox32          | u32    | +       | +     | +       | +    | 1.6  | N/A    | +       | >= 8 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      |         | >= 32 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      |         | 512 KiB
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      |         | 2 MiB
