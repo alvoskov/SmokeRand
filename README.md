@@ -515,7 +515,7 @@ batteries and have mainly historical and educational interest.
  chacha_ctr32      | u32    | +       | +     | +       | 1    | 2.0  | N/A    | +       | 256 GiB
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | N/A    | +       | >= 32 TiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | N/A    | Small   | 256 KiB
- cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 1 TiB
+ cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 16 TiB
  drand48           | u32    | 1       | 12    | 20      | 22/23| 0.72 | -      | -       | 1 MiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | +       | >= 1 TiB
  flea32x1          | u32    | +       | +     | 1       | 1    | 0.48 | +      | +       | 4 MiB
@@ -572,6 +572,7 @@ batteries and have mainly historical and educational interest.
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.50 | N/A    | Small   | 128 GiB
  mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | N/A    | +       | 2 TiB
  msws              | u32    | +       | +     | +       | +    | 0.72 | N/A    | +       | >= 2 TiB
+ msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      |         | >= 2 TiB
  mulberry32        | u32    | +       | 1     | 2       | 4    | 0.51 | N/A    | Small   | 512 MiB
  mwc32x            | u32    | +       | 2     | 2       | 7    | 1.5  | N/A    | Small   | 128 MiB
  mwc64             | u32    | +       | 1     | 2       | 4    | 0.37 | N/A    | Small   | 1 TiB
