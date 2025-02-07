@@ -1264,4 +1264,8 @@ TestResults gap_test_wrap(GeneratorState *obj, const void *udata)
     return gap_test(obj, udata);
 }
 
-
+TestResults gap16_count0_test_wrap(GeneratorState *obj, const void *udata)
+{
+    const Gap16Count0Options *opts = udata;
+    return gap16_count0_test(obj, opts->ngaps);
+}

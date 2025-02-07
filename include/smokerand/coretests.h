@@ -35,6 +35,13 @@ typedef struct {
 } GapOptions;
 
 /**
+ * @brief Options for gap16_count0 test.
+ */
+typedef struct {
+    unsigned long ngaps;
+} Gap16Count0Options;
+
+/**
  * @brief Settings for frequencies of n-bit words test.
  * @details Recommended settings:
  *
@@ -78,5 +85,5 @@ TestResults bspace_nd_test_wrap(GeneratorState *obj, const void *udata);
 TestResults bspace4_8d_decimated_test_wrap(GeneratorState *obj, const void *udata);
 TestResults collisionover_test_wrap(GeneratorState *obj, const void *udata);
 TestResults gap_test_wrap(GeneratorState *obj, const void *udata);
-
+TestResults gap16_count0_test_wrap(GeneratorState *obj, const void *udata);
 #endif

@@ -387,6 +387,8 @@ int print_battery_info(const char *battery_name)
         battery_brief(NULL, NULL, 0, 0);
     } else if (!strcmp(battery_name, "full")) {
         battery_full(NULL, NULL, 0, 0);
+    } else if (battery_name[0] == '@') {
+        battery_file(battery_name + 1, NULL, NULL, 0, 0);        
     } else {
         fprintf(stderr, "Information about battery %s is absent\n",
             battery_name);

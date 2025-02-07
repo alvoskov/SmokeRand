@@ -29,53 +29,6 @@ static TestResults bspace4_8d_dec(GeneratorState *obj, const void *udata)
     return bspace4_8d_decimated_test(obj, 1 << 12);
 }
 
-/////////////////////
-///// Gap tests /////
-/////////////////////
-
-/**
- * @brief A modification of gap tests that consumes more than \f$ 2^32 \f$
- * values and allows to detect any PRNG with 32-bit state. It also detects
- * additive/subtractive lagged Fibonacci and AWC/SWB generators.
- */
-static TestResults gap_inv512(GeneratorState *obj, const void *udata)
-{
-    GapOptions opts = {.shl = 9, .ngaps = 10000000};
-    (void) udata;
-    return gap_test(obj, &opts );
-}
-
-static TestResults gap16_count0(GeneratorState *obj, const void *udata)
-{
-    (void) udata;
-    return gap16_count0_test(obj, 100000000);
-}
-
-///////////////////////////////////////
-///// Hamming weights based tests /////
-///////////////////////////////////////
-
-static TestResults hamming_ot_values_test(GeneratorState *obj, const void *udata)
-{
-    HammingOtOptions opts = {.mode = hamming_ot_values, .nbytes = 1ull << 28};
-    (void) udata;
-    return hamming_ot_test(obj, &opts);
-}
-
-static TestResults hamming_ot_low1_test(GeneratorState *obj, const void *udata)
-{
-    HammingOtOptions opts = {.mode = hamming_ot_bytes_low1, .nbytes = 1ull << 30};
-    (void) udata;
-    return hamming_ot_test(obj, &opts);
-}
-
-static TestResults hamming_ot_long128_test(GeneratorState *obj, const void *udata)
-{
-    HammingOtLongOptions opts = {.nvalues = 1ull << 28, .wordsize = hamming_ot_w128};
-    (void) udata;
-    return hamming_ot_long_test(obj, &opts);
-}
-
 void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
@@ -94,6 +47,24 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
         collover5_8d     = {.nbits_per_dim = 5, .ndims = 8, .nsamples = 3, .get_lower = 1},
         collover13_3d    = {.nbits_per_dim = 13, .ndims = 3, .nsamples = 3, .get_lower = 1},
         collover20_2d    = {.nbits_per_dim = 20, .ndims = 2, .nsamples = 3, .get_lower = 1};
+
+    // Gap test
+    /**
+     * @brief A modification of gap tests that consumes more than \f$ 2^32 \f$
+     * values and allows to detect any PRNG with 32-bit state. It also detects
+     * additive/subtractive lagged Fibonacci and AWC/SWB generators.
+     */
+    static const GapOptions gap_inv512 = {.shl = 9, .ngaps = 10000000};
+    static const Gap16Count0Options gap16_count0 = {.ngaps = 100000000};
+
+    // Hamming weights based tests
+    static const HammingOtOptions
+        hw_ot_values = {.mode = hamming_ot_values,     .nbytes = 1ull << 28},
+        hw_ot_low1   = {.mode = hamming_ot_bytes_low1, .nbytes = 1ull << 30};
+
+    // Hamming weights based "long" tests
+    static const HammingOtLongOptions
+        hw_ot_long128 = {.nvalues = 1ull << 28, .wordsize = hamming_ot_w128};
 
     // Linear complexity tests
     static const LinearCompOptions
@@ -117,11 +88,11 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
         {"collover13_3d", collisionover_test_wrap, &collover13_3d, 7, ram_hi},
         {"collover8_5d",  collisionover_test_wrap, &collover8_5d,  7, ram_med},
         {"collover5_8d",  collisionover_test_wrap, &collover5_8d,  7, ram_med},
-        {"gap_inv512", gap_inv512, NULL, 13, ram_lo},
-        {"gap16_count0", gap16_count0, NULL, 2, ram_med},
-        {"hamming_ot_low1", hamming_ot_low1_test, NULL, 1, ram_med},
-        {"hamming_ot_values", hamming_ot_values_test, NULL, 1, ram_med},
-        {"hamming_ot_u128", hamming_ot_long128_test, NULL, 2, ram_med},
+        {"gap_inv512",    gap_test_wrap, &gap_inv512, 13, ram_lo},
+        {"gap16_count0",  gap16_count0_test_wrap, &gap16_count0, 2, ram_med},
+        {"hamming_ot_low1",   hamming_ot_test_wrap, &hw_ot_low1, 1, ram_med},
+        {"hamming_ot_values", hamming_ot_test_wrap, &hw_ot_values, 1, ram_med},
+        {"hamming_ot_u128",   hamming_ot_long_test_wrap, &hw_ot_long128, 2, ram_med},
         {"linearcomp_high", linearcomp_test_wrap, &linearcomp_high, 1, ram_lo},
         {"linearcomp_mid",  linearcomp_test_wrap, &linearcomp_mid,  1, ram_lo},
         {"linearcomp_low",  linearcomp_test_wrap, &linearcomp_low,  1, ram_lo},
