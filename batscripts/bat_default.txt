@@ -1,0 +1,52 @@
+# SmokeRand `default` battery written as a script
+byte_freq  test=nbit_words_freq  bits_per_word=8 average_freq=1024 nblocks=4096
+#        {"bspace64_1d", bspace64_1d_test, NULL, 23, ram_hi},
+
+# Birthday spacings tests
+bspace32_1d      test=bspace_nd nbits_per_dim=32 ndims=1 nsamples=8192 get_lower=1
+bspace32_1d_high test=bspace_nd nbits_per_dim=32 ndims=1 nsamples=8192 get_lower=0
+bspace32_2d      test=bspace_nd nbits_per_dim=32 ndims=2 nsamples=10    get_lower=1
+bspace32_2d_high test=bspace_nd nbits_per_dim=32 ndims=2 nsamples=10    get_lower=0
+bspace21_3d      test=bspace_nd nbits_per_dim=21 ndims=3 nsamples=10    get_lower=1
+bspace21_3d_high test=bspace_nd nbits_per_dim=21 ndims=3 nsamples=10    get_lower=0
+bspace16_4d      test=bspace_nd nbits_per_dim=16 ndims=4 nsamples=10    get_lower=1
+bspace16_4d_high test=bspace_nd nbits_per_dim=16 ndims=4 nsamples=10    get_lower=0
+bspace8_8d       test=bspace_nd nbits_per_dim=8  ndims=8 nsamples=10    get_lower=1
+bspace8_8d_high  test=bspace_nd nbits_per_dim=8  ndims=8 nsamples=10    get_lower=0
+bspace4_8d_dec   test=bspace4_8d_decimated  step=4096
+bspace4_16d      test=bspace_nd nbits_per_dim=4  ndims=16 nsamples=10    get_lower=1
+bspace4_16d_high test=bspace_nd nbits_per_dim=4  ndims=16 nsamples=10    get_lower=0
+
+
+# CollisionOver tests
+collover20_2d      test=collisionover nbits_per_dim=20 ndims=2 nsamples=5 get_lower=1
+collover20_2d_high test=collisionover nbits_per_dim=20 ndims=2 nsamples=5 get_lower=0
+collover13_3d      test=collisionover nbits_per_dim=13 ndims=3 nsamples=5 get_lower=1
+collover13_3d_high test=collisionover nbits_per_dim=13 ndims=3 nsamples=5 get_lower=0
+collover8_5d       test=collisionover nbits_per_dim=8  ndims=5 nsamples=5 get_lower=1
+collover8_5d_high  test=collisionover nbits_per_dim=8  ndims=5 nsamples=5 get_lower=0
+collover5_8d       test=collisionover nbits_per_dim=5  ndims=8 nsamples=5 get_lower=1
+collover5_8d_high  test=collisionover nbits_per_dim=5  ndims=8 nsamples=5 get_lower=0
+
+ 
+#    static const TestDescription tests[] = {
+#        {"gap_inv512", gap_inv512, NULL, 13, ram_lo},
+#        {"gap16_count0", gap16_count0, NULL, 2, ram_med},
+
+# Hamming weights based tests
+hamming_ot         test=hamming_ot      mode=bytes      nbytes=1073741824 # 2^30
+hamming_ot_low1    test=hamming_ot      mode=bytes_low1 nbytes=1073741824 # 2^30
+hamming_ot_low8    test=hamming_ot      mode=bytes_low8 nbytes=1073741824 # 2^30
+hamming_ot_values  test=hamming_ot      mode=values     nbytes=1073741824 # 2^30
+
+# Hamming weights based "long" tests
+hamming_ot_u128    test=hamming_ot_long wordsize=w128   nvalues=1073741824 # 2^30
+hamming_ot_u256    test=hamming_ot_long wordsize=w256   nvalues=1073741824 # 2^30
+hamming_ot_u512    test=hamming_ot_long wordsize=w512   nvalues=1073741824 # 2^30
+
+
+# Linear complexity tests
+linearcomp_high test=linearcomp nbits=100000 bitpos=high
+linearcomp_mid  test=linearcomp nbits=100000 bitpos=mid
+linearcomp_low  test=linearcomp nbits=100000 bitpos=low
+

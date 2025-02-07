@@ -31,37 +31,6 @@ static TestResults bspace4_8d_dec(GeneratorState *obj, const void *udata)
 }
 
 
-
-/////////////////////
-///// Gap tests /////
-/////////////////////
-
-static TestResults gap_inv512(GeneratorState *obj, const void *udata)
-{
-    GapOptions opts = {.shl = 9, .ngaps = 10000000};
-    (void) udata;
-    return gap_test(obj, &opts);
-}
-
-/**
- * @brief This modification of gap test allows to catch some additive/subtractive
- * lagged Fibonacci PRNGs with big lags. Also detects ChaCha12 with 32-bit
- * counter: the test consumes more than 2^36 values.
- */
-static TestResults gap_inv1024(GeneratorState *obj, const void *udata)
-{
-    GapOptions opts = {.shl = 10, .ngaps = 100000000};
-    (void) udata;
-    return gap_test(obj, &opts);
-}
-
-
-static TestResults gap16_count0(GeneratorState *obj, const void *udata)
-{
-    (void) udata;
-    return gap16_count0_test(obj, 1000000000);
-}
-
 ///////////////////////
 ///// Other tests /////
 ///////////////////////
@@ -83,8 +52,11 @@ static TestResults sumcollector_long_test(GeneratorState *obj, const void *udata
 /**
  * @details One-dimensional 32-bit birthday spacings test. Allows to catch additive lagged 
  * Fibonacci PRNGs. In the case of 32-bit PRNG it is equivalent to `bspace32_1d'.
+ *
+ * The gap_inv1024 modification of gap test allows to catch some additive/subtractive
+ * lagged Fibonacci PRNGs with big lags. Also detects ChaCha12 with 32-bit
+ * counter: the test consumes more than 2^36 values.
  */
-
 void battery_full(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
@@ -113,6 +85,11 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         collover13_3d_high = {.nbits_per_dim = 13, .ndims = 3, .nsamples = 50, .get_lower = 0},
         collover20_2d      = {.nbits_per_dim = 20, .ndims = 2, .nsamples = 50, .get_lower = 1},
         collover20_2d_high = {.nbits_per_dim = 20, .ndims = 2, .nsamples = 50, .get_lower = 0};
+
+    // Gap test
+    static const GapOptions gap_inv512  = {.shl = 9,  .ngaps = 10000000};
+    static const GapOptions gap_inv1024 = {.shl = 10, .ngaps = 100000000};
+    static const Gap16Count0Options gap16_count0 = {.ngaps = 1000000000};
 
     // Hamming weights based tests
     static const HammingOtOptions
@@ -167,9 +144,9 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         {"collover8_5d_high",  collisionover_test_wrap, &collover8_5d_high,  73, ram_med},
         {"collover5_8d",       collisionover_test_wrap, &collover5_8d,       72, ram_med},
         {"collover5_8d_high",  collisionover_test_wrap, &collover5_8d_high,  72, ram_med},
-        {"gap_inv512", gap_inv512, NULL, 14, ram_lo},
-        {"gap_inv1024", gap_inv1024, NULL, 284, ram_lo},
-        {"gap16_count0", gap16_count0, NULL, 27, ram_med},
+        {"gap_inv512",  gap_test_wrap, &gap_inv512, 14, ram_lo},
+        {"gap_inv1024", gap_test_wrap, &gap_inv1024, 284, ram_lo},
+        {"gap16_count0", gap16_count0_test_wrap, &gap16_count0, 27, ram_med},
         {"hamming_ot",        hamming_ot_test_wrap, &hw_ot_all,    36, ram_med},
         {"hamming_ot_low1",   hamming_ot_test_wrap, &hw_ot_low1,   8, ram_med},
         {"hamming_ot_low8",   hamming_ot_test_wrap, &hw_ot_low8,   16, ram_med},

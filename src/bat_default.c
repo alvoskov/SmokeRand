@@ -30,24 +30,6 @@ static TestResults bspace4_8d_dec(GeneratorState *obj, const void *udata)
 }
 
 
-
-/////////////////////
-///// Gap tests /////
-/////////////////////
-
-static TestResults gap_inv512(GeneratorState *obj, const void *udata)
-{
-    GapOptions opts = {.shl = 9, .ngaps = 10000000};
-    (void) udata;
-    return gap_test(obj, &opts);
-}
-
-static TestResults gap16_count0(GeneratorState *obj, const void *udata)
-{
-    (void) udata;
-    return gap16_count0_test(obj, 500000000);
-}
-
 ///////////////////////
 ///// Other tests /////
 ///////////////////////
@@ -87,6 +69,10 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf,
         collover13_3d_high = {.nbits_per_dim = 13, .ndims = 3, .nsamples = 5, .get_lower = 0},
         collover20_2d      = {.nbits_per_dim = 20, .ndims = 2, .nsamples = 5, .get_lower = 1},
         collover20_2d_high = {.nbits_per_dim = 20, .ndims = 2, .nsamples = 5, .get_lower = 0};
+
+    // Gap test
+    static const GapOptions gap_inv512 = {.shl = 9, .ngaps = 10000000};
+    static const Gap16Count0Options gap16_count0 = {.ngaps = 500000000};
 
     // Hamming weights based tests
     static const HammingOtOptions
@@ -138,8 +124,8 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf,
         {"collover8_5d_high",  collisionover_test_wrap, &collover8_5d_high,  7, ram_med},
         {"collover5_8d",       collisionover_test_wrap, &collover5_8d,       7, ram_med},
         {"collover5_8d_high",  collisionover_test_wrap, &collover5_8d_high,  7, ram_med},
-        {"gap_inv512", gap_inv512, NULL, 14, ram_lo},
-        {"gap16_count0", gap16_count0, NULL, 10, ram_med},
+        {"gap_inv512", gap_test_wrap, &gap_inv512, 14, ram_lo},
+        {"gap16_count0", gap16_count0_test_wrap, &gap16_count0, 10, ram_med},
         {"hamming_ot",        hamming_ot_test_wrap, &hw_ot_all,  5, ram_med},
         {"hamming_ot_low1",   hamming_ot_test_wrap, &hw_ot_low1, 5, ram_med},
         {"hamming_ot_low8",   hamming_ot_test_wrap, &hw_ot_low8, 5, ram_med},

@@ -83,6 +83,28 @@ long long TestInfo_get_arg_intvalue(const TestInfo *obj, const char *name)
 }
 
 
+int TestInfo_arg_value_to_code(const TestInfo *obj, const char *name,
+    const char **vals, const int *codes, char *errmsg, int *is_ok)
+{
+    const char *value = TestInfo_get_arg_value(obj, name);
+    if (value == NULL) {
+        snprintf(errmsg, ERRMSG_BUF_SIZE, "Argument '%s' not found\n", name);
+        *is_ok = 0;
+        return 0;
+    }
+    for (size_t i = 0; vals[i] != NULL; i++) {
+        if (!strcmp(vals[i], value)) {
+            *is_ok = 1;
+            return codes[i];
+        }
+    }
+    *is_ok = 0;
+    snprintf(errmsg, ERRMSG_BUF_SIZE, "Unknown '%s' value '%s'", name, value);
+    return 0;
+}
+
+
+
 void TestInfo_free(TestInfo *obj)
 {
     free(obj->args);
@@ -211,7 +233,7 @@ static int parse_bspace_nd(TestDescription *out, const TestInfo *obj, char *errm
     }
 
     long long nsamples = TestInfo_get_arg_intvalue(obj, "nsamples");
-    if (nsamples == LLONG_MAX || nsamples < 128 || nsamples > (1ll << 30ll)) {
+    if (nsamples == LLONG_MAX || nsamples < 1 || nsamples > (1ll << 30ll)) {
         snprintf(errmsg, ERRMSG_BUF_SIZE, "Invalid nsamples value");
         return 0;
     }
@@ -233,6 +255,15 @@ static int parse_bspace_nd(TestDescription *out, const TestInfo *obj, char *errm
     out->ram_load = ram_hi;
     return 1;
 }
+
+static int parse_collisionover(TestDescription *out, const TestInfo *obj, char *errmsg)
+{
+    int is_ok = parse_bspace_nd(out, obj, errmsg);
+    out->run = collisionover_test_wrap;
+    return is_ok;
+}
+
+
 
 static int parse_nbit_words_freq(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
@@ -319,6 +350,65 @@ static int parse_linearcomp(TestDescription *out, const TestInfo *obj, char *err
 }
 
 
+static int parse_hamming_ot(TestDescription *out, const TestInfo *obj, char *errmsg)
+{
+    long long nbytes = TestInfo_get_arg_intvalue(obj, "nbytes");
+    if (nbytes == LLONG_MAX || nbytes < 65536 || nbytes > (1ll << 40ll)) {
+        snprintf(errmsg, ERRMSG_BUF_SIZE, "Invalid nbytes value");
+        return 0;
+    }
+
+    int is_ok;
+    const char *m_txt[] = {"values", "bytes", "bytes_low8", "bytes_low1", NULL};
+    const int m_codes[] = {hamming_ot_values, hamming_ot_bytes,
+        hamming_ot_bytes_low8, hamming_ot_bytes_low1, 0};
+    HammingOtMode mode = TestInfo_arg_value_to_code(obj, "mode",
+        m_txt, m_codes, errmsg, &is_ok);
+    if (!is_ok) {
+        return 0;
+    }
+
+    HammingOtOptions *opts = calloc(1, sizeof(HammingOtOptions));
+    opts->nbytes = nbytes;
+    opts->mode = mode;
+    out->name = obj->testname;
+    out->run = hamming_ot_test_wrap;
+    out->udata = opts;
+    out->nseconds = 1;
+    out->ram_load = ram_hi;
+    return 1;
+}
+
+
+static int parse_hamming_ot_long(TestDescription *out, const TestInfo *obj, char *errmsg)
+{
+    long long nvalues = TestInfo_get_arg_intvalue(obj, "nvalues");
+    if (nvalues == LLONG_MAX || nvalues < 65536 || nvalues > (1ll << 40ll)) {
+        snprintf(errmsg, ERRMSG_BUF_SIZE, "Invalid nvalues value");
+        return 0;
+    }
+    int is_ok;
+    const char *ws_txt[] = {"w128", "w256", "w512", "w1024", NULL};
+    const int ws_codes[] = {hamming_ot_w128, hamming_ot_w256,
+        hamming_ot_w512, hamming_ot_w1024, 0};
+    HammingOtWordSize ws = TestInfo_arg_value_to_code(obj, "wordsize",
+        ws_txt, ws_codes, errmsg, &is_ok);
+    if (!is_ok) {
+        return 0;
+    }
+    HammingOtLongOptions *opts = calloc(1, sizeof(HammingOtLongOptions));
+    opts->nvalues = nvalues;
+    opts->wordsize = ws;
+    out->name = obj->testname;
+    out->run = hamming_ot_long_test_wrap;
+    out->udata = opts;
+    out->nseconds = 1;
+    out->ram_load = ram_hi;
+    return 1;
+}
+
+
+
 
 /**
  * @brief Loads a custom battery from a user-defined text file.
@@ -346,6 +436,12 @@ int battery_file(const char *filename, GeneratorInfo *gen, CallerAPI *intf,
             is_ok = parse_bspace_nd(&tests[i], curtest, errmsg);
         } else if (!strcmp(name, "bspace4_8d_decimated")) {
             is_ok = parse_bspace4_8d_decimated(&tests[i], curtest, errmsg);
+        } else if (!strcmp(name, "collisionover")) {
+            is_ok = parse_collisionover(&tests[i], curtest, errmsg);
+        } else if (!strcmp(name, "hamming_ot")) {
+            is_ok = parse_hamming_ot(&tests[i], curtest, errmsg);
+        } else if (!strcmp(name, "hamming_ot_long")) {
+            is_ok = parse_hamming_ot_long(&tests[i], curtest, errmsg);
         } else if (!strcmp(name, "linearcomp")) {
             is_ok = parse_linearcomp(&tests[i], curtest, errmsg);
         } else if (!strcmp(name, "nbit_words_freq")) {    
@@ -353,6 +449,7 @@ int battery_file(const char *filename, GeneratorInfo *gen, CallerAPI *intf,
         } else {
             fprintf(stderr, "Error in line %d. Unknown test '%s'\n", curtest->linenum, name);
             is_ok = 0;
+            goto battery_file_freemem;
         }
 
         if (!is_ok) {
