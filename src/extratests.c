@@ -615,15 +615,17 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
     return res;
 }
 
-TestResults ising2d_wolff(GeneratorState *gs)
+TestResults ising2d_wolff(GeneratorState *gs, const void *udata)
 {
     Ising2DOptions opts = {.sample_len = 5000000, .nsamples = 20, .algorithm = ising_wolff};
+    (void) udata;
     return ising2d_test(gs, &opts);
 }
 
-TestResults ising2d_metropolis(GeneratorState *gs)
+TestResults ising2d_metropolis(GeneratorState *gs, const void *udata)
 {
     Ising2DOptions opts = {.sample_len = 5000000, .nsamples = 20, .algorithm = ising_metropolis};
+    (void) udata;
     return ising2d_test(gs, &opts);
 }
 
@@ -631,9 +633,9 @@ void battery_ising(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
     static const TestDescription tests[] = {
-        {"ising16_metropolis", ising2d_metropolis, 125, ram_med},
-        {"ising16_wolff", ising2d_wolff, 198, ram_med},
-        {NULL, NULL, 0, 0}
+        {"ising16_metropolis", ising2d_metropolis, NULL, 125, ram_med},
+        {"ising16_wolff", ising2d_wolff, NULL, 198, ram_med},
+        {NULL, NULL, NULL, 0, 0}
     };
     const TestsBattery bat = {
         "ising", tests

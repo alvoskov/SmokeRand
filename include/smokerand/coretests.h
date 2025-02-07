@@ -47,6 +47,13 @@ typedef struct {
     size_t nblocks; ///< Number of blocks for K.-S. criterion
 } NBitWordsFreqOptions;
 
+/**
+ * @brief Options for birthday spacings test with decimation.
+ */
+typedef struct {
+    unsigned int step;
+} Bspace4x8dDecOptions;
+
 TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts);
 TestResults bspace64_1d_ns_test(GeneratorState *obj, unsigned int nsamples);
 TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step);
@@ -61,5 +68,15 @@ TestResults nbit_words_freq_test(GeneratorState *obj,
 TestResults byte_freq_test(GeneratorState *obj);
 TestResults word16_freq_test(GeneratorState *obj);
 
+
+// Unified interfaces that can be used for batteries composition
+TestResults monobit_freq_test_wrap(GeneratorState *obj, const void *udata);
+TestResults nbit_words_freq_test_wrap(GeneratorState *obj, const void *udata);
+TestResults byte_freq_test_wrap(GeneratorState *obj, const void *udata);
+TestResults word16_freq_test_wrap(GeneratorState *obj, const void *udata);
+TestResults bspace_nd_test_wrap(GeneratorState *obj, const void *udata);
+TestResults bspace4_8d_decimated_test_wrap(GeneratorState *obj, const void *udata);
+TestResults collisionover_test_wrap(GeneratorState *obj, const void *udata);
+TestResults gap_test_wrap(GeneratorState *obj, const void *udata);
 
 #endif

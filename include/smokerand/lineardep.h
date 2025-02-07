@@ -9,7 +9,38 @@
 #ifndef __SMOKERAND_LINEARDEP_H
 #define __SMOKERAND_LINEARDEP_H
 #include "smokerand/core.h"
-TestResults linearcomp_test(GeneratorState *obj, size_t nbits, unsigned int bitpos);
-TestResults matrixrank_test(GeneratorState *obj, size_t n, unsigned int max_nbits);
+
+/**
+ * @brief Matrix rank test options.
+ */
+typedef struct {
+    size_t n; ///< Size of nxn square matrix.
+    unsigned int max_nbits; ///< Number of lower bits that will be used (8, 32, 64)
+} MatrixRankOptions;
+
+
+enum {
+    linearcomp_bitpos_low = 0,
+    linearcomp_bitpos_high = -1,
+    linearcomp_bitpos_mid = -2
+};
+
+/**
+ * @brief Linear complexity test options.
+ * @details Note: bitpos field supports the special values
+ * linearcomp_bitpos_low, linearcomp_bitpos_high, linearcomp_bitpos_mid
+ */
+typedef struct {
+    size_t nbits; ///< Number of bits (recommended value is 200000)
+    int bitpos; ///< Bit position (0 is the lowest).
+} LinearCompOptions;
+
+TestResults linearcomp_test(GeneratorState *obj, const LinearCompOptions *opts);
+TestResults matrixrank_test(GeneratorState *obj, const MatrixRankOptions *opts);
+
+// Unified interfaces that can be used for batteries composition
+TestResults linearcomp_test_wrap(GeneratorState *obj, const void *udata);
+TestResults matrixrank_test_wrap(GeneratorState *obj, const void *udata);
+
 #endif
 

@@ -712,6 +712,13 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 
 # Versions history
 
+07.02.2025: SmokeRand 0.20.
+
+- Preliminary support of user-defined batteries stored in text files.
+- Philox2x32 and 'squares' CBPRNG by B.Widynski.
+- Refactoring that allowed to get rid of a lot of small functions in the
+  battery description (support of user-defined data for tests was added).
+
 02.01.2025: SmokeRand 0.19.
 
 - CSPRNG based on Magma GOST R 34.12-2015 block cipher (CTR and CBC modes).

@@ -513,7 +513,7 @@ static void *battery_thread(void *data)
         size_t ind = th_data->tests_inds[i];
         th_data->intf->printf("vvvvv Thread %lld: test %s started vvvvv\n",
             get_thread_id(th_data->thrd_id), th_data->tests[i].name);
-        th_data->results[ind] = th_data->tests[i].run(&obj);
+        th_data->results[ind] = TestDescription_run(&th_data->tests[i], &obj);
         th_data->intf->printf("^^^^^ Thread %lld: test %s finished ^^^^^\n",
             get_thread_id(th_data->thrd_id), th_data->tests[i].name);
         th_data->results[ind].name = th_data->tests[i].name;
@@ -777,13 +777,13 @@ void TestsBattery_run(const TestsBattery *bat,
         GeneratorState obj = GeneratorState_create(gen, intf);
         if (testid == TESTS_ALL) {
             for (size_t i = 0; i < ntests; i++) {
-                results[i] = bat->tests[i].run(&obj);
+                results[i] = TestDescription_run(&bat->tests[i], &obj);
                 results[i].name = bat->tests[i].name;
                 results[i].id = i + 1;
                 results[i].thread_id = 0;
             }
         } else {
-            *results = bat->tests[testid - 1].run(&obj);
+            *results = TestDescription_run(&bat->tests[testid - 1], &obj);
             results->name = bat->tests[testid - 1].name;
             results->id = testid;
         }

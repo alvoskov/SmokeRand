@@ -12,6 +12,7 @@
 #include "smokerand/bat_default.h"
 #include "smokerand/bat_brief.h"
 #include "smokerand/bat_full.h"
+#include "smokerand/bat_file.h"
 #include "smokerand/bat_express.h"
 #include "smokerand/extratests.h"
 #include "smokerand/fileio.h"
@@ -201,7 +202,7 @@ void print_help(void)
 {
     static const char help_str[] = 
     "SmokeRand: a test suite for pseudorandom number generators\n"
-    "(C) 2024 Alexey L. Voskov\n\n"
+    "(C) 2024-2025 Alexey L. Voskov\n\n"
     "Usage: smokerand battery generator_lib [keys]\n"
     "battery: battery name; supported batteries:\n"
     "  General purpose batteries\n"
@@ -362,6 +363,13 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
         battery_ising(gi, intf, opts->testid, opts->nthreads);
     } else if (!strcmp(battery_name, "dummy")) {
         fprintf(stderr, "Battery 'dummy': do nothing\n");
+    } else if (battery_name[0] == '@') {
+        if (battery_name[1] == '\0') {
+            fprintf(stderr, "File name cannot be empty");
+            return 1;
+        }
+        const char *filename = battery_name + 1;
+        return battery_file(filename, gi, intf, opts->testid, opts->nthreads);
     } else {
         fprintf(stderr, "Unknown battery %s\n", battery_name);
         return 1;

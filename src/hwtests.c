@@ -620,3 +620,18 @@ TestResults hamming_ot_long_test(GeneratorState *obj, const HammingOtLongOptions
     return res;
 }
 
+
+///////////////////////////////////////////////
+///// Interfaces (wrappers) for batteries /////
+///////////////////////////////////////////////
+
+TestResults hamming_ot_test_wrap(GeneratorState *obj, const void *udata)
+{
+    return hamming_ot_test(obj, udata);
+}
+
+TestResults hamming_ot_long_test_wrap(GeneratorState *obj, const void *udata)
+{
+    return hamming_ot_long_test(obj, udata);
+}
+

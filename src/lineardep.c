@@ -95,23 +95,25 @@ static size_t calc_bin_matrix_rank(uint32_t *a, size_t n)
  *    https://doi.org/10.1017/CBO9780511721342
  * 3. OEIS A048651 (https://oeis.org/A048651).
  *
- * @param n Size of nxn square matrix.
- * @param max_nbits Number of lower bits that will be used (8, 32, 64)
+ * @param opts Test options (matrix size, number of lower bits from each value)
  */
-TestResults matrixrank_test(GeneratorState *obj, size_t n, unsigned int max_nbits)
+TestResults matrixrank_test(GeneratorState *obj, const MatrixRankOptions *opts)
 {
     TestResults ans = TestResults_create("mrank");
     int nmat = 64, Oi[3] = {0, 0, 0};
     double pi[3] = {0.1284, 0.5776, 0.2888};
+    size_t n = opts->n;
+    //unsigned int max_nbits = opts->max_nbits;
     size_t mat_len = n * n / 32;
     size_t min_rank = n + 1;
     uint32_t *a = calloc(mat_len, sizeof(uint32_t));
     obj->intf->printf("Matrix rank test\n");
-    obj->intf->printf("  n = %d. Number of matrices: %d\n", (int) n, nmat);
+    obj->intf->printf("  n = %d. Number of matrices: %d; max_nbits: %u\n",
+        (int) n, nmat, opts->max_nbits);
     for (int i = 0; i < nmat; i++) {
         size_t mat_len = n * n / 32;
         // Prepare nthreads matrices for threads
-        if (max_nbits == 8) {
+        if (opts->max_nbits == 8) {
             uint8_t *a8 = (uint8_t *) a;
             for (size_t j = 0; j < mat_len * 4; j++) {
                 a8[j] = obj->gi->get_bits(obj->state) & 0xFF;
@@ -225,6 +227,21 @@ size_t berlekamp_massey(const uint8_t *s, size_t n)
 }
 
 
+/**
+ * @brief Recalculate special bitpos values (relative offsets) to absolute ones.
+ */
+static unsigned int linearcomp_get_bitpos(const GeneratorState *obj, const LinearCompOptions *opts)
+{
+    if (opts->bitpos == linearcomp_bitpos_high) {
+        return obj->gi->nbits - 1;
+    } else if (opts->bitpos == linearcomp_bitpos_mid) {
+        return obj->gi->nbits / 2 - 1;
+    } else if (opts->bitpos < 0) {
+        return 0;
+    } else {
+        return opts->bitpos;
+    }
+}
 
 /**
  * @brief Linear complexity test based on Berlekamp-Massey algorithm.
@@ -234,28 +251,29 @@ size_t berlekamp_massey(const uint8_t *s, size_t n)
  *    // Information Processing Letters. 1997. V. 61. P. 165-168.
  *    https://doi.org/10.1016/S0020-0190(97)00004-5
  *
- * @param nbits Number of bits (recommended value is 200000)
- * @param bitpos Bit position (0 is the lowest).
+ * @param opts Test options (number of bits, bit position)
  */
-TestResults linearcomp_test(GeneratorState *obj, size_t nbits, unsigned int bitpos)
+TestResults linearcomp_test(GeneratorState *obj, const LinearCompOptions *opts)
 {
     TestResults ans = TestResults_create("linearcomp");
-    uint8_t *s = calloc(nbits, sizeof(uint8_t));
+    unsigned int bitpos = linearcomp_get_bitpos(obj, opts);
+    uint8_t *s = calloc(opts->nbits, sizeof(uint8_t));
     if (s == NULL) {
         fprintf(stderr, "***** linearcomp_test: not enough memory *****\n");
         exit(1);
     }
     obj->intf->printf("Linear complexity test\n");
-    obj->intf->printf("  nbits: %lld\n", (long long) nbits);
+    obj->intf->printf("  nbits: %lld; bitpos: %d\n",
+        (long long) opts->nbits, (int) bitpos);
     uint64_t mask = 1ull << bitpos;
-    for (size_t i = 0; i < nbits; i++) {
+    for (size_t i = 0; i < opts->nbits; i++) {
         if (obj->gi->get_bits(obj->state) & mask)
             s[i] = 1;
     }
-    double parity = nbits & 1;
-    double mu = nbits / 2.0 + (9.0 - parity) / 36.0;
+    double parity = opts->nbits & 1;
+    double mu = opts->nbits / 2.0 + (9.0 - parity) / 36.0;
     double sigma = sqrt(86.0/81.0);
-    ans.x = berlekamp_massey(s, nbits);
+    ans.x = berlekamp_massey(s, opts->nbits);
     double z = (ans.x - mu) / sigma;
     ans.p = stdnorm_pvalue(z);
     ans.alpha = stdnorm_cdf(z);
@@ -263,4 +281,19 @@ TestResults linearcomp_test(GeneratorState *obj, size_t nbits, unsigned int bitp
     obj->intf->printf("\n");
     free(s);
     return ans;
+}
+
+///////////////////////////////////////////////
+///// Interfaces (wrappers) for batteries /////
+///////////////////////////////////////////////
+
+TestResults linearcomp_test_wrap(GeneratorState *obj, const void *udata)
+{
+    return linearcomp_test(obj, udata);
+}
+
+
+TestResults matrixrank_test_wrap(GeneratorState *obj, const void *udata)
+{
+    return matrixrank_test(obj, udata);
 }

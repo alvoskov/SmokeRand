@@ -102,11 +102,16 @@ typedef enum {
  */
 typedef struct {
     const char *name;
-    TestResults (*run)(GeneratorState *obj);
+    TestResults (*run)(GeneratorState *obj, const void *udata);
+    const void *udata; ///< User data for the function
     unsigned int nseconds; ///< Estimated time, seconds
     int ram_load; ///< Intensity of RAM usage (0, 1, 2)
 } TestDescription;
 
+static inline TestResults TestDescription_run(const TestDescription *obj, GeneratorState *gs)
+{
+    return obj->run(gs, obj->udata);
+}
 
 /**
  * @brief Tests battery description.

@@ -12,7 +12,7 @@
  * required data may be reduced to 16 MiB that is comparable to DIEHARD test
  * suite.
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -23,47 +23,33 @@
 #include "smokerand/hwtests.h"
 #include "smokerand/entropy.h"
 
-static TestResults bspace32_1d_test(GeneratorState *obj)
+static TestResults bspace4_8d_dec_test(GeneratorState *obj, const void *udata)
 {
-    BSpaceNDOptions opts = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 1024, .get_lower = 1};
-    return bspace_nd_test(obj, &opts);
-}
-
-
-static TestResults bspace4_8d_dec_test(GeneratorState *obj)
-{
+    (void) udata;
     return bspace4_8d_decimated_test(obj, 1<<7);
-}
-
-
-static TestResults linearcomp_high(GeneratorState *obj)
-{
-    return linearcomp_test(obj, 10000, obj->gi->nbits - 1);
-}
-
-static TestResults linearcomp_low(GeneratorState *obj)
-{
-    return linearcomp_test(obj, 10000, 0);
-}
-
-TestResults byte_freq_short_test(GeneratorState *obj)
-{
-    NBitWordsFreqOptions opts = {.bits_per_word = 8, .average_freq = 256,
-        .nblocks = 256};
-    return nbit_words_freq_test(obj, &opts);
 }
 
 
 void battery_express(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
+    static const BSpaceNDOptions
+        bspace32_1d = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 1024, .get_lower = 1};
+    static const NBitWordsFreqOptions
+        byte_freq   = {.bits_per_word = 8, .average_freq = 256, .nblocks = 256};
+
+    // Linear complexity tests
+    static const LinearCompOptions
+        linearcomp_low  = {.nbits = 10000, .bitpos = linearcomp_bitpos_low},
+        linearcomp_high = {.nbits = 10000, .bitpos = linearcomp_bitpos_high};
+
     static const TestDescription tests[] = {
-        {"byte_freq", byte_freq_short_test, 2, ram_lo},
-        {"bspace32_1d", bspace32_1d_test, 2, ram_hi},
-        {"bspace4_8d_dec", bspace4_8d_dec_test, 3, ram_lo},
-        {"linearcomp_high", linearcomp_high, 1, ram_lo},
-        {"linearcomp_low", linearcomp_low, 1, ram_lo},
-        {NULL, NULL, 0, 0}
+        {"byte_freq", nbit_words_freq_test_wrap, &byte_freq, 2, ram_lo},
+        {"bspace32_1d", bspace_nd_test_wrap, &bspace32_1d, 2, ram_hi},
+        {"bspace4_8d_dec", bspace4_8d_dec_test, NULL, 3, ram_lo},
+        {"linearcomp_high", linearcomp_test_wrap, &linearcomp_high, 1, ram_lo},
+        {"linearcomp_low",  linearcomp_test_wrap, &linearcomp_low,  1, ram_lo},
+        {NULL, NULL, NULL, 0, 0}
     };
 
     const TestsBattery bat = {

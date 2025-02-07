@@ -1213,3 +1213,55 @@ TestResults word16_freq_test(GeneratorState *obj)
         .nblocks = 4096};
     return nbit_words_freq_test(obj, &opts);
 }
+
+///////////////////////////////////////////////
+///// Interfaces (wrappers) for batteries /////
+///////////////////////////////////////////////
+
+TestResults monobit_freq_test_wrap(GeneratorState *obj, const void *udata)
+{
+    (void) udata;
+    return monobit_freq_test(obj);
+}
+
+TestResults byte_freq_test_wrap(GeneratorState *obj, const void *udata)
+{
+    (void) udata;
+    return byte_freq_test(obj);
+}
+
+TestResults word16_freq_test_wrap(GeneratorState *obj, const void *udata)
+{
+    (void) udata;
+    return word16_freq_test(obj);
+}
+
+
+TestResults nbit_words_freq_test_wrap(GeneratorState *obj, const void *udata)
+{
+    return nbit_words_freq_test(obj, udata);
+}
+
+TestResults bspace_nd_test_wrap(GeneratorState *obj, const void *udata)
+{
+    return bspace_nd_test(obj, udata);
+}
+
+TestResults bspace4_8d_decimated_test_wrap(GeneratorState *obj, const void *udata)
+{
+    const Bspace4x8dDecOptions *opts = udata;
+    return bspace4_8d_decimated_test(obj, opts->step);
+}
+
+
+TestResults collisionover_test_wrap(GeneratorState *obj, const void *udata)
+{
+    return collisionover_test(obj, udata);
+}
+
+TestResults gap_test_wrap(GeneratorState *obj, const void *udata)
+{
+    return gap_test(obj, udata);
+}
+
+

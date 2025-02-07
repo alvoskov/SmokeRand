@@ -50,6 +50,7 @@ add_executable(smokerand src/smokerand.c
     src/bat_express.c include/smokerand/bat_express.h
     src/bat_default.c include/smokerand/bat_default.h
     src/bat_brief.c include/smokerand/bat_brief.h
+    src/bat_file.c include/smokerand/bat_file.h
     src/bat_full.c include/smokerand/bat_full.h)
 target_include_directories(smokerand PRIVATE include)
 target_link_libraries(smokerand smokerand_core)

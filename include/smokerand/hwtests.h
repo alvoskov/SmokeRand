@@ -61,5 +61,9 @@ typedef struct {
 TestResults hamming_ot_test(GeneratorState *obj, const HammingOtOptions *opts);
 TestResults hamming_ot_long_test(GeneratorState *obj, const HammingOtLongOptions *opts);
 
+// Unified interfaces that can be used for batteries composition
+TestResults hamming_ot_test_wrap(GeneratorState *obj, const void *udata);
+TestResults hamming_ot_long_test_wrap(GeneratorState *obj, const void *udata);
+
 #endif
 
