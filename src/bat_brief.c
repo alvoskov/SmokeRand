@@ -13,33 +13,23 @@
 #include "smokerand/lineardep.h"
 #include "smokerand/entropy.h"
 
-///////////////////////////////////
-///// Birthday spacings tests /////
-///////////////////////////////////
-
-static TestResults bspace64_1d_test(GeneratorState *obj, const void *udata)
-{
-    (void) udata;
-    return bspace64_1d_ns_test(obj, 40);
-}
-
-static TestResults bspace4_8d_dec(GeneratorState *obj, const void *udata)
-{
-    (void) udata;
-    return bspace4_8d_decimated_test(obj, 1 << 12);
-}
-
 void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
+    // Monobit frequency test options
+    static const MonobitFreqOptions monobit = {.nvalues = 1ull << 28};
     // Birthday spacings tests options
     static const BSpaceNDOptions
+        bspace64_1d      = {.nbits_per_dim = 64, .ndims = 1, .nsamples = 40,   .get_lower = 1},
         bspace32_1d      = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 4096, .get_lower = 1},
         bspace32_1d_high = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 4096, .get_lower = 0},
         bspace32_2d      = {.nbits_per_dim = 32, .ndims = 2, .nsamples = 5, .get_lower = 1},
         bspace21_3d      = {.nbits_per_dim = 21, .ndims = 3, .nsamples = 5, .get_lower = 1},
         bspace16_4d      = {.nbits_per_dim = 16, .ndims = 4, .nsamples = 5, .get_lower = 1},
         bspace8_8d       = {.nbits_per_dim = 8,  .ndims = 8, .nsamples = 5, .get_lower = 1};
+
+    // Birthday spacings test with decimation
+    static const Bspace4x8dDecOptions bs_dec = {.step = 1 << 12};
 
     // CollisionOver tests options
     static const BSpaceNDOptions
@@ -74,16 +64,16 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
 
 
     static const TestDescription tests[] = {
-        {"monobit_freq", monobit_freq_test_wrap, NULL, 2, ram_lo},
+        {"monobit_freq", monobit_freq_test_wrap, &monobit, 2, ram_lo},
         {"byte_freq", byte_freq_test_wrap, NULL, 2, ram_med},
-        {"bspace64_1d", bspace64_1d_test, NULL, 23, ram_hi},
+        {"bspace64_1d",      bspace_nd_test_wrap, &bspace64_1d, 23, ram_hi},
         {"bspace32_1d",      bspace_nd_test_wrap, &bspace32_1d, 2, ram_hi},
         {"bspace32_1d_high", bspace_nd_test_wrap, &bspace32_1d_high, 2, ram_hi},
         {"bspace32_2d",      bspace_nd_test_wrap, &bspace32_2d, 3, ram_hi},
         {"bspace21_3d",      bspace_nd_test_wrap, &bspace21_3d, 2, ram_hi},
         {"bspace16_4d",      bspace_nd_test_wrap, &bspace16_4d, 3, ram_med},
         {"bspace8_8d",       bspace_nd_test_wrap, &bspace8_8d,  3, ram_med},
-        {"bspace4_8d_dec", bspace4_8d_dec, NULL, 3, ram_lo},
+        {"bspace4_8d_dec", bspace4_8d_decimated_test_wrap, &bs_dec, 3, ram_lo},
         {"collover20_2d", collisionover_test_wrap, &collover20_2d, 7, ram_hi},
         {"collover13_3d", collisionover_test_wrap, &collover13_3d, 7, ram_hi},
         {"collover8_5d",  collisionover_test_wrap, &collover8_5d,  7, ram_med},

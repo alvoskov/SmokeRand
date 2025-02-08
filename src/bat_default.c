@@ -13,39 +13,14 @@
 #include "smokerand/lineardep.h"
 #include "smokerand/entropy.h"
 
-///////////////////////////////////
-///// Birthday spacings tests /////
-///////////////////////////////////
-
-static TestResults bspace64_1d(GeneratorState *obj, const void *udata)
-{
-    (void) udata;
-    return bspace64_1d_ns_test(obj, 100);
-}
-
-static TestResults bspace4_8d_dec(GeneratorState *obj, const void *udata)
-{
-    (void) udata;
-    return bspace4_8d_decimated_test(obj, 1 << 18);
-}
-
-
-///////////////////////
-///// Other tests /////
-///////////////////////
-
-static TestResults mod3_short_test(GeneratorState *obj, const void *udata)
-{
-    (void) udata;
-    return mod3_test(obj, 1ull << 28);
-}
-
-
 void battery_default(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
+    // Monobit frequency test options
+    static const MonobitFreqOptions monobit = {.nvalues = 1ull << 28};
     // Birthday spacings tests options
     static const BSpaceNDOptions
+        bspace64_1d      = {.nbits_per_dim = 64, .ndims = 1,  .nsamples = 100,  .get_lower = 1},
         bspace32_1d      = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, .get_lower = 1},
         bspace32_1d_high = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, .get_lower = 0},
         bspace32_2d      = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 10,   .get_lower = 1},
@@ -58,6 +33,9 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf,
         bspace8_8d_high  = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 10,   .get_lower = 0},
         bspace4_16d      = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 10,   .get_lower = 1},
         bspace4_16d_high = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 10,   .get_lower = 0};
+
+    // Birthday spacings test with decimation
+    static const Bspace4x8dDecOptions bs_dec = {.step = 1 << 18};
 
     // CollisionOver tests options
     static const BSpaceNDOptions
@@ -98,11 +76,14 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf,
         matrixrank_4096      = {.n = 4096, .max_nbits = 64},
         matrixrank_4096_low8 = {.n = 4096, .max_nbits = 8};
 
+    // mod3 test
+    static const Mod3Options mod3 = {.nvalues = 1ull << 28};
+
     static const TestDescription tests[] = {
-        {"monobit_freq", monobit_freq_test_wrap, NULL, 1, ram_lo},
+        {"monobit_freq", monobit_freq_test_wrap, &monobit, 1, ram_lo},
         {"byte_freq", byte_freq_test_wrap, NULL, 1, ram_med},
         {"word16_freq", word16_freq_test_wrap, NULL, 17, ram_med},
-        {"bspace64_1d", bspace64_1d, NULL, 34, ram_hi},
+        {"bspace64_1d",      bspace_nd_test_wrap, &bspace64_1d,      34, ram_hi},
         {"bspace32_1d",      bspace_nd_test_wrap, &bspace32_1d,      2, ram_hi},
         {"bspace32_1d_high", bspace_nd_test_wrap, &bspace32_1d_high, 2, ram_hi},
         {"bspace32_2d",      bspace_nd_test_wrap, &bspace32_2d,      3, ram_hi},
@@ -113,7 +94,7 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf,
         {"bspace16_4d_high", bspace_nd_test_wrap, &bspace16_4d_high, 4, ram_hi},
         {"bspace8_8d",       bspace_nd_test_wrap, &bspace8_8d,       4, ram_med},
         {"bspace8_8d_high",  bspace_nd_test_wrap, &bspace8_8d_high,  4, ram_med},
-        {"bspace4_8d_dec",   bspace4_8d_dec, NULL, 30, ram_lo},
+        {"bspace4_8d_dec",   bspace4_8d_decimated_test_wrap, &bs_dec, 30, ram_lo},
         {"bspace4_16d",      bspace_nd_test_wrap, &bspace4_16d,      6, ram_med},
         {"bspace4_16d_high", bspace_nd_test_wrap, &bspace4_16d_high, 6, ram_med},
         {"collover20_2d",      collisionover_test_wrap, &collover20_2d,      7, ram_hi},
@@ -138,7 +119,7 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf,
         {"linearcomp_low",  linearcomp_test_wrap, &linearcomp_low,  1, ram_lo},
         {"matrixrank_4096", matrixrank_test_wrap, &matrixrank_4096, 4, ram_med},
         {"matrixrank_4096_low8", matrixrank_test_wrap, &matrixrank_4096_low8, 5, ram_med},
-        {"mod3", mod3_short_test, NULL, 1, ram_med},
+        {"mod3", mod3_test_wrap, &mod3, 1, ram_med},
         {NULL, NULL, NULL, 0, 0}
     };
 

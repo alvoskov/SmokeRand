@@ -58,7 +58,7 @@ void TestInfo_addarg(TestInfo *obj, const char *name, const char *value)
     xstrcpy_s(obj->args[obj->nargs - 1].value, 64, value);
 }
 
-const char *TestInfo_get_arg_value(const TestInfo *obj, const char *name)
+const char *TestInfo_get_value(const TestInfo *obj, const char *name)
 {
     for (size_t i = 0; i < obj->nargs; i++) {
         if (!strcmp(name, obj->args[i].name)) {
@@ -69,9 +69,9 @@ const char *TestInfo_get_arg_value(const TestInfo *obj, const char *name)
 }
 
 
-long long TestInfo_get_arg_intvalue(const TestInfo *obj, const char *name)
+long long TestInfo_get_intvalue(const TestInfo *obj, const char *name)
 {
-    const char *txtvalue = TestInfo_get_arg_value(obj, name);
+    const char *txtvalue = TestInfo_get_value(obj, name);
     long long value;
     if (txtvalue == NULL) {
         return LLONG_MAX;
@@ -83,10 +83,34 @@ long long TestInfo_get_arg_intvalue(const TestInfo *obj, const char *name)
 }
 
 
-int TestInfo_arg_value_to_code(const TestInfo *obj, const char *name,
+static long long TestInfo_get_limited_intvalue(const TestInfo *obj, const char *name,
+    long long xmin, long long xmax, char *errmsg)
+{
+    const char *txtvalue = TestInfo_get_value(obj, name);
+    long long value;
+    errmsg[0] = '\0';
+    if (txtvalue == NULL) {
+        snprintf(errmsg, ERRMSG_BUF_SIZE, "Argument '%s' not found", name);
+        return LLONG_MAX;
+    }
+    if (sscanf(txtvalue, "%lld", &value) != 1) {
+        snprintf(errmsg, ERRMSG_BUF_SIZE, "Argument '%s' must be an integer", name);
+        return LLONG_MAX;
+    }
+    if (value < xmin || value > xmax) {
+        snprintf(errmsg, ERRMSG_BUF_SIZE, "'%s' value must be between %lld and %lld",
+            name, xmin, xmax);
+        return LLONG_MAX;
+    }
+    return value;
+}
+
+
+
+int TestInfo_value_to_code(const TestInfo *obj, const char *name,
     const char **vals, const int *codes, char *errmsg, int *is_ok)
 {
-    const char *value = TestInfo_get_arg_value(obj, name);
+    const char *value = TestInfo_get_value(obj, name);
     if (value == NULL) {
         snprintf(errmsg, ERRMSG_BUF_SIZE, "Argument '%s' not found\n", name);
         *is_ok = 0;
@@ -221,26 +245,20 @@ static TestInfoArray load_tests(const char *filename)
 
 static int parse_bspace_nd(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long nbits_per_dim = TestInfo_get_arg_intvalue(obj, "nbits_per_dim");
-    if (nbits_per_dim == LLONG_MAX || nbits_per_dim < 1 || nbits_per_dim > 64) {
+    long long nbits_per_dim = TestInfo_get_limited_intvalue(obj, "nbits_per_dim", 1, 64, errmsg);
+    if (nbits_per_dim == LLONG_MAX) {
         return 0;
     }
-
-    long long ndims = TestInfo_get_arg_intvalue(obj, "ndims");
-    if (ndims == LLONG_MAX || ndims < 1 || ndims > 64) {
-        snprintf(errmsg, ERRMSG_BUF_SIZE, "Invalid ndims value");
+    long long ndims = TestInfo_get_limited_intvalue(obj, "ndims", 1, 64, errmsg);
+    if (ndims == LLONG_MAX) {
         return 0;
     }
-
-    long long nsamples = TestInfo_get_arg_intvalue(obj, "nsamples");
-    if (nsamples == LLONG_MAX || nsamples < 1 || nsamples > (1ll << 30ll)) {
-        snprintf(errmsg, ERRMSG_BUF_SIZE, "Invalid nsamples value");
+    long long nsamples = TestInfo_get_limited_intvalue(obj, "nsamples", 1, 1ll << 30ll, errmsg);
+    if (nsamples == LLONG_MAX) {
         return 0;
     }
-
-    long long get_lower = TestInfo_get_arg_intvalue(obj, "get_lower");
-    if (nsamples == LLONG_MAX || (get_lower != 0 && get_lower != 1)) {
-        snprintf(errmsg, ERRMSG_BUF_SIZE, "Invalid get_lower value");    
+    long long get_lower = TestInfo_get_limited_intvalue(obj, "get_lower", 0, 1, errmsg);
+    if (nsamples == LLONG_MAX) {
         return 0;
     }
     BSpaceNDOptions *opts = calloc(1, sizeof(BSpaceNDOptions));
@@ -265,23 +283,38 @@ static int parse_collisionover(TestDescription *out, const TestInfo *obj, char *
 
 
 
+static int parse_monobit_freq(TestDescription *out, const TestInfo *obj, char *errmsg)
+{
+    long long nvalues = TestInfo_get_limited_intvalue(obj, "nvalues", 1024, 1ll << 50ll, errmsg);
+    if (nvalues == LLONG_MAX) {
+        return 0;
+    }
+    MonobitFreqOptions *opts = calloc(1, sizeof(MonobitFreqOptions));
+    opts->nvalues = nvalues;
+    out->name = obj->testname;
+    out->run = monobit_freq_test_wrap;
+    out->udata = opts;
+    out->nseconds = 1;
+    out->ram_load = ram_hi;
+    return 1;
+}
+
+
+
 static int parse_nbit_words_freq(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long bits_per_word = TestInfo_get_arg_intvalue(obj, "bits_per_word");
-    if (bits_per_word == LLONG_MAX || bits_per_word < 1 || bits_per_word > 16) {
-        snprintf(errmsg, ERRMSG_BUF_SIZE, "Invalid bits_per_word value");
+    long long bits_per_word = TestInfo_get_limited_intvalue(obj, "bits_per_word", 1, 16, errmsg);
+    if (bits_per_word == LLONG_MAX) {
         return 0;
     }
 
-    long long average_freq = TestInfo_get_arg_intvalue(obj, "average_freq");
-    if (average_freq == LLONG_MAX || average_freq < 8 || average_freq > (1ll << 20ll)) {
-        snprintf(errmsg, ERRMSG_BUF_SIZE, "Invalid average_freq value");
+    long long average_freq = TestInfo_get_limited_intvalue(obj, "average_freq", 8, 1ll << 20ll, errmsg);
+    if (average_freq == LLONG_MAX) {
         return 0;
     }
 
-    long long nblocks = TestInfo_get_arg_intvalue(obj, "nblocks");
-    if (nblocks == LLONG_MAX || nblocks < 16 || nblocks > (1ll << 30ll)) {
-        snprintf(errmsg, ERRMSG_BUF_SIZE, "Invalid nblocks value");
+    long long nblocks = TestInfo_get_limited_intvalue(obj, "nblocks", 16, 1ll << 30ll, errmsg);
+    if (nblocks == LLONG_MAX) {
         return 0;
     }
     NBitWordsFreqOptions *opts = calloc(1, sizeof(NBitWordsFreqOptions));
@@ -296,11 +329,11 @@ static int parse_nbit_words_freq(TestDescription *out, const TestInfo *obj, char
     return 1;
 }
 
+
 static int parse_bspace4_8d_decimated(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long step = TestInfo_get_arg_intvalue(obj, "step");
-    if (step == LLONG_MAX || step < 1 || step > (1ll << 30ll)) {
-        snprintf(errmsg, ERRMSG_BUF_SIZE, "Invalid step value");
+    long long step = TestInfo_get_limited_intvalue(obj, "step", 1, 1ll << 30ll, errmsg);
+    if (step == LLONG_MAX) {
         return 0;
     }
 
@@ -315,34 +348,21 @@ static int parse_bspace4_8d_decimated(TestDescription *out, const TestInfo *obj,
 }
 
 
-static int parse_linearcomp(TestDescription *out, const TestInfo *obj, char *errmsg)
+static int parse_gap(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long nbits = TestInfo_get_arg_intvalue(obj, "nbits");
-    if (nbits == LLONG_MAX || nbits < 16 || nbits > (1ll << 24ll)) {
-        snprintf(errmsg, ERRMSG_BUF_SIZE, "Invalid nbits value");
+    long long shl = TestInfo_get_limited_intvalue(obj, "shl", 1, 64, errmsg);
+    if (shl == LLONG_MAX) {
         return 0;
     }
-    const char *bitpos_descr = TestInfo_get_arg_value(obj, "bitpos");
-    long long bitpos;
-    if (!strcmp(bitpos_descr, "low")) {
-        bitpos = linearcomp_bitpos_low;
-    } else if (!strcmp(bitpos_descr, "mid")) {
-        bitpos = linearcomp_bitpos_mid;
-    } else if (!strcmp(bitpos_descr, "high")) {
-        bitpos = linearcomp_bitpos_high;
-    } else {
-        bitpos = TestInfo_get_arg_intvalue(obj, "bitpos");
-        if (bitpos == LLONG_MAX || bitpos < 0 || bitpos > 64) {
-            snprintf(errmsg, ERRMSG_BUF_SIZE, "Invalid bitpos value");
-            return 0;
-        }
+    long long ngaps = TestInfo_get_limited_intvalue(obj, "ngaps", 10000, 1ll << 40ll, errmsg);
+    if (ngaps == LLONG_MAX) {
+        return 0;
     }
-
-    LinearCompOptions *opts = calloc(1, sizeof(LinearCompOptions));
-    opts->nbits = nbits;
-    opts->bitpos = bitpos;
+    GapOptions *opts = calloc(1, sizeof(GapOptions));
+    opts->shl = shl;
+    opts->ngaps = ngaps;
     out->name = obj->testname;
-    out->run = linearcomp_test_wrap;
+    out->run = gap_test_wrap;
     out->udata = opts;
     out->nseconds = 1;
     out->ram_load = ram_hi;
@@ -350,19 +370,37 @@ static int parse_linearcomp(TestDescription *out, const TestInfo *obj, char *err
 }
 
 
-static int parse_hamming_ot(TestDescription *out, const TestInfo *obj, char *errmsg)
+static int parse_gap16_count0(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long nbytes = TestInfo_get_arg_intvalue(obj, "nbytes");
-    if (nbytes == LLONG_MAX || nbytes < 65536 || nbytes > (1ll << 40ll)) {
-        snprintf(errmsg, ERRMSG_BUF_SIZE, "Invalid nbytes value");
+    long long ngaps = TestInfo_get_limited_intvalue(obj, "ngaps", 10000, 1ll << 40ll, errmsg);
+    if (ngaps == LLONG_MAX) {
         return 0;
     }
+    Gap16Count0Options *opts = calloc(1, sizeof(Gap16Count0Options));
+    opts->ngaps = ngaps;
+    out->name = obj->testname;
+    out->run = gap16_count0_test_wrap;
+    out->udata = opts;
+    out->nseconds = 1;
+    out->ram_load = ram_hi;
+    return 1;
+}
 
+
+
+
+
+static int parse_hamming_ot(TestDescription *out, const TestInfo *obj, char *errmsg)
+{
+    long long nbytes = TestInfo_get_limited_intvalue(obj, "nbytes", 65536, 1ll << 40ll, errmsg);
+    if (nbytes == LLONG_MAX) {
+        return 0;
+    }
     int is_ok;
     const char *m_txt[] = {"values", "bytes", "bytes_low8", "bytes_low1", NULL};
     const int m_codes[] = {hamming_ot_values, hamming_ot_bytes,
         hamming_ot_bytes_low8, hamming_ot_bytes_low1, 0};
-    HammingOtMode mode = TestInfo_arg_value_to_code(obj, "mode",
+    HammingOtMode mode = TestInfo_value_to_code(obj, "mode",
         m_txt, m_codes, errmsg, &is_ok);
     if (!is_ok) {
         return 0;
@@ -382,16 +420,15 @@ static int parse_hamming_ot(TestDescription *out, const TestInfo *obj, char *err
 
 static int parse_hamming_ot_long(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long nvalues = TestInfo_get_arg_intvalue(obj, "nvalues");
-    if (nvalues == LLONG_MAX || nvalues < 65536 || nvalues > (1ll << 40ll)) {
-        snprintf(errmsg, ERRMSG_BUF_SIZE, "Invalid nvalues value");
+    long long nvalues = TestInfo_get_limited_intvalue(obj, "nvalues", 65536, 1ll << 40ll, errmsg);
+    if (nvalues == LLONG_MAX) {
         return 0;
     }
     int is_ok;
     const char *ws_txt[] = {"w128", "w256", "w512", "w1024", NULL};
     const int ws_codes[] = {hamming_ot_w128, hamming_ot_w256,
         hamming_ot_w512, hamming_ot_w1024, 0};
-    HammingOtWordSize ws = TestInfo_arg_value_to_code(obj, "wordsize",
+    HammingOtWordSize ws = TestInfo_value_to_code(obj, "wordsize",
         ws_txt, ws_codes, errmsg, &is_ok);
     if (!is_ok) {
         return 0;
@@ -408,6 +445,100 @@ static int parse_hamming_ot_long(TestDescription *out, const TestInfo *obj, char
 }
 
 
+static int parse_linearcomp(TestDescription *out, const TestInfo *obj, char *errmsg)
+{
+    long long nbits = TestInfo_get_limited_intvalue(obj, "nbits", 8, 1ll << 30ll, errmsg);
+    if (nbits == LLONG_MAX) {
+        return 0;
+    }
+    const char *bitpos_descr = TestInfo_get_value(obj, "bitpos");
+    long long bitpos;
+    if (!strcmp(bitpos_descr, "low")) {
+        bitpos = linearcomp_bitpos_low;
+    } else if (!strcmp(bitpos_descr, "mid")) {
+        bitpos = linearcomp_bitpos_mid;
+    } else if (!strcmp(bitpos_descr, "high")) {
+        bitpos = linearcomp_bitpos_high;
+    } else {
+        bitpos = TestInfo_get_limited_intvalue(obj, "bitpos", 0, 64, errmsg);
+        if (bitpos == LLONG_MAX) {
+            return 0;
+        }
+    }
+    LinearCompOptions *opts = calloc(1, sizeof(LinearCompOptions));
+    opts->nbits = nbits;
+    opts->bitpos = bitpos;
+    out->name = obj->testname;
+    out->run = linearcomp_test_wrap;
+    out->udata = opts;
+    out->nseconds = 1;
+    out->ram_load = ram_hi;
+    return 1;
+}
+
+static int parse_matrixrank(TestDescription *out, const TestInfo *obj, char *errmsg)
+{
+    long long n = TestInfo_get_limited_intvalue(obj, "n", 256, 65536, errmsg);
+    if (n == LLONG_MAX) {
+        return 0;
+    } else if (n % 256 != 0) {
+        snprintf(errmsg, ERRMSG_BUF_SIZE, "'n' value must be divisible by 256");
+        return 0;
+    }
+
+    long long max_nbits = TestInfo_get_limited_intvalue(obj, "max_nbits", 8, 64, errmsg);
+    if (max_nbits == LLONG_MAX) {
+        return 0;
+    }
+    MatrixRankOptions *opts = calloc(1, sizeof(MatrixRankOptions));
+    opts->n = n;
+    opts->max_nbits = max_nbits;
+    out->name = obj->testname;
+    out->run = matrixrank_test_wrap;
+    out->udata = opts;
+    out->nseconds = 1;
+    out->ram_load = ram_hi;
+    return 1;
+}
+
+static int parse_mod3(TestDescription *out, const TestInfo *obj, char *errmsg)
+{
+    long long nvalues = TestInfo_get_limited_intvalue(obj, "nvalues", 100000, 1ll << 50ll, errmsg);
+    if (nvalues == LLONG_MAX) {
+        return 0;
+    }
+    Mod3Options *opts = calloc(1, sizeof(Mod3Options));
+    opts->nvalues = nvalues;
+    out->name = obj->testname;
+    out->run = mod3_test_wrap;
+    out->udata = opts;
+    out->nseconds = 1;
+    out->ram_load = ram_hi;
+    return 1;
+}
+
+static int parse_sumcollector(TestDescription *out, const TestInfo *obj, char *errmsg)
+{
+    long long nvalues = TestInfo_get_limited_intvalue(obj, "nvalues", 100000, 1ll << 50ll, errmsg);
+    if (nvalues == LLONG_MAX) {
+        return 0;
+    }
+    SumCollectorOptions *opts = calloc(1, sizeof(SumCollectorOptions));
+    opts->nvalues = nvalues;
+    out->name = obj->testname;
+    out->run = sumcollector_test_wrap;
+    out->udata = opts;
+    out->nseconds = 1;
+    out->ram_load = ram_hi;
+    return 1;
+}
+
+
+
+typedef struct {
+    const char *name;
+    int (*func)(TestDescription *, const TestInfo *, char *);
+} TestFunc;
 
 
 /**
@@ -418,6 +549,21 @@ static int parse_hamming_ot_long(TestDescription *out, const TestInfo *obj, char
 int battery_file(const char *filename, GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
+    static const TestFunc parsers[] = {
+        {"bspace_nd", parse_bspace_nd},
+        {"bspace4_8d_decimated", parse_bspace4_8d_decimated},
+        {"collisionover", parse_collisionover},
+        {"gap", parse_gap},
+        {"gap16_count0", parse_gap16_count0},
+        {"hamming_ot", parse_hamming_ot},
+        {"hamming_ot_long", parse_hamming_ot_long},
+        {"linearcomp", parse_linearcomp},
+        {"matrixrank", parse_matrixrank},
+        {"mod3", parse_mod3},
+        {"monobit_freq", parse_monobit_freq},
+        {"nbit_words_freq", parse_nbit_words_freq},
+        {"sumcollector", parse_sumcollector}, {NULL, NULL}
+    };
     char errmsg[ERRMSG_BUF_SIZE];
     errmsg[0] = '\0';
     TestInfoArray tests_args = load_tests(filename);
@@ -430,23 +576,16 @@ int battery_file(const char *filename, GeneratorInfo *gen, CallerAPI *intf,
 
     int is_ok = 1;
     for (size_t i = 0; i < tests_args.ntests; i++) {        
-        const char *name = TestInfo_get_arg_value(&tests_args.tests[i], "test");
+        const char *name = TestInfo_get_value(&tests_args.tests[i], "test");
         const TestInfo *curtest = &tests_args.tests[i];
-        if (!strcmp(name, "bspace_nd")) {
-            is_ok = parse_bspace_nd(&tests[i], curtest, errmsg);
-        } else if (!strcmp(name, "bspace4_8d_decimated")) {
-            is_ok = parse_bspace4_8d_decimated(&tests[i], curtest, errmsg);
-        } else if (!strcmp(name, "collisionover")) {
-            is_ok = parse_collisionover(&tests[i], curtest, errmsg);
-        } else if (!strcmp(name, "hamming_ot")) {
-            is_ok = parse_hamming_ot(&tests[i], curtest, errmsg);
-        } else if (!strcmp(name, "hamming_ot_long")) {
-            is_ok = parse_hamming_ot_long(&tests[i], curtest, errmsg);
-        } else if (!strcmp(name, "linearcomp")) {
-            is_ok = parse_linearcomp(&tests[i], curtest, errmsg);
-        } else if (!strcmp(name, "nbit_words_freq")) {    
-            is_ok = parse_nbit_words_freq(&tests[i], curtest, errmsg);
-        } else {
+        int parsed = 0;
+        for (const TestFunc *parser = parsers; parser->name != NULL; parser++) {
+            if (!strcmp(name, parser->name)) {
+                is_ok = parser->func(&tests[i], curtest, errmsg);
+                parsed = 1;
+            }
+        }
+        if (!parsed) {
             fprintf(stderr, "Error in line %d. Unknown test '%s'\n", curtest->linenum, name);
             is_ok = 0;
             goto battery_file_freemem;

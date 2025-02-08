@@ -13,42 +13,6 @@
 #include "smokerand/hwtests.h"
 #include "smokerand/entropy.h"
 
-///////////////////////////////////
-///// Birthday spacings tests /////
-///////////////////////////////////
-
-static TestResults bspace64_1d(GeneratorState *obj, const void *udata)
-{
-    (void) udata;
-    return bspace64_1d_ns_test(obj, 250);
-}
-
-
-static TestResults bspace4_8d_dec(GeneratorState *obj, const void *udata)
-{
-    (void) udata;
-    return bspace4_8d_decimated_test(obj, 262144);
-}
-
-
-///////////////////////
-///// Other tests /////
-///////////////////////
-
-static TestResults mod3_long_test(GeneratorState *obj, const void *udata)
-{
-    (void) udata;
-    return mod3_test(obj, 1ull << 30);
-}
-
-
-static TestResults sumcollector_long_test(GeneratorState *obj, const void *udata)
-{
-    (void) udata;
-    return sumcollector_test(obj, 20000000000);
-}
-
-
 /**
  * @details One-dimensional 32-bit birthday spacings test. Allows to catch additive lagged 
  * Fibonacci PRNGs. In the case of 32-bit PRNG it is equivalent to `bspace32_1d'.
@@ -60,8 +24,11 @@ static TestResults sumcollector_long_test(GeneratorState *obj, const void *udata
 void battery_full(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
+    // Monobit frequency test options
+    static const MonobitFreqOptions monobit = {.nvalues = 1ull << 28};
     // Birthday spacings tests options
     static const BSpaceNDOptions
+        bspace64_1d      = {.nbits_per_dim = 64, .ndims = 1, .nsamples = 250,  .get_lower = 1},
         bspace32_1d      = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 8192, .get_lower = 1},
         bspace32_1d_high = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 8192, .get_lower = 0},
         bspace32_2d      = {.nbits_per_dim = 32, .ndims = 2, .nsamples = 250, .get_lower = 1},
@@ -74,6 +41,9 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         bspace8_8d_high  = {.nbits_per_dim = 8, .ndims = 8, .nsamples = 200, .get_lower = 0},
         bspace4_16d      = {.nbits_per_dim = 4, .ndims = 16, .nsamples = 200, .get_lower = 1},
         bspace4_16d_high = {.nbits_per_dim = 4, .ndims = 16, .nsamples = 200, .get_lower = 0};
+
+    // Birthday spacings test with decimation
+    static const Bspace4x8dDecOptions bs_dec = {.step = 1 << 18};
 
     // CollisionOver tests options
     static const BSpaceNDOptions
@@ -117,12 +87,17 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         matrixrank_8192      = {.n = 8192, .max_nbits = 64},
         matrixrank_8192_low8 = {.n = 8192, .max_nbits = 8};
 
+    // mod3 test
+    static const Mod3Options mod3 = {.nvalues = 1ull << 30};
+
+    // SumCollector test
+    static const SumCollectorOptions sumcoll = {.nvalues = 20000000000};
 
     static const TestDescription tests[] = {
-        {"monobit_freq", monobit_freq_test_wrap, NULL, 1, ram_lo},
+        {"monobit_freq", monobit_freq_test_wrap, &monobit, 1, ram_lo},
         {"byte_freq", byte_freq_test_wrap, NULL, 1, ram_med},
         {"word16_freq", word16_freq_test_wrap, NULL, 20, ram_med},
-        {"bspace64_1d", bspace64_1d, NULL, 90, ram_hi},
+        {"bspace64_1d",      bspace_nd_test_wrap, &bspace64_1d,      90, ram_hi},
         {"bspace32_1d",      bspace_nd_test_wrap, &bspace32_1d,      2, ram_hi},
         {"bspace32_1d_high", bspace_nd_test_wrap, &bspace32_1d_high, 2, ram_hi},
         {"bspace32_2d",      bspace_nd_test_wrap, &bspace32_2d,      90, ram_hi},
@@ -133,7 +108,7 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         {"bspace16_4d_high", bspace_nd_test_wrap, &bspace16_4d_high, 78, ram_med},
         {"bspace8_8d",       bspace_nd_test_wrap, &bspace8_8d,       96, ram_med},
         {"bspace8_8d_high",  bspace_nd_test_wrap, &bspace8_8d_high,  96, ram_med},
-        {"bspace4_8d_dec",   bspace4_8d_dec, NULL, 30, ram_lo},
+        {"bspace4_8d_dec",   bspace4_8d_decimated_test_wrap, &bs_dec, 30, ram_lo},
         {"bspace4_16d",      bspace_nd_test_wrap, &bspace4_16d,      116, ram_lo},
         {"bspace4_16d_high", bspace_nd_test_wrap, &bspace4_16d_high, 116, ram_lo},
         {"collover20_2d",      collisionover_test_wrap, &collover20_2d,      73, ram_hi},
@@ -161,8 +136,8 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         {"matrixrank_4096_low8", matrixrank_test_wrap, &matrixrank_4096_low8, 5, ram_med},
         {"matrixrank_8192",      matrixrank_test_wrap, &matrixrank_8192, 36, ram_med},
         {"matrixrank_8192_low8", matrixrank_test_wrap, &matrixrank_8192_low8, 36, ram_med},
-        {"mod3", mod3_long_test, NULL, 1, ram_med},
-        {"sumcollector", sumcollector_long_test, NULL, 60, ram_med},
+        {"mod3", mod3_test_wrap, &mod3, 1, ram_med},
+        {"sumcollector", sumcollector_test_wrap, &sumcoll, 60, ram_med},
         {NULL, NULL, NULL, 0, 0}
     };
 

@@ -23,18 +23,12 @@
 #include "smokerand/hwtests.h"
 #include "smokerand/entropy.h"
 
-static TestResults bspace4_8d_dec_test(GeneratorState *obj, const void *udata)
-{
-    (void) udata;
-    return bspace4_8d_decimated_test(obj, 1<<7);
-}
-
-
 void battery_express(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads)
 {
     static const BSpaceNDOptions
         bspace32_1d = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 1024, .get_lower = 1};
+    static const Bspace4x8dDecOptions bs_dec = {.step = 1 << 7};
     static const NBitWordsFreqOptions
         byte_freq   = {.bits_per_word = 8, .average_freq = 256, .nblocks = 256};
 
@@ -46,7 +40,7 @@ void battery_express(GeneratorInfo *gen, CallerAPI *intf,
     static const TestDescription tests[] = {
         {"byte_freq", nbit_words_freq_test_wrap, &byte_freq, 2, ram_lo},
         {"bspace32_1d", bspace_nd_test_wrap, &bspace32_1d, 2, ram_hi},
-        {"bspace4_8d_dec", bspace4_8d_dec_test, NULL, 3, ram_lo},
+        {"bspace4_8d_dec", bspace4_8d_decimated_test_wrap, &bs_dec, 3, ram_lo},
         {"linearcomp_high", linearcomp_test_wrap, &linearcomp_high, 1, ram_lo},
         {"linearcomp_low",  linearcomp_test_wrap, &linearcomp_low,  1, ram_lo},
         {NULL, NULL, NULL, 0, 0}

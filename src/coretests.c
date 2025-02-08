@@ -198,8 +198,6 @@ static unsigned long bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions
     return ndups_total;
 }
 
-
-
 /**
  * @brief n-dimensional birthday spacings test.
  * @details An implementation of classical N-dimensional birthday spacings test
@@ -221,6 +219,10 @@ static unsigned long bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions
  * value, in the case of N-dimensional test -- from lower or higher bits of 
  * N points. These tuples are NOT OVERLAPPING!
  *
+ * It also has a special mode for one-dimensional 64-bit birthday spacings.
+ * In the case of 32-bit PRNG it automatically switches to the 2D 32-bit
+ * birthday spacings test.
+ *
  * References:
  *
  * 1. Marsaglia G., Tsang W. W. Some Difficult-to-pass Tests of Randomness
@@ -234,6 +236,17 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
         (obj->gi->nbits != 32 && obj->gi->nbits != 64)) {
         return ans;
     }
+    // A special case: 64-bit one-dimensional test for 32-bit
+    // generator.
+    if (opts->nbits_per_dim == 64 && opts->ndims == 1 &&
+        obj->gi->nbits == 32) {
+        const BSpaceNDOptions opts32 = {.nbits_per_dim = 32, .ndims = 2,
+            .nsamples = opts->nsamples, .get_lower = opts->get_lower};
+        obj->intf->printf("Birthday spacings test: 1D 64-bit test for 32-bit PRNG\n");
+        obj->intf->printf("Switching to the 2D 32-bit test\n");
+        return bspace_nd_test(obj, &opts32);
+    }
+    // Initialize some variables
     unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
     unsigned long len = bspace_calc_len(nbits_total);
     double lambda = bspace_calc_lambda(len, nbits_total);
@@ -256,40 +269,6 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     obj->intf->printf("  x = %.0f; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
     return ans;
-}
-
-static uint64_t get_bits64_from32(void *state)
-{
-    GeneratorState *obj = state;
-    uint64_t x = obj->gi->get_bits(obj->state);
-    uint64_t y = obj->gi->get_bits(obj->state);
-    return (x << 32) | y;
-}
-
-
-/**
- * @brief One-dimensional 32-bit birthday spacings test.
- * In the case of 32-bit PRNG it automatically switches to the 2D 32-bit
- * birthday spacings test.
- */
-TestResults bspace64_1d_ns_test(GeneratorState *obj, unsigned int nsamples)
-{
-    BSpaceNDOptions opts;
-    opts.nbits_per_dim = 64;
-    opts.ndims = 1;
-    opts.nsamples = nsamples;
-    opts.get_lower = 1;
-    if (obj->gi->nbits == 64) {
-        return bspace_nd_test(obj, &opts);
-    } else {
-        GeneratorInfo genenv_info = *(obj->gi);
-        GeneratorState genenv;
-        genenv_info.get_bits = get_bits64_from32;
-        genenv.gi = &genenv_info;
-        genenv.state = obj; // Enveloped generator
-        genenv.intf = obj->intf;
-        return bspace_nd_test(&genenv, &opts);
-    }
 }
 
 
@@ -979,7 +958,7 @@ static void sumcollector_calc_p(double *p, const int g, const int nmax)
  *    generators // Computing. 1991. V. 46. P. 53-65.
  *    https://doi.org/10.1007/BF02239011
  */
-TestResults sumcollector_test(GeneratorState *obj, unsigned long long nvalues)
+TestResults sumcollector_test(GeneratorState *obj, const SumCollectorOptions *opts)
 {
     TestResults ans = TestResults_create("sumcollector");
     const unsigned int g = 10, nmax = 49;
@@ -989,10 +968,11 @@ TestResults sumcollector_test(GeneratorState *obj, unsigned long long nvalues)
     unsigned long long *Oi_vec = calloc(nmax + 1, sizeof(unsigned long long));
     double *p_vec = calloc(nmax + 1, sizeof(double));
     obj->intf->printf("SumCollector test\n");
-    obj->intf->printf("  Number of values: %llu (2^%g)\n", nvalues, sr_log2(nvalues));
+    obj->intf->printf("  Number of values: %llu (2^%g)\n",
+        opts->nvalues, sr_log2(opts->nvalues));
     sumcollector_calc_p(p_vec, g, nmax);
 
-    for (unsigned long long i = 0; i < nvalues; i++) {
+    for (unsigned long long i = 0; i < opts->nvalues; i++) {
         uint64_t u = obj->gi->get_bits(obj->state) >> shr;
         uint64_t sum_new = u + sum;
         if (sum_new <= sum_max) {
@@ -1042,26 +1022,26 @@ TestResults sumcollector_test(GeneratorState *obj, unsigned long long nvalues)
  *
  * At larger samples (about 2^30 values) it catches 32-bit LCGs with (even
  * with prime modulus and shr3 (xorshift32).
- * @param nvalues Sample size, number of values (at least 2^27 is recommended).
+ * @param opts  Test options (nvalues - sample size, number of values)
  */
-TestResults mod3_test(GeneratorState *obj, unsigned long long nvalues)
+TestResults mod3_test(GeneratorState *obj, const Mod3Options *opts)
 {
     TestResults ans = TestResults_create("mod3");
     const size_t ntuples = 19683; // 3^9
     unsigned long long *Oi = calloc(ntuples, sizeof(unsigned long long));
     uint32_t tuple = 0;
     obj->intf->printf("mod3 test\n");
-    obj->intf->printf("  Sample size: %llu values\n", nvalues);
+    obj->intf->printf("  Sample size: %llu values\n", opts->nvalues);
     for (int i = 0; i < 9; i++) {
         int d = obj->gi->get_bits(obj->state) % 3;
         tuple = (tuple * 3 + d) % ntuples;
     }
-    for (unsigned long long i = 0; i < nvalues; i++) {
+    for (unsigned long long i = 0; i < opts->nvalues; i++) {
         Oi[tuple]++;
         int d = obj->gi->get_bits(obj->state) % 3;
         tuple = (tuple * 3 + d) % ntuples;
     }
-    double Ei = (double) nvalues / (double) ntuples;
+    double Ei = (double) opts->nvalues / (double) ntuples;
     ans.x = 0.0;
     for (size_t i = 0; i < ntuples; i++) {
         ans.x += (Oi[i] - Ei) * (Oi[i] - Ei) / Ei;
@@ -1081,10 +1061,10 @@ TestResults mod3_test(GeneratorState *obj, unsigned long long nvalues)
 /**
  * @brief Monobit frequency test.
  */
-TestResults monobit_freq_test(GeneratorState *obj)
+TestResults monobit_freq_test(GeneratorState *obj, const MonobitFreqOptions *opts)
 {
     int sum_per_byte[256];
-    unsigned long long len = 1ul << 28;
+    unsigned long long len = opts->nvalues;
     TestResults ans;
     ans.name = "MonobitFreq";
     for (size_t i = 0; i < 256; i++) {
@@ -1220,8 +1200,7 @@ TestResults word16_freq_test(GeneratorState *obj)
 
 TestResults monobit_freq_test_wrap(GeneratorState *obj, const void *udata)
 {
-    (void) udata;
-    return monobit_freq_test(obj);
+    return monobit_freq_test(obj, udata);
 }
 
 TestResults byte_freq_test_wrap(GeneratorState *obj, const void *udata)
@@ -1268,4 +1247,14 @@ TestResults gap16_count0_test_wrap(GeneratorState *obj, const void *udata)
 {
     const Gap16Count0Options *opts = udata;
     return gap16_count0_test(obj, opts->ngaps);
+}
+
+TestResults mod3_test_wrap(GeneratorState *obj, const void *udata)
+{
+    return mod3_test(obj, udata);
+}
+
+TestResults sumcollector_test_wrap(GeneratorState *obj, const void *udata)
+{
+    return sumcollector_test(obj, udata);
 }

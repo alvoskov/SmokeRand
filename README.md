@@ -712,6 +712,12 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 
 # Versions history
 
+08.02.2025: SmokeRand 0.21.
+
+- Scripted versions of all four general purpose batteries: `express`, `brief`,
+  `default`, `full`.
+- Refactoring of C versions of batteries.
+
 07.02.2025: SmokeRand 0.20.
 
 - Preliminary support of user-defined batteries stored in text files.

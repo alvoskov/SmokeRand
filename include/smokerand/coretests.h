@@ -61,15 +61,40 @@ typedef struct {
     unsigned int step;
 } Bspace4x8dDecOptions;
 
+/**
+ * @brief Options for mod3 test.
+ * @details It is recommended to use samples with at least 2^27 values.
+ */
+typedef struct {
+    unsigned long long nvalues; ///< Number of values (sample size)
+} Mod3Options;
+
+/**
+ * @brief Monobit frequency test options.
+ * @details A recommended sample size (nvalues) is 2^28.
+ */
+typedef struct {
+    unsigned long long nvalues; ///< Number of pseudorandom values in the sample.
+} MonobitFreqOptions;
+
+
+/**
+ * @brief Sumcollector test options.
+ * @details A recommended sample size (nvalues) is 20e9
+ */
+typedef struct {
+    unsigned long long nvalues; ///< Number of pseudorandom values in the sample.
+} SumCollectorOptions;
+
+
 TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts);
-TestResults bspace64_1d_ns_test(GeneratorState *obj, unsigned int nsamples);
 TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step);
 TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts);
 TestResults gap_test(GeneratorState *obj, const GapOptions *opts);
 TestResults gap16_count0_test(GeneratorState *obj, long long ngaps);
-TestResults sumcollector_test(GeneratorState *obj, unsigned long long nvalues);
-TestResults mod3_test(GeneratorState *obj, unsigned long long nvalues);
-TestResults monobit_freq_test(GeneratorState *obj);
+TestResults sumcollector_test(GeneratorState *obj, const SumCollectorOptions *opts);
+TestResults mod3_test(GeneratorState *obj, const Mod3Options *opts);
+TestResults monobit_freq_test(GeneratorState *obj, const MonobitFreqOptions *opts);
 TestResults nbit_words_freq_test(GeneratorState *obj,
     const NBitWordsFreqOptions *opts);
 TestResults byte_freq_test(GeneratorState *obj);
@@ -86,4 +111,6 @@ TestResults bspace4_8d_decimated_test_wrap(GeneratorState *obj, const void *udat
 TestResults collisionover_test_wrap(GeneratorState *obj, const void *udata);
 TestResults gap_test_wrap(GeneratorState *obj, const void *udata);
 TestResults gap16_count0_test_wrap(GeneratorState *obj, const void *udata);
+TestResults mod3_test_wrap(GeneratorState *obj, const void *udata);
+TestResults sumcollector_test_wrap(GeneratorState *obj, const void *udata);
 #endif
