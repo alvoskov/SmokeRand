@@ -35,7 +35,7 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf,
         bspace4_16d_high = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 10,   .get_lower = 0};
 
     // Birthday spacings test with decimation
-    static const Bspace4x8dDecOptions bs_dec = {.step = 1 << 18};
+    static const BSpace4x8dDecimatedOptions bs_dec = {.step = 1 << 18};
 
     // CollisionOver tests options
     static const BSpaceNDOptions

@@ -59,7 +59,7 @@ typedef struct {
  */
 typedef struct {
     unsigned int step;
-} Bspace4x8dDecOptions;
+} BSpace4x8dDecimatedOptions;
 
 /**
  * @brief Options for mod3 test.

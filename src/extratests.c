@@ -335,11 +335,6 @@ void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf)
 ///// 2D Ising model based test /////
 /////////////////////////////////////
 
-typedef enum {
-    ising_wolff,
-    ising_metropolis
-} IsingAlgorithm;
-
 /**
  * @brief Lattice cell neighbours description for 2D Ising model.
  */
@@ -500,15 +495,6 @@ void Ising2DLattice_pass(Ising2DLattice *obj, GeneratorState *gs, IsingAlgorithm
 }
 
 /**
- * @brief Options for the PRNG test based on 2D Ising model.
- */
-typedef struct {
-    IsingAlgorithm algorithm; ///< Used algorithm (Metropolis, Wolff etc.)
-    unsigned long sample_len; ///< Number of calls per sample
-    unsigned int nsamples; ///< Number of samples for computation of E and C
-} Ising2DOptions;
-
-/**
  * @brief PRNG test based on Ising 2D model. It calculates internal energy
  * and heat capacity using Monte-Carlo method: Metropolis algorithm and Wolff
  * algorithm.
@@ -548,8 +534,9 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
         res.name = "ising2d_unknown";
         return res;
     }
-    gs->intf->printf("Ising 2D model test (L = %d, algorithm = %s)\n",
-        (int) obj.L, res.name);
+    gs->intf->printf("Ising 2D model test\n");
+    gs->intf->printf("  L = %d, algorithm = %s, sample_len = %lu, nsamples = %u\n",
+        (int) obj.L, res.name, opts->sample_len, opts->nsamples);
     // Warm-up
     for (unsigned int i = 0; i < opts->sample_len; i++) {
         Ising2DLattice_pass(&obj, gs, opts->algorithm);
@@ -645,4 +632,13 @@ void battery_ising(GeneratorInfo *gen, CallerAPI *intf,
     } else {
         TestsBattery_print_info(&bat);
     }
+}
+
+///////////////////////////////////////////////
+///// Interfaces (wrappers) for batteries /////
+///////////////////////////////////////////////
+
+TestResults ising2d_test_wrap(GeneratorState *obj, const void *udata)
+{
+    return ising2d_test(obj, udata);
 }

@@ -22,15 +22,10 @@
 
 PRNG_CMODULE_PROLOG
 
-typedef struct {
-    uint32_t x;
-} MinstdState;
-
-
 static inline uint64_t get_bits_raw(void *state)
 {
     static const int32_t m = 2147483647, a = 16807, q = 127773, r = 2836;
-    MinstdState *obj = state;
+    Lcg32State *obj = state;
     const uint32_t hi = obj->x / q;
     const uint32_t lo = obj->x - q * hi; // It is x mod q
     const int32_t t = a * lo - r * hi;
@@ -41,7 +36,7 @@ static inline uint64_t get_bits_raw(void *state)
 
 static void *create(const CallerAPI *intf)
 {
-    MinstdState *obj = intf->malloc(sizeof(MinstdState));
+    Lcg32State *obj = intf->malloc(sizeof(Lcg32State));
     obj->x = intf->get_seed64() >> 33;
     return (void *) obj;
 }
@@ -50,7 +45,7 @@ static void *create(const CallerAPI *intf)
 int run_self_test(const CallerAPI *intf)
 {
     const uint32_t x_ref = 1043618065;
-    MinstdState obj;
+    Lcg32State obj;
     obj.x = 1;
     for (size_t i = 0; i < 10000; i++) {
         get_bits_raw(&obj);

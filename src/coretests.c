@@ -333,7 +333,7 @@ static void bspace4_8d_decimated_pvalue(TestResults *ans, const char *name,
  */
 TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step)
 {
-    TestResults ans = TestResults_create("bspace4_8d");
+    TestResults ans = TestResults_create("bspace4_8d_dec");
     const unsigned int nbits_total = 32;
     size_t len = bspace_calc_len(nbits_total);
     double lambda = bspace_calc_lambda(len, nbits_total);
@@ -1065,8 +1065,12 @@ TestResults monobit_freq_test(GeneratorState *obj, const MonobitFreqOptions *opt
 {
     int sum_per_byte[256];
     unsigned long long len = opts->nvalues;
+    unsigned long long nbits_total = len * obj->gi->nbits;
     TestResults ans;
     ans.name = "MonobitFreq";
+    obj->intf->printf("Monobit frequency test\n");
+    obj->intf->printf("  Number of bits: %llu (2^%.2f)\n", nbits_total,
+        log(nbits_total) / log(2.0));
     for (size_t i = 0; i < 256; i++) {
         uint8_t u = i;
         sum_per_byte[i] = 0;
@@ -1090,8 +1094,6 @@ TestResults monobit_freq_test(GeneratorState *obj, const MonobitFreqOptions *opt
     ans.x = fabs((double) bitsum) / sqrt(len * obj->gi->nbits);
     ans.p = stdnorm_pvalue(ans.x);
     ans.alpha = stdnorm_cdf(ans.x);
-    obj->intf->printf("Monobit frequency test\n");
-    obj->intf->printf("  Number of bits: %llu\n", len * obj->gi->nbits);
     obj->intf->printf("  sum = %lld; x = %g; p = %g\n",
         bitsum, ans.x, ans.p);
     obj->intf->printf("\n");
@@ -1228,7 +1230,7 @@ TestResults bspace_nd_test_wrap(GeneratorState *obj, const void *udata)
 
 TestResults bspace4_8d_decimated_test_wrap(GeneratorState *obj, const void *udata)
 {
-    const Bspace4x8dDecOptions *opts = udata;
+    const BSpace4x8dDecimatedOptions *opts = udata;
     return bspace4_8d_decimated_test(obj, opts->step);
 }
 

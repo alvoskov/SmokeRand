@@ -11,10 +11,6 @@
 
 PRNG_CMODULE_PROLOG
 
-typedef struct {
-    uint64_t x;
-} Lcg64State;
-
 static inline uint64_t get_bits_raw(void *state)
 {
     Lcg64State *obj = state;

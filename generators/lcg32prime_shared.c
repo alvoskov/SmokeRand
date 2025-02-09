@@ -1,7 +1,14 @@
 /**
- * @file lcg69069_shared.c
+ * @file lcg32prime_shared_shared.c
  * @brief An implementation of classic 32-bit MCG with prime modulus.
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @details The multiplier is taken from:
+ *
+ *  1. P. L'Ecuyer. Tables of linear congruential generators of different
+ *  sizes and good lattice structure // Mathematics of Computation. 1999.
+ *  V. 68. N. 225. P. 249-260
+ *  http://dx.doi.org/10.1090/S0025-5718-99-00996-5
+ *
+ * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -9,14 +16,6 @@
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
-
-/**
- * @brief 32-bit LCG state.
- */
-typedef struct {
-    uint32_t x;
-} Lcg32State;
-
 
 static inline uint64_t get_bits_raw(void *state)
 {
