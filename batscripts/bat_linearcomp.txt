@@ -1,0 +1,16 @@
+# KISS93:         65,   1121,   35411,  >=999999
+# LFIB:           607,  185135, >= 500000
+# superduper64:   66,   131,    4293,   95945,    >= 1e6
+# tinymt32:       127,  8128,   341503, >=1000000
+# tinymt64:       127,  8128,   341503, >=999999
+# xoroshiro128+:  128,  8256,   349632, >=500000
+# xorshift128+:   128,  8256,   349632, >=500000
+# xoroshiro1024*: 1024, 1024,   >=500001
+# xorwow:         162,  323,    26085, >= 1000000
+linearcomp_low  test=linearcomp nbits=2000000 bitpos=low
+linearcomp_1    test=linearcomp nbits=2000000 bitpos=1
+linearcomp_2    test=linearcomp nbits=2000000 bitpos=2
+linearcomp_3    test=linearcomp nbits=2000000 bitpos=3
+linearcomp_4    test=linearcomp nbits=2000000 bitpos=4
+linearcomp_mid  test=linearcomp nbits=2000000 bitpos=mid
+linearcomp_high test=linearcomp nbits=2000000 bitpos=high

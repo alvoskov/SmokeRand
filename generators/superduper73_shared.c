@@ -1,10 +1,19 @@
 /**
  * @file superduper73_shared.c
  * @brief An implementation of 32-bit combined "Super Duper" PRNG
- * by G. Marsaglia.
- * @details 
+ * by G. Marsaglia et al.
+ * @details SuperDuper73 is a combined generator based on 32-bit "69069"
+ * MCG and xorshift32 LFSR. Proposed in the next work:
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * - Marsaglia G.,, Ananthanarayanan K., Paul N. 1973. How to use the McGill
+ *   random number package SUPER-DUPER. Tech. rep., School of Computer
+ *   Science, McGill University, Montreal, Canada.
+ *
+ * @copyright SuperDuper73 PRNG was proposed by Marsagla et al.
+ *
+ * Implementation for SmokeRand:
+ *
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.

@@ -11,7 +11,7 @@
  *    http://dx.doi.org/10.1090/S0025-5718-99-00996-5
  * 2. https://en.wikipedia.org/wiki/Linear_congruential_generator
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -19,13 +19,6 @@
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
-
-/**
- * @brief 64-bit LCG state.
- */
-typedef struct {
-    uint64_t x;
-} Lcg64State;
 
 /**
  * @brief A cross-compiler implementation of 64-bit LCG with prime modulus.

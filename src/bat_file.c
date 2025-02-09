@@ -11,6 +11,7 @@
 #include "smokerand/coretests.h"
 #include "smokerand/lineardep.h"
 #include "smokerand/hwtests.h"
+#include "smokerand/extratests.h"
 #include "smokerand/entropy.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -242,25 +243,17 @@ static TestInfoArray load_tests(const char *filename)
     return tests;
 }
 
+#define GET_LIMITED_INTVALUE(name, xmin, xmax) \
+    long long name = TestInfo_get_limited_intvalue(obj, #name, xmin, xmax, errmsg); \
+    if (name == LLONG_MAX) return 0;
+
 
 static int parse_bspace_nd(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long nbits_per_dim = TestInfo_get_limited_intvalue(obj, "nbits_per_dim", 1, 64, errmsg);
-    if (nbits_per_dim == LLONG_MAX) {
-        return 0;
-    }
-    long long ndims = TestInfo_get_limited_intvalue(obj, "ndims", 1, 64, errmsg);
-    if (ndims == LLONG_MAX) {
-        return 0;
-    }
-    long long nsamples = TestInfo_get_limited_intvalue(obj, "nsamples", 1, 1ll << 30ll, errmsg);
-    if (nsamples == LLONG_MAX) {
-        return 0;
-    }
-    long long get_lower = TestInfo_get_limited_intvalue(obj, "get_lower", 0, 1, errmsg);
-    if (nsamples == LLONG_MAX) {
-        return 0;
-    }
+    GET_LIMITED_INTVALUE(nbits_per_dim, 1, 64)
+    GET_LIMITED_INTVALUE(ndims, 1, 64)
+    GET_LIMITED_INTVALUE(nsamples, 1, 1ll << 30ll)
+    GET_LIMITED_INTVALUE(get_lower, 0, 1)
     BSpaceNDOptions *opts = calloc(1, sizeof(BSpaceNDOptions));
     opts->nbits_per_dim = nbits_per_dim;
     opts->ndims = ndims;
@@ -285,10 +278,7 @@ static int parse_collisionover(TestDescription *out, const TestInfo *obj, char *
 
 static int parse_monobit_freq(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long nvalues = TestInfo_get_limited_intvalue(obj, "nvalues", 1024, 1ll << 50ll, errmsg);
-    if (nvalues == LLONG_MAX) {
-        return 0;
-    }
+    GET_LIMITED_INTVALUE(nvalues, 1024, 1ll << 50ll)
     MonobitFreqOptions *opts = calloc(1, sizeof(MonobitFreqOptions));
     opts->nvalues = nvalues;
     out->name = obj->testname;
@@ -303,20 +293,9 @@ static int parse_monobit_freq(TestDescription *out, const TestInfo *obj, char *e
 
 static int parse_nbit_words_freq(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long bits_per_word = TestInfo_get_limited_intvalue(obj, "bits_per_word", 1, 16, errmsg);
-    if (bits_per_word == LLONG_MAX) {
-        return 0;
-    }
-
-    long long average_freq = TestInfo_get_limited_intvalue(obj, "average_freq", 8, 1ll << 20ll, errmsg);
-    if (average_freq == LLONG_MAX) {
-        return 0;
-    }
-
-    long long nblocks = TestInfo_get_limited_intvalue(obj, "nblocks", 16, 1ll << 30ll, errmsg);
-    if (nblocks == LLONG_MAX) {
-        return 0;
-    }
+    GET_LIMITED_INTVALUE(bits_per_word, 1, 16)
+    GET_LIMITED_INTVALUE(average_freq, 8, 1ll << 20ll)
+    GET_LIMITED_INTVALUE(nblocks, 16, 1ll << 30ll)
     NBitWordsFreqOptions *opts = calloc(1, sizeof(NBitWordsFreqOptions));
     opts->bits_per_word = bits_per_word;
     opts->average_freq = average_freq;
@@ -332,12 +311,8 @@ static int parse_nbit_words_freq(TestDescription *out, const TestInfo *obj, char
 
 static int parse_bspace4_8d_decimated(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long step = TestInfo_get_limited_intvalue(obj, "step", 1, 1ll << 30ll, errmsg);
-    if (step == LLONG_MAX) {
-        return 0;
-    }
-
-    Bspace4x8dDecOptions *opts = calloc(1, sizeof(Bspace4x8dDecOptions));
+    GET_LIMITED_INTVALUE(step, 1, 1ll << 30ll)
+    BSpace4x8dDecimatedOptions *opts = calloc(1, sizeof(BSpace4x8dDecimatedOptions));
     opts->step = step;
     out->name = obj->testname;
     out->run = bspace4_8d_decimated_test_wrap;
@@ -350,14 +325,8 @@ static int parse_bspace4_8d_decimated(TestDescription *out, const TestInfo *obj,
 
 static int parse_gap(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long shl = TestInfo_get_limited_intvalue(obj, "shl", 1, 64, errmsg);
-    if (shl == LLONG_MAX) {
-        return 0;
-    }
-    long long ngaps = TestInfo_get_limited_intvalue(obj, "ngaps", 10000, 1ll << 40ll, errmsg);
-    if (ngaps == LLONG_MAX) {
-        return 0;
-    }
+    GET_LIMITED_INTVALUE(shl, 1, 64)
+    GET_LIMITED_INTVALUE(ngaps, 10000, 1ll << 40ll)
     GapOptions *opts = calloc(1, sizeof(GapOptions));
     opts->shl = shl;
     opts->ngaps = ngaps;
@@ -372,10 +341,7 @@ static int parse_gap(TestDescription *out, const TestInfo *obj, char *errmsg)
 
 static int parse_gap16_count0(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long ngaps = TestInfo_get_limited_intvalue(obj, "ngaps", 10000, 1ll << 40ll, errmsg);
-    if (ngaps == LLONG_MAX) {
-        return 0;
-    }
+    GET_LIMITED_INTVALUE(ngaps, 10000, 1ll << 40ll)
     Gap16Count0Options *opts = calloc(1, sizeof(Gap16Count0Options));
     opts->ngaps = ngaps;
     out->name = obj->testname;
@@ -392,10 +358,7 @@ static int parse_gap16_count0(TestDescription *out, const TestInfo *obj, char *e
 
 static int parse_hamming_ot(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long nbytes = TestInfo_get_limited_intvalue(obj, "nbytes", 65536, 1ll << 40ll, errmsg);
-    if (nbytes == LLONG_MAX) {
-        return 0;
-    }
+    GET_LIMITED_INTVALUE(nbytes, 65536, 1ll << 50ll)
     int is_ok;
     const char *m_txt[] = {"values", "bytes", "bytes_low8", "bytes_low1", NULL};
     const int m_codes[] = {hamming_ot_values, hamming_ot_bytes,
@@ -420,10 +383,7 @@ static int parse_hamming_ot(TestDescription *out, const TestInfo *obj, char *err
 
 static int parse_hamming_ot_long(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long nvalues = TestInfo_get_limited_intvalue(obj, "nvalues", 65536, 1ll << 40ll, errmsg);
-    if (nvalues == LLONG_MAX) {
-        return 0;
-    }
+    GET_LIMITED_INTVALUE(nvalues, 65536, 1ll << 50ll)
     int is_ok;
     const char *ws_txt[] = {"w128", "w256", "w512", "w1024", NULL};
     const int ws_codes[] = {hamming_ot_w128, hamming_ot_w256,
@@ -447,10 +407,7 @@ static int parse_hamming_ot_long(TestDescription *out, const TestInfo *obj, char
 
 static int parse_linearcomp(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long nbits = TestInfo_get_limited_intvalue(obj, "nbits", 8, 1ll << 30ll, errmsg);
-    if (nbits == LLONG_MAX) {
-        return 0;
-    }
+    GET_LIMITED_INTVALUE(nbits, 8, 1ll << 30ll);
     const char *bitpos_descr = TestInfo_get_value(obj, "bitpos");
     long long bitpos;
     if (!strcmp(bitpos_descr, "low")) {
@@ -478,16 +435,10 @@ static int parse_linearcomp(TestDescription *out, const TestInfo *obj, char *err
 
 static int parse_matrixrank(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long n = TestInfo_get_limited_intvalue(obj, "n", 256, 65536, errmsg);
-    if (n == LLONG_MAX) {
-        return 0;
-    } else if (n % 256 != 0) {
+    GET_LIMITED_INTVALUE(max_nbits, 8, 64)
+    GET_LIMITED_INTVALUE(n, 256, 65536)
+    if (n % 256 != 0) {
         snprintf(errmsg, ERRMSG_BUF_SIZE, "'n' value must be divisible by 256");
-        return 0;
-    }
-
-    long long max_nbits = TestInfo_get_limited_intvalue(obj, "max_nbits", 8, 64, errmsg);
-    if (max_nbits == LLONG_MAX) {
         return 0;
     }
     MatrixRankOptions *opts = calloc(1, sizeof(MatrixRankOptions));
@@ -503,10 +454,7 @@ static int parse_matrixrank(TestDescription *out, const TestInfo *obj, char *err
 
 static int parse_mod3(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long nvalues = TestInfo_get_limited_intvalue(obj, "nvalues", 100000, 1ll << 50ll, errmsg);
-    if (nvalues == LLONG_MAX) {
-        return 0;
-    }
+    GET_LIMITED_INTVALUE(nvalues, 100000, 1ll << 50ll)
     Mod3Options *opts = calloc(1, sizeof(Mod3Options));
     opts->nvalues = nvalues;
     out->name = obj->testname;
@@ -519,10 +467,7 @@ static int parse_mod3(TestDescription *out, const TestInfo *obj, char *errmsg)
 
 static int parse_sumcollector(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    long long nvalues = TestInfo_get_limited_intvalue(obj, "nvalues", 100000, 1ll << 50ll, errmsg);
-    if (nvalues == LLONG_MAX) {
-        return 0;
-    }
+    GET_LIMITED_INTVALUE(nvalues, 100000, 1ll << 50ll)
     SumCollectorOptions *opts = calloc(1, sizeof(SumCollectorOptions));
     opts->nvalues = nvalues;
     out->name = obj->testname;
@@ -532,6 +477,33 @@ static int parse_sumcollector(TestDescription *out, const TestInfo *obj, char *e
     out->ram_load = ram_hi;
     return 1;
 }
+
+
+static int parse_ising2d(TestDescription *out, const TestInfo *obj, char *errmsg)
+{
+    GET_LIMITED_INTVALUE(sample_len, 100, 10000000000);
+    GET_LIMITED_INTVALUE(nsamples, 3, 100000);
+    int is_ok;
+    const char *alg_txt[] = {"wolff", "metropolis", NULL};
+    const int alg_codes[] = {ising_wolff, ising_metropolis, 0};
+    IsingAlgorithm algorithm = TestInfo_value_to_code(obj, "algorithm",
+        alg_txt, alg_codes, errmsg, &is_ok);
+    if (!is_ok) {
+        return 0;
+    }
+
+    Ising2DOptions *opts = calloc(1, sizeof(Ising2DOptions));
+    opts->sample_len = sample_len;
+    opts->nsamples = nsamples;
+    opts->algorithm = algorithm;
+    out->name = obj->testname;
+    out->run = ising2d_test_wrap;
+    out->udata = opts;
+    out->nseconds = 1;
+    out->ram_load = ram_hi;
+    return 1;
+}
+
 
 
 
@@ -557,6 +529,7 @@ int battery_file(const char *filename, GeneratorInfo *gen, CallerAPI *intf,
         {"gap16_count0", parse_gap16_count0},
         {"hamming_ot", parse_hamming_ot},
         {"hamming_ot_long", parse_hamming_ot_long},
+        {"ising2d", parse_ising2d},
         {"linearcomp", parse_linearcomp},
         {"matrixrank", parse_matrixrank},
         {"mod3", parse_mod3},

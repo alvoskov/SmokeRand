@@ -1,7 +1,7 @@
 /**
  * @file lcg69069_shared.c
  * @brief An implementation of classic 32-bit LCG suggested by G.Marsaglia.
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -9,14 +9,6 @@
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
-
-/**
- * @brief 32-bit LCG state.
- */
-typedef struct {
-    uint32_t x;
-} Lcg32State;
-
 
 static inline uint64_t get_bits_raw(void *state)
 {

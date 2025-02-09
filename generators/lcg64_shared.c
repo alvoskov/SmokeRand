@@ -10,7 +10,7 @@
  *    V. 52. N. 2. P. 443-458. https://doi.org/10.1002/spe.3030
  * 2. TAOCP2.
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -18,10 +18,6 @@
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
-
-typedef struct {
-    uint64_t x;
-} Lcg64State;
 
 static inline uint64_t get_bits_raw(void *state)
 {

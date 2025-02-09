@@ -28,7 +28,7 @@ void battery_express(GeneratorInfo *gen, CallerAPI *intf,
 {
     static const BSpaceNDOptions
         bspace32_1d = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 1024, .get_lower = 1};
-    static const Bspace4x8dDecOptions bs_dec = {.step = 1 << 7};
+    static const BSpace4x8dDecimatedOptions bs_dec = {.step = 1 << 7};
     static const NBitWordsFreqOptions
         byte_freq   = {.bits_per_word = 8, .average_freq = 256, .nblocks = 256};
 
