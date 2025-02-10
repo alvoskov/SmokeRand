@@ -1,97 +1,90 @@
-/*
-NOT OPTIMIZED! Optimize input/output permutations!
-https://github.com/dhuertas/DES/blob/master/des.c
-https://page.math.tu-berlin.de/~kant/teaching/hess/krypto-ws2006/des.htm
-https://people.csail.mit.edu/rivest/pubs/pubs/Riv85.txt
-https://github.com/openwebos/qt/blob/master/src/3rdparty/des/des.cpp#L489
-https://www.schneier.com/academic/twofish/performance/
-FIPS PUB 46-3
-*/
+/**
+ * @file des_shared.c
+ * @brief DES based PRNG implementation.
+ * @details DES is an obsolete block cipher with 64-bit blocks and 56-bit key.
+ * This implementation has some simple optimizations and has a speed around
+ * 30 cpb. It also equipped with an internal self-test based on the test
+ * suggested by Ronald L. Rivest.
+ *
+ * References:
+ *
+ * - FIPS PUB 46-3. Data Encryption Standard (DES)
+ *   https://csrc.nist.gov/pubs/fips/46-3/final
+ * - Ronald L. Rivest. Testing implementations of DES. 1985.
+ *   https://people.csail.mit.edu/rivest/pubs/pubs/Riv85.txt
+ * - Bruce Schneier Twofish's Performance vs. Other Block Ciphers
+ *   (on a Pentium) https://www.schneier.com/academic/twofish/performance/
+ * - https://github.com/dhuertas/DES/blob/master/des.c
+ * - https://page.math.tu-berlin.de/~kant/teaching/hess/krypto-ws2006/des.htm
+ * - https://github.com/openwebos/qt/blob/master/src/3rdparty/des/des.cpp#L489
+ *
+ * @copyright This PRNG uses code from two other DES implementations licensed
+ * under the MIT license:
+ *
+ * Non-optimized (naive) DES implementation by D.H. Gonzales.
+ * (c) 2020 Daniel Huertas Gonzalez (huertas.dani@gmail.com)
+ * https://github.com/dhuertas/DES/blob/master/des.c
+ *
+ * Optimized implementation of DES encryption for NTLM.
+ * (c) 1997-2005 Simon Tatham.
+ * https://github.com/openwebos/qt/blob/master/src/3rdparty/des/des.cpp#L489
+ *
+ * Adaptation for SmokeRand:
+ *
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 
-/*
- * Data Encryption Standard
- * An approach to DES algorithm
- * 
- * By: Daniel Huertas Gonzalez
- * Email: huertas.dani@gmail.com
- * Version: 0.1
- * 
- * Based on the document FIPS PUB 46-3
- */
-
-#define LB32_MASK   0x00000001
 #define LB64_MASK   0x0000000000000001
 #define L64_MASK    0x00000000ffffffff
 #define H64_MASK    0xffffffff00000000
-
-/* Initial Permutation Table */
-static const char IP[] = {
-    58, 50, 42, 34, 26, 18, 10,  2, 
-    60, 52, 44, 36, 28, 20, 12,  4, 
-    62, 54, 46, 38, 30, 22, 14,  6, 
-    64, 56, 48, 40, 32, 24, 16,  8, 
-    57, 49, 41, 33, 25, 17,  9,  1, 
-    59, 51, 43, 35, 27, 19, 11,  3, 
-    61, 53, 45, 37, 29, 21, 13,  5, 
-    63, 55, 47, 39, 31, 23, 15,  7
-};
-
-/* Inverse Initial Permutation Table */
-static const char PI[] = {
-    40,  8, 48, 16, 56, 24, 64, 32, 
-    39,  7, 47, 15, 55, 23, 63, 31, 
-    38,  6, 46, 14, 54, 22, 62, 30, 
-    37,  5, 45, 13, 53, 21, 61, 29, 
-    36,  4, 44, 12, 52, 20, 60, 28, 
-    35,  3, 43, 11, 51, 19, 59, 27, 
-    34,  2, 42, 10, 50, 18, 58, 26, 
-    33,  1, 41,  9, 49, 17, 57, 25
-};
 
 /**
  * @brief The S-box table in the optimized format: we use
  * @details Possible code for conversion:
  *
-uint32_t des_pfunc(uint32_t x)
-{
-    uint64_t out = x;
-    for (int j = 0; j < 32; j++) {
-        out <<= 1;
-        out |= (x >> (32 - P[j])) & 0x1;
-    }
-    return out;
-}
-
- * int main()
- * {
- *    for (int i = 0; i < 8; i++) {
- *        for (int j = 0; j < 64; j++) {
- *            int col = (j >> 1) & 0xF;
- *            int row = ((j >> 4) & 0x2) | (j & 0x1);
- *            int ind = (row << 4) | col;
- *            printf("%2d, ", S[i][ind]);
- *            if ((j + 1) % 16 == 0)
- *                printf("\n");
+ *     uint32_t des_pfunc(uint32_t x)
+ *     {
+ *         uint64_t out = x;
+ *         for (int j = 0; j < 32; j++) {
+ *             out <<= 1;
+ *             out |= (x >> (32 - P[j])) & 0x1;
+ *         }
+ *         return out;
+ *     }
+ *
+ *     int main()
+ *     {
+ *        for (int i = 0; i < 8; i++) {
+ *            for (int j = 0; j < 64; j++) {
+ *                int col = (j >> 1) & 0xF;
+ *                int row = ((j >> 4) & 0x2) | (j & 0x1);
+ *                int ind = (row << 4) | col;
+ *                printf("%2d, ", S[i][ind]);
+ *                if ((j + 1) % 16 == 0)
+ *                    printf("\n");
+ *            }
+ *            printf("\n");
  *        }
- *        printf("\n");
- *    }
- *    return 0;
- * }
-
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 64; j++) {
-            uint32_t s_output = ((uint32_t) (Sx[i][j])) << (28 - 4*i);
-            printf("0x%8.8X, ", (uint32_t) des_pfunc(s_output));
-            if ((j + 1) % 8 == 0) {
-                printf("\n");
-            }
-        }
-        printf("\n");
-    }
+ *        return 0;
+ *     }
+ *
+ *     for (int i = 0; i < 8; i++) {
+ *         for (int j = 0; j < 64; j++) {
+ *             uint32_t s_output = ((uint32_t) (Sx[i][j])) << (28 - 4*i);
+ *             printf("0x%8.8X, ", (uint32_t) des_pfunc(s_output));
+ *             if ((j + 1) % 8 == 0) {
+ *                 printf("\n");
+ *             }
+ *         }
+ *         printf("\n");
+ *     }
  */
 static const uint32_t Sw[8][64] = {{ // 0
     0x00808200, 0x00000000, 0x00008000, 0x00808202, 0x00808002, 0x00008202, 0x00000002, 0x00008000, 
@@ -199,31 +192,21 @@ static const char iteration_shift[] = {
 };
 
 
-/* initial permutation */
-static inline uint64_t init_perm_func(uint64_t x)
-{
-    uint64_t out = 0;
-    for (int i = 0; i < 64; i++) {
-        out <<= 1;
-        out |= (x >> (64-IP[i])) & LB64_MASK;
-    }
-    return out;
-}
+/**
+ * @brief DES round keys with 6-bit digits unwrapped into bytes.
+ * Odd and even 6-bit digits are kept in different 32-bit words.
+ */
+typedef struct {
+    uint32_t k0246; ///< Keeps 6-bit parts/digits 0,2,4,6 (0 is the highest digit)
+    uint32_t k1357; ///< Keeps 6-bit parts/digits 1,3,5,7 (1 is the highest digit)
+} DESSubkey;
 
-
-/* inverse initial permutation */
-static inline uint64_t inv_init_perm_func(uint32_t L, uint32_t R)
-{
-    uint64_t x = (((uint64_t) R) << 32) | (uint64_t) L;
-    uint64_t out = 0;
-    for (int i = 0; i < 64; i++) {
-        out <<= 1;
-        out |= (x >> (64 - PI[i])) & LB64_MASK;
-    }
-    return out;
-}
-
-void fill_key_schedule(uint64_t *sub_key, uint64_t key)
+/**
+ * @brief Calculate DES key schedule.
+ * @param[in]  key     Input 56-bit key.
+ * @param[out] sub_key Output buffer for 16 round keys.
+ */
+void fill_key_schedule(DESSubkey *sub_key, uint64_t key)
 {
     uint64_t permuted_choice_1 = 0; // 56-bit
     uint64_t permuted_choice_2 = 0; // 56-bit
@@ -246,24 +229,37 @@ void fill_key_schedule(uint64_t *sub_key, uint64_t key)
         }
         permuted_choice_2 = 0;
         permuted_choice_2 = (((uint64_t) C) << 28) | (uint64_t) D ;
-        sub_key[i] = 0;
+        uint64_t sk = 0;
         for (int j = 0; j < 48; j++) {
-            sub_key[i] <<= 1;
-            sub_key[i] |= (permuted_choice_2 >> (56-PC2[j])) & LB64_MASK;
+            sk <<= 1;
+            sk |= (permuted_choice_2 >> (56-PC2[j])) & LB64_MASK;
         }
+        sub_key[i].k0246 = ((sk >> (42 - 24)) & 0x3F000000) |
+            ((sk >> (30 - 16)) & 0x3F0000) |
+            ((sk >> (18 - 8)) & 0x3F00) |
+            ((sk >> 6) & 0x3F);
+        sub_key[i].k1357 = ((sk >> (36 - 24)) & 0x3F000000) |
+            ((sk >> (24 - 16)) & 0x3F0000) |
+            ((sk >> (12 - 8)) & 0x3F00) |
+            (sk & 0x3F);
     }
 }
 
 
-
+/**
+ * @brief DES PRNG state.
+ */
 typedef struct {
     uint64_t ctr;
     uint64_t key;
     uint64_t out;
-    uint64_t sub_key[16];
+    DESSubkey sub_key[16];
 } DESState;
 
 
+/**
+ * @brief Initialize DES-based PRNG.
+ */
 void DESState_init(DESState *obj, uint64_t key)
 {
     obj->ctr = 0;
@@ -271,108 +267,94 @@ void DESState_init(DESState *obj, uint64_t key)
     fill_key_schedule(obj->sub_key, key);
 }
 
-
-
-
-
-// Expansion permutation
-// Highest byte is 1, lowest byte is 32
-// 32**1  2  3  4  5** 4  5  6  7  8  9**   <== 1-12
-//  8  9 10 11 12 13**12 13 14 15 16 17**   <== 13-24
-// 16 17 18 19 20 21**20 21 22 23 24 25**   <== 25-36
-// 24 25 26 27 28 29**28 29 30 31 32**1**   <== 37-48
-//
-//
-//            1-8  9-16 17-24 25-32: w32
-// 1-8 9-16 17-24 25-32 33-40 41-48: w48
-/*
-uint64_t des_expand(uint32_t R)
-{
-    uint64_t r = R;
-    uint64_t e = ((r & 0x1) << 47) | (r >> 31);
-    e |= (r & 0xF8000000) << (42 - 27);
-    e |= (r & 0x1F800000) << (36 - 23);
-    e |= (r & 0x01F80000) << (30 - 19);
-    e |= (r & 0x001F8000) << (24 - 15);
-    e |= (r & 0x0001F800) << (18 - 11);
-    e |= (r & 0x00001F80) << (12 - 7);
-    e |= (r & 0x000001F8) << (6 - 3);
-    e |= (r & 0x0000001F) << 1;
-    return e;
-}
-*/
-
-static inline uint32_t des_ff(uint32_t x, uint64_t key)
-{
-    int ind0 = (x & 0xF8000000) >> 27 | ((x & 0x1) << 5);
-    int ind1 = (x & 0x1F800000) >> 23;
-    int ind2 = (x & 0x01F80000) >> 19;
-    int ind3 = (x & 0x001F8000) >> 15;
-    int ind4 = (x & 0x0001F800) >> 11;
-    int ind5 = (x & 0x00001F80) >> 7;
-    int ind6 = (x & 0x000001F8) >> 3;
-    int ind7 = ((x & 0x0000001F) << 1) | (x >> 31);
-
-    ind0 ^= (key >> 42);
-    ind1 ^= (key >> 36) & 0x3F;
-    ind2 ^= (key >> 30) & 0x3F;
-    ind3 ^= (key >> 24) & 0x3F;
-    ind4 ^= (key >> 18) & 0x3F;
-    ind5 ^= (key >> 12) & 0x3F;
-    ind6 ^= (key >> 6) & 0x3F;
-    ind7 ^= key & 0x3F;
-
-    uint32_t s_output = Sw[0][ind0] |
-            Sw[1][ind1] |
-            Sw[2][ind2] |
-            Sw[3][ind3] |
-            Sw[4][ind4] |
-            Sw[5][ind5] |
-            Sw[6][ind6] |
-            Sw[7][ind7];
-    return s_output;
-}
-
-
-/*
- * The DES function
- * input: 64 bit message
- * key: 64 bit key for encryption/decryption
- * mode: 'e' = encryption; 'd' = decryption
+/**
+ * @brief DES round function that uses pre-calculated lookup tables
+ * and a pre-parsed round key.
+ * @details It consists of the next step:
+ *
+ * 1. Extract 6-bit digits from the input 32-bit word and apply
+ *    pre-parsed round key.
+ * 2. Apply S-boxes and output permutations using the pre-calculated
+ *    lookup tables
  */
-void DESState_go(DESState *obj, char mode)
+static inline uint32_t des_ff(uint32_t x, DESSubkey key)
 {
-    uint64_t init_perm_res  = init_perm_func(obj->ctr);
-    uint32_t L = (uint32_t) (init_perm_res >> 32) & L64_MASK;
-    uint32_t R = (uint32_t) init_perm_res & L64_MASK;
-    // DES rounds
-    if (mode == 'e') {
-        // Encryption
-        for (int i = 0; i < 16; i++) {
-            uint32_t temp = R;
-            R = L ^ des_ff(R, obj->sub_key[i]);
-            L = temp;
-            
-        }
-    } else {
-        // Decryption
-        for (int i = 0; i < 16; i++) {
-            uint32_t temp = R;
-            R = L ^ des_ff(R, obj->sub_key[15-i]);
-            L = temp;
-        }
+    uint32_t x0246 = (rotr32(x, 3) & 0x3F3F3F3F) ^ key.k0246;
+    uint32_t x1357 = (rotl32(x, 1) & 0x3F3F3F3F) ^ key.k1357;
+    uint32_t out =
+            Sw[0][x0246 >> 24] |
+            Sw[1][x1357 >> 24] |
+            Sw[2][(x0246 >> 16) & 0xFF] |
+            Sw[3][(x1357 >> 16) & 0xFF] |
+            Sw[4][(x0246 >> 8) & 0xFF] |
+            Sw[5][(x1357 >> 8) & 0xFF] |
+            Sw[6][x0246 & 0xFF] |
+            Sw[7][x1357 & 0xFF];
+    return out;
+}
+
+#define bitswap(L, R, n, mask) { \
+    uint32_t swap = mask & ( (R >> n) ^ L ); \
+    R ^= swap << n; \
+    L ^= swap; }
+
+/* Initial permutation */
+#define IP(L, R) {\
+    bitswap(R, L,  4, 0x0F0F0F0F) \
+    bitswap(R, L, 16, 0x0000FFFF) \
+    bitswap(L, R,  2, 0x33333333) \
+    bitswap(L, R,  8, 0x00FF00FF) \
+    bitswap(R, L,  1, 0x55555555)}
+
+/* Final permutation */
+#define FP(L, R) {\
+	bitswap(R, L,  1, 0x55555555) \
+	bitswap(L, R,  8, 0x00FF00FF) \
+	bitswap(L, R,  2, 0x33333333) \
+	bitswap(R, L, 16, 0x0000FFFF) \
+	bitswap(R, L,  4, 0x0F0F0F0F)}
+
+
+/**
+ * @brief Encrypt 64-bit block using DES.
+ */
+uint64_t DESState_encrypt(DESState *obj, uint64_t in)
+{
+    uint32_t L = (uint32_t) (in >> 32) & L64_MASK;
+    uint32_t R = (uint32_t) (in) & L64_MASK;
+    IP(L, R);
+    for (int i = 0; i < 16; i += 2) {
+        L ^= des_ff(R, obj->sub_key[i]);
+        R ^= des_ff(L, obj->sub_key[i + 1]);
+    }
+    FP(R, L);
+    return (((uint64_t) R) << 32) | (uint64_t) L;
+}
+
+/**
+ * @brief Decrypt 64-bit block using DES.
+ */
+uint64_t DESState_decrypt(DESState *obj, uint64_t in)
+{
+    uint32_t L = (uint32_t) (in >> 32) & L64_MASK;
+    uint32_t R = (uint32_t) (in) & L64_MASK;
+    IP(L, R);
+    for (int i = 15; i >= 1; i -= 2) {
+        L ^= des_ff(R, obj->sub_key[i]);
+        R ^= des_ff(L, obj->sub_key[i - 1]);
     }
     // inverse initial permutation
-    obj->out = inv_init_perm_func(L, R);
+    FP(R, L);
+    return (((uint64_t) R) << 32) | (uint64_t) L;
 }
+
 
 
 
 static inline uint64_t get_bits_raw(void *state)
 {
     DESState *obj = state;
-    DESState_go(obj, 'e');
-    obj->ctr++;
+    obj->out = DESState_encrypt(obj, obj->ctr++);
     return obj->out;
 }
 
@@ -408,11 +390,16 @@ static int run_self_test(const CallerAPI *intf)
     uint64_t result = input;
     int is_ok = 1;
     for (int i = 0; i < 16; i++) {
-        char mode = (i % 2 == 0) ? 'e' : 'd';
+        char mode;
         DESState_init(obj, result);
         obj->ctr = result;
-        DESState_go(obj, mode);
-        result = obj->out;
+        if (i % 2 == 0) {
+            result = DESState_encrypt(obj, result);
+            mode = 'e';
+        } else {
+            result = DESState_decrypt(obj, result);
+            mode = 'd';
+        }
         intf->printf("%c: %016llx %016llx\n", mode, result, refval[i]);
         if (result != refval[i]) {
             is_ok = 0;

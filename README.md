@@ -126,12 +126,12 @@ Extra tests:
 A lot of pseudorandom number generators are supplied with SmokeRand. They can
 be divided into several groups:
 
-- Cryptographically secure: chacha, chacha_avx (ChaCha12), isaac64, speck128,
-  speck128_avx (Speck128/128).
-- Obsolete CSPRNG: rc4.
+- Cryptographically secure: chacha, chacha_avx (ChaCha12), hc256, isaac64,
+  speck128, speck128_avx (Speck128/128).
+- Obsolete CSPRNG: DES, GOST R 34.12-2015 "Magma", RC4.
 - Counter-based scramblers based on cryptographical primitives: philox,
-  philox32, threefry.
-- Lagged Fibonacci: alfib, alfib_mod, mlfib17_5, lfib_par, r1279.
+  philox32, speck128_r16, threefry.
+- Lagged Fibonacci: alfib, alfib_lux, alfib_mod, mlfib17_5, lfib_par, r1279.
 - Linear congruental: cmwc4096, drand48, lcg32prime, lcg64, lcg64prime, lcg96,
   lcg128, lcg128_full, lcg128_u32_full, lcg69069, minstd, mwc1616, mwc64,
   mwc128, randu, ranluxpp, seizgin63.
@@ -140,16 +140,16 @@ be divided into several groups:
 - "Weyl sequence" (LCG with a=1) with output scrambling: mulberry32, rrmxmx,
   splitmix, splitmix32, sqxor, sqxor32, wyrand.
 - "Weyl sequence" injected into reversible nonlinear transformation: sfc8,
-  sfc16, sfc32, sfc64
+  sfc16, sfc32, sfc64.
 - "Weyl sequence" injected into irreversible nonlinear transformation: cwg64,
-  stormdrop, msws.
-- Subtract with borrow: swb, swblux, swbw.
+  msws, stormdrop, stormdrop_old.
+- Subtract with borrow: swb, swblarge, swblux, swbw.
 - LSFR without scrambling: shr3, xsh, xorshift128, lfsr113, lfsr258, well1024a.
-- LSFR with scrambling: xorshift128p, xoroshiro128p, xoroshiro128pp,
-  xoroshiro1024st, xoroshiro1024stst, xorwow.
+- LSFR with scrambling: xorshift128p, xorshift128pp, xoroshiro128p,
+  xoroshiro128pp, xoroshiro1024st, xoroshiro1024stst, xorwow.
 - GSFR: mt19937, tinymt32, tinymt64.
-- Combined generators: kiss93, kiss99, kiss64, superduper73, superduper64,
-  superduper64_u32.
+- Combined generators: kiss93, kiss99, kiss64, lxm_64x128, superduper73,
+  superduper64, superduper64_u32.
 - Other: coveyou64, mrg32k3a, romutrio.
 
 
@@ -516,6 +516,7 @@ batteries and have mainly historical and educational interest.
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | N/A    | +       | >= 32 TiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | N/A    | Small   | 256 KiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 16 TiB
+ des-ctr           | u64    | +       | +     | +       |      |      |        |         |
  drand48           | u32    | 1       | 12    | 20      | 22/23| 0.72 | -      | -       | 1 MiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | +       | >= 1 TiB
  flea32x1          | u32    | +       | +     | 1       | 1    | 0.48 | +      | +       | 4 MiB

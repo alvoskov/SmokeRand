@@ -76,9 +76,9 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
 
     // Linear complexity tests
     static const LinearCompOptions
-        linearcomp_low  = {.nbits = 500000, .bitpos = linearcomp_bitpos_low},
-        linearcomp_mid  = {.nbits = 500000, .bitpos = linearcomp_bitpos_mid},
-        linearcomp_high = {.nbits = 500000, .bitpos = linearcomp_bitpos_high};
+        linearcomp_low  = {.nbits = 1000000, .bitpos = linearcomp_bitpos_low},
+        linearcomp_mid  = {.nbits = 1000000, .bitpos = linearcomp_bitpos_mid},
+        linearcomp_high = {.nbits = 1000000, .bitpos = linearcomp_bitpos_high};
 
     // Matrix rank tests
     static const MatrixRankOptions
