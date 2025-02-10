@@ -50,9 +50,9 @@ hamming_ot_u256    test=hamming_ot_long wordsize=w256   nvalues=8589934592 # 2^3
 hamming_ot_u512    test=hamming_ot_long wordsize=w512   nvalues=8589934592 # 2^33
 
 # Linear complexity tests
-linearcomp_high test=linearcomp nbits=500000 bitpos=high
-linearcomp_mid  test=linearcomp nbits=500000 bitpos=mid
-linearcomp_low  test=linearcomp nbits=500000 bitpos=low
+linearcomp_high test=linearcomp nbits=1000000 bitpos=high
+linearcomp_mid  test=linearcomp nbits=1000000 bitpos=mid
+linearcomp_low  test=linearcomp nbits=1000000 bitpos=low
 
 # Matrix rank tests
 matrixrank_4096       test=matrixrank n=4096 max_nbits=64
