@@ -1,11 +1,13 @@
 /**
  * @file xorgens_shared.c
  * @brief 64-bit version of xor4096i ("xorgens") generator by R.P. Brent.
- * @details
+ * @details This PRNG is based on xorgens 3.06 library by R.P. Brent.
+ * The code was simplified by exclusion of 32-bit architectures support.
+ * It was also made reentrant.
  *
- * https://maths-people.anu.edu.au/~brent/random.html
- * Based on xorgens 3.06 by R.P. Brent.
- * 
+ * References:
+ *
+ * - https://maths-people.anu.edu.au/~brent/random.html
  *
  * @copyright The original algorithm and its original implementations were
  * suggested by R.P. Brent. It was adapted to SmokeRand, C99 and multithreaded
@@ -71,11 +73,10 @@ void xor4096i_init(Xorgens4096 *obj, uint64_t seed)
 {
     uint64_t v;
     unsigned int k;
-
     obj->i = -1;
-    /* weyl = odd approximation to 2**wlen*(3-sqrt(5))/2. */
+    // weyl = odd approximation to 2**wlen * (3-sqrt(5))/2.
     obj->weyl = 0x61c8864680b583eb;                 
-    v = (seed != 0) ? seed: ~seed;  // v must be nonzero
+    v = (seed != 0) ? seed : ~seed;  // v must be nonzero
 
     for (k = wlen; k > 0; k--) {     // Avoid correlations for close seeds
         v ^= v << 10; v ^= v >> 15;  // Recurrence has period 2**wlen-1 
@@ -86,7 +87,7 @@ void xor4096i_init(Xorgens4096 *obj, uint64_t seed)
         v ^= v << 4;  v ^= v >> 13;
         obj->x[k] = v + (obj->w += obj->weyl);                
     }
-    for (obj->i = r-1, k = 4*r; k > 0; k--) { // Discard first 4*r results
+    for (obj->i = r - 1, k = 4 * r; k > 0; k--) { // Discard first 4*r results
         (void) xor4096i_lfsr(obj);
     }
 }
