@@ -1,9 +1,11 @@
 /*
-NOT OPTIMIZED!
+NOT OPTIMIZED! Optimize input/output permutations!
 https://github.com/dhuertas/DES/blob/master/des.c
 https://page.math.tu-berlin.de/~kant/teaching/hess/krypto-ws2006/des.htm
 https://people.csail.mit.edu/rivest/pubs/pubs/Riv85.txt
 https://github.com/openwebos/qt/blob/master/src/3rdparty/des/des.cpp#L489
+https://www.schneier.com/academic/twofish/performance/
+FIPS PUB 46-3
 */
 
 #include "smokerand/cinterface.h"
@@ -283,6 +285,7 @@ void DESState_init(DESState *obj, uint64_t key)
 //
 //            1-8  9-16 17-24 25-32: w32
 // 1-8 9-16 17-24 25-32 33-40 41-48: w48
+/*
 uint64_t des_expand(uint32_t R)
 {
     uint64_t r = R;
@@ -297,20 +300,39 @@ uint64_t des_expand(uint32_t R)
     e |= (r & 0x0000001F) << 1;
     return e;
 }
+*/
 
-
-static inline uint32_t des_spbox_perm(uint64_t s_input)
+static inline uint32_t des_ff(uint32_t x, uint64_t key)
 {
-    uint32_t s_output = Sw[0][s_input >> 42] |
-            Sw[1][(s_input >> 36) & 0x3F] |
-            Sw[2][(s_input >> 30) & 0x3F] |
-            Sw[3][(s_input >> 24) & 0x3F] |
-            Sw[4][(s_input >> 18) & 0x3F] |
-            Sw[5][(s_input >> 12) & 0x3F] |
-            Sw[6][(s_input >> 6) & 0x3F] |
-            Sw[7][s_input & 0x3F];
+    int ind0 = (x & 0xF8000000) >> 27 | ((x & 0x1) << 5);
+    int ind1 = (x & 0x1F800000) >> 23;
+    int ind2 = (x & 0x01F80000) >> 19;
+    int ind3 = (x & 0x001F8000) >> 15;
+    int ind4 = (x & 0x0001F800) >> 11;
+    int ind5 = (x & 0x00001F80) >> 7;
+    int ind6 = (x & 0x000001F8) >> 3;
+    int ind7 = ((x & 0x0000001F) << 1) | (x >> 31);
+
+    ind0 ^= (key >> 42);
+    ind1 ^= (key >> 36) & 0x3F;
+    ind2 ^= (key >> 30) & 0x3F;
+    ind3 ^= (key >> 24) & 0x3F;
+    ind4 ^= (key >> 18) & 0x3F;
+    ind5 ^= (key >> 12) & 0x3F;
+    ind6 ^= (key >> 6) & 0x3F;
+    ind7 ^= key & 0x3F;
+
+    uint32_t s_output = Sw[0][ind0] |
+            Sw[1][ind1] |
+            Sw[2][ind2] |
+            Sw[3][ind3] |
+            Sw[4][ind4] |
+            Sw[5][ind5] |
+            Sw[6][ind6] |
+            Sw[7][ind7];
     return s_output;
 }
+
 
 /*
  * The DES function
@@ -320,24 +342,23 @@ static inline uint32_t des_spbox_perm(uint64_t s_input)
  */
 void DESState_go(DESState *obj, char mode)
 {
-    uint64_t init_perm_res      = init_perm_func(obj->ctr);
+    uint64_t init_perm_res  = init_perm_func(obj->ctr);
     uint32_t L = (uint32_t) (init_perm_res >> 32) & L64_MASK;
     uint32_t R = (uint32_t) init_perm_res & L64_MASK;
     // DES rounds
     if (mode == 'e') {
         // Encryption
         for (int i = 0; i < 16; i++) {
-            uint64_t s_input = des_expand(R) ^ obj->sub_key[i];
             uint32_t temp = R;
-            R = L ^ des_spbox_perm(s_input);
+            R = L ^ des_ff(R, obj->sub_key[i]);
             L = temp;
+            
         }
     } else {
         // Decryption
         for (int i = 0; i < 16; i++) {
-            uint64_t s_input = des_expand(R) ^ obj->sub_key[15-i];            
             uint32_t temp = R;
-            R = L ^ des_spbox_perm(s_input);
+            R = L ^ des_ff(R, obj->sub_key[15-i]);
             L = temp;
         }
     }
