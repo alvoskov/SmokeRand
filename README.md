@@ -645,7 +645,7 @@ batteries and have mainly historical and educational interest.
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.40 | +      |         | >= 1 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | N/A    | Small   | 64 MiB
  wyrand            | u64    | +       | +     | +       | +    | 0.08 | +      |         | >= 1 TiB
- xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      |         | >= 1 TiB
+ xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      |         | 2 TiB
  xorshift128       | u32    | 2       | 4     | 6/7     | 8    | 0.41 | +      | -       | 128 KiB
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      |         | 32 GiB
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.19 | +      |         | >= 1 TiB
