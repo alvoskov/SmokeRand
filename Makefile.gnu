@@ -28,7 +28,7 @@ else ifeq ($(PLATFORM_NAME), GENERIC)
     PLATFORM_FLAGS=-DNO_X86_EXTENSIONS -DNOTHREADS
     IS_PORTABLE=1
 endif
-#------------------------------------------
+#-----------------------------------------------------------------------------
 CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native
 CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native
 LINKFLAGS = $(PLATFORM_FLAGS)
@@ -54,8 +54,10 @@ endif
 
 # Core library
 CORE_LIB = $(LIBDIR)/libsmokerand_core.a
-LIB_SOURCES = $(addprefix $(SRCDIR)/, core.c coretests.c entropy.c extratests.c fileio.c lineardep.c hwtests.c specfuncs.c)
-LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, apidefs.h cinterface.h core.h coretests.h entropy.h extratests.h fileio.h lineardep.h hwtests.h specfuncs.h)
+LIB_SOURCES = $(addprefix $(SRCDIR)/, core.c coretests.c \
+    entropy.c extratests.c fileio.c lineardep.c hwtests.c specfuncs.c)
+LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, apidefs.h cinterface.h core.h coretests.h \
+    entropy.h extratests.h fileio.h lineardep.h hwtests.h specfuncs.h)
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
 INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/core.h
 # Battery
@@ -67,30 +69,30 @@ EXE_NAMES = smokerand sr_tiny calibrate_dc6 test_funcs
 EXE_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXE_NAMES)))
 
 # Generators
-GEN_CUSTOM_SOURCES = $(addsuffix _shared.c,$(addprefix generators/, mixmax \
+GEN_CUSTOM_SOURCES = $(addsuffix _shared.c,$(addprefix generators/, ranluxpp \
     superduper64 superduper64_u32))
 ifeq ($(IS_PORTABLE), 1)
 GEN_ALL_SOURCES = $(addsuffix _shared.c,$(addprefix generators/, alfib_mod alfib \
-    chacha coveyou64 crand cmwc4096 drand48 isaac64 flea32x1 kiss64 kiss93 \
-    kiss99 lcg32prime lcg64 lcg96_portable lcg128_u32_portable lcg69069 \
-    lfib_par lfsr113 lfsr258 loop_7fff_w64 minstd mlfib17_5 msws mt19937 \
-    mulberry32 mwc64x mwc64 mwc4691 pcg32 pcg64_64 philox32 r1279 randu \
-    ranluxpp ranrot32 rc4 romutrio rrmxmx sapparot sapparot2 \
-    sfc8 sfc16 sfc32 sfc64 shr3 speck128 splitmix32 splitmix sqxor32 stormdrop \
-    superduper73 superduper64 superduper64_u32 swb swblarge swblux swbw threefry \
-    tinymt32 tinymt64 well1024a xoroshiro1024stst xoroshiro1024st \
-    xoroshiro128pp xoroshiro128p xorshift128p xorshift128 xorwow xsh))
+    chacha coveyou64 crand cmwc4096 cwg64 des drand48 efiix64x48 isaac64 \
+    flea32x1 kiss64 kiss93 kiss99 lcg32prime lcg64 lcg96_portable \
+    lcg128_u32_portable lcg69069 lfib_par lfsr113 lfsr258 loop_7fff_w64 \
+    lxm_64x128 macmarsa magma minstd mixmax mrg32k3a mlfib17_5 msws_ctr msws \
+    mt19937 mulberry32 mwc64x mwc64 mwc4691 pcg32 pcg64_64 philox32 philox2x32 \
+    r1279 ran randu ranq1 ranq2 ranrot_bi ranluxpp ranrot32 ranshi ranval rc4 \
+    rc4ok romutrio rrmxmx sapparot sapparot2 sfc8 sfc16 sfc32 sfc64 shr3 \
+    speck128 splitmix32 splitmix sqxor32 stormdrop stormdrop_old superduper73 \
+    superduper64 superduper64_u32 swb swblarge swblux swbw threefry threefry2x64 \
+    tinymt32 tinymt64 well1024a xorgens xorshift128 xorshift128p xoroshiro1024stst \
+    xoroshiro1024st xoroshiro128pp xoroshiro128p xorwow xsh))
 else
 GEN_ALL_SOURCES = $(wildcard generators/*.c)
-#GEN_ALL_SOURCES = $(filter-out $(GEN_CUSTOM_SOURCES), $(wildcard generators/*.c))
 endif
-#GEN_SOURCES = $(filter-out $(GEN_CUSTOM_SOURCES), $(GEN_ALL_SOURCES))
-GEN_SOURCES=$(GEN_ALL_SOURCES)
+GEN_SOURCES = $(filter-out $(GEN_CUSTOM_SOURCES), $(GEN_ALL_SOURCES))
 GEN_OBJFILES = $(patsubst %.c,%.o,$(subst generators/,$(BINDIR)/generators/obj/,$(GEN_SOURCES)))
-GEN_SHARED = $(patsubst %.c,%$(SO),$(subst generators/,$(BINDIR)/generators/lib, $(GEN_SOURCES)))
+GEN_SHARED = $(patsubst %.c,%$(SO),$(subst generators/,$(BINDIR)/generators/lib, $(GEN_ALL_SOURCES)))
 GEN_BINDIR = $(BINDIR)/generators
 
-
+#-----------------------------------------------------------------------------
 all: $(CORE_LIB) $(addprefix $(BINDIR)/, $(addsuffix $(EXE),$(EXE_NAMES))) generators
 
 $(CORE_LIB): $(LIB_OBJFILES)
@@ -115,25 +117,22 @@ $(LIB_OBJFILES) $(BAT_OBJFILES) $(EXE_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.c $
 
 generators: $(GEN_SHARED)
 
+# Linking crand PRNG requires linking with C standard library
 $(GEN_BINDIR)/libcrand_shared$(SO): $(GEN_BINDIR)/obj/crand_shared.o
 	$(CC) $(LINKFLAGS) -shared $< -s $(GEN_LFLAGS) -o $@
 
-#$(GEN_BINDIR)/libmixmax_shared$(SO): $(GEN_BINDIR)/obj/mixmax_shared.o $(GEN_BINDIR)/obj/mixmax/mixmax.o
-#	$(CC) $(LINKFLAGS) -shared $< $(GEN_BINDIR)/obj/mixmax/mixmax.o -s $(GEN_LFLAGS) -o $@
-
-
+# Generic rules for linking PRNG plugins
 $(GEN_BINDIR)/lib%$(SO): $(GEN_BINDIR)/obj/%.o
 	$(CC) $(LINKFLAGS) -shared $(GEN_CFLAGS) $< -s $(GEN_LFLAGS) -o $@
 
 $(GEN_OBJFILES): $(BINDIR)/generators/obj/%.o : generators/%.c $(INTERFACE_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
 
-
-# Generators that should be compiled from several files
-
-$(BINDIR)/generators/obj/mixmax/mixmax.o : generators/mixmax/mixmax.c $(INTERFACE_HEADERS)
+# Generators that depend on some extra header files that should be taken
+# into account in their dependency rules.
+$(GEN_BINDIR)/obj/ranluxpp_shared.o : generators/ranluxpp_shared.c \
+    generators/ranluxpp_helpers.h generators/ranluxpp_mulmod.h $(INTERFACE_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
-
 
 $(GEN_BINDIR)/obj/superduper64_shared.o : generators/superduper64_shared.c \
     generators/superduper64_body.h $(INTERFACE_HEADERS)
@@ -142,9 +141,6 @@ $(GEN_BINDIR)/obj/superduper64_shared.o : generators/superduper64_shared.c \
 $(GEN_BINDIR)/obj/superduper64_u32_shared.o : generators/superduper64_u32_shared.c \
     generators/superduper64_body.h $(INTERFACE_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
-
-# TODO: RANLUX!
-
 
 clean:
 ifeq ($(OS), Windows_NT)
