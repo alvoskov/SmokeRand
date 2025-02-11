@@ -503,13 +503,13 @@ batteries and have mainly historical and educational interest.
 
 # Tests results
 
- Algoritrhm        | Output | express | brief | default | full | cpb  | bday64 | TestU01 | PractRand 
+ Algorithm         | Output | express | brief | default | full | cpb  | bday64 | TestU01 | PractRand 
 -------------------|--------|---------|-------|---------|------|------|--------|---------|-----------
  aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      |         | >= 1 TiB
  alfib             | u64    | 2       | 5     | 6       | 8    | 0.23 | +      | Small   | 128 MiB
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    | +       | 4 GiB
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | N/A    | +       | 1 TiB
- ara32             | u32    | +       | +     | 1       | 1    | 0.96 | N/A    | +       | 512 MiB
+ ara32             | u32    | +       | +     | 1       | 1    | 0.96 | +      | +       | 512 MiB
  chacha            | u32    | +       | +     | +       | +    | 2.0  | N/A    | +       | >= 1 TiB
  chacha_avx        | u32    | +       | +     | +       | +    | 0.7  | N/A    | +       | >= 2 TiB
  chacha_ctr32      | u32    | +       | +     | +       | 1    | 2.0  | N/A    | +       | 256 GiB
@@ -518,7 +518,7 @@ batteries and have mainly historical and educational interest.
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 16 TiB
  des-ctr           | u64    | +       | +     | +       |      | 24   |        |         | >= 256 GiB
  drand48           | u32    | 1       | 12    | 20      | 22/23| 0.72 | -      | -       | 1 MiB
- efiix64x48        | u64    | +       | +     | +       | +    |      | +      |         |
+ efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      |         | >= 2 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | +       | >= 1 TiB
  flea32x1          | u32    | +       | +     | 1       | 1    | 0.48 | +      | +       | 4 MiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | N/A    | +       | >= 1 TiB
@@ -715,6 +715,13 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 - Passed dieharder: lcg64
 
 # Versions history
+
+12.02.2025: SmokeRand 0.233.
+
+- efiix64x48, DES-CTR, xorgens were added.
+- In `full` battery number of bits in linearcomp tests was increased to
+  1 million, mainly due to experiments with lower bits of xorgens and
+  other scrambled LFSRs.
 
 09.02.2025: SmokeRand 0.22.
 

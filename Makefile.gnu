@@ -67,8 +67,10 @@ EXE_NAMES = smokerand sr_tiny calibrate_dc6 test_funcs
 EXE_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXE_NAMES)))
 
 # Generators
+GEN_CUSTOM_SOURCES = $(addsuffix _shared.c,$(addprefix generators/, mixmax \
+    superduper64 superduper64_u32))
 ifeq ($(IS_PORTABLE), 1)
-GEN_SOURCES = $(addsuffix _shared.c,$(addprefix generators/, alfib_mod alfib \
+GEN_ALL_SOURCES = $(addsuffix _shared.c,$(addprefix generators/, alfib_mod alfib \
     chacha coveyou64 crand cmwc4096 drand48 isaac64 flea32x1 kiss64 kiss93 \
     kiss99 lcg32prime lcg64 lcg96_portable lcg128_u32_portable lcg69069 \
     lfib_par lfsr113 lfsr258 loop_7fff_w64 minstd mlfib17_5 msws mt19937 \
@@ -79,11 +81,15 @@ GEN_SOURCES = $(addsuffix _shared.c,$(addprefix generators/, alfib_mod alfib \
     tinymt32 tinymt64 well1024a xoroshiro1024stst xoroshiro1024st \
     xoroshiro128pp xoroshiro128p xorshift128p xorshift128 xorwow xsh))
 else
-GEN_SOURCES = $(wildcard generators/*.c)
+GEN_ALL_SOURCES = $(wildcard generators/*.c)
+#GEN_ALL_SOURCES = $(filter-out $(GEN_CUSTOM_SOURCES), $(wildcard generators/*.c))
 endif
+#GEN_SOURCES = $(filter-out $(GEN_CUSTOM_SOURCES), $(GEN_ALL_SOURCES))
+GEN_SOURCES=$(GEN_ALL_SOURCES)
 GEN_OBJFILES = $(patsubst %.c,%.o,$(subst generators/,$(BINDIR)/generators/obj/,$(GEN_SOURCES)))
-GEN_SHARED = $(patsubst %.c,%$(SO),$(subst generators/,$(BINDIR)/generators/lib,$(GEN_SOURCES)))
+GEN_SHARED = $(patsubst %.c,%$(SO),$(subst generators/,$(BINDIR)/generators/lib, $(GEN_SOURCES)))
 GEN_BINDIR = $(BINDIR)/generators
+
 
 all: $(CORE_LIB) $(addprefix $(BINDIR)/, $(addsuffix $(EXE),$(EXE_NAMES))) generators
 
@@ -121,6 +127,9 @@ $(GEN_BINDIR)/lib%$(SO): $(GEN_BINDIR)/obj/%.o
 
 $(GEN_OBJFILES): $(BINDIR)/generators/obj/%.o : generators/%.c $(INTERFACE_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
+
+
+# Generators that should be compiled from several files
 
 $(BINDIR)/generators/obj/mixmax/mixmax.o : generators/mixmax/mixmax.c $(INTERFACE_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
