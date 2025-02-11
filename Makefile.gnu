@@ -77,13 +77,14 @@ GEN_ALL_SOURCES = $(addsuffix _shared.c,$(addprefix generators/, alfib_mod alfib
     flea32x1 kiss64 kiss93 kiss99 lcg32prime lcg64 lcg96_portable \
     lcg128_u32_portable lcg69069 lfib_par lfsr113 lfsr258 loop_7fff_w64 \
     lxm_64x128 macmarsa magma minstd mixmax mrg32k3a mlfib17_5 msws_ctr msws \
-    mt19937 mulberry32 mwc64x mwc64 mwc4691 pcg32 pcg64_64 philox32 philox2x32 \
-    r1279 ran randu ranq1 ranq2 ranrot_bi ranluxpp ranrot32 ranshi ranval rc4 \
-    rc4ok romutrio rrmxmx sapparot sapparot2 sfc8 sfc16 sfc32 sfc64 shr3 \
-    speck128 splitmix32 splitmix sqxor32 stormdrop stormdrop_old superduper73 \
-    superduper64 superduper64_u32 swb swblarge swblux swbw threefry threefry2x64 \
-    tinymt32 tinymt64 well1024a xorgens xorshift128 xorshift128p xoroshiro1024stst \
-    xoroshiro1024st xoroshiro128pp xoroshiro128p xorwow xsh))
+    mt19937 mulberry32 mwc64x mwc64 mwc4691 mwc1616 mwc1616x mwc3232x pcg32 \
+    pcg64_64 philox32 philox2x32 r1279 ran randu ranq1 ranq2 ranrot_bi ranluxpp \
+    ranrot32 ranshi ranval rc4 rc4ok romutrio rrmxmx sapparot sapparot2 sfc8 \
+    sfc16 sfc32 sfc64 shr3 speck128 splitmix32 splitmix sqxor32 stormdrop \
+    stormdrop_old superduper73 superduper64 superduper64_u32 swb swblarge \
+    swblux swbw threefry threefry2x64 tinymt32 tinymt64 well1024a xorgens \
+    xorshift128 xorshift128p xoroshiro1024stst xoroshiro1024st xoroshiro128pp \
+    xoroshiro128p xorwow xsh))
 else
 GEN_ALL_SOURCES = $(wildcard generators/*.c)
 endif
