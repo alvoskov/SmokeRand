@@ -1,7 +1,7 @@
 /**
  * @file smokerand.c
  * @brief SmokeRand command line interface.
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -206,18 +206,19 @@ void print_help(void)
     "Usage: smokerand battery generator_lib [keys]\n"
     "battery: battery name; supported batteries:\n"
     "  General purpose batteries\n"
-    "  - express  Express battery (32-64 MiB of data)\n"
-    "  - brief    Fast battery (64-128 GiB of data)\n"
-    "  - default  Slower but more sensitive battery (128-256 GiB of data)\n"
-    "  - full     The slowest battery (1-2 TiB of data)\n"
+    "  - express   Express battery (32-64 MiB of data)\n"
+    "  - brief     Fast battery (64-128 GiB of data)\n"
+    "  - default   Slower but more sensitive battery (128-256 GiB of data)\n"
+    "  - full      The slowest battery (1-2 TiB of data)\n"
     "  Special batteries\n"
-    "  - birthday 64-bit birthday paradox based test.\n"
-    "  - ising    Ising model based tests: Wolff and Metropolis algorithms.\n"
-    "  - freq     8-bit and 16-bit words frequency adaptive tests.\n"
+    "  - birthday  64-bit birthday paradox based test.\n"
+    "  - ising     Ising model based tests: Wolff and Metropolis algorithms.\n"
+    "  - freq      8-bit and 16-bit words frequency adaptive tests.\n"  
+    "  - @filename Load a custom battery from the file.\n"
     "  Special modes\n"
-    "  - selftest Runs PRNG internal self-test (if available).\n"
-    "  - speed    Measure speed of the generator\n"
-    "  - stdout   Sends PRNG output to stdout in the binary form.\n"
+    "  - selftest  Runs PRNG internal self-test (if available).\n"
+    "  - speed     Measure speed of the generator\n"
+    "  - stdout    Sends PRNG output to stdout in the binary form.\n"
     "generator_lib: name of dynamic library with PRNG or special mode name.\n"
     "  Special modes names:\n"
     "  - stdin32, stdin64  Get random sequence from stdin\n"

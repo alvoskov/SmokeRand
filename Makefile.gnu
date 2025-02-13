@@ -25,7 +25,7 @@ else ifeq ($(PLATFORM_NAME), GENERIC)
     CC = gcc
     AR = ar
     GEN_CFLAGS = -fPIC
-    PLATFORM_FLAGS=-DNO_X86_EXTENSIONS -DNOTHREADS
+    PLATFORM_FLAGS=-DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY
     IS_PORTABLE=1
 endif
 #-----------------------------------------------------------------------------
