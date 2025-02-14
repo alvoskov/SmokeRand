@@ -632,7 +632,7 @@ batteries and have mainly historical and educational interest.
  stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | N/A    | Small   | 1 MiB
  superduper73      | u32    | 1       | 9     | 15      | 18   | 0.64 | +      | -       | 32 KiB
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      |         | 512 KiB
- superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | N/A    |         | >= 8 TiB
+ superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | +      |         | >= 32 TiB
  shr3              | u32    | 2       | 15    | 32      | 36   | 0.76 | N/A    | -       | 32 KiB
  swb               | u32    | 1       | 5     | 6       | 8    | 2.7  | N/A    | Small   | 128 MiB
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | Crush   | 4 TiB
