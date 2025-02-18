@@ -639,6 +639,7 @@ batteries and have mainly historical and educational interest.
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | +       | >= 2 TiB
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | N/A    | Crush   | 512 GiB
  swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | N/A    | +       | 4 GiB
+ taus88            | u32    | 2       | 3     | 5       |      |      |        |         | 32 KiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | N/A    | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      |         | 32 GiB
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | +       | >= 8 TiB
