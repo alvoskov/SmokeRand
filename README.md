@@ -511,10 +511,10 @@ batteries and have mainly historical and educational interest.
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | N/A    | +       | 1 TiB
  ara32             | u32    | +       | +     | 1       | 1    | 0.96 | +      | +       | 512 MiB
  chacha            | u32    | +       | +     | +       | +    | 2.0  | N/A    | +       | >= 1 TiB
- chacha_avx        | u32    | +       | +     | +       | +    | 0.7  | N/A    | +       | >= 2 TiB
+ chacha_avx        | u32    | +       | +     | +       | +    | 0.7  | +      | +       | >= 2 TiB
  chacha_ctr32      | u32    | +       | +     | +       | 1    | 2.0  | N/A    | +       | 256 GiB
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | N/A    | +       | >= 32 TiB
- coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | N/A    | Small   | 256 KiB
+ coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | Small   | 256 KiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 16 TiB
  des-ctr           | u64    | +       | +     | +       |      | 24   |        |         | >= 256 GiB
  drand48           | u32    | 1       | 12    | 20      | 22/23| 0.72 | -      | -       | 1 MiB
@@ -619,7 +619,7 @@ batteries and have mainly historical and educational interest.
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | N/A    | Crush   | >= 16 TiB
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | N/A    |         | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | N/A    |         | 128 GiB(stdin32)*
- sfc32             | u32    | +       | +     | +       | +    | 0.24 | N/A    |         | >= 4 TiB
+ sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      |         | >= 4 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | +       | >= 1 TiB
  speck128          | u64    | +       | +     | +       | +    | 3.1  | +      |         | >= 2 TiB
  speck128_avx      | u64    | +       | +     | +       | +    | 0.65 | +      |         | >= 2 TiB
@@ -633,14 +633,14 @@ batteries and have mainly historical and educational interest.
  superduper73      | u32    | 1       | 9     | 15      | 18   | 0.64 | +      | -       | 32 KiB
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      |         | 512 KiB
  superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | +      |         | >= 32 TiB
- shr3              | u32    | 2       | 15    | 32      | 36   | 0.76 | N/A    | -       | 32 KiB
+ shr3              | u32    | 2       | 15    | 32      | 36   | 0.76 | -(>>10)| -       | 32 KiB
  swb               | u32    | 1       | 5     | 6       | 8    | 2.7  | N/A    | Small   | 128 MiB
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | Crush   | 4 TiB
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | +       | >= 2 TiB
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | N/A    | Crush   | 512 GiB
  swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | N/A    | +       | 4 GiB
- taus88            | u32    | 2       | 3     | 5       |      |      |        |         | 32 KiB
- tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | N/A    | +       | 4 GiB
+ taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      |         | 32 KiB
+ tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      |         | 32 GiB
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | +       | >= 8 TiB
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      |         | >= 1 TiB
