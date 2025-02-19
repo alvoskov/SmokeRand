@@ -616,7 +616,7 @@ batteries and have mainly historical and educational interest.
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      |         | >= 2 TiB
  sapparot          | u32    | +       | 1     | 3       | 4    | 0.70 | N/A    | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | N/A    | +       | 2 TiB
- sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | N/A    | Crush   | >= 16 TiB
+ sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | N/A    | Crush   | >= 32 TiB
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | N/A    |         | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | N/A    |         | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      |         | >= 4 TiB
