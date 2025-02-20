@@ -564,7 +564,7 @@ batteries and have mainly historical and educational interest.
  lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | N/A    |         | >= 32 TiB
  lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | N/A    | Small   | 32 KiB 
  lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | Small   | 1 MiB
- lxm_64x128        | u64    | +       | +     | +       | +    | 0.42 | +      |         | >= 2 TiB
+ lxm_64x128        | u64    | +       | +     | +       | +    | 0.42 | +      |         | >= 8 TiB
  macmarsa          | u32    | 2       | 12    | 18      | 19   | 0.67 |        |         | 128 KiB
  magma             | u64    | +       | +     | +       | +    | 25   |        |         |
  magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      |         | >= 2 TiB
@@ -591,7 +591,7 @@ batteries and have mainly historical and educational interest.
  pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | +       | >= 2 TiB
  pcg64_xsl_rr      | u64    | +       | +     | +       | +    | 0.43 | +      |         | >= 32 TiB
  philox            | u64    | +       | +     | +       | +    | 1.0  | +      | +       | >= 32 TiB
- philox2x32        | u32    | +       | +     | +       | +    | 1.6  | -      |         | >= 16 TiB
+ philox2x32        | u32    | +       | +     | +       | +    | 1.6  | -      |         | >= 32 TiB
  philox32          | u32    | +       | +     | +       | +    | 1.6  | +      | +       | >= 8 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      |         | >= 32 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      |         | 512 KiB
