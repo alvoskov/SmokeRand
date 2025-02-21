@@ -620,7 +620,7 @@ batteries and have mainly historical and educational interest.
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | N/A    |         | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | N/A    |         | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      |         | >= 4 TiB
- sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | +       | >= 8 TiB
+ sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | +       | >= 16 TiB
  speck128          | u64    | +       | +     | +       | +    | 3.1  | +      |         | >= 2 TiB
  speck128_avx      | u64    | +       | +     | +       | +    | 0.65 | +      |         | >= 2 TiB
  speck128_r16_avx  | u64    | +       | +     | +       | +    | 0.33 | +      |         | >= 32 TiB
@@ -646,7 +646,7 @@ batteries and have mainly historical and educational interest.
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      |         | >= 1 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.40 | +      |         | >= 32 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | Small   | 64 MiB
- wyrand            | u64    | +       | +     | +       | +    | 0.08 | +      |         | >= 1 TiB
+ wyrand            | u64    | +       | +     | +       | +    | 0.08 | +      |         | >= 8 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      |         | 2 TiB
  xorshift128       | u32    | 2       | 4     | 6/7     | 8    | 0.41 | +      | -       | 128 KiB
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      |         | 32 GiB
