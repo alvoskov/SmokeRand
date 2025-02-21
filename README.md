@@ -564,7 +564,7 @@ batteries and have mainly historical and educational interest.
  lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | N/A    |         | >= 32 TiB
  lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | N/A    | Small   | 32 KiB 
  lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | Small   | 1 MiB
- lxm_64x128        | u64    | +       | +     | +       | +    | 0.42 | +      |         | >= 16 TiB
+ lxm_64x128        | u64    | +       | +     | +       | +    | 0.42 | +      |         | >= 32 TiB
  macmarsa          | u32    | 2       | 12    | 18      | 19   | 0.67 |        |         | 128 KiB
  magma             | u64    | +       | +     | +       | +    | 25   |        |         |
  magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      |         | >= 2 TiB
@@ -620,7 +620,7 @@ batteries and have mainly historical and educational interest.
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | N/A    |         | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | N/A    |         | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      |         | >= 4 TiB
- sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | +       | >= 1 TiB
+ sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | +       | >= 8 TiB
  speck128          | u64    | +       | +     | +       | +    | 3.1  | +      |         | >= 2 TiB
  speck128_avx      | u64    | +       | +     | +       | +    | 0.65 | +      |         | >= 2 TiB
  speck128_r16_avx  | u64    | +       | +     | +       | +    | 0.33 | +      |         | >= 32 TiB
