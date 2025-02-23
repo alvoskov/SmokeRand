@@ -1,0 +1,36 @@
+.TH smokerand 1  "February 23, 2025" "version 0.23" "USER COMMANDS"
+.SH NAME
+smokerand \- a test suite for pseudorandom numbers generators
+.SH SYNOPSIS
+.B smokerand
+battery generator_lib [\fIOPTIONS\fR]
+.SH DESCRIPTION
+Descr 1
+.PP
+Descr 2
+.SH OPTIONS
+Options
+.TP
+.B \-\-threads=n
+Run battery in multithreaded mode using n threads.
+.TP
+.B \-\-nthreads
+Run battery in multithreaded mode (default number of threads
+.TP
+.B \-\-filter=name
+Apply pre-defined filter to the generator output.
+reverse\-bits   Reverse bits in the generator output
+interleaved32  Process 64-bit generator output as interleaving 32\-bit words
+high32, low32  Analyse higher/lower 32 bits of 64\-bit generator
+.TP
+\-d
+option 2
+.SH EXAMPLES
+.TP
+tada
+.B smokerand
+.PP
+.TP
+Example 2
+.B smokerand
+\s-
