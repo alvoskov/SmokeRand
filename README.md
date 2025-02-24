@@ -717,11 +717,13 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 
 # Versions history
 
-24.02.2025: SmokeRand 0.24.
+25.02.2025: SmokeRand 0.24.
 
 - man page draft added.
 - `aesni` fixes for clang.
 - PractRand results updated for some generators.
+- lua script for build.ninja.
+- A new `--report-brief` key for brief final reports.
 
 12.02.2025: SmokeRand 0.23.
 
