@@ -224,12 +224,13 @@ void print_help(void)
     "  - stdin32, stdin64  Get random sequence from stdin\n"
     "  - list              Print list of tests in the battery\n"
     "Optional keys\n"
-    "  --threads=n Run battery in multithreaded mode using n threads\n"
-    "  --nthreads  Run battery in multithreaded mode (default number of threads\n"
     "  --filter=name Apply pre-defined filter to the generator output\n"
     "    reverse-bits   Reverse bits in the generator output\n"
     "    interleaved32  Process 64-bit generator output as interleaving 32-bit words\n"
     "    high32, low32  Analyse higher/lower 32 bits of 64-bit generator\n"
+    "  --report-brief Show only failures in the report\n"
+    "  --nthreads  Run battery in multithreaded mode (default number of threads\n"
+    "  --threads=n Run battery in multithreaded mode using n threads\n"
     "\n";
 
     printf(help_str);
@@ -265,6 +266,7 @@ typedef struct {
     int nthreads;
     int testid;
     GeneratorFilter filter;
+    ReportType report_type;
 } SmokeRandSettings;
 
 
@@ -279,6 +281,7 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
     obj->nthreads = 1;
     obj->testid = TESTS_ALL;
     obj->filter = filter_none;
+    obj->report_type = report_full;
     for (int i = 3; i < argc; i++) {
         char argname[32];
         int argval;
@@ -287,6 +290,10 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
         if (!strcmp(argv[i], "--threads")) {
             obj->nthreads = get_cpu_numcores();
             fprintf(stderr, "%d CPU cores detected\n", obj->nthreads);
+            continue;
+        }
+        if (!strcmp(argv[i], "--report-brief")) {
+            obj->report_type = report_brief;
             continue;
         }
         if (len < 3 || (argv[i][0] != '-' || argv[i][1] != '-') || eqpos == NULL) {
@@ -343,13 +350,13 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
     CallerAPI *intf, SmokeRandSettings *opts)
 {
     if (!strcmp(battery_name, "default")) {
-        battery_default(gi, intf, opts->testid, opts->nthreads);
+        battery_default(gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else if (!strcmp(battery_name, "brief")) {
-        battery_brief(gi, intf, opts->testid, opts->nthreads);
+        battery_brief(gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else if (!strcmp(battery_name, "full")) {
-        battery_full(gi, intf, opts->testid, opts->nthreads);
+        battery_full(gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else if (!strcmp(battery_name, "express")) {
-        battery_express(gi, intf, opts->testid, opts->nthreads);
+        battery_express(gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else if (!strcmp(battery_name, "selftest")) {
         battery_self_test(gi, intf);
     } else if (!strcmp(battery_name, "speed")) {
@@ -361,7 +368,7 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
     } else if (!strcmp(battery_name, "birthday")) {
         battery_birthday(gi, intf);
     } else if (!strcmp(battery_name, "ising")) {
-        battery_ising(gi, intf, opts->testid, opts->nthreads);
+        battery_ising(gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else if (!strcmp(battery_name, "dummy")) {
         fprintf(stderr, "Battery 'dummy': do nothing\n");
     } else if (battery_name[0] == '@') {
@@ -370,7 +377,7 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
             return 1;
         }
         const char *filename = battery_name + 1;
-        return battery_file(filename, gi, intf, opts->testid, opts->nthreads);
+        return battery_file(filename, gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else {
         fprintf(stderr, "Unknown battery %s\n", battery_name);
         return 1;
@@ -381,15 +388,15 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
 int print_battery_info(const char *battery_name)
 {
     if (!strcmp(battery_name, "express")) {
-        battery_express(NULL, NULL, 0, 0);
+        battery_express(NULL, NULL, 0, 0, report_full);
     } else if (!strcmp(battery_name, "default")) {
-        battery_default(NULL, NULL, 0, 0);
+        battery_default(NULL, NULL, 0, 0, report_full);
     } else if (!strcmp(battery_name, "brief")) {
-        battery_brief(NULL, NULL, 0, 0);
+        battery_brief(NULL, NULL, 0, 0, report_full);
     } else if (!strcmp(battery_name, "full")) {
-        battery_full(NULL, NULL, 0, 0);
+        battery_full(NULL, NULL, 0, 0, report_full);
     } else if (battery_name[0] == '@') {
-        battery_file(battery_name + 1, NULL, NULL, 0, 0);        
+        battery_file(battery_name + 1, NULL, NULL, 0, 0, report_full);
     } else {
         fprintf(stderr, "Information about battery %s is absent\n",
             battery_name);

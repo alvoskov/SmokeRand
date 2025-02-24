@@ -617,7 +617,7 @@ TestResults ising2d_metropolis(GeneratorState *gs, const void *udata)
 }
 
 void battery_ising(GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads)
+    unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
     static const TestDescription tests[] = {
         {"ising16_metropolis", ising2d_metropolis, NULL, 125, ram_med},
@@ -628,7 +628,7 @@ void battery_ising(GeneratorInfo *gen, CallerAPI *intf,
         "ising", tests
     };
     if (gen != NULL) {
-        TestsBattery_run(&bat, gen, intf, testid, nthreads);
+        TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
     } else {
         TestsBattery_print_info(&bat);
     }

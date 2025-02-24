@@ -682,6 +682,7 @@ void measure_speed(Generator32State *gen)
                 sum += gen->get_bits32(gen->state);
             }
         }
+        (void) sum;
         nblocks_total += nblocks;
         nblocks *= 2;
         toc = clock();

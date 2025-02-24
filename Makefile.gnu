@@ -1,5 +1,6 @@
 #
 # Classic makefile for SmokeRand.
+# Supports GCC and Clang (as Zig CC) compilers.
 #
 
 PLATFORM_NAME=GCC
@@ -19,7 +20,7 @@ else ifeq ($(PLATFORM_NAME), ZIGCC)
     CC = zig cc
     AR = zig ar
     GEN_CFLAGS = -fPIC
-    PLATFORM_FLAGS=-DNO_X86_EXTENSIONS -DUSE_WINTHREADS
+    PLATFORM_FLAGS=-DUSE_WINTHREADS
     IS_PORTABLE=0
 else ifeq ($(PLATFORM_NAME), GENERIC)
     CC = gcc

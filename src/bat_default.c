@@ -14,7 +14,7 @@
 #include "smokerand/entropy.h"
 
 void battery_default(GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads)
+    unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
     // Monobit frequency test options
     static const MonobitFreqOptions monobit = {.nvalues = 1ull << 28};
@@ -127,7 +127,7 @@ void battery_default(GeneratorInfo *gen, CallerAPI *intf,
         "default", tests
     };
     if (gen != NULL) {
-        TestsBattery_run(&bat, gen, intf, testid, nthreads);
+        TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
     } else {
         TestsBattery_print_info(&bat);
     }

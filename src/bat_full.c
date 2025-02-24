@@ -22,7 +22,7 @@
  * counter: the test consumes more than 2^36 values.
  */
 void battery_full(GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads)
+    unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
     // Monobit frequency test options
     static const MonobitFreqOptions monobit = {.nvalues = 1ull << 28};
@@ -145,7 +145,7 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
         "full", tests
     };
     if (gen != NULL) {
-        TestsBattery_run(&bat, gen, intf, testid, nthreads);
+        TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
     } else {
         TestsBattery_print_info(&bat);
     }

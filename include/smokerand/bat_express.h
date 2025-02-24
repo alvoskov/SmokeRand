@@ -16,5 +16,5 @@
 #define __SMOKERAND_BAT_EXPRESS_H
 #include "smokerand/core.h"
 void battery_express(GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads);
+    unsigned int testid, unsigned int nthreads, ReportType rtype);
 #endif

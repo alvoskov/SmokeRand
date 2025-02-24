@@ -1,0 +1,370 @@
+.TH smokerand 1  "February 24, 2025" "version 0.24" "USER COMMANDS"
+.SH NAME
+smokerand \- a test suite for pseudorandom numbers generators
+.SH SYNOPSIS
+.B smokerand
+\fIbattery\fR \fIgenerator_lib\fR [\fIkeys\fR]
+.SH DESCRIPTION
+.PP
+SmokeRand is a cross-platform set of tests for pseudorandom number generators
+(PRNGs). Tested generators should return either 32\-bit or 64\-bit unsigned
+uniformly distributed unsigned integers. They can be connected to SmokeRand
+either through stdin/stdout or by means of C API as dynamic libraries.
+It has the next important features:
+.IP \[bu]
+Direct support of 64-bit generators without taking upper/lower parts,
+interleaving etc.
+.IP \[bu]
+Analysis of the lowest bits of generators output that improves sensitivity
+of tests, e.g. linear complexity, matrix rank or birthday spacings test.
+.IP \[bu]
+Multithreading support by means of POSIX threads or WinAPI threads.
+In this case PRNG must be supplied as a dynamic library.
+.IP \[bu]
+A minimalistic set of fast, relatively simple and mostly well known
+statistical tests that cover the most common artefacts of popular PRNGs.
+Users can either apply several predefined batteries or write custom
+batteries by means of a human-readable text files.
+.PP
+The main idea behind SmokeRand is development of statistical tests batteries
+that would take into account weak spots of TestU01 (testing of lower bits,
+64-bit generators, absence of some newer criteria), PractRand (absence of
+birthday spacings and linear complexity tests) and dieharder (relatively low
+sensitivity of included tests). The resulting program cannot replace them
+but its batteries are diverse enough to be used as a "smoke test" for PRNGs.
+However it easily detects statistical flaws in truncated 128-bit LCGs with
+power of 2 modulo, additive/subtractive lagged Fibonacci generators with large
+lags up to 44497, xoroshiro128+, Mersenne Twister, TinyMT32/64, SplitMix
+and even DES in CTR mode.
+.PP
+\fBWARNING!\fR The SmokeRand test batteries can detect flaws in many popular
+pseudorandom number generators but they \fBcannot guarantee a high quality\fR
+of generator that passed them, \fBespecially for cryptography\fR. Consider
+them just as a "smoke test" for searching obvious defects in pseudorandom number
+generators.
+.PP
+A state-of-art general purpose PRNG must be cryptographically secure, i.e. its
+quality should be analysed not only by empirical test but by cryptoanalytic
+techniques. Of course, it should be used correctly, i.e. having period at least
+2**64, not be prone to the birthday paradox, not be reseeded during the sample
+generation if reproducible simulation is desired etc.
+.SS Custom batteries
+.PP
+Custom batteries are kept inside a simple human-readable text files. It supports
+single line comments beginning with \# and blank lines. Each non-blank line
+contains description of a single test. It has the next format:
+.PP
+\fItestname\fR \fBtest=\fItestid\fR \fI[arguments]\fI
+.PP
+\fItestname\fR is a user-defined test name that will be used in a final report.
+.PP
+\fI[arguments]\fR are space separated list of key-value pairs, each pair
+is written as \fIkey\fB=\fIvalue\fR, spaces between the \fB=\fR separator,
+key and value are not allowed.
+.PP
+\fItestid\fR is the test identifier that is used to find the corresponding
+engine and send user-defined parameters to id. The next predefined identifiers
+(engines) are supported by SmokeRand:
+.TP
+.B bspace_nd
+A classical n-dimensional birthday spacings test suggested by G. Marsaglia.
+It has the next parameters: \fBnbits_per_dim\fR (number of bits per dimension),
+\fBndims\fR (number of dimensions) \fBnsamples\fR (number of samples/runs),
+\fBget_lower\fR (use lower/upper part from each pseudorandom value).
+.TP
+.B bspace4_8d_decimated 
+A modification of 8-dimensional 32-bit birthday spacings test that includes
+decimation. It has only one parameter \- \fBstep\fR that should be a power of 2.
+This test is especially sensitive to truncated LCGs that use power of 2 modulo.
+.TP
+.B collisionover
+An n-dimensional \"monkey test\". The supported parameters are the same as
+for the \fBbspace_nd\fR test.
+.TP
+.B gap
+A classical gap test described in TAOCP volume 2 by D. Knuth. It requires two
+parameters: \fBngaps\fR (the number of gaps) and \fBshl\fR (defines the
+interval width as \fC[0;2**(\-shl)) * 2**nbits.\fR
+.TP
+.B gap16_count0
+A modification of gap test suggested by G.Jones, the gjrand author, also known
+as \fBrda\fR (relative distance analysis).
+Requires only one parameter, \fBngaps\fR, the number of gaps.
+.TP
+.B hamming_ot
+Hamming weights "overlapping tuples" based test that detects short and medium
+range correlations in bits frequencies.
+The required parameters are \fBnbytes\fR, the number of processed bytes,
+and \fBmode\fR, the test mode. Supported modes are \fBvalues\fR (compute
+Hamming weights for entire values), \fBbytes\fR (compute Hamming weights for
+separate bytes), \fBbytes_low8\fR and \fBbytes_low1\fR (compute Hamming weights
+for bytes made from lower 8 and 1 bits of values respectively).
+.TP
+.B hamming_ot_long
+Hamming weights "overlapping tuples" based test that detects longer range
+correlations in bits frequencies. It considers the input stream as a sequence
+of n\-bit words for each of them Hamming weight is calculated. The required
+parameters are \fBnvalues\fR, the number of processed values, and \fBwordsize\fR,
+the number of bits per word (\fBw128\fR, \fBw256\fR, \fBw512\fR and \fBw1024\fR
+values for 128, 256, 512 and 1024\-bit words are supported.
+.TP
+.B ising2d
+The test is based on internal energy and heat capacity computation for
+2D 16x16 Ising model by means of Monte-Carlo simulation. Additional lagged
+Fibonacci and Subtract-With-Borrow PRNGs with short lags fail it.
+It requres three parameters: \fBsample_len\fR (number of values per sample,
+i.e. Monte-Carlo simulation run), \fBnsamples\fR (number of samples/runs),
+\fBalgorithm\fR (the used algorithm, \fBwolff\fR or \fBmetropolis\fR).
+.TP
+.B linearcomp
+A linear complexity test based the Berlekamp–Massey algorithm, it is
+sensitive to LFSR generators such as Mersenne Twister or xorshift.
+It takes one bit from the same position from each pseudorandom value.
+The supported parameters are \fBnbits\fR (the total number of bits)
+and \fBbitpos\fR (position of analyzed bit, 0 is the lowest one;
+also \fBlow\fR, \fBmid\fR and \fBhigh\fR can be used instead of
+absolute position).
+.TP
+.B matrixrank
+Binary matrix rank test that is sensitive to LFSR generators.
+Two parameters are required: \fBn\fR, the square matrix size (must be
+divisible by 256), and \fBmax_nbits\fR, the maximal number of lower bits
+that are taken from each number (8 or 64 are currently supported).
+.TP
+.B mod3
+This test is a simplified version of \fBmod3\fR tests  from gjrand
+and PractRand. Requires the only one parameter, \fBnvalues\fR, the
+number of processed values. Catches only some non-linear generators,
+but the test is fast and detected flaws may have influence on
+computations.
+.TP
+.B monobit_freq
+A classical monobit frequency test that requires the only one
+parameter \- \fBnvalues\fR, number of processed values.
+.TP
+.B nbit_words_freq
+A modification of frequency test that considers PRNG output as a
+sequence of n-bit words. Blocks of such words are processed by means
+of Pearson criterion and then meta-test based on Kolmogorov-Smirnov
+criterion is applied. The next parameters are required:
+\fBbits_per_word\fR (number of bits per word), \fBaverage_freq\fR (average
+word frequency per block), \fBnblocks\fR (number of processed blocks).
+.TP
+.B sumcollector
+The SumCollector test suggested by D.Ugrin-Sparac and implemented in
+the TestU01 test suite. Sensitive to the SWB (subtract with borrow) algorithm,
+in some cases even to its versions with lower "luxury levels".
+.SH OPTIONS
+.TP
+\fIbattery\fR is battery name that will be applied to the tested pseudorandom
+number generator. Batteries are either predefined sets of statistical tests or
+special operation modes. There are general purpose batteries (\fBexpress\fR,
+\fBbrief\fR, \fBdefault\fR, \fBfull\fR), specialized batteries (\fBbirthday\fR,
+\fBising\fR, \fBfreq\fR), special operation modes (\fBselftest\fR, \fBspeed\fR,
+\fBstdout\fR), custom batteries from user-defined scripts (\fB@\fIfilename\fR).
+.TP
+\fIgenerator_lib\fR is the name of dynamic library (.so or .dll) with an
+implementation of pseudorandom number generator or a special mode name.
+The special modes are:
+.IP \[bu]
+\fBstdin32\fR \- obtain an input from a 32\-bit generator from stdin.
+.IP \[bu]
+\fBstdin64\fR \- obtain an input from a 64\-bit generator from stdin.
+.IP \[bu]
+\fBlist\fR \- print a list of tests included in the battery.
+.SS General purpose batteries
+.PP
+General purpose batteries are designed for testing general purpose
+pseudorandon number generators (PRNGs). The fastest and less sensitive 
+\fBexpress\fR battery takes about 1 second, the slowest but most sensitive
+\fBfull\fR battery requires up to 90 minutes in one-threaded mode
+for fast PRNGs. They don't include some specialized tests that require large
+amount of RAM and/or take more than 10 minutes.
+.TP
+.B express
+Express battery that contains 5 tests and consumes 32 or 64 MiB of data for
+32-bit or 64-bit PRNG respectively. Consists of 1\-dimensional 32\-bit birthday
+spacings tests, byte frequency test, 8\-dimensional 32\-bit birthday spacings
+test with decimation and linear complexity test. Detects 64\-bit LCGs with
+power of 2 modulo, 32\-bit LCGs, some lagged Fibonacci and subtract-with-borrow
+generators, small LFSR. Mersenne Twister and 128\-bit LCG with power of 2 modulo
+pass it.
+.TP
+.B brief
+Fast battery that contains 22 tests and consumes 64 or 128 GiB of data for
+32\-bit or 64\-bit PRNG respectively. Contains frequency tests, birthday spacings
+tests, gap tests, Hamming weights \"overlapping tuples\" based tests, monkey
+tests, linear complexity test. Detects Mersenne Twister, 64\-bit LCGs with prime
+modulus, 128\-bit LCGs with power of 2 modulo and RANROT32.
+.TP
+.B default
+Slower but more sensitive battery that contains 40 tests and consumes
+128 or 256 GiB of data for 32\-bit or 64\-bit PRNG respectively. The test set
+is similar to the \fBbrief\fR battery but it is configured for larger samples;
+also includes binary matrix rank test and mod3 test. This battery has an
+improved sensitivity for truncated 64-bit and 128-bit LCGs, also for some
+nonlinear generators.
+.TP
+.B full
+The slowest battery that contains 40 tests and consumes 1 or 256 TiB of data for
+32\-bit or 64\-bit PRNG respectively. Includes a special modification of gap test
+that allows to detect CSPRNGs with 32\-bit counters (e.g. some implementations of
+ChaCha20) and sumcollector test.
+.SS Specialized batteries
+.PP
+Specialized batteries are designed either for search of some subtle flaws in
+PRNG output (\fBbirthday\fR, \fBfreq\fR) or for illustrative purposes
+(\fBising\fR). Although good general purpose PRNGs should pass them they
+are either too slow and/or require too much RAM to be included in general
+purpose batteries.
+.TP
+.B birthday
+A 64\-bit birthday test that processes PRNG output as a stream of 64\-bit words.
+It counts a number of duplicates in these 64\-bit words. Based on classical
+"birthday paradox", consumes up to 2 TiB of data and about 8 GiB of RAM, may
+take up to 1 hour even for fast PRNGs. A decimation method suggested
+by Melissa O'Neill is used to reduce memory consumption. The \fBbirthday\fR
+battery detects statistical flaws (absence of duplicates) for SplitMix and
+even arbitrary block ciphers with 64-bit block in the counter mode such as
+DES, XXTEA, GOST R 34.12\-2015 \"Magma\".
+.TP
+.B ising
+Statistical tests based on Monte-Carlo simulation for 2D Ising model that uses
+Wolff and Metropolis algorithms. Although they are slower and less sensitive
+than classical birthday spacings and gap tests, they have an important
+historical meaning as an example of 
+.TP
+.B freq
+An adaptive frequency test for 8-bit and 16-bit words that can be applied to the
+arbitrary amount of data. Not very sensitive but allows to detect statistical
+flaws in RC4 obsolete CSPRNG.
+.SS Special operation modes
+.PP
+Special operation modes are pseudo-batteries that don't make any
+statistical testing but are useful for controlling PRNGs integrity,
+output redirection, performance evaluation etc.
+.TP
+.B selftest
+Runs an internal self-test for the PRNG if it is available, i.e. implemented
+inside the generator module.
+.TP
+.B speed
+Performance evaluation of the PRNG in two modes: calling a function for each
+value and summation inside the cycle. A special "dummy" generators are used
+as a baseline. The results are converted to the cpb (counts per byte) units
+using either \fCRDTSC\fR instruction for x86 processors or \fCclock\fR function
+and assumtion about fixed 3 GHz CPU frequency.
+.TP
+.B stdout
+Send the PRNG output to the stdout in the binary format. Endianness is
+platform-dependent.
+.SS Custom batteries
+Custom batteries are defined by users in a human-readable text format.
+In this case the name of battery is the name of file with the \fB@\fR prefix.
+.TP
+.B @\fIfilename\fR Load a custom battery from a file with \fIfilename\fR name.
+.SS Optional keys
+Optional command line \fIkeys\fR are used for multithreading, applying filters
+to the PRNG output, management of the final report layout etc. 
+.TP
+.B \-\-report\-brief
+The final report will include only failed test.
+.TP
+.B \-\-threads=\fIn\fR
+Run battery in multithreaded mode using \fIn\fR threads.
+.TP
+.B \-\-nthreads
+Run battery in multithreaded mode using a default number of threads estimated
+from the number of CPU cores, architecture etc.
+.TP
+.B \-\-filter=\fIname\fR
+Apply a pre-defined filter to the generator output. The next filters are
+supported:
+.IP \[bu]
+\fBhigh32\fR Analyse higher 32 bits of a 64\-bit generator.
+.IP \[bu]
+\fBlow32\fR  Analyse lower 32 bits of a 64\-bit generator.
+.IP \[bu]
+\fBinterleaved32\fR  Process 64\-bit generator output as interleaving 32\-bit words.
+.IP \[bu]
+\fBreverse\-bits\fR  Reverse bits in the generator output.
+.SH EXAMPLES
+.SS Command line options
+.PP
+An example of applying the \fBexpress\fR test battery to the PRNG from the
+\fBliblcg64_shared.so\fR dynamic library (module).
+
+.EX
+$ smokerand express generators/liblcg64_shared.so
+Generator name:    LCG64
+Output size, bits: 32
+Entropy pool (seed generator) initialized
+  machine_id: 0xD213188D886F34A3
+  seed0:      0x8DA7D540740F7D92
+  seed1:      0xFC3610CF7B495369
+  state:      0x081B353B65E5DA8F
+===== Starting 'express' battery =====
+
+[skipped output]
+
+==================== 'express' battery report ====================
+Generator name:    LCG64
+Output size, bits: 32
+
+    # Test name               xemp         p Interpretation  Thr#
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+    1 byte_freq           0.783549     0.571 Ok                 0
+    2 bspace32_1d             4134     0.273 Ok                 0
+    3 bspace4_8d_dec           964         0 FAIL               0
+    4 linearcomp_high         5000     0.596 Ok                 0
+    5 linearcomp_low          5001     0.233 Ok                 0
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+Passed:       4
+Suspicious:   0
+Failed:       1
+Elapsed time: 00:00:01
+.EE
+.SS Custom batteries
+.PP
+An example of custom battery: express battery written as a custom battery
+script.
+.EX
+#
+# SmokeRand `express` battery written as a script
+#
+byte_freq   test=nbit_words_freq bits_per_word=8 average_freq=256 nblocks=256
+bspace32_1d test=bspace_nd nbits_per_dim=32 ndims=1 nsamples=1024 get_lower=1
+bspace4_8d_dec  test=bspace4_8d_decimated  step=128
+linearcomp_high test=linearcomp nbits=10000 bitpos=high
+linearcomp_low  test=linearcomp nbits=10000 bitpos=low
+.EE
+.SS External modules
+.PP
+The dynamic libraries (modules) with PRNGs for SmokeRand can be written in
+C programming language, C99 standard. 
+
+.EX
+#include "smokerand/cinterface.h"
+
+PRNG_CMODULE_PROLOG
+
+typedef struct {
+    uint64_t x;
+} Lcg64State;
+
+static inline uint64_t get_bits_raw(void *state)
+{
+    LcgState *obj = state;
+    obj->x = obj->x * 6906969069 + 1;
+    return obj->x >> 32;
+}
+
+static void *create(const CallerAPI *intf)
+{
+    LcgState *obj = intf->malloc(sizeof(LcgState));
+    obj->x = intf->get_seed64();
+    return (void *) obj;
+}
+
+MAKE_UINT32_PRNG("LCG64", NULL)
+.EE

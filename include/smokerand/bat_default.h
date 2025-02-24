@@ -11,5 +11,5 @@
 #define __SMOKERAND_BAT_DEFAULT_H
 #include "smokerand/core.h"
 void battery_default(GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads);
+    unsigned int testid, unsigned int nthreads, ReportType rtype);
 #endif

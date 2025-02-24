@@ -96,6 +96,11 @@ typedef enum {
     ram_hi = 2
 } RamLoad;
 
+typedef enum {
+    report_brief = 0,
+    report_full = 1
+} ReportType;
+
 
 /**
  * @brief Test generalized description.
@@ -125,7 +130,7 @@ size_t TestsBattery_ntests(const TestsBattery *obj);
 void TestsBattery_print_info(const TestsBattery *obj);
 void TestsBattery_run(const TestsBattery *bat,
     const GeneratorInfo *gen, const CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads);
+    unsigned int testid, unsigned int nthreads, ReportType rtype);
 
 
 typedef enum {

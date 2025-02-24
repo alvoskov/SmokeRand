@@ -717,7 +717,13 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 
 # Versions history
 
-12.02.2025: SmokeRand 0.233.
+24.02.2025: SmokeRand 0.24.
+
+- man page draft added.
+- `aesni` fixes for clang.
+- PractRand results updated for some generators.
+
+12.02.2025: SmokeRand 0.23.
 
 - efiix64x48, DES-CTR, xorgens were added.
 - In `full` battery number of bits in linearcomp tests was increased to

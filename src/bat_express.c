@@ -24,7 +24,7 @@
 #include "smokerand/entropy.h"
 
 void battery_express(GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads)
+    unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
     static const BSpaceNDOptions
         bspace32_1d = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 1024, .get_lower = 1};
@@ -50,7 +50,7 @@ void battery_express(GeneratorInfo *gen, CallerAPI *intf,
         "express", tests
     };
     if (gen != NULL) {
-        TestsBattery_run(&bat, gen, intf, testid, nthreads);
+        TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
     } else {
         TestsBattery_print_info(&bat);
     }

@@ -54,10 +54,12 @@ typedef struct rng_state_st {
 } rng_state_t;
 
 // get the N programmatically, useful for checking the value for which the library was compiled
+/*
 static inline int rng_get_N(void)
 {
     return N;
 }
+*/
 
 uint64_t iterate_raw_vec(uint64_t* Y, uint64_t sumtotOld);
 
@@ -155,7 +157,8 @@ static inline uint64_t get_next(rng_state_t* X)
         return X->V[1];
     }
 }
-	
+
+#if 0	
 static inline double get_next_float(rng_state_t *X)
 {
     /* cast to signed int trick suggested by Andrzej Görlich     */
@@ -172,6 +175,7 @@ static inline double get_next_float(rng_state_t *X)
     F=Z;
     return F*INV_MERSBASE;
 }
+#endif
 
 #undef N
 

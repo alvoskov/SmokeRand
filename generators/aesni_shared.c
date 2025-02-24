@@ -13,7 +13,7 @@
  *    https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf
  * 2. https://gist.github.com/acapola/d5b940da024080dfaf5f
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -48,15 +48,14 @@ typedef union {
     uint8_t b[16];
 } AES128Key;
 
-static __m128i AES128_expand_key(__m128i key, unsigned int rc)
-{
-    __m128i keygened = _mm_aeskeygenassist_si128(key, rc);
-	keygened = _mm_shuffle_epi32(keygened, _MM_SHUFFLE(3,3,3,3));
-	key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
-	key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
-	key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
-	return _mm_xor_si128(key, keygened);
-}
+
+#define AES128_EXPAND_KEY(ks_out, ks_in, rc) \
+    keygened = _mm_aeskeygenassist_si128((ks_in), rc);\
+	keygened = _mm_shuffle_epi32(keygened, _MM_SHUFFLE(3,3,3,3));\
+    key = _mm_xor_si128((ks_in), _mm_slli_si128((ks_in), 4));\
+    key = _mm_xor_si128(key, _mm_slli_si128((key), 4));\
+    key = _mm_xor_si128(key, _mm_slli_si128((key), 4));\
+    (ks_out) = _mm_xor_si128((key), keygened);
 
 /**
  * @brief Initialize AES128 based PRNG state, i.e. fill key schedule
@@ -64,18 +63,19 @@ static __m128i AES128_expand_key(__m128i key, unsigned int rc)
  */
 void AES128State_init(AES128State *obj, const AES128Key *enc_key)
 {
+    __m128i keygened, key;
     __m128i *ks = obj->key_schedule;
-    ks[0]  = _mm_loadu_si128((const __m128i*)(enc_key->b));
-    ks[1]  = AES128_expand_key(ks[0], 0x01);
-    ks[2]  = AES128_expand_key(ks[1], 0x02);
-    ks[3]  = AES128_expand_key(ks[2], 0x04);
-    ks[4]  = AES128_expand_key(ks[3], 0x08);
-    ks[5]  = AES128_expand_key(ks[4], 0x10);
-    ks[6]  = AES128_expand_key(ks[5], 0x20);
-    ks[7]  = AES128_expand_key(ks[6], 0x40);
-    ks[8]  = AES128_expand_key(ks[7], 0x80);
-    ks[9]  = AES128_expand_key(ks[8], 0x1B);
-    ks[10] = AES128_expand_key(ks[9], 0x36);
+    ks[0] = _mm_loadu_si128((const __m128i*)(enc_key->b));
+    AES128_EXPAND_KEY(ks[1],  ks[0], 0x01);
+    AES128_EXPAND_KEY(ks[2],  ks[1], 0x02);
+    AES128_EXPAND_KEY(ks[3],  ks[2], 0x04);
+    AES128_EXPAND_KEY(ks[4],  ks[3], 0x08);
+    AES128_EXPAND_KEY(ks[5],  ks[4], 0x10);
+    AES128_EXPAND_KEY(ks[6],  ks[5], 0x20);
+    AES128_EXPAND_KEY(ks[7],  ks[6], 0x40);
+    AES128_EXPAND_KEY(ks[8],  ks[7], 0x80);
+    AES128_EXPAND_KEY(ks[9],  ks[8], 0x1B);
+    AES128_EXPAND_KEY(ks[10], ks[9], 0x36);
     obj->ctr[0] = obj->ctr[1] = 0;
     obj->pos = 2;
 }

@@ -686,7 +686,7 @@ static void print_bar()
 
 
 static void TestResults_print_report(const TestResults *results,
-    size_t ntests, time_t nseconds_total)
+    size_t ntests, time_t nseconds_total, ReportType rtype)
 {
     unsigned int npassed = 0, nwarnings = 0, nfailed = 0;
     printf("  %3s %-20s %12s %14s %-15s %4s\n",
@@ -694,18 +694,21 @@ static void TestResults_print_report(const TestResults *results,
     print_bar();
     for (size_t i = 0; i < ntests; i++) {
         char pvalue_txt[32];
-        snprintf_pvalue(pvalue_txt, 32, results[i].p, results[i].alpha);
-        printf("  %3u %-20s %12g %14s %-15s %4llu\n",
-            results[i].id, results[i].name, results[i].x, pvalue_txt,
-            interpret_pvalue(results[i].p),
-            (unsigned long long) results[i].thread_id);
-        switch (get_pvalue_category(results[i].p)) {
-        case pvalue_passed:
-            npassed++; break;
-        case pvalue_warning:
-            nwarnings++; break;
-        case pvalue_failed:
-            nfailed++; break;
+        PValueCategory pvalue_cat = get_pvalue_category(results[i].p);
+        if (rtype == report_full || pvalue_cat != pvalue_passed) {
+            snprintf_pvalue(pvalue_txt, 32, results[i].p, results[i].alpha);
+            printf("  %3u %-20s %12g %14s %-15s %4llu\n",
+                results[i].id, results[i].name, results[i].x, pvalue_txt,
+                interpret_pvalue(results[i].p),
+                (unsigned long long) results[i].thread_id);
+            switch (pvalue_cat) {
+            case pvalue_passed:
+                npassed++; break;
+            case pvalue_warning:
+                nwarnings++; break;
+            case pvalue_failed:
+                nfailed++; break;
+            }
         }
     }
     print_bar();
@@ -744,7 +747,7 @@ void TestsBattery_print_info(const TestsBattery *obj)
  */
 void TestsBattery_run(const TestsBattery *bat,
     const GeneratorInfo *gen, const CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads)
+    unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
     time_t tic, toc;
     size_t ntests = TestsBattery_ntests(bat);
@@ -804,7 +807,7 @@ void TestsBattery_run(const TestsBattery *bat,
     }
     printf("Generator name:    %s\n", gen->name);
     printf("Output size, bits: %d\n\n", (int) gen->nbits);
-    TestResults_print_report(results, nresults, toc - tic);
+    TestResults_print_report(results, nresults, toc - tic, rtype);
     free(results);
 }
 

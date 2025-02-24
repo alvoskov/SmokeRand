@@ -519,7 +519,7 @@ typedef struct {
  * test_name param1=value1 param2=value2
  */
 int battery_file(const char *filename, GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads)
+    unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
     static const TestFunc parsers[] = {
         {"bspace_nd", parse_bspace_nd},
@@ -572,7 +572,7 @@ int battery_file(const char *filename, GeneratorInfo *gen, CallerAPI *intf,
 
     TestsBattery bat = {.name = "CUSTOM", .tests = tests};
     if (gen != NULL) {
-        TestsBattery_run(&bat, gen, intf, testid, nthreads);
+        TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
     } else {
         TestsBattery_print_info(&bat);
     }

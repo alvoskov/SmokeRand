@@ -47,7 +47,7 @@ TestResults ising2d_test(GeneratorState *obj, const Ising2DOptions *opts);
 
 void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf);
 void battery_ising(GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads);
+    unsigned int testid, unsigned int nthreads, ReportType rtype);
 void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf);
 
 
