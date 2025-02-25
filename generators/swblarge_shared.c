@@ -58,7 +58,7 @@ static void *create(const CallerAPI *intf)
     // pcg_rxs_m_xs64 for initialization
     uint64_t state = intf->get_seed64();
     for (int i = 0; i <= SWB_A; i++) {
-        obj->x[i] = pcg_bits64(&state);
+        obj->x[i] = (uint32_t) pcg_bits64(&state);
     }
     // Ensure state validity
     obj->c = 1;

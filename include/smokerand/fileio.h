@@ -16,5 +16,5 @@ typedef enum {
 } StdinCollectorType;
 
 GeneratorInfo StdinCollector_get_info(StdinCollectorType type);
-void StdinCollector_print_report();
+void StdinCollector_print_report(void);
 #endif

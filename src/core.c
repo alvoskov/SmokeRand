@@ -689,29 +689,40 @@ static void TestResults_print_report(const TestResults *results,
     size_t ntests, time_t nseconds_total, ReportType rtype)
 {
     unsigned int npassed = 0, nwarnings = 0, nfailed = 0;
-    printf("  %3s %-20s %12s %14s %-15s %4s\n",
-        "#", "Test name", "xemp", "p", "Interpretation", "Thr#");
-    print_bar();
     for (size_t i = 0; i < ntests; i++) {
-        char pvalue_txt[32];
         PValueCategory pvalue_cat = get_pvalue_category(results[i].p);
-        if (rtype == report_full || pvalue_cat != pvalue_passed) {
-            snprintf_pvalue(pvalue_txt, 32, results[i].p, results[i].alpha);
-            printf("  %3u %-20s %12g %14s %-15s %4llu\n",
-                results[i].id, results[i].name, results[i].x, pvalue_txt,
-                interpret_pvalue(results[i].p),
-                (unsigned long long) results[i].thread_id);
-            switch (pvalue_cat) {
-            case pvalue_passed:
-                npassed++; break;
-            case pvalue_warning:
-                nwarnings++; break;
-            case pvalue_failed:
-                nfailed++; break;
-            }
+        switch (pvalue_cat) {
+        case pvalue_passed:
+            npassed++; break;
+        case pvalue_warning:
+            nwarnings++; break;
+        case pvalue_failed:
+            nfailed++; break;
         }
     }
-    print_bar();
+
+    if (rtype != report_full && npassed == ntests) {
+        printf("\n\n"
+            "---------------------------------------------------\n"
+            "----- All tests have been passed successfully -----\n"
+            "---------------------------------------------------\n\n");
+    } else {
+        printf("  %3s %-20s %12s %14s %-15s %4s\n",
+            "#", "Test name", "xemp", "p", "Interpretation", "Thr#");
+        print_bar();
+        for (size_t i = 0; i < ntests; i++) {
+            char pvalue_txt[32];
+            PValueCategory pvalue_cat = get_pvalue_category(results[i].p);
+            if (rtype == report_full || pvalue_cat != pvalue_passed) {
+                snprintf_pvalue(pvalue_txt, 32, results[i].p, results[i].alpha);
+                printf("  %3u %-20s %12g %14s %-15s %4llu\n",
+                    results[i].id, results[i].name, results[i].x, pvalue_txt,
+                    interpret_pvalue(results[i].p),
+                    (unsigned long long) results[i].thread_id);
+            }
+        }
+        print_bar();
+    }
     printf("Passed:       %u\n", npassed);
     printf("Suspicious:   %u\n", nwarnings);
     printf("Failed:       %u\n", nfailed);

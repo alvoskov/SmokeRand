@@ -549,7 +549,7 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     uint64_t beta = 1ull << (obj->gi->nbits - opts->shl);
     uint64_t u;
     size_t ngaps = opts->ngaps;
-    size_t nbins = log(Ei_min / (ngaps * p)) / log(1 - p);
+    size_t nbins = (size_t) (log(Ei_min / (ngaps * p)) / log(1 - p));
     size_t *Oi = calloc(nbins + 1, sizeof(size_t));
     if (Oi == NULL) {
         fprintf(stderr, "***** gap_test: not enough memory *****\n");
@@ -581,7 +581,7 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     }
     ans.x = 0.0; // chi2emp
     for (size_t i = 0; i < nbins; i++) {
-        double Ei = p * pow(1.0 - p, i) * ngaps;
+        double Ei = p * pow(1.0 - p, (double) i) * ngaps;
         double d = Ei - Oi[i];
         ans.x += d * d / Ei;
     }
@@ -589,7 +589,7 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     ans.p = chi2_pvalue(ans.x, nbins - 1);
     ans.alpha = chi2_cdf(ans.x, nbins - 1);
     obj->intf->printf("  Values processed: %llu (2^%.1f)\n",
-        nvalues, sr_log2(nvalues));
+        nvalues, sr_log2((double) nvalues));
     obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
     return ans;
@@ -697,7 +697,7 @@ static double GapFrequencyArray_sumsq_as_norm(const GapFrequencyArray *obj,
 {
     double chi2emp = 0.0;
     for (size_t i = 0; i < obj->nbins; i++) {
-        double Oi = obj->f[i].ngaps_total;
+        double Oi = (double) obj->f[i].ngaps_total;
         double Ei = ngaps * obj->f[i].p_total;
         chi2emp += pow(Oi - Ei, 2.0) / Ei;
     }
@@ -849,7 +849,7 @@ TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
         return ans;
     }
     const double Ei_min = 1000.0, p = 1.0 / 65536.0;
-    size_t nbins = log(Ei_min / (ngaps * p)) / log(1 - p);
+    size_t nbins = (size_t) (log(Ei_min / (ngaps * p)) / log(1 - p));
     // Initialize frequency and position tables
     GapFrequencyArray *gapfreq = GapFrequencyArray_create(nbins, p);
     GapFrequencyArray *gapfreq_rb = GapFrequencyArray_create(nbins, p);
@@ -969,7 +969,7 @@ TestResults sumcollector_test(GeneratorState *obj, const SumCollectorOptions *op
     double *p_vec = calloc(nmax + 1, sizeof(double));
     obj->intf->printf("SumCollector test\n");
     obj->intf->printf("  Number of values: %llu (2^%g)\n",
-        opts->nvalues, sr_log2(opts->nvalues));
+        opts->nvalues, sr_log2((double) opts->nvalues));
     sumcollector_calc_p(p_vec, g, nmax);
 
     for (unsigned long long i = 0; i < opts->nvalues; i++) {
@@ -1004,7 +1004,8 @@ TestResults sumcollector_test(GeneratorState *obj, const SumCollectorOptions *op
     ans.p = chi2_pvalue(ans.x, df);
     ans.alpha = chi2_cdf(ans.x, df);
     // Output p-value
-    obj->intf->printf("  Number of sums: %llu (2^%g)\n", Oi_sum, sr_log2(Oi_sum));
+    obj->intf->printf("  Number of sums: %llu (2^%g)\n",
+        Oi_sum, sr_log2((double) Oi_sum));
     obj->intf->printf("  x = %g; p = %g; df = %lu\n", ans.x, ans.p, df);
     obj->intf->printf("\n");
     // Free buffers
@@ -1027,7 +1028,7 @@ TestResults sumcollector_test(GeneratorState *obj, const SumCollectorOptions *op
 TestResults mod3_test(GeneratorState *obj, const Mod3Options *opts)
 {
     TestResults ans = TestResults_create("mod3");
-    const size_t ntuples = 19683; // 3^9
+    const unsigned int ntuples = 19683; // 3^9
     unsigned long long *Oi = calloc(ntuples, sizeof(unsigned long long));
     uint32_t tuple = 0;
     obj->intf->printf("mod3 test\n");
@@ -1043,7 +1044,7 @@ TestResults mod3_test(GeneratorState *obj, const Mod3Options *opts)
     }
     double Ei = (double) opts->nvalues / (double) ntuples;
     ans.x = 0.0;
-    for (size_t i = 0; i < ntuples; i++) {
+    for (unsigned int i = 0; i < ntuples; i++) {
         ans.x += (Oi[i] - Ei) * (Oi[i] - Ei) / Ei;
     }
     ans.x = chi2_to_stdnorm_approx(ans.x, ntuples - 1);
@@ -1070,9 +1071,9 @@ TestResults monobit_freq_test(GeneratorState *obj, const MonobitFreqOptions *opt
     ans.name = "MonobitFreq";
     obj->intf->printf("Monobit frequency test\n");
     obj->intf->printf("  Number of bits: %llu (2^%.2f)\n", nbits_total,
-        log(nbits_total) / log(2.0));
+        log((double) nbits_total) / log(2.0));
     for (size_t i = 0; i < 256; i++) {
-        uint8_t u = i;
+        uint8_t u = (uint8_t) i;
         sum_per_byte[i] = 0;
         for (size_t j = 0; j < 8; j++) {
             if ((u & 0x1) != 0) {
@@ -1091,7 +1092,7 @@ TestResults monobit_freq_test(GeneratorState *obj, const MonobitFreqOptions *opt
             u >>= 8;
         }
     }
-    ans.x = fabs((double) bitsum) / sqrt(len * obj->gi->nbits);
+    ans.x = fabs((double) bitsum) / sqrt((double) (len * obj->gi->nbits));
     ans.p = stdnorm_pvalue(ans.x);
     ans.alpha = stdnorm_cdf(ans.x);
     obj->intf->printf("  sum = %lld; x = %g; p = %g\n",

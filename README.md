@@ -581,7 +581,7 @@ batteries and have mainly historical and educational interest.
  mwc64             | u32    | +       | 1     | 2       | 4    | 0.37 | -      | Small   | 1 TiB
  mwc64x            | u32    | +       | +     | +       | +    | 0.53 | +      | +       | >= 16 TiB
  mwc128            | u64    | +       | +     | +       | +    | 0.30 | +      | +       | >= 16 TiB
- mwc128x           | u64    | +       | +     | +       | +    | 0.30 | +      | +       | >= 16 TiB
+ mwc128x           | u64    | +       | +     | +       | +    | 0.30 | +      | +       | >= 32 TiB
  mwc1616           | u32    | +       | 10/11 | 12/18   | 19   | 0.48 | N/A    | -/Small | 16 MiB
  mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | +      | +       | >= 32 TiB(?)
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 32 TiB

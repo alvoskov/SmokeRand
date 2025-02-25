@@ -18,7 +18,11 @@
 
 #ifdef __AVX2__
 #pragma message ("AVX2 version will be compiled")
+#if defined(_MSC_VER) && !defined(__clang__)
+#include <intrin.h>
+#else
 #include <x86intrin.h>
+#endif
 #define VECINT_NBITS 256
 typedef __m256i VECINT;
 static inline void xorbits(VECINT *a_j, const VECINT *a_i, size_t i1, size_t i2)
@@ -60,8 +64,9 @@ static size_t calc_bin_matrix_rank(uint32_t *a, size_t n)
     size_t rank = 0;
     for (size_t i = 0; i < n; i++) {
         // Some useful offsets
-        size_t i_offset = i / 32, i_mask = 1 << (i % 32);
+        size_t i_offset = i / 32;
         size_t i_offset_64 = i / VECINT_NBITS;
+        uint32_t i_mask = 1ul << (i % 32);
         // Find the j-th row where a(j,i) is not zero, swap it
         // with i-th row and make Gaussian elimination
         size_t j = rank;
@@ -120,7 +125,7 @@ TestResults matrixrank_test(GeneratorState *obj, const MatrixRankOptions *opts)
             }
         } else if (obj->gi->nbits == 32) {
             for (size_t j = 0; j < mat_len; j++) {
-                a[j] = obj->gi->get_bits(obj->state);
+                a[j] = (uint32_t) obj->gi->get_bits(obj->state);
             }
         } else {
             uint64_t *a64 = (uint64_t *) a;
@@ -214,7 +219,7 @@ size_t berlekamp_massey(const uint8_t *s, size_t n)
             xorbytes(&C[N - m], B, n - N + m);
             if (2*L <= N) {
                 L = N + 1 - L;
-                m = N;
+                m = (long) N;
                 memcpy(B, T, (L + 1) * sizeof(uint8_t));
             }
         }
@@ -270,10 +275,10 @@ TestResults linearcomp_test(GeneratorState *obj, const LinearCompOptions *opts)
         if (obj->gi->get_bits(obj->state) & mask)
             s[i] = 1;
     }
-    double parity = opts->nbits & 1;
-    double mu = opts->nbits / 2.0 + (9.0 - parity) / 36.0;
+    double parity = (double) (opts->nbits & 1);
+    double mu = (double) opts->nbits / 2.0 + (9.0 - parity) / 36.0;
     double sigma = sqrt(86.0/81.0);
-    ans.x = berlekamp_massey(s, opts->nbits);
+    ans.x = (double) berlekamp_massey(s, opts->nbits);
     double z = (ans.x - mu) / sigma;
     ans.p = stdnorm_pvalue(z);
     ans.alpha = stdnorm_cdf(z);

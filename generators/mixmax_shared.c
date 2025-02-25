@@ -364,7 +364,7 @@ static int run_self_test(const CallerAPI *intf)
     int is_ok = 1;
     rng_state_t *obj = create(intf);
     for (int i = 0; i < 16; i++) {
-        uint32_t x = get_bits_raw(obj);
+        uint32_t x = (uint32_t) get_bits_raw(obj);
         intf->printf("%.8llX|%.8llX\n", x, x_ref[i]);
         if (x != x_ref[i]) {
             is_ok = 0;

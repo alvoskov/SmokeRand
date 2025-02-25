@@ -80,7 +80,7 @@ static int run_self_test(const CallerAPI *intf)
     Mwc4691State *obj = intf->malloc(sizeof(Mwc4691State));
     Mwc4691State_init(obj, 521288629, 362436069); 
     for (unsigned long i = 0; i < 1000000000;i++) {
-        x = get_bits_raw(obj);
+        x = (uint32_t) get_bits_raw(obj);
     }
     intf->printf("x = %22u; x_ref = %22u\n", x, x_ref);
     intf->free(obj);

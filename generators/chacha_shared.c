@@ -51,7 +51,11 @@ typedef struct {
 //////////////////////////////
 
 #ifdef CHACHA_VECTOR_INTR
+#if defined(_MSC_VER) && !defined(__clang__)
+#include <intrin.h>
+#else
 #include <x86intrin.h>
+#endif
 
 static inline __m128i mm_roti_epi32_def(__m128i in, int r)
 {

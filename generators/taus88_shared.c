@@ -60,7 +60,7 @@ static int run_self_test(const CallerAPI *intf)
     Taus88State_init(&obj, 19660809);
     uint32_t u, u_ref = 262361229;
     for (int i = 0; i < 5000; i++) {
-        u = get_bits_raw(&obj);
+        u = (uint32_t) get_bits_raw(&obj);
     }
     u >>= 1;
     intf->printf("%u %u\n", u, u_ref);

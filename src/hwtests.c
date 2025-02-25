@@ -209,7 +209,7 @@ TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
     ans.x = 0;
     for (size_t i = 0; i < obj->len; i++) {
         double Ei = count_total * obj->tuples[i].p;
-        double Oi = obj->tuples[i].count;
+        double Oi = (double) obj->tuples[i].count;
         if (Oi > DBL_EPSILON) {
             ans.x += 2.0 * Oi * log(Oi / Ei);
         }
