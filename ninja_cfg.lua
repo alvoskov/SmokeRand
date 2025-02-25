@@ -1,3 +1,4 @@
+#!/bin/lua
 --
 -- Creates build.ninja file for SmokeRand.
 -- GCC, MinGW, ZIG CC (Clang) and MSVC compilers are supported.
@@ -161,8 +162,8 @@ rule link
 
 if platform == 'gcc' or platform == 'mingw' then
     stub = "cflags = -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native\n" ..
-    "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native" ..
-    "exe_libs =\nexe_linkflags =\n" ..
+    "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native\n" ..
+    "exe_libs = -lm\nexe_linkflags = \n" ..
     "cc = gcc\n" ..
     "gen_cflags = $cflags -fPIC -ffreestanding -nostdlib\n" ..
     "so_linkflags = -shared\n" ..
@@ -171,7 +172,7 @@ if platform == 'gcc' or platform == 'mingw' then
 elseif platform == 'gcc32' then
     stub = "cflags = -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native -m32\n" ..
     "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native -m32\n" ..
-    "exe_libs =\nexe_linkflags = -m32\n" ..
+    "exe_libs = -lm\nexe_linkflags = -m32 \n" ..
     "cc = gcc\n" ..
     "gen_cflags = $cflags -fPIC\n" ..
     "so_linkflags = -m32 -shared\n" ..
@@ -181,7 +182,7 @@ elseif platform == 'gcc32' then
 elseif platform == 'zigcc' then
     stub = "cflags = -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native\n" ..
     "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native\n" ..
-    "exe_libs =\nexe_linkflags =\n" ..
+    "exe_libs = -lm\nexe_linkflags = \n" ..
     "cc = zig cc\n" ..
     "gen_cflags = $cflags -fPIC\n" ..
     "so_linkflags = -shared\n" ..
@@ -279,13 +280,14 @@ add_exefile("calibrate_dc6", {lib_name})
 -- Build extra executables
 io.write("build $objdir/sr_tiny.o: cc89 $srcdir/sr_tiny.c\n")
 io.write("build $bindir/sr_tiny" .. exe_ext .. ": link $objdir/sr_tiny.o $objdir/specfuncs.o\n")
+io.write("  libs = $exe_libs\n")
 io.write("  linkflags=$exe_linkflags\n")
 table.insert(default_builds, "$bindir/sr_tiny" .. exe_ext)
 
 -- Build generators
 for _, f in pairs(gen_sources) do
     local gen_fullname = "$gen_bindir/lib" .. f .. "_shared" .. so_ext
-    io.write("build $gen_bindir/obj/" .. f .. "_shared.o: cc_gen $gen_srcdir/" .. f .. "_shared.c\n")        
+    io.write("build $gen_bindir/obj/" .. f .. "_shared.o: cc_gen $gen_srcdir/" .. f .. "_shared.c\n")
     io.write("build " .. gen_fullname .. ": link $gen_bindir/obj/" .. f .. "_shared.o\n")
     table.insert(default_builds, gen_fullname)
     if f == "crand" then
@@ -297,7 +299,7 @@ end
 
 -- Default rules
 io.write("default ")
-for k, v in pairs(default_builds) do        
+for k, v in pairs(default_builds) do
     io.write(v .. " ")
     if k % 2 == 0 then
         io.write("$\n    ")
@@ -307,5 +309,5 @@ io.write("\n\n")
 
 -- Finish the work
 io.close(file)
-io.output(io.stdout) 
+io.output(io.stdout)
 print("Success")

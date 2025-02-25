@@ -37,6 +37,22 @@ power of 2 modulo, additive/subtractive lagged Fibonacci generators with large
 lags up to 44497, xoroshiro128+, Mersenne Twister, TinyMT32/64, SplitMix
 and even DES in CTR mode.
 .PP
+All statistical tests included in SmokeRand batteries return p-value. Their
+interpretation is rather simple and based on the next intervals:
+.IP \[bu]
+\fBOk\fR: in the (0.001 and 0.999) interval;
+.IP \[bu]
+\fBSUSPICIOUS\fR: in the [1e-10; 0.001] and [0.999; 1 - 1e-10] intervals;
+.IP \[bu]
+\fBFAIL\fR: in the [0; 1e-10) and (1 - 1e-10; 1] intervals.
+.PP
+Only systematic \fBSUSPICIOUS\fR or \fBFAIL\fR results must be interpreted
+as detected statistical flaw of the tested pseudorandom number generator.
+Such threshold values may seem unusually strict but allow to significantly
+reduce false positives. Tests sensitivity can be easily increased by using
+larger samples without altering critical p-values. Such approach is used in
+dieharder, TestU01, and PractRand test suites.
+.PP
 \fBWARNING!\fR The SmokeRand test batteries can detect flaws in many popular
 pseudorandom number generators but they \fBcannot guarantee a high quality\fR
 of generator that passed them, \fBespecially for cryptography\fR. Consider
@@ -368,3 +384,6 @@ static void *create(const CallerAPI *intf)
 
 MAKE_UINT32_PRNG("LCG64", NULL)
 .EE
+.SH SEE ALSO
+.PP
+\fBdieharder\fR(1)
