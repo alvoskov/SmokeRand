@@ -110,7 +110,7 @@ static void init_mutexes()
 }
 #define MUTEX_LOCK(mutex) pthread_mutex_lock(&mutex);
 #define MUTEX_UNLOCK(mutex) pthread_mutex_unlock(&mutex);
-static inline uint64_t get_current_thread_id()
+static inline uint64_t get_current_thread_id(void)
 {
     return (uint64_t) pthread_self();
 }
@@ -123,7 +123,7 @@ static inline uint64_t get_thread_id(pthread_t handle)
 // Begin of WinAPI-specific code
 static HANDLE get_seed64_mt_mutex = NULL;
 static HANDLE printf_mt_mutex = NULL;
-static void init_mutexes()
+static void init_mutexes(void)
 {
     get_seed64_mt_mutex = CreateMutex(NULL, FALSE, "seed64_mutex");
     printf_mt_mutex = CreateMutex(NULL, FALSE, "printf_mutex");
@@ -134,7 +134,7 @@ static void init_mutexes()
         exit(EXIT_FAILURE); \
     }
 #define MUTEX_UNLOCK(mutex) ReleaseMutex(mutex);
-static inline uint64_t get_current_thread_id()
+static inline uint64_t get_current_thread_id(void)
 {
     return (uint64_t) GetCurrentThreadId();
 }
@@ -449,12 +449,12 @@ void radixsort32(uint32_t *x, size_t len)
  * @brief Converts the number of seconds to the hours/minutes/seconds
  * format. Useful for showing the elapsed time.
  */
-TimeHMS nseconds_to_hms(unsigned long nseconds_total)
+TimeHMS nseconds_to_hms(unsigned long long nseconds_total)
 {
     TimeHMS hms;
-    hms.h = (nseconds_total / 3600);
-    hms.m = (nseconds_total / 60) % 60;
-    hms.s = nseconds_total % 60;
+    hms.h = (unsigned int) (nseconds_total / 3600);
+    hms.m = (unsigned short) ((nseconds_total / 60) % 60);
+    hms.s = (unsigned short) (nseconds_total % 60);
     return hms;
 }
 
@@ -462,7 +462,7 @@ TimeHMS nseconds_to_hms(unsigned long nseconds_total)
  * @brief Prints elapsed time in hh:mm:ss format to stdout.
  * @param nseconds_total  Number of seconds.
  */
-void print_elapsed_time(unsigned long nseconds_total)
+void print_elapsed_time(unsigned long long nseconds_total)
 {
     TimeHMS hms = nseconds_to_hms(nseconds_total);
     printf("%.2d:%.2d:%.2d", hms.h, hms.m, hms.s);
@@ -517,7 +517,7 @@ static void *battery_thread(void *data)
         th_data->intf->printf("^^^^^ Thread %lld: test %s finished ^^^^^\n",
             get_thread_id(th_data->thrd_id), th_data->tests[i].name);
         th_data->results[ind].name = th_data->tests[i].name;
-        th_data->results[ind].id = ind + 1;
+        th_data->results[ind].id = (unsigned int) (ind + 1);
         th_data->results[ind].thread_id = get_current_thread_id();
     }
     th_data->intf->printf("^^^^^^^^^^ Thread %lld finished ^^^^^^^^^^\n",
@@ -676,7 +676,7 @@ static void snprintf_pvalue(char *buf, size_t len, double p, double alpha)
     }
 }
 
-static void print_bar()
+static void print_bar(void)
 {
     for (int i = 0; i < 79; i++) {
         printf("-");
@@ -782,7 +782,7 @@ void TestsBattery_run(const TestsBattery *bat,
             for (size_t i = 0; i < ntests; i++) {
                 results[i] = TestDescription_run(&bat->tests[i], &obj);
                 results[i].name = bat->tests[i].name;
-                results[i].id = i + 1;
+                results[i].id = (unsigned int) (i + 1);
                 results[i].thread_id = 0;
             }
         } else {
@@ -976,7 +976,7 @@ GeneratorInfo define_low32_generator(const GeneratorInfo *gi)
  * @brief Switches stdout to binary mode in MS Windows (needed for
  * correct output of binary data)
  */
-void set_bin_stdout()
+void set_bin_stdout(void)
 {
 #ifdef USE_LOADLIBRARY
     (void) _setmode( _fileno(stdout), _O_BINARY);
@@ -988,7 +988,7 @@ void set_bin_stdout()
  * @brief Switches stdin to binary mode in MS Windows (needed for
  * correct input of binary data)
  */
-void set_bin_stdin()
+void set_bin_stdin(void)
 {
 #ifdef USE_LOADLIBRARY
     (void) _setmode( _fileno(stdin), _O_BINARY);
@@ -1008,7 +1008,7 @@ void GeneratorInfo_bits_to_file(GeneratorInfo *gen, const CallerAPI *intf)
         uint32_t buf[256];
         while (1) {
             for (size_t i = 0; i < 256; i++) {
-                buf[i] = gen->get_bits(state);
+                buf[i] = (uint32_t) gen->get_bits(state);
             }
             fwrite(buf, sizeof(uint32_t), 256, stdout);
         }

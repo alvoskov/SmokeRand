@@ -288,7 +288,7 @@ void Entropy_free(Entropy *obj)
 /**
  * @brief Tests 64-bit XXTEA implementation correctness
  */
-int xxtea_test()
+int xxtea_test(void)
 {
     static const uint64_t OUT0 = 0x575d8c80053704ab;
     static const uint64_t OUT1 = 0xc4cc7f1cc007378c;
