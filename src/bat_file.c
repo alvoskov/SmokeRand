@@ -15,6 +15,8 @@
 #include "smokerand/entropy.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <limits.h>
 
 #define ERRMSG_BUF_SIZE 128
 
