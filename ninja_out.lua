@@ -2,11 +2,30 @@
 -- Creates build.ninja file for SmokeRand.
 --
 
+local platform = ''
+if #arg < 1 then
+    print(
+    [[Usage:
+    lua ninja_out.lua plaform
+    platform --- gcc, mingw, msvc
+    ]])
+    return 0
+else
+    platform = arg[1]
+end
+
+local lib_name = "$libdir/libsmokerand_core.a"
+
+local lib_sources = {'core.c', 'coretests.c', 'entropy.c', 'extratests.c',
+    'fileio.c', 'lineardep.c', 'hwtests.c', 'specfuncs.c'}
+
+local bat_sources = {'bat_express.c', 'bat_brief.c', 'bat_default.c',
+    'bat_file.c', 'bat_full.c'}
 
 local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
     'chacha_avx',  'chacha', 'cmwc4096', 'coveyou64', 'crand', 'cwg64', 'des',
     'drand48', 'efiix64x48', 'flea32x1', 'hc256', 'isaac64', 'kiss64', 'kiss93',
-    'kiss99', 'lcg128_full', 'lcg128', 'lcg128_u32_full_rot', 'lcg128_u32_full',
+    'kiss99', 'lcg128_full', 'lcg128', 'lcg128_u32_full',
     'lcg128_u32_portable', 'lcg32prime', 'lcg64prime',  'lcg64', 'lcg69069',
     'lcg96_portable', 'lcg96', 'lfib4', 'lfib4_u64', 'lfib_par', 'lfsr113',
     'lfsr258', 'loop_7fff_w64', 'lxm_64x128', 'macmarsa', 'magma_avx', 'magma',
@@ -24,10 +43,7 @@ local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
     'xoroshiro1024st', 'xoroshiro128pp_avx', 'xoroshiro128pp', 'xoroshiro128p',
     'xorshift128pp_avx', 'xorshift128p', 'xorshift128', 'xorwow', 'xsh'}
 
-local stub = [[cflags = -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native
-cflags89 = -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native
-gen_cflags = $cflags -fPIC -ffreestanding -nostdlib
-cc = gcc
+local exe_ext, stub, stub_crossplatform = '', '', [[
 srcdir = src
 objdir = obj
 bindir = bin
@@ -35,6 +51,17 @@ libdir = lib
 includedir = include/smokerand
 gen_bindir = $bindir/generators
 gen_srcdir = generators
+]]
+
+if platform == 'gcc' or platform == 'mingw' then
+    if platform == 'mingw' then
+        exe_ext = '.exe'
+    end
+    stub = [[cflags = -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native
+cflags89 = -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native
+gen_cflags = $cflags -fPIC -ffreestanding -nostdlib
+cc = gcc
+exe_libs =
 exe_linkflags =
 so_linkflags = -shared
 gen_linkflags = -shared -fPIC -ffreestanding -nostdlib
@@ -67,9 +94,57 @@ rule link
     command = $cc $linkflags $in -o $out $libs -Iinclude
     description = LINK $out
 ]]
+elseif platform == 'msvc' then
+    exe_ext = '.exe'
+    -- /WX if treat warnings as errors
+    stub = [[cflags = /O2 /W3 /arch:avx2 /D_CRT_SECURE_NO_WARNINGS
+cflags89 = /O2 /W3 /arch:avx2 /D_CRT_SECURE_NO_WARNINGS
+gen_cflags = $cflags
+cc = cl
+exe_libs = advapi32.lib
+exe_linkflags = /SUBSYSTEM:CONSOLE
+so_linkflags = /DLL
+gen_linkflags = /DLL
+]]
 
+--    stub = stub .. "\nmsvc_deps_prefix = Note: including file:\n"
+    stub = stub .. "\nmsvc_deps_prefix = Примечание: включение файла:\n"
+
+    stub = stub .. [[
+rule cc
+    command = $cc /showIncludes $cflags /c /Iinclude $in /Fo:$out
+    description = CC $out
+    deps = msvc
+
+rule cc89
+    command = $cc /showIncludes $cflags /c /Iinclude $in /Fo:$out
+    description = CC $out
+    deps = msvc
+
+rule cc_gen
+    command = $cc /showIncludes $cflags /c /Iinclude $in /Fo:$out
+    description = CC $out
+    deps = msvc
+
+rule ar
+    command = lib /OUT:$out $in
+    description = AR $out
+
+rule link
+    command = link $linkflags $in $libs /Out:$out
+    description = LINK $out
+]]
+else
+    error("Unknown platform '" .. platform .. "'")
+    return 1
+end
+
+print("Generating build.ninja for the '" .. platform .. "'...")
+
+stub = stub_crossplatform .. "\n" .. stub .. "\n"
+
+local default_builds = {}
 --
-
 function add_sources(sources)
     local objfiles = {}
     for _, f in pairs(sources) do
@@ -88,60 +163,72 @@ function add_objfiles(objfiles)
     for _, f in pairs(objfiles) do
         io.write("    " .. f .. " $\n")
     end
-    io.write("\n")
+    io.write("\n");
 end
 
+function add_exefile(exefile, extra_objfiles)
+    io.write("build $objdir/" .. exefile .. ".o: cc $srcdir/" .. exefile .. ".c\n")
+    local exefile_full = "$bindir/" .. exefile .. exe_ext
+    io.write("build " .. exefile_full .. ": link $objdir/" .. exefile .. ".o ")
+    table.insert(default_builds, exefile_full)
+    if #extra_objfiles > 0 then
+        add_objfiles(extra_objfiles)
+    else
+        io.write("\n");
+    end
+    io.write("  libs = $exe_libs\n")
+    io.write("  linkflags = $exe_linkflags\n")
+end
 
 local file = io.open("build.ninja", "w")
 io.output(file)
 io.write(stub)
 
 -- Build core library
-local lib_sources = {'core.c', 'coretests.c', 'entropy.c', 'extratests.c',
-    'fileio.c', 'lineardep.c', 'hwtests.c', 'specfuncs.c'}
 local lib_objfiles = add_sources(lib_sources)
-io.write("build $libdir/libsmokerand_core.a: ar ")
+io.write("build " .. lib_name .. ": ar ")
 add_objfiles(lib_objfiles)
 
-
 -- Build batteries
-local bat_sources = {'bat_express.c', 'bat_brief.c', 'bat_default.c',
-    'bat_file.c', 'bat_full.c'}
 local bat_objfiles = add_sources(bat_sources)
 
 -- Build the command line tool executable
-io.write("build $objdir/smokerand.o: cc $srcdir/smokerand.c\n")
-io.write("build $bindir/smokerand: link $objdir/smokerand.o $libdir/libsmokerand_core.a ")
-add_objfiles(bat_objfiles)
-io.write("  libs = -L$libdir -lm -lsmokerand_core\n")
-io.write("  linkflags=$exe_linkflags\n")
-
+table.insert(bat_objfiles, lib_name)
+add_exefile("smokerand", bat_objfiles)
+add_exefile("test_funcs", {lib_name})
+add_exefile("calibrate_dc6", {lib_name})
 -- Build extra executables
 io.write("build $objdir/sr_tiny.o: cc89 $srcdir/sr_tiny.c\n")
-io.write("build $bindir/sr_tiny: link $objdir/sr_tiny.o $objdir/specfuncs.o\n")
+io.write("build $bindir/sr_tiny" .. exe_ext .. ": link $objdir/sr_tiny.o $objdir/specfuncs.o\n")
 io.write("  linkflags=$exe_linkflags\n")
-
-io.write("build $objdir/test_funcs.o: cc $srcdir/test_funcs.c\n")
-io.write("build $bindir/test_funcs: link $objdir/test_funcs.o $libdir/libsmokerand_core.a\n")
-io.write("  libs = -L$libdir -lm -lsmokerand_core\n")
-io.write("  linkflags=$exe_linkflags\n")
-
-io.write("build $objdir/calibrate_dc6.o: cc $srcdir/calibrate_dc6.c\n")
-io.write("build $bindir/calibrate_dc6: link $objdir/calibrate_dc6.o $libdir/libsmokerand_core.a\n")
-io.write("  libs = -L$libdir -lm -lsmokerand_core\n")
-io.write("  linkflags=$exe_linkflags\n")
-
+table.insert(default_builds, "$bindir/sr_tiny" .. exe_ext)
 
 -- Build generators
 for _, f in pairs(gen_sources) do
-    io.write("build $gen_bindir/obj/lib" .. f .. "_shared.o: cc_gen $gen_srcdir/" .. f .. "_shared.c\n")        
-    io.write("build $gen_bindir/lib" .. f .. "_shared.dll: link $gen_bindir/obj/lib" .. f .. "_shared.o\n")
+    local gen_fullname = "$gen_bindir/lib" .. f .. "_shared.dll"
+    io.write("build $gen_bindir/obj/" .. f .. "_shared.o: cc_gen $gen_srcdir/" .. f .. "_shared.c\n")        
+    io.write("build " .. gen_fullname .. ": link $gen_bindir/obj/" .. f .. "_shared.o\n")
+    table.insert(default_builds, gen_fullname)
     if f == "crand" then
-        io.write("    linkflags = $so_linkflags\n");
+        io.write("    linkflags = $so_linkflags\n\n");
     else
-        io.write("    linkflags = $gen_linkflags\n");
+        io.write("    linkflags = $gen_linkflags\n\n");
     end
 end
 
+-- Default rules
+io.write("default ")
+for k, v in pairs(default_builds) do        
+    io.write(v .. " ")
+    if k % 2 == 0 then
+        io.write("$\n    ")
+    end
+end
+io.write("\n\n")
+
+
 io.close(file)
 io.output(io.stdout) 
+
+print("Success")
+

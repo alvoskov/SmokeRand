@@ -56,7 +56,7 @@ typedef struct {
 
 
 uint64_t xxtea_encrypt(const uint64_t inp, const uint32_t *key);
-int xxtea_test();
+int xxtea_test(void);
 void Entropy_init(Entropy *obj);
 void Entropy_free(Entropy *obj);
 uint64_t Entropy_seed64(Entropy *obj, uint64_t thread_id);

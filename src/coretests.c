@@ -355,7 +355,7 @@ TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step)
     for (size_t i = 0; i < len; i++) {
         for (int j = 0; j < 8; j++) {
             uint64_t x = obj->gi->get_bits(obj->state);
-            uint32_t x_hi4 = x >> (obj->gi->nbits - 4);
+            uint32_t x_hi4 = (uint32_t) (x >> (obj->gi->nbits - 4));
             // Take lower 4 bits
             u[i] <<= 4;
             u[i] |=  x & 0xF;
@@ -469,7 +469,7 @@ TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     uint64_t nstates_u64 = 1ull << opts->ndims * opts->nbits_per_dim;
     uint64_t Oi[4] = {0, 0, 0, 0};
     Oi[0] = nstates_u64;
-    double nstates = nstates_u64;
+    double nstates = (double) nstates_u64;
     double lambda = (n - opts->ndims + 1.0) / nstates;
     double mu = nstates * (lambda - 1 + exp(-lambda));
     TestResults ans;
@@ -528,7 +528,7 @@ static int gap_test_guard(GeneratorState *obj, const GapOptions *opts)
     int is_ok = 0;
     uint64_t beta = 1ull << (obj->gi->nbits - opts->shl);
     double p = 1.0 / (1 << opts->shl); // beta in the floating point format
-    unsigned long long nsamples = -20.0 / log10(1.0 - p);
+    unsigned long long nsamples = (unsigned long long) (-20.0 / log10(1.0 - p));
     for (unsigned long i = 0; i < nsamples; i++) {
         if (obj->gi->get_bits(obj->state) <= beta) {
             is_ok = 1;
@@ -1163,7 +1163,8 @@ TestResults nbit_words_freq_test(GeneratorState *obj,
         if (Dplus > D) D = Dplus;
         if (Dminus > D) D = Dminus;
     }
-    double K = sqrt(opts->nblocks) * D + 1.0 / (6.0 * sqrt(opts->nblocks));
+    double sqrt_nblocks = sqrt((double) opts->nblocks);
+    double K = sqrt_nblocks * D + 1.0 / (6.0 * sqrt_nblocks);
     ans.x = K;
     ans.p = ks_pvalue(K);
     ans.alpha = 1.0 - ans.p;
