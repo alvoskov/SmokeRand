@@ -505,7 +505,7 @@ batteries and have mainly historical and educational interest.
 
  Algorithm         | Output | express | brief | default | full | cpb  | bday64 | TestU01 | PractRand 
 -------------------|--------|---------|-------|---------|------|------|--------|---------|-----------
- aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      |         | >= 8 TiB
+ aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      |         | >= 16 TiB
  alfib             | u64    | 2       | 5     | 6       | 8    | 0.23 | +      | Small   | 128 MiB
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    | +       | 4 GiB
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | N/A    | +       | 1 TiB
