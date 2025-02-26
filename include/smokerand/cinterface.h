@@ -1,6 +1,49 @@
+/**
+ * @file cinterface.h
+ * @brief C interface for modules (dynamic libraries) with pseudorandom
+ * number generators implementations.
+ *
+ * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #ifndef __SMOKERAND_CINTERFACE_H
 #define __SMOKERAND_CINTERFACE_H
 #include "smokerand/apidefs.h"
+
+///////////////////////////////
+///// 128-bit arithmetics /////
+///////////////////////////////
+
+#if defined(_MSC_VER) && !defined(__clang__)
+#include <intrin.h>
+#define UMUL128_FUNC_ENABLED
+#pragma intrinsic(_umul128)
+static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
+{
+    return _umul128(a, b, high);
+}
+#elif defined(__SIZEOF_INT128__)
+#define UINT128_ENABLED
+#define UMUL128_FUNC_ENABLED
+static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
+{
+    __uint128_t mul = ((__uint128_t) a) * b;
+    *high = mul >> 64;
+    return (uint64_t) mul;
+}
+#else
+#define unsigned_mul128 \
+\
+#pragma error "128-bit arithmetics is not supported by this compiler" \
+\
+//# pragma message ("128-bit arithmetics is not supported by this compiler")
+#endif
+
+//////////////////////
+///// Interfaces /////
+//////////////////////
 
 #define PRNG_CMODULE_PROLOG SHARED_ENTRYPOINT_CODE
 

@@ -322,7 +322,7 @@ GeneratorModule GeneratorModule_load(const char *libname)
         fprintf(stderr, "Cannot load the '%s' module; error code: %d\n",
             libname, errcode);
         LPSTR msg_buf = NULL;
-        size_t size = FormatMessageA(
+        (void) FormatMessageA(
             FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
             NULL, errcode,
             MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
@@ -662,6 +662,7 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
     printf("Rerunning in one-threaded mode\n");
     TestsBattery_run(bat, gen, intf, TESTS_ALL, 1, rtype);
 #endif
+    (void) rtype;
 }
 
 

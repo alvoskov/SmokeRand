@@ -2,7 +2,7 @@
  * @file apidefs.h
  * @brief Data types and definitions required for PRNG C interface.
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -37,32 +37,6 @@ static inline uint64_t rotr64(uint64_t x, unsigned int r)
 }
 
 
-///////////////////////////////
-///// 128-bit arithmetics /////
-///////////////////////////////
-
-#if defined(_MSC_VER) && !defined(__clang__)
-#include <intrin.h>
-#define UMUL128_FUNC_ENABLED
-#pragma intrinsic(_umul128)
-static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
-{
-    return _umul128(a, b, high);
-}
-#elif defined(__SIZEOF_INT128__)
-#define UINT128_ENABLED
-#define UMUL128_FUNC_ENABLED
-static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
-{
-    __uint128_t mul = ((__uint128_t) a) * b;
-    *high = mul >> 64;
-    return (uint64_t) mul;
-}
-#else
-#pragma message ("128-bit arithmetics is not supported by this compiler")
-#endif
-
-
 //////////////////////////////////////////
 ///// Custom DLL entry point for GCC /////
 //////////////////////////////////////////
@@ -93,6 +67,11 @@ int DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
 #endif
 
 
+/**
+ * @brief Pointers to the API functions used by a caller, i.e. PRNG
+ * implementation. Gives access to a seed generator and some subset
+ * of C standard library.
+ */
 typedef struct {
     uint32_t (*get_seed32)(void); ///< Get 32-bit seed
     uint64_t (*get_seed64)(void); ///< Get 64-bit seed
