@@ -572,7 +572,9 @@ int battery_file(const char *filename, GeneratorInfo *gen, CallerAPI *intf,
         }
     }
 
-    TestsBattery bat = {.name = "CUSTOM", .tests = tests};
+    TestsBattery bat;
+    bat.name = "CUSTOM";
+    bat.tests = tests;
     if (gen != NULL) {
         TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
     } else {
