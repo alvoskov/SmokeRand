@@ -321,6 +321,14 @@ GeneratorModule GeneratorModule_load(const char *libname)
         int errcode = (int) GetLastError();
         fprintf(stderr, "Cannot load the '%s' module; error code: %d\n",
             libname, errcode);
+        LPSTR msg_buf = NULL;
+        size_t size = FormatMessageA(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL, errcode,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPSTR) &msg_buf, 0, NULL);
+        fprintf(stderr, "  Error message: %s\n", msg_buf);
+        LocalFree(msg_buf);
         mod.lib = 0;
         mod.valid = 0;
         return mod;
@@ -581,7 +589,7 @@ static inline size_t test_pos_to_thread_ind(size_t test_pos, size_t nthreads)
  */
 static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
     const GeneratorInfo *gen, const CallerAPI *intf,
-    unsigned int nthreads, TestResults *results)
+    unsigned int nthreads, TestResults *results, ReportType rtype)
 {
 #ifndef NOTHREADS
     // Multithreaded version
@@ -652,7 +660,7 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
     (void) results;
     printf("WARNING: multithreading is not supported on this platform\n");
     printf("Rerunning in one-threaded mode\n");
-    TestsBattery_run(bat, gen, intf, TESTS_ALL, 1);
+    TestsBattery_run(bat, gen, intf, TESTS_ALL, 1, rtype);
 #endif
 }
 
@@ -804,7 +812,7 @@ void TestsBattery_run(const TestsBattery *bat,
         GeneratorState_free(&obj, intf);
     } else {
        // Multithreaded version
-       TestsBattery_run_threads(bat, ntests, gen, intf, nthreads, results);
+       TestsBattery_run_threads(bat, ntests, gen, intf, nthreads, results, rtype);
     }
     toc = time(NULL);
     printf("\n");
