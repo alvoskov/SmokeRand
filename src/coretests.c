@@ -240,8 +240,11 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     // generator.
     if (opts->nbits_per_dim == 64 && opts->ndims == 1 &&
         obj->gi->nbits == 32) {
-        const BSpaceNDOptions opts32 = {.nbits_per_dim = 32, .ndims = 2,
-            .nsamples = opts->nsamples, .get_lower = opts->get_lower};
+        BSpaceNDOptions opts32;
+        opts32.nbits_per_dim = 32;
+        opts32.ndims = 2;
+        opts32.nsamples = opts->nsamples;
+        opts32.get_lower = opts->get_lower;
         obj->intf->printf("Birthday spacings test: 1D 64-bit test for 32-bit PRNG\n");
         obj->intf->printf("Switching to the 2D 32-bit test\n");
         return bspace_nd_test(obj, &opts32);
