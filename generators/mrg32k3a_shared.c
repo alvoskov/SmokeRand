@@ -126,12 +126,16 @@ static inline uint64_t get_bits_raw(void *state)
 static int run_self_test(const CallerAPI *intf)
 {
     const uint32_t seed = 12345;
-    Mrg32k3aState obj = {{seed, seed, seed}, {seed, seed, seed}};
+    Mrg32k3aState obj;
     uint32_t u_ref[] = {
         0x1C6D4BA6, 0xAEDE0194, 0x6D85B214, 0x45A88A44,
         0xA3D5BEC0, 0x583A7E3A, 0xBD2798DA, 0xD0BB36FD
     };
     int is_ok = 1;
+    for (int i = 0; i < 3; i++) {
+        obj.s1[i] = seed;
+        obj.s2[i] = seed;
+    }
     for (int i = 0; i < 10000; i++) {
         get_bits_raw(&obj);
     }

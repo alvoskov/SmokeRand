@@ -60,13 +60,16 @@ static inline uint64_t get_bits_raw(void *state)
 static int run_self_test(const CallerAPI *intf)
 {
     const uint64_t seed = 123456789123456789ull;
-    Lfsr258State obj = {{seed, seed, seed, seed, seed}};
+    Lfsr258State obj;
     uint64_t u_ref[] = {
         0xEB3C31E8FDA1078C, 0xE2EE79241DC0EBF1,
         0x18E38AA3FC7562DB, 0x5A0DB4C898770E81,
         0xE9AC291C6241F0C4, 0xA98DD55E73FBDC7A,
         0x861718EE328C0912, 0xA4F9821B624D0E78
     };
+    for (int i = 0; i < 5; i++) {
+        obj.y[i] = seed;
+    }
     int is_ok = 1;
     for (int i = 0; i < 10000; i++) {
         get_bits_raw(&obj);

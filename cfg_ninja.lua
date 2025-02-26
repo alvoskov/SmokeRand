@@ -13,7 +13,7 @@ local platform = ''
 if #arg < 1 then
     print(
     [[Usage:
-    lua ninja_cfg.lua plaform
+    lua cfg_ninja.lua plaform
     platform --- gcc, mingw, gcc32, msvc, zigcc
     ]])
     return 0
