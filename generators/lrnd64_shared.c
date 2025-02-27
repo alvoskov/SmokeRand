@@ -42,8 +42,8 @@ PRNG_CMODULE_PROLOG
  * @brief LRnd64 PRNG state.
  */
 typedef struct {
-    int w_pos[4];
     uint64_t w[16];
+    int8_t w_pos;
 } LRnd64State;
 
 /**
@@ -58,26 +58,23 @@ void *create(const CallerAPI *intf)
             obj->w[i] = intf->get_seed64();
         } while (obj->w[i] == 0);
     }
-    obj->w_pos[0] = 0;
-    obj->w_pos[1] = 1;
-    obj->w_pos[2] = 2;
-    obj->w_pos[3] = 8;
+    obj->w_pos = 0;
     return obj;
 }
 
 static inline uint64_t get_bits_raw(void *state)
 {
     LRnd64State *obj = state;
-    uint64_t w0 = obj->w[obj->w_pos[0]];
-    uint64_t w1 = obj->w[obj->w_pos[1]];
-    uint64_t w2 = obj->w[obj->w_pos[2]];
-    uint64_t w8 = obj->w[obj->w_pos[3]];
+    int8_t ind = obj->w_pos;
+    int8_t ind_next = (ind + 1) & 0xF;
+    uint64_t w0 = obj->w[ind];
+    uint64_t w1 = obj->w[ind_next];
+    uint64_t w2 = obj->w[(ind + 2) & 0xF];
+    uint64_t w8 = obj->w[(ind + 8) & 0xF];
     // b_{j+1024} = b_{j+512} + b_{j+128} + b_{j+8} + b_{j+1}
     uint64_t w16 = w8 ^ w2 ^ ((w0 >> 8) ^ (w1 << 56)) ^ ((w0 >> 1) ^ (w1 << 63));
-    obj->w[obj->w_pos[0]] = w16;
-    for (int i = 0; i < 4; i++) {
-        obj->w_pos[i] = (obj->w_pos[i] + 1) & 0xF;
-    }
+    obj->w[ind] = w16;
+    obj->w_pos = ind_next;
     return w16;
 }
 
