@@ -1,15 +1,38 @@
 /**
  * @file lrnd64_shared.c
- * @brief A simple 64-bit LFSR generator. Fails linear complexity
- * and matrix rank tests.
+ * @brief A simple LFSR generator with 1024 bits of state and based on
+ * 64-bit arithmetics. Fails linear complexity and matrix rank tests.
+ * @details It is based on the next recurrent formula:
+ *
+ * \f[
+ * b_{j+1024} = b_{j+512} + b_{j+128} + b_{j+8} + b_{j+1}
+ * \f]
+ *
+ * where b are bits and + is addition modulo 2 (i.e. XOR). This optimized
+ * implementation works with 64-bit chunks and a circular buffer.
  *
  * References:
- * 1. http://dx.doi.org/10.4203/ccp.95.23
- * 2. https://itprojects.narfu.ru/grid/materials2015/Yacobovskii.pdf
- * 3. Воронюк Михаил Николаевич Математическое моделирование процессов
- *    фильтрации в перколяционных решетках с использованием вычислительных
- *    систем сверхвысокой производительности // Приборостроение. 2013. №5. 
- *    https://cyberleninka.ru/article/n/matematicheskoe-modelirovanie-protsessov-filtratsii-v-perkolyatsionnyh-reshetkah-s-ispolzovaniem-vychislitelnyh-sistem-sverhvysokoy.
+ *
+ * 1. M.V. Iakobovski, M.A. Kornilina, M.N. Voroniuk. The Scalable GPU-based
+ *    Parallel Algorithm for Uniform Pseudorandom Number Generation", in
+ *    "Proceedings of the Second International Conference on Parallel,
+ *    Distributed, Grid and Cloud Computing for Engineering", Civil-Comp Press,
+ *    Stirlingshire, UK, Paper 23, 2011. http://dx.doi.org/10.4203/ccp.95.23
+ * 2. М.Н. Воронюк, М.В. Якобовский. Адаптация алгоритмов моделирования
+ *    динамических процессов фильтрации в перколяционных решетках для
+ *    графических ускорителей // Математическое моделирование. 2012.
+ *    Т. 24. N 12. С. 78--85. http://mi.mathnet.ru/mm3227
+ * 3. https://itprojects.narfu.ru/grid/materials2015/Yacobovskii.pdf
+ *
+ * @copyright The LRND64 algorithm is suggested by M.V. Iakobovski,
+ * M.A. Kornilina and M.N. Voroniuk.
+ *
+ * The optimized reentrant implementation for SmokeRand:
+ *
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 
