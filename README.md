@@ -623,7 +623,7 @@ batteries and have mainly historical and educational interest.
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      |         | >= 4 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | +       | >= 16 TiB
  speck128          | u64    | +       | +     | +       | +    | 3.1  | +      |         | >= 2 TiB
- speck128_avx      | u64    | +       | +     | +       | +    | 0.65 | +      |         | >= 2 TiB
+ speck128_avx      | u64    | +       | +     | +       | +    | 0.65 | +      |         | >= 16 TiB
  speck128_r16_avx  | u64    | +       | +     | +       | +    | 0.33 | +      |         | >= 32 TiB
  splitmix          | u64    | +       | +     | +       | +    | 0.19 | -      | +       | >= 2 TiB
  splitmix32        | u32    | +       | 2     | 3       | 4/5  | 0.25 | -(>>10)| Small   | 1 GiB
