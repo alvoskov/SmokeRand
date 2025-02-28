@@ -644,7 +644,7 @@ batteries and have mainly historical and educational interest.
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      |         | 32 GiB
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | +       | >= 32 TiB
- threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      |         | >= 8 TiB
+ threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.40 | +      |         | >= 32 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | Small   | 64 MiB
  wyrand            | u64    | +       | +     | +       | +    | 0.08 | +      |         | >= 8 TiB
