@@ -954,7 +954,7 @@ static void sumcollector_calc_p(double *p, const int g, const int nmax)
  * - even to its versions with lower "luxury levels".
  *
  * References:
- * 1. D. Ugrin-Sparac. On a distribution encountered in the renewal process based
+ * 1. G. Ugrin-Sparac. On a distribution encountered in the renewal process based
  *    on uniform distribution // Glasnik Matematicki. 1990. V. 25. N 1. P.221-233.
  *    https://web.math.pmf.unizg.hr/glasnik/Vol/vol25no1.html
  * 2. Ugrin-Sparac G. Stochastic investigations of pseudo-random number
