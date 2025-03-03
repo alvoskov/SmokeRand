@@ -260,6 +260,7 @@ int BlockFrequency_calc(BlockFrequency *obj)
     const double pcrit_bytes = pcrit / 256.0, pcrit_w16 = pcrit / 65536.0;
     double chi2_bytes = 0.0, chi2_w16 = 0.0;
     double zmax_bytes = 0.0, zmax_w16 = 0.0;
+    int zmax_bytes_ind = -1, zmax_w16_ind = -1;
     for (size_t i = 0; i < 256; i++) {        
         long long Ei = (long long) obj->nbytes / 256;
         long long dE = (long long) obj->bytefreq[i] - (long long) Ei;
@@ -267,6 +268,7 @@ int BlockFrequency_calc(BlockFrequency *obj)
         double z_bytes = fabs((double) dE) / sqrt( obj->nbytes * 255.0 / 65536.0);
         if (zmax_bytes < z_bytes) {
             zmax_bytes = z_bytes;
+            zmax_bytes_ind = i;
         }
     }
     for (size_t i = 0; i < 65536; i++) {
@@ -276,19 +278,20 @@ int BlockFrequency_calc(BlockFrequency *obj)
         double z_w16 = fabs((double) dE) / sqrt( obj->nw16 * 65535.0 / 65536.0 / 65536.0);
         if (zmax_w16 < z_w16) {
             zmax_w16 = z_w16;
+            zmax_w16_ind = i;
         }
     }
     double p_bytes = halfnormal_pvalue(zmax_bytes);
     double p_w16 = halfnormal_pvalue(zmax_w16);
     printf("2^%g bytes analyzed\n", sr_log2((double) obj->nbytes));
-    printf("  %10s %10s %10s %10s %10s %10s\n",
-        "Chunk", "chi2emp", "p(chi2)", "zmax", "p(zmax)", "p(crit)");
-    printf("  %10s %10g %10.2g %10.3g %10.2g %10.2g\n",
+    printf("  %10s %10s %10s %10s %10s %10s %10s\n",
+        "Chunk", "chi2emp", "p(chi2)", "zmax", "max_ind", "p(zmax)", "p(crit)");
+    printf("  %10s %10g %10.2g %10.3g %10d %10.2g %10.2g\n",
         "8 bits", chi2_bytes, chi2_pvalue(chi2_bytes, 255),
-        zmax_bytes, p_bytes, pcrit_bytes);
-    printf("  %10s %10g %10.2g %10.3g %10.2g %10.2g\n",
+        zmax_bytes, zmax_bytes_ind, p_bytes, pcrit_bytes);
+    printf("  %10s %10g %10.2g %10.3g %10d %10.2g %10.2g\n",
         "16 bits", chi2_w16, chi2_pvalue(chi2_w16, 65536),
-        zmax_w16, p_w16, pcrit_w16);
+        zmax_w16, zmax_w16_ind, p_w16, pcrit_w16);
     // p-values interpretation
     if (p_bytes < pcrit_bytes) {
         printf("===== zmax_bytes test failed =====\n");
