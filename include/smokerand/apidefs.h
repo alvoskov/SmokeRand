@@ -11,10 +11,14 @@
 #define __SMOKERAND_APIDEFS_H
 #include <stdint.h>
 #include <stddef.h>
+#ifdef __WATCOMC__
+#include <stdlib.h>
+#endif
 
 ///////////////////////////
 ///// Circular shifts /////
 ///////////////////////////
+
 
 static inline uint32_t rotl32(uint32_t x, unsigned int r)
 {

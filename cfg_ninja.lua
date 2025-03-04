@@ -6,15 +6,14 @@
 --
 -- Known issues:
 --
--- 1. Not all generators can be compiled for the 'gcc32' 32-bit platform
---    due to 128-bit arithmetics etc. Generators with AVX/AVX2 instructions
---    are also excluded from the build for 32-bit platforms.
+-- 1. Not all generators can be compiled for the 'gcc32' and 'mingw-hx' 32-bit
+--    platform due to 128-bit arithmetics etc. Generators with AVX/AVX2
+--    instructions are also excluded from the build for 32-bit platforms.
 -- 2. MSVC headers dependency tracing may depend on the system locale because
 --    ninja analyses stdout output of the MSVC compiler. Some issues with
 --    encodings for non-latin based languages are possible. And this script
 --    supports only English version of MSVC.
 --
-
 
 ---------------------------------------------
 ----- Processing command line arguments -----
@@ -25,7 +24,7 @@ if #arg < 1 then
     print(
     [[Usage:
     lua cfg_ninja.lua plaform
-    platform --- gcc, mingw, gcc32, msvc, zigcc
+    platform --- gcc, mingw, gcc32, mingw-hx, msvc, zigcc
     ]])
     return 0
 else
@@ -141,8 +140,18 @@ if platform == 'gcc' or platform == 'mingw' then
     "gen_linkflags = -shared -fPIC -ffreestanding -nostdlib\n"
     stub = stub .. gcc_rules
 elseif platform == 'gcc32' then
-    stub = "cflags = -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=i686 -m32\n" ..
-    "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=i686 -m32\n" ..
+    stub = "cflags = -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native -m32\n" ..
+    "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native -m32\n" ..
+    "exe_libs = -lm\nexe_linkflags = -m32 \n" ..
+    "cc = gcc\n" ..
+    "gen_cflags = $cflags -fPIC\n" ..
+    "so_linkflags = -m32 -shared\n" ..
+    "gen_linkflags = -m32 -shared -fPIC\n"
+    stub = stub .. gcc_rules
+    gen_sources = cfg.get_gen_sources(true) -- Only portable generators are supported
+elseif platform == 'mingw-hx' then
+    stub = "cflags = -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=i686 -m32 -DUSE_WINTHREADS\n" ..
+    "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=i686 -m32 -DUSE_WINTHREADS\n" ..
     "exe_libs = -lm\nexe_linkflags = -m32 \n" ..
     "cc = gcc\n" ..
     "gen_cflags = $cflags -fPIC\n" ..

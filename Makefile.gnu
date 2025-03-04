@@ -3,34 +3,40 @@
 # Supports GCC and Clang (as Zig CC) compilers.
 #
 
-PLATFORM_NAME=GCC
+PLATFORM_NAME=MINGW-HX
 ifeq ($(PLATFORM_NAME), GCC)
     CC = gcc
     AR = ar
     GEN_CFLAGS = -fPIC -ffreestanding -nostdlib
-    PLATFORM_FLAGS=-g
-    IS_PORTABLE=0
+    PLATFORM_FLAGS = -march=native
+    IS_PORTABLE = 0
 else ifeq ($(PLATFORM_NAME), GCC32)
     CC = gcc
     AR = ar
-    GEN_CFLAGS = -fPIC -ffreestanding -nostdlib
-    PLATFORM_FLAGS=-m32
-    IS_PORTABLE=0
+    GEN_CFLAGS = -fPIC  -DNO_CUSTOM_DLLENTRY
+    PLATFORM_FLAGS = -m32 -march=native
+    IS_PORTABLE = 1
+else ifeq ($(PLATFORM_NAME), MINGW-HX)
+    CC = gcc
+    AR = ar
+    GEN_CFLAGS = -fPIC -DNO_CUSTOM_DLLENTRY
+    PLATFORM_FLAGS = -m32 -march=i686
+    IS_PORTABLE = 1
 else ifeq ($(PLATFORM_NAME), ZIGCC)
     CC = zig cc
     AR = zig ar
     GEN_CFLAGS = -fPIC
-    PLATFORM_FLAGS=-DUSE_WINTHREADS
-    IS_PORTABLE=0
+    PLATFORM_FLAGS = -DUSE_WINTHREADS -march=native
+    IS_PORTABLE = 0
 else ifeq ($(PLATFORM_NAME), GENERIC)
     CC = gcc
     AR = ar
     GEN_CFLAGS = -fPIC
-    PLATFORM_FLAGS=-DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY
-    IS_PORTABLE=1
+    PLATFORM_FLAGS = -DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY
+    IS_PORTABLE = 1
 endif
 #-----------------------------------------------------------------------------
-CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native
+CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes
 CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native
 LINKFLAGS = $(PLATFORM_FLAGS)
 INCLUDE = -Iinclude
