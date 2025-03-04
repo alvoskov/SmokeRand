@@ -73,7 +73,16 @@ The next compilers are supported: GCC (including MinGW), Clang (as zig cc), MSVC
 (Microsoft Visual C) and Open Watcom C. It allows to compile SmokeRand under
 Windows, UNIX-like systems and DOS.
 
-Implemented tests:
+
+## Compilation
+
+SmokeRand supports three software build systems: GNU Make, CMake and Ninja.
+Usage of Ninja requires Lua 5.x interpreter for generation of `build.ninja`
+script.
+
+## About implemented tests
+
+The next tests are implemented in the SmokeRand core:
 
 1. Monobit frequency test.
 2. Frequency test for bytes and 16-bit chunks.
@@ -87,7 +96,7 @@ Implemented tests:
 10. Hamming weights tests based on overlapping tuples (similar to DC6 test
     from PractRand 0.94).
 11. Simplified `mod3` test from grand.
-
+12. SumCollector test.
 
 Systematic failure of even one test means that PRNG is not suitable as a general
 purpose PRNG. However different tests have different impact on the PRNG quality:
@@ -97,9 +106,9 @@ purpose PRNG. However different tests have different impact on the PRNG quality:
    Local deviations from the uniform distribution are possible.
 3. Gap test failure: the PRNG output has regularities that may disrupt
    Monte-Carlo simulations (similar to Ising 2D model case).
-4. Birthday spacings and CollisionOver test failure: the PRNG output shows a
-   regular structure (often similar to lattice) that can break generation of
-   identifiers and Monte-Carlo simulations.
+4. Birthday spacings, CollisionOver and SumCollector test failure: the PRNG
+   output shows a regular structure (often similar to lattice) that can break
+   generation of identifiers and Monte-Carlo simulations.
 5. Matrix rank and linear complexity tests failure: there is a linear dependence
    between bits of the PRNG output sequence. Don't work with separate bits of 
    such PRNG, even `a % n` usage may be risky. However, these flaws are usually

@@ -85,20 +85,16 @@ static inline void mm_qround_vert(__m128i *a, __m128i *b, __m128i *c, __m128i *d
     *c = _mm_add_epi32(*c, *d); *b = _mm_xor_si128(*b, *c); *b = mm_roti_epi32_def(*b, 7);
 }
 #else
-static inline uint32_t rotl(uint32_t x, uint32_t r)
-{
-    return (x << r) | (x >> (32 - r));
-}
 
 /**
  * @brief Qround (cross-platform scalar implementation)
  */
 static inline void qround(uint32_t *x, size_t ai, size_t bi, size_t ci, size_t di)
 {
-    x[ai] += x[bi]; x[di] ^= x[ai]; x[di] = rotl(x[di], 16);
-    x[ci] += x[di]; x[bi] ^= x[ci]; x[bi] = rotl(x[bi], 12);
-    x[ai] += x[bi]; x[di] ^= x[ai]; x[di] = rotl(x[di], 8);
-    x[ci] += x[di]; x[bi] ^= x[ci]; x[bi] = rotl(x[bi], 7);
+    x[ai] += x[bi]; x[di] ^= x[ai]; x[di] = rotl32(x[di], 16);
+    x[ci] += x[di]; x[bi] ^= x[ci]; x[bi] = rotl32(x[bi], 12);
+    x[ai] += x[bi]; x[di] ^= x[ai]; x[di] = rotl32(x[di], 8);
+    x[ci] += x[di]; x[bi] ^= x[ci]; x[bi] = rotl32(x[bi], 7);
 }
 #endif
 
