@@ -61,6 +61,7 @@ void Entropy_init(Entropy *obj);
 void Entropy_free(Entropy *obj);
 uint64_t Entropy_seed64(Entropy *obj, uint64_t thread_id);
 void Entropy_print_seeds_log(const Entropy *obj, FILE *fp);
+uint64_t mix_rdseed(const uint64_t x);
 uint64_t cpuclock(void);
 
 #endif

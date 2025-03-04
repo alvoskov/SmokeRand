@@ -34,7 +34,7 @@
 
 PRNG_CMODULE_PROLOG
 
-#define USE_INLINE_ASM
+//#define USE_INLINE_ASM
 
 /* The currently recommended generator is the three-parameter MIXMAX with
 N=240, s=487013230256099140, m=2^51+1
