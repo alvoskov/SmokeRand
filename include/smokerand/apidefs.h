@@ -18,22 +18,22 @@
 
 static inline uint32_t rotl32(uint32_t x, unsigned int r)
 {
-    return (x << r) | (x >> (32 - r));
+    return (x << r) | (x >> ((-r) & 31));
 }
 
 static inline uint32_t rotr32(uint32_t x, unsigned int r)
 {
-    return (x << (32 - r)) | (x >> r);
+    return (x << ((-r) & 31)) | (x >> r);
 }
 
 static inline uint64_t rotl64(uint64_t x, unsigned int r)
 {
-    return (x << r) | (x >> (64 - r));
+    return (x << r) | (x >> ((-r) & 63));
 }
 
 static inline uint64_t rotr64(uint64_t x, unsigned int r)
 {
-    return (x << (64 - r)) | (x >> r);
+    return (x << ((-r) & 63)) | (x >> r);
 }
 
 
