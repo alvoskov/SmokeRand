@@ -141,8 +141,8 @@ if platform == 'gcc' or platform == 'mingw' then
     "gen_linkflags = -shared -fPIC -ffreestanding -nostdlib\n"
     stub = stub .. gcc_rules
 elseif platform == 'gcc32' then
-    stub = "cflags = -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native -m32\n" ..
-    "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native -m32\n" ..
+    stub = "cflags = -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=i686 -m32\n" ..
+    "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=i686 -m32\n" ..
     "exe_libs = -lm\nexe_linkflags = -m32 \n" ..
     "cc = gcc\n" ..
     "gen_cflags = $cflags -fPIC\n" ..
@@ -247,6 +247,7 @@ local bat_objfiles = add_sources(bat_sources)
 table.insert(bat_objfiles, lib_name)
 add_exefile("smokerand", bat_objfiles)
 add_exefile("test_funcs", {lib_name})
+add_exefile("test_rdseed", {lib_name})
 add_exefile("calibrate_dc6", {lib_name})
 -- Build extra executables
 io.write("build $objdir/sr_tiny.o: cc89 $srcdir/sr_tiny.c\n")

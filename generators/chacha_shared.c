@@ -23,9 +23,9 @@
 
 PRNG_CMODULE_PROLOG
 
-#ifdef  __AVX__
-#define CHACHA_VECTOR_INTR
-#endif
+//#ifdef  __AVX__
+//#define CHACHA_VECTOR_INTR
+//#endif
 
 static const int gen_nrounds = 12;
 

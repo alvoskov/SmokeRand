@@ -161,7 +161,7 @@ uint64_t get_machine_id()
 /**
  * @brief XORs input with output of hardware RNG in CPU (rdseed).
  */
-static uint64_t mix_rdseed(const uint64_t x)
+uint64_t mix_rdseed(const uint64_t x)
 {
     return x;
 }
@@ -188,10 +188,12 @@ uint64_t cpuclock(void)
 /**
  * @brief XORs input with output of hardware RNG in CPU (rdseed).
  */
-static uint64_t mix_rdseed(const uint64_t x)
+uint64_t mix_rdseed(const uint64_t x)
 {
     unsigned long long rd;
-#if SIZE_MAX == UINT32_MAX
+#if !defined(__RDSEED__)
+    rd = 0;
+#elif SIZE_MAX == UINT32_MAX
     // For 32-bit x86 executables
     unsigned int rd_hi, rd_lo;
     while (!_rdseed32_step(&rd_hi)) {}

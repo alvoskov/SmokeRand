@@ -502,6 +502,7 @@ typedef struct {
     TestDescription *tests;
     size_t *tests_inds;
     size_t ntests;
+    size_t ntests_total;
     TestResults *results;
     const GeneratorInfo *gi;
     const CallerAPI *intf;
@@ -519,11 +520,17 @@ static void *battery_thread(void *data)
     GeneratorState obj = GeneratorState_create(th_data->gi, th_data->intf);
     for (size_t i = 0; i < th_data->ntests; i++) {
         size_t ind = th_data->tests_inds[i];
-        th_data->intf->printf("vvvvv Thread %lld: test %s started vvvvv\n",
-            get_thread_id(th_data->thrd_id), th_data->tests[i].name);
+        th_data->intf->printf(
+            "vvvvv Thread %lld: test #%lld: %s (%lld of %lld) started vvvvv\n",
+            get_thread_id(th_data->thrd_id),
+            (long long) ind + 1, th_data->tests[i].name,
+            (long long) i + 1, (long long) th_data->ntests);
         th_data->results[ind] = TestDescription_run(&th_data->tests[i], &obj);
-        th_data->intf->printf("^^^^^ Thread %lld: test %s finished ^^^^^\n",
-            get_thread_id(th_data->thrd_id), th_data->tests[i].name);
+        th_data->intf->printf(
+            "^^^^^ Thread %lld: test #%lld: %s (%lld of %lld) finished ^^^^^\n",
+            get_thread_id(th_data->thrd_id),
+            (long long) ind + 1, th_data->tests[i].name,
+            (long long) i + 1, (long long) th_data->ntests);
         th_data->results[ind].name = th_data->tests[i].name;
         th_data->results[ind].id = (unsigned int) (ind + 1);
         th_data->results[ind].thread_id = get_current_thread_id();
@@ -800,6 +807,8 @@ void TestsBattery_run(const TestsBattery *bat,
         GeneratorState obj = GeneratorState_create(gen, intf);
         if (testid == TESTS_ALL) {
             for (size_t i = 0; i < ntests; i++) {
+                intf->printf("----- Test %u of %u (%s)\n",
+                    (unsigned int) (i + 1), (unsigned int) ntests, bat->tests[i].name);
                 results[i] = TestDescription_run(&bat->tests[i], &obj);
                 results[i].name = bat->tests[i].name;
                 results[i].id = (unsigned int) (i + 1);
