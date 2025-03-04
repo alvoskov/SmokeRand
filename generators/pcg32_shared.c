@@ -29,7 +29,7 @@ static inline uint64_t get_bits_raw(void *state)
     uint32_t xorshifted = (uint32_t) ( ((obj->x >> 18) ^ obj->x) >> 27 );
     uint32_t rot = obj->x >> 59;
     obj->x = obj->x * 6364136223846793005ull + 12345;
-    return (xorshifted << (32 - rot)) | (xorshifted >> rot);
+    return rotr32(xorshifted, rot);
 }
 
 static void *create(const CallerAPI *intf)

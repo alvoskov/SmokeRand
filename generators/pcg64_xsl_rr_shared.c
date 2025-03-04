@@ -40,7 +40,7 @@ static inline uint64_t get_bits_raw(void *state)
 #endif
     unsigned int rot = x_hi >> 58; // 64 - 6
     uint64_t xsl = x_hi ^ x_lo;
-    return (xsl << (64 - rot)) | (xsl >> rot);
+    return rotr64(xsl, rot);
 }
 
 
