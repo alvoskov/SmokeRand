@@ -73,19 +73,22 @@ EXE_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXE_NAMES)))
 GEN_CUSTOM_SOURCES = $(addsuffix _shared.c,$(addprefix generators/, ranluxpp \
     superduper64 superduper64_u32))
 ifeq ($(IS_PORTABLE), 1)
-GEN_ALL_SOURCES = $(addsuffix _shared.c,$(addprefix generators/, alfib_mod alfib \
-    chacha coveyou64 crand cmwc4096 cwg64 des drand48 efiix64x48 isaac64 \
-    flea32x1 kiss64 kiss93 kiss99 lcg32prime lcg64 lcg96_portable \
-    lcg128_u32_portable lcg69069 lfib_par lfsr113 lfsr258 loop_7fff_w64 \
-    lxm_64x128 macmarsa magma minstd mixmax mrg32k3a mlfib17_5 msws_ctr msws \
-    mt19937 mulberry32 mwc64x mwc64 mwc4691 mwc1616 mwc1616x mwc3232x pcg32 \
-    pcg64_64 philox32 philox2x32 r1279 ran randu ranq1 ranq2 ranrot_bi ranluxpp \
-    ranrot32 ranshi ranval rc4 rc4ok romutrio rrmxmx sapparot sapparot2 sfc8 \
-    sfc16 sfc32 sfc64 shr3 speck128 splitmix32 splitmix sqxor32 stormdrop \
-    stormdrop_old superduper73 superduper64 superduper64_u32 swb swblarge \
-    swblux swbw threefry threefry2x64 tinymt32 tinymt64 well1024a xorgens \
-    xorshift128 xorshift128p xoroshiro1024stst xoroshiro1024st xoroshiro128pp \
-    xoroshiro128p xorwow xsh))
+GEN_ALL_SOURCES = $(addsuffix _shared.c,$(addprefix generators/, \
+    alfib_lux alfib_mod alfib ara32 chacha cmwc4096 coveyou64 crand \
+    cwg64 des drand48 efiix64x48 flea32x1 hc256 isaac64 kiss64 kiss93 \
+    kiss99 lcg128_u32_portable lcg32prime lcg64 lcg69069 lcg96_portable \
+    lfib4 lfib4_u64 lfib_par lfsr113 lfsr258 loop_7fff_w64 lrnd64 \
+    lxm_64x128 macmarsa magma minstd mixmax mlfib17_5 mrg32k3a msws_ctr \
+    msws mt19937 mulberry32 mwc1616x mwc1616 mwc3232x mwc32x mwc4691 \
+    mwc64x mwc64 pcg32 pcg32_streams pcg32_xsl_rr pcg64_64 philox2x32 \
+    philox32 r1279 randu ranlux48 ranluxpp ranq1 ranq2 ranrot32 ranrot_bi \
+    ranshi ranval ran rc4ok rc4 romutrio rrmxmx sapparot2 sapparot \
+    sezgin63 sfc16 sfc32 sfc64 sfc8 shr3 speck128 splitmix32 splitmix \
+    sqxor32 stormdrop_old stormdrop superduper64 superduper64_u32 \
+    superduper73 swblarge swblux swbw swb taus88 threefry2x64 threefry \
+    tinymt32 tinymt64 well1024a xorgens xoroshiro1024stst xoroshiro1024st \
+    xoroshiro128pp xoroshiro128p xorshift128p xorshift128 xorwow \
+    xsh ))
 else
 GEN_ALL_SOURCES = $(wildcard generators/*.c)
 endif
