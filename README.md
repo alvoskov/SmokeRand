@@ -69,6 +69,9 @@ Recommended configuration:
   instructions.
 - 16 GiB of RAM, especially for multithreaded mode and/or `birthday` battery.
 
+The next compilers are supported: GCC (including MinGW), Clang (as zig cc), MSVC
+(Microsoft Visual C) and Open Watcom C. It allows to compile SmokeRand under
+Windows, UNIX-like systems and DOS.
 
 Implemented tests:
 
@@ -717,6 +720,15 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 - Passed dieharder: lcg64
 
 # Versions history
+
+04.03.2025: SmokeRand 0.25
+
+- lrnd64 (a modification of lrnd32-1023) generator.
+- Extension of Lua scripts for Ninja build system.
+- `freq` battery now shows bytes/words that caused failure.
+- Open Watcom C support for Windows NT target. It is always a 32-bit build
+  and may have performance issues, especially with modern CSPRNGs. But it
+  was successfully tested in FreeDOS (HX DOS Extender).
 
 25.02.2025: SmokeRand 0.24.
 
