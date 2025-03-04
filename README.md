@@ -524,7 +524,7 @@ batteries and have mainly historical and educational interest.
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      |         | >= 2 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | +       | >= 1 TiB
  flea32x1          | u32    | +       | +     | 1       | 1    | 0.48 | +      | +       | 4 MiB
- hc256             | u32    | +       | +     | +       | +    | 1.1  | N/A    | +       | >= 1 TiB
+ hc256             | u32    | +       | +     | +       | +    | 1.1  | N/A    | +       | >= 32 TiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | Small   | 1 MiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | +       | >= 16 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | +       | >= 32 TiB
