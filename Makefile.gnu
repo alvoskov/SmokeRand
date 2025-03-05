@@ -196,7 +196,7 @@ endif
 
 uninstall:
 ifeq ($(OS), Windows_NT)
-	echo `make install` is supported only for UNIX-like systems.
+	echo `make uninstall` is supported only for UNIX-like systems.
 else
 	rm $(DESTDIR)$(PREFIX)/bin/smokerand
 	rm $(DESTDIR)$(PREFIX)/lib/libsmokerand_core.a
