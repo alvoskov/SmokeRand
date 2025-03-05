@@ -30,14 +30,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 find_library(M_LIB m)
 
 add_library(smokerand_core
-    src/core.c       include/smokerand/core.h
-    src/coretests.c  include/smokerand/coretests.h
-    src/entropy.c    include/smokerand/entropy.h
-    src/extratests.c include/smokerand/extratests.h
-    src/lineardep.c  include/smokerand/lineardep.h
-    src/fileio.c     include/smokerand/fileio.h
-    src/hwtests.c    include/smokerand/hwtests.h
-    src/specfuncs.c  include/smokerand/specfuncs.h
+    src/core.c          include/smokerand/core.h
+    src/coretests.c     include/smokerand/coretests.h
+    src/entropy.c       include/smokerand/entropy.h
+    src/extratests.c    include/smokerand/extratests.h
+    src/lineardep.c     include/smokerand/lineardep.h
+    src/fileio.c        include/smokerand/fileio.h
+    src/hwtests.c       include/smokerand/hwtests.h
+    src/specfuncs.c     include/smokerand/specfuncs.h
+    src/threads_intf.c  include/smokerand/threads_intf.h
     include/smokerand/cinterface.h
     include/smokerand/apidefs.h
 )
