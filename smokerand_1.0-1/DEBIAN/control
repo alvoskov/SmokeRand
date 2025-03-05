@@ -1,0 +1,12 @@
+Package: smokerand
+Version: 1.0-1
+Section: science
+Priority: optional
+Architecture: amd64
+Depends: libc6, libc6-dev
+Maintainer: Alexey L. Voskov <alvoskov@gmail.com>
+Description: A test suite for pseudorandom numbers generators.
+ SmokeRand is a cross-platform set of tests for pseudorandom number generators
+ (PRNGs). Tested generators should return either 32-bit or 64-bit unsigned
+ uniformly distributed unsigned integers. They can be connected to SmokeRand
+ either through stdin/stdout or by means of C API as dynamic libraries.

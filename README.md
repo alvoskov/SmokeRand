@@ -730,6 +730,13 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 
 # Versions history
 
+05.03.2025: SmokeRand 0.26
+
+- Multithreading support was transferred to a separate file.
+- Improved threads IDs printing.
+- `make install`, `make uninstall` and deb package support
+  for UNIX-like systems was added.
+
 04.03.2025: SmokeRand 0.25
 
 - lrnd64 (a modification of lrnd32-1023) generator.
