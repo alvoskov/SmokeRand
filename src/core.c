@@ -3,7 +3,7 @@
  * @brief Subroutines and special functions required for implementation
  * of statistical tests.
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -11,6 +11,7 @@
 #include "smokerand/core.h"
 #include "smokerand/entropy.h"
 #include "smokerand/specfuncs.h"
+#include "smokerand/threads_intf.h"
 #include <math.h>
 #include <float.h>
 #include <stdio.h>
@@ -99,56 +100,20 @@ void CallerAPI_free(void)
 ///// Multithreaded API /////
 /////////////////////////////
 
-#if defined(USE_PTHREADS) || defined(USE_WINTHREADS)
+DECLARE_MUTEX(get_seed64_mt_mutex)
+DECLARE_MUTEX(printf_mt_mutex)
 
-#ifdef USE_PTHREADS
-// Begin of pthreads-specific code
-static pthread_mutex_t get_seed64_mt_mutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t printf_mt_mutex = PTHREAD_MUTEX_INITIALIZER;
 static void init_mutexes()
 {
+    INIT_MUTEX(get_seed64_mt_mutex)
+    INIT_MUTEX(printf_mt_mutex)
 }
-#define MUTEX_LOCK(mutex) pthread_mutex_lock(&mutex);
-#define MUTEX_UNLOCK(mutex) pthread_mutex_unlock(&mutex);
-static inline uint64_t get_current_thread_id(void)
-{
-    return (uint64_t) pthread_self();
-}
-static inline uint64_t get_thread_id(pthread_t handle)
-{
-    return (uint64_t) handle;
-}
-// End of pthreads-specific code
-#else
-// Begin of WinAPI-specific code
-static HANDLE get_seed64_mt_mutex = NULL;
-static HANDLE printf_mt_mutex = NULL;
-static void init_mutexes(void)
-{
-    get_seed64_mt_mutex = CreateMutex(NULL, FALSE, "seed64_mutex");
-    printf_mt_mutex = CreateMutex(NULL, FALSE, "printf_mutex");
-}
-#define MUTEX_LOCK(mutex) DWORD dwResult = WaitForSingleObject(mutex, INFINITE); \
-    if (dwResult != WAIT_OBJECT_0) { \
-        fprintf(stderr, "get_seed64_mt internal error"); \
-        exit(EXIT_FAILURE); \
-    }
-#define MUTEX_UNLOCK(mutex) ReleaseMutex(mutex);
-static inline uint64_t get_current_thread_id(void)
-{
-    return (uint64_t) GetCurrentThreadId();
-}
-static inline uint64_t get_thread_id(DWORD id)
-{
-    return (uint64_t) id;
-}
-// End of WinAPI-specific code
-#endif
 
 static uint64_t get_seed64_mt(void)
 {
     MUTEX_LOCK(get_seed64_mt_mutex);
-    uint64_t seed = Entropy_seed64(&entropy, get_current_thread_id());
+    ThreadObj thr = ThreadObj_current();
+    uint64_t seed = Entropy_seed64(&entropy, thr.ord);
     MUTEX_UNLOCK(get_seed64_mt_mutex);
     return seed;
 }
@@ -158,22 +123,18 @@ static uint32_t get_seed32_mt(void)
     return get_seed64_mt() >> 32;
 }
 
-
-
-
 static int printf_mt(const char *format, ...)
 {
     int ans;
+    ThreadObj thr = ThreadObj_current();
     MUTEX_LOCK(printf_mt_mutex);
     va_list args;
-    va_start(args, format);
+    va_start(args, format);    
     if (use_stderr_for_printf) {
-        fprintf(stderr, "=== THREAD #%2llu ===> ",
-            (unsigned long long) get_current_thread_id());
+        fprintf(stderr, "=== THREAD #%2u ===> ", thr.ord);
         ans = vfprintf(stderr, format, args);
     } else {
-        printf("=== THREAD #%2llu ===> ",
-            (unsigned long long) get_current_thread_id());
+        printf("=== THREAD #%2u ===> ", thr.ord);
         ans = vprintf(format, args);
     }
     va_end(args);
@@ -200,16 +161,6 @@ CallerAPI CallerAPI_init_mthr(void)
     intf.strcmp = strcmp;
     return intf;
 }
-#else
-/**
- * @brief Return one-threaded version of functions for platforms
- * that don't support pthread.h
- */
-CallerAPI CallerAPI_init_mthr(void)
-{
-    return CallerAPI_init();
-}
-#endif
 
 /////////////////////////////////////////////
 ///// Some platform-dependent functions /////
@@ -366,11 +317,6 @@ void GeneratorModule_unload(GeneratorModule *mod)
     }
 }
 
-///////////////////////////////////////
-///// Hamming weights subroutines /////
-///////////////////////////////////////
-
-
 ///////////////////////////////
 ///// Sorting subroutines /////
 ///////////////////////////////
@@ -490,15 +436,8 @@ size_t TestsBattery_ntests(const TestsBattery *obj)
 }
 
 
-#ifndef NOTHREADS
-
 typedef struct {
-#ifdef USE_PTHREADS
-    pthread_t thrd_id;
-#elif defined(USE_WINTHREADS)
-    DWORD thrd_id;
-    HANDLE thrd_handle;
-#endif
+    ThreadObj thrd;
     TestDescription *tests;
     size_t *tests_inds;
     size_t ntests;
@@ -508,35 +447,31 @@ typedef struct {
     const CallerAPI *intf;
 } BatteryThread;
 
-#ifdef USE_WINTHREADS
-static DWORD WINAPI battery_thread(void *data)
-#else
-static void *battery_thread(void *data)
-#endif
+static THREADFUNC_SPEC ThreadRetVal battery_thread(void *data)
 {
     BatteryThread *th_data = data;
-    th_data->intf->printf("vvvvvvvvvv Thread %lld started vvvvvvvvvv\n",
-        get_thread_id(th_data->thrd_id));
+    th_data->intf->printf("vvvvvvvvvv Thread %u (ID %llu) started vvvvvvvvvv\n",
+        th_data->thrd.ord, (unsigned long long) th_data->thrd.id);
     GeneratorState obj = GeneratorState_create(th_data->gi, th_data->intf);
     for (size_t i = 0; i < th_data->ntests; i++) {
         size_t ind = th_data->tests_inds[i];
         th_data->intf->printf(
-            "vvvvv Thread %lld: test #%lld: %s (%lld of %lld) started vvvvv\n",
-            get_thread_id(th_data->thrd_id),
+            "vvvvv Thread %u: test #%lld: %s (%lld of %lld) started vvvvv\n",
+            th_data->thrd.ord,
             (long long) ind + 1, th_data->tests[i].name,
             (long long) i + 1, (long long) th_data->ntests);
         th_data->results[ind] = TestDescription_run(&th_data->tests[i], &obj);
         th_data->intf->printf(
-            "^^^^^ Thread %lld: test #%lld: %s (%lld of %lld) finished ^^^^^\n",
-            get_thread_id(th_data->thrd_id),
+            "^^^^^ Thread %u: test #%lld: %s (%lld of %lld) finished ^^^^^\n",
+            th_data->thrd.ord,
             (long long) ind + 1, th_data->tests[i].name,
             (long long) i + 1, (long long) th_data->ntests);
         th_data->results[ind].name = th_data->tests[i].name;
         th_data->results[ind].id = (unsigned int) (ind + 1);
-        th_data->results[ind].thread_id = get_current_thread_id();
+        th_data->results[ind].thread_id = th_data->thrd.ord;
     }
-    th_data->intf->printf("^^^^^^^^^^ Thread %lld finished ^^^^^^^^^^\n",
-        get_thread_id(th_data->thrd_id));
+    th_data->intf->printf("^^^^^^^^^^ Thread %u (ID %llu) finished ^^^^^^^^^^\n",
+        th_data->thrd.ord, (unsigned long long) th_data->thrd.id);
     GeneratorState_free(&obj, th_data->intf);
     return 0;
 }
@@ -575,10 +510,6 @@ static TestTiming *sort_tests_by_time(const TestDescription *descr, size_t ntest
     return out;
 }
 
-#endif
-// NOTHREADS
-
-
 
 static inline size_t test_pos_to_thread_ind(size_t test_pos, size_t nthreads)
 {
@@ -598,7 +529,6 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
     const GeneratorInfo *gen, const CallerAPI *intf,
     unsigned int nthreads, TestResults *results, ReportType rtype)
 {
-#ifndef NOTHREADS
     // Multithreaded version
     BatteryThread *th = calloc(nthreads, sizeof(BatteryThread));
     size_t *th_pos = calloc(nthreads, sizeof(size_t));
@@ -635,25 +565,15 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
         }
         printf("\n");
     }
-#ifdef USE_PTHREADS
     // Run threads
-    for (size_t i = 0; i < nthreads; i++) {
-        pthread_create(&th[i].thrd_id, NULL, battery_thread, &th[i]);
+    init_thread_dispatcher();
+    for (unsigned int i = 0; i < nthreads; i++) {
+        th[i].thrd = ThreadObj_create(battery_thread, &th[i], i + 1);
     }
     // Get data from threads
     for (size_t i = 0; i < nthreads; i++) {
-        pthread_join(th[i].thrd_id, NULL);
+        ThreadObj_wait(&th[i].thrd);
     }
-#elif defined(USE_WINTHREADS)
-    // Run threads
-    for (size_t i = 0; i < nthreads; i++) {
-        th[i].thrd_handle = CreateThread(NULL, 0, battery_thread, &th[i], 0, &th[i].thrd_id);
-    }
-    // Get data from threads
-    for (size_t i = 0; i < nthreads; i++) {
-        WaitForSingleObject(th[i].thrd_handle, INFINITE);
-    }
-#endif
     // Deallocate array
     for (size_t i = 0; i < nthreads; i++) {
         free(th[i].tests);
@@ -661,14 +581,6 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
     }
     free(th);
     free(th_pos);
-#else
-    (void) ntests;
-    (void) nthreads;
-    (void) results;
-    printf("WARNING: multithreading is not supported on this platform\n");
-    printf("Rerunning in one-threaded mode\n");
-    TestsBattery_run(bat, gen, intf, TESTS_ALL, 1, rtype);
-#endif
     (void) rtype;
 }
 
@@ -782,6 +694,8 @@ void TestsBattery_run(const TestsBattery *bat,
     TestResults *results = NULL;
 #ifdef NOTHREADS
     nthreads = 1;
+    printf("WARNING: multithreading is not supported on this platform\n");
+    printf("They will be run sequentally\n");
 #endif
     printf("===== Starting '%s' battery =====\n", bat->name);
     if (testid > ntests) { // testid is 1-based index
