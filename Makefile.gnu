@@ -179,6 +179,9 @@ install:
 ifeq ($(OS), Windows_NT)
 	echo `make install` is supported only for UNIX-like systems.
 else
+	install -d $(DESTDIR)$(PREFIX)/bin
+	install -d $(DESTDIR)$(PREFIX)/lib
+	install -d $(DESTDIR)$(PREFIX)/man
 	install -m 755 $(BINDIR)/smokerand $(DESTDIR)$(PREFIX)/bin
 	install -m 644 $(LIBDIR)/libsmokerand_core.a $(DESTDIR)$(PREFIX)/lib
 	gzip -c smokerand.1 > smokerand.1.gz
