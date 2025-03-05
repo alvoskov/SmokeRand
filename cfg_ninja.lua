@@ -41,6 +41,7 @@ end
 -------------------------
 cfg = require('cfg_data')
 local lib_name = "$libdir/libsmokerand_core.a"
+local batlib_name = "$libdir/libsmokerand_bat.a"
 local lib_sources = cfg.get_lib_sources()
 local bat_sources = cfg.get_bat_sources()
 local gen_sources = cfg.get_gen_sources(false)
@@ -81,6 +82,12 @@ rule cc
     depfile = $out.d
     deps = gcc
 
+rule cpp
+    command = $cxx -MMD -MT $out -MF $out.d $cxxflags -c -Iinclude $in -o $out
+    description = CXX $out
+    depfile = $out.d
+    deps = gcc
+
 rule cc89
     command = $cc -MMD -MT $out -MF $out.d $cflags89 -c -Iinclude $in -o $out
     description = CC $out
@@ -100,6 +107,10 @@ rule ar
 
 rule link
     command = $cc $linkflags $in -o $out $libs -Iinclude
+    description = LINK $out
+
+rule cpplink
+    command = $cxx $linkflags $in -o $out $libs -Iinclude
     description = LINK $out
 ]]
 
@@ -130,55 +141,37 @@ rule link
 ]]
 
 
+function make_gcc_stub(cflags, gen_cflags, so_lflags, gen_lflags)
+    return "cflags = -std=c99 -O3 -Werror -Wall -Wextra " .. cflags .. "\n" ..
+    "cxxflags = -std=c++11 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native " .. cflags .. "\n" ..
+    "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra " .. cflags .. "\n" ..
+    "exe_libs = -lm\nexe_linkflags = " .. so_lflags .. "\n" ..
+    "cc = gcc\n" ..
+    "cxx = g++\n" ..
+    "gen_cflags = $cflags -fPIC " .. gen_cflags .. "\n" ..
+    "so_linkflags = -shared " .. so_lflags .. "\n" ..
+    "gen_linkflags = -shared -fPIC " .. gen_lflags .. "\n"
+end
+
 
 if platform == 'generic' then
-    stub = "cflags = -std=c99 -O3 -Werror -Wall -Wextra -DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY\n" ..
-    "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra -DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY\n" ..
-    "exe_libs = -lm\nexe_linkflags = \n" ..
-    "cc = gcc\n" ..
-    "gen_cflags = $cflags -fPIC\n" ..
-    "so_linkflags = -shared\n" ..
-    "gen_linkflags = -shared -fPIC\n"
-    stub = stub .. gcc_rules
+    local e_cflags = "-DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY";
+    stub = make_gcc_stub(e_cflags, "", "", "") .. gcc_rules
     gen_sources = cfg.get_gen_sources(true) -- Only portable generators are supported
 elseif platform == 'gcc' or platform == 'mingw' then
-    stub = "cflags = -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native\n" ..
-    "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native\n" ..
-    "exe_libs = -lm\nexe_linkflags = \n" ..
-    "cc = gcc\n" ..
-    "gen_cflags = $cflags -fPIC -ffreestanding -nostdlib\n" ..
-    "so_linkflags = -shared\n" ..
-    "gen_linkflags = -shared -fPIC -ffreestanding -nostdlib\n"
-    stub = stub .. gcc_rules
+    local e_cflags, gen_cflags = "-march=native", "-ffreestanding -nostdlib"
+    stub = make_gcc_stub(e_cflags, gen_cflags, "", gen_cflags) .. gcc_rules
 elseif platform == 'gcc32' then
-    stub = "cflags = -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native -m32\n" ..
-    "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native -m32\n" ..
-    "exe_libs = -lm\nexe_linkflags = -m32 \n" ..
-    "cc = gcc\n" ..
-    "gen_cflags = $cflags -fPIC\n" ..
-    "so_linkflags = -m32 -shared\n" ..
-    "gen_linkflags = -m32 -shared -fPIC\n"
-    stub = stub .. gcc_rules
+    local e_cflags, gen_cflags = "-march=native -m32", "-m32"
+    stub = make_gcc_stub(e_cflags, gen_cflags, "-m32", gen_cflags) .. gcc_rules
     gen_sources = cfg.get_gen_sources(true) -- Only portable generators are supported
 elseif platform == 'mingw-hx' then
-    stub = "cflags = -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=i686 -m32 -DUSE_WINTHREADS\n" ..
-    "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=i686 -m32 -DUSE_WINTHREADS\n" ..
-    "exe_libs = -lm\nexe_linkflags = -m32 \n" ..
-    "cc = gcc\n" ..
-    "gen_cflags = $cflags -fPIC\n" ..
-    "so_linkflags = -m32 -shared\n" ..
-    "gen_linkflags = -m32 -shared -fPIC\n"
-    stub = stub .. gcc_rules
+    local e_cflags, gen_cflags = "-march=i686 -m32 -DUSE_WINTHREADS", "-m32"
+    stub = make_gcc_stub(e_cflags, gen_cflags, "-m32", gen_cflags) .. gcc_rules
     gen_sources = cfg.get_gen_sources(true) -- Only portable generators are supported
 elseif platform == 'zigcc' then
-    stub = "cflags = -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native -DUSE_WINTHREADS\n" ..
-    "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native -DUSE_WINTHREADS\n" ..
-    "exe_libs = -lm\nexe_linkflags = \n" ..
-    "cc = zig cc\n" ..
-    "gen_cflags = $cflags -fPIC\n" ..
-    "so_linkflags = -shared\n" ..
-    "gen_linkflags = -shared -fPIC\n"
-    stub = stub .. gcc_rules
+    local e_cflags, gen_cflags = "-march=native -DUSE_WINTHREADS", ""
+    stub = make_gcc_stub(e_cflags, gen_cflags, "", gen_cflags) .. gcc_rules
 elseif platform == 'msvc' then
     exe_ext = '.exe'
     -- /WX if treat warnings as errors
@@ -237,11 +230,15 @@ function add_objfiles(objfiles)
     io.write("\n");
 end
 
-function add_exefile(exefile, extra_objfiles)
-    io.write("build $objdir/" .. exefile .. ".o: cc $srcdir/" .. exefile .. ".c\n")
+function add_exefile(exefile, extra_objfiles, rule)
+    local srcext, linkrule = ".c", "link"
+    if rule == "cpp" or rule == "cxx" then
+        srcext = ".cpp"
+        linkrule = "cpplink"
+    end
+    io.write("build $objdir/" .. exefile .. ".o: " .. rule .. " $srcdir/" .. exefile .. srcext .. "\n")
     local exefile_full = "$bindir/" .. exefile .. exe_ext
-    io.write("build " .. exefile_full .. ": link $objdir/" .. exefile .. ".o ")
-    table.insert(default_builds, exefile_full)
+    io.write("build " .. exefile_full .. ": " .. linkrule .. " $objdir/" .. exefile .. ".o ")
     if #extra_objfiles > 0 then
         add_objfiles(extra_objfiles)
     else
@@ -249,6 +246,7 @@ function add_exefile(exefile, extra_objfiles)
     end
     io.write("  libs = $exe_libs\n")
     io.write("  linkflags = $exe_linkflags\n")
+    table.insert(default_builds, exefile_full)
 end
 
 local file = io.open("build.ninja", "w")
@@ -260,15 +258,20 @@ local lib_objfiles = add_sources(lib_sources)
 io.write("build " .. lib_name .. ": ar ")
 add_objfiles(lib_objfiles)
 
--- Build batteries
+-- Build batteries library
 local bat_objfiles = add_sources(bat_sources)
+io.write("build " .. batlib_name ..": ar ")
+add_objfiles(bat_objfiles)
+
+-- Build batteries
 
 -- Build the command line tool executable
-table.insert(bat_objfiles, lib_name)
-add_exefile("smokerand", bat_objfiles)
-add_exefile("test_funcs", {lib_name})
-add_exefile("test_rdseed", {lib_name})
-add_exefile("calibrate_dc6", {lib_name})
+--table.insert(bat_objfiles, lib_name)
+add_exefile("smokerand", {batlib_name, lib_name}, "cc")
+add_exefile("test_funcs", {lib_name}, "cc")
+add_exefile("test_rdseed", {lib_name}, "cc")
+add_exefile("test_cpp11", {batlib_name, lib_name}, "cpp")
+add_exefile("calibrate_dc6", {lib_name}, "cc")
 -- Build extra executables
 io.write("build $objdir/sr_tiny.o: cc89 $srcdir/sr_tiny.c\n")
 io.write("build $bindir/sr_tiny" .. exe_ext .. ": link $objdir/sr_tiny.o $objdir/specfuncs.o\n")
