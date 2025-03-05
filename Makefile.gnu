@@ -56,6 +56,9 @@ else
 GEN_LFLAGS =
 EXE =
 SO = .so
+ifeq ($(PREFIX),)
+PREFIX = /usr/local
+endif
 endif
 
 
@@ -64,7 +67,8 @@ CORE_LIB = $(LIBDIR)/libsmokerand_core.a
 LIB_SOURCES = $(addprefix $(SRCDIR)/, core.c coretests.c \
     entropy.c extratests.c fileio.c lineardep.c hwtests.c specfuncs.c threads_intf.c)
 LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, apidefs.h cinterface.h core.h coretests.h \
-    entropy.h extratests.h fileio.h lineardep.h hwtests.h specfuncs.h threads_intf.h)
+    entropy.h extratests.h fileio.h lineardep.h hwtests.h specfuncs.h threads_intf.h) \
+    include/smokerand_core.h
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
 INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/core.h
 # Battery
@@ -124,7 +128,7 @@ $(BINDIR)/test_funcs$(EXE): $(OBJDIR)/test_funcs.o $(CORE_LIB)
 $(LIB_OBJFILES) $(BAT_OBJFILES) $(EXE_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.c $(LIB_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
-.PHONY: clean generators
+.PHONY: clean generators install uninstall
 
 generators: $(GEN_SHARED)
 
@@ -169,4 +173,35 @@ else
 	rm $(LIBDIR)/*
 	rm $(BINDIR)/generators/*.so
 	rm $(BINDIR)/generators/obj/*.o
+endif
+
+install:
+ifeq ($(OS), Windows_NT)
+	echo `make install` is supported only for UNIX-like systems.
+else
+	install -m 755 $(BINDIR)/smokerand $(DESTDIR)$(PREFIX)/bin
+	install -m 644 $(LIBDIR)/libsmokerand_core.a $(DESTDIR)$(PREFIX)/lib
+	gzip -c smokerand.1 > smokerand.1.gz
+	install -d $(DESTDIR)$(PREFIX)/man/man1
+	install -m 644 smokerand.1.gz $(DESTDIR)$(PREFIX)/man/man1
+	install -d $(DESTDIR)$(PREFIX)/include/smokerand
+	install -m 644 include/smokerand/*.h $(DESTDIR)$(PREFIX)/include/smokerand
+	install -m 644 include/smokerand_core.h $(DESTDIR)$(PREFIX)/include
+	install -d $(DESTDIR)$(PREFIX)/lib/smokerand/generators
+	install -m 644 $(GEN_BINDIR)/*.so $(DESTDIR)$(PREFIX)/lib/smokerand/generators
+endif
+
+uninstall:
+ifeq ($(OS), Windows_NT)
+	echo `make install` is supported only for UNIX-like systems.
+else
+	rm $(DESTDIR)$(PREFIX)/bin/smokerand
+	rm $(DESTDIR)$(PREFIX)/lib/libsmokerand_core.a
+	rm $(DESTDIR)$(PREFIX)/man/man1/smokerand.1.gz
+	rm $(DESTDIR)$(PREFIX)/include/smokerand/*
+	rm $(DESTDIR)$(PREFIX)/include/smokerand_core.h
+	rm -d $(DESTDIR)$(PREFIX)/include/smokerand
+	rm $(DESTDIR)$(PREFIX)/lib/smokerand/generators/*.so
+	rm -d $(DESTDIR)$(PREFIX)/lib/smokerand/generators
+	rm -d $(DESTDIR)$(PREFIX)/lib/smokerand
 endif

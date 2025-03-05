@@ -75,7 +75,7 @@ io.write("$(bindir)/smokerand.exe:" .. objstr .. "\n")
 io.write("\twcl386 -4s -fe=$(bindir)/smokerand.exe " .. objstr .. "\n")
 
 -- Prepare list of library core headers
-local lib_headers_str = ""
+local lib_headers_str = "include/smokeand_core.h "
 for _, v in pairs(lib_headers) do
     lib_headers_str = lib_headers_str .. " $(includedir)/" .. v
 end

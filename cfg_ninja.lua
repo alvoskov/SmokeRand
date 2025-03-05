@@ -43,7 +43,6 @@ cfg = require('cfg_data')
 local lib_name = "$libdir/libsmokerand_core.a"
 local lib_sources = cfg.get_lib_sources()
 local bat_sources = cfg.get_bat_sources()
-local lib_headers = cfg.get_lib_headers()
 local gen_sources = cfg.get_gen_sources(false)
 
 --------------------------------
