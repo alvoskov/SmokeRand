@@ -599,7 +599,7 @@ batteries and have mainly historical and educational interest.
  mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | +      | +       | >= 32 TiB(?)
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | N/A    | +       | 1 GiB
- pcg32             | u32    | +       | +     | +       | +    | 0.44 | N/A    | +       | >= 2 TiB
+ pcg32             | u32    | +       | +     | +       | +    | 0.44 | N/A    | +       | >= 16 TiB
  pcg32_xsl_rr      | u32    | +       | +     | +       | +    | 0.58 | N/A    |         | 256 GiB
  pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | +       | >= 2 TiB
  pcg64_xsl_rr      | u64    | +       | +     | +       | +    | 0.43 | +      |         | >= 32 TiB
