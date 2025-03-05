@@ -41,6 +41,7 @@ add_library(smokerand_core
     src/threads_intf.c  include/smokerand/threads_intf.h
     include/smokerand/cinterface.h
     include/smokerand/apidefs.h
+    include/smokerand_core.h
 )
 target_include_directories(smokerand_core PRIVATE include)
 
