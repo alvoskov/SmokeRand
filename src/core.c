@@ -692,6 +692,9 @@ void TestsBattery_run(const TestsBattery *bat,
     size_t ntests = TestsBattery_ntests(bat);
     size_t nresults = ntests;
     TestResults *results = NULL;
+    if (nthreads == 0) {
+        nthreads = 1;
+    }
 #ifdef NOTHREADS
     nthreads = 1;
     printf("WARNING: multithreading is not supported on this platform\n");

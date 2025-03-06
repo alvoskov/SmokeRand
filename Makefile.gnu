@@ -19,7 +19,7 @@ else ifeq ($(PLATFORM_NAME), GCC32)
 else ifeq ($(PLATFORM_NAME), MINGW-HX)
     CC = gcc
     AR = ar
-    GEN_CFLAGS = -fPIC -DNO_CUSTOM_DLLENTRY
+    GEN_CFLAGS = -fPIC -DNO_CUSTOM_DLLENTRY -DUSE_WINTHREADS
     PLATFORM_FLAGS = -m32 -march=i686
     IS_PORTABLE = 1
 else ifeq ($(PLATFORM_NAME), ZIGCC)
@@ -37,7 +37,8 @@ else ifeq ($(PLATFORM_NAME), GENERIC)
 endif
 #-----------------------------------------------------------------------------
 CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes
-CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native
+CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 -O3 -Werror -Wall -Wextra -Wno-attributes
+CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes
 LINKFLAGS = $(PLATFORM_FLAGS)
 INCLUDE = -Iinclude
 
@@ -46,7 +47,7 @@ OBJDIR = obj
 BINDIR = bin
 LIBDIR = lib
 INCLUDEDIR = include/smokerand
-LFLAGS =  -L$(LIBDIR) -lsmokerand_core -lm
+LFLAGS =  -L$(LIBDIR) -lsmokerand_bat -lsmokerand_core -lm 
 ifeq ($(OS), Windows_NT)
 GEN_LFLAGS = 
 #-Wl,--exclude-all-symbols
@@ -72,9 +73,10 @@ LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, apidefs.h cinterface.h core.h coretest
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
 INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/core.h
 # Battery
-BAT_SOURCES = $(addprefix $(SRCDIR)/, bat_express.c bat_brief.c bat_default.c bat_file.c bat_full.c)
-BAT_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_express.h bat_brief.h bat_default.h bat_file.h bat_full.h)
-BAT_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(BAT_SOURCES)))
+BAT_LIB = $(LIBDIR)/libsmokerand_bat.a
+BATLIB_SOURCES = $(addprefix $(SRCDIR)/, bat_express.c bat_brief.c bat_default.c bat_file.c bat_full.c)
+BATLIB_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_express.h bat_brief.h bat_default.h bat_file.h bat_full.h)
+BATLIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(BATLIB_SOURCES)))
 # Executables
 EXE_NAMES = smokerand sr_tiny calibrate_dc6 test_funcs
 EXE_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXE_NAMES)))
@@ -108,15 +110,18 @@ GEN_SHARED = $(patsubst %.c,%$(SO),$(subst generators/,$(BINDIR)/generators/lib,
 GEN_BINDIR = $(BINDIR)/generators
 
 #-----------------------------------------------------------------------------
-all: $(CORE_LIB) $(addprefix $(BINDIR)/, $(addsuffix $(EXE),$(EXE_NAMES))) generators
+all: $(CORE_LIB) $(BAT_LIB) $(addprefix $(BINDIR)/, $(addsuffix $(EXE),$(EXE_NAMES))) generators
 
 $(CORE_LIB): $(LIB_OBJFILES)
+	$(AR) rcu $@ $^
+
+$(BAT_LIB): $(BATLIB_OBJFILES)
 	$(AR) rcu $@ $^
 
 $(BINDIR)/sr_tiny$(EXE): $(SRCDIR)/sr_tiny.c $(SRCDIR)/specfuncs.c include/smokerand/specfuncs.h
 	$(CC) $(CFLAGS89) $(LINKFLAGS) $(SRCDIR)/sr_tiny.c $(SRCDIR)/specfuncs.c -o $@ -lm $(INCLUDE) 
 
-$(BINDIR)/smokerand$(EXE): $(OBJDIR)/smokerand.o $(CORE_LIB) $(BAT_OBJFILES) $(BAT_HEADERS)
+$(BINDIR)/smokerand$(EXE): $(OBJDIR)/smokerand.o $(CORE_LIB) $(BAT_LIB) $(BAT_HEADERS)
 	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE) 
 
 $(BINDIR)/calibrate_dc6$(EXE): $(OBJDIR)/calibrate_dc6.o $(CORE_LIB)
@@ -125,7 +130,7 @@ $(BINDIR)/calibrate_dc6$(EXE): $(OBJDIR)/calibrate_dc6.o $(CORE_LIB)
 $(BINDIR)/test_funcs$(EXE): $(OBJDIR)/test_funcs.o $(CORE_LIB)
 	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE) 
 
-$(LIB_OBJFILES) $(BAT_OBJFILES) $(EXE_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.c $(LIB_HEADERS)
+$(LIB_OBJFILES) $(BATLIB_OBJFILES) $(EXE_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.c $(LIB_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 .PHONY: clean generators install uninstall
