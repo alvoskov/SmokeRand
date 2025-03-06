@@ -272,6 +272,7 @@ add_exefile("test_funcs", {lib_name}, "cc")
 add_exefile("test_rdseed", {lib_name}, "cc")
 add_exefile("test_cpp11", {batlib_name, lib_name}, "cpp")
 add_exefile("calibrate_dc6", {lib_name}, "cc")
+add_exefile("calibrate_lienarcomp", {lib_name}, "cc")
 -- Build extra executables
 io.write("build $objdir/sr_tiny.o: cc89 $srcdir/sr_tiny.c\n")
 io.write("build $bindir/sr_tiny" .. exe_ext .. ": link $objdir/sr_tiny.o $objdir/specfuncs.o\n")
