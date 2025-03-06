@@ -255,6 +255,34 @@ static unsigned int linearcomp_get_bitpos(const GeneratorState *obj, const Linea
  * 1. M.Z. Wang. Linear complexity profiles and jump complexity //
  *    // Information Processing Letters. 1997. V. 61. P. 165-168.
  *    https://doi.org/10.1016/S0020-0190(97)00004-5
+ * 2. H. Gustafson, E. Dawson, L. Nielsen, W. Caelli. A computer package for
+ *    measuring the strength of encryption algorithms // Computers & Security.
+ *    1994. V.13. N 8. P.687-697. https://doi.org/10.1016/0167-4048(94)90051-5.
+ * 3. Rukhin A., Soto J. et al. A Statistical Test Suite for Random and
+ *    Pseudorandom Number Generators for Cryptographic Applications //
+ *    NIST SP 800-22 Rev. 1a. https://doi.org/10.6028/NIST.SP.800-22r1a
+ *
+ * Gustafson et al. [2] proposed a normal approximation for the empirical
+ * linear complexity but Rukhin et al.[3] noted that it is too crude, mainly
+ * because of heavier tails. We use the next refined approximation: t obeys
+ * t-distribution with \f$ f=11 \f$ degrees of freedom. The t value is defined
+ * on the base of the linear complexity \f$ L \f$ as:
+ * 
+ *
+ * \f[
+ * t = \frac{L - \mu}{\sigma}
+ * \f]
+ *
+ * where parameters of the distribution are [1]:
+ *
+ * \f[
+ * \mu = \frac{n}{2} + \frac{9 - (-1)^n}{36};~
+ * \sigma = \sqrt{\frac{86}{81}}
+ * \f]
+ *
+ * The f value is obtained during the SmokeRand development by the Monte-Carlo
+ * method by repeating the test 10^7 times for n=1000,1001,2000,2001.
+ * Speck128/128 was used as a CSPRNG (see `src/calibrate_linearcomp.c`).
  *
  * @param opts Test options (number of bits, bit position)
  */
@@ -280,8 +308,9 @@ TestResults linearcomp_test(GeneratorState *obj, const LinearCompOptions *opts)
     double sigma = sqrt(86.0/81.0);
     ans.x = (double) berlekamp_massey(s, opts->nbits);
     double z = (ans.x - mu) / sigma;
-    ans.p = stdnorm_pvalue(z);
-    ans.alpha = stdnorm_cdf(z);
+    const unsigned long df = 11;
+    ans.p = t_cdf(z, df);        // We want obtain low p-values for low
+    ans.alpha = t_pvalue(z, df); // linear complexities.
     obj->intf->printf("  L = %g; z = %g; p = %g\n", ans.x, z, ans.p);
     obj->intf->printf("\n");
     free(s);
