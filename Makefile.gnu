@@ -220,6 +220,7 @@ else
 	install -d $(DESTDIR)$(PREFIX)/lib
 	install -d $(DESTDIR)$(PREFIX)/man
 	install -m 755 $(BINDIR)/smokerand $(DESTDIR)$(PREFIX)/bin
+	install -m 644 $(LIBDIR)/libsmokerand_bat.a $(DESTDIR)$(PREFIX)/lib
 	install -m 644 $(LIBDIR)/libsmokerand_core.a $(DESTDIR)$(PREFIX)/lib
 	gzip -c smokerand.1 > smokerand.1.gz
 	install -d $(DESTDIR)$(PREFIX)/man/man1
@@ -229,6 +230,16 @@ else
 	install -m 644 include/smokerand_core.h $(DESTDIR)$(PREFIX)/include
 	install -d $(DESTDIR)$(PREFIX)/lib/smokerand/generators
 	install -m 644 $(GEN_BINDIR)/*.so $(DESTDIR)$(PREFIX)/lib/smokerand/generators
+
+	install -d $(DESTDIR)$(PREFIX)/src/smokerand
+	install -d $(DESTDIR)$(PREFIX)/src/smokerand/generators
+	install -d $(DESTDIR)$(PREFIX)/src/smokerand/src
+	install -m 644 src/*.c $(DESTDIR)$(PREFIX)/src/smokerand/src
+	install -m 644 src/*.asm $(DESTDIR)$(PREFIX)/src/smokerand/src
+	install -m 644 Makefile.gnu $(DESTDIR)$(PREFIX)/src/smokerand
+	install -m 644 CMakeLists.txt $(DESTDIR)$(PREFIX)/src/smokerand
+	install -m 644 generators/*.c $(DESTDIR)$(PREFIX)/src/smokerand/generators
+	install -m 644 generators/*.h $(DESTDIR)$(PREFIX)/src/smokerand/generators
 endif
 
 uninstall:
@@ -236,6 +247,7 @@ ifeq ($(OS), Windows_NT)
 	echo `make uninstall` is supported only for UNIX-like systems.
 else
 	rm $(DESTDIR)$(PREFIX)/bin/smokerand
+	rm $(DESTDIR)$(PREFIX)/lib/libsmokerand_bat.a
 	rm $(DESTDIR)$(PREFIX)/lib/libsmokerand_core.a
 	rm $(DESTDIR)$(PREFIX)/man/man1/smokerand.1.gz
 	rm $(DESTDIR)$(PREFIX)/include/smokerand/*
@@ -244,4 +256,11 @@ else
 	rm $(DESTDIR)$(PREFIX)/lib/smokerand/generators/*.so
 	rm -d $(DESTDIR)$(PREFIX)/lib/smokerand/generators
 	rm -d $(DESTDIR)$(PREFIX)/lib/smokerand
+
+	rm $(DESTDIR)$(PREFIX)/src/smokerand/generators/*
+	rm -d $(DESTDIR)$(PREFIX)/src/smokerand/generators
+	rm $(DESTDIR)$(PREFIX)/src/smokerand/src/*
+	rm -d $(DESTDIR)$(PREFIX)/src/smokerand/src
+	rm $(DESTDIR)$(PREFIX)/src/smokerand/*
+	rm -d $(DESTDIR)$(PREFIX)/src/smokerand
 endif
