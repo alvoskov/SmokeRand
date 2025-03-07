@@ -9,6 +9,7 @@
  * This software is licensed under the MIT license.
  */
 #include "smokerand/threads_intf.h"
+#include <stdio.h>
 
 #define NTHREADS_MAX 128
 
@@ -93,3 +94,83 @@ ThreadObj ThreadObj_current(void)
     return obj;
 }
 
+//-------------------------------------------------------------
+
+#ifdef USE_LOADLIBRARY
+#include <windows.h>
+#elif !defined(NO_POSIX)
+#include <unistd.h>
+#include <dlfcn.h>
+#endif
+
+void *dlopen_wrap(const char *libname)
+{
+#ifdef USE_LOADLIBRARY
+    HMODULE lib = LoadLibraryA(libname);
+    if (lib == NULL || lib == INVALID_HANDLE_VALUE) {
+        int errcode = (int) GetLastError();
+        fprintf(stderr, "Cannot load the '%s' module; error code: %d\n",
+            libname, errcode);
+        LPSTR msg_buf = NULL;
+        (void) FormatMessageA(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL, errcode,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPSTR) &msg_buf, 0, NULL);
+        fprintf(stderr, "  Error message: %s\n", msg_buf);
+        LocalFree(msg_buf);
+        lib = 0;
+    }
+    return (void *) lib;
+#elif !defined(NO_POSIX)
+    void *lib = dlopen(libname, RTLD_LAZY);
+    if (lib == NULL) {
+        fprintf(stderr, "dlopen() error: %s\n", dlerror());
+    };
+    return lib;
+#else
+    fprintf(stderr,
+        "Cannot load the '%s' module: shared libraries support not found!\n",
+        libname);
+    return NULL;
+#endif
+
+}
+
+
+void *dlsym_wrap(void *handle, const char *symname)
+{
+#ifdef USE_LOADLIBRARY
+    return (void *) GetProcAddress(handle, symname);
+#elif !defined(NO_POSIX)
+    return dlsym(handle, symname);
+#else
+    return NULL;
+#endif
+}
+
+
+void dlclose_wrap(void *handle)
+{
+#ifdef USE_LOADLIBRARY
+    FreeLibrary((HANDLE) handle);
+#elif !defined(NO_POSIX)
+    dlclose(handle);
+#else
+    (void) handle;
+#endif
+}
+
+
+int get_cpu_numcores(void)
+{
+#ifdef USE_LOADLIBRARY
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo(&sysinfo);
+    return sysinfo.dwNumberOfProcessors;
+#elif !defined(NO_POSIX)
+    return sysconf(_SC_NPROCESSORS_ONLN);
+#else
+    return 1;
+#endif
+}

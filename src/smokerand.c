@@ -10,6 +10,7 @@
 #include "smokerand_core.h"
 #include "smokerand_bat.h"
 #include "smokerand/fileio.h"
+#include "smokerand/threads_intf.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>

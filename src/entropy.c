@@ -95,8 +95,10 @@ uint32_t get_current_process_id()
 {
 #ifdef WINDOWS_PLATFORM
     return (uint32_t) GetCurrentProcessId();
-#else
+#elif !defined(NO_POSIX)
     return (uint32_t) getpid();
+#else
+    return 0;
 #endif
 }
 
@@ -107,10 +109,12 @@ uint32_t get_tick_count()
 {
 #ifdef WINDOWS_PLATFORM
     return (uint32_t) GetTickCount();
-#else
+#elif !defined(NO_POSIX)
     struct timespec t;
     clock_gettime(CLOCK_REALTIME, &t);
     return (uint32_t) t.tv_nsec;
+#else
+    return time(NULL);
 #endif
 }
 

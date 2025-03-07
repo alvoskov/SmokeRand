@@ -159,21 +159,6 @@ CallerAPI CallerAPI_init_mthr(void)
     return intf;
 }
 
-/////////////////////////////////////////////
-///// Some platform-dependent functions /////
-/////////////////////////////////////////////
-
-int get_cpu_numcores(void)
-{
-#ifdef USE_LOADLIBRARY
-    SYSTEM_INFO sysinfo;
-    GetSystemInfo(&sysinfo);
-    return sysinfo.dwNumberOfProcessors;
-#else
-    return sysconf(_SC_NPROCESSORS_ONLN);
-#endif
-}
-
 ////////////////////////////////////////////
 ///// TestResults class implementation /////
 ////////////////////////////////////////////
@@ -263,35 +248,12 @@ void GeneratorState_free(GeneratorState *obj, const CallerAPI *intf)
 GeneratorModule GeneratorModule_load(const char *libname)
 {
     GeneratorModule mod = {.valid = 1};
-#ifdef USE_LOADLIBRARY
-    mod.lib = LoadLibraryA(libname);
-    if (mod.lib == 0 || mod.lib == INVALID_HANDLE_VALUE) {
-        int errcode = (int) GetLastError();
-        fprintf(stderr, "Cannot load the '%s' module; error code: %d\n",
-            libname, errcode);
-        LPSTR msg_buf = NULL;
-        (void) FormatMessageA(
-            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-            NULL, errcode,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            (LPSTR) &msg_buf, 0, NULL);
-        fprintf(stderr, "  Error message: %s\n", msg_buf);
-        LocalFree(msg_buf);
-        mod.lib = 0;
+    mod.lib = dlopen_wrap(libname);
+    if (mod.lib == NULL) {
         mod.valid = 0;
         return mod;
     }
-#else
-    mod.lib = dlopen(libname, RTLD_LAZY);
-    if (mod.lib == 0) {
-        fprintf(stderr, "dlopen() error: %s\n", dlerror());
-        mod.lib = 0;
-        mod.valid = 0;
-        return mod;
-    };
-#endif
-
-    GetGenInfoFunc gen_getinfo = (GetGenInfoFunc)( (void *) DLSYM_WRAPPER(mod.lib, "gen_getinfo") );
+    GetGenInfoFunc gen_getinfo = (GetGenInfoFunc)( dlsym_wrap(mod.lib, "gen_getinfo") );
     if (gen_getinfo == NULL) {
         fprintf(stderr, "Cannot find the 'gen_getinfo' function\n");
         mod.valid = 0;
@@ -309,8 +271,8 @@ GeneratorModule GeneratorModule_load(const char *libname)
 void GeneratorModule_unload(GeneratorModule *mod)
 {
     mod->valid = 0;
-    if (mod->lib != 0) {
-        DLCLOSE_WRAPPER(mod->lib);
+    if (mod->lib != NULL) {
+        dlclose_wrap(mod->lib);
     }
 }
 
@@ -921,7 +883,7 @@ GeneratorInfo define_low32_generator(const GeneratorInfo *gi)
  */
 void set_bin_stdout(void)
 {
-#ifdef USE_LOADLIBRARY
+#if defined(USE_LOADLIBRARY) || defined(NO_POSIX)
     (void) _setmode( _fileno(stdout), _O_BINARY);
 #endif
 }
@@ -933,7 +895,7 @@ void set_bin_stdout(void)
  */
 void set_bin_stdin(void)
 {
-#ifdef USE_LOADLIBRARY
+#if defined(USE_LOADLIBRARY) || defined(NO_POSIX)
     (void) _setmode( _fileno(stdin), _O_BINARY);
 #endif
 }

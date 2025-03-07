@@ -3,7 +3,7 @@
  * @brief Subroutines and special functions required for implementation
  * of statistical tests.
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -14,36 +14,6 @@
 #include <stdint.h>
 
 #define TESTS_ALL 0
-
-#if !defined(NOTHREADS) && defined(_MSC_VER) && !defined (__clang__)
-#define USE_WINTHREADS
-#endif
-
-#if !defined(NOTHREADS) && (defined(__GNUC__) || defined(__MINGW32__) || defined(__MINGW64__)) && !defined(__clang__)
-#ifndef USE_WINTHREADS
-#define USE_PTHREADS
-#endif
-#endif
-
-
-#if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
-#include <windows.h>
-#define USE_LOADLIBRARY
-#define DLSYM_WRAPPER GetProcAddress
-#define DLCLOSE_WRAPPER FreeLibrary
-#define MODULE_HANDLE HMODULE
-#if !defined(USE_PTHREADS) && !defined(NOTHREADS) && !defined(USE_WINTHREADS)
-#define USE_WINTHREADS
-#endif
-#else
-#include <unistd.h>
-#include <dlfcn.h>
-#define DLSYM_WRAPPER dlsym
-#define DLCLOSE_WRAPPER dlclose
-#define MODULE_HANDLE void *
-#endif
-
-int get_cpu_numcores(void);
 
 CallerAPI CallerAPI_init(void);
 CallerAPI CallerAPI_init_mthr(void);
@@ -66,7 +36,7 @@ void GeneratorState_free(GeneratorState *obj, const CallerAPI *intf);
 
 typedef struct
 {
-    MODULE_HANDLE lib;
+    void *lib;
     int valid;
     GeneratorInfo gen;
 } GeneratorModule;

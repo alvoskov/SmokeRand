@@ -2,6 +2,13 @@
  * @file threads_intf.h
  * @brief Cross-platform multithreading interface. Supports POSIX threads
  * and WinAPI threads.
+ * @details Rules of selection of default multi-threading API:
+ * 
+ * 1. MSVC - use WinAPI threads (POSIX threads are usually not present here)
+ * 2. CLANG or GCC/MinGW - use POSIX threads.
+ *
+ * Can be overriden by `-dNOTHREADS` (stubs instead of multithreading API)
+ * or by `-dUSE_WINTHREADS` (use WinAPI threads).
  *
  * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
@@ -11,9 +18,18 @@
 #ifndef __SMOKERAND_THREADS_INTF_H
 #define __SMOKERAND_THREADS_INTF_H
 
-// Default multi-threading API is pthreads (POSIX threads)
-#if !defined(NOTHREADS) && !defined(USE_WINTHREADS)
+////////////////////////////////////////////////////
+///// Selection of default multi-threading API /////
+////////////////////////////////////////////////////
+
+#if !defined(NOTHREADS) && defined(_MSC_VER) && !defined (__clang__)
+#define USE_WINTHREADS
+#endif
+
+#if !defined(NOTHREADS) && (defined(__GNUC__) || defined(__MINGW32__) || defined(__MINGW64__)) && !defined(__clang__)
+#ifndef USE_WINTHREADS
 #define USE_PTHREADS
+#endif
 #endif
 
 //////////////////////////////////
@@ -66,7 +82,7 @@ typedef DWORD ThreadRetVal;
 //---------------------------------------------------------------------------------
 // Stubs for a plaform without threads
 #else
-#pragma message "Note: no known multithreading API is present"
+#pragma message ("Note: no known multithreading API is present")
 #include <stdint.h>
 
 #define DECLARE_MUTEX(mutex)
@@ -95,5 +111,16 @@ void init_thread_dispatcher(void);
 ThreadObj ThreadObj_create(ThreadFuncPtr thr_func, void *udata, unsigned int ord);
 void ThreadObj_wait(ThreadObj *obj);
 ThreadObj ThreadObj_current(void);
+
+//------------------------------------------------------------------------------------
+
+#if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
+#define USE_LOADLIBRARY
+#endif
+
+void *dlopen_wrap(const char *libname);
+void *dlsym_wrap(void *handle, const char *symname);
+void dlclose_wrap(void *handle);
+int get_cpu_numcores(void);
 
 #endif
