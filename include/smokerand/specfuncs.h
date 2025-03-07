@@ -15,6 +15,7 @@ double sr_expm1(double x);
 double sr_log2(double x);
 double sr_lgamma(double x);
 double sr_betainc(double x, double a, double b, double *cIx_out);
+double sr_round(double x);
 double ks_pvalue(double x);
 double gammainc(double a, double x);
 double binomial_pdf(unsigned long k, unsigned long n, double p);
@@ -31,4 +32,6 @@ double t_pvalue(double x, unsigned long f);
 double chi2_cdf(double x, unsigned long f);
 double chi2_pvalue(double x, unsigned long f);
 double chi2_to_stdnorm_approx(double x, unsigned long f);
+double linearcomp_Tcdf(double k);
+double linearcomp_Tccdf(double k);
 #endif

@@ -423,16 +423,16 @@ size_t berlekamp_massey(const u8 *s, size_t n)
  * @param nbits Number of bits.
  * @param bitpos Bit position (0 is the lowest).
  */
-void linearcomp_test(ResultsList *out, Generator32State *obj,
+void linearcomp_test_c89(ResultsList *out, Generator32State *obj,
     size_t nbits, unsigned int bitpos)
 {
     TestResultEntry tres;
     size_t i;
-    double parity, mu, sigma, L;
+    double L, T;
     u8 *s = calloc(nbits, sizeof(u8));
     u32 mask = 1ul << bitpos;
     if (s == NULL) {
-        fprintf(stderr, "***** linearcomp_test: not enough memory *****\n");
+        fprintf(stderr, "***** linearcomp_test_89: not enough memory *****\n");
         exit(1);
     }
     printf("Linear complexity test\n");
@@ -441,15 +441,17 @@ void linearcomp_test(ResultsList *out, Generator32State *obj,
         if (obj->get_bits32(obj->state) & mask)
             s[i] = 1;
     }
-    parity = nbits & 1;
-    mu = nbits / 2.0 + (9.0 - parity) / 36.0;
-    sigma = sqrt(86.0 / 81.0);
     L = berlekamp_massey(s, nbits);
+    if (nbits & 1) {
+        T = -L + (double) (nbits + 1) / 2.0;
+    } else {
+        T = L - (double) nbits / 2.0;
+    }
     sprintf(tres.name, "linearcomp:%u", bitpos);
-    tres.x = (L - mu) / sigma;
-    tres.p = stdnorm_pvalue(tres.x);
-    tres.alpha = stdnorm_cdf(tres.x);
-    printf("  L = %g; z = %g; p = %g; 1 - p = %g\n\n",
+    tres.x = T;
+    tres.p = linearcomp_Tcdf(T);
+    tres.alpha = linearcomp_Tccdf(T);
+    printf("  L = %g; T = %g; p = %g; 1 - p = %g\n\n",
         L, tres.x, tres.p, tres.alpha);
     ResultsList_add(out, &tres);
     free(s);
@@ -726,8 +728,8 @@ int main(int argc, char *argv[])
         ResultsList_init(&results);
         tic = clock();
         gen_tests(&results, &gen);
-        linearcomp_test(&results, &gen, 10000, 31);
-        linearcomp_test(&results, &gen, 10000, 0);
+        linearcomp_test_c89(&results, &gen, 10000, 31);
+        linearcomp_test_c89(&results, &gen, 10000, 0);
         toc = clock();
         ResultsList_print(&results);
         ResultsList_free(&results);

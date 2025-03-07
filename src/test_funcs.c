@@ -227,10 +227,10 @@ int test_tdistr_cdf()
          1,    11,  0.830599651901899,
         -1.96, 1e4, 0.025011760115899,
          1.96, 1e4,  0.974988239884101,
-         1e100, 100.0};
+         1e10, 100.0};
     double dfmax = -1, dfmean = 0.0;
     size_t indmax = 0, n = 0;
-    for (size_t i = 0; dat[3*i] != 1e100; i++) {
+    for (size_t i = 0; dat[3*i] != 1e10; i++) {
         double t = dat[3*i];
         unsigned long f = (unsigned long) dat[3*i + 1];
         double p = dat[3*i + 2];
@@ -286,6 +286,33 @@ int test_norminv()
 
 }
 
+int test_linearcomp()
+{
+    printf("%g %g\n", -3.0, sr_round(-3.0));
+    printf("%g %g\n", -3.3, sr_round(-3.3));
+    printf("%g %g\n", -3.8, sr_round(-3.8));
+    printf("%g %g\n", -0.6, sr_round(-0.6));
+    printf("%g %g\n", -0.5, sr_round(-0.5));
+    printf("%g %g\n", -0.4, sr_round(-0.4));
+    printf("%g %g\n", 0.0, sr_round(0.0));
+    printf("%g %g\n", 0.1, sr_round(0.1));
+    printf("%g %g\n", 0.4, sr_round(0.4));
+    printf("%g %g\n", 0.5, sr_round(0.5));
+    printf("%g %g\n", 0.6, sr_round(0.6));
+    printf("%g %g\n", 5.1, sr_round(5.1));
+    printf("%g %g\n", 5.5, sr_round(5.5));
+    printf("%g %g\n", 5.9, sr_round(5.9));
+    printf("----------\n");
+    printf("%g %g\n", 0.010417, linearcomp_Tcdf(-2.5));
+    printf("%g %g\n", 0.03125, linearcomp_Tcdf(-1.5) - linearcomp_Tcdf(-2.5));
+    printf("%g %g\n", 0.125, linearcomp_Tcdf(-0.5) - linearcomp_Tcdf(-1.5));
+    printf("%g %g\n", 0.5, linearcomp_Tcdf(0.5) - linearcomp_Tcdf(-0.5));
+    printf("%g %g\n", 0.25, linearcomp_Tcdf(1.5) - linearcomp_Tcdf(0.5));
+    printf("%g %g\n", 0.0625, linearcomp_Tcdf(2.5) - linearcomp_Tcdf(1.5));
+    printf("%g %g\n", 0.020833, linearcomp_Tccdf(2.5));
+    return 0;
+}
+
 
 int main()
 {
@@ -301,5 +328,6 @@ int main()
     test_binocdf();
     test_norminv();
     test_radixsort64();
+    test_linearcomp();
     return 0;
 }
