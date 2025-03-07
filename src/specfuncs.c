@@ -79,6 +79,16 @@ double sr_lgamma(double x)
 }
 
 
+double sr_round(double x)
+{
+    double x_rnd = floor(x);
+    if (x >= 0) {
+        if (x - x_rnd >= 0.5) x_rnd++;
+    } else if (x - x_rnd > 0.5) {
+        x_rnd++;
+    }
+    return x_rnd;
+}
 
 
 /**
@@ -594,5 +604,43 @@ double stdnorm_inv(double p)
 double halfnormal_pvalue(double x)
 {
     return 2.0 * stdnorm_pvalue(x);
+}
+
+
+/**
+ * @brief Implementation of c.d.f. for T variable from linear complexity test.
+ * @details The next formula is used:
+ *
+ * \f[
+ *   F(k) = \begin{cases}
+ *     1 - \frac{2^{-2k + 2}}{3} & \textrm{for } k > 0 \\
+ *         \frac{2^{2k + 1}}{3}  & \textrm{for } k \le 0 \\
+ *   \end{cases}
+ * \f]
+ *
+ * Suggested in the next work:
+ * 
+ * 1. Rukhin A., Soto J. et al. A Statistical Test Suite for Random and
+ *    Pseudorandom Number Generators for Cryptographic Applications //
+ *    NIST SP 800-22 Rev. 1a. https://doi.org/10.6028/NIST.SP.800-22r1a
+ */
+double linearcomp_Tcdf(double k)
+{
+    k = sr_round(k);
+    if (k > 0.0) {
+        return 1.0 - pow(2.0, -2*k + 2.0) / 3.0;
+    } else {
+        return pow(2.0, 2*k + 1) / 3.0;
+    }
+}
+
+double linearcomp_Tccdf(double k)
+{
+    k = sr_round(k);
+    if (k > 0.0) {
+        return pow(2.0, -2*k + 2.0) / 3.0;
+    } else {
+        return 1.0 - pow(2.0, 2*k + 1) / 3.0;
+    }
 }
 

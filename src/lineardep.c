@@ -262,27 +262,39 @@ static unsigned int linearcomp_get_bitpos(const GeneratorState *obj, const Linea
  *    Pseudorandom Number Generators for Cryptographic Applications //
  *    NIST SP 800-22 Rev. 1a. https://doi.org/10.6028/NIST.SP.800-22r1a
  *
- * Gustafson et al. [2] proposed a normal approximation for the empirical
- * linear complexity but Rukhin et al.[3] noted that it is too crude, mainly
- * because of heavier tails. We use the next refined approximation: t obeys
- * t-distribution with \f$ f=11 \f$ degrees of freedom. The t value is defined
- * on the base of the linear complexity \f$ L \f$ as:
+ * An empirical linear complexity has the next mathematical expectance and
+ * variance [1]:
  * 
- *
- * \f[
- * t = \frac{L - \mu}{\sigma}
- * \f]
- *
- * where parameters of the distribution are [1]:
- *
  * \f[
  * \mu = \frac{n}{2} + \frac{9 - (-1)^n}{36};~
  * \sigma = \sqrt{\frac{86}{81}}
  * \f]
  *
- * The f value is obtained during the SmokeRand development by the Monte-Carlo
- * method by repeating the test 10^7 times for n=1000,1001,2000,2001.
- * Speck128/128 was used as a CSPRNG (see `src/calibrate_linearcomp.c`).
+ * Gustafson et al. [2] proposed a normal approximation for it but
+ * Rukhin et al.[3] noted that it is too crude, mainly because of heavier
+ * tails and proposed to use the next integer T variable:
+ *
+ * \f[
+ *   T = \begin{cases}
+ *     L - \frac{n}{2}            & \textrm{for even } L \\
+ *    -L + \frac{n + 1}{2}\right) & \textrm{for odd } L \\
+ *   \end{cases}
+ * \f]
+ *
+ * It has the next c.d.f.:
+ * \f[
+ *   F(k) = \begin{cases}
+ *     1 - \frac{2^{-2k + 2}}{3} & \textrm{for } k > 0 \\
+ *         \frac{2^{2k + 1}}{3}  & \textrm{for } k \le 0 \\
+ *   \end{cases}
+ * \f]
+ *
+ * It is also possible to approximate the \f$(L - \mu)/\sigma$ value by
+ * t-distribution with \f$ f=11 \f$ degrees of freedom. It is good in central
+ * part but has too dense tails. The f value is obtained during the SmokeRand
+ * development by the Monte-Carlo method by repeating the test 10^7 times
+ * for n=1000,1001,2000,2001. Speck128/128 was used as a CSPRNG
+ * (see `src/calibrate_linearcomp.c`).
  *
  * @param opts Test options (number of bits, bit position)
  */
@@ -303,15 +315,16 @@ TestResults linearcomp_test(GeneratorState *obj, const LinearCompOptions *opts)
         if (obj->gi->get_bits(obj->state) & mask)
             s[i] = 1;
     }
-    double parity = (double) (opts->nbits & 1);
-    double mu = (double) opts->nbits / 2.0 + (9.0 - parity) / 36.0;
-    double sigma = sqrt(86.0/81.0);
     ans.x = (double) berlekamp_massey(s, opts->nbits);
-    double z = (ans.x - mu) / sigma;
-    const unsigned long df = 11;
-    ans.p = t_cdf(z, df);        // We want obtain low p-values for low
-    ans.alpha = t_pvalue(z, df); // linear complexities.
-    obj->intf->printf("  L = %g; z = %g; p = %g\n", ans.x, z, ans.p);
+    double T;
+    if (opts->nbits & 1) {
+        T = -ans.x + (double) (opts->nbits + 1) / 2.0;
+    } else {
+        T = ans.x - (double) opts->nbits / 2.0;
+    }
+    ans.p = linearcomp_Tcdf(T);
+    ans.alpha = linearcomp_Tccdf(T);
+    obj->intf->printf("  L = %g; T = %g; p = %g\n", ans.x, T, ans.p);
     obj->intf->printf("\n");
     free(s);
     return ans;
