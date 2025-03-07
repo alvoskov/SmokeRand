@@ -1,20 +1,14 @@
 /**
  * @file smokerand.c
  * @brief SmokeRand command line interface.
- * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
  */
-#include "smokerand/coretests.h"
-#include "smokerand/lineardep.h"
-#include "smokerand/entropy.h"
-#include "smokerand/bat_default.h"
-#include "smokerand/bat_brief.h"
-#include "smokerand/bat_full.h"
-#include "smokerand/bat_file.h"
-#include "smokerand/bat_express.h"
-#include "smokerand/extratests.h"
+#include "smokerand_core.h"
+#include "smokerand_bat.h"
 #include "smokerand/fileio.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -274,7 +268,7 @@ typedef struct {
  * @brief Process command line arguments to extract settings.
  * @param[out] obj  Output buffer for parsed settings.
  * @param[in]  argc Number of command line arguments (from `main` function).
- * @arapm[in]  argv Values of command line arguments (from `main` function).
+ * @param[in]  argv Values of command line arguments (from `main` function).
  */
 int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
 {
@@ -340,7 +334,7 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
 
 /**
  * @brief Run a battery of statistical test for a given generator.
- * @param battery_name  Name of tests battery: `default`, \express`, `brief`,
+ * @param battery_name  Name of tests battery: `default`, `express`, `brief`,
  * `full`, `selftest`, `speed`, `stdout`, `freq`, 'birthday`, `ising`.
  * @param gi   PRNG to be tested.
  * @param intf Pointers to API functions.

@@ -1,7 +1,7 @@
 /**
  * @file lineardep.h
  * @brief Implementation of linear complexity and matrix rank tests.
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -19,10 +19,15 @@ typedef struct {
 } MatrixRankOptions;
 
 
+/**
+ * @brief A special values of the `bitpos` field of the `LinearCompOptions`
+ * structure. Needed for autoselection of lowest, highest and middle bits
+ * without an explicit position.
+ */
 enum {
-    linearcomp_bitpos_low = 0,
-    linearcomp_bitpos_high = -1,
-    linearcomp_bitpos_mid = -2
+    linearcomp_bitpos_low = 0, ///< Analyze the lowest bit.
+    linearcomp_bitpos_high = -1, ///< Analyze the middle bit.
+    linearcomp_bitpos_mid = -2 ///< Analyze the highest bit.
 };
 
 /**

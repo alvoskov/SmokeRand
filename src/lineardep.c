@@ -1,7 +1,7 @@
 /**
  * @file lineardep.c
  * @brief Implementation of linear complexity and matrix rank tests.
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -272,12 +272,12 @@ static unsigned int linearcomp_get_bitpos(const GeneratorState *obj, const Linea
  *
  * Gustafson et al. [2] proposed a normal approximation for it but
  * Rukhin et al.[3] noted that it is too crude, mainly because of heavier
- * tails and proposed to use the next integer T variable:
+ * tails and proposed to use the next integer \f$ T \f$ variable:
  *
  * \f[
  *   T = \begin{cases}
- *     L - \frac{n}{2}            & \textrm{for even } L \\
- *    -L + \frac{n + 1}{2}\right) & \textrm{for odd } L \\
+ *     L - \frac{n}{2}     & \textrm{for even } L \\
+ *    -L + \frac{n + 1}{2} & \textrm{for odd } L \\
  *   \end{cases}
  * \f]
  *
@@ -289,7 +289,7 @@ static unsigned int linearcomp_get_bitpos(const GeneratorState *obj, const Linea
  *   \end{cases}
  * \f]
  *
- * It is also possible to approximate the \f$(L - \mu)/\sigma$ value by
+ * It is also possible to approximate the \f$(L - \mu)/\sigma\f$ value by
  * t-distribution with \f$ f=11 \f$ degrees of freedom. It is good in central
  * part but has too dense tails. The f value is obtained during the SmokeRand
  * development by the Monte-Carlo method by repeating the test 10^7 times

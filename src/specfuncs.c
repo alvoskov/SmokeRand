@@ -4,7 +4,8 @@
  * different statistical criteria.
  * @details This file is designed for C89 (ANSI C)! Don't use features
  * from C99 and later!
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -198,7 +199,7 @@ double gammainc_upper(double a, double x)
 }
 
 /**
- * @brief Natural logarithm of complete beta function: $\ln\Beta(a,b)$.
+ * @brief Natural logarithm of complete beta function \f$ \ln\Beta(a,b) \f$.
  */
 double sr_betaln(double a, double b)
 {
@@ -608,7 +609,8 @@ double halfnormal_pvalue(double x)
 
 
 /**
- * @brief Implementation of c.d.f. for T variable from linear complexity test.
+ * @brief Implementation of c.d.f. for the T variable from the linear
+ * complexity test.
  * @details The next formula is used:
  *
  * \f[
@@ -634,6 +636,10 @@ double linearcomp_Tcdf(double k)
     }
 }
 
+/**
+ * @brief Implementation of c.c.d.f. for the T variable from the linear
+ * complexity test. See the `linearcomp_Tcdf` function for details.
+ */
 double linearcomp_Tccdf(double k)
 {
     k = sr_round(k);
@@ -643,4 +649,3 @@ double linearcomp_Tccdf(double k)
         return 1.0 - pow(2.0, 2*k + 1) / 3.0;
     }
 }
-

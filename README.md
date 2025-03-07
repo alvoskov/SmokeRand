@@ -528,10 +528,10 @@ batteries and have mainly historical and educational interest.
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | N/A    | +       | >= 32 TiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | Small   | 256 KiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      |         | >= 16 TiB
- des-ctr           | u64    | +       | +     | +       |      | 24   |        |         | >= 256 GiB
+ des-ctr           | u64    | +       | +     | +       |      | 24   |        |         | >= 4 TiB
  drand48           | u32    | 1       | 12    | 20      | 22/23| 0.72 | -      | -       | 1 MiB
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      |         | >= 2 TiB
- isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | +       | >= 16 TiB
+ isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | +       | >= 32 TiB
  flea32x1          | u32    | +       | +     | 1       | 1    | 0.48 | +      | +       | 4 MiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | N/A    | +       | >= 32 TiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | Small   | 1 MiB
@@ -737,6 +737,13 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 - Passed dieharder: lcg64
 
 # Versions history
+
+07.03.2025: SmokeRand 0.27
+
+- Improved computation of p-values for the linear complexity test.
+- Bugfix in the rrmxmx generator.
+- Test vectors for some generators.
+- Generators source files are renames (`_shared` suffix excluded).
 
 05.03.2025: SmokeRand 0.26
 

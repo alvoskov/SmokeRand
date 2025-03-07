@@ -16,7 +16,6 @@
 #define USE_PTHREADS
 #endif
 
-
 //////////////////////////////////
 ///// Platform-specific part /////
 //////////////////////////////////
@@ -89,7 +88,8 @@ typedef int ThreadRetVal;
 ///// Cross-platform part /////
 ///////////////////////////////
 
-typedef THREADFUNC_SPEC ThreadRetVal (*ThreadFuncPtr)(void *);
+//typedef THREADFUNC_SPEC ThreadRetVal (*ThreadFuncPtr)(void *);
+typedef ThreadRetVal (THREADFUNC_SPEC *ThreadFuncPtr)(void *);
 
 void init_thread_dispatcher(void);
 ThreadObj ThreadObj_create(ThreadFuncPtr thr_func, void *udata, unsigned int ord);

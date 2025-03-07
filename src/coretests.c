@@ -543,7 +543,7 @@ static int gap_test_guard(GeneratorState *obj, const GapOptions *opts)
 
 /**
  * @brief Knuth's gap test for detecting lagged Fibonacci generators.
- * @details Gap is \f$ [0;\beta) \f$ where $\beta = 1 / (2^{shl}) \f$.
+ * @details Gap is \f$ [0;\beta) \f$ where \f$\beta = 1 / (2^{shl}) \f$.
  */
 TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
 {

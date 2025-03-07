@@ -6,30 +6,35 @@
 PLATFORM_NAME=GCC
 ifeq ($(PLATFORM_NAME), GCC)
     CC = gcc
+    CXX = g++
     AR = ar
     GEN_CFLAGS = -fPIC -ffreestanding -nostdlib
     PLATFORM_FLAGS = -march=native
     IS_PORTABLE = 0
 else ifeq ($(PLATFORM_NAME), GCC32)
     CC = gcc
+    CXX = g++
     AR = ar
     GEN_CFLAGS = -fPIC  -DNO_CUSTOM_DLLENTRY
     PLATFORM_FLAGS = -m32 -march=native
     IS_PORTABLE = 1
 else ifeq ($(PLATFORM_NAME), MINGW-HX)
     CC = gcc
+    CXX = g++
     AR = ar
     GEN_CFLAGS = -fPIC -DNO_CUSTOM_DLLENTRY -DUSE_WINTHREADS
     PLATFORM_FLAGS = -m32 -march=i686
     IS_PORTABLE = 1
 else ifeq ($(PLATFORM_NAME), ZIGCC)
     CC = zig cc
+    CXX = zic c++
     AR = zig ar
     GEN_CFLAGS = -fPIC
     PLATFORM_FLAGS = -DUSE_WINTHREADS -march=native
     IS_PORTABLE = 0
 else ifeq ($(PLATFORM_NAME), GENERIC)
     CC = gcc
+    CXX = g++
     AR = ar
     GEN_CFLAGS = -fPIC
     PLATFORM_FLAGS = -DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY
@@ -75,17 +80,20 @@ INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/cinterface.h $(INCLUDE
 # Battery
 BAT_LIB = $(LIBDIR)/libsmokerand_bat.a
 BATLIB_SOURCES = $(addprefix $(SRCDIR)/, bat_express.c bat_brief.c bat_default.c bat_file.c bat_full.c)
-BATLIB_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_express.h bat_brief.h bat_default.h bat_file.h bat_full.h)
+BATLIB_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_express.h bat_brief.h bat_default.h bat_file.h bat_full.h) \
+    include/smokerand_bat.h
 BATLIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(BATLIB_SOURCES)))
 # Executables
-EXE_NAMES = smokerand sr_tiny calibrate_dc6 test_funcs
-EXE_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXE_NAMES)))
+EXEC_NAMES = smokerand sr_tiny calibrate_linearcomp calibrate_dc6 test_funcs test_rdseed
+EXEC_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXEC_NAMES)))
+EXECXX_NAMES = test_cpp11
+EXECXX_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXECXX_NAMES)))
 
 # Generators
-GEN_CUSTOM_SOURCES = $(addsuffix _shared.c,$(addprefix generators/, ranluxpp \
+GEN_CUSTOM_SOURCES = $(addsuffix .c,$(addprefix generators/, ranluxpp \
     superduper64 superduper64_u32))
 ifeq ($(IS_PORTABLE), 1)
-GEN_ALL_SOURCES = $(addsuffix _shared.c,$(addprefix generators/, \
+GEN_ALL_SOURCES = $(addsuffix .c,$(addprefix generators/, \
     alfib_lux alfib_mod alfib ara32 chacha cmwc4096 coveyou64 crand \
     cwg64 des drand48 efiix64x48 flea32x1 hc256 isaac64 kiss64 kiss93 \
     kiss99 lcg128_u32_portable lcg32prime lcg64 lcg69069 lcg96_portable \
@@ -110,7 +118,8 @@ GEN_SHARED = $(patsubst %.c,%$(SO),$(subst generators/,$(BINDIR)/generators/lib,
 GEN_BINDIR = $(BINDIR)/generators
 
 #-----------------------------------------------------------------------------
-all: $(CORE_LIB) $(BAT_LIB) $(addprefix $(BINDIR)/, $(addsuffix $(EXE),$(EXE_NAMES))) generators
+all: $(CORE_LIB) $(BAT_LIB) $(addprefix $(BINDIR)/, $(addsuffix $(EXE),$(EXEC_NAMES))) \
+    $(addprefix $(BINDIR)/, $(addsuffix $(EXE),$(EXECXX_NAMES))) generators
 
 $(CORE_LIB): $(LIB_OBJFILES)
 	$(AR) rcu $@ $^
@@ -127,18 +136,31 @@ $(BINDIR)/smokerand$(EXE): $(OBJDIR)/smokerand.o $(CORE_LIB) $(BAT_LIB) $(BAT_HE
 $(BINDIR)/calibrate_dc6$(EXE): $(OBJDIR)/calibrate_dc6.o $(CORE_LIB)
 	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE) 
 
+$(BINDIR)/calibrate_linearcomp$(EXE): $(OBJDIR)/calibrate_linearcomp.o $(CORE_LIB)
+	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE) 
+
+$(BINDIR)/test_cpp11$(EXE): $(OBJDIR)/test_cpp11.o $(CORE_LIB)
+	$(CXX) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE) 
+
 $(BINDIR)/test_funcs$(EXE): $(OBJDIR)/test_funcs.o $(CORE_LIB)
 	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE) 
 
-$(LIB_OBJFILES) $(BATLIB_OBJFILES) $(EXE_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.c $(LIB_HEADERS)
+$(BINDIR)/test_rdseed$(EXE): $(OBJDIR)/test_rdseed.o $(CORE_LIB)
+	$(CXX) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE) 
+
+$(LIB_OBJFILES) $(BATLIB_OBJFILES) $(EXEC_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.c $(LIB_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
+
+$(EXECXX_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp $(LIB_HEADERS)
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -o $@
+
 
 .PHONY: clean generators install uninstall
 
 generators: $(GEN_SHARED)
 
 # Linking crand PRNG requires linking with C standard library
-$(GEN_BINDIR)/libcrand_shared$(SO): $(GEN_BINDIR)/obj/crand_shared.o
+$(GEN_BINDIR)/libcrand$(SO): $(GEN_BINDIR)/obj/crand.o
 	$(CC) $(LINKFLAGS) -shared $< -s $(GEN_LFLAGS) -o $@
 
 # Generic rules for linking PRNG plugins
@@ -150,21 +172,27 @@ $(GEN_OBJFILES): $(BINDIR)/generators/obj/%.o : generators/%.c $(INTERFACE_HEADE
 
 # Generators that depend on some extra header files that should be taken
 # into account in their dependency rules.
-$(GEN_BINDIR)/obj/ranluxpp_shared.o : generators/ranluxpp_shared.c \
+$(GEN_BINDIR)/obj/ranluxpp.o : generators/ranluxpp.c \
     generators/ranluxpp_helpers.h generators/ranluxpp_mulmod.h $(INTERFACE_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
 
-$(GEN_BINDIR)/obj/superduper64_shared.o : generators/superduper64_shared.c \
+$(GEN_BINDIR)/obj/superduper64.o : generators/superduper64.c \
     generators/superduper64_body.h $(INTERFACE_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
 
-$(GEN_BINDIR)/obj/superduper64_u32_shared.o : generators/superduper64_u32_shared.c \
+$(GEN_BINDIR)/obj/superduper64_u32.o : generators/superduper64_u32.c \
     generators/superduper64_body.h $(INTERFACE_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
 
 clean:
 ifeq ($(OS), Windows_NT)
-	del $(BINDIR)\*.exe
+	del $(BINDIR)\smokerand.exe
+	del $(BINDIR)\calibrate_dc6.exe
+	del $(BINDIR)\calibrate_linearcomp.exe
+	del $(BINDIR)\sr_tiny.exe
+	del $(BINDIR)\test_cpp11.exe
+	del $(BINDIR)\test_funcs.exe
+	del $(BINDIR)\test_rdseed.exe
 	del $(OBJDIR)\*.o /q
 	del $(LIBDIR)\*.a /q
 	del $(BINDIR)\generators\*.dll /q
@@ -173,7 +201,11 @@ ifeq ($(OS), Windows_NT)
 else
 	rm $(BINDIR)/smokerand
 	rm $(BINDIR)/calibrate_dc6
+	rm $(BINDIR)/calibrate_linearcomp
+	rm $(BINDIR)/sr_tiny
 	rm $(BINDIR)/test_funcs
+	rm $(BINDIR)/test_cpp11
+	rm $(BINDIR)/test_rdseed
 	rm $(OBJDIR)/*.o
 	rm $(LIBDIR)/*
 	rm $(BINDIR)/generators/*.so

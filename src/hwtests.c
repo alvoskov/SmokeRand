@@ -187,7 +187,7 @@ size_t HammingWeightsTuple_reduce_table(HammingWeightsTuple *info, double Ei_min
  * corrections based on percentile tables obtained by Monte-Carlo method using
  * CSPRNG. Experiments showed that increasing \f$E_{i,\mathrm{min}}\f$ from
  * 25 to 100 makes the output distribution much closer to standard normal.
- * It is still slightly biased: \f$ \mu \approx -0.15\f$, $\sigma\approx 1.0$.
+ * It is still slightly biased: \f$\mu\approx-0.15\f$, \f$\sigma\approx 1.0\f$.
  * Q-Q plot shows that it is normal. And this bias was not taken into account.
  */
 TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)

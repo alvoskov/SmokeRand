@@ -28,6 +28,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # GCC in GNU/Linux cannot work without -lm key, MSVC
 # cannot work WITH it, MinGW tolerates both variants
 find_library(M_LIB m)
+if (M_LIB)
+    set(COMMON_LIBS m)
+endif()
 
 add_library(smokerand_core
     src/core.c          include/smokerand/core.h
@@ -45,30 +48,33 @@ add_library(smokerand_core
 )
 target_include_directories(smokerand_core PRIVATE include)
 
-# Executables
-# a) Main executable
-add_executable(smokerand src/smokerand.c
+add_library(smokerand_bat
     src/bat_express.c include/smokerand/bat_express.h
     src/bat_default.c include/smokerand/bat_default.h
     src/bat_brief.c   include/smokerand/bat_brief.h
     src/bat_file.c    include/smokerand/bat_file.h
-    src/bat_full.c    include/smokerand/bat_full.h)
+    src/bat_full.c    include/smokerand/bat_full.h
+    include/smokerand_bat.h)
+target_include_directories(smokerand_bat PRIVATE include)
+
+# Executables
+# a) Main executable
+add_executable(smokerand src/smokerand.c)
 target_include_directories(smokerand PRIVATE include)
-target_link_libraries(smokerand smokerand_core)
-if (M_LIB)
-    target_link_libraries(smokerand m)
-endif()
+target_link_libraries(smokerand smokerand_bat smokerand_core ${COMMON_LIBS})
 
 # b) Some tests
 set(TESTS calibrate_dc6 test_funcs test_rdseed)
 foreach(testname ${TESTS})
     add_executable(${testname} src/${testname}.c)
     target_include_directories(${testname} PRIVATE include)
-    target_link_libraries(${testname} smokerand_core)
-    if (M_LIB)
-        target_link_libraries(${testname} m smokerand_core)
-    endif()
+    target_link_libraries(${testname} smokerand_core ${COMMON_LIBS})
 endforeach()
+
+# c) Call batteries from C++
+add_executable(test_cpp11 src/test_cpp11.cpp)
+target_include_directories(test_cpp11 PRIVATE include)
+target_link_libraries(test_cpp11 smokerand_bat smokerand_core ${COMMON_LIBS})
 
 # Generators list
 if (ONLY_PORTABLE)
@@ -79,7 +85,7 @@ if (ONLY_PORTABLE)
     lfib4 lfib4_u64 lfib_par lfsr113 lfsr258 loop_7fff_w64 lrnd64 
     lxm_64x128 macmarsa magma minstd mixmax mlfib17_5 mrg32k3a msws_ctr 
     msws mt19937 mulberry32 mwc1616x mwc1616 mwc3232x mwc32x mwc4691 
-    mwc64x mwc64 pcg32 pcg32_streams pcg32_xsl_rr pcg64_64 philox2x32 
+    mwc64x mwc64 pcg32 pcg32_xsl_rr pcg64_64 philox2x32 
     philox32 r1279 randu ranlux48 ranluxpp ranq1 ranq2 ranrot32 ranrot_bi 
     ranshi ranval ran rc4ok rc4 romutrio rrmxmx sapparot2 sapparot 
     sezgin63 sfc16 sfc32 sfc64 sfc8 shr3 speck128 splitmix32 splitmix 
@@ -97,7 +103,7 @@ else()
     lfib4_u64 lfib_par lfsr113 lfsr258 loop_7fff_w64 lrnd64 lxm_64x128 
     macmarsa magma_avx magma minstd mixmax mlfib17_5 mrg32k3a msws_ctr 
     msws mt19937 mulberry32 mwc128x mwc128 mwc1616x mwc1616 mwc3232x 
-    mwc32x mwc4691 mwc64x mwc64 pcg32 pcg32_streams pcg32_xsl_rr 
+    mwc32x mwc4691 mwc64x mwc64 pcg32 pcg32_xsl_rr 
     pcg64_64 pcg64_xsl_rr philox2x32 philox32 philox r1279 randu 
     ranlux48 ranluxpp ranq1 ranq2 ranrot32 ranrot_bi ranshi ranval 
     ran rc4ok rc4 romutrio rrmxmx sapparot2 sapparot sezgin63 sfc16 
@@ -113,16 +119,16 @@ endif()
 
 # Examples of plugins, i.e. modules with PRNGs
 foreach(prng_name ${GENERATORS})
-    add_library(${prng_name}_shared SHARED generators/${prng_name}_shared.c include/smokerand/cinterface.h)
+    add_library(${prng_name} SHARED generators/${prng_name}.c include/smokerand/cinterface.h)
     if (NOT ${prng_name} STREQUAL "crand")
         # crand uses standard library, so we can't link it as a freestanding
         # appication. All other modules don't use standard library and are
         # freestanding.
-        set_target_properties(${prng_name}_shared PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
-        target_compile_options(${prng_name}_shared PRIVATE ${FREESTANDING}) 
+        set_target_properties(${prng_name} PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
+        target_compile_options(${prng_name} PRIVATE ${FREESTANDING}) 
     endif()
-    set_target_properties(${prng_name}_shared PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
-    set_target_properties(${prng_name}_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
-    set_target_properties(${prng_name}_shared PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
-    target_include_directories(${prng_name}_shared PRIVATE include)
+    set_target_properties(${prng_name} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
+    set_target_properties(${prng_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
+    set_target_properties(${prng_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
+    target_include_directories(${prng_name} PRIVATE include)
 endforeach()

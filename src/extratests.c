@@ -84,8 +84,8 @@ static int cmp_ints(const void *aptr, const void *bptr)
  * \f[
  * \lambda = \frac{n^2}{2\cdot 2^m}
  * \f]
- * where \f$ m = 2^{64} \f$. However even for $\lambda = 8$ the $n = 2^{34}$ that
- * correspond to 128GiB of RAM that is beyond capabilities of majority of
+ * where \f$ m = 2^{64} \f$. However even for \f$\lambda=8\f$ the \f$n=2^{34}\f$
+ * that correspond to 128 GiB of RAM that is beyond capabilities of majority of
  * workstations in 2024. To overcome this problem the vast majority of PRNG output
  * is thrown out; only numbers with lower \f$ e \f$ bits equal to 0 are used.
  *

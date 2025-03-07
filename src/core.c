@@ -23,9 +23,6 @@
 #if defined(_MSC_VER) || defined(__WATCOMC__)
 #include <io.h>
 #endif
-#ifdef USE_PTHREADS
-#include <pthread.h>
-#endif
 
 static Entropy entropy = {{0, 0, 0, 0}, 0, NULL, 0, 0};
 static char cmd_param[128] = {0};
@@ -447,7 +444,7 @@ typedef struct {
     const CallerAPI *intf;
 } BatteryThread;
 
-static THREADFUNC_SPEC ThreadRetVal battery_thread(void *data)
+static ThreadRetVal THREADFUNC_SPEC battery_thread(void *data)
 {
     BatteryThread *th_data = data;
     th_data->intf->printf("vvvvvvvvvv Thread %u (ID %llu) started vvvvvvvvvv\n",
