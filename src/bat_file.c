@@ -269,9 +269,32 @@ static int parse_bspace_nd(TestDescription *out, const TestInfo *obj, char *errm
     return 1;
 }
 
+
+static int parse_collover_nd(TestDescription *out, const TestInfo *obj, char *errmsg)
+{
+    GET_LIMITED_INTVALUE(nbits_per_dim, 1, 64)
+    GET_LIMITED_INTVALUE(ndims, 1, 64)
+    GET_LIMITED_INTVALUE(nsamples, 1, 1ll << 30ll)
+    GET_LIMITED_INTVALUE(get_lower, 0, 1)
+    GET_LIMITED_INTVALUE(n, 1000, 1ll << 30ll)
+    CollOverNDOptions *opts = calloc(1, sizeof(CollOverNDOptions));
+    opts->nbits_per_dim = nbits_per_dim;
+    opts->ndims = ndims;
+    opts->nsamples = nsamples;
+    opts->n = n;
+    opts->get_lower = get_lower;
+    out->name = obj->testname;
+    out->run = bspace_nd_test_wrap;
+    out->udata = opts;
+    out->nseconds = 1;
+    out->ram_load = ram_hi;
+    return 1;
+}
+
+
 static int parse_collisionover(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    int is_ok = parse_bspace_nd(out, obj, errmsg);
+    int is_ok = parse_collover_nd(out, obj, errmsg);
     out->run = collisionover_test_wrap;
     return is_ok;
 }

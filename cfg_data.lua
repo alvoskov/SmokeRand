@@ -2,7 +2,7 @@ local lib_sources = {'core.c', 'coretests.c', 'entropy.c', 'extratests.c',
     'fileio.c', 'lineardep.c', 'hwtests.c', 'specfuncs.c', 'threads_intf.c'}
 
 local bat_sources = {'bat_express.c', 'bat_brief.c', 'bat_default.c',
-    'bat_file.c', 'bat_full.c'}
+    'bat_file.c', 'bat_full.c', 'bat_special.c'}
 
 local lib_headers = {'apidefs.h', 'cinterface.h', 'core.h', 'coretests.h',
     'entropy.h', 'extratests.h', 'fileio.h', 'hwtests.h', 'lineardep.h', 
@@ -32,7 +32,7 @@ local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
     'threefry2x64', 'threefry', 'tinymt32', 'tinymt64', 'well1024a', 'wyrand',
     'xorgens', 'xoroshiro1024stst', 'xoroshiro1024st', 'xoroshiro128pp_avx',
     'xoroshiro128pp', 'xoroshiro128p', 'xorshift128pp_avx', 'xorshift128p',
-    'xorshift128', 'xorwow', 'xsh'}
+    'xorshift128', 'xorwow', 'xoshiro128pp', 'xsh'}
 
 -- List of non-portable generators that use compiler-specific extensions
 local gen_not_portable_sources = {'aesni', 'chacha_avx', 'lcg128',

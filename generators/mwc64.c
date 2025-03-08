@@ -1,33 +1,42 @@
 /**
  * @file mwc64.c
- * @brief MWC64X - 64-bit PRNG based on MWC method.
+ * @brief MWC64 - 64-bit PRNG based on MWC method.
  * @details Multiply-with-carry PRNG with a period about 2^63.
- * Passes SmallCrush, Crush and BigCrush tests.
  *
- * @details Multiply-with-carry PRNG with a simple output function x ^ c.
- * Has a period about 2^63. Passes SmallCrush, Crush and BigCrush tests.
+ * @details Multiply-with-carry PRNG that just returns x.
+ * Has a period about 2^63, passes SmallCrush but fails Crush and BigCrush
+ * batteries from TestU01.
  *
- * This PRNG is was proposed by David B. Thomas. MWC itself is invented
- * by G. Marsaglia. The A0 multiplier was changed by A.L. Voskov using
- * spectral test from TAOCP and SmallCrush for the version without XORing.
+ * This type of PRNG was proposed by G. Marsaglia. The A0 multiplier was
+ * found by A.L. Voskov using spectral test from TAOCP and SmallCrush
+ * for the version without XORing.
  *
- * Without XORing this PRNG fails "birthdayspacing t=3 (N12)" test from
- * Crush battery. The similar problem was noticed by S.Vigna in MWC128,
- * and he proposed a similar (but not the same) solution with XORing.
+ * This PRNG fails "birthdayspacing t=3 (N12)" test from Crush battery.
+ * The similar problem was noticed by S.Vigna in MWC128 on much larger
+ * samples.
  *
  * References:
- * 1. David B. Thomas. The MWC64X Random Number Generator.
- *    https://cas.ee.ic.ac.uk/people/dt10/research/rngs-gpu-mwc64x.html
- * 2. G. Marsaglia "Multiply-With-Carry (MWC) generators" (from DIEHARD
+ * 1. G. Marsaglia "Multiply-With-Carry (MWC) generators" (from DIEHARD
  *    CD-ROM) https://www.grc.com/otg/Marsaglia_MWC_Generators.pdf
- * 3. https://github.com/lpareja99/spectral-test-knuth
- * 4. Sebastiano Vigna. MWC128. https://prng.di.unimi.it/MWC128.c
+ * 2. https://github.com/lpareja99/spectral-test-knuth
+ * 3. Sebastiano Vigna. MWC128. https://prng.di.unimi.it/MWC128.c
+ *
+ * SmokeRand test results:
+ *
+ *        # Test name            xemp              p Interpretation  Thr#
+ *    -----------------------------------------------------------------------
+ *        4 bspace64_1d           897   1 - 4.94e-04 SUSPICIOUS         6
+ *        7 bspace32_2d           816   1 - 1.05e-09 SUSPICIOUS         6
+ *        8 bspace32_2d_high      861   1 - 3.70e-06 SUSPICIOUS         5
+ *        9 bspace21_3d        172306              0 FAIL               6
+ *       10 bspace21_3d_high   172791              0 FAIL               5
+ *    -----------------------------------------------------------------------
  *
  * @copyright
  * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * The MWC64X algorithm was proposed by David B. Thomas.
+ * The MWC algorithm was proposed by G.Marsaglia.
  *
  * This software is licensed under the MIT license.
  */

@@ -13,7 +13,9 @@
 #include "apidefs.h"
 #include <stdint.h>
 
-#define TESTS_ALL 0
+enum {
+    TESTS_ALL = 0
+};
 
 CallerAPI CallerAPI_init(void);
 CallerAPI CallerAPI_init_mthr(void);
@@ -67,8 +69,8 @@ typedef enum {
 } RamLoad;
 
 typedef enum {
-    report_brief = 0,
-    report_full = 1
+    REPORT_BRIEF = 0,
+    REPORT_FULL = 1
 } ReportType;
 
 
@@ -104,9 +106,9 @@ void TestsBattery_run(const TestsBattery *bat,
 
 
 typedef enum {
-    pvalue_passed = 0,
-    pvalue_warning = 1,
-    pvalue_failed = 2
+    PVALUE_PASSED = 0,
+    PVALUE_WARNING = 1,
+    PVALUE_FAILED = 2
 } PValueCategory;
 
 const char *interpret_pvalue(double pvalue);

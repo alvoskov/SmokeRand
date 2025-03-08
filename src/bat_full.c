@@ -46,15 +46,15 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
     static const BSpace4x8dDecimatedOptions bs_dec = {.step = 1 << 18};
 
     // CollisionOver tests options
-    static const BSpaceNDOptions
-        collover8_5d       = {.nbits_per_dim = 8, .ndims = 5, .nsamples = 50, .get_lower = 1},
-        collover8_5d_high  = {.nbits_per_dim = 8, .ndims = 5, .nsamples = 50, .get_lower = 0},
-        collover5_8d       = {.nbits_per_dim = 5, .ndims = 8, .nsamples = 50, .get_lower = 1},
-        collover5_8d_high  = {.nbits_per_dim = 5, .ndims = 8, .nsamples = 50, .get_lower = 0},
-        collover13_3d      = {.nbits_per_dim = 13, .ndims = 3, .nsamples = 50, .get_lower = 1},
-        collover13_3d_high = {.nbits_per_dim = 13, .ndims = 3, .nsamples = 50, .get_lower = 0},
-        collover20_2d      = {.nbits_per_dim = 20, .ndims = 2, .nsamples = 50, .get_lower = 1},
-        collover20_2d_high = {.nbits_per_dim = 20, .ndims = 2, .nsamples = 50, .get_lower = 0};
+    static const CollOverNDOptions
+        collover8_5d       = {.nbits_per_dim = 8, .ndims = 5, .nsamples = 50, .n = COLLOVER_DEFAULT_N, .get_lower = 1},
+        collover8_5d_high  = {.nbits_per_dim = 8, .ndims = 5, .nsamples = 50, .n = COLLOVER_DEFAULT_N, .get_lower = 0},
+        collover5_8d       = {.nbits_per_dim = 5, .ndims = 8, .nsamples = 50, .n = COLLOVER_DEFAULT_N, .get_lower = 1},
+        collover5_8d_high  = {.nbits_per_dim = 5, .ndims = 8, .nsamples = 50, .n = COLLOVER_DEFAULT_N, .get_lower = 0},
+        collover13_3d      = {.nbits_per_dim = 13, .ndims = 3, .nsamples = 50, .n = COLLOVER_DEFAULT_N, .get_lower = 1},
+        collover13_3d_high = {.nbits_per_dim = 13, .ndims = 3, .nsamples = 50, .n = COLLOVER_DEFAULT_N, .get_lower = 0},
+        collover20_2d      = {.nbits_per_dim = 20, .ndims = 2, .nsamples = 50, .n = COLLOVER_DEFAULT_N, .get_lower = 1},
+        collover20_2d_high = {.nbits_per_dim = 20, .ndims = 2, .nsamples = 50, .n = COLLOVER_DEFAULT_N, .get_lower = 0};
 
     // Gap test
     static const GapOptions gap_inv512  = {.shl = 9,  .ngaps = 10000000};

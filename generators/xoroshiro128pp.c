@@ -2,7 +2,8 @@
  * @file xoroshiro128pp.c
  * @brief xoroshiro128++ pseurorandom number generator.
  * @details The implementation is based on public domain code by D.Blackman
- * and S.Vigna (vigna@acm.org). This PRNG fails matrixrank and linearcomp tests.
+ * and S.Vigna (vigna@acm.org). Doesn't fail matrix rank and linear complexity
+ * tests.
  *
  * References:
  * 1. D. Blackman, S. Vigna. Scrambled Linear Pseudorandom Number Generators
@@ -14,8 +15,8 @@
  *    https://doi.org/10.1016/j.cam.2018.10.019.
  * 3. xoshiro / xoroshiro generators and the PRNG shootout
  *    https://prng.di.unimi.it/
- * @copyright The xoroshiro128++ algorithm is suggested by D. Blackman
- * and S. Vigna.
+ * @copyright The xoroshiro128++ algorithm and its public domain implementation
+ * are suggested by D. Blackman and S. Vigna.
  *
  * Adaptation for SmokeRand:
  *

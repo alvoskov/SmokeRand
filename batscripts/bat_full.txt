@@ -24,14 +24,14 @@ bspace4_16d      test=bspace_nd nbits_per_dim=4  ndims=16 nsamples=200 get_lower
 bspace4_16d_high test=bspace_nd nbits_per_dim=4  ndims=16 nsamples=200 get_lower=0
 
 # CollisionOver tests
-collover20_2d      test=collisionover nbits_per_dim=20 ndims=2 nsamples=50 get_lower=1
-collover20_2d_high test=collisionover nbits_per_dim=20 ndims=2 nsamples=50 get_lower=0
-collover13_3d      test=collisionover nbits_per_dim=13 ndims=3 nsamples=50 get_lower=1
-collover13_3d_high test=collisionover nbits_per_dim=13 ndims=3 nsamples=50 get_lower=0
-collover8_5d       test=collisionover nbits_per_dim=8  ndims=5 nsamples=50 get_lower=1
-collover8_5d_high  test=collisionover nbits_per_dim=8  ndims=5 nsamples=50 get_lower=0
-collover5_8d       test=collisionover nbits_per_dim=5  ndims=8 nsamples=50 get_lower=1
-collover5_8d_high  test=collisionover nbits_per_dim=5  ndims=8 nsamples=50 get_lower=0
+collover20_2d      test=collisionover nbits_per_dim=20 ndims=2 nsamples=50 n=50000000 get_lower=1
+collover20_2d_high test=collisionover nbits_per_dim=20 ndims=2 nsamples=50 n=50000000 get_lower=0
+collover13_3d      test=collisionover nbits_per_dim=13 ndims=3 nsamples=50 n=50000000 get_lower=1
+collover13_3d_high test=collisionover nbits_per_dim=13 ndims=3 nsamples=50 n=50000000 get_lower=0
+collover8_5d       test=collisionover nbits_per_dim=8  ndims=5 nsamples=50 n=50000000 get_lower=1
+collover8_5d_high  test=collisionover nbits_per_dim=8  ndims=5 nsamples=50 n=50000000 get_lower=0
+collover5_8d       test=collisionover nbits_per_dim=5  ndims=8 nsamples=50 n=50000000 get_lower=1
+collover5_8d_high  test=collisionover nbits_per_dim=5  ndims=8 nsamples=50 n=50000000 get_lower=0
 
 # Gap tests
 gap_inv512   test=gap shl=9    ngaps=10000000

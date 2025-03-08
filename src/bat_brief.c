@@ -32,11 +32,11 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
     static const BSpace4x8dDecimatedOptions bs_dec = {.step = 1 << 12};
 
     // CollisionOver tests options
-    static const BSpaceNDOptions
-        collover8_5d     = {.nbits_per_dim = 8, .ndims = 5, .nsamples = 3, .get_lower = 1},
-        collover5_8d     = {.nbits_per_dim = 5, .ndims = 8, .nsamples = 3, .get_lower = 1},
-        collover13_3d    = {.nbits_per_dim = 13, .ndims = 3, .nsamples = 3, .get_lower = 1},
-        collover20_2d    = {.nbits_per_dim = 20, .ndims = 2, .nsamples = 3, .get_lower = 1};
+    static const CollOverNDOptions
+        collover8_5d     = {.nbits_per_dim = 8, .ndims = 5, .nsamples = 3, .n = COLLOVER_DEFAULT_N, .get_lower = 1},
+        collover5_8d     = {.nbits_per_dim = 5, .ndims = 8, .nsamples = 3, .n = COLLOVER_DEFAULT_N, .get_lower = 1},
+        collover13_3d    = {.nbits_per_dim = 13, .ndims = 3, .nsamples = 3, .n = COLLOVER_DEFAULT_N, .get_lower = 1},
+        collover20_2d    = {.nbits_per_dim = 20, .ndims = 2, .nsamples = 3, .n = COLLOVER_DEFAULT_N, .get_lower = 1};
 
     // Gap test
     /**

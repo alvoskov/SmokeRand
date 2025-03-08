@@ -79,8 +79,8 @@ LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
 INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/core.h
 # Battery
 BAT_LIB = $(LIBDIR)/libsmokerand_bat.a
-BATLIB_SOURCES = $(addprefix $(SRCDIR)/, bat_express.c bat_brief.c bat_default.c bat_file.c bat_full.c)
-BATLIB_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_express.h bat_brief.h bat_default.h bat_file.h bat_full.h) \
+BATLIB_SOURCES = $(addprefix $(SRCDIR)/, bat_express.c bat_brief.c bat_default.c bat_file.c bat_full.c bat_special.c)
+BATLIB_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_express.h bat_brief.h bat_default.h bat_file.h bat_full.h bat_special.h) \
     include/smokerand_bat.h
 BATLIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(BATLIB_SOURCES)))
 # Executables
@@ -107,8 +107,8 @@ GEN_ALL_SOURCES = $(addsuffix .c,$(addprefix generators/, \
     sqxor32 stormdrop_old stormdrop superduper64 superduper64_u32 \
     superduper73 swblarge swblux swbw swb taus88 threefry2x64 threefry \
     tinymt32 tinymt64 well1024a xorgens xoroshiro1024stst xoroshiro1024st \
-    xoroshiro128pp xoroshiro128p xorshift128p xorshift128 xorwow \
-    xsh ))
+    xoroshiro128pp xoroshiro128p xorshift128p xorshift128 xoshiro128pp \
+    xorwow xsh ))
 else
 GEN_ALL_SOURCES = $(wildcard generators/*.c)
 endif

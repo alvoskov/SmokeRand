@@ -54,6 +54,7 @@ add_library(smokerand_bat
     src/bat_brief.c   include/smokerand/bat_brief.h
     src/bat_file.c    include/smokerand/bat_file.h
     src/bat_full.c    include/smokerand/bat_full.h
+    src/bat_special.c include/smokerand/bat_special.h
     include/smokerand_bat.h)
 target_include_directories(smokerand_bat PRIVATE include)
 
@@ -113,7 +114,7 @@ else()
     threefry2x64_avx threefry2x64 threefry tinymt32 tinymt64 well1024a 
     wyrand xorgens xoroshiro1024stst xoroshiro1024st xoroshiro128pp_avx 
     xoroshiro128pp xoroshiro128p xorshift128pp_avx xorshift128p xorshift128 
-    xorwow xsh)
+    xorwow xoshiro128pp xsh)
 endif()
 
 

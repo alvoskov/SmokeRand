@@ -2,7 +2,8 @@
  * @file xoroshiro128pp_avx.c
  * @brief xoroshiro128++ pseurorandom number generator.
  * @details The implementation is based on public domain code by D.Blackman
- * and S.Vigna (vigna@acm.org). This PRNG fails matrixrank and linearcomp tests.
+ * and S.Vigna (vigna@acm.org). Doesn't fail matrix rank and linear complexity
+ * tests.
  *
  * References:
  * 1. D. Blackman, S. Vigna. Scrambled Linear Pseudorandom Number Generators

@@ -16,6 +16,7 @@ extern "C" {
 #include "smokerand/bat_default.h"
 #include "smokerand/bat_file.h"
 #include "smokerand/bat_full.h"
+#include "smokerand/bat_special.h"
 
 #ifdef __cplusplus
 } // extern "C"

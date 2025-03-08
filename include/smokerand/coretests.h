@@ -21,6 +21,23 @@ typedef struct {
     int get_lower; ///< 0/1 - use lower/higher part of PRNG output.
 } BSpaceNDOptions;
 
+
+/**
+ * @brief Options for n-dimensional collision over tests.
+ */
+typedef struct {
+    unsigned int nbits_per_dim; ///< Number of bits per dimension.
+    unsigned int ndims; ///< Number of dimensions.
+    unsigned long nsamples; ///< Number of samples.
+    unsigned long n; ///< Sample length.
+    int get_lower; ///< 0/1 - use lower/higher part of PRNG output.
+} CollOverNDOptions;
+
+enum {
+    COLLOVER_DEFAULT_N = 50000000
+};
+
+
 /**
  * @brief Options for gap test.
  * @details Recommended options:
@@ -89,7 +106,7 @@ typedef struct {
 
 TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts);
 TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step);
-TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts);
+TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opts);
 TestResults gap_test(GeneratorState *obj, const GapOptions *opts);
 TestResults gap16_count0_test(GeneratorState *obj, long long ngaps);
 TestResults sumcollector_test(GeneratorState *obj, const SumCollectorOptions *opts);

@@ -187,22 +187,22 @@ PValueCategory get_pvalue_category(double pvalue)
     const double pvalue_fail_val = 1.0e-10;
     const double pvalue_warn_val = 1.0e-3;
     if (pvalue < pvalue_fail_val || pvalue > 1.0 - pvalue_fail_val) {
-        return pvalue_failed;
+        return PVALUE_FAILED;
     } else if (pvalue < pvalue_warn_val || pvalue > 1.0 - pvalue_warn_val) {
-        return pvalue_warning;
+        return PVALUE_WARNING;
     } else {
-        return pvalue_passed;
+        return PVALUE_PASSED;
     }
 }
 
 const char *interpret_pvalue(double pvalue)
 {
     switch (get_pvalue_category(pvalue)) {
-    case pvalue_failed:
+    case PVALUE_FAILED:
         return "FAIL";
-    case pvalue_warning:
+    case PVALUE_WARNING:
         return "SUSPICIOUS";
-    case pvalue_passed:
+    case PVALUE_PASSED:
         return "Ok";
     default:
         return "???";
@@ -579,16 +579,16 @@ static void TestResults_print_report(const TestResults *results,
     for (size_t i = 0; i < ntests; i++) {
         PValueCategory pvalue_cat = get_pvalue_category(results[i].p);
         switch (pvalue_cat) {
-        case pvalue_passed:
+        case PVALUE_PASSED:
             npassed++; break;
-        case pvalue_warning:
+        case PVALUE_WARNING:
             nwarnings++; break;
-        case pvalue_failed:
+        case PVALUE_FAILED:
             nfailed++; break;
         }
     }
 
-    if (rtype != report_full && npassed == ntests) {
+    if (rtype != REPORT_FULL && npassed == ntests) {
         printf("\n\n"
             "---------------------------------------------------\n"
             "----- All tests have been passed successfully -----\n"
@@ -600,7 +600,7 @@ static void TestResults_print_report(const TestResults *results,
         for (size_t i = 0; i < ntests; i++) {
             char pvalue_txt[32];
             PValueCategory pvalue_cat = get_pvalue_category(results[i].p);
-            if (rtype == report_full || pvalue_cat != pvalue_passed) {
+            if (rtype == REPORT_FULL || pvalue_cat != PVALUE_PASSED) {
                 snprintf_pvalue(pvalue_txt, 32, results[i].p, results[i].alpha);
                 printf("  %3u %-20s %12g %14s %-15s %4llu\n",
                     results[i].id, results[i].name, results[i].x, pvalue_txt,

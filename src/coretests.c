@@ -397,7 +397,7 @@ TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step)
  * @brief Make overlapping tuples (points in n-dimensional space) for
  * collisionover test. It may use either higher or lower bits.
  */
-static inline void collisionover_make_tuples(const BSpaceNDOptions *opts,
+static inline void collisionover_make_tuples(const CollOverNDOptions *opts,
     const GeneratorInfo *gi, void *state, uint64_t *u, size_t len)
 {
     uint64_t cur_tuple = 0;
@@ -461,9 +461,9 @@ static inline void collisionover_make_tuples(const BSpaceNDOptions *opts,
  *
  * The formula are taken from the TestU01 user manual.
  */
-TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
+TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opts)
 {
-    size_t n = 50000000;
+    size_t n = opts->n;
     uint64_t *u = calloc(n, sizeof(uint64_t));
     if (u == NULL) {
         fprintf(stderr, "***** collisionover_test: not enough memory *****\n");
@@ -478,8 +478,8 @@ TestResults collisionover_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     TestResults ans;
     ans.name = "CollisionOver";
     obj->intf->printf("CollisionOver test\n");
-    obj->intf->printf("  ndims = %d; nbits_per_dim = %d; get_lower = %d\n",
-        opts->ndims, opts->nbits_per_dim, opts->get_lower);
+    obj->intf->printf("  ndims = %d; nbits_per_dim = %d; n = %lu, get_lower = %d\n",
+        opts->ndims, opts->nbits_per_dim, opts->n, opts->get_lower);
     obj->intf->printf("  nsamples = %lu; len = %lu, mu = %g * %d\n",
         opts->nsamples, n, mu, (int) opts->nsamples);
 

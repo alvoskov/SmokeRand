@@ -68,7 +68,7 @@ int main()
     TestResults res = linearcomp_test(&state, &opts);
     printf("p = %g x = %g\n", res.p, res.x);
 
-    battery_brief(&tw, &intf, TESTS_ALL, 4, report_full);
+    battery_brief(&tw, &intf, TESTS_ALL, 4, REPORT_FULL);
 
 
     GeneratorState_free(&state, &intf);
