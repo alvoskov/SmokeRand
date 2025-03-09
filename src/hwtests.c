@@ -1,7 +1,8 @@
 /**
  * @file hwtests.c
  * @brief Hamming weights bases tests implementation, mainly DC6.
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -194,7 +195,7 @@ TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
 {
     // Concatenate low-populated bins
     const size_t nbins_max = 250000;
-    double Ei_min = 250.0;    
+    double Ei_min = 250.0;
     do {
         obj->len = HammingWeightsTuple_reduce_table(obj->tuples, Ei_min, obj->len);
         Ei_min *= 2;
@@ -216,7 +217,7 @@ TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
     }
     ans.x = chi2_to_stdnorm_approx(ans.x, obj->len - 1);
     ans.p = stdnorm_pvalue(ans.x);
-    ans.alpha = stdnorm_cdf(ans.x);    
+    ans.alpha = stdnorm_cdf(ans.x);
     return ans;
 }
 
@@ -355,7 +356,7 @@ static const uint8_t *hamming_ot_fill_hw_tables(GeneratorState *obj,
     for (int i = 0; i < nweights; i++) {
         code_to_prob[hw[i]] += binomial_pdf(i, nweights - 1, 0.5);
     }
-    return hw;        
+    return hw;
 }
 
 

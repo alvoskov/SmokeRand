@@ -13,6 +13,15 @@
 #include "smokerand/lineardep.h"
 #include "smokerand/entropy.h"
 
+#define COLLOVER_PROPS .nsamples = 3, .n = COLLOVER_DEFAULT_N, .get_lower = 1
+
+/**
+ * @brief The `brief` battery of tests that runs in about 1 minute.
+ * Contains `bspace`, `bspace_dec`, `collover`, `gap`, `gap16_count0`,
+ * `hamming_ot`, `linearcomp` tests. The gap test consumes more than
+ * \f$2^{32}\f$ values and can detect any PRNG with 32-bit state. It also
+ * detects additive/subtractive lagged Fibonacci generators.
+ */
 void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
@@ -33,17 +42,12 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
 
     // CollisionOver tests options
     static const CollOverNDOptions
-        collover8_5d     = {.nbits_per_dim = 8, .ndims = 5, .nsamples = 3, .n = COLLOVER_DEFAULT_N, .get_lower = 1},
-        collover5_8d     = {.nbits_per_dim = 5, .ndims = 8, .nsamples = 3, .n = COLLOVER_DEFAULT_N, .get_lower = 1},
-        collover13_3d    = {.nbits_per_dim = 13, .ndims = 3, .nsamples = 3, .n = COLLOVER_DEFAULT_N, .get_lower = 1},
-        collover20_2d    = {.nbits_per_dim = 20, .ndims = 2, .nsamples = 3, .n = COLLOVER_DEFAULT_N, .get_lower = 1};
+        collover8_5d  = {.nbits_per_dim = 8, .ndims = 5, COLLOVER_PROPS},
+        collover5_8d  = {.nbits_per_dim = 5, .ndims = 8, COLLOVER_PROPS},
+        collover13_3d = {.nbits_per_dim = 13, .ndims = 3, COLLOVER_PROPS},
+        collover20_2d = {.nbits_per_dim = 20, .ndims = 2, COLLOVER_PROPS};
 
     // Gap test
-    /**
-     * @brief A modification of gap tests that consumes more than \f$ 2^32 \f$
-     * values and allows to detect any PRNG with 32-bit state. It also detects
-     * additive/subtractive lagged Fibonacci and AWC/SWB generators.
-     */
     static const GapOptions gap_inv512 = {.shl = 9, .ngaps = 10000000};
     static const Gap16Count0Options gap16_count0 = {.ngaps = 100000000};
 
