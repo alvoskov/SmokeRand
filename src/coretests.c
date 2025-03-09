@@ -627,6 +627,11 @@ static GapFrequencyArray *GapFrequencyArray_create(size_t nbins, double p)
 {
     GapFrequencyArray *gapfreq = calloc(1, sizeof(GapFrequencyArray));
     gapfreq->f = calloc(nbins + 1, sizeof(GapFrequency));
+    if (gapfreq->f == NULL) {
+        fprintf(stderr, "***** gap16_count0: not enough memory (nbins = %llu) *****\n",
+            (unsigned long long) nbins);
+        exit(EXIT_FAILURE);
+    }
     gapfreq->nbins = nbins;
     double p_gap = p;
     for (size_t i = 0; i < nbins; i++) {

@@ -9,7 +9,7 @@ ifeq ($(PLATFORM_NAME), GCC)
     CXX = g++
     AR = ar
     GEN_CFLAGS = -fPIC -ffreestanding -nostdlib
-    PLATFORM_FLAGS = -march=native
+    PLATFORM_FLAGS = -g -march=native
     IS_PORTABLE = 0
 else ifeq ($(PLATFORM_NAME), GCC32)
     CC = gcc
