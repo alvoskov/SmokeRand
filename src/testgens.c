@@ -112,6 +112,16 @@ DECLARE_NEW_DELETE(lcg69069)
 #undef run_self_test
 #undef get_bits_raw
 MAKE_UINT_PRNG(lcg69069, "LCG69069", NULL, 32)
+//----- lcg96_portable -----
+#define create create_lcg96_portable
+#define run_self_test run_self_test_lcg96_portable
+#define get_bits_raw get_bits_raw_lcg96_portable
+#include "../generators/lcg96_portable.c"
+DECLARE_NEW_DELETE(lcg96_portable)
+#undef create
+#undef run_self_test
+#undef get_bits_raw
+MAKE_UINT_PRNG(lcg96_portable, "lcg96_portable", run_self_test_lcg96_portable, 32)
 //----- MT19937 PRNG -----
 #define create create_mt19937
 #define run_self_test run_self_test_mt19937
@@ -175,17 +185,18 @@ typedef struct {
 int main(int argc, char *argv[])
 {
     static const GeneratorEntry generators[] = {
-        {gen_getinfo_lfib, "alfib607"},
-        {gen_getinfo_chacha, "chacha"},
-        {gen_getinfo_flea32x1, "flea32x1"},
-        {gen_getinfo_hc256, "hc256"},
-        {gen_getinfo_lcg64, "lcg64"},
-        {gen_getinfo_lcg69069, "lcg69069"},
-        {gen_getinfo_mt19937, "mt19937"},
-        {gen_getinfo_mwc64, "mwc64"},
-        {gen_getinfo_swb, "swb"},
-        {gen_getinfo_xoshiro128pp, "xoshiro128++"},
-        {gen_getinfo_xorwow, "xorwow"},
+        {gen_getinfo_lfib,           "alfib607"},
+        {gen_getinfo_chacha,         "chacha"},
+        {gen_getinfo_flea32x1,       "flea32x1"},
+        {gen_getinfo_hc256,          "hc256"},
+        {gen_getinfo_lcg64,          "lcg64"},
+        {gen_getinfo_lcg69069,       "lcg69069"},
+        {gen_getinfo_lcg96_portable, "lcg96_portable"},
+        {gen_getinfo_mt19937,        "mt19937"},
+        {gen_getinfo_mwc64,          "mwc64"},
+        {gen_getinfo_swb,            "swb"},
+        {gen_getinfo_xoshiro128pp,   "xoshiro128++"},
+        {gen_getinfo_xorwow,         "xorwow"},
         {NULL, ""}
     };
 
