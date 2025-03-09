@@ -3,13 +3,14 @@ coreobjs = obj\bat_brief.obj obj\bat_brief.obj obj\bat_default.obj obj\bat_expre
     obj\bat_file.obj obj\bat_full.obj obj\bat_special.obj obj\core.obj obj\coretests.obj &
     obj\entropy.obj obj\extratests.obj obj\fileio.obj obj\hwtests.obj obj\lineardep.obj &
     obj\specfuncs.obj obj\threads_intf.obj
+platform=causeway
 
 all: bin\smokernd.exe bin\testgens.exe
 
 bin\smokernd.exe: obj\smokerand.obj $(coreobjs)
-	wcl386 -q -6s -bcl=dos32a -fe=bin\smokernd.exe obj\smokerand.obj $(coreobjs)
+	wcl386 -q -6s -bcl=$(platform) -fe=bin\smokernd.exe obj\smokerand.obj $(coreobjs)
 bin\testgens.exe: obj\testgens.obj $(coreobjs)
-	wcl386 -q -6s -bcl=dos32a -fe=bin\testgens.exe $(coreobjs) obj\testgens.obj
+	wcl386 -q -6s -bcl=$(platform) -fe=bin\testgens.exe $(coreobjs) obj\testgens.obj
 obj\testgens.obj: src\testgens.c
 	wcc386 $(cflags) -fo=obj\testgens.obj src\testgens.c
 

@@ -24,7 +24,7 @@
 #include <io.h>
 #endif
 
-static Entropy entropy = {{0, 0, 0, 0}, 0, NULL, 0, 0};
+static Entropy entropy = {{0, 0, 0, 0}, 0, NULL, 0, 0, 0};
 static char cmd_param[128] = {0};
 static int use_stderr_for_printf = 0;
 

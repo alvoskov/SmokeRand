@@ -51,7 +51,8 @@ typedef struct {
     uint64_t state; ///< Internal PRNG state
     SeedLogEntry *slog; ///< Log of returned seeds
     size_t slog_pos; ///< Current position inside the seeds log
-    size_t slog_len; ///< Maximal length of the log
+    size_t slog_len; ///< Current length of the log
+    size_t slog_maxlen; ///< Maximal length of the log
 } Entropy;
 
 

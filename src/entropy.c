@@ -274,7 +274,8 @@ void Entropy_init(Entropy *obj)
     obj->key[0] = (uint32_t) seed0; obj->key[1] = seed0 >> 32;
     obj->key[2] = (uint32_t) seed1; obj->key[3] = seed1 >> 32;
     obj->state = mix_hash(time(NULL) ^ mid);
-    obj->slog_len = 1 << 20;
+    obj->slog_len = 1 << 8;
+    obj->slog_maxlen = 1 << 20;
     obj->slog = calloc(obj->slog_len, sizeof(SeedLogEntry));
     obj->slog_pos = 0;
     fprintf(stderr, "Entropy pool (seed generator) initialized\n");
@@ -321,7 +322,15 @@ int xxtea_test(void)
 uint64_t Entropy_seed64(Entropy *obj, uint64_t thread_id)
 {
     uint64_t seed = xxtea_encrypt(Entropy_nextstate(obj), obj->key);
-    if (obj->slog_pos != obj->slog_len - 1) {
+    if (obj->slog_pos != obj->slog_maxlen - 1) {
+        // Check if buffer resizing is needed
+        if (obj->slog_pos >= obj->slog_len - 1) {
+            size_t newlen = obj->slog_len * 2;
+            if (newlen > obj->slog_maxlen) newlen = obj->slog_maxlen;
+            obj->slog_len = newlen;
+            obj->slog = realloc(obj->slog, newlen * sizeof(SeedLogEntry));
+        }
+        // Save seed to the log
         SeedLogEntry log_entry;
         log_entry.seed = seed;
         log_entry.thread_id = thread_id;
