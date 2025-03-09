@@ -1050,6 +1050,7 @@ TestResults mod3_test(GeneratorState *obj, const Mod3Options *opts)
     for (unsigned int i = 0; i < ntuples; i++) {
         ans.x += (Oi[i] - Ei) * (Oi[i] - Ei) / Ei;
     }
+    free(Oi);
     ans.x = chi2_to_stdnorm_approx(ans.x, ntuples - 1);
     ans.p = stdnorm_pvalue(ans.x);
     ans.alpha = stdnorm_cdf(ans.x);

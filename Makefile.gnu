@@ -133,9 +133,6 @@ $(BINDIR)/sr_tiny$(EXE): $(SRCDIR)/sr_tiny.c $(SRCDIR)/specfuncs.c include/smoke
 $(BINDIR)/smokerand$(EXE): $(OBJDIR)/smokerand.o $(CORE_LIB) $(BAT_LIB) $(BAT_HEADERS)
 	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
 
-$(BINDIR)/smokerand$(EXE): $(OBJDIR)/smokerand.o $(CORE_LIB) $(BAT_LIB) $(BAT_HEADERS)
-	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
-
 $(BINDIR)/calibrate_dc6$(EXE): $(OBJDIR)/calibrate_dc6.o $(CORE_LIB)
 	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
 
@@ -246,6 +243,9 @@ else
 	install -m 644 CMakeLists.txt $(DESTDIR)$(PREFIX)/src/smokerand
 	install -m 644 generators/*.c $(DESTDIR)$(PREFIX)/src/smokerand/generators
 	install -m 644 generators/*.h $(DESTDIR)$(PREFIX)/src/smokerand/generators
+
+	install -d $(DESTDIR)$(PREFIX)/etc/smokerand
+	install -m 644 batscripts/*.txt $(DESTDIR)$(PREFIX)/etc/smokerand
 endif
 
 uninstall:
@@ -269,4 +269,7 @@ else
 	rm -d $(DESTDIR)$(PREFIX)/src/smokerand/src
 	rm $(DESTDIR)$(PREFIX)/src/smokerand/*
 	rm -d $(DESTDIR)$(PREFIX)/src/smokerand
+
+	rm $(DESTDIR)$(PREFIX)/etc/smokerand/*.txt
+	rm -d $(DESTDIR)$(PREFIX)/etc/smokerand
 endif

@@ -1,5 +1,5 @@
 #
-# SmokeRand battery with low RAM consumption (under 4MiB).
+# SmokeRand battery with low RAM consumption (16 MiB or less).
 # Close to the `brief` battery but doesn't include "collision over" tests
 # and birthday spacings tests that work with 64-bit values.
 #
