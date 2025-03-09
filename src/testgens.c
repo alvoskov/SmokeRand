@@ -132,6 +132,24 @@ DECLARE_NEW_DELETE(mt19937)
 #undef run_self_test
 #undef get_bits_raw
 MAKE_UINT_PRNG(mt19937, "MT19937", NULL, 32)
+//----- MWC1616 PRNG -----
+#define create create_mwc1616
+#define get_bits_raw get_bits_raw_mwc1616
+#include "../generators/mwc1616.c"
+DECLARE_NEW_DELETE(mwc1616)
+#undef create
+#undef run_self_test
+#undef get_bits_raw
+MAKE_UINT_PRNG(mwc1616, "MWC1616", NULL, 32)
+//----- MWC1616X PRNG -----
+#define create create_mwc1616x
+#define get_bits_raw get_bits_raw_mwc1616x
+#include "../generators/mwc1616x.c"
+DECLARE_NEW_DELETE(mwc1616x)
+#undef create
+#undef run_self_test
+#undef get_bits_raw
+MAKE_UINT_PRNG(mwc1616x, "MWC1616X", NULL, 32)
 //----- MWC64 PRNG -----
 #define create create_mwc64
 #define get_bits_raw get_bits_raw_mwc64
@@ -191,8 +209,10 @@ int main(int argc, char *argv[])
         {gen_getinfo_hc256,          "hc256"},
         {gen_getinfo_lcg64,          "lcg64"},
         {gen_getinfo_lcg69069,       "lcg69069"},
-        {gen_getinfo_lcg96_portable, "lcg96_portable"},
+        {gen_getinfo_lcg96_portable, "lcg96"},
         {gen_getinfo_mt19937,        "mt19937"},
+        {gen_getinfo_mwc1616,        "mwc1616"},
+        {gen_getinfo_mwc1616x,       "mwc1616x"},
         {gen_getinfo_mwc64,          "mwc64"},
         {gen_getinfo_swb,            "swb"},
         {gen_getinfo_xoshiro128pp,   "xoshiro128++"},
@@ -201,14 +221,17 @@ int main(int argc, char *argv[])
     };
 
     if (argc < 3) {
-        puts("SmokeRand: a version with built-in generators\n"
+        printf("SmokeRand: a version with built-in generators\n"
             "Usage:\n"
             "  rungens battery generator\n"
-            "Batteries: express brief default full selftest speed @filename\n"
-            "  filename is a text file with a custom battery description\n"
-            "Generators: ");
-        for (const GeneratorEntry *ptr = generators; ptr->gen_getinfo; ptr++) {
-            printf("%s ", ptr->name);
+            "  Batteries: express brief default full selftest speed @filename\n"
+            "    filename is a text file with a custom battery description\n"
+            "  Generators:");
+        for (size_t i = 0; generators[i].gen_getinfo != NULL; i++) {
+            if (i % 5 == 0) {
+                printf("    \n");
+            }
+            printf("%14s ", generators[i].name);
         }
         printf("\n");
         return 0;

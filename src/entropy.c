@@ -114,7 +114,7 @@ uint32_t get_tick_count()
     clock_gettime(CLOCK_REALTIME, &t);
     return (uint32_t) t.tv_nsec;
 #else
-    return time(NULL);
+    return (uint32_t) (time(NULL) * 69069);
 #endif
 }
 
@@ -183,7 +183,11 @@ uint64_t cpuclock(void)
     return clk * clocks_to_tics;
 }
 #else
-#if (defined(WIN32) || defined(WIN64)) && !defined(__MINGW32__) && !defined(__MINGW64__)
+#if defined(__WATCOMC__)
+uint64_t __rdtsc(void);
+#pragma aux __rdtsc = " .586 " \
+    "rdtsc " value [eax edx];
+#elif (defined(WIN32) || defined(WIN64)) && !defined(__MINGW32__) && !defined(__MINGW64__)
 #include <intrin.h>
 #pragma intrinsic(__rdtsc)
 #else

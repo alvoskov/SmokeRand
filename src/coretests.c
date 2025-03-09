@@ -720,6 +720,10 @@ void gap16_count0_mainloop(GapFrequencyArray *gapfreq, GapFrequencyArray *gapfre
     uint64_t u = 0;
     size_t nbins = gapfreq->nbins;
     long long *lastw16_pos = calloc(65536, sizeof(long long));
+    if (lastw16_pos == NULL) {
+        fprintf(stderr, "***** gap16_count0: not enough memory *****\n");
+        exit(EXIT_FAILURE);
+    }
     for (size_t i = 0; i < 65536; i++) {
         lastw16_pos[i] = -1;
     }

@@ -1,4 +1,4 @@
-cflags = -q -otexanhi -ol+ -d0 -6s -za99 -bm -bt=dos32a -Iinclude -dNO_X86_EXTENSIONS -dNOTHREADS -dNO_POSIX
+cflags = -q -otexanhi -ol+ -d0 -6s -za99 -bm -bt=dos32a -Iinclude -dNOTHREADS -dNO_POSIX
 coreobjs = obj\bat_brief.obj obj\bat_brief.obj obj\bat_default.obj obj\bat_express.obj &
     obj\bat_file.obj obj\bat_full.obj obj\bat_special.obj obj\core.obj obj\coretests.obj &
     obj\entropy.obj obj\extratests.obj obj\fileio.obj obj\hwtests.obj obj\lineardep.obj &

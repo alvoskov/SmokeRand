@@ -107,8 +107,8 @@ GEN_ALL_SOURCES = $(addsuffix .c,$(addprefix generators/, \
     sqxor32 stormdrop_old stormdrop superduper64 superduper64_u32 \
     superduper73 swblarge swblux swbw swb taus88 threefry2x64 threefry \
     tinymt32 tinymt64 well1024a xorgens xoroshiro1024stst xoroshiro1024st \
-    xoroshiro128pp xoroshiro128p xorshift128p xorshift128 xoshiro128pp \
-    xorwow xsh ))
+    xoroshiro128pp xoroshiro128p xorshift128p xorshift128 xoshiro128p \
+    xoshiro128pp xorwow xsh ))
 else
 GEN_ALL_SOURCES = $(wildcard generators/*.c)
 endif

@@ -63,9 +63,9 @@ typedef struct {
 TestResults TestResults_create(const char *name);
 
 typedef enum {
-    ram_lo = 0,
-    ram_med = 1,
-    ram_hi = 2
+    RAM_LO = 0,
+    RAM_MED = 1,
+    RAM_HI = 2
 } RamLoad;
 
 typedef enum {

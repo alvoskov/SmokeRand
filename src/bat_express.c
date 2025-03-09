@@ -38,11 +38,11 @@ void battery_express(GeneratorInfo *gen, CallerAPI *intf,
         linearcomp_high = {.nbits = 10000, .bitpos = LINEARCOMP_BITPOS_HIGH};
 
     static const TestDescription tests[] = {
-        {"byte_freq", nbit_words_freq_test_wrap, &byte_freq, 2, ram_lo},
-        {"bspace32_1d", bspace_nd_test_wrap, &bspace32_1d, 2, ram_hi},
-        {"bspace4_8d_dec", bspace4_8d_decimated_test_wrap, &bs_dec, 3, ram_lo},
-        {"linearcomp_high", linearcomp_test_wrap, &linearcomp_high, 1, ram_lo},
-        {"linearcomp_low",  linearcomp_test_wrap, &linearcomp_low,  1, ram_lo},
+        {"byte_freq", nbit_words_freq_test_wrap, &byte_freq, 2, RAM_LO},
+        {"bspace32_1d", bspace_nd_test_wrap, &bspace32_1d, 2, RAM_HI},
+        {"bspace4_8d_dec", bspace4_8d_decimated_test_wrap, &bs_dec, 3, RAM_LO},
+        {"linearcomp_high", linearcomp_test_wrap, &linearcomp_high, 1, RAM_LO},
+        {"linearcomp_low",  linearcomp_test_wrap, &linearcomp_low,  1, RAM_LO},
         {NULL, NULL, NULL, 0, 0}
     };
 

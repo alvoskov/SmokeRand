@@ -1,0 +1,32 @@
+#
+# SmokeRand battery with low RAM consumption (2 MiB or less).
+# Close to the `brief` battery but doesn't include "collision over" tests
+# and birthday spacings tests that work with 64-bit values.
+#
+
+# Frequency tests
+monobit_freq test=monobit_freq   nvalues=268435456  # 2^28
+byte_freq    test=nbit_words_freq  bits_per_word=8 average_freq=256 nblocks=256
+word16_freq  test=nbit_words_freq  bits_per_word=16 average_freq=32 nblocks=128
+
+# Birthday spacings tests
+bspace32_1d      test=bspace_nd nbits_per_dim=32 ndims=1 nsamples=4096 get_lower=1
+bspace32_1d_high test=bspace_nd nbits_per_dim=32 ndims=1 nsamples=4096 get_lower=0
+bspace8_4d       test=bspace_nd nbits_per_dim=8  ndims=4 nsamples=4096 get_lower=1
+bspace4_8d       test=bspace_nd nbits_per_dim=4  ndims=8 nsamples=4096 get_lower=1
+bspace4_8d_dec   test=bspace4_8d_decimated  step=262144 # 2^18
+
+# Gap tests
+gap_inv512   test=gap shl=9    ngaps=10000000
+
+# Linear complexity tests
+linearcomp_high test=linearcomp nbits=50000 bitpos=high
+linearcomp_mid  test=linearcomp nbits=50000 bitpos=mid
+linearcomp_low  test=linearcomp nbits=50000 bitpos=low
+
+# Matrix rank tests
+matrixrank_1024       test=matrixrank n=1024 max_nbits=64
+matrixrank_1024_low8  test=matrixrank n=1024 max_nbits=8
+
+# Mod3 test
+mod3 test=mod3 nvalues=268435456 # 2^28
