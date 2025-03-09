@@ -847,11 +847,16 @@ static double gap16_z_bonferroni(double z, double p_gap)
  */
 TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
 {
+    const double p = 1.0 / 65536.0;
     TestResults ans = TestResults_create("gap16_count0");
-    if (ngaps < 1000000) {
+    double Ei_min;
+    if (ngaps < 10000000.0) { // 1e7
         return ans;
+    } else if (ngaps < 100000000.0) { // 1e8
+        Ei_min = 100.0;
+    } else {
+        Ei_min = 1000.0;
     }
-    const double Ei_min = 1000.0, p = 1.0 / 65536.0;
     size_t nbins = (size_t) (log(Ei_min / (ngaps * p)) / log(1 - p));
     // Initialize frequency and position tables
     GapFrequencyArray *gapfreq = GapFrequencyArray_create(nbins, p);
