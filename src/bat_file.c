@@ -386,8 +386,8 @@ static int parse_hamming_ot(TestDescription *out, const TestInfo *obj, char *err
     GET_LIMITED_INTVALUE(nbytes, 65536, 1ll << 50ll)
     int is_ok;
     const char *m_txt[] = {"values", "bytes", "bytes_low8", "bytes_low1", NULL};
-    const int m_codes[] = {hamming_ot_values, hamming_ot_bytes,
-        hamming_ot_bytes_low8, hamming_ot_bytes_low1, 0};
+    const int m_codes[] = {HAMMING_OT_VALUES, HAMMING_OT_BYTES,
+        HAMMING_OT_BYTES_LOW8, HAMMING_OT_BYTES_LOW1, 0};
     HammingOtMode mode = TestInfo_value_to_code(obj, "mode",
         m_txt, m_codes, errmsg, &is_ok);
     if (!is_ok) {
@@ -411,8 +411,8 @@ static int parse_hamming_ot_long(TestDescription *out, const TestInfo *obj, char
     GET_LIMITED_INTVALUE(nvalues, 65536, 1ll << 50ll)
     int is_ok;
     const char *ws_txt[] = {"w128", "w256", "w512", "w1024", NULL};
-    const int ws_codes[] = {hamming_ot_w128, hamming_ot_w256,
-        hamming_ot_w512, hamming_ot_w1024, 0};
+    const int ws_codes[] = {HAMMING_OT_W128, HAMMING_OT_W256,
+        HAMMING_OT_W512, HAMMING_OT_W1024, 0};
     HammingOtWordSize ws = TestInfo_value_to_code(obj, "wordsize",
         ws_txt, ws_codes, errmsg, &is_ok);
     if (!is_ok) {
@@ -436,11 +436,11 @@ static int parse_linearcomp(TestDescription *out, const TestInfo *obj, char *err
     const char *bitpos_descr = TestInfo_get_value(obj, "bitpos");
     long long bitpos;
     if (!strcmp(bitpos_descr, "low")) {
-        bitpos = linearcomp_bitpos_low;
+        bitpos = LINEARCOMP_BITPOS_LOW;
     } else if (!strcmp(bitpos_descr, "mid")) {
-        bitpos = linearcomp_bitpos_mid;
+        bitpos = LINEARCOMP_BITPOS_MID;
     } else if (!strcmp(bitpos_descr, "high")) {
-        bitpos = linearcomp_bitpos_high;
+        bitpos = LINEARCOMP_BITPOS_HIGH;
     } else {
         bitpos = TestInfo_get_limited_intvalue(obj, "bitpos", 0, 64, errmsg);
         if (bitpos == LLONG_MAX) {

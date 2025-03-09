@@ -34,8 +34,8 @@ void battery_express(GeneratorInfo *gen, CallerAPI *intf,
 
     // Linear complexity tests
     static const LinearCompOptions
-        linearcomp_low  = {.nbits = 10000, .bitpos = linearcomp_bitpos_low},
-        linearcomp_high = {.nbits = 10000, .bitpos = linearcomp_bitpos_high};
+        linearcomp_low  = {.nbits = 10000, .bitpos = LINEARCOMP_BITPOS_LOW},
+        linearcomp_high = {.nbits = 10000, .bitpos = LINEARCOMP_BITPOS_HIGH};
 
     static const TestDescription tests[] = {
         {"byte_freq", nbit_words_freq_test_wrap, &byte_freq, 2, ram_lo},

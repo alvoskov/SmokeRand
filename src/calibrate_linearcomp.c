@@ -7,7 +7,7 @@
 unsigned int *calc_linearcomp_vector(GeneratorState *obj, size_t nvalues)
 {
     static const LinearCompOptions lc_opts =
-        {.nbits = 1000, .bitpos = linearcomp_bitpos_low};
+        {.nbits = 1000, .bitpos = LINEARCOMP_BITPOS_LOW};
     unsigned int *lc_vec = calloc(nvalues, sizeof(unsigned int));
     clock_t tic = clock(), toc;
     for (size_t i = 0; i < nvalues; i++) {

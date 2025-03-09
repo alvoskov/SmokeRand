@@ -63,22 +63,22 @@ void battery_full(GeneratorInfo *gen, CallerAPI *intf,
 
     // Hamming weights based tests
     static const HammingOtOptions
-        hw_ot_all    = {.mode = hamming_ot_bytes, .nbytes = 1ull << 33},
-        hw_ot_values = {.mode = hamming_ot_values, .nbytes = 1ull << 33},
-        hw_ot_low1   = {.mode = hamming_ot_bytes_low1, .nbytes = 1ull << 33},
-        hw_ot_low8   = {.mode = hamming_ot_bytes_low8, .nbytes = 1ull << 33};
+        hw_ot_all    = {.mode = HAMMING_OT_BYTES, .nbytes = 1ull << 33},
+        hw_ot_values = {.mode = HAMMING_OT_VALUES, .nbytes = 1ull << 33},
+        hw_ot_low1   = {.mode = HAMMING_OT_BYTES_LOW1, .nbytes = 1ull << 33},
+        hw_ot_low8   = {.mode = HAMMING_OT_BYTES_LOW8, .nbytes = 1ull << 33};
 
     // Hamming weights based "long" tests
     static const HammingOtLongOptions
-        hw_ot_long128 = {.nvalues = 1ull << 33, .wordsize = hamming_ot_w128},
-        hw_ot_long256 = {.nvalues = 1ull << 33, .wordsize = hamming_ot_w256},
-        hw_ot_long512 = {.nvalues = 1ull << 33, .wordsize = hamming_ot_w512};
+        hw_ot_long128 = {.nvalues = 1ull << 33, .wordsize = HAMMING_OT_W128},
+        hw_ot_long256 = {.nvalues = 1ull << 33, .wordsize = HAMMING_OT_W256},
+        hw_ot_long512 = {.nvalues = 1ull << 33, .wordsize = HAMMING_OT_W512};
 
     // Linear complexity tests
     static const LinearCompOptions
-        linearcomp_low  = {.nbits = 1000000, .bitpos = linearcomp_bitpos_low},
-        linearcomp_mid  = {.nbits = 1000000, .bitpos = linearcomp_bitpos_mid},
-        linearcomp_high = {.nbits = 1000000, .bitpos = linearcomp_bitpos_high};
+        linearcomp_low  = {.nbits = 1000000, .bitpos = LINEARCOMP_BITPOS_LOW},
+        linearcomp_mid  = {.nbits = 1000000, .bitpos = LINEARCOMP_BITPOS_MID},
+        linearcomp_high = {.nbits = 1000000, .bitpos = LINEARCOMP_BITPOS_HIGH};
 
     // Matrix rank tests
     static const MatrixRankOptions

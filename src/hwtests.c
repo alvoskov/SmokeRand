@@ -78,15 +78,15 @@ void ByteStreamGenerator_init(ByteStreamGenerator *obj,
     obj->nbytes = gs->gi->nbits / 8;
     obj->bytes_left = 0;
     switch (use_bits) {
-    case use_bits_all:
+    case USE_BITS_ALL:
         obj->get_byte = ByteStreamGenerator_getbyte;
         break;
 
-    case use_bits_low8:
+    case USE_BITS_LOW8:
         obj->get_byte = ByteStreamGenerator_getbyte_low8;
         break;
 
-    case use_bits_low1:
+    case USE_BITS_LOW1:
         obj->get_byte = ByteStreamGenerator_getbyte_low1;
         break;
 
@@ -238,19 +238,19 @@ unsigned long long hamming_ot_nbytes_to_ntuples(unsigned long long nbytes,
     // Note: tuples are overlapping, i.e. one new tuple digit means
     // one new tuple.
     switch (mode) {
-    case hamming_ot_values:
+    case HAMMING_OT_VALUES:
         // Each PRNG output is converted to tuple digits
         ntuples = nbytes * 8 / nbits;
         break;
-    case hamming_ot_bytes:
+    case HAMMING_OT_BYTES:
         // Each byte is converted to tuple digit
         ntuples = nbytes;
         break;
-    case hamming_ot_bytes_low8:
+    case HAMMING_OT_BYTES_LOW8:
         // Only lower bytes of PRNG outputs are converted to tuple digits
         ntuples = nbytes * 8 / nbits;
         break;
-    case hamming_ot_bytes_low1:
+    case HAMMING_OT_BYTES_LOW1:
         // Only lower bits of PRNG outputs are converted to tuple digits
         ntuples = nbytes / nbits;
         break;
@@ -272,18 +272,18 @@ static void hamming_ot_test_print_info(GeneratorState *obj, const HammingOtOptio
     obj->intf->printf("  Sample size, bytes:     %llu\n", opts->nbytes);
     obj->intf->printf("  Tuples to be generated: %llu\n", ntuples);
     switch (opts->mode) {
-    case hamming_ot_values:
+    case HAMMING_OT_VALUES:
         obj->intf->printf("  Mode: process %d-bit words of PRNG output directly\n",
             (int) obj->gi->nbits);
         break;
-    case hamming_ot_bytes:
+    case HAMMING_OT_BYTES:
         obj->intf->printf("  Mode: process PRNG output as a stream of bytes\n",
             (int) obj->gi->nbits);
         break;
-    case hamming_ot_bytes_low1:
+    case HAMMING_OT_BYTES_LOW1:
         obj->intf->printf("  Mode: byte stream made of lower bits (bit 0) of PRNG values\n");
         break;
-    case hamming_ot_bytes_low8:
+    case HAMMING_OT_BYTES_LOW8:
         obj->intf->printf("  Mode: byte stream made of 8 lower bits (bit 7..0) of PRNG values\n");
         break;
     }
@@ -306,7 +306,7 @@ static const uint8_t *hamming_ot_fill_hw_tables(GeneratorState *obj,
     // Select the right table for recoding Hamming weights to codes
     int nweights = 0;
     const uint8_t *hw = NULL;
-    if (opts->mode != hamming_ot_values) {
+    if (opts->mode != HAMMING_OT_VALUES) {
         // 2-bit codes for Hamming weights (taken from PractRand)
         //                                   0  1  2  3  4  5  6  7  8
         static const uint8_t hw_to_code[] = {0, 0, 1, 1, 2, 2, 3, 3, 0};
@@ -440,7 +440,7 @@ TestResults hamming_ot_test(GeneratorState *obj, const HammingOtOptions *opts)
     for (int i = 0; i < 4; i++) {
         obj->intf->printf("    p(%d) = %10.8f\n", i, code_to_prob[i]);
     }
-    if (opts->mode == hamming_ot_values) {
+    if (opts->mode == HAMMING_OT_VALUES) {
         // Process input as a sequence of 32/64-bit words
         // Pre-fill tuple
         cur_weight = get_uint64_hamming_weight(obj->gi->get_bits(obj->state));
@@ -458,12 +458,12 @@ TestResults hamming_ot_test(GeneratorState *obj, const HammingOtOptions *opts)
         }
     } else {
         ByteStreamGenerator bs;
-        if (opts->mode == hamming_ot_bytes) {
-            ByteStreamGenerator_init(&bs, obj, use_bits_all);
-        } else if (opts->mode == hamming_ot_bytes_low8) {
-            ByteStreamGenerator_init(&bs, obj, use_bits_low8);
-        } else if (opts->mode == hamming_ot_bytes_low1) {
-            ByteStreamGenerator_init(&bs, obj, use_bits_low1);
+        if (opts->mode == HAMMING_OT_BYTES) {
+            ByteStreamGenerator_init(&bs, obj, USE_BITS_ALL);
+        } else if (opts->mode == HAMMING_OT_BYTES_LOW8) {
+            ByteStreamGenerator_init(&bs, obj, USE_BITS_LOW8);
+        } else if (opts->mode == HAMMING_OT_BYTES_LOW1) {
+            ByteStreamGenerator_init(&bs, obj, USE_BITS_LOW1);
         } else {
             fprintf(stderr, "Internal error");
             exit(1);

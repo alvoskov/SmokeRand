@@ -64,7 +64,7 @@ int main()
 
     LinearCompOptions opts;
     opts.nbits = 50000;
-    opts.bitpos = linearcomp_bitpos_mid;
+    opts.bitpos = LINEARCOMP_BITPOS_MID;
     TestResults res = linearcomp_test(&state, &opts);
     printf("p = %g x = %g\n", res.p, res.x);
 

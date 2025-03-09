@@ -49,18 +49,18 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
 
     // Hamming weights based tests
     static const HammingOtOptions
-        hw_ot_values = {.mode = hamming_ot_values,     .nbytes = 1ull << 28},
-        hw_ot_low1   = {.mode = hamming_ot_bytes_low1, .nbytes = 1ull << 30};
+        hw_ot_values = {.mode = HAMMING_OT_VALUES,     .nbytes = 1ull << 28},
+        hw_ot_low1   = {.mode = HAMMING_OT_BYTES_LOW1, .nbytes = 1ull << 30};
 
     // Hamming weights based "long" tests
     static const HammingOtLongOptions
-        hw_ot_long128 = {.nvalues = 1ull << 28, .wordsize = hamming_ot_w128};
+        hw_ot_long128 = {.nvalues = 1ull << 28, .wordsize = HAMMING_OT_W128};
 
     // Linear complexity tests
     static const LinearCompOptions
-        linearcomp_low  = {.nbits = 50000, .bitpos = linearcomp_bitpos_low},
-        linearcomp_mid  = {.nbits = 50000, .bitpos = linearcomp_bitpos_mid},
-        linearcomp_high = {.nbits = 50000, .bitpos = linearcomp_bitpos_high};
+        linearcomp_low  = {.nbits = 50000, .bitpos = LINEARCOMP_BITPOS_LOW},
+        linearcomp_mid  = {.nbits = 50000, .bitpos = LINEARCOMP_BITPOS_MID},
+        linearcomp_high = {.nbits = 50000, .bitpos = LINEARCOMP_BITPOS_HIGH};
 
 
     static const TestDescription tests[] = {

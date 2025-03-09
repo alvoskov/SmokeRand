@@ -15,9 +15,9 @@
  * @brief Sets which bits of random number will be analysed.
  */
 typedef enum {
-    use_bits_all,
-    use_bits_low8,
-    use_bits_low1
+    USE_BITS_ALL,
+    USE_BITS_LOW8,
+    USE_BITS_LOW1
 } UseBitsMode;
 
 /**
@@ -25,10 +25,10 @@ typedef enum {
  * to the bit chunks that will be used for computation of Hamming weights.
  */
 typedef enum {
-    hamming_ot_values, ///< Calculate Hamming weights for whole 32/64-bit values.
-    hamming_ot_bytes, ///< Process PRNG output as byte sequence.
-    hamming_ot_bytes_low8, ///< Make byte sequence from lower 8 bits of PRNG output
-    hamming_ot_bytes_low1 ///< Make byte sequence from lower 1 bit of PRNG output
+    HAMMING_OT_VALUES, ///< Calculate Hamming weights for whole 32/64-bit values.
+    HAMMING_OT_BYTES, ///< Process PRNG output as byte sequence.
+    HAMMING_OT_BYTES_LOW8, ///< Make byte sequence from lower 8 bits of PRNG output
+    HAMMING_OT_BYTES_LOW1 ///< Make byte sequence from lower 1 bit of PRNG output
 } HammingOtMode;
 
 /**
@@ -42,10 +42,10 @@ typedef struct {
 
 
 typedef enum {
-    hamming_ot_w128 = 128,
-    hamming_ot_w256 = 256,
-    hamming_ot_w512 = 512,
-    hamming_ot_w1024 = 1024
+    HAMMING_OT_W128 = 128,
+    HAMMING_OT_W256 = 256,
+    HAMMING_OT_W512 = 512,
+    HAMMING_OT_W1024 = 1024
 } HammingOtWordSize;
 
 /**

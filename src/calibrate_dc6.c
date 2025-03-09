@@ -15,8 +15,8 @@
 
 static TestResults hamming_ot_all_test(GeneratorState *obj)
 {
-    HammingOtOptions opts = {.mode = hamming_ot_bytes, .nbytes = 100000000};
-//    HammingDc6Options opts = {.mode = hamming_dc6_values, .nbytes = 100000000};
+    HammingOtOptions opts = {.mode = HAMMING_OT_BYTES, .nbytes = 100000000};
+//    HammingDc6Options opts = {.mode = HAMMING_DC6_VALUES, .nbytes = 100000000};
     return hamming_ot_test(obj, &opts);
 }
 

@@ -25,9 +25,9 @@ typedef struct {
  * without an explicit position.
  */
 enum {
-    linearcomp_bitpos_low = 0, ///< Analyze the lowest bit.
-    linearcomp_bitpos_high = -1, ///< Analyze the middle bit.
-    linearcomp_bitpos_mid = -2 ///< Analyze the highest bit.
+    LINEARCOMP_BITPOS_LOW  =  0, ///< Analyze the lowest bit.
+    LINEARCOMP_BITPOS_HIGH = -1, ///< Analyze the middle bit.
+    LINEARCOMP_BITPOS_MID  = -2  ///< Analyze the highest bit.
 };
 
 /**

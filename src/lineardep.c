@@ -237,9 +237,9 @@ size_t berlekamp_massey(const uint8_t *s, size_t n)
  */
 static unsigned int linearcomp_get_bitpos(const GeneratorState *obj, const LinearCompOptions *opts)
 {
-    if (opts->bitpos == linearcomp_bitpos_high) {
+    if (opts->bitpos == LINEARCOMP_BITPOS_HIGH) {
         return obj->gi->nbits - 1;
-    } else if (opts->bitpos == linearcomp_bitpos_mid) {
+    } else if (opts->bitpos == LINEARCOMP_BITPOS_MID) {
         return obj->gi->nbits / 2 - 1;
     } else if (opts->bitpos < 0) {
         return 0;
