@@ -230,6 +230,18 @@ GeneratorState GeneratorState_create(const GeneratorInfo *gi,
     return obj;
 }
 
+void GeneratorInfo_print(const GeneratorInfo *gi, int to_stderr)
+{
+    FILE *fp = (to_stderr) ? stderr : stdout;
+    fprintf(fp, "Generator name:    %s\n", gi->name);
+    fprintf(fp, "Output size, bits: %d\n", gi->nbits);
+    if (gi->parent != NULL) {
+        fprintf(fp, "Parent generator:\n");
+        fprintf(fp, "  Name:              %s\n", gi->parent->name);
+        fprintf(fp, "  Output size, bits: %d\n", gi->parent->nbits);
+    }
+}
+
 void GeneratorState_free(GeneratorState *obj, const CallerAPI *intf)
 {
     obj->gi->free(obj->state, obj->gi, intf);

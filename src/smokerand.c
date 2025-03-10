@@ -225,18 +225,6 @@ int print_battery_info(const char *battery_name)
     return 0;
 }
 
-void GeneratorInfo_print(const GeneratorInfo *gi, int to_stderr)
-{
-    FILE *fp = (to_stderr) ? stderr : stdout;
-    fprintf(fp, "Generator name:    %s\n", gi->name);
-    fprintf(fp, "Output size, bits: %d\n", gi->nbits);
-    if (gi->parent != NULL) {
-        fprintf(fp, "Parent generator:\n");
-        fprintf(fp, "  Name:              %s\n", gi->parent->name);
-        fprintf(fp, "  Output size, bits: %d\n", gi->parent->nbits);
-    }
-}
-
 int main(int argc, char *argv[])
 {
     if (argc < 3) {

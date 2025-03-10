@@ -740,6 +740,16 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 
 # Versions history
 
+10.03.2025: SmokeRand 0.28
+
+- `gap16_count0`: "not enough memory" messages added.
+- `Makefile.d32` file for building a simplified version of SmokeRand 
+  for 32-bit DOS extenders using Open Watcom C.
+- `testgens`: a simplified version of SmokeRand for platforms without DLL
+  support. Mainly a hack for DOS version.
+- `xoshiro128+` and `xoshiro128++` generators were added.
+- Internal self-tests for some LFSR generators were added.
+
 07.03.2025: SmokeRand 0.27
 
 - Improved computation of p-values for the linear complexity test.

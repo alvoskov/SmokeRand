@@ -34,6 +34,7 @@ typedef struct {
 
 GeneratorState GeneratorState_create(const GeneratorInfo *gi,
     const CallerAPI *intf);
+void GeneratorInfo_print(const GeneratorInfo *gi, int to_stderr);
 void GeneratorState_free(GeneratorState *obj, const CallerAPI *intf);
 
 typedef struct

@@ -1,3 +1,28 @@
+/**
+ * @file testgens.c
+ * @brief A simplified variant of SmokeRand command line inteface for systems
+ * without dynamic libraries support. Some pseudorandom number generators are
+ * just embedded into the program.
+ * @details It is essentially a hack to run SmokeRand under DOS using using
+ * 32-bit extenders. Probably it will be useful as an example of SmokeRand
+ * adaptation for constrained environments.
+ *
+ * Notes about tests in constrained environment:
+ *
+ * - `gap16_count0` may consume several MiB for gaps and frequencies tables.
+ *   Probably RAM consumption may be significantly reduces but it may slow down
+ *   and complicate a program for 64-bit environments.
+ * - `bspace` uses more than 64 MiB of memory for 64-bit values.
+ * - `collover` may use about 0.5 GiB of memory in most batteries. It may be
+ *   significantly reduced but the test will be slower and less sensitive
+ *   for 64-bit systems.
+ *
+ * @copyright
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #define NO_CUSTOM_DLLENTRY
 #define __SMOKERAND_CINTERFACE_H
 #define PRNG_CMODULE_PROLOG
@@ -7,6 +32,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+//////////////////////////////////////////////////////////
+///// A simplified version of smokerand/cinterface.h /////
+//////////////////////////////////////////////////////////
 
 /**
  * @brief 32-bit LCG state.
@@ -51,6 +80,9 @@ static void default_delete_##suffix(void *state, const GeneratorInfo *gi, const 
 #define MAKE_UINT32_PRNG(prng_name, selftest_func)
 #define MAKE_UINT64_PRNG(prng_name, selftest_func)
 
+///////////////////////////////
+///// Embedded generators /////
+///////////////////////////////
 
 //----- lfib_par PRNG ------
 #define create create_lfib
@@ -82,6 +114,26 @@ DECLARE_NEW_DELETE(flea32x1)
 #undef run_self_test
 #undef get_bits_raw
 MAKE_UINT_PRNG(flea32x1, "flea32x1", NULL, 32)
+//----- kiss64 PRNG -----
+#define create create_kiss64
+#define run_self_test run_self_test_kiss64
+#define get_bits_raw get_bits_raw_kiss64
+#include "../generators/kiss64.c"
+DECLARE_NEW_DELETE(kiss64)
+#undef create
+#undef run_self_test
+#undef get_bits_raw
+MAKE_UINT_PRNG(kiss64, "KISS64", run_self_test_kiss64, 64)
+//----- kiss99 PRNG -----
+#define create create_kiss99
+#define run_self_test run_self_test_kiss99
+#define get_bits_raw get_bits_raw_kiss99
+#include "../generators/kiss99.c"
+DECLARE_NEW_DELETE(kiss99)
+#undef create
+#undef run_self_test
+#undef get_bits_raw
+MAKE_UINT_PRNG(kiss99, "KISS99", run_self_test_kiss99, 32)
 //----- HC256 PRNG -----
 #define create create_hc256
 #define run_self_test run_self_test_hc256
@@ -150,6 +202,16 @@ DECLARE_NEW_DELETE(mwc1616x)
 #undef run_self_test
 #undef get_bits_raw
 MAKE_UINT_PRNG(mwc1616x, "MWC1616X", NULL, 32)
+//----- MWC4691 PRNG -----
+#define create create_mwc4691
+#define run_self_test run_self_test_mwc4691
+#define get_bits_raw get_bits_raw_mwc4691
+#include "../generators/mwc4691.c"
+DECLARE_NEW_DELETE(mwc4691)
+#undef create
+#undef run_self_test
+#undef get_bits_raw
+MAKE_UINT_PRNG(mwc4691, "MWC4691", run_self_test_mwc4691, 32)
 //----- MWC64 PRNG -----
 #define create create_mwc64
 #define get_bits_raw get_bits_raw_mwc64
@@ -159,6 +221,26 @@ DECLARE_NEW_DELETE(mwc64)
 #undef run_self_test
 #undef get_bits_raw
 MAKE_UINT_PRNG(mwc64, "MWC64", NULL, 32)
+//----- SplitMix  PRNG -----
+#define create create_splitmix
+#define run_self_test run_self_test_splitmix
+#define get_bits_raw get_bits_raw_splitmix
+#include "../generators/splitmix.c"
+DECLARE_NEW_DELETE(splitmix)
+#undef create
+#undef run_self_test
+#undef get_bits_raw
+MAKE_UINT_PRNG(splitmix, "SplitMix", NULL, 64)
+//----- SplitMix32 PRNG -----
+#define create create_splitmix32
+#define run_self_test run_self_test_splitmix32
+#define get_bits_raw get_bits_raw_splitmix32
+#include "../generators/splitmix32.c"
+DECLARE_NEW_DELETE(splitmix32)
+#undef create
+#undef run_self_test
+#undef get_bits_raw
+MAKE_UINT_PRNG(splitmix32, "SplitMix32", NULL, 32)
 //----- SWB (subtract-with-borrow) PRNG -----
 #define create create_swb
 #define run_self_test run_self_test_swb
@@ -169,6 +251,36 @@ DECLARE_NEW_DELETE(swb)
 #undef run_self_test
 #undef get_bits_raw
 MAKE_UINT_PRNG(swb, "SWB", NULL, 32)
+//----- xoroshiro128+ PRNG (32-bit) -----
+#define create create_xoroshiro128p
+#define run_self_test run_self_test_xoroshiro128p
+#define get_bits_raw get_bits_raw_xoroshiro128p
+#include "../generators/xoroshiro128p.c"
+DECLARE_NEW_DELETE(xoroshiro128p)
+#undef create
+#undef run_self_test
+#undef get_bits_raw
+MAKE_UINT_PRNG(xoroshiro128p, "xoroshiro128+", run_self_test_xoroshiro128p, 64)
+//----- xoroshiro128++ PRNG (32-bit) -----
+#define create create_xoroshiro128pp
+#define run_self_test run_self_test_xoroshiro128pp
+#define get_bits_raw get_bits_raw_xoroshiro128pp
+#include "../generators/xoroshiro128pp.c"
+DECLARE_NEW_DELETE(xoroshiro128pp)
+#undef create
+#undef run_self_test
+#undef get_bits_raw
+MAKE_UINT_PRNG(xoroshiro128pp, "xoroshiro128++", run_self_test_xoroshiro128pp, 64)
+//----- xoshiro128+ PRNG (32-bit) -----
+#define create create_xoshiro128p
+#define run_self_test run_self_test_xoshiro128p
+#define get_bits_raw get_bits_raw_xoshiro128p
+#include "../generators/xoshiro128p.c"
+DECLARE_NEW_DELETE(xoshiro128p)
+#undef create
+#undef run_self_test
+#undef get_bits_raw
+MAKE_UINT_PRNG(xoshiro128p, "xoshiro128+", NULL, 32)
 //----- xoshiro128++ PRNG (32-bit) -----
 #define create create_xoshiro128pp
 #define run_self_test run_self_test_xoshiro128pp
@@ -191,6 +303,9 @@ DECLARE_NEW_DELETE(xorwow)
 MAKE_UINT_PRNG(xorwow, "xorwow", NULL, 32)
 
 
+///////////////////////////////
+///// Program entry point /////
+///////////////////////////////
 
 
 typedef struct {
@@ -206,6 +321,8 @@ int main(int argc, char *argv[])
         {gen_getinfo_lfib,           "alfib607"},
         {gen_getinfo_chacha,         "chacha"},
         {gen_getinfo_flea32x1,       "flea32x1"},
+        {gen_getinfo_kiss64,         "kiss64"},
+        {gen_getinfo_kiss99,         "kiss99"},
         {gen_getinfo_hc256,          "hc256"},
         {gen_getinfo_lcg64,          "lcg64"},
         {gen_getinfo_lcg69069,       "lcg69069"},
@@ -214,7 +331,13 @@ int main(int argc, char *argv[])
         {gen_getinfo_mwc1616,        "mwc1616"},
         {gen_getinfo_mwc1616x,       "mwc1616x"},
         {gen_getinfo_mwc64,          "mwc64"},
+        {gen_getinfo_mwc4691,        "mwc4691"},
+        {gen_getinfo_splitmix,       "splitmix"},
+        {gen_getinfo_splitmix32,     "spiltmix32"},
         {gen_getinfo_swb,            "swb"},
+        {gen_getinfo_xoroshiro128p,  "xoroshiro128+"},
+        {gen_getinfo_xoroshiro128pp, "xoroshiro128++"},
+        {gen_getinfo_xoshiro128p,    "xoshiro128+"},
         {gen_getinfo_xoshiro128pp,   "xoshiro128++"},
         {gen_getinfo_xorwow,         "xorwow"},
         {NULL, ""}
@@ -249,6 +372,7 @@ int main(int argc, char *argv[])
     }
     GeneratorInfo gi;
     gen_getinfo(&gi);
+    GeneratorInfo_print(&gi, 1);
     CallerAPI intf = CallerAPI_init();
     if (!strcmp("express", argv[1])) {
         battery_express(&gi, &intf, TESTS_ALL, 1, REPORT_FULL);
