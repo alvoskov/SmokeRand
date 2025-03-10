@@ -670,7 +670,7 @@ batteries and have mainly historical and educational interest.
  xoroshiro1024st   | u64    | 1       | 1     | 1       | 2    | 0.33 | +      |         | 128 GiB
  xoroshiro1024stst | u64    | +       | +     | +       | +    | 0.33 | +      | +       | >= 1 TiB
  xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | +      | Small   | 128 KiB
- xoshiro128p       | u32    | 1       | 1     | 2       |      | 0.38 |        |         | 8 MiB
+ xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 |        |         | 8 MiB
  xoshiro128pp      | u32    | +       | +     | +       |      | 0.42 |        |         |
  xsh               | u64    | 2       | 8     | 13      | 17   | 0.43 | -      | -       | 32 KiB
 
