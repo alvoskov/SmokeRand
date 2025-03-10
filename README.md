@@ -529,15 +529,15 @@ batteries and have mainly historical and educational interest.
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 16 TiB
  des-ctr           | u64    | +       | +     | +       |      | 24   |        |       |         | >= 4 TiB
- drand48           | u32    | 1       | 12    | 20      | 22/23| 0.72 | -      |       | -       | 1 MiB
+ drand48           | u32    | 1       | 12    | 20      | 22/23| 0.72 | -      | 0     | -       | 1 MiB
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 2 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 4     | +       | >= 32 TiB
- flea32x1          | u32    | +       | +     | 1       | 1    | 0.48 | +      |       | +       | 4 MiB
+ flea32x1          | u32    | +       | +     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | N/A    |       | +       | >= 32 TiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      |       | Small   | 1 MiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 16 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
- lcg32prime        | u32    | 0/1     | 13    | 24      | 25/26| 2.2  | -(>>10)|       | -       | 512 MiB
+ lcg32prime        | u32    | 0/1     | 13    | 24      | 25/26| 2.2  | -(>>10)| 0     | -       | 512 MiB
  lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | +      | 0     | Small   | 16 MiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | 0     | +-      | >= 32 TiB
  lcg96             | u32    | +       | 1     | 1       | 1    | 0.78 | +      | 3     | +       | 32 GiB
@@ -654,7 +654,7 @@ batteries and have mainly historical and educational interest.
  swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | N/A    | 2     | +       | 4 GiB
  taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  |         | 32 KiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
- tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      |       |         | 32 GiB
+ tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      | 3     |         | 32 GiB
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 32 TiB
