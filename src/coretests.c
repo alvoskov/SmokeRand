@@ -266,6 +266,7 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     } else {
         ndups_total = bspace32_nd_test(obj, opts);
     }
+    ans.penalty = PENALTY_BSPACE;
     ans.x = (double) ndups_total;
     ans.p = poisson_pvalue(ans.x, lambda * opts->nsamples);
     ans.alpha = poisson_cdf(ans.x, lambda * opts->nsamples);
@@ -374,6 +375,7 @@ TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step)
             }
         }
     }
+    ans.penalty = PENALTY_BSPACE_DEC;
     ans.p = 1000.0;
     bspace4_8d_decimated_pvalue(&ans, "Lower bits:", u, len, lambda, obj->intf);
     bspace4_8d_decimated_pvalue(&ans, "Higher bits (reversed):",
@@ -483,6 +485,7 @@ TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opt
     obj->intf->printf("  nsamples = %lu; len = %lu, mu = %g * %d\n",
         opts->nsamples, n, mu, (int) opts->nsamples);
 
+    ans.penalty = PENALTY_COLLOVER;
     ans.x = 0;
     for (unsigned long i = 0; i < opts->nsamples; i++) {
         collisionover_make_tuples(opts, obj->gi, obj->state, u, n);
@@ -582,6 +585,7 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
         }
         Oi[(gap_len < nbins) ? gap_len : nbins]++;
     }
+    ans.penalty = PENALTY_GAP;
     ans.x = 0.0; // chi2emp
     for (size_t i = 0; i < nbins; i++) {
         double Ei = p * pow(1.0 - p, (double) i) * ngaps;
@@ -919,6 +923,7 @@ TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
     if (zabs_max_wrb > z_bonferroni && zabs_max_wrb > fabs(ans.x)) {
         ans.x = gap16_z_bonferroni(gf_rb.z_max_w0, p);
     }
+    ans.penalty = PENALTY_GAP16_COUNT0;
     ans.p = stdnorm_pvalue(ans.x);
     ans.alpha = stdnorm_cdf(ans.x);
     // Output p-value
@@ -1008,6 +1013,7 @@ TestResults sumcollector_test(GeneratorState *obj, const SumCollectorOptions *op
     }
 
     unsigned long df = 0;
+    ans.penalty = PENALTY_SUMCOLLECTOR;
     ans.x = 0.0;
     for (size_t i = 0; i < 50; i++) {
         double Ei = p_vec[i] * Oi_sum;
@@ -1065,6 +1071,7 @@ TestResults mod3_test(GeneratorState *obj, const Mod3Options *opts)
         ans.x += (Oi[i] - Ei) * (Oi[i] - Ei) / Ei;
     }
     free(Oi);
+    ans.penalty = PENALTY_MOD3;
     ans.x = chi2_to_stdnorm_approx(ans.x, ntuples - 1);
     ans.p = stdnorm_pvalue(ans.x);
     ans.alpha = stdnorm_cdf(ans.x);
@@ -1110,6 +1117,7 @@ TestResults monobit_freq_test(GeneratorState *obj, const MonobitFreqOptions *opt
             u >>= 8;
         }
     }
+    ans.penalty = PENALTY_FREQ;
     ans.x = fabs((double) bitsum) / sqrt((double) (len * obj->gi->nbits));
     ans.p = stdnorm_pvalue(ans.x);
     ans.alpha = stdnorm_cdf(ans.x);
@@ -1184,6 +1192,7 @@ TestResults nbit_words_freq_test(GeneratorState *obj,
     }
     double sqrt_nblocks = sqrt((double) opts->nblocks);
     double K = sqrt_nblocks * D + 1.0 / (6.0 * sqrt_nblocks);
+    ans.penalty = PENALTY_FREQ;
     ans.x = K;
     ans.p = ks_pvalue(K);
     ans.alpha = 1.0 - ans.p;

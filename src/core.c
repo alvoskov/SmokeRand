@@ -172,6 +172,7 @@ TestResults TestResults_create(const char *name)
     ans.alpha = NAN;
     ans.x = NAN;
     ans.thread_id = 0;
+    ans.penalty = 0;
     return ans;
 }
 
@@ -575,6 +576,21 @@ static void snprintf_pvalue(char *buf, size_t len, double p, double alpha)
     }
 }
 
+static const char *interpret_grade(double penalty)
+{
+    if (penalty >= 3.999) {
+        return "good";
+    } else if (penalty >= 3.0) {
+        return "some issues";
+    } else if (penalty >= 2.0) {
+        return "flawed";
+    } else if (penalty >= 1.0) {
+        return "bad";
+    } else {
+        return "very bad";
+    }
+}
+
 static void print_bar(void)
 {
     for (int i = 0; i < 79; i++) {
@@ -588,6 +604,7 @@ static void TestResults_print_report(const TestResults *results,
     size_t ntests, time_t nseconds_total, ReportType rtype)
 {
     unsigned int npassed = 0, nwarnings = 0, nfailed = 0;
+    double grade = 4.0;
     for (size_t i = 0; i < ntests; i++) {
         PValueCategory pvalue_cat = get_pvalue_category(results[i].p);
         switch (pvalue_cat) {
@@ -596,8 +613,13 @@ static void TestResults_print_report(const TestResults *results,
         case PVALUE_WARNING:
             nwarnings++; break;
         case PVALUE_FAILED:
-            nfailed++; break;
+            nfailed++;
+            grade -= results[i].penalty;
+            break;
         }
+    }
+    if (grade < 0.0) {
+        grade = 0.0;
     }
 
     if (rtype != REPORT_FULL && npassed == ntests) {
@@ -622,10 +644,13 @@ static void TestResults_print_report(const TestResults *results,
         }
         print_bar();
     }
-    printf("Passed:       %u\n", npassed);
-    printf("Suspicious:   %u\n", nwarnings);
-    printf("Failed:       %u\n", nfailed);
-    printf("Elapsed time: "); print_elapsed_time(nseconds_total);
+    printf("Passed:        %u\n", npassed);
+    printf("Suspicious:    %u\n", nwarnings);
+    printf("Failed:        %u\n", nfailed);
+    if (ntests >= 5) {
+        printf("Quality (0-4): %.2f (%s)\n", grade, interpret_grade(grade));
+    }
+    printf("Elapsed time:  "); print_elapsed_time(nseconds_total);
     printf("\n\n");
 }
 

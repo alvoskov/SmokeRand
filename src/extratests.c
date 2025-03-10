@@ -593,6 +593,7 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
     // Ising2DLattice_print(&obj);
     Ising2DLattice_free(&obj);
     // Fill results
+    res.penalty = PENALTY_ISING2D;
     if (fabs(cv_z) > fabs(e_z)) {
         res.x = cv_z;
         res.p = t_pvalue(cv_z, df);

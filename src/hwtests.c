@@ -215,6 +215,7 @@ TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
             ans.x += 2.0 * Oi * log(Oi / Ei);
         }
     }
+    ans.penalty = PENALTY_HAMMING_OT;
     ans.x = chi2_to_stdnorm_approx(ans.x, obj->len - 1);
     ans.p = stdnorm_pvalue(ans.x);
     ans.alpha = stdnorm_cdf(ans.x);

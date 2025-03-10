@@ -64,6 +64,72 @@ quality should be analysed not only by empirical test but by cryptoanalytic
 techniques. Of course, it should be used correctly, i.e. having period at least
 2**64, not be prone to the birthday paradox, not be reseeded during the sample
 generation if reproducible simulation is desired etc.
+.SS Automatic quality assessment
+.PP
+SmokeRand makes an automatic quality assessment in the form of numerical grade
+from 0 (the lowest quality) to 1 (the highest quality). The grades are
+interpreted the next way:
+.IP \[bu]
+\fB4.0\fR \- \fBgood\fR generator, probably may be used as a general purpose PRNG.
+.IP \[bu]
+\fB3.0\-3.99\fR \- \fBsome issues\fR have been detected, usage for any computational
+task requires an extra analysis.
+.IP \[bu]
+\fB2.0\-2.99\fR \- \fBflawed\fR generator. Cannot be recommended as a general purpose
+generator but detected flaws will probably cause problems only in some specific
+conditions.
+.IP \[bu]
+\fB1.0\-1.99\fR \- \fBbad\fR generator. Detected biases are serious and can easily
+distort results of Monte-Carlo simulations. But it may be suitable for e.g.
+programming games like TETRIS or generating some non-repeating values.
+.IP \[bu]
+\fB<1.0\fR \- \fBvery bad\fR generator. Can be used only if its replacement
+to a simple counter (0,1,2,3,....) would be totally acceptable.
+.PP
+The \fBexcellent\fR grade is intentionally avoided because such grading is
+impossible without thorough cryptoanalysis that cannot be fully automated and
+represented as a battery of statistical tests.
+.PP
+The grading algorithm is rather simple and based on a penalty system. An initial
+grade is 4.0 and some penalty is subtracted from it for an every failed test.
+The used penalties for failures:
+.IP \[bu]
+4.0 for frequency test and gap test.
+.IP \[bu]
+3.0 for birthday spacings and collision over tests.
+.IP \[bu]
+2.0 for Hamming weights based test, gap16_count0, mod3 and sumcollector tests.
+.IP \[bu]
+1.0 for birthday spacings test with decimation.
+.IP \[bu]
+0.25 for a matrix rank and linear complexity tests. If e.g. three test of this
+kind are failed \- 0.75 is subtracted from the grade.
+.PP
+If the resulting grade is less than zero then it is converted to zero.
+Of course, this scale is very crude, partially subjective and probably rather
+strict. It is aimed on distinction between e.g. low linear complexity of some
+bits (important only in some specific cases) and failure of gap test (can
+easily distort a Monte-Carlo simulation results).
+.PP
+If failures for the \fBbirthday\fR or \fBfreq\fR extra batteries were observed
+then the 1.0 penalty value should be subtracted from the final grade for each
+failure. E.g. SplitMix and RC4 will be graded as 3.0 instead of 4.0.
+.PP
+Examples of grading for some generators:
+.IP \[bu]
+\fBgood\fR: AES128, ChaCha12, xoroshiro128++, KISS99, MWC64X.
+\fBsome issues\fR: Mersenne Twister, 128-bit LCG, xoroshiro128+,
+SplitMix, RC4, DES-CTR.
+\fBflawed\fR: flea32x1, taus88, WELL1024a.
+\fBbad
+\fBvery bad\fR: RANDU, 32-bit and 64-bit LCGs with power of 2 modulo,
+xorwow, SWB, ChaCha12 with 32-bit counter, LFIB(607,273,+)
+.PP
+Grouping RANDU together with xorwow and additive lagged Fibonacci PRNGs
+may be seen as too pessimistic quality estimation of some generators. But
+it is partially based on the idea that usage of non-cryptographic generators
+that even pass all tests (have 4.0 final grade) is an intentional downgrade
+in quality, bithack that requires a special justification.
 .SS Custom batteries
 .PP
 Custom batteries are kept inside a simple human-readable text files. It supports

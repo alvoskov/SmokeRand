@@ -13,6 +13,20 @@
 #include "apidefs.h"
 #include <stdint.h>
 
+#define PENALTY_FREQ           4.0
+#define PENALTY_GAP            4.0
+#define PENALTY_ISING2D        4.0
+#define PENALTY_BSPACE         3.0
+#define PENALTY_COLLOVER       3.0
+#define PENALTY_MOD3           2.0
+#define PENALTY_SUMCOLLECTOR   2.0
+#define PENALTY_GAP16_COUNT0   2.0
+#define PENALTY_HAMMING_OT     2.0
+#define PENALTY_BSPACE_DEC     1.0
+#define PENALTY_MATRIXRANK     0.25
+#define PENALTY_MATRIXRANK_LOW 0.25
+#define PENALTY_LINEARCOMP     0.25
+
 enum {
     TESTS_ALL = 0
 };
@@ -57,6 +71,7 @@ typedef struct {
     double p; ///< p-value
     double alpha; ///< 1 - p where p is p-value
     double x; ///< Empirical random value
+    double penalty; ///< Penalty score for failure
     uint64_t thread_id; ///< Thread ID for logging
 } TestResults;
 
