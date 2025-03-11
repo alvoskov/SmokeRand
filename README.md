@@ -671,7 +671,7 @@ batteries and have mainly historical and educational interest.
  xoroshiro1024stst | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +       | >= 1 TiB
  xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | +      | 0     | Small   | 128 KiB
  xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 |        |       |         | 8 MiB
- xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 |        |       |         |
+ xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 |        |       |         | >= 16 TiB
  xsh               | u64    | 2       | 8     | 13      | 17   | 0.43 | -      |       | -       | 32 KiB
 
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
