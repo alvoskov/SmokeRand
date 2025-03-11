@@ -230,6 +230,7 @@ else
 	install -m 644 smokerand.1.gz $(DESTDIR)$(PREFIX)/man/man1
 	install -d $(DESTDIR)$(PREFIX)/include/smokerand
 	install -m 644 include/smokerand/*.h $(DESTDIR)$(PREFIX)/include/smokerand
+	install -m 644 include/smokerand_bat.h $(DESTDIR)$(PREFIX)/include
 	install -m 644 include/smokerand_core.h $(DESTDIR)$(PREFIX)/include
 	install -d $(DESTDIR)$(PREFIX)/lib/smokerand/generators
 	install -m 644 $(GEN_BINDIR)/*.so $(DESTDIR)$(PREFIX)/lib/smokerand/generators
@@ -257,6 +258,7 @@ else
 	rm $(DESTDIR)$(PREFIX)/lib/libsmokerand_core.a
 	rm $(DESTDIR)$(PREFIX)/man/man1/smokerand.1.gz
 	rm $(DESTDIR)$(PREFIX)/include/smokerand/*
+	rm $(DESTDIR)$(PREFIX)/include/smokerand_bat.h
 	rm $(DESTDIR)$(PREFIX)/include/smokerand_core.h
 	rm -d $(DESTDIR)$(PREFIX)/include/smokerand
 	rm $(DESTDIR)$(PREFIX)/lib/smokerand/generators/*.so
