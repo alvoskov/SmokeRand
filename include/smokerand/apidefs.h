@@ -58,7 +58,7 @@ static inline uint64_t rotr64(uint64_t x, unsigned int r)
 
 #ifndef NO_CUSTOM_DLLENTRY
 #define SHARED_ENTRYPOINT_CODE \
-int DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) { \
+int WINAPI DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) { \
     (void) hinstDLL; (void) fdwReason; (void) lpvReserved; return TRUE; }
 #else
 #define SHARED_ENTRYPOINT_CODE

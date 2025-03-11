@@ -162,7 +162,7 @@ elseif platform == 'gcc' or platform == 'mingw' then
     local e_cflags, gen_cflags = "-march=native", "-ffreestanding -nostdlib"
     stub = make_gcc_stub(e_cflags, gen_cflags, "", gen_cflags) .. gcc_rules
 elseif platform == 'gcc32' then
-    local e_cflags, gen_cflags = "-march=native -m32", "-m32"
+    local e_cflags, gen_cflags = "-march=native -m32", "-m32 -ffreestanding -nostdlib"
     stub = make_gcc_stub(e_cflags, gen_cflags, "-m32", gen_cflags) .. gcc_rules
     gen_sources = cfg.get_gen_sources(true) -- Only portable generators are supported
 elseif platform == 'mingw-hx' then
