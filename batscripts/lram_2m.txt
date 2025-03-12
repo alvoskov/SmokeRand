@@ -4,8 +4,9 @@
 # samples. It also doesn't include "collision over" tests and birthday spacings
 # tests that work with 64-bit values.
 #
-# Warning: it contains a simplified version of gap test that doesn't detect
-# PRNGs with 2^32 period (uses ngaps=2500000 instead of ngaps=10000000).
+# Warning: it doesn't contain a gap test and may not detect nonlinear
+# scramblers based PRNG with period around 2^32, e.g., SplitMix32. This test
+# can be run on 4 MiB of RAM but is rather slow, especially on weaker machines.
 #
 
 # Frequency tests
@@ -19,9 +20,6 @@ bspace32_1d_high test=bspace_nd nbits_per_dim=32 ndims=1 nsamples=1024 get_lower
 bspace8_4d       test=bspace_nd nbits_per_dim=8  ndims=4 nsamples=1024 get_lower=1
 bspace4_8d       test=bspace_nd nbits_per_dim=4  ndims=8 nsamples=1024 get_lower=1
 bspace4_8d_dec   test=bspace4_8d_decimated  step=4096 # 2^12
-
-# Gap tests
-gap_inv512   test=gap shl=9    ngaps=2500000
 
 # Linear complexity tests
 linearcomp_high test=linearcomp nbits=50000 bitpos=high
