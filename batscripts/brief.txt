@@ -9,7 +9,7 @@ byte_freq  test=nbit_words_freq  bits_per_word=8 average_freq=1024 nblocks=4096
 # Birthday spacings tests
 bspace64_1d      test=bspace_nd nbits_per_dim=64 ndims=1 nsamples=40   get_lower=1
 bspace32_1d      test=bspace_nd nbits_per_dim=32 ndims=1 nsamples=4096 get_lower=1
-bspace32_1d_high test=bspace_nd nbits_per_dim=32 ndims=1 nsamples=4095 get_lower=0
+bspace32_1d_high test=bspace_nd nbits_per_dim=32 ndims=1 nsamples=4096 get_lower=0
 bspace32_2d      test=bspace_nd nbits_per_dim=32 ndims=2 nsamples=5    get_lower=1
 bspace21_3d      test=bspace_nd nbits_per_dim=21 ndims=3 nsamples=5    get_lower=1
 bspace16_4d      test=bspace_nd nbits_per_dim=16 ndims=4 nsamples=5    get_lower=1

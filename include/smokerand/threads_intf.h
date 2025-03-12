@@ -116,6 +116,8 @@ ThreadObj ThreadObj_current(void);
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
 #define USE_LOADLIBRARY
+#elif defined(__WATCOMC__) && defined(__386__) && defined(__DOS__)
+#define USE_PE32_DOS
 #endif
 
 void *dlopen_wrap(const char *libname);

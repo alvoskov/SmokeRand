@@ -10,6 +10,7 @@
  *    Executable File Format. March 1994.
  *    https://coffi.readthedocs.io/en/latest/peering_inside_pe.pdf
  * 2. https://learn.microsoft.com/en-us/windows/win32/debug/pe-format
+ * 3. https://ferreirasc.github.io/PE-Export-Address-Table/
  *
  * @copyright
  * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
@@ -21,6 +22,15 @@
 #define __SMOKERAND_PE32LOADER_H
 #include <stdio.h>
 #include <stdint.h>
+
+
+void *dlopen_pe32dos(const char *libname, int flag);
+void *dlsym_pe32dos(void *handle, const char *symname);
+void dlclose_pe32dos(void *handle);
+const char *dlerror_pe32dos(void);
+
+
+
 
 typedef struct {
     char name[9]; ///< ASCIIZ-string with section name.
@@ -37,6 +47,7 @@ typedef struct {
     int nexports;
     void **exports_addrs;
     char **exports_names;
+    uint16_t *exports_ords;
 } PE32MemoryImage;
 
 typedef struct {

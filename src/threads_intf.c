@@ -101,6 +101,8 @@ ThreadObj ThreadObj_current(void)
 #elif !defined(NO_POSIX)
 #include <unistd.h>
 #include <dlfcn.h>
+#elif defined(USE_PE32_DOS)
+#include "smokerand/pe32loader.h"
 #endif
 
 void *dlopen_wrap(const char *libname)
@@ -128,6 +130,12 @@ void *dlopen_wrap(const char *libname)
         fprintf(stderr, "dlopen() error: %s\n", dlerror());
     };
     return lib;
+#elif defined(USE_PE32_DOS)
+    void *lib = dlopen_pe32dos(libname, 0);
+    if (lib == NULL) {
+        fprintf(stderr, "dlopen() error: %s\n", dlerror_pe32dos());
+    };
+    return lib;
 #else
     fprintf(stderr,
         "Cannot load the '%s' module: shared libraries support not found!\n",
@@ -144,6 +152,8 @@ void *dlsym_wrap(void *handle, const char *symname)
     return (void *) GetProcAddress(handle, symname);
 #elif !defined(NO_POSIX)
     return dlsym(handle, symname);
+#elif defined(USE_PE32_DOS)
+    return dlsym_pe32dos(handle, symname);
 #else
     return NULL;
 #endif
@@ -156,6 +166,8 @@ void dlclose_wrap(void *handle)
     FreeLibrary((HANDLE) handle);
 #elif !defined(NO_POSIX)
     dlclose(handle);
+#elif defined(USE_PE32_DOS)
+    dlclose_pe32dos(handle);
 #else
     (void) handle;
 #endif

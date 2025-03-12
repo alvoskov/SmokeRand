@@ -270,9 +270,12 @@ GeneratorModule GeneratorModule_load(const char *libname)
     if (gen_getinfo == NULL) {
         fprintf(stderr, "Cannot find the 'gen_getinfo' function\n");
         mod.valid = 0;
-    } else if (!gen_getinfo(&mod.gen)) {
-        fprintf(stderr, "'gen_getinfo' function failed\n");
-        mod.valid = 0;
+    } else {
+        int is_ok = gen_getinfo(&mod.gen);
+        if (!is_ok) {
+            fprintf(stderr, "'gen_getinfo' function failed (%d returned)\n", is_ok);
+            mod.valid = 0;
+        }
     }
     return mod;
 }

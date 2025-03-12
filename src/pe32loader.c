@@ -1,6 +1,10 @@
-#include "pe32loader.h"
+#include "smokerand/pe32loader.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define ERRMSG_MAXLEN 256
+static char errmsg[ERRMSG_MAXLEN] = "";
 
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
@@ -20,7 +24,7 @@ void execbuffer_free(void *buf)
 #else
 void *execbuffer_alloc(size_t len)
 {
-    return malloc(len);
+    return calloc(len, 1);
 }
 
 void execbuffer_free(void *buf)
@@ -48,8 +52,9 @@ static inline uint16_t read_u16(FILE *fp, unsigned int offset)
 void *PE32MemoryImage_get_func_addr(const PE32MemoryImage *img, const char *func_name)
 {
     for (int i = 0; i < img->nexports; i++) {
+        int ord = img->exports_ords[i];
         if (!strcmp(func_name, img->exports_names[i])) {
-            return img->exports_addrs[i];
+            return img->exports_addrs[ord];
         }
     }
     return NULL;
@@ -142,6 +147,66 @@ uint32_t PE32BasicInfo_get_membuf_size(PE32BasicInfo *info)
 }
 
 
+int PE32MemoryImage_apply_relocs(PE32MemoryImage *img, PE32BasicInfo *info)
+{
+    uint8_t *buf = img->img;
+    uint32_t imagebase_real = (uint32_t) ((size_t) buf);
+    uint32_t *relocs = (uint32_t *) (buf + info->reloc_dir);
+    uint32_t offset = imagebase_real - info->imagebase;
+    for (uint32_t *r = relocs; r[0] != 0; ) {
+        uint32_t rva = r[0];
+        uint32_t nbytes = r[1];
+        uint32_t nrelocs = (r[1] - 8) / 2;
+        printf("Reloc. chunk: rva=%X, nbytes=%X, nrelocs=%X\n",
+            rva, nbytes, nrelocs);
+        uint16_t *re = (uint16_t *) (r + 2);
+        for (uint32_t i = 0; i < nrelocs; i++) {
+            if (re[i] >> 12 == 3) {
+                uint32_t reloc_rva = rva + (re[i] & 0x0FFF);
+                uint32_t *reloc_place = (uint32_t *) (buf + reloc_rva);
+                printf("  Reloc: rva=%X, before=%X, ", reloc_rva, *reloc_place);
+                *reloc_place += offset;
+                printf("after: %X\n", *reloc_place);
+            }
+        }
+        r += (nbytes) / sizeof(uint32_t);
+    }
+    return 1;
+}
+
+int PE32MemoryImage_apply_exports(PE32MemoryImage *img, PE32BasicInfo *info)
+{
+    img->nexports = *( (uint32_t *) (img->img + info->export_dir + 24) );
+    uint32_t func_addrs_array_rva = *( (uint32_t *) (img->img + info->export_dir + 28) );
+    uint32_t func_names_array_rva = *( (uint32_t *) (img->img + info->export_dir + 32) );
+    uint32_t ord_array_rva = *( (uint32_t *) (img->img + info->export_dir + 36) );
+    uint32_t *func_names_rva = (uint32_t *) &img->img[func_names_array_rva];
+    uint32_t *func_addrs_rva = (uint32_t *) &img->img[func_addrs_array_rva];
+    img->exports_ords = (uint16_t *) &img->img[ord_array_rva];
+    printf("nexports: %d\n", img->nexports);
+    printf("addrs rva: %X\n", func_addrs_array_rva);
+    printf("names rva: %X\n", func_names_array_rva);
+    printf("ord rva: %X\n", ord_array_rva);
+    // Patch RVAs
+    uint32_t imagebase_real = (uint32_t) ((size_t) img->img);
+    for (int i = 0; i < img->nexports; i++) {
+        func_names_rva[i] += imagebase_real;
+        func_addrs_rva[i] += imagebase_real;
+    }
+    img->exports_names = (void *) func_names_rva;
+    img->exports_addrs = (void *) func_addrs_rva;
+
+    for (int i = 0; i < img->nexports; i++) {
+        int ord = img->exports_ords[i];
+        printf("  func=%s, addr=%llX, rva=%llX, ord=%d\n",
+            img->exports_names[i],
+            (unsigned long long) img->exports_addrs[ord],
+            (unsigned long long) img->exports_addrs[ord] - (unsigned long long) img->img,
+            ord);
+    }
+    return 1;
+}
+
 
 PE32MemoryImage PE32BasicInfo_load(PE32BasicInfo *info, FILE *fp)
 {
@@ -151,56 +216,89 @@ PE32MemoryImage PE32BasicInfo_load(PE32BasicInfo *info, FILE *fp)
     uint8_t *buf = img.img;
     for (int i = 0; i < info->nsections; i++) {
         PE32SectionInfo *sect = &info->sections[i];
-        fseek(fp, sect->physical_addr, SEEK_SET);
-        fread(buf + sect->virtual_addr, sect->physical_size, 1, fp);
+        if (fseek(fp, sect->physical_addr, SEEK_SET)) {
+            fprintf(stderr, "fseek error (section %d)\n", i);
+        }
+        if (fread(buf + sect->virtual_addr, sect->physical_size, 1, fp) != 1) {
+            fprintf(stderr, "fread error (section %d)\n", i);
+        }
     }
     // Export table: get size and RVAs
-    img.nexports = *( (uint32_t *) (buf + info->export_dir + 24) );
-    uint32_t func_addrs_array_rva = *( (uint32_t *) (buf + info->export_dir + 28) );
-    uint32_t func_names_array_rva = *( (uint32_t *) (buf + info->export_dir + 32) );
-    uint32_t *func_names_rva = (uint32_t *) &buf[func_names_array_rva];
-    uint32_t *func_addrs_rva = (uint32_t *) &buf[func_addrs_array_rva];
-    printf("nexports: %d\n", img.nexports);
-    printf("addrs rva: %X\n", func_addrs_array_rva);
-    printf("names rva: %X\n", func_names_array_rva);
-    // Patch RVAs
-    size_t imagebase_real = (size_t) buf;
-    for (int i = 0; i < img.nexports; i++) {
-        func_names_rva[i] += imagebase_real;
-        func_addrs_rva[i] += imagebase_real;
-    }
-    img.exports_names = (void *) func_names_rva;
-    img.exports_addrs = (void *) func_addrs_rva;
-
+    PE32MemoryImage_apply_exports(&img, info);
     // Relocations
-    uint32_t *relocs = (uint32_t *) (buf + info->reloc_dir);
-    size_t offset = imagebase_real - info->imagebase; 
-    for (uint32_t *r = relocs; r[0] != 0; ) {
-        uint32_t rva = r[0];
-        uint32_t nbytes = r[1];
-        uint32_t nrelocs = (r[1] - 8) / 2;
-        printf("RELOC: %X %X %X\n", rva, nbytes, nrelocs);
-        uint16_t *re = (uint16_t *) (r + 2);
-        for (uint32_t i = 0; i < nrelocs; i++) {
-            if (re[i] >> 12 == 3) {
-                uint32_t reloc_rva = rva + (re[i] & 0x0FFF);
-                printf("RELOC_RVA: %X\n", reloc_rva);
-                uint32_t *reloc_place = (uint32_t *) (buf + reloc_rva);
-                printf("BEFORE:%X\n", *reloc_place);
-                *reloc_place += offset;
-                printf("AFTER:%X\n", *reloc_place);
-            }
-        }
-
-        r += (nbytes) / sizeof(uint32_t);
-    }
-
+    PE32MemoryImage_apply_relocs(&img, info);
     // Write metainformation to the image
     snprintf((char *) buf, 128,
-        "Image base from PE: %lX\n"
-        "Image base (real):  %lX\n",
-        (unsigned long) info->imagebase, (unsigned long) buf);
+        "Image base from PE: %llX\n"
+        "Image base (real):  %llX\n",
+        (unsigned long long) info->imagebase, (unsigned long long) buf);
 
     return img;
 }
 
+int PE32MemoryImage_dump(const PE32MemoryImage *img, const char *filename)
+{
+    FILE *fp = fopen(filename, "wb");
+    if (fp == NULL) {
+        fprintf(stderr, "Cannot dump the file\n");
+        return 0;
+    }
+    int is_ok = fwrite(img->img, img->imgsize, 1, fp);
+    fclose(fp);
+    return is_ok;
+}
+
+////////////////////////////////
+///// The higher-level API /////
+////////////////////////////////
+
+void *dlopen_pe32dos(const char *libname, int flag)
+{
+    if (sizeof(size_t) != sizeof(uint32_t)) {
+        snprintf(errmsg, ERRMSG_MAXLEN,
+            "This program can work only in 32-bit mode\n");
+        return NULL;
+    }
+    FILE *fp = fopen(libname, "rb");
+    if (fp == NULL) {
+        snprintf(errmsg, ERRMSG_MAXLEN,
+            "Cannot open the '%s' file\n", libname);
+        return NULL;
+    }
+    uint32_t pe_offset = get_pe386_offset(fp);
+    if (pe_offset == 0) {
+        snprintf(errmsg, ERRMSG_MAXLEN, "The file '%s' is corrupted\n", libname);
+        fclose(fp);
+        return NULL;
+    }
+    PE32BasicInfo peinfo;
+    PE32BasicInfo_init(&peinfo, fp, pe_offset);
+    PE32MemoryImage *img = calloc(sizeof(PE32MemoryImage), 1);
+    *img = PE32BasicInfo_load(&peinfo, fp);
+    fclose(fp);
+    PE32BasicInfo_free(&peinfo);
+    (void) flag;
+    return img;
+}
+
+void *dlsym_pe32dos(void *handle, const char *symname)
+{
+    void *func = PE32MemoryImage_get_func_addr(handle, symname);
+    if (func == NULL) {
+        snprintf(errmsg, ERRMSG_MAXLEN, "Function '%s' not found", symname);
+    }
+    return func;
+}
+
+void dlclose_pe32dos(void *handle)
+{
+    if (handle != NULL) {
+        PE32MemoryImage_free(handle);
+        free(handle);
+    }
+}
+
+const char *dlerror_pe32dos(void)
+{
+    return errmsg;
+}

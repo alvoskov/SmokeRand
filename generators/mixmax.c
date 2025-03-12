@@ -67,8 +67,10 @@ uint64_t iterate_raw_vec(uint64_t* Y, uint64_t sumtotOld);
 //   FUNCTIONS FOR SEEDING
 
 void seed_spbox(rng_state_t* X, uint64_t seed);    // non-linear method, makes certified unique vectors,  probability for streams to collide is < 1/10^4600
+/*
 void fill_array(rng_state_t* X, unsigned int n, double *array); // fastest method: set n to a multiple of N (e.g. n=256)
 void iterate_and_fill_array(rng_state_t* X, double *array); // fills the array with N numbers
+*/
 
 
 #define BITS  61
@@ -251,6 +253,7 @@ uint64_t iterate_raw_vec(uint64_t* Y, uint64_t sumtotOld)
 /**
  * @brief Return an array of n random numbers uniformly distributed in (0,1]
  */
+/*
 void fill_array(rng_state_t* X, unsigned int n, double *array)
 {
     unsigned int i,j;
@@ -271,7 +274,9 @@ void fill_array(rng_state_t* X, unsigned int n, double *array)
         X->counter = N;
     }
 }
+*/
 
+/*
 void iterate_and_fill_array(rng_state_t* X, double *array)
 {
     uint64_t *Y = X->V;
@@ -302,6 +307,7 @@ void iterate_and_fill_array(rng_state_t* X, double *array)
 #endif
     X->sumtot = MOD_MERSENNE(MOD_MERSENNE(sumtot) + (ovflow <<3 ));
 }
+*/
 
 /**
  * @brief Non-linear seeding method, makes certified unique vectors,

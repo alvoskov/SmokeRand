@@ -1,7 +1,8 @@
-#include "pe32loader.h"
+#include "smokerand/pe32loader.h"
 #include "smokerand_core.h"
 #include "smokerand_bat.h"
 #include <stdio.h>
+#include <string.h>
 
 int main(int argc, char *argv[])
 {
@@ -15,6 +16,12 @@ int main(int argc, char *argv[])
     }
     const char *filename = argv[2];
 
+    void *handle = dlopen_pe32dos(filename, 0);
+    if (handle == NULL) {
+        fprintf(stderr, "Error: %s\n", dlerror_pe32dos());
+    }
+
+/*
     FILE *fp = fopen(filename, "rb");
     if (fp == NULL) {
         fprintf(stderr, "Cannot open the file\n");
@@ -35,15 +42,16 @@ int main(int argc, char *argv[])
     PE32MemoryImage img = PE32BasicInfo_load(&peinfo, fp);
     printf("Buffer size: %lX\n", (unsigned long) img.imgsize);
     fclose(fp);
+*/
+
+    
 
 
-    int (*gen_getinfo)(GeneratorInfo *gi) = PE32MemoryImage_get_func_addr(&img, "gen_getinfo");
+    int (*gen_getinfo)(GeneratorInfo *gi) = dlsym_pe32dos(handle, "gen_getinfo");
     if (gen_getinfo == NULL) {
         fprintf(stderr, "Cannot find the 'gen_getinfo' function\n");
         return 1;
     }
-
-
     //----------------------------------------------------
     GeneratorInfo gi;
     gen_getinfo(&gi);
@@ -69,20 +77,7 @@ int main(int argc, char *argv[])
         battery_file(argv[1] + 1, &gi, &intf, TESTS_ALL, 1, REPORT_FULL);
     }
     CallerAPI_free();
-
     //----------------------------------------------------
-
-/*
-    fp = fopen("dump.bin", "wb");
-    if (fp == NULL) {
-        fprintf(stderr, "Cannot dump the file\n");
-        return 1;
-    }
-    fwrite(img.img, img.imgsize, 1, fp);
-    fclose(fp);
-*/
-
-    PE32MemoryImage_free(&img);
-    PE32BasicInfo_free(&peinfo);
+    dlclose_pe32dos(handle);
     return 0;
 }
