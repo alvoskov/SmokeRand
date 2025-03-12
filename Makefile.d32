@@ -5,14 +5,20 @@ coreobjs = obj\bat_brief.obj obj\bat_brief.obj obj\bat_default.obj obj\bat_expre
     obj\specfuncs.obj obj\threads_intf.obj
 platform=causeway
 
-all: bin\smokernd.exe bin\testgens.exe
+all: bin\smokernd.exe bin\testgens.exe bin\peparse.exe
 
 bin\smokernd.exe: obj\smokerand.obj $(coreobjs)
 	wcl386 -q -6s -bcl=$(platform) -fe=bin\smokernd.exe obj\smokerand.obj $(coreobjs)
+bin\peparse.exe: obj\peparse.obj obj\pe32loader.obj $(coreobjs)
+	wcl386 -q -6s -bcl=$(platform) -fe=bin\peparse.exe obj\peparse.obj obj\pe32loader.obj $(coreobjs)
 bin\testgens.exe: obj\testgens.obj $(coreobjs)
 	wcl386 -q -6s -bcl=$(platform) -fe=bin\testgens.exe $(coreobjs) obj\testgens.obj
 obj\testgens.obj: src\testgens.c
 	wcc386 $(cflags) -fo=obj\testgens.obj src\testgens.c
+obj\peparse.obj: src\peparse.c src\pe32loader.h
+	wcc386 $(cflags) -fo=obj\peparse.obj src\peparse.c
+obj\pe32loader.obj: src\pe32loader.c src\pe32loader.h
+	wcc386 $(cflags) -fo=obj\pe32loader.obj src\pe32loader.c
 
 obj\bat_brief.obj: src\bat_brief.c
 	wcc386 $(cflags) -fo=obj\bat_brief.obj src\bat_brief.c

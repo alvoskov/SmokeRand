@@ -28,7 +28,7 @@ platform --- generic, gcc, mingw, gcc32, mingw-hx, msvc, zigcc
     generic     gcc-like compiler, no threads and x86 extensions.
     gcc, mingw  gcc compiler (POSIX threads).
     gcc32       gcc compiler, compilation of 32-bit binaries.
-    gcc-hx      32-bit binaries friendly to HX DOX extender.
+    mingw-hx    32-bit binaries friendly to HX DOS extender.
     zigcc       clang from Zig distribution (WinAPI threads).
 ]])
     return 0
@@ -162,7 +162,7 @@ elseif platform == 'gcc' or platform == 'mingw' then
     local e_cflags, gen_cflags = "-march=native", "-ffreestanding -nostdlib"
     stub = make_gcc_stub(e_cflags, gen_cflags, "", gen_cflags) .. gcc_rules
 elseif platform == 'gcc32' then
-    local e_cflags, gen_cflags = "-march=native -m32", "-m32 -ffreestanding -nostdlib"
+    local e_cflags, gen_cflags = "-march=i686 -m32", "-m32 -ffreestanding -nostdlib"
     stub = make_gcc_stub(e_cflags, gen_cflags, "-m32", gen_cflags) .. gcc_rules
     gen_sources = cfg.get_gen_sources(true) -- Only portable generators are supported
 elseif platform == 'mingw-hx' then
@@ -274,7 +274,14 @@ add_exefile("testgens", {batlib_name, lib_name}, "cc")
 add_exefile("test_cpp11", {batlib_name, lib_name}, "cpp")
 add_exefile("calibrate_dc6", {lib_name}, "cc")
 add_exefile("calibrate_linearcomp", {lib_name}, "cc")
--- Build extra executables
+-- Build extra executables: PE32 hack
+io.write("build $objdir/pe32loader.o: cc $srcdir/pe32loader.c\n")
+io.write("build $objdir/peparse.o: cc $srcdir/peparse.c\n")
+io.write("build $bindir/peparse" .. exe_ext .. ": link $objdir/pe32loader.o $objdir/peparse.o " .. batlib_name .. " " .. lib_name .. "\n")
+io.write("  libs = $exe_libs\n")
+io.write("  linkflags=$exe_linkflags\n")
+table.insert(default_builds, "$bindir/peparse" .. exe_ext)
+-- Build extra executables: C89 compatible version
 io.write("build $objdir/sr_tiny.o: cc89 $srcdir/sr_tiny.c\n")
 io.write("build $bindir/sr_tiny" .. exe_ext .. ": link $objdir/sr_tiny.o $objdir/specfuncs.o\n")
 io.write("  libs = $exe_libs\n")
