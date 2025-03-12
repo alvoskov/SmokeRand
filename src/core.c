@@ -411,90 +411,65 @@ size_t TestsBattery_ntests(const TestsBattery *obj)
 }
 
 
+DECLARE_MUTEX(tests_dispatcher_mutex)
+
 typedef struct {
-    ThreadObj thrd;
-    TestDescription *tests;
-    size_t *tests_inds;
+    size_t ord;
+    size_t *inds;
+    const TestsBattery *bat;
     size_t ntests;
-    size_t ntests_total;
     TestResults *results;
     const GeneratorInfo *gi;
     const CallerAPI *intf;
-} BatteryThread;
+} TestsDispatcher;
+
+
+size_t TestsDispatcher_get_ordinal(TestsDispatcher *obj)
+{
+    size_t ord;
+    MUTEX_LOCK(tests_dispatcher_mutex)
+    ord = obj->ord;
+    if (obj->ord < obj->ntests) {
+        obj->ord++;        
+    } else {
+        ord = SIZE_MAX;
+    }
+    MUTEX_UNLOCK(tests_dispatcher_mutex)
+    return ord;
+}
+
 
 static ThreadRetVal THREADFUNC_SPEC battery_thread(void *data)
 {
-    BatteryThread *th_data = data;
+    TestsDispatcher *th_data = data;
+    const TestsBattery *bat = th_data->bat;
+    ThreadObj thrd = ThreadObj_current();
     th_data->intf->printf("vvvvvvvvvv Thread %u (ID %llu) started vvvvvvvvvv\n",
-        th_data->thrd.ord, (unsigned long long) th_data->thrd.id);
+        thrd.ord, (unsigned long long) thrd.id);
     GeneratorState obj = GeneratorState_create(th_data->gi, th_data->intf);
-    for (size_t i = 0; i < th_data->ntests; i++) {
-        size_t ind = th_data->tests_inds[i];
+    for (size_t ord = TestsDispatcher_get_ordinal(th_data);
+        ord < th_data->ntests;
+        ord = TestsDispatcher_get_ordinal(th_data)) {
+        size_t ind = th_data->inds[ord];
         th_data->intf->printf(
             "vvvvv Thread %u: test #%lld: %s (%lld of %lld) started vvvvv\n",
-            th_data->thrd.ord,
-            (long long) ind + 1, th_data->tests[i].name,
-            (long long) i + 1, (long long) th_data->ntests);
-        th_data->results[ind] = TestDescription_run(&th_data->tests[i], &obj);
+            thrd.ord,
+            (long long) ind + 1, bat->tests[ind].name,
+            (long long) ord + 1, (long long) th_data->ntests);
+        th_data->results[ind] = TestDescription_run(&bat->tests[ind], &obj);
         th_data->intf->printf(
             "^^^^^ Thread %u: test #%lld: %s (%lld of %lld) finished ^^^^^\n",
-            th_data->thrd.ord,
-            (long long) ind + 1, th_data->tests[i].name,
-            (long long) i + 1, (long long) th_data->ntests);
-        th_data->results[ind].name = th_data->tests[i].name;
+            thrd.ord,
+            (long long) ind + 1, bat->tests[ind].name,
+            (long long) ord + 1, (long long) th_data->ntests);
+        th_data->results[ind].name = bat->tests[ind].name;
         th_data->results[ind].id = (unsigned int) (ind + 1);
-        th_data->results[ind].thread_id = th_data->thrd.ord;
+        th_data->results[ind].thread_id = thrd.ord;
     }
     th_data->intf->printf("^^^^^^^^^^ Thread %u (ID %llu) finished ^^^^^^^^^^\n",
-        th_data->thrd.ord, (unsigned long long) th_data->thrd.id);
+        thrd.ord, (unsigned long long) thrd.id);
     GeneratorState_free(&obj, th_data->intf);
     return 0;
-}
-
-typedef struct {
-    size_t ind; ///< Text index in the array
-    unsigned int nseconds; ///< Estimated time, seconds
-} TestTiming;
-
-
-static int cmp_TestTiming(const void *aptr, const void *bptr)
-{
-    const TestTiming *o1 = aptr, *o2 = bptr;
-    if (o1->nseconds < o2->nseconds) { return 1; }
-    else if (o1->nseconds == o2->nseconds) { return 0; }
-    else { return -1; }
-}
-
-
-/**
- * @brief Sorts tests by the estimated execution time in the descending order.
- * It is used to distribute them between threads.
- */
-static TestTiming *sort_tests_by_time(const TestDescription *descr, size_t ntests)
-{
-    TestTiming *out = calloc(ntests, sizeof(TestTiming));
-    if (out == NULL) {
-        fprintf(stderr, "sort_tests_by_time: out of memory");
-        exit(EXIT_FAILURE);
-    }
-    for (size_t i = 0; i < ntests; i++) {
-        out[i].ind = i;
-        out[i].nseconds = descr[i].nseconds;
-    }
-    qsort(out, ntests, sizeof(TestTiming), cmp_TestTiming);
-    return out;
-}
-
-
-static inline size_t test_pos_to_thread_ind(size_t test_pos, size_t nthreads)
-{
-    size_t thr_ind;
-    if ((test_pos / nthreads) % 2 == 0) {
-        thr_ind = test_pos % nthreads;
-    } else {
-        thr_ind = (nthreads - 1) - test_pos % nthreads;
-    }
-    return thr_ind;
 }
 
 /**
@@ -504,58 +479,44 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
     const GeneratorInfo *gen, const CallerAPI *intf,
     unsigned int nthreads, TestResults *results, ReportType rtype)
 {
-    // Multithreaded version
-    BatteryThread *th = calloc(nthreads, sizeof(BatteryThread));
-    size_t *th_pos = calloc(nthreads, sizeof(size_t));
-    // Preallocate arrays
+    TestsDispatcher tdisp;
+    tdisp.ord = 0;
+    tdisp.inds = calloc(ntests, sizeof(size_t));
+    tdisp.bat = bat;
+    tdisp.ntests = ntests;
+    tdisp.results = results;
+    tdisp.gi = gen;
+    tdisp.intf = intf;
     for (size_t i = 0; i < ntests; i++) {
-        size_t ind = test_pos_to_thread_ind(i, nthreads);
-        th[ind].ntests++;
+        tdisp.inds[i] = i;
     }
-    for (size_t i = 0; i < nthreads; i++) {
-        th[i].tests = calloc(th[i].ntests, sizeof(TestDescription));
-        th[i].tests_inds = calloc(th[i].ntests, sizeof(size_t));
-        th[i].gi = gen;
-        th[i].intf = intf;
-        th[i].results = results;
-    }
-    // Dispatch tests (and try to balance them between threads
-    // according to estimations of elapsed time)
-    // 0,1,...,(nthreads-1),(nthreads-1),...,2,1,0,0,1,2,....
-    TestTiming *tt = sort_tests_by_time(bat->tests, ntests);
+
+/*
+    uint64_t state = intf->get_seed64();
     for (size_t i = 0; i < ntests; i++) {
-        size_t thr_ind = test_pos_to_thread_ind(i, nthreads);
-        size_t test_ind = tt[i].ind;
-        th[thr_ind].tests[th_pos[thr_ind]] = bat->tests[test_ind];
-        th[thr_ind].tests_inds[th_pos[thr_ind]] = test_ind;
-        th_pos[thr_ind]++;
+        state = pcg_bits64(&state);
+        size_t j = state % ntests;
+        size_t tmp = tdisp.inds[i];
+        tdisp.inds[i] = tdisp.inds[j];
+        tdisp.inds[j] = tmp;
     }
-    free(tt);
-    // Show balance
-    for (size_t i = 0; i < nthreads; i++) {
-        printf("Thread %d: ", (int) (i + 1));
-        for (size_t j = 0; j < th[i].ntests; j++) {
-            size_t test_ind = th[i].tests_inds[j];
-            printf("%d(%s) ", (int) test_ind, bat->tests[test_ind].name);
-        }
-        printf("\n");
-    }
+*/
+
+    INIT_MUTEX(tests_dispatcher_mutex);
+
     // Run threads
     init_thread_dispatcher();
+    ThreadObj *thrd = calloc(sizeof(ThreadObj), nthreads);
     for (unsigned int i = 0; i < nthreads; i++) {
-        th[i].thrd = ThreadObj_create(battery_thread, &th[i], i + 1);
+        thrd[i] = ThreadObj_create(battery_thread, &tdisp, i + 1);
     }
     // Get data from threads
     for (size_t i = 0; i < nthreads; i++) {
-        ThreadObj_wait(&th[i].thrd);
+        ThreadObj_wait(&thrd[i]);
     }
     // Deallocate array
-    for (size_t i = 0; i < nthreads; i++) {
-        free(th[i].tests);
-        free(th[i].tests_inds);
-    }
-    free(th);
-    free(th_pos);
+    free(thrd);
+    free(tdisp.inds);
     (void) rtype;
 }
 

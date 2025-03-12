@@ -53,38 +53,24 @@ typedef struct rng_state_st {
     int counter;
 } rng_state_t;
 
-// get the N programmatically, useful for checking the value for which the library was compiled
-/*
-static inline int rng_get_N(void)
-{
-    return N;
-}
-*/
 
 uint64_t iterate_raw_vec(uint64_t* Y, uint64_t sumtotOld);
 
 
-//   FUNCTIONS FOR SEEDING
-
-void seed_spbox(rng_state_t* X, uint64_t seed);    // non-linear method, makes certified unique vectors,  probability for streams to collide is < 1/10^4600
-/*
-void fill_array(rng_state_t* X, unsigned int n, double *array); // fastest method: set n to a multiple of N (e.g. n=256)
-void iterate_and_fill_array(rng_state_t* X, double *array); // fills the array with N numbers
-*/
+// FUNCTIONS FOR SEEDING
+// non-linear method, makes certified unique vectors,  probability for streams to collide is < 1/10^4600
+void seed_spbox(rng_state_t* X, uint64_t seed);
 
 
 #define BITS  61
 
 /* magic with Mersenne Numbers */
-
 #define M61   2305843009213693951ULL
 #define MERSBASE M61 //xSUFF(M61)
 #define MOD_PAYNE(k) ((((k)) & MERSBASE) + (((k)) >> BITS) )  // slightly faster than my old way, ok for addition
 #define MOD_REM(k) ((k) % MERSBASE )  // latest Intel CPU is supposed to do this in one CPU cycle, but on my machines it seems to be 20% slower than the best tricks
 #define MOD_MERSENNE(k) MOD_PAYNE(k)
 #define INV_MERSBASE (0x1p-61)
-//#define INV_MERSBASE (0.4336808689942017736029811203479766845703E-18)
-//const double INV_MERSBASE=(0.4336808689942017736029811203479766845703E-18); // gives "duplicate symbol" error
 
 // Begin of fmodmulM61 implementation
 #if defined(__x86_64__)
@@ -160,24 +146,6 @@ static inline uint64_t get_next(rng_state_t* X)
     }
 }
 
-#if 0	
-static inline double get_next_float(rng_state_t *X)
-{
-    /* cast to signed int trick suggested by Andrzej Görlich     */
-    int64_t Z = (int64_t) get_next(X);
-    double F;
-#if defined(__GNUC__) && (__GNUC__ < 5) && (!defined(__ICC)) && defined(__x86_64__) && defined(__SSE2_MATH__) && defined(USE_INLINE_ASM)
-/* using SSE inline assemly to zero the xmm register, just before int64 -> double conversion,
-   not really necessary in GCC-5 or better, but huge penalty on earlier compilers 
- */
-   __asm__  __volatile__("pxor %0, %0; "
-                        :"=x"(F)
-                        );
-#endif
-    F=Z;
-    return F*INV_MERSBASE;
-}
-#endif
 
 #undef N
 
@@ -250,64 +218,6 @@ uint64_t iterate_raw_vec(uint64_t* Y, uint64_t sumtotOld)
 	return MOD_MERSENNE(MOD_MERSENNE(sumtot) + (ovflow <<3 ));
 }
 
-/**
- * @brief Return an array of n random numbers uniformly distributed in (0,1]
- */
-/*
-void fill_array(rng_state_t* X, unsigned int n, double *array)
-{
-    unsigned int i,j;
-    const int M = N - 1;
-    for (i=0; i<(n/M); i++){
-        iterate_and_fill_array(X, array+i*M);
-    }
-    unsigned int rem=(n % M);
-    if (rem) {
-        iterate(X);
-        for (j=0; j< (rem); j++){
-            array[M*i+j] = (int64_t)X->V[j] * (double)(INV_MERSBASE);
-        }
-        // Needed to continue with single fetches from the exact spot,
-        // but if you only use fill_array to get numbers then it is not necessary
-        X->counter = j;
-    } else {
-        X->counter = N;
-    }
-}
-*/
-
-/*
-void iterate_and_fill_array(rng_state_t* X, double *array)
-{
-    uint64_t *Y = X->V;
-    uint64_t tempP, tempV;
-#if (SPECIAL != 0)
-    uint64_t temp2 = Y[1];
-#endif
-    Y[0] = (tempV = X->sumtot);
-    uint64_t sumtot = Y[0], ovflow = 0; // will keep a running sum of all new elements
-    tempP = 0;             // will keep a partial sum of all old elements
-    for (int i = 1; i < N; i++) {
-#if (SPECIALMUL!=0)
-        uint64_t tempPO = MULWU(tempP);
-        tempP = modadd(tempP,Y[i]);
-        tempV = MOD_MERSENNE(tempV + tempP + tempPO); // edge cases ?
-#else
-        tempP = MOD_MERSENNE(tempP + Y[i]);
-        tempV = MOD_MERSENNE(tempV + tempP);
-#endif
-        Y[i] = tempV;
-        sumtot += tempV; if (sumtot < tempV) {ovflow++;}
-        array[i-1] = (int64_t)tempV * (double)(INV_MERSBASE);
-    }
-#if (SPECIAL!=0)
-    temp2 = MOD_MULSPEC(temp2);
-    Y[2] = modadd( Y[2] , temp2 );
-    sumtot += temp2; if (sumtot < temp2) {ovflow++;}
-#endif
-    X->sumtot = MOD_MERSENNE(MOD_MERSENNE(sumtot) + (ovflow <<3 ));
-}
-*/
 
 /**
  * @brief Non-linear seeding method, makes certified unique vectors,
@@ -339,10 +249,6 @@ void seed_spbox(rng_state_t* X, uint64_t seed)
 
 
 //////////////////////////////////////////////////////////////////////////////////
-
-
-
-
 
 static inline uint64_t get_bits_raw(void *state)
 {
