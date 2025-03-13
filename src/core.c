@@ -416,12 +416,50 @@ DECLARE_MUTEX(tests_dispatcher_mutex)
 typedef struct {
     size_t ord;
     size_t *inds;
+    size_t *res_thrd_ord;
     const TestsBattery *bat;
     size_t ntests;
     TestResults *results;
     const GeneratorInfo *gi;
     const CallerAPI *intf;
 } TestsDispatcher;
+
+
+void TestsDispatcher_init(TestsDispatcher *obj, const TestsBattery *bat,
+    const GeneratorInfo *gen, const CallerAPI *intf, TestResults *results,
+    int shuffle)
+{
+    size_t ntests = TestsBattery_ntests(bat);
+    obj->ord = 0;
+    obj->inds = calloc(ntests, sizeof(size_t));
+    obj->res_thrd_ord = calloc(ntests, sizeof(size_t));
+    obj->bat = bat;
+    obj->ntests = ntests;
+    obj->results = results;
+    obj->gi = gen;
+    obj->intf = intf;
+    for (size_t i = 0; i < ntests; i++) {
+        obj->inds[i] = i;
+    }
+    if (shuffle) {
+        uint64_t state = intf->get_seed64();
+        for (size_t i = 0; i < ntests; i++) {
+            state = pcg_bits64(&state);
+            size_t j = state % ntests;
+            size_t tmp = obj->inds[i];
+            obj->inds[i] = obj->inds[j];
+            obj->inds[j] = tmp;
+        }
+    }
+
+    INIT_MUTEX(tests_dispatcher_mutex);
+}
+
+void TestsDispatcher_free(TestsDispatcher *obj)
+{
+    free(obj->inds);
+    free(obj->res_thrd_ord);
+}
 
 
 size_t TestsDispatcher_get_ordinal(TestsDispatcher *obj)
@@ -457,6 +495,7 @@ static ThreadRetVal THREADFUNC_SPEC battery_thread(void *data)
             (long long) ind + 1, bat->tests[ind].name,
             (long long) ord + 1, (long long) th_data->ntests);
         th_data->results[ind] = TestDescription_run(&bat->tests[ind], &obj);
+        th_data->res_thrd_ord[ind] = thrd.ord;
         th_data->intf->printf(
             "^^^^^ Thread %u: test #%lld: %s (%lld of %lld) finished ^^^^^\n",
             thrd.ord,
@@ -475,35 +514,12 @@ static ThreadRetVal THREADFUNC_SPEC battery_thread(void *data)
 /**
  * @brief Run the test battery in the multithreaded mode.
  */
-static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
+static void TestsBattery_run_threads(const TestsBattery *bat,
     const GeneratorInfo *gen, const CallerAPI *intf,
     unsigned int nthreads, TestResults *results, ReportType rtype)
 {
     TestsDispatcher tdisp;
-    tdisp.ord = 0;
-    tdisp.inds = calloc(ntests, sizeof(size_t));
-    tdisp.bat = bat;
-    tdisp.ntests = ntests;
-    tdisp.results = results;
-    tdisp.gi = gen;
-    tdisp.intf = intf;
-    for (size_t i = 0; i < ntests; i++) {
-        tdisp.inds[i] = i;
-    }
-
-/*
-    uint64_t state = intf->get_seed64();
-    for (size_t i = 0; i < ntests; i++) {
-        state = pcg_bits64(&state);
-        size_t j = state % ntests;
-        size_t tmp = tdisp.inds[i];
-        tdisp.inds[i] = tdisp.inds[j];
-        tdisp.inds[j] = tmp;
-    }
-*/
-
-    INIT_MUTEX(tests_dispatcher_mutex);
-
+    TestsDispatcher_init(&tdisp, bat, gen, intf, results, 1);
     // Run threads
     init_thread_dispatcher();
     ThreadObj *thrd = calloc(sizeof(ThreadObj), nthreads);
@@ -515,8 +531,8 @@ static void TestsBattery_run_threads(const TestsBattery *bat, size_t ntests,
         ThreadObj_wait(&thrd[i]);
     }
     // Deallocate array
+    TestsDispatcher_free(&tdisp);
     free(thrd);
-    free(tdisp.inds);
     (void) rtype;
 }
 
@@ -699,7 +715,7 @@ void TestsBattery_run(const TestsBattery *bat,
         GeneratorState_free(&obj, intf);
     } else {
        // Multithreaded version
-       TestsBattery_run_threads(bat, ntests, gen, intf, nthreads, results, rtype);
+       TestsBattery_run_threads(bat, gen, intf, nthreads, results, rtype);
     }
     toc = time(NULL);
     printf("\n");
