@@ -665,7 +665,7 @@ batteries and have mainly historical and educational interest.
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      |       |         | 32 GiB
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 1 TiB
  xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      |       |         | 16 MiB
- xoroshiro128pp    | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 2 TiB
+ xoroshiro128pp    | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 16 TiB
  xoroshiro128pp_avx| u64    | +       | +     | +       | +    | 0.16 | +      | 4     |         | >= 1 TiB
  xoroshiro1024st   | u64    | 1       | 1     | 1       | 2    | 0.33 | +      |       |         | 128 GiB
  xoroshiro1024stst | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +       | >= 1 TiB
