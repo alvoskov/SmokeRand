@@ -141,13 +141,15 @@ rule link
 ]]
 
 
-function make_gcc_stub(cflags, gen_cflags, so_lflags, gen_lflags)
+function make_gcc_stub(cflags, gen_cflags, so_lflags, gen_lflags, compilers)
+    if compilers == nil then
+        compilers = "cc = gcc\ncxx = g++\n"
+    end
     return "cflags = -std=c99 -O3 -Werror -Wall -Wextra " .. cflags .. "\n" ..
     "cxxflags = -std=c++11 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native " .. cflags .. "\n" ..
     "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra " .. cflags .. "\n" ..
     "exe_libs = -lm\nexe_linkflags = " .. so_lflags .. "\n" ..
-    "cc = gcc\n" ..
-    "cxx = g++\n" ..
+    compilers ..
     "gen_cflags = $cflags -fPIC " .. gen_cflags .. "\n" ..
     "so_linkflags = -shared " .. so_lflags .. "\n" ..
     "gen_linkflags = -shared -fPIC " .. gen_lflags .. "\n"
@@ -171,7 +173,8 @@ elseif platform == 'mingw-hx' then
     gen_sources = cfg.get_gen_sources(true) -- Only portable generators are supported
 elseif platform == 'zigcc' then
     local e_cflags, gen_cflags = "-march=native -DUSE_WINTHREADS", ""
-    stub = make_gcc_stub(e_cflags, gen_cflags, "", gen_cflags) .. gcc_rules
+    local compilers = "cc = zig cc\ncxx = zig cpp\n"
+    stub = make_gcc_stub(e_cflags, gen_cflags, "", gen_cflags, compilers) .. gcc_rules
 elseif platform == 'msvc' then
     exe_ext = '.exe'
     -- /WX if treat warnings as errors
