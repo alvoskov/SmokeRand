@@ -49,21 +49,24 @@ static inline uint64_t rotr64(uint64_t x, unsigned int r)
 }
 
 
-//////////////////////////////////////////
-///// Custom DLL entry point for GCC /////
-//////////////////////////////////////////
+////////////////////////////////////////////////////
+///// Custom DLL entry point for GCC and clang /////
+////////////////////////////////////////////////////
 
-#if !defined(__cplusplus) && (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(__clang__)
+//#if !defined(__cplusplus) && (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(__clang__)
+#if !defined(NO_CUSTOM_DLLENTRY) && !defined(__cplusplus) && (defined(__MINGW32__) || defined(__MINGW64__))
+// -- Beginning of custom DLL entry for freestanding libraries
+#ifdef __clang__
+#define SHARED_ENTRYPOINT_CODE \
+int __stdcall _DllMainCRTStartup(void *hinstDLL, uint32_t fdwReason, void *lpvReserved) { \
+    (void) hinstDLL; (void) fdwReason; (void) lpvReserved; return 1; }
+#else
 #include <windows.h>
-
-#ifndef NO_CUSTOM_DLLENTRY
 #define SHARED_ENTRYPOINT_CODE \
 int WINAPI DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) { \
     (void) hinstDLL; (void) fdwReason; (void) lpvReserved; return TRUE; }
-#else
-#define SHARED_ENTRYPOINT_CODE
 #endif
-
+// -- Ending of custom DLL entry for freestanding libraries
 #else
 #define SHARED_ENTRYPOINT_CODE
 #endif

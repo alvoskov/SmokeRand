@@ -1,4 +1,4 @@
-cflags = -q -otexanhi -ol+ -d0 -6s -za99 -bm -bt=dos32a -Iinclude -dNOTHREADS -dNO_POSIX
+cflags = -q -otexanhi -ol+ -d0 -6s -za99 -bm -bt=dos32a -Iinclude -DNOTHREADS -DNO_POSIX
 coreobjs = obj\bat_brief.obj obj\bat_brief.obj obj\bat_default.obj obj\bat_express.obj &
     obj\bat_file.obj obj\bat_full.obj obj\bat_special.obj obj\core.obj obj\coretests.obj &
     obj\entropy.obj obj\extratests.obj obj\fileio.obj obj\hwtests.obj obj\lineardep.obj &
@@ -13,11 +13,11 @@ bin\peparse.exe: obj\peparse.obj obj\pe32loader.obj $(coreobjs)
 	wcl386 -q -6s -bcl=$(platform) -fe=bin\peparse.exe obj\peparse.obj obj\pe32loader.obj $(coreobjs)
 bin\testgens.exe: obj\testgens.obj $(coreobjs)
 	wcl386 -q -6s -bcl=$(platform) -fe=bin\testgens.exe $(coreobjs) obj\testgens.obj
-obj\testgens.obj: src\testgens.c
-	wcc386 $(cflags) -fo=obj\testgens.obj src\testgens.c
-obj\peparse.obj: src\peparse.c src\pe32loader.h
-	wcc386 $(cflags) -fo=obj\peparse.obj src\peparse.c
-obj\pe32loader.obj: src\pe32loader.c src\pe32loader.h
+obj\testgens.obj: apps\testgens.c
+	wcc386 $(cflags) -fo=obj\testgens.obj apps\testgens.c
+obj\peparse.obj: apps\peparse.c include\smokerand\pe32loader.h
+	wcc386 $(cflags) -fo=obj\peparse.obj apps\peparse.c
+obj\pe32loader.obj: src\pe32loader.c include\smokerand\pe32loader.h
 	wcc386 $(cflags) -fo=obj\pe32loader.obj src\pe32loader.c
 
 obj\bat_brief.obj: src\bat_brief.c
@@ -46,8 +46,8 @@ obj\hwtests.obj: src\hwtests.c
 	wcc386 $(cflags) -fo=obj\hwtests.obj src\hwtests.c
 obj\lineardep.obj: src\lineardep.c
 	wcc386 $(cflags) -fo=obj\lineardep.obj src\lineardep.c
-obj\smokerand.obj: src\smokerand.c
-	wcc386 $(cflags) -fo=obj\smokerand.obj src\smokerand.c
+obj\smokerand.obj: apps\smokerand.c
+	wcc386 $(cflags) -fo=obj\smokerand.obj apps\smokerand.c
 obj\specfuncs.obj: src\specfuncs.c
 	wcc386 $(cflags) -fo=obj\specfuncs.obj src\specfuncs.c
 obj\threads_intf.obj: src\threads_intf.c

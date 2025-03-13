@@ -65,6 +65,7 @@ cflags = $(cflags_generic) -bt=nt -DNO_X86_EXTENSIONS -DUSE_WINTHREADS
 cflags_dos32 = $(cflags_generic) -bt=DOS -DNOTHREADS -DNO_POSIX
 cc = wcc386
 lnk = wcl386
+appsrcdir = apps
 srcdir = src
 objdir = obj
 objdir_dos32 = dos32
@@ -117,11 +118,11 @@ for _, v in pairs(lib_headers) do
 end
 
 ---------- Object file with the main() function ----------
-io.write("$(objdir)/smokerand.obj: $(srcdir)/smokerand.c " .. lib_headers_str .. "\n")
-io.write("\twcc386 $(cflags) -fo=$(objdir)/smokerand.obj $(srcdir)/smokerand.c\n")
+io.write("$(objdir)/smokerand.obj: $(appsrcdir)/smokerand.c " .. lib_headers_str .. "\n")
+io.write("\twcc386 $(cflags) -fo=$(objdir)/smokerand.obj $(appsrcdir)/smokerand.c\n")
 
-io.write("$(objdir_dos32)/smokerand.obj: $(srcdir)/smokerand.c " .. lib_headers_str .. "\n")
-io.write("\twcc386 $(cflags_dos32) -fo=$(objdir_dos32)/smokerand.obj $(srcdir)/smokerand.c\n")
+io.write("$(objdir_dos32)/smokerand.obj: $(appsrcdir)/smokerand.c " .. lib_headers_str .. "\n")
+io.write("\twcc386 $(cflags_dos32) -fo=$(objdir_dos32)/smokerand.obj $(appsrcdir)/smokerand.c\n")
 
 io.write("$(objdir_dos32)/pe32loader.obj: $(srcdir)/pe32loader.c " .. lib_headers_str .. "\n")
 io.write("\twcc386 $(cflags_dos32) -fo=$(objdir_dos32)/pe32loader.obj $(srcdir)/pe32loader.c\n")
@@ -130,8 +131,8 @@ io.write("\twcc386 $(cflags_dos32) -fo=$(objdir_dos32)/pe32loader.obj $(srcdir)/
 io.write("$(bindir)/srtiny16.exe: $(objdir_dos32)/srtiny16.obj $(objdir_dos32)/spfunc16.obj\n")
 io.write("\twcl -s -q -otexanh $(objdir_dos32)/srtiny16.obj $(objdir_dos32)/spfunc16.obj " ..
     "-fe=$(bindir)/srtiny16.exe\n")
-io.write("$(objdir_dos32)/srtiny16.obj: $(srcdir)/sr_tiny.c\n")
-io.write("\twcc -s -q -otexanh $(srcdir)/sr_tiny.c -fo=$(objdir_dos32)/srtiny16.obj -Iinclude\n")
+io.write("$(objdir_dos32)/srtiny16.obj: $(appsrcdir)/sr_tiny.c\n")
+io.write("\twcc -s -q -otexanh $(appsrcdir)/sr_tiny.c -fo=$(objdir_dos32)/srtiny16.obj -Iinclude\n")
 io.write("$(objdir_dos32)/spfunc16.obj: $(srcdir)/specfuncs.c\n")
 io.write("\twcc -s -q -otexanh $(srcdir)/specfuncs.c -fo=$(objdir_dos32)/spfunc16.obj -Iinclude\n")
 

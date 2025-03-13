@@ -26,8 +26,7 @@
 #define RANLUXPP_MULMOD_H
 
 #include "ranluxpp_helpers.h"
-
-#include <inttypes.h>
+#include <stdint.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"

@@ -1,5 +1,5 @@
 /**
- * @file crand.c
+ * @file test_crand.c
  * @brief PRNG based on C rand() function. DON'T USE IN A MULTITHREADING
  * ENVIRONMENT! FOR EXPERIMENTAL PURPOSES ONLY!
  * @details The quality of this generator is entirely dependent on the
@@ -9,7 +9,7 @@
  * 1. MinGW and MSVC: some 32-bit modulo 2^{32} that returns the higher
  *    15 bits (bits 30..16). Fails almost everything.
  * 2. GCC (glibc): lagged Fibonacci PRNG with short lags initialized
- *    by minstd algorithm. Fails some modifications of Hamming DC6 test.
+ *    by minstd algorithm. Fails some modifications of `hamming_ot` test.
  *
  * This PRNG is also VERY SLOW and NOT THREAD SAFE!
  *
@@ -19,11 +19,12 @@
  *
  * This software is licensed under the MIT license.
  */
-#include "smokerand/cinterface.h"
+#include "smokerand_core.h"
+#include "smokerand_bat.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-static inline uint64_t get_bits_raw(void *state)
+static uint64_t get_bits(void *state)
 {
     uint32_t x = 0;
     for (int i = 0; i < 4; i++) {
@@ -33,7 +34,6 @@ static inline uint64_t get_bits_raw(void *state)
     return x;
 }
 
-
 /**
  * @brief Just seeds PRNG from C standard library. So this PRNG has
  * no local state and IS NOT THREAD SAFE!
@@ -41,10 +41,35 @@ static inline uint64_t get_bits_raw(void *state)
  * it will distort the results of statistical tests due to effect similar
  * to decimation in ranlux.
  */
-static void *create(const CallerAPI *intf)
+static void *gen_create(const GeneratorInfo *gi, const CallerAPI *intf)
 {
+    (void) gi;
     srand(intf->get_seed64());
-    return NULL;
+    return intf->malloc(sizeof(uint64_t));
 }
 
-MAKE_UINT32_PRNG("crand", NULL)
+static void gen_free(void *state, const GeneratorInfo *info, const CallerAPI *intf)
+{
+    (void) info;
+    intf->free(state);
+}
+
+int main()
+{
+    static const GeneratorInfo gen = {
+        .name = "crand",
+        .description = "rand() function test",
+        .nbits = 32,
+        .create = gen_create,
+        .free = gen_free,
+        .get_bits = get_bits,
+        .self_test = NULL,
+        .get_sum = NULL,
+        .parent = NULL
+    };
+
+    CallerAPI intf = CallerAPI_init_mthr();
+    battery_default(&gen, &intf, TESTS_ALL, 4, REPORT_FULL);
+    CallerAPI_free();
+    return 0;
+}

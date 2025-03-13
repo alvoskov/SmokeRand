@@ -13,7 +13,7 @@
 #include "smokerand/lineardep.h"
 #include "smokerand/entropy.h"
 
-void battery_default(GeneratorInfo *gen, CallerAPI *intf,
+void battery_default(const GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
     // Monobit frequency test options

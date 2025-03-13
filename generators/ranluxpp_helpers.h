@@ -3,7 +3,7 @@
  * ranluxpp-portable and ROOT Data Analysis Framework.
  *
  * @copyright (c) 2020-2021 Jonas Hahfeld, Jirka Hladky (original library);
- * (c) 2024 Alexey L. Voskov (modifications for TestU01-threads and MinGW)
+ * (c) 2024-2025 Alexey L. Voskov (modifications for SmokeRand and MinGW)
  *
  * @license This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,9 +24,7 @@
  */
 #ifndef RANLUXPP_HELPERS_H
 #define RANLUXPP_HELPERS_H
-#include <stdio.h>
-
-#include <inttypes.h>
+#include <stdint.h>
 
 /// Compute `a + b` and set `overflow` accordingly.
 static inline uint64_t add_overflow(uint64_t a, uint64_t b, unsigned *overflow)

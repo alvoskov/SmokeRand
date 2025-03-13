@@ -60,27 +60,48 @@ target_include_directories(smokerand_bat PRIVATE include)
 
 # Executables
 # a) Main executable
-add_executable(smokerand src/smokerand.c)
+add_executable(smokerand apps/smokerand.c)
 target_include_directories(smokerand PRIVATE include)
 target_link_libraries(smokerand smokerand_bat smokerand_core ${COMMON_LIBS})
 
-# b) Some tests
-set(TESTS calibrate_dc6 test_funcs test_rdseed)
+# b) Simplified version
+add_executable(sr_tiny apps/sr_tiny.c src/specfuncs.c)
+target_include_directories(sr_tiny PRIVATE include)
+target_link_libraries(sr_tiny ${COMMON_LIBS})
+
+# c) PE loader for 32-bit systems
+add_executable(peparse apps/peparse.c src/pe32loader.c)
+target_include_directories(peparse PRIVATE include)
+target_link_libraries(peparse smokerand_core ${COMMON_LIBS})
+
+# d) Some tests
+set(TESTS calibrate_dc6 calibrate_linearcomp test_funcs test_rdseed)
 foreach(testname ${TESTS})
-    add_executable(${testname} src/${testname}.c)
+    add_executable(${testname} apps/${testname}.c)
     target_include_directories(${testname} PRIVATE include)
     target_link_libraries(${testname} smokerand_core ${COMMON_LIBS})
 endforeach()
 
-# c) Call batteries from C++
-add_executable(test_cpp11 src/test_cpp11.cpp)
+# e) Call batteries from C++
+add_executable(test_cpp11 apps/test_cpp11.cpp)
 target_include_directories(test_cpp11 PRIVATE include)
 target_link_libraries(test_cpp11 smokerand_bat smokerand_core ${COMMON_LIBS})
+
+# f) Embedded batteries
+add_executable(testgens apps/testgens.c)
+target_include_directories(testgens PRIVATE include)
+target_link_libraries(testgens smokerand_bat smokerand_core ${COMMON_LIBS})
+
+# crand uses standard library, so we can't link it as a freestanding
+# dynamic linked (shared) library.
+add_executable(test_crand apps/test_crand.c)
+target_include_directories(test_crand PRIVATE include)
+target_link_libraries(test_crand smokerand_bat smokerand_core ${COMMON_LIBS})
 
 # Generators list
 if (ONLY_PORTABLE)
     message("Only portable generators will be compiled")
-    set(GENERATORS alfib_lux alfib_mod alfib ara32 chacha cmwc4096 coveyou64 crand 
+    set(GENERATORS alfib_lux alfib_mod alfib ara32 chacha cmwc4096 coveyou64
     cwg64 des drand48 efiix64x48 flea32x1 hc256 isaac64 kiss64 kiss93 
     kiss99 lcg128_u32_portable lcg32prime lcg64 lcg69069 lcg96_portable 
     lfib4 lfib4_u64 lfib_par lfsr113 lfsr258 loop_7fff_w64 lrnd64 
@@ -98,7 +119,7 @@ if (ONLY_PORTABLE)
 else()
     message("All generators will be compiled")
     set(GENERATORS aesni alfib_lux alfib_mod alfib ara32 chacha_avx chacha cmwc4096 
-    coveyou64 crand cwg64 des drand48 efiix64x48 flea32x1 hc256 isaac64 
+    coveyou64 cwg64 des drand48 efiix64x48 flea32x1 hc256 isaac64 
     kiss64 kiss93 kiss99 lcg128_full lcg128 lcg128_u32_full lcg128_u32_portable 
     lcg32prime lcg64prime lcg64 lcg69069 lcg96_portable lcg96 lfib4 
     lfib4_u64 lfib_par lfsr113 lfsr258 loop_7fff_w64 lrnd64 lxm_64x128 
@@ -121,13 +142,8 @@ endif()
 # Examples of plugins, i.e. modules with PRNGs
 foreach(prng_name ${GENERATORS})
     add_library(${prng_name} SHARED generators/${prng_name}.c include/smokerand/cinterface.h)
-    if (NOT ${prng_name} STREQUAL "crand")
-        # crand uses standard library, so we can't link it as a freestanding
-        # appication. All other modules don't use standard library and are
-        # freestanding.
-        set_target_properties(${prng_name} PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
-        target_compile_options(${prng_name} PRIVATE ${FREESTANDING}) 
-    endif()
+    set_target_properties(${prng_name} PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
+    target_compile_options(${prng_name} PRIVATE ${FREESTANDING}) 
     set_target_properties(${prng_name} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
     set_target_properties(${prng_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
     set_target_properties(${prng_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)

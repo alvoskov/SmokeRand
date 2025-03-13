@@ -12,7 +12,7 @@ local lib_headers = {'apidefs.h', 'cinterface.h', 'core.h', 'coretests.h',
 -- List of all generators; some of them are not portable, e.g. can require
 -- AVX or AESNI extensions, 128-bit arithmetics etc.
 local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
-    'chacha_avx',  'chacha', 'cmwc4096', 'coveyou64', 'crand', 'cwg64', 'des',
+    'chacha_avx',  'chacha', 'cmwc4096', 'coveyou64', 'cwg64', 'des',
     'drand48', 'efiix64x48', 'flea32x1', 'hc256', 'isaac64', 'kiss64',
     'kiss93', 'kiss99', 'lcg128_full', 'lcg128', 'lcg128_u32_full',
     'lcg128_u32_portable', 'lcg32prime', 'lcg64prime',  'lcg64', 'lcg69069',

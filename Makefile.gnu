@@ -47,6 +47,7 @@ CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes
 LINKFLAGS = $(PLATFORM_FLAGS)
 INCLUDE = -Iinclude
 
+APPSRCDIR = apps
 SRCDIR = src
 OBJDIR = obj
 BINDIR = bin
@@ -84,7 +85,8 @@ BATLIB_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_express.h bat_brief.h bat_defau
     include/smokerand_bat.h
 BATLIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(BATLIB_SOURCES)))
 # Executables
-EXEC_NAMES = smokerand sr_tiny calibrate_linearcomp calibrate_dc6 test_funcs test_rdseed testgens
+EXEC_NAMES = smokerand sr_tiny calibrate_linearcomp calibrate_dc6 \
+    test_crand test_funcs test_rdseed testgens
 EXEC_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXEC_NAMES)))
 EXECXX_NAMES = test_cpp11
 EXECXX_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXECXX_NAMES)))
@@ -94,7 +96,7 @@ GEN_CUSTOM_SOURCES = $(addsuffix .c,$(addprefix generators/, ranluxpp \
     superduper64 superduper64_u32))
 ifeq ($(IS_PORTABLE), 1)
 GEN_ALL_SOURCES = $(addsuffix .c,$(addprefix generators/, \
-    alfib_lux alfib_mod alfib ara32 chacha cmwc4096 coveyou64 crand \
+    alfib_lux alfib_mod alfib ara32 chacha cmwc4096 coveyou64 \
     cwg64 des drand48 efiix64x48 flea32x1 hc256 isaac64 kiss64 kiss93 \
     kiss99 lcg128_u32_portable lcg32prime lcg64 lcg69069 lcg96_portable \
     lfib4 lfib4_u64 lfib_par lfsr113 lfsr258 loop_7fff_w64 lrnd64 \
@@ -127,8 +129,8 @@ $(CORE_LIB): $(LIB_OBJFILES)
 $(BAT_LIB): $(BATLIB_OBJFILES)
 	$(AR) rcu $@ $^
 
-$(BINDIR)/sr_tiny$(EXE): $(SRCDIR)/sr_tiny.c $(SRCDIR)/specfuncs.c include/smokerand/specfuncs.h
-	$(CC) $(CFLAGS89) $(LINKFLAGS) $(SRCDIR)/sr_tiny.c $(SRCDIR)/specfuncs.c -o $@ -lm $(INCLUDE) 
+$(BINDIR)/sr_tiny$(EXE): $(APPSRCDIR)/sr_tiny.c $(SRCDIR)/specfuncs.c include/smokerand/specfuncs.h
+	$(CC) $(CFLAGS89) $(LINKFLAGS) $(APPSRCDIR)/sr_tiny.c $(SRCDIR)/specfuncs.c -o $@ -lm $(INCLUDE) 
 
 $(BINDIR)/smokerand$(EXE): $(OBJDIR)/smokerand.o $(CORE_LIB) $(BAT_LIB) $(BAT_HEADERS)
 	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
@@ -142,6 +144,9 @@ $(BINDIR)/calibrate_linearcomp$(EXE): $(OBJDIR)/calibrate_linearcomp.o $(CORE_LI
 $(BINDIR)/test_cpp11$(EXE): $(OBJDIR)/test_cpp11.o $(CORE_LIB)
 	$(CXX) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
 
+$(BINDIR)/test_crand$(EXE): $(OBJDIR)/test_crand.o $(CORE_LIB)
+	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
+
 $(BINDIR)/test_funcs$(EXE): $(OBJDIR)/test_funcs.o $(CORE_LIB)
 	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
 
@@ -151,10 +156,13 @@ $(BINDIR)/test_rdseed$(EXE): $(OBJDIR)/test_rdseed.o $(CORE_LIB)
 $(BINDIR)/testgens$(EXE): $(OBJDIR)/testgens.o $(CORE_LIB) $(BAT_LIB) $(BAT_HEADERS)
 	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
 
-$(LIB_OBJFILES) $(BATLIB_OBJFILES) $(EXEC_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.c $(LIB_HEADERS)
+$(LIB_OBJFILES) $(BATLIB_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.c $(LIB_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
-$(EXECXX_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp $(LIB_HEADERS)
+$(EXEC_OBJFILES): $(OBJDIR)/%.o : $(APPSRCDIR)/%.c $(LIB_HEADERS)
+	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
+
+$(EXECXX_OBJFILES): $(OBJDIR)/%.o : $(APPSRCDIR)/%.cpp $(LIB_HEADERS)
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -o $@
 
 
@@ -163,8 +171,8 @@ $(EXECXX_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp $(LIB_HEADERS)
 generators: $(GEN_SHARED)
 
 # Linking crand PRNG requires linking with C standard library
-$(GEN_BINDIR)/libcrand$(SO): $(GEN_BINDIR)/obj/crand.o
-	$(CC) $(LINKFLAGS) -shared $< -s $(GEN_LFLAGS) -o $@
+#$(GEN_BINDIR)/libcrand$(SO): $(GEN_BINDIR)/obj/crand.o
+#	$(CC) $(LINKFLAGS) -shared $< -s $(GEN_LFLAGS) -o $@
 
 # Generic rules for linking PRNG plugins
 $(GEN_BINDIR)/lib%$(SO): $(GEN_BINDIR)/obj/%.o
