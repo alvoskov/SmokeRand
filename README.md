@@ -525,7 +525,7 @@ batteries and have mainly historical and educational interest.
  chacha            | u32    | +       | +     | +       | +    | 2.0  | N/A    | 4     | +       | >= 1 TiB
  chacha_avx        | u32    | +       | +     | +       | +    | 0.7  | +      | 4     | +       | >= 2 TiB
  chacha_ctr32      | u32    | +       | +     | +       | 1    | 2.0  | N/A    | 0     | +       | 256 GiB
- cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | N/A    | 4     | +       | >= 32 TiB
+ cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | +      | 4     | +       | >= 32 TiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 16 TiB
  des-ctr           | u64    | +       | +     | +       |      | 24   |        |       |         | >= 4 TiB
@@ -533,7 +533,7 @@ batteries and have mainly historical and educational interest.
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 2 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 4     | +       | >= 32 TiB
  flea32x1          | u32    | +       | +     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
- hc256             | u32    | +       | +     | +       | +    | 1.1  | N/A    | 4     | +       | >= 32 TiB
+ hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 32 TiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 16 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
@@ -545,7 +545,7 @@ batteries and have mainly historical and educational interest.
  lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | 3     | +       | 64 GiB
  lcg128_u32_full   | u32    | +       | +     | 1       | 1    | 0.75 | N/A    | 3     | +       | >= 32 TiB
  lcg69069          | u32    | 4       | 19    | 37/38   | 42   | 0.38 | N/A    | 0     | -       | 2 KiB
- lfib_par[31+]     | u32    | 1       | 5/6   | 6/7     | 10   | 0.70 | N/A    | 0     | -       | 32 MiB
+ lfib_par[31+]     | u32    | 1       | 5/6   | 6/7     | 10   | 0.70 | +      | 0     | -       | 32 MiB
  lfib_par[55+]     | u32    | 1       | 4     | 5       | 7    | 0.51 | N/A    | 0     | -       | 2 GiB
  lfib_par[55-]     | u32    | 1       | 4     | 5       | 7    | 0.51 | N/A    | 0     | -       | 2 GiB
  lfib_par[127+]    | u32    | 1       | 4     | 4       | 5    | 0.48 | N/A    | 0     | -/Small | 512 MiB
@@ -554,7 +554,7 @@ batteries and have mainly historical and educational interest.
  lfib_par[258-]    | u32    | 1       | 4     | 4       | 5    | 0.46 | N/A    | 0     | Small   | 8 GiB
  lfib_par[378+]    | u32    | 1       | 4     | 4       | 5    | 0.46 | N/A    | 0     | Small   | 32 GiB
  lfib_par[378-]    | u32    | 1       | 4     | 4       | 5    | 0.45 | N/A    | 0     | Small   | 32 GiB
- lfib_par[607+]    | u32    | 1       | 4     | 4       | 5    | 0.41 | N/A    | 0     | Small   | 256 GiB
+ lfib_par[607+]    | u32    | 1       | 4     | 4       | 5    | 0.41 | +      | 0     | Small   | 256 GiB
  lfib_par[607-]    | u32    | 1       | 4     | 4       | 5    | 0.40 | N/A    | 0     | Small   | 256 GiB
  lfib_par[1279+]   | u32    | 1       | 3/4   | 3/4     | 4/5  | 0.40 | N/A    | 0     | Crush   | 1 TiB
  lfib_par[1279-]   | u32    | 1       | 3/4   | 3/4     | 4/5  | 0.40 | N/A    | 0     | Crush   | 1 TiB
@@ -570,8 +570,8 @@ batteries and have mainly historical and educational interest.
  lfib_par[19937-]  | u32    | +       | +     | 1       | 1    | 0.48 | N/A    | 2     | +       |
  lfib_par[44497+]  | u32    | +       | +     | 1       | 1    | 0.49 | N/A    | 2     | +       |
  lfib_par[44497-]  | u32    | +       | +     | 1       | 1    | 0.49 | N/A    | 2     | +       |
- lfib_par[110503+] | u32    | +       | +     | +       | +    | 0.52 | N/A    | 4     | +       |
- lfib_par[110503-] | u32    | +       | +     | +       | +    | 0.50 | N/A    | 4     | +       |
+ lfib_par[110503+] | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       |
+ lfib_par[110503-] | u32    | +       | +     | +       | +    | 0.50 | +      | 4     | +       |
  lfib4             | u32    | 1       | 1     | 3       | 4    | 0.37 | N/A    |       | +       | 32 MiB
  lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | N/A    |       |         | >= 32 TiB
  lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | N/A    | 2.25  | Small   | 32 KiB 
@@ -595,12 +595,12 @@ batteries and have mainly historical and educational interest.
  mwc64x            | u32    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 16 TiB
  mwc128            | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 16 TiB
  mwc128x           | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 32 TiB
- mwc1616           | u32    | +       | 10/11 | 12/18   | 19   | 0.48 | N/A    | 0     | -/Small | 16 MiB
+ mwc1616           | u32    | +       | 10/11 | 12/18   | 19   | 0.48 | -      | 0     | -/Small | 16 MiB
  mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | +       | >= 32 TiB(?)
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 32 TiB
- mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | N/A    | 2     | +       | 1 GiB
- pcg32             | u32    | +       | +     | +       | +    | 0.44 | N/A    | 4     | +       | >= 32 TiB(?)
- pcg32_xsl_rr      | u32    | +       | +     | +       | +    | 0.58 | N/A    | 4     |         | 256 GiB
+ mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 1 GiB
+ pcg32             | u32    | +       | +     | +       | +    | 0.44 | +      | 4     | +       | >= 32 TiB(?)
+ pcg32_xsl_rr      | u32    | +       | +     | +       | +    | 0.58 | +      | 4     |         | 256 GiB
  pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | 3     | +       | >= 2 TiB
  pcg64_xsl_rr      | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
  philox            | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
@@ -619,7 +619,7 @@ batteries and have mainly historical and educational interest.
  ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | N/A    |       |         | >= 2 TiB
  ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | N/A    |       |         | >= 1 TiB
  ranval            | u32    | +       | +     | +       | +    | 0.31 | N/A    | 4(0)  | +       | >= 4 TiB
- r1279             | u32    | 2       | 5     | 7       | 10   | 0.47 | N/A    | 0     | Small   | 64 MiB
+ r1279             | u32    | 2       | 5     | 7       | 10   | 0.47 | +      | 0     | Small   | 64 MiB
  ranlux[0]         | u32    | 1       | 6     | 9       | 12   | 6.8  | N/A    |       |         | 4 MiB
  ranlux[1]         | u32    | +       | +     | 2       | 3    | 13   | N/A    |       |         | 4 GiB
  ranlux[2]         | u32    | +       | +     | +       | +    | 27   | N/A    |       |         | >= 128 GiB
@@ -670,8 +670,8 @@ batteries and have mainly historical and educational interest.
  xoroshiro1024st   | u64    | 1       | 1     | 1       | 2    | 0.33 | +      |       |         | 128 GiB
  xoroshiro1024stst | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +       | >= 1 TiB
  xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | +      | 0     | Small   | 128 KiB
- xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 |        |       |         | 8 MiB
- xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 |        |       |         | >= 16 TiB
+ xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      |       |         | 8 MiB
+ xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      |       |         | >= 16 TiB
  xsh               | u64    | 2       | 8     | 13      | 17   | 0.43 | -      | 0     | -       | 32 KiB
 
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
