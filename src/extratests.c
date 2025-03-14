@@ -70,6 +70,31 @@ static int cmp_ints(const void *aptr, const void *bptr)
     else { return 1; }
 }
 
+/**
+ * @brief Generate truncated pseudorandom value
+ */
+static inline uint64_t birthday_gen_trvalue(GeneratorState *obj, uint64_t mask, int *is_ok)
+{
+    uint64_t u;
+    long ctr = 0;
+    static const long ctr_max = 10000000;
+    if (obj->gi->nbits == 64) {
+        do {            
+            u = obj->gi->get_bits(obj->state);
+            ctr++;
+        } while ((u & mask) != 0 && ctr < ctr_max);
+    } else {
+        do {
+            uint64_t lo = obj->gi->get_bits(obj->state);
+            uint64_t hi = obj->gi->get_bits(obj->state);
+            u = (hi << 32) | lo;
+            ctr++;
+        } while ((u & mask) != 0 && ctr < ctr_max);
+    }
+    *is_ok = ctr < ctr_max;
+    return u;
+}
+
 
 /**
  * @brief Birthday paradox (not birthday spacings!) test for 64-bit pseudorandom
@@ -102,6 +127,8 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
     TestResults ans = TestResults_create("birthday");
     unsigned int nbits_per_value = birthday_get_nbits_per_value(obj->gi);
     double lambda = BirthdayOptions_calc_lambda(opts, nbits_per_value);
+    obj->intf->printf("  Sample size: 2^%.2f values\n", sr_log2(opts->n));
+    obj->intf->printf("  Shift:       %d bits\n", (int) opts->e);
     obj->intf->printf("  lambda = %g\n", lambda);
     obj->intf->printf("  Filling the array with 'birthdays'\n");
     uint64_t mask = (1ull << opts->e) - 1;
@@ -113,21 +140,18 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
         return ans;
     }
     for (size_t i = 0; i < opts->n; i++) {
-        uint64_t u;
-        if (obj->gi->nbits == 64) {
-            do {            
-                u = obj->gi->get_bits(obj->state);
-            } while ((u & mask) != 0);
-        } else {
-            do {
-                uint64_t lo = obj->gi->get_bits(obj->state);
-                uint64_t hi = obj->gi->get_bits(obj->state);
-                u = (hi << 32) | lo;
-            } while ((u & mask) != 0);
+        int is_ok;
+        x[i] = birthday_gen_trvalue(obj, mask, &is_ok);
+        if (!is_ok) {
+            obj->intf->printf("  The generator is too flawed to return a truncated value\n");
+            ans.x = 0;
+            ans.p = poisson_cdf(ans.x, lambda);
+            ans.alpha = poisson_pvalue(ans.x, lambda);
+            free(x);
+            return ans;
         }
-        x[i] = u;
         if (i % (opts->n / 1000) == 0) {
-            unsigned long nseconds_total, nseconds_left;            
+            unsigned long nseconds_total, nseconds_left;
             nseconds_total = time(NULL) - tic;
             nseconds_left = ((unsigned long long) nseconds_total * (opts->n - i)) / (i + 1);
             obj->intf->printf("\r    %.1f %% completed; ", 100.0 * i / (double) opts->n);
@@ -182,7 +206,7 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
  */
 void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
 {
-    static const size_t log2_n = (SIZE_MAX == UINT64_MAX) ? 30 : 27;
+    static const int log2_n = (SIZE_MAX == UINT64_MAX) ? 30 : 27;
     unsigned int nbits_per_value = birthday_get_nbits_per_value(gen);
     BirthdayOptions opts_small = BirthdayOptions_create(gen, log2_n, 2);
     BirthdayOptions opts_large = BirthdayOptions_create(gen, log2_n, 4);

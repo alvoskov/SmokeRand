@@ -520,7 +520,7 @@ batteries and have mainly historical and educational interest.
  aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      | 4     |         | >= 32 TiB
  alfib             | u64    | 2       | 5     | 6       | 8    | 0.23 | +      | 0     | Small   | 128 MiB
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    | 3.75  | +       | 4 GiB
- alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | N/A    | 4     | +       | 1 TiB
+ alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 4     | +       | 1 TiB
  ara32             | u32    | +       | +     | 1       | 1    | 0.96 | +      | 2     | +       | 512 MiB
  chacha            | u32    | +       | +     | +       | +    | 2.0  | N/A    | 4     | +       | >= 1 TiB
  chacha_avx        | u32    | +       | +     | +       | +    | 0.7  | +      | 4     | +       | >= 2 TiB
@@ -544,7 +544,7 @@ batteries and have mainly historical and educational interest.
  lcg128            | u64    | +       | 1     | 1       | 1    | 0.35 | +      | 3     | +       | 64 GiB
  lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | 3     | +       | 64 GiB
  lcg128_u32_full   | u32    | +       | +     | 1       | 1    | 0.75 | +      | 3     | +       | >= 32 TiB
- lcg69069          | u32    | 4       | 19    | 37/38   | 42   | 0.38 | N/A    | 0     | -       | 2 KiB
+ lcg69069          | u32    | 4       | 19    | 37/38   | 42   | 0.38 | -(>>10)| 0     | -       | 2 KiB
  lfib_par[31+]     | u32    | 1       | 5/6   | 6/7     | 10   | 0.70 | +      | 0     | -       | 32 MiB
  lfib_par[55+]     | u32    | 1       | 4     | 5       | 7    | 0.51 | +      | 0     | -       | 2 GiB
  lfib_par[55-]     | u32    | 1       | 4     | 5       | 7    | 0.51 | +      | 0     | -       | 2 GiB
@@ -573,16 +573,16 @@ batteries and have mainly historical and educational interest.
  lfib_par[110503+] | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       |
  lfib_par[110503-] | u32    | +       | +     | +       | +    | 0.50 | +      | 4     | +       |
  lfib4             | u32    | 1       | 1     | 3       | 4    | 0.37 | N/A    |       | +       | 32 MiB
- lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | N/A    |       |         | >= 32 TiB
+ lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | N/A    | 4     |         | >= 32 TiB
  lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | N/A    | 2.25  | Small   | 32 KiB 
  lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | 2.25  | Small   | 1 MiB
  lrnd64            | u64    | 2       | 3     | 5       | 7    | 0.44 | +      | 2.25  |         | 4 MiB
  lxm_64x128        | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 32 TiB
- macmarsa          | u32    | 2       | 12    | 18      | 19   | 0.67 |        | 0     |         | 128 KiB
+ macmarsa          | u32    | 2       | 12    | 18      | 19   | 0.67 | -(>>10)| 0     |         | 128 KiB
  magma             | u64    | +       | +     | +       | +    | 25   |        |       |         |
  magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      | 3     |         | >= 2 TiB
  magma_avx-cbc     | u64    | +       | +     | +       | +    | 7.1  | +      | 4     |         | >= 2 TiB
- minstd            | u32    | 4       | 20    | 38      | 42   | 2.4  | N/A    | 0     | -       | 1 KiB
+ minstd            | u32    | 4       | 20    | 38      | 42   | 2.4  | -(>>10)| 0     | -       | 1 KiB
  mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | N/A    | 4     | +       | >= 16 TiB
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | +      | 4     | +       | >= 32 TiB
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.50 | +      | 3.25  | Small   | 128 GiB
@@ -609,7 +609,7 @@ batteries and have mainly historical and educational interest.
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      |       |         | 512 KiB
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      |       |         | 2 MiB
- randu             | u32    | 4       | 21    | 39      | 43   | 0.41 | N/A    | 0     | -       | 1 KiB
+ randu             | u32    | 4       | 21    | 39      | 43   | 0.41 | -(>>10)| 0     | -       | 1 KiB
  ranlux++          | u64    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 32 TiB
  ranrot_bi         | u64    | +       | +     | +       | 1/3  | 0.33 | +      |       |         | 8 GiB
  ranrot32[7/3]     | u32    | +       | 1/2   | 4/5     | 5    | 0.58 | +      | 0     | Small   | 128 MiB
