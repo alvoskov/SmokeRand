@@ -572,9 +572,9 @@ batteries and have mainly historical and educational interest.
  lfib_par[44497-]  | u32    | +       | +     | 1       | 1    | 0.49 | +      | 2     | +       |
  lfib_par[110503+] | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       |
  lfib_par[110503-] | u32    | +       | +     | +       | +    | 0.50 | +      | 4     | +       |
- lfib4             | u32    | 1       | 1     | 3       | 4    | 0.37 | N/A    |       | +       | 32 MiB
+ lfib4             | u32    | 1       | 1     | 3       | 4    | 0.37 | +      | 3     | +       | 32 MiB
  lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | N/A    | 4     |         | >= 32 TiB
- lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | N/A    | 2.25  | Small   | 32 KiB 
+ lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | +      | 2.25  | Small   | 32 KiB 
  lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | 2.25  | Small   | 1 MiB
  lrnd64            | u64    | 2       | 3     | 5       | 7    | 0.44 | +      | 2.25  |         | 4 MiB
  lxm_64x128        | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 32 TiB
@@ -591,7 +591,7 @@ batteries and have mainly historical and educational interest.
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 2 TiB
  mulberry32        | u32    | +       | 1     | 2       | 4    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
  mwc32x            | u32    | +       | 2     | 2       | 7    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
- mwc64             | u32    | +       | 1     | 2       | 4    | 0.37 | -      |       | Small   | 1 TiB
+ mwc64             | u32    | +       | 1     | 2       | 4    | 0.37 | -      | 0     | Small   | 1 TiB
  mwc64x            | u32    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 16 TiB
  mwc128            | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 16 TiB
  mwc128x           | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 32 TiB
@@ -607,7 +607,7 @@ batteries and have mainly historical and educational interest.
  philox2x32        | u32    | +       | +     | +       | +    | 1.6  | -      | 3     |         | >= 32 TiB
  philox32          | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
- ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      |       |         | 512 KiB
+ ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      | 0     |         | 512 KiB
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      |       |         | 2 MiB
  randu             | u32    | 4       | 21    | 39      | 43   | 0.41 | -(>>10)| 0     | -       | 1 KiB
  ranlux++          | u64    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 32 TiB
@@ -665,10 +665,10 @@ batteries and have mainly historical and educational interest.
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      |       |         | 32 GiB
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 1 TiB
  xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      |       |         | 16 MiB
- xoroshiro128pp    | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 16 TiB
+ xoroshiro128pp    | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 32 TiB
  xoroshiro128pp_avx| u64    | +       | +     | +       | +    | 0.16 | +      | 4     |         | >= 1 TiB
  xoroshiro1024st   | u64    | 1       | 1     | 1       | 2    | 0.33 | +      |       |         | 128 GiB
- xoroshiro1024stst | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +       | >= 1 TiB
+ xoroshiro1024stst | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +       | >= 16 TiB
  xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | +      | 0     | Small   | 128 KiB
  xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      |       |         | 8 MiB
  xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      |       |         | >= 16 TiB
