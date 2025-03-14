@@ -3,7 +3,8 @@
  * @brief `Ranq1` pseudorandom number generator from "Numerical Recipes.
  * The Art of Scientific Computation" (3rd edition). It is a modification
  * of classical xorshift64* PRNG. Its lower bits have a low linear
- * complexity. It also fails 64-bit birthday paradox test.
+ * complexity. It also fails the `bspace32_2d` test and the 64-bit birthday
+ * paradox test.
  * @copyright The original xorshift64 generator was invented by G.Marsaglia.
  * The xorshift64* modiciation with non-linear output was suggesed by S.Vigna.
  * The `Ranq1` variant was suggested by the authors of "Numerical Recipes".

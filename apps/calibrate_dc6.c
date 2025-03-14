@@ -1,11 +1,6 @@
-#include "smokerand/coretests.h"
-#include "smokerand/lineardep.h"
-#include "smokerand/hwtests.h"
-#include "smokerand/entropy.h"
-#include "smokerand/bat_default.h"
-#include "smokerand/bat_brief.h"
-#include "smokerand/bat_full.h"
-#include "smokerand/extratests.h"
+#include "smokerand_core.h"
+#include "smokerand_bat.h"
+#include "smokerand/threads_intf.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -13,20 +8,68 @@
 #include <string.h>
 #include <float.h>
 
-static TestResults hamming_ot_all_test(GeneratorState *obj)
+
+
+#define NTHREADS 6
+
+typedef struct {
+    size_t init_pos;
+    size_t nsamples;    
+    double *z_ary;
+    GeneratorInfo *gi;
+    CallerAPI *intf;
+} HammingThreadState;
+
+static ThreadRetVal THREADFUNC_SPEC hamming_ot_run_test(void *udata)
 {
     HammingOtOptions opts = {.mode = HAMMING_OT_BYTES, .nbytes = 100000000};
-//    HammingDc6Options opts = {.mode = HAMMING_DC6_VALUES, .nbytes = 100000000};
-    return hamming_ot_test(obj, &opts);
+    HammingThreadState *obj = udata;
+    GeneratorState gen = GeneratorState_create(obj->gi, obj->intf);
+    for (size_t i = obj->init_pos; i < obj->nsamples; i += NTHREADS) {
+        obj->intf->printf("%lu of %lu\n",
+            (unsigned long) (i + 1), (unsigned long) obj->nsamples);
+        TestResults res = hamming_ot_test(&gen, &opts);
+        obj->z_ary[i] = res.x;
+    }
+    GeneratorState_free(&gen, obj->intf);
+    return NULL;
 }
 
 
+double *generate_sample(GeneratorInfo *gi, int nsamples)
+{
+    HammingThreadState threads[NTHREADS];
+    CallerAPI intf = CallerAPI_init_mthr();
+    double *z_ary = calloc(nsamples, sizeof(double));
+    for (int i = 0; i < NTHREADS; i++) {
+        threads[i].init_pos = i;
+        threads[i].nsamples = nsamples;
+        threads[i].z_ary = z_ary;
+        threads[i].gi = gi;
+        threads[i].intf = &intf;
+    }
+    init_thread_dispatcher();
+    ThreadObj *handles = calloc(sizeof(ThreadObj), NTHREADS);
+    for (int i = 0; i < NTHREADS; i++) {
+        handles[i] = ThreadObj_create(hamming_ot_run_test, &threads[i], i + 1);
+    }
+    // Get data from threads
+    for (int i = 0; i < NTHREADS; i++) {
+        ThreadObj_wait(&handles[i]);
+    }
+    // Deallocate array
+    free(handles);
+    CallerAPI_free();
+    return z_ary;
+}
+
 int main()
 {
-    int nsamples = 32768;
-    CallerAPI intf = CallerAPI_init();
-    GeneratorModule mod = GeneratorModule_load("generators/libspeck128_avx_shared.dll");
-//    GeneratorModule mod = GeneratorModule_load("generators/libchacha_avx_shared.dll");
+    const char *mod_name = "generators/libchacha_avx.dll";
+    //const char *mod_name = "generators/libspeck128_avx.dll";
+    int nsamples = 100000;
+
+    GeneratorModule mod = GeneratorModule_load(mod_name);
     if (!mod.valid) {
         CallerAPI_free();
         return 1;
@@ -34,18 +77,14 @@ int main()
     GeneratorInfo *gi = &mod.gen;
     printf("Generator name:    %s\n", gi->name);
     printf("Output size, bits: %d\n", gi->nbits);
-    FILE *fp = fopen("dc6.m", "w");
+    FILE *fp = fopen("dc6.bin", "wb");
     if (fp == NULL) {
         fprintf(stderr, "Cannot open output file 'dc6.m'\n");
         return 1;
     }
-    double *z_ary = calloc(nsamples, sizeof(double));
-    GeneratorState obj = GeneratorState_create(gi, &intf);
-    for (int i = 0; i < nsamples; i++) {
-        printf("%d out of %d\n", i + 1, nsamples);
-        TestResults res = hamming_ot_all_test(&obj);
-        z_ary[i] = res.x;
-    }
+    double *z_ary = generate_sample(gi, nsamples);
+    fwrite(z_ary, nsamples, sizeof(double), fp);
+/*
     fprintf(fp, "z = [");
     for (int i = 0; i < nsamples; i++) {
         if (i != nsamples - 1) {
@@ -58,10 +97,9 @@ int main()
         }
     }
     fprintf(fp, "]\n");
+*/
     fclose(fp);
     free(z_ary);
-    GeneratorState_free(&obj, &intf);
     GeneratorModule_unload(&mod);
-    CallerAPI_free();
     return 0;
 }

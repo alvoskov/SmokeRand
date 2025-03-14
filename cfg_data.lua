@@ -30,9 +30,10 @@ local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
     'stormdrop', 'superduper64', 'superduper64_u32', 'superduper73',
     'swblarge', 'swblux', 'swbw', 'swb', 'taus88', 'threefry2x64_avx',
     'threefry2x64', 'threefry', 'tinymt32', 'tinymt64', 'well1024a', 'wyrand',
-    'xorgens', 'xoroshiro1024stst', 'xoroshiro1024st', 'xoroshiro128pp_avx',
-    'xoroshiro128pp', 'xoroshiro128p', 'xorshift128pp_avx', 'xorshift128p',
-    'xorshift128', 'xorwow', 'xoshiro128p', 'xoshiro128pp', 'xsh'}
+    'xorgens', 'xoroshiro1024stst', 'xoroshiro1024st', 'xoroshiro128pp',
+    'xoroshiro128pp_avx', 'xoroshiro128pp_vec', 'xoroshiro128p',
+    'xorshift128pp_avx', 'xorshift128p', 'xorshift128', 'xorwow', 'xoshiro128p',
+    'xoshiro128pp', 'xsh'}
 
 -- List of non-portable generators that use compiler-specific extensions
 local gen_not_portable_sources = {'aesni', 'chacha_avx', 'lcg128',
