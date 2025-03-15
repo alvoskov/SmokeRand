@@ -264,13 +264,14 @@ for fast PRNGs. They don't include some specialized tests that require large
 amount of RAM and/or take more than 10 minutes.
 .TP
 .B express
-Express battery that contains 5 tests and consumes 32 or 64 MiB of data for
-32-bit or 64-bit PRNG respectively. Consists of 1\-dimensional 32\-bit birthday
-spacings tests, byte frequency test, 8\-dimensional 32\-bit birthday spacings
-test with decimation and linear complexity test. Detects 64\-bit LCGs with
+Express battery that contains 7 tests and consumes 80 or 145 MiB of data for
+32-bit or 64-bit PRNG respectively. Consists of byte frequency test,
+1\-dimensional 32\-bit birthday spacings tests, 4\-dimensional 32-\bit birthday
+spacings test, two variants of 8\dimensional 32-\bit birthday spacings test (without
+and with decimation) and linear complexity test. Detects 64\-bit LCGs with
 power of 2 modulo, 32\-bit LCGs, some lagged Fibonacci and subtract-with-borrow
-generators, small LFSR. Mersenne Twister and 128\-bit LCG with power of 2 modulo
-pass it.
+generators, small LFSR, MWC1616 and xorwow. Mersenne Twister and 128\-bit LCG with
+power of 2 modulo pass it.
 .TP
 .B brief
 Fast battery that contains 22 tests and consumes 64 or 128 GiB of data for
@@ -394,7 +395,7 @@ An example of applying the \fBexpress\fR test battery to the PRNG from the
 \fBliblcg64_shared.so\fR dynamic library (module).
 
 .EX
-$ smokerand express generators/liblcg64_shared.so
+$ smokerand express generators/liblcg64.so
 Generator name:    LCG64
 Output size, bits: 32
 Entropy pool (seed generator) initialized
@@ -412,13 +413,15 @@ Output size, bits: 32
 
     # Test name               xemp         p Interpretation  Thr#
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
-    1 byte_freq           0.783549     0.571 Ok                 0
-    2 bspace32_1d             4134     0.273 Ok                 0
-    3 bspace4_8d_dec           964         0 FAIL               0
-    4 linearcomp_high         5000     0.596 Ok                 0
-    5 linearcomp_low          5001     0.233 Ok                 0
+    1 byte_freq            1.05498     0.216 Ok                 0
+    2 bspace32_1d             4086     0.558 Ok                 0
+    3 bspace8_4d              1114     0.003 Ok                 0
+    4 bspace4_8d               500     0.692 Ok                 0
+    5 bspace4_8d_dec          1013         0 FAIL               0
+    6 linearcomp_high         5000     0.667 Ok                 0
+    7 linearcomp_low          5000     0.667 Ok                 0
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
-Passed:       4
+Passed:       6
 Suspicious:   0
 Failed:       1
 Elapsed time: 00:00:01
@@ -449,7 +452,7 @@ PRNG_CMODULE_PROLOG
 
 typedef struct {
     uint64_t x;
-} Lcg64State;
+} LcgState;
 
 static inline uint64_t get_bits_raw(void *state)
 {

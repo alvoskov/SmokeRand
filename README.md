@@ -248,7 +248,7 @@ Four batteries are implemented in SmokeRand:
 
  Battery | Number of tests | Bytes (32-bit PRNG) | Bytes (64-bit PRNG)
 ---------|-----------------|---------------------|---------------------
- express | 5               | 2^25                | 2^26
+ express | 7               | 2^26                | 2^27
  brief   | 22              | 2^35                | 2^36
  default | 40              | 2^37                | 2^38
  full    | 44              | 2^40                | 2^41
@@ -522,14 +522,14 @@ batteries and have mainly historical and educational interest.
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    | 3.75  | +       | 4 GiB
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 4     | +       | 1 TiB
  ara32             | u32    | +       | +     | 1       | 1    | 0.96 | +      | 2     | +       | 512 MiB
- chacha            | u32    | +       | +     | +       | +    | 2.0  | N/A    | 4     | +       | >= 1 TiB
+ chacha            | u32    | +       | +     | +       | +    | 2.0  | +      | 4     | +       | >= 1 TiB
  chacha_avx        | u32    | +       | +     | +       | +    | 0.7  | +      | 4     | +       | >= 2 TiB
  chacha_ctr32      | u32    | +       | +     | +       | 1    | 2.0  | N/A    | 0     | +       | 256 GiB
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | +      | 4     | +       | >= 32 TiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 16 TiB
  des-ctr           | u64    | +       | +     | +       |      | 24   |        |       |         | >= 4 TiB
- drand48           | u32    | 1       | 12    | 20      | 22/23| 0.72 | -      | 0     | -       | 1 MiB
+ drand48           | u32    | 3       | 12    | 20      | 22/23| 0.72 | -      | 0     | -       | 1 MiB
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 2 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 4     | +       | >= 32 TiB
  flea32x1          | u32    | +       | +     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
@@ -537,14 +537,14 @@ batteries and have mainly historical and educational interest.
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 16 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
- lcg32prime        | u32    | 0/1     | 13    | 24      | 25/26| 2.2  | -(>>10)| 0     | -       | 512 MiB
+ lcg32prime        | u32    | 1       | 13    | 24      | 25/26| 2.2  | -(>>10)| 0     | -       | 512 MiB
  lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | +      | 0     | Small   | 16 MiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | 0     | +-      | >= 32 TiB
  lcg96             | u32    | +       | 1     | 1       | 1    | 0.78 | +      | 3     | +       | 32 GiB
  lcg128            | u64    | +       | 1     | 1       | 1    | 0.35 | +      | 3     | +       | 64 GiB
  lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | 3     | +       | 64 GiB
  lcg128_u32_full   | u32    | +       | +     | 1       | 1    | 0.75 | +      | 3     | +       | >= 32 TiB
- lcg69069          | u32    | 4       | 19    | 37/38   | 42   | 0.38 | -(>>10)| 0     | -       | 2 KiB
+ lcg69069          | u32    | 6       | 19    | 37/38   | 42   | 0.38 | -(>>10)| 0     | -       | 2 KiB
  lfib_par[31+]     | u32    | 1       | 5/6   | 6/7     | 10   | 0.70 | +      | 0     | -       | 32 MiB
  lfib_par[55+]     | u32    | 1       | 4     | 5       | 7    | 0.51 | +      | 0     | -       | 2 GiB
  lfib_par[55-]     | u32    | 1       | 4     | 5       | 7    | 0.51 | +      | 0     | -       | 2 GiB
@@ -573,7 +573,7 @@ batteries and have mainly historical and educational interest.
  lfib_par[110503+] | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       |
  lfib_par[110503-] | u32    | +       | +     | +       | +    | 0.50 | +      | 4     | +       |
  lfib4             | u32    | 1       | 1     | 3       | 4    | 0.37 | +      | 3     | +       | 32 MiB
- lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | N/A    | 4     |         | >= 32 TiB
+ lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | +      | 4     |         | >= 32 TiB
  lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | +      | 2.25  | Small   | 32 KiB 
  lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | 2.25  | Small   | 1 MiB
  lrnd64            | u64    | 2       | 3     | 5       | 7    | 0.44 | +      | 2.25  |         | 4 MiB
@@ -582,8 +582,8 @@ batteries and have mainly historical and educational interest.
  magma             | u64    | +       | +     | +       | +    | 25   |        |       |         |
  magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      | 3     |         | >= 2 TiB
  magma_avx-cbc     | u64    | +       | +     | +       | +    | 7.1  | +      | 4     |         | >= 2 TiB
- minstd            | u32    | 4       | 20    | 38      | 42   | 2.4  | -(>>10)| 0     | -       | 1 KiB
- mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | N/A    | 4     | +       | >= 16 TiB
+ minstd            | u32    | 6       | 20    | 38      | 42   | 2.4  | -(>>10)| 0     | -       | 1 KiB
+ mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 16 TiB
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | +      | 4     | +       | >= 32 TiB
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.50 | +      | 3.25  | Small   | 128 GiB
  mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | N/A    | 4     | +       | 2 TiB
@@ -595,7 +595,7 @@ batteries and have mainly historical and educational interest.
  mwc64x            | u32    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 16 TiB
  mwc128            | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 16 TiB
  mwc128x           | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 32 TiB
- mwc1616           | u32    | +       | 10/11 | 12/18   | 19   | 0.48 | -      | 0     | -/Small | 16 MiB
+ mwc1616           | u32    | 1       | 10/11 | 12/18   | 19   | 0.48 | -      | 0     | -/Small | 16 MiB
  mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | +       | >= 32 TiB(?)
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 1 GiB
@@ -608,10 +608,10 @@ batteries and have mainly historical and educational interest.
  philox32          | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      | 0     |         | 512 KiB
- ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      |       |         | 2 MiB
- randu             | u32    | 4       | 21    | 39      | 43   | 0.41 | -(>>10)| 0     | -       | 1 KiB
+ ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      | 3.5   |         | 2 MiB
+ randu             | u32    | 6       | 21    | 39      | 43   | 0.41 | -(>>10)| 0     | -       | 1 KiB
  ranlux++          | u64    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 32 TiB
- ranrot_bi         | u64    | +       | +     | +       | 1/3  | 0.33 | +      |       |         | 8 GiB
+ ranrot_bi         | u64    | +       | +     | +       | 1/3  | 0.33 | +      | 0     |         | 8 GiB
  ranrot32[7/3]     | u32    | +       | 1/2   | 4/5     | 5    | 0.58 | +      | 0     | Small   | 128 MiB
  ranrot32[17/9]    | u32    | +       | 1     | 2       | 3    | 0.68 | +      | 0     | +       | 1 GiB
  ranrot32[57/13]   | u32    | +       | +     | +       | 1    | 0.74 | +      | 2     | +       | 8 GiB
@@ -641,9 +641,9 @@ batteries and have mainly historical and educational interest.
  splitmix32        | u32    | +       | 2     | 3       | 4/5  | 0.25 | -(>>10)| 0     | Small   | 1 GiB
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | 4     | +       | >= 16 TiB
  sqxor32           | u32    | +       | 1     | 2       | 4    | 0.20 | -(>>10)| 0     | Small   | 16 GiB
- stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | N/A    |       |         | >= 8 TiB
- stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | N/A    |       | Small   | 1 MiB
- superduper73      | u32    | 1       | 9     | 15      | 18   | 0.64 | +      | 0     | -       | 32 KiB
+ stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | N/A    | 0     |         | >= 8 TiB
+ stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | N/A    | 3.5   | Small   | 1 MiB
+ superduper73      | u32    | 3       | 9     | 15      | 18   | 0.64 | +      | 0     | -       | 32 KiB
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      | 2.75  |         | 512 KiB
  superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | +      | 4     |         | >= 32 TiB
  shr3              | u32    | 2       | 15    | 32      | 36   | 0.76 | -(>>10)| 0     | -       | 32 KiB
@@ -662,16 +662,16 @@ batteries and have mainly historical and educational interest.
  wyrand            | u64    | +       | +     | +       | +    | 0.08 | +      | 4     |         | >= 8 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xorshift128       | u32    | 2       | 4     | 6/7     | 8    | 0.41 | +      | 1.25  | -       | 128 KiB
- xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      |       |         | 32 GiB
+ xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      | 3.25  |         | 32 GiB
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 1 TiB
  xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      | 3.25  |         | 16 MiB
  xoroshiro128pp    | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 32 TiB
  xoroshiro128pp_avx| u64    | +       | +     | +       | +    | 0.16 | +      | 4     |         | >= 1 TiB
- xoroshiro1024st   | u64    | 1       | 1     | 1       | 2    | 0.33 | +      |       |         | 128 GiB
+ xoroshiro1024st   | u64    | 1       | 1     | 1       | 2    | 0.33 | +      | 3.5   |         | 128 GiB
  xoroshiro1024stst | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +       | >= 16 TiB
  xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | +      | 0     | Small   | 128 KiB
  xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      | 3     | +       | 8 MiB
- xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 16 TiB
+ xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      | 4     | +       | >= 16 TiB
  xsh               | u64    | 2       | 8     | 13      | 17   | 0.43 | -      | 0     | -       | 32 KiB
 
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
@@ -739,6 +739,23 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 - Passed dieharder: lcg64
 
 # Versions history
+
+16.03.2025: SmokeRand 0.29
+
+- `express` battery extended: `bspace4_8d` and `bspace8_4d` tests were added.
+  It allows to detect flaws in `xorwow` and `mwc1616` generators respectively.
+  The `sr_tiny` executable (C89 implementation of `express` battery) was also
+  upgraded.
+- DLL support for 32-bit DOS version was added by means of implementation of
+  a simplified PE32 loader.
+- Improved makefiles for Open Watcom C: freestanding DLLs, 32-bit and 16-bit
+  DOS versions.
+- Improvements and simplification in a multithreaded battery launcher: dynamic
+  assignment of tests to threads, randomization. Estimated times and RAM
+  usage intensity were removed from tests info: they were not relevant and
+  accurate anyway.
+- Some bugfixes in makefiles, especially for zig cc (clang). Now freestanding
+  libraries linking is also supported for zig cc / clang.
 
 10.03.2025: SmokeRand 0.28
 

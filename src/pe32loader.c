@@ -66,7 +66,11 @@ void PE32MemoryImage_free(PE32MemoryImage *obj)
 }
 
 
-
+/**
+ * @brief Checks some "magic" signatures of PE32 format and returns
+ * an offset of PE header.
+ * @return PE header offset or 0 in the case of failure.
+ */
 int get_pe386_offset(FILE *fp)
 {
     uint32_t pe_offset;
@@ -146,6 +150,14 @@ uint32_t PE32BasicInfo_get_membuf_size(PE32BasicInfo *info)
     return bufsize;
 }
 
+////////////////////////////////////////////////
+///// PE32MemoryImage class implementation /////
+////////////////////////////////////////////////
+
+static inline uint32_t PE32MemoryImage_get_u32(const PE32MemoryImage *obj, uint32_t rva)
+{
+    return *( (uint32_t *) (obj->img + rva) );
+}
 
 int PE32MemoryImage_apply_relocs(PE32MemoryImage *img, PE32BasicInfo *info)
 {
@@ -174,12 +186,16 @@ int PE32MemoryImage_apply_relocs(PE32MemoryImage *img, PE32BasicInfo *info)
     return 1;
 }
 
+/**
+ * @brief Fill export table in the PE32 preloaded image. Converts RVAs to real
+ * addresses.
+ */
 int PE32MemoryImage_apply_exports(PE32MemoryImage *img, PE32BasicInfo *info)
 {
-    img->nexports = *( (uint32_t *) (img->img + info->export_dir + 24) );
-    uint32_t func_addrs_array_rva = *( (uint32_t *) (img->img + info->export_dir + 28) );
-    uint32_t func_names_array_rva = *( (uint32_t *) (img->img + info->export_dir + 32) );
-    uint32_t ord_array_rva = *( (uint32_t *) (img->img + info->export_dir + 36) );
+    img->nexports = PE32MemoryImage_get_u32(img, info->export_dir + 24);
+    uint32_t func_addrs_array_rva = PE32MemoryImage_get_u32(img, info->export_dir + 28);
+    uint32_t func_names_array_rva = PE32MemoryImage_get_u32(img, info->export_dir + 32);
+    uint32_t ord_array_rva = PE32MemoryImage_get_u32(img, info->export_dir + 36);
     uint32_t *func_names_rva = (uint32_t *) &img->img[func_names_array_rva];
     uint32_t *func_addrs_rva = (uint32_t *) &img->img[func_addrs_array_rva];
     img->exports_ords = (uint16_t *) &img->img[ord_array_rva];
@@ -200,39 +216,62 @@ int PE32MemoryImage_apply_exports(PE32MemoryImage *img, PE32BasicInfo *info)
         int ord = img->exports_ords[i];
         printf("  func=%s, addr=%llX, rva=%llX, ord=%d\n",
             img->exports_names[i],
-            (unsigned long long) img->exports_addrs[ord],
-            (unsigned long long) img->exports_addrs[ord] - (unsigned long long) img->img,
+            (unsigned long long) ( (size_t) img->exports_addrs[ord] ),
+            (unsigned long long) ( (size_t) img->exports_addrs[ord] ) -
+                (unsigned long long) ( (size_t) img->img ),
             ord);
     }
     return 1;
 }
 
-
-PE32MemoryImage PE32BasicInfo_load(PE32BasicInfo *info, FILE *fp)
+/**
+ * @brief Checks if the import table is present. Presence of the import table
+ * is considered as an error (because it is not supported).
+ * @return 0 - failure (imports are present), 1 - succes (imports are not
+ * present).
+ */
+int PE32MemoryImage_apply_imports(PE32MemoryImage *img, PE32BasicInfo *info)
 {
-    PE32MemoryImage img;
-    img.imgsize = PE32BasicInfo_get_membuf_size(info);
-    img.img = execbuffer_alloc(img.imgsize);
-    uint8_t *buf = img.img;
+    if (info->import_dir == 0) {
+        return 1;
+    }
+    uint32_t lookup_rva = PE32MemoryImage_get_u32(img, info->import_dir);
+    if (lookup_rva != 0) {
+        snprintf(errmsg, ERRMSG_MAXLEN, "DLL imports are not supported");
+        return 0;
+    }
+    return 1;
+}
+
+
+PE32MemoryImage *PE32BasicInfo_load(PE32BasicInfo *info, FILE *fp)
+{
+    PE32MemoryImage *img = calloc(sizeof(PE32MemoryImage), 1);
+    img->imgsize = PE32BasicInfo_get_membuf_size(info);
+    img->img = execbuffer_alloc(img->imgsize);
+    uint8_t *buf = img->img;
     for (int i = 0; i < info->nsections; i++) {
         PE32SectionInfo *sect = &info->sections[i];
-        if (fseek(fp, sect->physical_addr, SEEK_SET)) {
-            fprintf(stderr, "fseek error (section %d)\n", i);
-        }
-        if (fread(buf + sect->virtual_addr, sect->physical_size, 1, fp) != 1) {
-            fprintf(stderr, "fread error (section %d)\n", i);
+        if (fseek(fp, sect->physical_addr, SEEK_SET) ||
+            fread(buf + sect->virtual_addr, sect->physical_size, 1, fp) != 1) {
+            snprintf(errmsg, ERRMSG_MAXLEN, "Cannot read section %d\n", i + 1);
+            free(img->img); free(img);
+            return NULL;
         }
     }
     // Export table: get size and RVAs
-    PE32MemoryImage_apply_exports(&img, info);
-    // Relocations
-    PE32MemoryImage_apply_relocs(&img, info);
+    if (!PE32MemoryImage_apply_imports(img, info) ||
+        !PE32MemoryImage_apply_exports(img, info) ||
+        !PE32MemoryImage_apply_relocs(img, info)) {
+        free(img->img); free(img);
+        return NULL;
+    }
     // Write metainformation to the image
     snprintf((char *) buf, 128,
         "Image base from PE: %llX\n"
         "Image base (real):  %llX\n",
-        (unsigned long long) info->imagebase, (unsigned long long) buf);
-
+        (unsigned long long) info->imagebase,
+        (unsigned long long) ( (size_t) buf ) );
     return img;
 }
 
@@ -252,6 +291,16 @@ int PE32MemoryImage_dump(const PE32MemoryImage *img, const char *filename)
 ///// The higher-level API /////
 ////////////////////////////////
 
+/**
+ * @brief Loads DLL (dynamic library) in PE32 format to memory without WinAPI.
+ * @details The support of PE32 is very limited. This loader processes
+ * relocations and export table but doesn't support an import table (fails if
+ * it is present). It is made intentionally because it is designed for simple
+ * plugins with pseudorandom number generators.
+ * @param libname Library file name.
+ * @param flag    Reserved.
+ * @return Library handle or NULL in the case of failure.
+ */
 void *dlopen_pe32dos(const char *libname, int flag)
 {
     if (sizeof(size_t) != sizeof(uint32_t)) {
@@ -273,14 +322,19 @@ void *dlopen_pe32dos(const char *libname, int flag)
     }
     PE32BasicInfo peinfo;
     PE32BasicInfo_init(&peinfo, fp, pe_offset);
-    PE32MemoryImage *img = calloc(sizeof(PE32MemoryImage), 1);
-    *img = PE32BasicInfo_load(&peinfo, fp);
+    PE32MemoryImage *img = PE32BasicInfo_load(&peinfo, fp);
     fclose(fp);
     PE32BasicInfo_free(&peinfo);
     (void) flag;
     return img;
 }
 
+/**
+ * @brief Returns a pointer to a function from a loaded dynamic library.
+ * @param handle   Library handle.
+ * @param symname  Function name.
+ * @return Function pointer or NULL in the case of failure.
+ */
 void *dlsym_pe32dos(void *handle, const char *symname)
 {
     void *func = PE32MemoryImage_get_func_addr(handle, symname);
@@ -290,6 +344,10 @@ void *dlsym_pe32dos(void *handle, const char *symname)
     return func;
 }
 
+/**
+ * @brief Unloads a loaded dynamic library from memory.
+ * @param handle  Library handle.
+ */
 void dlclose_pe32dos(void *handle)
 {
     if (handle != NULL) {
@@ -298,6 +356,9 @@ void dlclose_pe32dos(void *handle)
     }
 }
 
+/**
+ * @brief Returns a pointer to a last error message.
+ */
 const char *dlerror_pe32dos(void)
 {
     return errmsg;

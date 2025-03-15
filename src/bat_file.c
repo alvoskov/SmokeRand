@@ -264,8 +264,6 @@ static int parse_bspace_nd(TestDescription *out, const TestInfo *obj, char *errm
     out->name = obj->testname;
     out->run = bspace_nd_test_wrap;
     out->udata = opts;
-    out->nseconds = 1;
-    out->ram_load = RAM_HI;
     return 1;
 }
 
@@ -286,8 +284,6 @@ static int parse_collover_nd(TestDescription *out, const TestInfo *obj, char *er
     out->name = obj->testname;
     out->run = bspace_nd_test_wrap;
     out->udata = opts;
-    out->nseconds = 1;
-    out->ram_load = RAM_HI;
     return 1;
 }
 
@@ -309,8 +305,6 @@ static int parse_monobit_freq(TestDescription *out, const TestInfo *obj, char *e
     out->name = obj->testname;
     out->run = monobit_freq_test_wrap;
     out->udata = opts;
-    out->nseconds = 1;
-    out->ram_load = RAM_HI;
     return 1;
 }
 
@@ -328,8 +322,6 @@ static int parse_nbit_words_freq(TestDescription *out, const TestInfo *obj, char
     out->name = obj->testname;
     out->run = nbit_words_freq_test_wrap;
     out->udata = opts;
-    out->nseconds = 1;
-    out->ram_load = RAM_HI;
     return 1;
 }
 
@@ -342,8 +334,6 @@ static int parse_bspace4_8d_decimated(TestDescription *out, const TestInfo *obj,
     out->name = obj->testname;
     out->run = bspace4_8d_decimated_test_wrap;
     out->udata = opts;
-    out->nseconds = 1;
-    out->ram_load = RAM_HI;
     return 1;
 }
 
@@ -358,8 +348,6 @@ static int parse_gap(TestDescription *out, const TestInfo *obj, char *errmsg)
     out->name = obj->testname;
     out->run = gap_test_wrap;
     out->udata = opts;
-    out->nseconds = 1;
-    out->ram_load = RAM_HI;
     return 1;
 }
 
@@ -372,8 +360,6 @@ static int parse_gap16_count0(TestDescription *out, const TestInfo *obj, char *e
     out->name = obj->testname;
     out->run = gap16_count0_test_wrap;
     out->udata = opts;
-    out->nseconds = 1;
-    out->ram_load = RAM_HI;
     return 1;
 }
 
@@ -400,8 +386,6 @@ static int parse_hamming_ot(TestDescription *out, const TestInfo *obj, char *err
     out->name = obj->testname;
     out->run = hamming_ot_test_wrap;
     out->udata = opts;
-    out->nseconds = 1;
-    out->ram_load = RAM_HI;
     return 1;
 }
 
@@ -424,8 +408,6 @@ static int parse_hamming_ot_long(TestDescription *out, const TestInfo *obj, char
     out->name = obj->testname;
     out->run = hamming_ot_long_test_wrap;
     out->udata = opts;
-    out->nseconds = 1;
-    out->ram_load = RAM_HI;
     return 1;
 }
 
@@ -453,8 +435,6 @@ static int parse_linearcomp(TestDescription *out, const TestInfo *obj, char *err
     out->name = obj->testname;
     out->run = linearcomp_test_wrap;
     out->udata = opts;
-    out->nseconds = 1;
-    out->ram_load = RAM_HI;
     return 1;
 }
 
@@ -472,8 +452,6 @@ static int parse_matrixrank(TestDescription *out, const TestInfo *obj, char *err
     out->name = obj->testname;
     out->run = matrixrank_test_wrap;
     out->udata = opts;
-    out->nseconds = 1;
-    out->ram_load = RAM_HI;
     return 1;
 }
 
@@ -485,8 +463,6 @@ static int parse_mod3(TestDescription *out, const TestInfo *obj, char *errmsg)
     out->name = obj->testname;
     out->run = mod3_test_wrap;
     out->udata = opts;
-    out->nseconds = 1;
-    out->ram_load = RAM_HI;
     return 1;
 }
 
@@ -498,8 +474,6 @@ static int parse_sumcollector(TestDescription *out, const TestInfo *obj, char *e
     out->name = obj->testname;
     out->run = sumcollector_test_wrap;
     out->udata = opts;
-    out->nseconds = 1;
-    out->ram_load = RAM_HI;
     return 1;
 }
 
@@ -524,8 +498,6 @@ static int parse_ising2d(TestDescription *out, const TestInfo *obj, char *errmsg
     out->name = obj->testname;
     out->run = ising2d_test_wrap;
     out->udata = opts;
-    out->nseconds = 1;
-    out->ram_load = RAM_HI;
     return 1;
 }
 

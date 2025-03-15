@@ -1,8 +1,10 @@
 #
 # SmokeRand `express` battery written as a script
 #
-byte_freq       test=nbit_words_freq       bits_per_word=8 average_freq=256 nblocks=256
-bspace32_1d     test=bspace_nd             nbits_per_dim=32 ndims=1 nsamples=1024 get_lower=1
+byte_freq       test=nbit_words_freq  bits_per_word=8  average_freq=256 nblocks=256
+bspace32_1d     test=bspace_nd        nbits_per_dim=32 ndims=1 nsamples=1024 get_lower=1
+bspace8_4d      test=bspace_nd        nbits_per_dim=8  ndims=4 nsamples=256 get_lower=1
+bspace4_8d      test=bspace_nd        nbits_per_dim=4  ndims=8 nsamples=128 get_lower=1
 bspace4_8d_dec  test=bspace4_8d_decimated  step=128
 linearcomp_high test=linearcomp            nbits=10000 bitpos=high
 linearcomp_low  test=linearcomp            nbits=10000 bitpos=low

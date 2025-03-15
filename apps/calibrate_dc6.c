@@ -22,18 +22,18 @@ typedef struct {
 
 static ThreadRetVal THREADFUNC_SPEC hamming_ot_run_test(void *udata)
 {
-    //HammingOtOptions opts = {.mode = HAMMING_OT_BYTES, .nbytes = 100000000};
+    HammingOtOptions opts = {.mode = HAMMING_OT_BYTES, .nbytes = 100000000};
     //HammingOtOptions opts = {.mode = HAMMING_OT_BYTES, .nbytes = 10000000};
 //    HammingOtLongOptions opts = {.nvalues = 100000000, .wordsize = HAMMING_OT_W128};
-    HammingOtLongOptions opts = {.nvalues = 10000000, .wordsize = HAMMING_OT_W128};
+//    HammingOtLongOptions opts = {.nvalues = 10000000, .wordsize = HAMMING_OT_W128};
 
     HammingThreadState *obj = udata;
     GeneratorState gen = GeneratorState_create(obj->gi, obj->intf);
     for (size_t i = obj->init_pos; i < obj->nsamples; i += NTHREADS) {
         obj->intf->printf("%lu of %lu\n",
             (unsigned long) (i + 1), (unsigned long) obj->nsamples);
-        //TestResults res = hamming_ot_test(&gen, &opts);
-        TestResults res = hamming_ot_long_test(&gen, &opts);
+        TestResults res = hamming_ot_test(&gen, &opts);
+        //TestResults res = hamming_ot_long_test(&gen, &opts);
         obj->z_ary[i] = res.x;
     }
     GeneratorState_free(&gen, obj->intf);

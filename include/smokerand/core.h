@@ -79,12 +79,6 @@ typedef struct {
 TestResults TestResults_create(const char *name);
 
 typedef enum {
-    RAM_LO = 0,
-    RAM_MED = 1,
-    RAM_HI = 2
-} RamLoad;
-
-typedef enum {
     REPORT_BRIEF = 0,
     REPORT_FULL = 1
 } ReportType;
@@ -97,9 +91,8 @@ typedef struct {
     const char *name;
     TestResults (*run)(GeneratorState *obj, const void *udata);
     const void *udata; ///< User data for the function
-    unsigned int nseconds; ///< Estimated time, seconds
-    int ram_load; ///< Intensity of RAM usage (0, 1, 2)
 } TestDescription;
+
 
 static inline TestResults TestDescription_run(const TestDescription *obj, GeneratorState *gs)
 {
