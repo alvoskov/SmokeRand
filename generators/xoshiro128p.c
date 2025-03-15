@@ -3,6 +3,8 @@
  * @brief xoshiro128+ pseurorandom number generator.
  * @details The implementation is based on public domain code by D.Blackman
  * and S.Vigna (vigna@acm.org). Its lowest bit has low linear complexity.
+ * It fails `linearcomp_low`, `matrixrank_4096_low`, `matrixrank_8192_low` and
+ * `matrixrank_8192` tests.
  *
  * References:
  * 1. D. Blackman, S. Vigna. Scrambled Linear Pseudorandom Number Generators

@@ -644,7 +644,7 @@ batteries and have mainly historical and educational interest.
  stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | N/A    |       |         | >= 8 TiB
  stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | N/A    |       | Small   | 1 MiB
  superduper73      | u32    | 1       | 9     | 15      | 18   | 0.64 | +      | 0     | -       | 32 KiB
- superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      |       |         | 512 KiB
+ superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      | 2.75  |         | 512 KiB
  superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | +      | 4     |         | >= 32 TiB
  shr3              | u32    | 2       | 15    | 32      | 36   | 0.76 | -(>>10)| 0     | -       | 32 KiB
  swb               | u32    | 1       | 5     | 6       | 8    | 2.7  | N/A    | 0     | Small   | 128 MiB
@@ -652,7 +652,7 @@ batteries and have mainly historical and educational interest.
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 2 TiB
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | N/A    | 0     | Crush   | 512 GiB
  swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | N/A    | 2     | +       | 4 GiB
- taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  |         | 32 KiB
+ taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  | Small   | 32 KiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      | 3     |         | 32 GiB
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
@@ -664,14 +664,14 @@ batteries and have mainly historical and educational interest.
  xorshift128       | u32    | 2       | 4     | 6/7     | 8    | 0.41 | +      | 1.25  | -       | 128 KiB
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      |       |         | 32 GiB
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 1 TiB
- xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      |       |         | 16 MiB
+ xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      | 3.25  |         | 16 MiB
  xoroshiro128pp    | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 32 TiB
  xoroshiro128pp_avx| u64    | +       | +     | +       | +    | 0.16 | +      | 4     |         | >= 1 TiB
  xoroshiro1024st   | u64    | 1       | 1     | 1       | 2    | 0.33 | +      |       |         | 128 GiB
  xoroshiro1024stst | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +       | >= 16 TiB
  xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | +      | 0     | Small   | 128 KiB
- xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      |       |         | 8 MiB
- xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      |       |         | >= 16 TiB
+ xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      | 3     | +       | 8 MiB
+ xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 16 TiB
  xsh               | u64    | 2       | 8     | 13      | 17   | 0.43 | -      | 0     | -       | 32 KiB
 
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
