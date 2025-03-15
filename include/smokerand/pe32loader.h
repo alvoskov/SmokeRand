@@ -74,6 +74,6 @@ int PE32BasicInfo_init(PE32BasicInfo *peinfo, FILE *fp, uint32_t pe_offset);
 void PE32BasicInfo_free(PE32BasicInfo *peinfo);
 void PE32BasicInfo_print(const PE32BasicInfo *peinfo);
 uint32_t PE32BasicInfo_get_membuf_size(PE32BasicInfo *info);
-PE32MemoryImage PE32BasicInfo_load(PE32BasicInfo *info, FILE *fp);
+PE32MemoryImage *PE32BasicInfo_load(PE32BasicInfo *info, FILE *fp);
 
 #endif

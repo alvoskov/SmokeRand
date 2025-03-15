@@ -129,12 +129,12 @@ io.write("\twcc386 $(cflags_dos32) -fo=$(objdir_dos32)/pe32loader.obj $(srcdir)/
 
 ---------- Compile the 16-bit version ----------
 io.write("$(bindir)/srtiny16.exe: $(objdir_dos32)/srtiny16.obj $(objdir_dos32)/spfunc16.obj\n")
-io.write("\twcl -s -q -otexanh $(objdir_dos32)/srtiny16.obj $(objdir_dos32)/spfunc16.obj " ..
+io.write("\twcl -s -q -mc -otexanh $(objdir_dos32)/srtiny16.obj $(objdir_dos32)/spfunc16.obj " ..
     "-fe=$(bindir)/srtiny16.exe\n")
 io.write("$(objdir_dos32)/srtiny16.obj: $(appsrcdir)/sr_tiny.c\n")
-io.write("\twcc -s -q -otexanh $(appsrcdir)/sr_tiny.c -fo=$(objdir_dos32)/srtiny16.obj -Iinclude\n")
+io.write("\twcc -s -q -mc -otexanhi $(appsrcdir)/sr_tiny.c -fo=$(objdir_dos32)/srtiny16.obj -Iinclude\n")
 io.write("$(objdir_dos32)/spfunc16.obj: $(srcdir)/specfuncs.c\n")
-io.write("\twcc -s -q -otexanh $(srcdir)/specfuncs.c -fo=$(objdir_dos32)/spfunc16.obj -Iinclude\n")
+io.write("\twcc -s -q -mc -otexanhi $(srcdir)/specfuncs.c -fo=$(objdir_dos32)/spfunc16.obj -Iinclude\n")
 
 ---------- Object files for Windows NT ----------
 -- Compile the library core sources

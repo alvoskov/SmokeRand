@@ -640,19 +640,13 @@ static void TestResults_print_report(const TestResults *results,
 void TestsBattery_print_info(const TestsBattery *obj)
 {
     size_t ntests = TestsBattery_ntests(obj);
-    unsigned long nseconds_total = 0;
     printf("===== Battery '%s' summary =====\n", obj->name);
-    printf("  %3s %-20s %-20s\n",
-        "#", "Test name", "Estimated time, sec");
+    printf("  %3s %-20s\n", "#", "Test name");
     print_bar();
     for (size_t i = 0; i < ntests; i++) {
-        printf("  %3d %-20s %6u\n",
-            (int) i + 1, obj->tests[i].name, obj->tests[i].nseconds);
-        nseconds_total += obj->tests[i].nseconds;
+        printf("  %3d %-20s\n", (int) i + 1, obj->tests[i].name);
     }
     print_bar();
-    printf("Estimated elapsed time (one-threaded): ");
-    print_elapsed_time(nseconds_total);
     printf("\n\n");
 }
 

@@ -2,41 +2,69 @@
  * @file sr_tiny.c
  * @brief A minimalistic 32-bit PRNG tests suite for 16-bit computers;
  * it is compatible with ANSI C compilers.
- * @details This tests suite includes only 5 tests:
+ * @details This tests suite includes only 7 tests:
  *
- * - 1D 32-bit birthday spacings
- * - 8D 32-bit birthday spacings test with decimation
+ * - 1D 32-bit birthday spacings test (`bspace32_1d`)
+ * - 4D 32-bit birthday spacings test (`bspace8_4d`)
+ * - 8D 32-bit birthday spacings test (`bspace4_8d`)
+ * - 8D 32-bit birthday spacings test with decimation (`bspace4_8d_dec`)
  * - Byte frequency test
- * - Linear complexity (lowest bit)
- * - Linear complexity (highest bit)
+ * - Linear complexity (lowest bit, `linearcomp:31`)
+ * - Linear complexity (highest bit, `linearcomp:0`)
  *
  * Can be compiled by any ANSI C compiler for 16-bit, 32-bit and 64-bit
- * platforms. On modern computers (2024) it will run in less than 2 seconds,
+ * platforms. On modern computers (2025) it will run in less than 2 seconds,
  * in DosBOX 0.74 with 3000 cycles (~80286 16 MHz) it will run about 15-20
  * minutes.
  *
  * The next generators are implemented here:
  *
- * - alfib: x_{n} = {x_{n-55}} + {x_{n-24}} mod 2^{32}, fails 2 of 5.
- * - lcg32: x_{n+1} = 69069 x_{n} + 12345, fails 4 of 5.
- * - lcg64: x_{n+1} = 6906969069 x_{n} + 12345 [returns upper 32 bits], fails
- *   1 of 5.
- * - mwc1616x: a combination of two 16-bit MWC generators that has a period
+ * - `alfib`: x_{n} = {x_{n-55}} + {x_{n-24}} mod 2^{32}, fails 2 of 7.
+ * - `lcg32`: x_{n+1} = 69069 x_{n} + 12345, fails 6 of 7.
+ * - `lcg64`: x_{n+1} = 6906969069 x_{n} + 12345 [returns upper 32 bits],
+ *   fails the `bspace4_8d_dec` test (1 of 7).
+ * - `mwc1616`: a combination of two 16-bit MWC generators from KISS99.
+ *   Fails the `bspace8_4d` test (1 of 7).
+ * - `mwc1616x`: a combination of two 16-bit MWC generators that has a period
  *   about 2^{62}, passes all tests.
- * - xorshift32: fails 2 of 5, i.e. linear complexity tests
- * 
+ * - `xorshift32`: fails 2 of 7, i.e. linear complexity tests.
+ * - `xorwow`: an obsolete combined generator based on LFSR and "discrete Weyl
+ *   sequence". Fails 2 of 7, i.e. the `bspace4_8d` and `linearcomp:0` tests.
  *
- * Compilation with Digital Mars C:
+ * Compilation with Digital Mars C (from `apps` directory):
  *
  *     set path=%path%;c:\c_prog\dm\bin
- *     path
- *     dmc sr_tiny.c -c -2 -o -ms -I../include -osr_tiny.obj
- *     dmc specfuncs.c -c -2 -o -ms -I../include -ospecfuncs.obj
- *     dmc sr_tiny.obj specfuncs.obj -osr_tiny.exe
+ *     dmc sr_tiny.c -c -2 -o -mc -I../include -osr_tiny.obj
+ *     dmc ../src/specfuncs.c -c -2 -o -mc -I../include -ospecfuncs.obj
+ *     dmc sr_tiny.obj specfuncs.obj -mc -osr_tiny.exe
  *
- * WARNING! This file is designed for C89 (ANSI C)! Don't use features
- * from C99 and later! It should be compilable with Turbo C 2.0,
- * Digital Mars C, Open Watcom 11.0 and other ancient compilers!
+ * Compilation with Open Watcom C (from `apps` directory): 
+ *
+ *     set path=c:\watcom\binnt;%PATH%
+ *     set watcom=c:\watcom
+ *     set include=c:\watcom\h
+ *     wcc sr_tiny.c -mc -q -s -otexanhi -I..\include -fo=sr_tiny.obj
+ *     wcc ..\src\specfuncs.c -mc -q -s -otexanhi -I..\include -fo=specfuncs.obj
+ *     wcl sr_tiny.obj specfuncs.obj -q -fe=sr_tiny.exe
+ *
+ * WARNING!
+ *
+ * 1. In the case of compilation for x86-16 (16-bit systems such as DOS)
+ *    "compact", "large" or "huge" memory models must be used. Otherwise "not
+ *    enough memory" error will occur. Digital Mars and Open Watcom use
+ *    the `-mc` command line key for that purpose.
+ * 2. Usage of compilers that is not aware of LFNs (such as Borland Turbo C 2.0
+ *    for DOS) will require a slight modification of source code to make it
+ *    compatible with 8.3 file names convention.
+ * 3. This file is designed for C89 (ANSI C)! Don't use features from C99 and
+ *    later! It should be compilable with Turbo C 2.0, Digital Mars C,
+ *    Open Watcom 11.0 and other ancient compilers!
+ *
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
 #define _STRICT_STDC
 #include "smokerand/specfuncs.h"
@@ -127,6 +155,20 @@ static void sprintf_pvalue(char *buf, double p, double alpha)
 }
 
 
+
+void ResultsList_add_poisson(ResultsList *obj,
+    const char *name, double xemp, double mu)
+{
+    TestResultEntry tres;
+    strcpy(tres.name, name);
+    tres.x = xemp;
+    tres.p = poisson_pvalue(tres.x, mu);
+    tres.alpha = poisson_cdf(tres.x, mu);
+    ResultsList_add(obj, &tres);
+    printf("  %s: x = %g, p = %g\n", name, tres.x, tres.p);
+}
+
+
 void ResultsList_print(const ResultsList *obj)
 {
     TestResultEntry *entry;
@@ -159,6 +201,36 @@ void ResultsList_free(ResultsList *obj)
 }
 
 
+/*---------------------------------------------------------------
+  ----- MWC1616 generator implementation (a part of KISS99) -----
+  ---------------------------------------------------------------*/
+
+/**
+ * @brief MWC1616 state.
+ * @details MWC1616X pseudorandom number generator is a combination of two
+ * multiply-with-carry generators that use base 2^{16}. It is a part of KISS99
+ * PRNG suggested by G.Marsaglia. It has poor quality and shouldn't be used
+ * as a general purpose generator.
+ */
+typedef struct {
+    u32 z;
+    u32 w;
+} Mwc1616State;
+
+void Mwc1616State_init(Mwc1616State *obj, u32 seed)
+{
+    obj->z = (seed & 0xFFFF) | (1ul << 16ul);
+    obj->w = (seed >> 16) | (1ul << 16ul);
+}
+
+u32 mwc1616_func(void *state)
+{
+    Mwc1616State *obj = state;
+    obj->z = 36969ul * (obj->z & 0xFFFF) + (obj->z >> 16);
+    obj->w = 18000ul * (obj->w & 0xFFFF) + (obj->w >> 16);
+    return (obj->z << 16) + obj->w;
+}
+
 
 /*------------------------------------------------------------------------
   ----- MWC1616X generator implementation (a high-quality generator) -----
@@ -173,10 +245,7 @@ void ResultsList_free(ResultsList *obj)
  *
  * Its quality is much better than quality of MWC1616.
  */
-typedef struct {
-    u32 z;
-    u32 w;
-} Mwc1616xState;
+typedef Mwc1616State Mwc1616xState;
 
 
 u32 mwc1616x_func(void *state)
@@ -191,10 +260,8 @@ u32 mwc1616x_func(void *state)
 
 void Mwc1616xState_init(Mwc1616xState *obj, u32 seed)
 {
-    obj->z = (seed & 0xFFFF) | (1ul << 16ul);
-    obj->w = (seed >> 16) | (1ul << 16ul);
+    Mwc1616State_init(obj, seed);
 }
-
 
 
 /*--------------------------------------------------------------
@@ -333,6 +400,46 @@ u32 xorshift32_func(void *state)
     *x ^= (*x >> 13);
     *x ^= (*x << 5);
     return *x;
+}
+
+/*--------------------------------------------
+  ----- xorwow  generator implementation -----
+  --------------------------------------------*/
+
+/**
+ * @brief xorwow PRNG state.
+ */
+typedef struct {
+    u32 x; /**< Xorshift register */
+    u32 y; /**< Xorshift register */
+    u32 z; /**< Xorshift register */
+    u32 w; /**< Xorshift register */
+    u32 v; /**< Xorshift register */
+    u32 d; /**< "Weyl sequence" counter */
+} XorWowState;
+
+
+void XorWowState_init(XorWowState *obj, u32 seed)
+{
+    obj->x = 123456789;
+    obj->y = 362436069;
+    obj->z = 521288629;
+    obj->w = 88675123;
+    obj->v = ~seed;
+    obj->d = seed;
+}
+
+u32 xorwow_func(void *state)
+{
+    static const u32 d_inc = 362437;
+    XorWowState *obj = state;
+    u32 t = (obj->x ^ (obj->x >> 2));
+    obj->x = obj->y;
+    obj->y = obj->z;
+    obj->z = obj->w;
+    obj->w = obj->v;
+    obj->v = (obj->v ^ (obj->v << 4)) ^ (t ^ (t << 1));
+    return (obj->d += d_inc) + obj->v;
 }
 
 
@@ -506,7 +613,10 @@ void quicksort(u32 *v, int begin, int end)
     }
 }
 
-
+/**
+ * @brief Calculates number of duplicates (essentially xemp) for
+ * birthday spacings test.
+ */
 int get_ndups(u32 *x, int n)
 {
     int i, ndups = 0;
@@ -540,17 +650,84 @@ double bytefreq_to_chi2emp(const u32 *bytefreq)
     return chi2emp;
 }
 
+/**
+ * @brief A buffer for birthday spacings test implementation.
+ */
+typedef struct {
+    u32 *x; /**< Buffer for a sample */
+    int len; /**< Number of values in the sample */
+    int pos; /**< Current number of elements in the sample */
+    int ndim; /**< Number of dimensions */
+    unsigned long ndups; /**< Number of duplicates that was found */
+    int nbits_per_dim; /**< Number of bits per dimensions */
+    u32 mask; /**< Bit mask for extracting lower bits from values */
+} BSpaceBuffer;
+
+
+void BSpaceBuffer_init(BSpaceBuffer *obj, int len, int ndim)
+{
+    obj->x = calloc(len, sizeof(u32));
+    if (obj->x == NULL) {
+        fprintf(stderr, "***** Not enough memory *****\n");
+        exit(1);
+    }
+    obj->len = len;
+    obj->pos = 0;
+    obj->ndups = 0;
+    obj->ndim = ndim;
+    obj->nbits_per_dim = 32 / ndim;
+    obj->mask = (1ul << obj->nbits_per_dim) - 1;
+}
+
+
+void BSpaceBuffer_add_values(BSpaceBuffer *obj, const u32 *x_in)
+{
+    int i, j;
+    int n = obj->len, ndim = obj->ndim, pos = obj->pos;
+    int mask = obj->mask, nbits_per_dim = obj->nbits_per_dim;
+    for (i = 0; i < n; i += ndim) {
+        u32 tmp = 0;
+        for (j = 0; j < ndim; j++) {
+            tmp <<= nbits_per_dim;
+            tmp |= x_in[i + j] & mask;
+        }
+        obj->x[pos++] = tmp;
+    }
+    if (pos >= n) {
+        obj->ndups += get_ndups(obj->x, n);
+        pos = 0;
+    }
+    obj->pos = pos;
+}
+
+
+void BSpaceBuffer_free(BSpaceBuffer *obj)
+{
+    free(obj->x);
+}
+
+/**
+ * @brief Runs all statistical tests except linear complexity.
+ * @param out  Pointer to an output structure for tests results.
+ * @param obj  The pseudorandom number generator to be tested.
+ */
 void gen_tests(ResultsList *out, Generator32State *obj)
 {
     const double lambda = 4.0;
-    int n = 4096, i, ii, ndups = 0, ndups_dec, nsamples = 1024;
-    int pos_dec = 0;
-    double chi2emp = 0.0;
+    int n = 4096, i, ii, ndups = 0, nsamples = 1024;
+    BSpaceBuffer bs_dec, bs_4x8d, bs_8x4d;
+    double chi2emp = 0.0, mu = 0.0;
     TestResultEntry tres;
     u32 u_dec = 0;
     u32 *x = calloc(n, sizeof(u32));
-    u32 *x_dec = calloc(n, sizeof(u32));
     u32 *bytefreq = calloc(256, sizeof(u32));
+    if (x == NULL || bytefreq == NULL) {
+        fprintf(stderr, "***** Not enough memory *****\n");
+        exit(1);
+    }
+    BSpaceBuffer_init(&bs_dec, n, 8);
+    BSpaceBuffer_init(&bs_4x8d, n, 8);
+    BSpaceBuffer_init(&bs_8x4d, n, 4);
     printf("Processing pseudorandom numbers blocks...\n");
     for (ii = 0; ii < nsamples; ii++) {
         for (i = 0; i < n; i++) {
@@ -559,12 +736,12 @@ void gen_tests(ResultsList *out, Generator32State *obj)
             /* Making subsample for birthday spacings with decimation
                Take only every 64th point and use lower 4 bits from each.
                We will analyse 8-tuples made of 4-bit elements. */
-            if ((i & 0x3F) == 0 && pos_dec < n) {
+            if ((i & 0x3F) == 0 && bs_dec.pos < n) {
                 u_dec <<= 4;
                 u_dec |= u & 0xF;
                 /* Check if 8 elements are already collected */
                 if ((i & 0x1C0) == 0x1C0) {
-                    x_dec[pos_dec++] = u_dec;
+                    bs_dec.x[bs_dec.pos++] = u_dec;
                     u_dec = 0;
                 }
             }
@@ -574,26 +751,23 @@ void gen_tests(ResultsList *out, Generator32State *obj)
             bytefreq[u & 0xFF]++; u >>= 8;
             bytefreq[u & 0xFF]++;            
         }
+        /* Subsampling for nD birthday spacings without decimation */
+        BSpaceBuffer_add_values(&bs_4x8d, x);        
+        BSpaceBuffer_add_values(&bs_8x4d, x);
+        /* 1D birthday spacings test */
         ndups += get_ndups(x, n);
         printf("  %d of %d\r", ii + 1, nsamples);
+        fflush(stdout);
     }
     chi2emp = bytefreq_to_chi2emp(bytefreq);
-    ndups_dec = get_ndups(x_dec, n);
+    bs_dec.ndups = get_ndups(bs_dec.x, n);
     printf("\nBirthday spacings and byte frequency tests results\n");
-    /* Analysis of 1-dimensional birthday spacings test */
-    strcpy(tres.name, "bspace32_1d");
-    tres.x = ndups;
-    tres.p = poisson_pvalue(tres.x, nsamples * lambda);
-    tres.alpha = poisson_cdf(tres.x, nsamples * lambda);
-    ResultsList_add(out, &tres);
-    printf("  bspace32_1d: x = %g, p = %g\n", tres.x, tres.p);
-    /* Analysis of 3D birthday spacings test with decimation */
-    strcpy(tres.name, "bspace4_8_dec");
-    tres.x = ndups_dec;
-    tres.p = poisson_pvalue(tres.x, lambda);
-    tres.alpha = poisson_cdf(tres.x, lambda);
-    ResultsList_add(out, &tres);
-    printf("  bspace4_8d_dec: x = %g, p = %g\n", tres.x, tres.p);
+    /* Analysis of birthday spacings tests */
+    mu = nsamples * lambda;
+    ResultsList_add_poisson(out, "bspace32_1d", ndups, mu);
+    ResultsList_add_poisson(out, "bspace8_4d", bs_8x4d.ndups, mu / 4);
+    ResultsList_add_poisson(out, "bspace4_8d", bs_4x8d.ndups, mu / 8);
+    ResultsList_add_poisson(out, "bspace4_8d_dec", bs_dec.ndups, lambda);
     /* Analysis of byte frequency test */
     strcpy(tres.name, "bytefreq");
     tres.x = chi2emp;
@@ -603,31 +777,43 @@ void gen_tests(ResultsList *out, Generator32State *obj)
     printf("  bytefreq: x = %g, p = %g\n", tres.x, tres.p);
     /* Free all buffers */
     free(x);
-    free(x_dec);
     free(bytefreq);
+    BSpaceBuffer_free(&bs_dec);
+    BSpaceBuffer_free(&bs_4x8d);
+    BSpaceBuffer_free(&bs_8x4d);
 }
 
-
+/**
+ * @brief Prints a short command line arguments reference to stdout.
+ */
 void print_help()
 {
-    printf("Test suite for 32-bit pseudorandom numbers generators.\n");
-    printf("It is minimalistic and can be compiled even for 16-bit DOS.\n");
-    printf("(C) 2024 Alexey L. Voskov\n\n");
-    printf("Usage: sr_tiny gen_name [speed]\n");
-    printf("  gen_name = alfib, lcg32, lcg64, mwc1616x, xorshift32\n");
-    printf("    alfib = LFib(55,24,+,2^32): additive lagged Fibonacci\n");
-    printf("    lcg32 - 32-bit LCG; x_n = 69069x_{n-1} + 12345 mod 2^32\n");
-    printf("    lcg64 - 64-bit LCG, returns upper 32 bits\n");
-    printf("    mwc1616x - a combination of 2 MWC generators, gives high\n");
-    printf("      quality sequence that passes all tests\n");
-    printf("    xorshift32 - classical 'shr3' LFSR PRNG\n\n");
-    printf("  speed - optional argument, enables speed measurement mode.\n");
+    printf(
+        "Test suite for 32-bit pseudorandom numbers generators.\n"
+        "It is minimalistic and can be compiled even for 16-bit DOS.\n"
+        "(C) 2024-2025 Alexey L. Voskov\n\n"
+        "Usage: sr_tiny gen_name [speed]\n"
+        "  gen_name = alfib, lcg32, lcg64, mwc1616x, xorshift32\n"
+        "    alfib = LFib(55,24,+,2^32): additive lagged Fibonacci\n"
+        "    lcg32 - 32-bit LCG; x_n = 69069x_{n-1} + 12345 mod 2^32\n"
+        "    lcg64 - 64-bit LCG, returns upper 32 bits\n"
+        "    mwc1616 - a combination of 2 MWC generators from KISS99,\n"
+        "      an output has a relatively low quality\n"
+        "    mwc1616x - a combination of 2 MWC generators, gives high\n"
+        "      quality sequence that passes all tests\n"
+        "    xorshift32 - classical 'shr3' LFSR PRNG\n"
+        "    xorwow - an obsolete combined PRNG\n\n"
+        "  speed - an optional argument, enables speed measurement mode.\n");
 }
 
-
+/**
+ * @brief Creates a pseudorandom number generator (PRNG).
+ * @param name Generator name, may be `alfib`, `lcg32`, `lcg64`, `mwc1616`,
+ * `mwc1616x`, `xorshift32`, `xorwow`.
+ */
 Generator32State create_generator(const char *name)
 {
-    static Generator32State gen = {NULL, NULL};
+    static Generator32State gen = {0, 0};
     u32 x = time(NULL);
     if (!strcmp("alfib", name)) {
         gen.state = malloc(sizeof(ALFibState));
@@ -654,6 +840,10 @@ Generator32State create_generator(const char *name)
             exit(1);
         }
         Lcg64x16State_init(gen.state, x);
+    } else if (!strcmp("mwc1616", name)) {
+        gen.state = malloc(sizeof(Mwc1616State));
+        gen.get_bits32 = mwc1616_func;
+        Mwc1616State_init(gen.state, x);
     } else if (!strcmp("mwc1616x", name)) {
         gen.state = malloc(sizeof(Mwc1616xState));
         gen.get_bits32 = mwc1616x_func;
@@ -662,12 +852,18 @@ Generator32State create_generator(const char *name)
         gen.state = malloc(sizeof(u32));
         gen.get_bits32 = xorshift32_func;
         *((u32 *) gen.state) = x | 0x1; /* Cannot be initialized with 0 */
+    } else if (!strcmp("xorwow", name)) {
+        gen.state = malloc(sizeof(XorWowState));
+        XorWowState_init(gen.state, x);
+        gen.get_bits32 = xorwow_func;
     }
     return gen;
 }
 
 
-
+/**
+ * @brief Measures speed of the PRNG in KiB/sec.
+ */
 void measure_speed(Generator32State *gen)
 {
     double nsec, kib_sec;
@@ -698,6 +894,10 @@ void measure_speed(Generator32State *gen)
     }
 }
 
+/**
+ * @brief Prints the elapsed time in the hh:mm:ss.msec format to stdout.
+ * @param sec_total  Elapsed time, seconds.
+ */
 void print_elapsed_time(double sec_total)
 {
     unsigned long sec_total_int = sec_total;
@@ -708,6 +908,9 @@ void print_elapsed_time(double sec_total)
     printf("%.2d:%.2d:%.2d.%.3d\n", hours, minutes, seconds, ms);
 }
 
+/**
+ * @brief Program entry point.
+ */
 int main(int argc, char *argv[])
 {
     Generator32State gen;

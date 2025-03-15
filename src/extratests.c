@@ -648,9 +648,9 @@ void battery_ising(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
     static const TestDescription tests[] = {
-        {"ising16_metropolis", ising2d_metropolis, NULL, 125, RAM_MED},
-        {"ising16_wolff", ising2d_wolff, NULL, 198, RAM_MED},
-        {NULL, NULL, NULL, 0, 0}
+        {"ising16_metropolis", ising2d_metropolis, NULL},
+        {"ising16_wolff",      ising2d_wolff,      NULL},
+        {NULL, NULL, NULL}
     };
     const TestsBattery bat = {
         "ising", tests
