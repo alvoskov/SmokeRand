@@ -22,6 +22,7 @@ set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_SHARED_LIBRARY_PREFIX )
 
 # Check if math library is required to link
 # It is a workaround for different behaviour of GCC and MSVC
@@ -92,7 +93,7 @@ add_executable(testgens apps/testgens.c)
 target_include_directories(testgens PRIVATE include)
 target_link_libraries(testgens smokerand_bat smokerand_core ${COMMON_LIBS})
 
-# crand uses standard library, so we can't link it as a freestanding
+# g) crand uses standard library, so we can't link it as a freestanding
 # dynamic linked (shared) library.
 add_executable(test_crand apps/test_crand.c)
 target_include_directories(test_crand PRIVATE include)

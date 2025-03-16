@@ -116,7 +116,7 @@ GEN_ALL_SOURCES = $(wildcard generators/*.c)
 endif
 GEN_SOURCES = $(filter-out $(GEN_CUSTOM_SOURCES), $(GEN_ALL_SOURCES))
 GEN_OBJFILES = $(patsubst %.c,%.o,$(subst generators/,$(BINDIR)/generators/obj/,$(GEN_SOURCES)))
-GEN_SHARED = $(patsubst %.c,%$(SO),$(subst generators/,$(BINDIR)/generators/lib, $(GEN_ALL_SOURCES)))
+GEN_SHARED = $(patsubst %.c,%$(SO),$(subst generators/,$(BINDIR)/generators/, $(GEN_ALL_SOURCES)))
 GEN_BINDIR = $(BINDIR)/generators
 
 #-----------------------------------------------------------------------------
@@ -170,12 +170,8 @@ $(EXECXX_OBJFILES): $(OBJDIR)/%.o : $(APPSRCDIR)/%.cpp $(LIB_HEADERS)
 
 generators: $(GEN_SHARED)
 
-# Linking crand PRNG requires linking with C standard library
-#$(GEN_BINDIR)/libcrand$(SO): $(GEN_BINDIR)/obj/crand.o
-#	$(CC) $(LINKFLAGS) -shared $< -s $(GEN_LFLAGS) -o $@
-
 # Generic rules for linking PRNG plugins
-$(GEN_BINDIR)/lib%$(SO): $(GEN_BINDIR)/obj/%.o
+$(GEN_BINDIR)/%$(SO): $(GEN_BINDIR)/obj/%.o
 	$(CC) $(LINKFLAGS) -shared $(GEN_CFLAGS) $< -s $(GEN_LFLAGS) -o $@
 
 $(GEN_OBJFILES): $(BINDIR)/generators/obj/%.o : generators/%.c $(INTERFACE_HEADERS)
