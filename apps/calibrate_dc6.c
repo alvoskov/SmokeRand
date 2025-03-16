@@ -22,8 +22,11 @@ typedef struct {
 
 static ThreadRetVal THREADFUNC_SPEC hamming_ot_run_test(void *udata)
 {
-    HammingOtOptions opts = {.mode = HAMMING_OT_BYTES, .nbytes = 100000000};
-    //HammingOtOptions opts = {.mode = HAMMING_OT_BYTES, .nbytes = 10000000};
+//    HammingOtOptions opts = {.mode = HAMMING_OT_BYTES, .nbytes = 1000000000}; // 10^9 bytes
+//    HammingOtOptions opts = {.mode = HAMMING_OT_BYTES, .nbytes = 100000000};
+//      HammingOtOptions opts = {.mode = HAMMING_OT_BYTES, .nbytes = 10000000}; // 10^7 bytes
+//      HammingOtOptions opts = {.mode = HAMMING_OT_VALUES, .nbytes = 100000000}; // 10^8 bytes
+      HammingOtOptions opts = {.mode = HAMMING_OT_VALUES, .nbytes = 1000000000}; // 10^9 bytes
 //    HammingOtLongOptions opts = {.nvalues = 100000000, .wordsize = HAMMING_OT_W128};
 //    HammingOtLongOptions opts = {.nvalues = 10000000, .wordsize = HAMMING_OT_W128};
 
@@ -74,9 +77,9 @@ double *generate_sample(GeneratorInfo *gi, int nsamples)
 
 int main()
 {
-    const char *mod_name = "generators/libchacha_avx.dll";
-    //const char *mod_name = "generators/libspeck128_avx.dll";
-    int nsamples = 100000;
+    //const char *mod_name = "generators/chacha_avx.dll";
+    const char *mod_name = "generators/speck128_avx.dll";
+    int nsamples = 10000;
 
     GeneratorModule mod = GeneratorModule_load(mod_name);
     if (!mod.valid) {
