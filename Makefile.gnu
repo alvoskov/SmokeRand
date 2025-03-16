@@ -242,8 +242,10 @@ else
 	install -d $(DESTDIR)$(PREFIX)/src/smokerand
 	install -d $(DESTDIR)$(PREFIX)/src/smokerand/generators
 	install -d $(DESTDIR)$(PREFIX)/src/smokerand/src
+	install -d $(DESTDIR)$(PREFIX)/src/smokerand/apps
 	install -m 644 src/*.c $(DESTDIR)$(PREFIX)/src/smokerand/src
-	install -m 644 src/*.asm $(DESTDIR)$(PREFIX)/src/smokerand/src
+	install -m 644 apps/*.c $(DESTDIR)$(PREFIX)/src/smokerand/apps
+	install -m 644 apps/*.asm $(DESTDIR)$(PREFIX)/src/smokerand/apps
 	install -m 644 Makefile.gnu $(DESTDIR)$(PREFIX)/src/smokerand
 	install -m 644 CMakeLists.txt $(DESTDIR)$(PREFIX)/src/smokerand
 	install -m 644 generators/*.c $(DESTDIR)$(PREFIX)/src/smokerand/generators
@@ -273,6 +275,8 @@ else
 	rm -d $(DESTDIR)$(PREFIX)/src/smokerand/generators
 	rm $(DESTDIR)$(PREFIX)/src/smokerand/src/*
 	rm -d $(DESTDIR)$(PREFIX)/src/smokerand/src
+	rm $(DESTDIR)$(PREFIX)/src/smokerand/apps/*
+	rm -d $(DESTDIR)$(PREFIX)/src/smokerand/apps
 	rm $(DESTDIR)$(PREFIX)/src/smokerand/*
 	rm -d $(DESTDIR)$(PREFIX)/src/smokerand
 

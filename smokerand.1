@@ -1,4 +1,4 @@
-.TH smokerand 1  "February 24, 2025" "version 0.24" "USER COMMANDS"
+.TH smokerand 1  "March 16, 2025" "version 0.30" "USER COMMANDS"
 .SH NAME
 smokerand \- a test suite for pseudorandom numbers generators
 .SH SYNOPSIS
@@ -42,9 +42,9 @@ interpretation is rather simple and based on the next intervals:
 .IP \[bu]
 \fBOk\fR: in the (0.001 and 0.999) interval;
 .IP \[bu]
-\fBSUSPICIOUS\fR: in the [1e-10; 0.001] and [0.999; 1 - 1e-10] intervals;
+\fBSUSPICIOUS\fR: in the [1e\-10; 0.001] and [0.999; 1 \- 1e-10] intervals;
 .IP \[bu]
-\fBFAIL\fR: in the [0; 1e-10) and (1 - 1e-10; 1] intervals.
+\fBFAIL\fR: in the [0; 1e\-10) and (1 \- 1e\-10; 1] intervals.
 .PP
 Only systematic \fBSUSPICIOUS\fR or \fBFAIL\fR results must be interpreted
 as detected statistical flaw of the tested pseudorandom number generator.
@@ -118,11 +118,13 @@ failure. E.g. SplitMix and RC4 will be graded as 3.0 instead of 4.0.
 Examples of grading for some generators:
 .IP \[bu]
 \fBgood\fR: AES128, ChaCha12, xoroshiro128++, KISS99, MWC64X.
+.IP \[bu]
 \fBsome issues\fR: Mersenne Twister, 128-bit LCG, xoroshiro128+,
 SplitMix, RC4, DES-CTR.
+.IP \[bu]
 \fBflawed\fR: flea32x1, taus88, WELL1024a.
-\fBbad
-\fBvery bad\fR: RANDU, 32-bit and 64-bit LCGs with power of 2 modulo,
+.IP \[bu]
+\fBbad\fR, \fBvery bad\fR: RANDU, 32-bit and 64-bit LCGs with power of 2 modulo,
 xorwow, SWB, ChaCha12 with 32-bit counter, LFIB(607,273,+)
 .PP
 Grouping RANDU together with xorwow and additive lagged Fibonacci PRNGs
@@ -265,11 +267,11 @@ amount of RAM and/or take more than 10 minutes.
 .TP
 .B express
 Express battery that contains 7 tests and consumes 80 or 145 MiB of data for
-32-bit or 64-bit PRNG respectively. Consists of byte frequency test,
-1\-dimensional 32\-bit birthday spacings tests, 4\-dimensional 32-\bit birthday
-spacings test, two variants of 8\dimensional 32-\bit birthday spacings test (without
+32\-bit or 64\-bit PRNG respectively. Consists of byte frequency test,
+1\-dimensional 32\-bit birthday spacings tests, 4\-dimensional 32\-bit birthday
+spacings test, two variants of 8\-dimensional 32\-bit birthday spacings test (without
 and with decimation) and linear complexity test. Detects 64\-bit LCGs with
-power of 2 modulo, 32\-bit LCGs, some lagged Fibonacci and subtract-with-borrow
+power of 2 modulo, 32\-bit LCGs, some lagged Fibonacci and subtract\-with\-borrow
 generators, small LFSR, MWC1616 and xorwow. Mersenne Twister and 128\-bit LCG with
 power of 2 modulo pass it.
 .TP
@@ -285,7 +287,7 @@ Slower but more sensitive battery that contains 40 tests and consumes
 128 or 256 GiB of data for 32\-bit or 64\-bit PRNG respectively. The test set
 is similar to the \fBbrief\fR battery but it is configured for larger samples;
 also includes binary matrix rank test and mod3 test. This battery has an
-improved sensitivity for truncated 64-bit and 128-bit LCGs, also for some
+improved sensitivity for truncated 64\-bit and 128\-bit LCGs, also for some
 nonlinear generators.
 .TP
 .B full
@@ -434,11 +436,13 @@ script.
 #
 # SmokeRand `express` battery written as a script
 #
-byte_freq   test=nbit_words_freq bits_per_word=8 average_freq=256 nblocks=256
+byte_freq   test=nbit_words_freq bits_per_word=8  average_freq=256 nblocks=256
 bspace32_1d test=bspace_nd nbits_per_dim=32 ndims=1 nsamples=1024 get_lower=1
+bspace8_4d  test=bspace_nd nbits_per_dim=8  ndims=4 nsamples=256  get_lower=1
+bspace4_8d  test=bspace_nd nbits_per_dim=4  ndims=8 nsamples=128  get_lower=1
 bspace4_8d_dec  test=bspace4_8d_decimated  step=128
-linearcomp_high test=linearcomp nbits=10000 bitpos=high
-linearcomp_low  test=linearcomp nbits=10000 bitpos=low
+linearcomp_high test=linearcomp            nbits=10000 bitpos=high
+linearcomp_low  test=linearcomp            nbits=10000 bitpos=low
 .EE
 .SS External modules
 .PP
