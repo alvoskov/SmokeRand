@@ -66,7 +66,7 @@ static int run_self_test(const CallerAPI *intf)
     LFib4State *obj = intf->malloc(sizeof(LFib4State));
     LFib4State_init(obj, 12345); 
     for (unsigned long i = 0; i < 1000000; i++) {
-        x = get_bits_raw(obj);
+        x = (uint32_t) get_bits_raw(obj);
     }
     intf->printf("x = %22u; x_ref = %22u\n", x, x_ref);
     intf->free(obj);

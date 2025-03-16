@@ -46,7 +46,7 @@ static inline uint64_t ALFib_State_get_bits(ALFib_State *obj)
 static inline uint64_t get_bits_raw(void *state)
 {
     ALFib_State *obj = state;
-    uint32_t x = ALFib_State_get_bits(obj);
+    uint32_t x = (uint32_t) ALFib_State_get_bits(obj);
     if (++obj->pos == LFIB_A) {
         for (int i = 0; i < LFIB_TOTAL - LFIB_A; i++) {
             (void) ALFib_State_get_bits(obj);
@@ -62,7 +62,7 @@ static void *create(const CallerAPI *intf)
     // pcg_rxs_m_xs64 for initialization
     uint64_t state = intf->get_seed64();
     for (int k = 0; k < LFIB_A; k++) {    
-        obj->x[k] = pcg_bits64(&state);
+        obj->x[k] = (uint32_t) pcg_bits64(&state);
     }
     obj->i = 0; obj->j = LFIB_A - LFIB_B;
     obj->pos = 0;

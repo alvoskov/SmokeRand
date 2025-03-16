@@ -57,6 +57,10 @@ void TestInfo_addarg(TestInfo *obj, const char *name, const char *value)
 {
     obj->nargs++;
     obj->args = realloc(obj->args, obj->nargs * sizeof(TestArgument));
+    if (obj->args == NULL) {
+        fprintf(stderr, "***** TestInfo_addarg: not enough memory *****");
+        exit(1);
+    }
     xstrcpy_s(obj->args[obj->nargs - 1].name, 64, name);
     xstrcpy_s(obj->args[obj->nargs - 1].value, 64, value);
 }
@@ -176,6 +180,10 @@ void TestInfoArray_addtest(TestInfoArray *obj, const TestInfo *test)
 {
     obj->ntests++;
     obj->tests = realloc(obj->tests, obj->ntests * sizeof(TestInfo));
+    if (obj->tests == NULL) {
+        fprintf(stderr, "***** TestInfoArray_addtest: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
     obj->tests[obj->ntests - 1] = *test;
 }
 
@@ -257,10 +265,14 @@ static int parse_bspace_nd(TestDescription *out, const TestInfo *obj, char *errm
     GET_LIMITED_INTVALUE(nsamples, 1, 1ll << 30ll)
     GET_LIMITED_INTVALUE(get_lower, 0, 1)
     BSpaceNDOptions *opts = calloc(1, sizeof(BSpaceNDOptions));
-    opts->nbits_per_dim = nbits_per_dim;
-    opts->ndims = ndims;
-    opts->nsamples = nsamples;
-    opts->get_lower = get_lower;
+    if (opts == NULL) {
+        fprintf(stderr, "***** parse_bspace_nd: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
+    opts->nbits_per_dim = (unsigned int) nbits_per_dim;
+    opts->ndims = (unsigned int) ndims;
+    opts->nsamples = (unsigned long) nsamples;
+    opts->get_lower = (int) get_lower;
     out->name = obj->testname;
     out->run = bspace_nd_test_wrap;
     out->udata = opts;
@@ -276,11 +288,15 @@ static int parse_collover_nd(TestDescription *out, const TestInfo *obj, char *er
     GET_LIMITED_INTVALUE(get_lower, 0, 1)
     GET_LIMITED_INTVALUE(n, 1000, 1ll << 30ll)
     CollOverNDOptions *opts = calloc(1, sizeof(CollOverNDOptions));
-    opts->nbits_per_dim = nbits_per_dim;
-    opts->ndims = ndims;
-    opts->nsamples = nsamples;
-    opts->n = n;
-    opts->get_lower = get_lower;
+    if (opts == NULL) {
+        fprintf(stderr, "***** parse_collover_nd: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
+    opts->nbits_per_dim = (unsigned int) nbits_per_dim;
+    opts->ndims = (unsigned int) ndims;
+    opts->nsamples = (unsigned long) nsamples;
+    opts->n = (unsigned long) n;
+    opts->get_lower = (int) get_lower;
     out->name = obj->testname;
     out->run = bspace_nd_test_wrap;
     out->udata = opts;
@@ -301,6 +317,10 @@ static int parse_monobit_freq(TestDescription *out, const TestInfo *obj, char *e
 {
     GET_LIMITED_INTVALUE(nvalues, 1024, 1ll << 50ll)
     MonobitFreqOptions *opts = calloc(1, sizeof(MonobitFreqOptions));
+    if (opts == NULL) {
+        fprintf(stderr, "***** parse_monobit_freq: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
     opts->nvalues = nvalues;
     out->name = obj->testname;
     out->run = monobit_freq_test_wrap;
@@ -316,9 +336,13 @@ static int parse_nbit_words_freq(TestDescription *out, const TestInfo *obj, char
     GET_LIMITED_INTVALUE(average_freq, 8, 1ll << 20ll)
     GET_LIMITED_INTVALUE(nblocks, 16, 1ll << 30ll)
     NBitWordsFreqOptions *opts = calloc(1, sizeof(NBitWordsFreqOptions));
-    opts->bits_per_word = bits_per_word;
-    opts->average_freq = average_freq;
-    opts->nblocks = nblocks;
+    if (opts == NULL) {
+        fprintf(stderr, "***** parse_nbit_words_freq: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
+    opts->bits_per_word = (unsigned int) bits_per_word;
+    opts->average_freq = (unsigned int) average_freq;
+    opts->nblocks = (size_t) nblocks;
     out->name = obj->testname;
     out->run = nbit_words_freq_test_wrap;
     out->udata = opts;
@@ -330,7 +354,11 @@ static int parse_bspace4_8d_decimated(TestDescription *out, const TestInfo *obj,
 {
     GET_LIMITED_INTVALUE(step, 1, 1ll << 30ll)
     BSpace4x8dDecimatedOptions *opts = calloc(1, sizeof(BSpace4x8dDecimatedOptions));
-    opts->step = step;
+    if (opts == NULL) {
+        fprintf(stderr, "***** parse_bspace4_8d_decimated: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
+    opts->step = (unsigned long) step;
     out->name = obj->testname;
     out->run = bspace4_8d_decimated_test_wrap;
     out->udata = opts;
@@ -343,7 +371,11 @@ static int parse_gap(TestDescription *out, const TestInfo *obj, char *errmsg)
     GET_LIMITED_INTVALUE(shl, 1, 64)
     GET_LIMITED_INTVALUE(ngaps, 10000, 1ll << 40ll)
     GapOptions *opts = calloc(1, sizeof(GapOptions));
-    opts->shl = shl;
+    if (opts == NULL) {
+        fprintf(stderr, "***** parse_gap: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
+    opts->shl = (unsigned int) shl;
     opts->ngaps = ngaps;
     out->name = obj->testname;
     out->run = gap_test_wrap;
@@ -356,7 +388,11 @@ static int parse_gap16_count0(TestDescription *out, const TestInfo *obj, char *e
 {
     GET_LIMITED_INTVALUE(ngaps, 10000, 1ll << 40ll)
     Gap16Count0Options *opts = calloc(1, sizeof(Gap16Count0Options));
-    opts->ngaps = ngaps;
+    if (opts == NULL) {
+        fprintf(stderr, "***** parse_gap16_count0: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
+    opts->ngaps = (unsigned long long) ngaps;
     out->name = obj->testname;
     out->run = gap16_count0_test_wrap;
     out->udata = opts;
@@ -381,6 +417,10 @@ static int parse_hamming_ot(TestDescription *out, const TestInfo *obj, char *err
     }
 
     HammingOtOptions *opts = calloc(1, sizeof(HammingOtOptions));
+    if (opts == NULL) {
+        fprintf(stderr, "***** parse_hamming_ot: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
     opts->nbytes = nbytes;
     opts->mode = mode;
     out->name = obj->testname;
@@ -403,6 +443,10 @@ static int parse_hamming_ot_long(TestDescription *out, const TestInfo *obj, char
         return 0;
     }
     HammingOtLongOptions *opts = calloc(1, sizeof(HammingOtLongOptions));
+    if (opts == NULL) {
+        fprintf(stderr, "***** parse_hamming_ot_long: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
     opts->nvalues = nvalues;
     opts->wordsize = ws;
     out->name = obj->testname;
@@ -430,8 +474,12 @@ static int parse_linearcomp(TestDescription *out, const TestInfo *obj, char *err
         }
     }
     LinearCompOptions *opts = calloc(1, sizeof(LinearCompOptions));
-    opts->nbits = nbits;
-    opts->bitpos = bitpos;
+    if (opts == NULL) {
+        fprintf(stderr, "***** parse_linearcomp: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
+    opts->nbits = (size_t) nbits;
+    opts->bitpos = (int) bitpos;
     out->name = obj->testname;
     out->run = linearcomp_test_wrap;
     out->udata = opts;
@@ -447,8 +495,12 @@ static int parse_matrixrank(TestDescription *out, const TestInfo *obj, char *err
         return 0;
     }
     MatrixRankOptions *opts = calloc(1, sizeof(MatrixRankOptions));
-    opts->n = n;
-    opts->max_nbits = max_nbits;
+    if (opts == NULL) {
+        fprintf(stderr, "***** parse_matrixrank: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
+    opts->n = (size_t) n;
+    opts->max_nbits = (unsigned int) max_nbits;
     out->name = obj->testname;
     out->run = matrixrank_test_wrap;
     out->udata = opts;
@@ -459,7 +511,11 @@ static int parse_mod3(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
     GET_LIMITED_INTVALUE(nvalues, 100000, 1ll << 50ll)
     Mod3Options *opts = calloc(1, sizeof(Mod3Options));
-    opts->nvalues = nvalues;
+    if (opts == NULL) {
+        fprintf(stderr, "***** parse_mod3: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
+    opts->nvalues = (unsigned long long) nvalues;
     out->name = obj->testname;
     out->run = mod3_test_wrap;
     out->udata = opts;
@@ -470,6 +526,10 @@ static int parse_sumcollector(TestDescription *out, const TestInfo *obj, char *e
 {
     GET_LIMITED_INTVALUE(nvalues, 100000, 1ll << 50ll)
     SumCollectorOptions *opts = calloc(1, sizeof(SumCollectorOptions));
+    if (opts == NULL) {
+        fprintf(stderr, "***** parse_sumcollector: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
     opts->nvalues = nvalues;
     out->name = obj->testname;
     out->run = sumcollector_test_wrap;
@@ -492,8 +552,12 @@ static int parse_ising2d(TestDescription *out, const TestInfo *obj, char *errmsg
     }
 
     Ising2DOptions *opts = calloc(1, sizeof(Ising2DOptions));
-    opts->sample_len = sample_len;
-    opts->nsamples = nsamples;
+    if (opts == NULL) {
+        fprintf(stderr, "***** parse_ising2d: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
+    opts->sample_len = (unsigned long) sample_len;
+    opts->nsamples = (unsigned int) nsamples;
     opts->algorithm = algorithm;
     out->name = obj->testname;
     out->run = ising2d_test_wrap;
@@ -543,6 +607,11 @@ int battery_file(const char *filename, GeneratorInfo *gen, CallerAPI *intf,
     }
     size_t ntests = tests_args.ntests;
     TestDescription *tests = calloc(ntests + 1, sizeof(TestDescription));
+    if (tests == NULL) {
+        fprintf(stderr, "***** battery_file: not enough memory *****");
+        TestInfoArray_free(&tests_args);
+        return 0;
+    }
 
     int is_ok = 1;
     for (size_t i = 0; i < tests_args.ntests; i++) {        

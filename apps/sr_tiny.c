@@ -124,11 +124,19 @@ void ResultsList_add(ResultsList *obj, const TestResultEntry *entry)
 {
     if (obj->first == NULL) {
         obj->first = malloc(sizeof(TestResultEntry));
+        if (obj->first == NULL) {
+            fprintf(stderr, "***** Resultslist_add: not enough memory *****\n");
+            exit(EXIT_FAILURE);
+        }
         *(obj->first) = *entry;
         obj->first->next = NULL;
         obj->top = obj->first;
     } else {
         obj->top->next = malloc(sizeof(TestResultEntry));
+        if (obj->top->next == NULL) {
+            fprintf(stderr, "***** Resultslist_add: not enough memory *****\n");
+            exit(EXIT_FAILURE);
+        }
         *(obj->top->next) = *entry;
         obj->top->next->next = NULL;
         obj->top = obj->top->next;
@@ -505,7 +513,7 @@ size_t berlekamp_massey(const u8 *s, size_t n)
             xorbytes(&C[N - m], B, n - N + m);
             if (2*L <= N) {
                 L = N + 1 - L;
-                m = N;
+                m = (long) N;
                 memcpy(B, T, (L + 1) * sizeof(u8));
             }
         }
@@ -548,7 +556,7 @@ void linearcomp_test_c89(ResultsList *out, Generator32State *obj,
         if (obj->get_bits32(obj->state) & mask)
             s[i] = 1;
     }
-    L = berlekamp_massey(s, nbits);
+    L = (double) berlekamp_massey(s, nbits);
     if (nbits & 1) {
         T = -L + (double) (nbits + 1) / 2.0;
     } else {
@@ -814,7 +822,7 @@ void print_help()
 Generator32State create_generator(const char *name)
 {
     static Generator32State gen = {0, 0};
-    u32 x = time(NULL);
+    u32 x = (u32) time(NULL);
     if (!strcmp("alfib", name)) {
         gen.state = malloc(sizeof(ALFibState));
         gen.get_bits32 = alfib_func;
@@ -886,7 +894,7 @@ void measure_speed(Generator32State *gen)
         toc = clock();
     } while (toc - tic < 2*CLOCKS_PER_SEC);
     nsec = ((double) (toc - tic) / CLOCKS_PER_SEC);
-    kib_sec = (double) (nblocks_total << 6) / nsec;
+    kib_sec = (double) ((unsigned long long) nblocks_total << 6) / nsec;
     if (kib_sec < 1000.0) {
         printf("  Generator speed: %g KiB/sec", kib_sec);
     } else {
@@ -900,8 +908,8 @@ void measure_speed(Generator32State *gen)
  */
 void print_elapsed_time(double sec_total)
 {
-    unsigned long sec_total_int = sec_total;
-    int ms = (sec_total - sec_total_int) * 1000.0;
+    unsigned long sec_total_int = (unsigned long) sec_total;
+    int ms = (int) ((sec_total - sec_total_int) * 1000.0);
     int seconds = sec_total_int % 60;
     int minutes = (sec_total_int / 60) % 60;
     int hours = (sec_total_int / 3600);

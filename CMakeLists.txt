@@ -23,6 +23,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_SHARED_LIBRARY_PREFIX )
+add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
 # Check if math library is required to link
 # It is a workaround for different behaviour of GCC and MSVC
@@ -116,7 +117,7 @@ if (ONLY_PORTABLE)
     superduper73 swblarge swblux swbw swb taus88 threefry2x64 threefry 
     tinymt32 tinymt64 well1024a xorgens xoroshiro1024stst xoroshiro1024st 
     xoroshiro128pp xoroshiro128pp_vec xoroshiro128p xorshift128p xorshift128
-    xorwow xsh)
+    xorwow xoshiro128p xoshiro128pp xsh)
 else()
     message("All generators will be compiled")
     set(GENERATORS aesni alfib_lux alfib_mod alfib ara32 chacha_avx chacha cmwc4096 
@@ -136,7 +137,7 @@ else()
     threefry2x64_avx threefry2x64 threefry tinymt32 tinymt64 well1024a 
     wyrand xorgens xoroshiro1024stst xoroshiro1024st xoroshiro128pp_avx 
     xoroshiro128pp xoroshiro128pp_vec xoroshiro128p xorshift128pp_avx
-    xorshift128p xorshift128 xorwow xoshiro128pp xsh)
+    xorshift128p xorshift128 xorwow xoshiro128p xoshiro128pp xsh)
 endif()
 
 

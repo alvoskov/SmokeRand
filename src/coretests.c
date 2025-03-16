@@ -533,7 +533,7 @@ static int gap_test_guard(GeneratorState *obj, const GapOptions *opts)
 {
     int is_ok = 0;
     uint64_t beta = 1ull << (obj->gi->nbits - opts->shl);
-    double p = 1.0 / (1 << opts->shl); // beta in the floating point format
+    double p = 1.0 / (1ull << opts->shl); // beta in the floating point format
     unsigned long long nsamples = (unsigned long long) (-20.0 / log10(1.0 - p));
     for (unsigned long i = 0; i < nsamples; i++) {
         if (obj->gi->get_bits(obj->state) <= beta) {
@@ -551,7 +551,7 @@ static int gap_test_guard(GeneratorState *obj, const GapOptions *opts)
 TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
 {
     const double Ei_min = 10.0;
-    double p = 1.0 / (1 << opts->shl); // beta in the floating point format
+    double p = 1.0 / (1ull << opts->shl); // beta in the floating point format
     uint64_t beta = 1ull << (obj->gi->nbits - opts->shl);
     uint64_t u;
     size_t ngaps = opts->ngaps;
@@ -593,8 +593,8 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
         ans.x += d * d / Ei;
     }
     free(Oi);
-    ans.p = chi2_pvalue(ans.x, nbins - 1);
-    ans.alpha = chi2_cdf(ans.x, nbins - 1);
+    ans.p = chi2_pvalue(ans.x, (unsigned long) (nbins - 1));
+    ans.alpha = chi2_cdf(ans.x, (unsigned long) (nbins - 1));
     obj->intf->printf("  Values processed: %llu (2^%.1f)\n",
         nvalues, sr_log2((double) nvalues));
     obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
@@ -630,6 +630,10 @@ typedef struct {
 static GapFrequencyArray *GapFrequencyArray_create(size_t nbins, double p)
 {
     GapFrequencyArray *gapfreq = calloc(1, sizeof(GapFrequencyArray));
+    if (gapfreq == NULL) {
+        fprintf(stderr, "***** gap16_count0: not enough memory *****\n");
+        exit(EXIT_FAILURE);
+    }
     gapfreq->f = calloc(nbins + 1, sizeof(GapFrequency));
     if (gapfreq->f == NULL) {
         fprintf(stderr, "***** gap16_count0: not enough memory (nbins = %llu) *****\n",
@@ -642,7 +646,7 @@ static GapFrequencyArray *GapFrequencyArray_create(size_t nbins, double p)
         gapfreq->f[i].p_total = p_gap;
         p_gap *= 1.0 - p;
         if (i > 1) {
-            gapfreq->f[i].p_with0 = 1.0 - binomial_pdf(0, i, p);
+            gapfreq->f[i].p_with0 = 1.0 - binomial_pdf(0, (unsigned long) i, p);
         } else if (i == 1) {
             gapfreq->f[i].p_with0 = p;
         } else if (i == 0) {
@@ -675,14 +679,16 @@ static void GapFrequencyArray_free(GapFrequencyArray *obj)
 
 static double GapFrequency_calc_z_with0(const GapFrequency *gf)
 {
-    double alpha = binomial_cdf(gf->ngaps_with0, gf->ngaps_total, gf->p_with0);
-    double pvalue = binomial_pvalue(gf->ngaps_with0, gf->ngaps_total, gf->p_with0);
+    unsigned long ngaps_total = (unsigned long) gf->ngaps_total;
+    unsigned long ngaps_with0 = (unsigned long) gf->ngaps_with0;
+    double alpha = binomial_cdf(ngaps_with0, ngaps_total, gf->p_with0);
+    double pvalue = binomial_pvalue(ngaps_with0, ngaps_total, gf->p_with0);
     // Check if discretization error is big enough to take it into account
     // It can be e.g. rather sensitive in the case of binopdf(1085, 1085, 0.992085)
     // when mathematical expectance is 1076.4 and standard deviation is 2.91.
     // It means that 1085 will give p-value 1 but is still inside 4sigma
     if (pvalue < 1e-10 || alpha < 1e-10) {
-        double p_discrete = binomial_pdf(gf->ngaps_with0, gf->ngaps_total, gf->p_with0);
+        double p_discrete = binomial_pdf(ngaps_with0, ngaps_total, gf->p_with0);
         if (p_discrete > 1e-10) {
             pvalue = p_discrete;
             alpha = 1 - pvalue;
@@ -713,7 +719,7 @@ static double GapFrequencyArray_sumsq_as_norm(const GapFrequencyArray *obj,
         double Ei = ngaps * obj->f[i].p_total;
         chi2emp += pow(Oi - Ei, 2.0) / Ei;
     }
-    return chi2_to_stdnorm_approx(chi2emp, obj->nbins - 1);
+    return chi2_to_stdnorm_approx(chi2emp, (unsigned long) (obj->nbins - 1));
 }
 
 void gap16_count0_mainloop(GapFrequencyArray *gapfreq, GapFrequencyArray *gapfreq_rb,
@@ -943,6 +949,10 @@ TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
 static void sumcollector_calc_p(double *p, const int g, const int nmax)
 {
     long double *g_mat = calloc((g + 1) * (nmax + 1), sizeof(long double));
+    if (g_mat == NULL) {
+        fprintf(stderr, "***** sumcollector_calc_p: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
     // g0(n) = d_{0n}
     g_mat[0] = 1.0;
     for (int i = 1; i <= nmax; i++) {
@@ -989,6 +999,10 @@ TestResults sumcollector_test(GeneratorState *obj, const SumCollectorOptions *op
     unsigned int shr = (obj->gi->nbits == 32) ? 0 : 32;
     unsigned long long *Oi_vec = calloc(nmax + 1, sizeof(unsigned long long));
     double *p_vec = calloc(nmax + 1, sizeof(double));
+    if (Oi_vec == NULL || p_vec == NULL) {
+        fprintf(stderr, "***** sumcollector_test: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
     obj->intf->printf("SumCollector test\n");
     obj->intf->printf("  Number of values: %llu (2^%g)\n",
         opts->nvalues, sr_log2((double) opts->nvalues));
@@ -1053,6 +1067,10 @@ TestResults mod3_test(GeneratorState *obj, const Mod3Options *opts)
     TestResults ans = TestResults_create("mod3");
     const unsigned int ntuples = 19683; // 3^9
     unsigned long long *Oi = calloc(ntuples, sizeof(unsigned long long));
+    if (Oi == NULL) {
+        fprintf(stderr, "***** mod3_test: not enough memory *****\n");
+        exit(EXIT_SUCCESS);
+    }
     uint32_t tuple = 0;
     obj->intf->printf("mod3 test\n");
     obj->intf->printf("  Sample size: %llu values\n", opts->nvalues);
@@ -1183,7 +1201,7 @@ TestResults nbit_words_freq_test(GeneratorState *obj,
     qsort(chi2, opts->nblocks, sizeof(double), cmp_doubles);
     double D = 0.0;
     for (size_t i = 0; i < opts->nblocks; i++) {
-        double f = chi2_cdf(chi2[i], nbins - 1);
+        double f = chi2_cdf(chi2[i], (unsigned long) (nbins - 1));
         double idbl = (double) i;
         double Dplus = (idbl + 1.0) / opts->nblocks - f;
         double Dminus = f - idbl / opts->nblocks;

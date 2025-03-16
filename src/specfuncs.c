@@ -376,6 +376,9 @@ double binomial_pdf(unsigned long k, unsigned long n, double p)
 
 /**
  * @brief Cumulative distribution function for binomial distribution.
+ * @param k Number of successful attempts.
+ * @param n Total number of attempts.
+ * @param p Probability of success.
  */
 double binomial_cdf(unsigned long k, unsigned long n, double p)
 {
@@ -384,8 +387,11 @@ double binomial_cdf(unsigned long k, unsigned long n, double p)
 
 /**
  * @brief C.c.d.f. (p-value) for binomial distribution.
+ * @param k Number of successful attempts.
+ * @param n Total number of attempts.
+ * @param p Probability of success.
  */
-double binomial_pvalue(unsigned long k, unsigned long n, double p)
+double binomial_pvalue(double k, double n, double p)
 {
     double cf;
     (void) sr_betainc(1 - p, n - k, 1 + k, &cf);

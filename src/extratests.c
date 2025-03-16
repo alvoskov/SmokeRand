@@ -54,7 +54,7 @@ static inline BirthdayOptions BirthdayOptions_create(GeneratorInfo *gi,
 static inline double BirthdayOptions_calc_lambda(const BirthdayOptions *opts,
     const unsigned int nbits)
 {
-    double lambda = pow(opts->n, 2.0) / pow(2.0, nbits - opts->e + 1.0);
+    double lambda = pow((double) opts->n, 2.0) / pow(2.0, (double) nbits - (double) opts->e + 1.0);
     return lambda;
 }
 
@@ -127,7 +127,11 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
     TestResults ans = TestResults_create("birthday");
     unsigned int nbits_per_value = birthday_get_nbits_per_value(obj->gi);
     double lambda = BirthdayOptions_calc_lambda(opts, nbits_per_value);
-    obj->intf->printf("  Sample size: 2^%.2f values\n", sr_log2(opts->n));
+    obj->intf->printf("  Sample size: 2^%.2f values\n", sr_log2((double) opts->n));
+    if (opts->n < 8) {
+        obj->intf->printf("  Sample size is too small");
+        return ans;
+    }
     obj->intf->printf("  Shift:       %d bits\n", (int) opts->e);
     obj->intf->printf("  lambda = %g\n", lambda);
     obj->intf->printf("  Filling the array with 'birthdays'\n");
@@ -152,8 +156,8 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
         }
         if (i % (opts->n / 1000) == 0) {
             unsigned long nseconds_total, nseconds_left;
-            nseconds_total = time(NULL) - tic;
-            nseconds_left = ((unsigned long long) nseconds_total * (opts->n - i)) / (i + 1);
+            nseconds_total = (unsigned long) (time(NULL) - tic);
+            nseconds_left = (unsigned long) ( ((unsigned long long) nseconds_total * (opts->n - i)) / (i + 1) );
             obj->intf->printf("\r    %.1f %% completed; ", 100.0 * i / (double) opts->n);
             obj->intf->printf("time elapsed: "); print_elapsed_time(nseconds_total);
             obj->intf->printf("; time left: ");
@@ -284,8 +288,9 @@ int BlockFrequency_calc(BlockFrequency *obj)
     const double pcrit_bytes = pcrit / 256.0, pcrit_w16 = pcrit / 65536.0;
     double chi2_bytes = 0.0, chi2_w16 = 0.0;
     double zmax_bytes = 0.0, zmax_w16 = 0.0;
-    int zmax_bytes_ind = -1, zmax_w16_ind = -1;
-    for (size_t i = 0; i < 256; i++) {        
+    int zmax_bytes_ind = -1;
+    long zmax_w16_ind = -1;
+    for (int i = 0; i < 256; i++) {        
         long long Ei = (long long) obj->nbytes / 256;
         long long dE = (long long) obj->bytefreq[i] - (long long) Ei;
         chi2_bytes += pow((double) dE, 2.0) / (double) Ei;
@@ -295,7 +300,7 @@ int BlockFrequency_calc(BlockFrequency *obj)
             zmax_bytes_ind = i;
         }
     }
-    for (size_t i = 0; i < 65536; i++) {
+    for (long i = 0; i < 65536; i++) {
         long long Ei = (long long) obj->nw16 / 65536;
         long long dE = (long long) obj->w16freq[i] - (long long) Ei;
         chi2_w16 += pow((double) dE, 2.0) / (double) Ei;
@@ -313,7 +318,7 @@ int BlockFrequency_calc(BlockFrequency *obj)
     printf("  %10s %10g %10.2g %10.3g %10d %10.2g %10.2g\n",
         "8 bits", chi2_bytes, chi2_pvalue(chi2_bytes, 255),
         zmax_bytes, zmax_bytes_ind, p_bytes, pcrit_bytes);
-    printf("  %10s %10g %10.2g %10.3g %10d %10.2g %10.2g\n",
+    printf("  %10s %10g %10.2g %10.3g %10ld %10.2g %10.2g\n",
         "16 bits", chi2_w16, chi2_pvalue(chi2_w16, 65536),
         zmax_w16, zmax_w16_ind, p_w16, pcrit_w16);
     // p-values interpretation
@@ -403,7 +408,7 @@ void Ising2DLattice_init(Ising2DLattice *obj, unsigned int L)
         exit(1);
     }
     // Precalculate neighbours indexes
-    for (size_t i = 0; i < obj->N; i++) {
+    for (unsigned int i = 0; i < obj->N; i++) {
         int ix = i % L, iy = i / L;
         //printf("%d %d | ", ix, iy);
         obj->s[i] = +1;

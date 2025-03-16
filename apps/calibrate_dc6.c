@@ -37,7 +37,7 @@ static ThreadRetVal THREADFUNC_SPEC hamming_ot_run_test(void *udata)
         obj->z_ary[i] = res.x;
     }
     GeneratorState_free(&gen, obj->intf);
-    return NULL;
+    return 0;
 }
 
 
@@ -55,6 +55,10 @@ double *generate_sample(GeneratorInfo *gi, int nsamples)
     }
     init_thread_dispatcher();
     ThreadObj *handles = calloc(sizeof(ThreadObj), NTHREADS);
+    if (handles == NULL) {
+        fprintf(stderr, "***** generate_sample: not enough memory *****\n");
+        exit(EXIT_FAILURE);
+    }
     for (int i = 0; i < NTHREADS; i++) {
         handles[i] = ThreadObj_create(hamming_ot_run_test, &threads[i], i + 1);
     }

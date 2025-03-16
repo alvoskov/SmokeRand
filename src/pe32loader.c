@@ -13,7 +13,9 @@ void *execbuffer_alloc(size_t len)
 {
     void *buf = VirtualAlloc(NULL, len, MEM_COMMIT, PAGE_READWRITE);
     DWORD dummy;
-    VirtualProtect(buf, len, PAGE_EXECUTE_READWRITE, &dummy);
+    if (buf != NULL) {
+        VirtualProtect(buf, len, PAGE_EXECUTE_READWRITE, &dummy);
+    }
     return buf;
 }
 
@@ -98,6 +100,11 @@ int PE32BasicInfo_init(PE32BasicInfo *peinfo, FILE *fp, uint32_t pe_offset)
     peinfo->import_dir = read_u32(fp, pe_offset + 0x80);
     peinfo->reloc_dir  = read_u32(fp, pe_offset + 0xA0);
     peinfo->sections = calloc(peinfo->nsections, sizeof(PE32SectionInfo));
+    if (peinfo->sections == NULL) {
+        snprintf(errmsg, ERRMSG_MAXLEN, "PE32BasicInfo_init: not enough memory");
+        peinfo->nsections = 0;
+        return 0;
+    }
     unsigned int offset = pe_offset + 0xF8;
     for (int i = 0; i < peinfo->nsections; i++) {
         PE32SectionInfo *sect = &peinfo->sections[i];
@@ -247,8 +254,18 @@ int PE32MemoryImage_apply_imports(PE32MemoryImage *img, PE32BasicInfo *info)
 PE32MemoryImage *PE32BasicInfo_load(PE32BasicInfo *info, FILE *fp)
 {
     PE32MemoryImage *img = calloc(sizeof(PE32MemoryImage), 1);
+    if (img == NULL) {
+        snprintf(errmsg, ERRMSG_MAXLEN, "PE32BasicInfo_load: not enough memory");
+        return NULL;
+    }
     img->imgsize = PE32BasicInfo_get_membuf_size(info);
     img->img = execbuffer_alloc(img->imgsize);
+    if (img->img == NULL) {
+        snprintf(errmsg, ERRMSG_MAXLEN, "PE32BasicInfo_load: not enough memory");
+        return NULL;
+        free(img);
+        return NULL;
+    }
     uint8_t *buf = img->img;
     for (int i = 0; i < info->nsections; i++) {
         PE32SectionInfo *sect = &info->sections[i];
@@ -282,7 +299,7 @@ int PE32MemoryImage_dump(const PE32MemoryImage *img, const char *filename)
         fprintf(stderr, "Cannot dump the file\n");
         return 0;
     }
-    int is_ok = fwrite(img->img, img->imgsize, 1, fp);
+    int is_ok = fwrite(img->img, img->imgsize, 1, fp) != 0;
     fclose(fp);
     return is_ok;
 }

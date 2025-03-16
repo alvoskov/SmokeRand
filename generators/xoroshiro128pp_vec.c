@@ -55,7 +55,7 @@ static inline void *create(const CallerAPI *intf)
 {
     Xs128ppVecState *obj = intf->malloc(sizeof(Xs128ppVecState));
     for (int i = 0; i < XOROSHIRO128_UNROLL; i++) {
-        obj->s[0][i] = 1 << i;
+        obj->s[0][i] = 1ull << i;
         obj->s[1][i] = 0;
     }
     obj->pos = BUF_LEN;

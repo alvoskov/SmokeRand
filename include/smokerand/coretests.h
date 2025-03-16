@@ -48,14 +48,14 @@ enum {
  */
 typedef struct {
     unsigned int shl; ///< Gap is [0; 2^{-shl})
-    unsigned long ngaps; ///< Number of gaps
+    unsigned long long ngaps; ///< Number of gaps
 } GapOptions;
 
 /**
  * @brief Options for gap16_count0 test.
  */
 typedef struct {
-    unsigned long ngaps;
+    unsigned long long ngaps;
 } Gap16Count0Options;
 
 /**
@@ -75,7 +75,7 @@ typedef struct {
  * @brief Options for birthday spacings test with decimation.
  */
 typedef struct {
-    unsigned int step;
+    unsigned long step;
 } BSpace4x8dDecimatedOptions;
 
 /**

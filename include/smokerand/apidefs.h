@@ -20,7 +20,7 @@
 ///////////////////////////
 
 
-static inline uint32_t rotl32(uint32_t x, unsigned int r)
+static inline uint32_t rotl32(uint32_t x, int r)
 {
 #ifdef __WATCOMC__
     return _lrotl(x, r);
@@ -29,7 +29,7 @@ static inline uint32_t rotl32(uint32_t x, unsigned int r)
 #endif
 }
 
-static inline uint32_t rotr32(uint32_t x, unsigned int r)
+static inline uint32_t rotr32(uint32_t x, int r)
 {
 #ifdef __WATCOMC__
     return _lrotr(x, r);
@@ -38,12 +38,12 @@ static inline uint32_t rotr32(uint32_t x, unsigned int r)
 #endif
 }
 
-static inline uint64_t rotl64(uint64_t x, unsigned int r)
+static inline uint64_t rotl64(uint64_t x, int r)
 {
     return (x << r) | (x >> ((-r) & 63));
 }
 
-static inline uint64_t rotr64(uint64_t x, unsigned int r)
+static inline uint64_t rotr64(uint64_t x, int r)
 {
     return (x << ((-r) & 63)) | (x >> r);
 }

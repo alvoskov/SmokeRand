@@ -216,7 +216,7 @@ TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
         }
     }
     ans.penalty = PENALTY_HAMMING_OT;
-    ans.x = chi2_to_stdnorm_approx(ans.x, obj->len - 1);
+    ans.x = chi2_to_stdnorm_approx(ans.x, (unsigned long) (obj->len - 1));
     ans.p = stdnorm_pvalue(ans.x);
     ans.alpha = stdnorm_cdf(ans.x);
     return ans;
@@ -575,6 +575,10 @@ TestResults hamming_ot_long_test(GeneratorState *obj, const HammingOtLongOptions
     const unsigned int bits_per_word = opts->wordsize;
     double code_to_prob[4];
     unsigned short *hw_to_code = calloc(bits_per_word + 1, sizeof(unsigned short));
+    if (hw_to_code == NULL) {
+        fprintf(stderr, "***** hamming_ot_long_test: not enough memory *****\n");
+        exit(EXIT_FAILURE);
+    }
     hamming_ot_long_fill_hw_tables(hw_to_code, code_to_prob, bits_per_word);
     // Parameters for 18-bit tuple with 2-bit digits
     static const unsigned int code_nbits = 2, tuple_size = 9;

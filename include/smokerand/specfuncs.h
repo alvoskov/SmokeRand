@@ -20,7 +20,7 @@ double ks_pvalue(double x);
 double gammainc(double a, double x);
 double binomial_pdf(unsigned long k, unsigned long n, double p);
 double binomial_cdf(unsigned long k, unsigned long n, double p);
-double binomial_pvalue(unsigned long k, unsigned long n, double p);
+double binomial_pvalue(double k, double n, double p);
 double poisson_cdf(double x, double lambda);
 double poisson_pvalue(double x, double lambda);
 double stdnorm_cdf(double x);

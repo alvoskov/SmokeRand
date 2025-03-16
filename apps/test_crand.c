@@ -44,7 +44,7 @@ static uint64_t get_bits(void *state)
 static void *gen_create(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     (void) gi;
-    srand(intf->get_seed64());
+    srand((unsigned int) intf->get_seed64());
     return intf->malloc(sizeof(uint64_t));
 }
 
