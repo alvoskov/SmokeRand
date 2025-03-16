@@ -295,15 +295,11 @@ table.insert(default_builds, "$bindir/sr_tiny" .. exe_ext)
 
 -- Build generators
 for _, f in pairs(gen_sources) do
-    local gen_fullname = "$gen_bindir/lib" .. f .. so_ext
+    local gen_fullname = "$gen_bindir/" .. f .. so_ext
     io.write("build $gen_bindir/obj/" .. f .. ".o: cc_gen $gen_srcdir/" .. f .. ".c\n")
     io.write("build " .. gen_fullname .. ": link $gen_bindir/obj/" .. f .. ".o\n")
+    io.write("  linkflags=$gen_linkflags\n")
     table.insert(default_builds, gen_fullname)
-    if f == "crand" then
-        io.write("    linkflags = $so_linkflags\n\n");
-    else
-        io.write("    linkflags = $gen_linkflags\n\n");
-    end
 end
 
 -- Default rules

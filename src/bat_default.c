@@ -13,6 +13,12 @@
 #include "smokerand/lineardep.h"
 #include "smokerand/entropy.h"
 
+#define COLLOVER_LO_PROPS .nsamples = 5, .n = COLLOVER_DEFAULT_N, .get_lower = 1
+#define COLLOVER_HI_PROPS .nsamples = 5, .n = COLLOVER_DEFAULT_N, .get_lower = 0
+
+/**
+ * @brief SmokeRand `default` battery.
+ */
 void battery_default(const GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
@@ -39,14 +45,14 @@ void battery_default(const GeneratorInfo *gen, CallerAPI *intf,
 
     // CollisionOver tests options
     static const CollOverNDOptions
-        collover8_5d       = {.nbits_per_dim = 8, .ndims = 5, .nsamples = 5, .n = COLLOVER_DEFAULT_N, .get_lower = 1},
-        collover8_5d_high  = {.nbits_per_dim = 8, .ndims = 5, .nsamples = 5, .n = COLLOVER_DEFAULT_N, .get_lower = 0},
-        collover5_8d       = {.nbits_per_dim = 5, .ndims = 8, .nsamples = 5, .n = COLLOVER_DEFAULT_N, .get_lower = 1},
-        collover5_8d_high  = {.nbits_per_dim = 5, .ndims = 8, .nsamples = 5, .n = COLLOVER_DEFAULT_N, .get_lower = 0},
-        collover13_3d      = {.nbits_per_dim = 13, .ndims = 3, .nsamples = 5, .n = COLLOVER_DEFAULT_N, .get_lower = 1},
-        collover13_3d_high = {.nbits_per_dim = 13, .ndims = 3, .nsamples = 5, .n = COLLOVER_DEFAULT_N, .get_lower = 0},
-        collover20_2d      = {.nbits_per_dim = 20, .ndims = 2, .nsamples = 5, .n = COLLOVER_DEFAULT_N, .get_lower = 1},
-        collover20_2d_high = {.nbits_per_dim = 20, .ndims = 2, .nsamples = 5, .n = COLLOVER_DEFAULT_N, .get_lower = 0};
+        collover8_5d       = {.nbits_per_dim = 8,  .ndims = 5, COLLOVER_LO_PROPS},
+        collover8_5d_high  = {.nbits_per_dim = 8,  .ndims = 5, COLLOVER_HI_PROPS},
+        collover5_8d       = {.nbits_per_dim = 5,  .ndims = 8, COLLOVER_LO_PROPS},
+        collover5_8d_high  = {.nbits_per_dim = 5,  .ndims = 8, COLLOVER_HI_PROPS},
+        collover13_3d      = {.nbits_per_dim = 13, .ndims = 3, COLLOVER_LO_PROPS},
+        collover13_3d_high = {.nbits_per_dim = 13, .ndims = 3, COLLOVER_HI_PROPS},
+        collover20_2d      = {.nbits_per_dim = 20, .ndims = 2, COLLOVER_LO_PROPS},
+        collover20_2d_high = {.nbits_per_dim = 20, .ndims = 2, COLLOVER_HI_PROPS};
 
     // Gap test
     static const GapOptions gap_inv512 = {.shl = 9, .ngaps = 10000000};

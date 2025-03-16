@@ -1,11 +1,11 @@
 /**
  * @file bat_express.c
  * @brief The `express` battery designed for memory constrained situations such
- * as 16-bit data segments (64 KiB of RAM per data and 64 KiB of RAM per code)
- * and absence of 64-bit arithmetics.
- * @details This battery is very fast but not very sensitive. Consumes 48 MiB
- * of data on modern computers, runs in less than 1 second. Of course, this
- * implementation of battery is not designed for 16-bit platforms and ANSI C
+ * as 16-bit data segments (128 KiB of RAM per data and 64 KiB of RAM per code,
+ * no arrays larger than 64 KiB) and absence of 64-bit arithmetics.
+ * @details This battery is very fast but not very sensitive. Consumes only
+ * 70-150 MiB of data on modern computers, runs in less than 1 second. Of course,
+ * this implementation of battery is not designed for 16-bit platforms and ANSI C
  * compilers and made just for testing the concept.
  * 
  * If the same input data are used for different tests --- then amount of
@@ -23,6 +23,9 @@
 #include "smokerand/hwtests.h"
 #include "smokerand/entropy.h"
 
+/**
+ * @brief SmokeRand `express` battery.
+ */
 void battery_express(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype)
 {

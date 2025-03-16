@@ -16,7 +16,8 @@
 #define COLLOVER_PROPS .nsamples = 3, .n = COLLOVER_DEFAULT_N, .get_lower = 1
 
 /**
- * @brief The `brief` battery of tests that runs in about 1 minute.
+ * @brief SmokeRand `brief` battery.
+ * @details The `brief` battery of tests that runs in about 1 minute.
  * Contains `bspace`, `bspace_dec`, `collover`, `gap`, `gap16_count0`,
  * `hamming_ot`, `linearcomp` tests. The gap test consumes more than
  * \f$2^{32}\f$ values and can detect any PRNG with 32-bit state. It also
