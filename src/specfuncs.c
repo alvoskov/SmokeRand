@@ -103,7 +103,7 @@ double sr_round(double x)
  *    // Journal of Statistical Software. 2003. V. 8. N 18. P. 1-4.
  *    https://doi.org/10.18637/jss.v008.i18
  */
-double ks_pvalue(double x)
+double sr_ks_pvalue(double x)
 {
     double xsq = x * x;
     if (x <= 0.0) {
@@ -173,7 +173,7 @@ static double gammainc_upper_contfrac(double a, double x)
  *    P. 329Ö336. https://doi.org/10.5194/gmd-3-329-2010
  * 2. https://functions.wolfram.com/GammaBetaErf/Gamma2/06/02/02/
  */
-double gammainc(double a, double x)
+double sr_gammainc(double a, double x)
 {
     if (x != x) {
         return x; /* NAN */
@@ -187,7 +187,7 @@ double gammainc(double a, double x)
 /**
  * @brief An approximation of upper incomplemete gamma function
  */
-double gammainc_upper(double a, double x)
+double sr_gammainc_upper(double a, double x)
 {
     if (x != x) {
         return x; /* NAN */
@@ -297,7 +297,7 @@ static double t_cdf_asymptotic(double x, unsigned long f)
     z_corr = z + z * (zsqr + 3) / b -
         0.4*z*(zsqr*zsqr*zsqr + 3.3*zsqr*zsqr + 24*zsqr + 85.5) /
         (10*b*(b + 0.8*zsqr*zsqr + 100));
-    return (x >= 0) ? stdnorm_cdf(z_corr) : stdnorm_cdf(-z_corr);
+    return (x >= 0) ? sr_stdnorm_cdf(z_corr) : sr_stdnorm_cdf(-z_corr);
 }
 
 /**
@@ -306,7 +306,7 @@ static double t_cdf_asymptotic(double x, unsigned long f)
  * @param f Degrees of freedom
  * @details Based on incomplete beta function.
  */
-double t_cdf(double x, unsigned long f)
+double sr_t_cdf(double x, unsigned long f)
 {
     if (x != x || f == 0) { /* Invalid value */
         return NAN;
@@ -326,27 +326,27 @@ double t_cdf(double x, unsigned long f)
  * @param f Degrees of freedom
  * @details Based on incomplete beta function.
  */
-double t_pvalue(double x, unsigned long f)
+double sr_t_pvalue(double x, unsigned long f)
 {
-    return t_cdf(-x, f);
+    return sr_t_cdf(-x, f);
 }
 
 
 /**
  * @brief Poisson distribution C.D.F. (cumulative distribution function)
  */
-double poisson_cdf(double x, double lambda)
+double sr_poisson_cdf(double x, double lambda)
 {
-    return gammainc_upper(floor(x) + 1.0, lambda);
+    return sr_gammainc_upper(floor(x) + 1.0, lambda);
 }
 
 /**
  * @brief Calculate p-value for Poission distribution as 1 - F(x)
  * where F(x) is Poission distribution C.D.F.
  */
-double poisson_pvalue(double x, double lambda)
+double sr_poisson_pvalue(double x, double lambda)
 {
-    return gammainc(floor(x) + 1.0, lambda);
+    return sr_gammainc(floor(x) + 1.0, lambda);
 }
 
 
@@ -367,7 +367,7 @@ static double ln_binomial_coeff(unsigned long n, unsigned long k)
  * @param n Total number of attempts.
  * @param p Probability of success.
  */
-double binomial_pdf(unsigned long k, unsigned long n, double p)
+double sr_binomial_pdf(unsigned long k, unsigned long n, double p)
 {
     double ln_pdf = ln_binomial_coeff(n, k) +
         k * log(p) + (n - k) * log(1.0 - p);
@@ -380,7 +380,7 @@ double binomial_pdf(unsigned long k, unsigned long n, double p)
  * @param n Total number of attempts.
  * @param p Probability of success.
  */
-double binomial_cdf(unsigned long k, unsigned long n, double p)
+double sr_binomial_cdf(unsigned long k, unsigned long n, double p)
 {
     return sr_betainc(1 - p, n - k, 1 + k, NULL);
 }
@@ -391,7 +391,7 @@ double binomial_cdf(unsigned long k, unsigned long n, double p)
  * @param n Total number of attempts.
  * @param p Probability of success.
  */
-double binomial_pvalue(double k, double n, double p)
+double sr_binomial_pvalue(double k, double n, double p)
 {
     double cf;
     (void) sr_betainc(1 - p, n - k, 1 + k, &cf);
@@ -408,7 +408,7 @@ double binomial_pvalue(double k, double n, double p)
  * of the National Academy of Sciences. 1931. Vol. 17. N 12. P. 684-688.
  * https://doi.org/10.1073/pnas.17.12.684
  */
-double chi2_to_stdnorm_approx(double x, unsigned long f)
+double sr_chi2_to_stdnorm_approx(double x, unsigned long f)
 {
     double s2 = 2.0 / (9.0 * f);
     double mu = 1 - s2;
@@ -422,17 +422,17 @@ double chi2_to_stdnorm_approx(double x, unsigned long f)
  * large numbers of degrees of freedom asymptotic approximation from
  * `chi2emp_to_normemp_approx` is used.
  */
-double chi2_cdf(double x, unsigned long f)
+double sr_chi2_cdf(double x, unsigned long f)
 {
     if (f == 1) {
-        return gammainc(0.5, x / 2.0); /* erf(sqrt(0.5 * x)); */
+        return sr_gammainc(0.5, x / 2.0); /* erf(sqrt(0.5 * x)); */
     } else if (f == 2) {
         return -sr_expm1(-0.5 * x);
     } else if (f < 100000) {
-        return gammainc((double) f / 2.0, x / 2.0);
+        return sr_gammainc((double) f / 2.0, x / 2.0);
     } else {
-        double z = chi2_to_stdnorm_approx(x, f);
-        return stdnorm_cdf(z);
+        double z = sr_chi2_to_stdnorm_approx(x, f);
+        return sr_stdnorm_cdf(z);
     }
 }
 
@@ -448,24 +448,24 @@ double chi2_cdf(double x, unsigned long f)
  * of the National Academy of Sciences. 1931. Vol. 17. N 12. P. 684-688.
  * https://doi.org/10.1073/pnas.17.12.684
  */
-double chi2_pvalue(double x, unsigned long f)
+double sr_chi2_pvalue(double x, unsigned long f)
 {
     if (f == 1) {
-        return 2.0 * stdnorm_pvalue(sqrt(x)); /* erfc(sqrt(0.5 * x)); */
+        return 2.0 * sr_stdnorm_pvalue(sqrt(x)); /* erfc(sqrt(0.5 * x)); */
     } else if (f == 2) {
         return exp(-0.5 * x);
     } else if (f < 100000) {
-        return gammainc_upper((double) f / 2.0, x / 2.0);
+        return sr_gammainc_upper((double) f / 2.0, x / 2.0);
     } else {
-        double z = chi2_to_stdnorm_approx(x, f);
-        return stdnorm_pvalue(z);
+        double z = sr_chi2_to_stdnorm_approx(x, f);
+        return sr_stdnorm_pvalue(z);
     }
 }
 
 /**
  * @brief Implementation of standard normal distribution p.d.f.
  */
-static double stdnorm_pdf(double x)
+static double sr_stdnorm_pdf(double x)
 {
     const double ln_2pi = 1.83787706640934548356; /* OEIS A061444 */
     return exp(-(x*x + ln_2pi) / 2);
@@ -483,7 +483,7 @@ static double stdnorm_pdf(double x)
  *     return 0.5 * erfc(-x / sqrt(2));
  * }
  */
-double stdnorm_cdf(double x)
+double sr_stdnorm_cdf(double x)
 {
     int i;
     if (x < -38.0) {
@@ -498,7 +498,7 @@ double stdnorm_cdf(double x)
             f_old = f;
             f *= c * d;
         }
-        return -f * stdnorm_pdf(x);
+        return -f * sr_stdnorm_pdf(x);
     } else if (x < 2.5) { /* Taylor series */
         long double q = x * x / 4, a0 = 1, a1 = q, b = a0;
         for (i = 2; 1 + a0 != 1 || 1 + a1 != 1; i += 2) {
@@ -506,9 +506,9 @@ double stdnorm_cdf(double x)
             a1 = q * (a0 - a1) / (i + 1);
             b += a0 / (i + 1);
         }
-        return 0.5 + x * stdnorm_pdf(x / 2) * b;
+        return 0.5 + x * sr_stdnorm_pdf(x / 2) * b;
     } else if (x >= 2.5) {
-        return 1.0 - stdnorm_cdf(-x);
+        return 1.0 - sr_stdnorm_cdf(-x);
     } else {
         return NAN;
     }
@@ -527,9 +527,9 @@ double stdnorm_cdf(double x)
  *         return 1.0 - 0.5 * erfc(-x / sqrt(2));
  *     }
  */
-double stdnorm_pvalue(double x)
+double sr_stdnorm_pvalue(double x)
 {
-    return stdnorm_cdf(-x);
+    return sr_stdnorm_cdf(-x);
 }
 
 
@@ -541,11 +541,11 @@ double stdnorm_pvalue(double x)
  */
 static double stdnorm_cdf_pdf_rel(double x, double p)
 {
-    double pdf = stdnorm_pdf(x);
+    double pdf = sr_stdnorm_pdf(x);
     if (x >= 0.0) {
-        return (1 - p) / pdf - stdnorm_pvalue(x) / pdf;
+        return (1 - p) / pdf - sr_stdnorm_pvalue(x) / pdf;
     } else {
-        return stdnorm_pvalue(-x) / pdf - p / pdf;
+        return sr_stdnorm_pvalue(-x) / pdf - p / pdf;
     }
 }
 
@@ -565,7 +565,7 @@ static double stdnorm_cdf_pdf_rel(double x, double p)
  *   Statisical Software. 2004. V. 11. N 4.
  *   https://doi.org/10.18637/jss.v011.i04
  */
-double stdnorm_inv(double p)
+double sr_stdnorm_inv(double p)
 {
     int i;
     double pp, a, b, z, znew;
@@ -608,9 +608,9 @@ double stdnorm_inv(double p)
  *
  *     return erfc(x / sqrt(2.0));
  */
-double halfnormal_pvalue(double x)
+double sr_halfnormal_pvalue(double x)
 {
-    return 2.0 * stdnorm_pvalue(x);
+    return 2.0 * sr_stdnorm_pvalue(x);
 }
 
 
@@ -632,7 +632,7 @@ double halfnormal_pvalue(double x)
  *    Pseudorandom Number Generators for Cryptographic Applications //
  *    NIST SP 800-22 Rev. 1a. https://doi.org/10.6028/NIST.SP.800-22r1a
  */
-double linearcomp_Tcdf(double k)
+double sr_linearcomp_Tcdf(double k)
 {
     k = sr_round(k);
     if (k > 0.0) {
@@ -646,7 +646,7 @@ double linearcomp_Tcdf(double k)
  * @brief Implementation of c.c.d.f. for the T variable from the linear
  * complexity test. See the `linearcomp_Tcdf` function for details.
  */
-double linearcomp_Tccdf(double k)
+double sr_linearcomp_Tccdf(double k)
 {
     k = sr_round(k);
     if (k > 0.0) {

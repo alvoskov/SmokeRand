@@ -122,8 +122,10 @@ typedef enum {
 
 const char *interpret_pvalue(double pvalue);
 PValueCategory get_pvalue_category(double pvalue);
+void quicksort64(uint64_t *x, size_t len);
 void radixsort32(uint32_t *x, size_t len);
 void radixsort64(uint64_t *x, size_t len);
+
 
 typedef struct {
     void *original_state;

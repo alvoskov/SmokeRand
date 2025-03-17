@@ -216,9 +216,9 @@ TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
         }
     }
     ans.penalty = PENALTY_HAMMING_OT;
-    ans.x = chi2_to_stdnorm_approx(ans.x, (unsigned long) (obj->len - 1));
-    ans.p = stdnorm_pvalue(ans.x);
-    ans.alpha = stdnorm_cdf(ans.x);
+    ans.x = sr_chi2_to_stdnorm_approx(ans.x, (unsigned long) (obj->len - 1));
+    ans.p = sr_stdnorm_pvalue(ans.x);
+    ans.alpha = sr_stdnorm_cdf(ans.x);
     return ans;
 }
 
@@ -355,7 +355,7 @@ static const uint8_t *hamming_ot_fill_hw_tables(GeneratorState *obj,
         code_to_prob[i] = 0.0;
     }
     for (int i = 0; i < nweights; i++) {
-        code_to_prob[hw[i]] += binomial_pdf(i, nweights - 1, 0.5);
+        code_to_prob[hw[i]] += sr_binomial_pdf(i, nweights - 1, 0.5);
     }
     return hw;
 }
@@ -542,7 +542,7 @@ static void hamming_ot_long_fill_hw_tables(unsigned short *hw_to_code,
         code_to_prob[i] = 0.0;
     }
     for (int i = 0; i < nweights; i++) {
-        code_to_prob[hw_to_code[i]] += binomial_pdf(i, nweights - 1, 0.5);
+        code_to_prob[hw_to_code[i]] += sr_binomial_pdf(i, nweights - 1, 0.5);
     }
 }
 

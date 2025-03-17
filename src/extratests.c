@@ -62,6 +62,7 @@ static inline double BirthdayOptions_calc_lambda(const BirthdayOptions *opts,
 ///// 64-bit birthday test implementation /////
 ///////////////////////////////////////////////
 
+/*
 static int cmp_ints(const void *aptr, const void *bptr)
 {
     uint64_t aval = *((uint64_t *) aptr), bval = *((uint64_t *) bptr);
@@ -69,6 +70,7 @@ static int cmp_ints(const void *aptr, const void *bptr)
     else if (aval == bval) { return 0; }
     else { return 1; }
 }
+*/
 
 /**
  * @brief Generate truncated pseudorandom value
@@ -149,8 +151,8 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
         if (!is_ok) {
             obj->intf->printf("  The generator is too flawed to return a truncated value\n");
             ans.x = 0;
-            ans.p = poisson_cdf(ans.x, lambda);
-            ans.alpha = poisson_pvalue(ans.x, lambda);
+            ans.p = sr_poisson_cdf(ans.x, lambda);
+            ans.alpha = sr_poisson_pvalue(ans.x, lambda);
             free(x);
             return ans;
         }
@@ -171,7 +173,8 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
     // qsort is used instead of radix sort to prevent "out of memory" error:
     // 2^30 of u64 is 8GiB of data
     tic = time(NULL);
-    qsort(x, opts->n, sizeof(uint64_t), cmp_ints); // Not radix: to prevent "out of memory"
+    //qsort(x, opts->n, sizeof(uint64_t), cmp_ints); // Not radix: to prevent "out of memory"
+    quicksort64(x, opts->n);
     obj->intf->printf("  Time elapsed: ");
     print_elapsed_time(time(NULL) - tic);
     obj->intf->printf("\n");    
@@ -182,8 +185,8 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
             ndups++;
     }
     ans.x = (double) ndups;
-    ans.p = poisson_cdf(ans.x, lambda);
-    ans.alpha = poisson_pvalue(ans.x, lambda);
+    ans.p = sr_poisson_cdf(ans.x, lambda);
+    ans.alpha = sr_poisson_pvalue(ans.x, lambda);
     obj->intf->printf("  x = %g (ndups); p = %g; 1-p=%g\n", ans.x, ans.p, ans.alpha);
     free(x);
     return ans;
@@ -229,8 +232,8 @@ void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
         ans = birthday_test(&obj, &opts_large);
         intf->printf("  p-value for x1 + x2 (lambda = %g):\n", lambda);
         ans.x += x_small;
-        ans.p = poisson_cdf(ans.x, lambda);
-        ans.alpha = poisson_pvalue(ans.x, lambda);
+        ans.p = sr_poisson_cdf(ans.x, lambda);
+        ans.alpha = sr_poisson_pvalue(ans.x, lambda);
         intf->printf("  x = %g (ndups); p = %g; 1-p=%g\n", ans.x, ans.p, ans.alpha);
     }
     GeneratorState_free(&obj, intf);
@@ -310,16 +313,16 @@ int BlockFrequency_calc(BlockFrequency *obj)
             zmax_w16_ind = i;
         }
     }
-    double p_bytes = halfnormal_pvalue(zmax_bytes);
-    double p_w16 = halfnormal_pvalue(zmax_w16);
+    double p_bytes = sr_halfnormal_pvalue(zmax_bytes);
+    double p_w16 = sr_halfnormal_pvalue(zmax_w16);
     printf("2^%g bytes analyzed\n", sr_log2((double) obj->nbytes));
     printf("  %10s %10s %10s %10s %10s %10s %10s\n",
         "Chunk", "chi2emp", "p(chi2)", "zmax", "max_ind", "p(zmax)", "p(crit)");
     printf("  %10s %10g %10.2g %10.3g %10d %10.2g %10.2g\n",
-        "8 bits", chi2_bytes, chi2_pvalue(chi2_bytes, 255),
+        "8 bits", chi2_bytes, sr_chi2_pvalue(chi2_bytes, 255),
         zmax_bytes, zmax_bytes_ind, p_bytes, pcrit_bytes);
     printf("  %10s %10g %10.2g %10.3g %10ld %10.2g %10.2g\n",
-        "16 bits", chi2_w16, chi2_pvalue(chi2_w16, 65536),
+        "16 bits", chi2_w16, sr_chi2_pvalue(chi2_w16, 65536),
         zmax_w16, zmax_w16_ind, p_w16, pcrit_w16);
     // p-values interpretation
     if (p_bytes < pcrit_bytes) {
@@ -614,9 +617,9 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
     double cv_z = (cv_mean - cv_ref) / (cv_std / sqrt(opts->nsamples));
     unsigned long df = opts->nsamples - 1;
     gs->intf->printf("e_mean  = %12.8g; e_std  = %12.8g; z = %12.8g; p = %.3g\n",
-        e_mean, e_std, e_z, t_pvalue(e_z, df));
+        e_mean, e_std, e_z, sr_t_pvalue(e_z, df));
     gs->intf->printf("cv_mean = %12.8g; cv_std = %12.8g; z = %12.8g; p = %.3g\n",
-        cv_mean, cv_std, cv_z, t_pvalue(cv_z, df));
+        cv_mean, cv_std, cv_z, sr_t_pvalue(cv_z, df));
     free(e);
     free(cv);
     // Ising2DLattice_print(&obj);
@@ -625,12 +628,12 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
     res.penalty = PENALTY_ISING2D;
     if (fabs(cv_z) > fabs(e_z)) {
         res.x = cv_z;
-        res.p = t_pvalue(cv_z, df);
-        res.alpha = t_cdf(cv_z, df);
+        res.p = sr_t_pvalue(cv_z, df);
+        res.alpha = sr_t_cdf(cv_z, df);
     } else {
         res.x = e_z;
-        res.p = t_pvalue(e_z, df);
-        res.alpha = t_cdf(e_z, df);
+        res.p = sr_t_pvalue(e_z, df);
+        res.alpha = sr_t_cdf(e_z, df);
     }
     return res;
 }

@@ -26,19 +26,64 @@ static void fill_rand64(uint64_t *x, size_t len)
 }
 
 
+static int cmp_int64(const void *aptr, const void *bptr)
+{
+    uint64_t aval = *((uint64_t *) aptr), bval = *((uint64_t *) bptr);
+    if (aval < bval) { return -1; }
+    else if (aval == bval) { return 0; }
+    else { return 1; }
+}
+
+static void qsort64_wrap(uint64_t *x, size_t len)
+{
+    qsort(x, len, sizeof(uint64_t), cmp_int64);
+}
+
+
+typedef struct {
+    const char *name;
+    void (*run)(uint64_t *, size_t);
+} SortMethodInfo;
+
 int test_radixsort64()
 {
-    size_t len = 1 << 24;
-    uint64_t *x = calloc(len, 20);
-    fill_rand64(x, len);
-    radixsort64(x, len);
-    if (is_array64_sorted(x, len)) {
-        printf("test_radixsort64: array is sorted\n");
-        return 1;
-    } else {
-        printf("test_radixsort64: array is not sorted\n");
-        return 0;
+    size_t len = 1 << 25;
+    uint64_t *x = calloc(len, sizeof(uint64_t));
+    clock_t tic, toc;
+    double msec;
+    int is_ok = 1;
+    const SortMethodInfo methods[] = {
+        {"radixsort64", radixsort64},
+        {"quicksort64", quicksort64},
+        {"qsort64", qsort64_wrap},
+        {NULL, NULL}
+    };
+
+
+    for (const SortMethodInfo *ptr = methods; ptr->name != NULL; ptr++) {
+        fill_rand64(x, len);
+        tic = clock();
+        ptr->run(x, len);
+        toc = clock();
+        msec = ((double) (toc - tic)) / CLOCKS_PER_SEC * 1000;
+        printf("%s --- time elapsed: %g ms\n", ptr->name, msec);
+        if (is_array64_sorted(x, len)) {
+            printf("%s: array is sorted\n", ptr->name);
+        } else {
+            printf("%s: array is not sorted\n", ptr->name);
+            is_ok = 0;
+        }
+
+        for (size_t i = 0; i < len; i++) {
+            x[i] = 0;
+        }
+        tic = clock();
+        ptr->run(x, len);
+        toc = clock();
+        msec = ((double) (toc - tic)) / CLOCKS_PER_SEC * 1000;
+        printf("%s|empty --- time elapsed: %g ms\n", ptr->name, msec);        
     }
+    return is_ok;
 }
 
 int test_chi2()
@@ -82,8 +127,8 @@ int test_chi2()
         double x = cdf_data[i];
         unsigned long f = (unsigned long) cdf_data[i + 1];
         double x_ref = cdf_data[i + 2];
-        double x_calc = chi2_cdf(x, f);
-        double xc_calc = chi2_pvalue(x, f);
+        double x_calc = sr_chi2_cdf(x, f);
+        double xc_calc = sr_chi2_pvalue(x, f);
         printf("%10g %10lu %16g %16g %16g\n",
             x, f, x_ref, x_calc, x_calc + xc_calc - 1.0);
     }
@@ -95,8 +140,8 @@ int test_chi2()
         double x = ccdf_data[i];
         unsigned long f = (unsigned long) ccdf_data[i + 1];
         double xc_ref = ccdf_data[i + 2];
-        double x_calc = chi2_cdf(x, f);
-        double xc_calc = chi2_pvalue(x, f);
+        double x_calc = sr_chi2_cdf(x, f);
+        double xc_calc = sr_chi2_pvalue(x, f);
         printf("%10g %10lu %16g %16g %16g\n",
             x, f, xc_ref, xc_calc, x_calc + xc_calc - 1.0);
     }
@@ -124,7 +169,7 @@ int test_ks()
     for (size_t i = 0; k_data[i] != 0.0; i += 2) {
         double k = k_data[i];
         double ccdf_ref = k_data[i + 1];
-        double ccdf_calc = ks_pvalue(k);
+        double ccdf_calc = sr_ks_pvalue(k);
         printf("%16g %16g %16g %16g\n",
             k, ccdf_ref, ccdf_calc,
                 100*(ccdf_calc - ccdf_ref)/ccdf_ref);
@@ -142,11 +187,11 @@ int test_hamming_weights()
 int test_binopdf()
 {
     for (int i = 0; i < 8; i++) {
-        printf("%3d %3d %6g\n", i, 8, binomial_pdf(i, 8, 0.5) * 256.0);
+        printf("%3d %3d %6g\n", i, 8, sr_binomial_pdf(i, 8, 0.5) * 256.0);
     }
     printf("\n");
     for (int i = 0; i < 9; i++) {
-        printf("%3d %3d %6g\n", i, 8, binomial_pdf(i, 9, 0.25) * pow(4.0, 9.0));
+        printf("%3d %3d %6g\n", i, 8, sr_binomial_pdf(i, 9, 0.25) * pow(4.0, 9.0));
     }
     printf("\n");
     return 0;
@@ -192,8 +237,8 @@ int test_stdnorm()
     for (int i = 0; i < 5; i++) {
         double x = ref[2*i], pref = ref[2*i + 1];
         printf("%7.3f %25.16g %25.16g %8.2e\n",
-            x, stdnorm_cdf(x), pref,
-            stdnorm_cdf(x) + stdnorm_pvalue(x) - 1.0);
+            x, sr_stdnorm_cdf(x), pref,
+            sr_stdnorm_cdf(x) + sr_stdnorm_pvalue(x) - 1.0);
     }
     return 0;
 }
@@ -234,13 +279,13 @@ int test_tdistr_cdf()
         double t = dat[3*i];
         unsigned long f = (unsigned long) dat[3*i + 1];
         double p = dat[3*i + 2];
-        double delta = fabs(p - t_cdf(t, f)) / p;
+        double delta = fabs(p - sr_t_cdf(t, f)) / p;
         if (dfmax < delta) {
             dfmax = delta; indmax = i;
         }
         dfmean += delta; n++;
         printf("t=%8g; f=%6lu; pcalc=%10g; pref=%10g; pcalc_ccdf=%10g; delta=%g\n",
-            t, f, t_cdf(t, f), p, t_pvalue(t, f), delta);
+            t, f, sr_t_cdf(t, f), p, sr_t_pvalue(t, f), delta);
     }
     dfmean /= (double) n;
     printf("test_tdistr_cdf; df(mean): %g; df(max): %g; ind(max): %d\n",
@@ -252,7 +297,7 @@ int test_tdistr_cdf()
 int test_halfnormal()
 {
     double x = 2.8;
-    printf("%25.16g %25.16g\n", halfnormal_pvalue(x), erfc(x / sqrt(2.0)));
+    printf("%25.16g %25.16g\n", sr_halfnormal_pvalue(x), erfc(x / sqrt(2.0)));
         
     return 0;
 }
@@ -260,14 +305,14 @@ int test_halfnormal()
 int test_binocdf()
 {
     printf("----- test_binocdf -----\n");
-    printf("%g %g %g\n", binomial_cdf(5,10,0.45), 0.738437299245508,
-        binomial_cdf(5,10,0.45) + binomial_pvalue(5,10,0.45));
-    printf("%g %g %g\n", binomial_cdf(95,100000,1e-3), 0.331101644198284,
-        binomial_cdf(95,100000,1e-3) + binomial_pvalue(95,100000,1e-3));
+    printf("%g %g %g\n", sr_binomial_cdf(5,10,0.45), 0.738437299245508,
+        sr_binomial_cdf(5,10,0.45) + sr_binomial_pvalue(5,10,0.45));
+    printf("%g %g %g\n", sr_binomial_cdf(95,100000,1e-3), 0.331101644198284,
+        sr_binomial_cdf(95,100000,1e-3) + sr_binomial_pvalue(95,100000,1e-3));
 
     printf("----- test_binopdf -----\n");
-    printf("%g %g\n", binomial_pdf(971, 1493, 0.036356), 0.0);
-    printf("%g %g\n", binomial_pdf(128, 256, 0.45), 0.013763);
+    printf("%g %g\n", sr_binomial_pdf(971, 1493, 0.036356), 0.0);
+    printf("%g %g\n", sr_binomial_pdf(128, 256, 0.45), 0.013763);
 
     return 0;
 }
@@ -275,19 +320,20 @@ int test_binocdf()
 int test_norminv()
 {
     printf("----- test_norminv -----\n");
-    printf("%.15g %.15g\n", stdnorm_inv(0.5 - 1e-8), stdnorm_inv(0.5 + 1e-8));
-    printf("%.15g %.15g\n", stdnorm_inv(0.5 - 1e-4), stdnorm_inv(0.5 + 1e-4));
-    printf("%.15g %.15g\n", stdnorm_inv(0.25), stdnorm_inv(0.75));
-    printf("%.15g %.15g\n", stdnorm_inv(1e-10), stdnorm_inv(1 - 1e-10));
+    printf("%.15g %.15g\n", sr_stdnorm_inv(0.5 - 1e-8), sr_stdnorm_inv(0.5 + 1e-8));
+    printf("%.15g %.15g\n", sr_stdnorm_inv(0.5 - 1e-4), sr_stdnorm_inv(0.5 + 1e-4));
+    printf("%.15g %.15g\n", sr_stdnorm_inv(0.25), sr_stdnorm_inv(0.75));
+    printf("%.15g %.15g\n", sr_stdnorm_inv(1e-10), sr_stdnorm_inv(1 - 1e-10));
 
-    printf("%.15g\n", stdnorm_inv(1e-50));
+    printf("%.15g\n", sr_stdnorm_inv(1e-50));
 
     return 0;
 
 }
 
-int test_linearcomp()
+int test_round()
 {
+    printf("----- test_round -----\n");
     printf("%g %g\n", -3.0, sr_round(-3.0));
     printf("%g %g\n", -3.3, sr_round(-3.3));
     printf("%g %g\n", -3.8, sr_round(-3.8));
@@ -302,14 +348,19 @@ int test_linearcomp()
     printf("%g %g\n", 5.1, sr_round(5.1));
     printf("%g %g\n", 5.5, sr_round(5.5));
     printf("%g %g\n", 5.9, sr_round(5.9));
-    printf("----------\n");
-    printf("%g %g\n", 0.010417, linearcomp_Tcdf(-2.5));
-    printf("%g %g\n", 0.03125, linearcomp_Tcdf(-1.5) - linearcomp_Tcdf(-2.5));
-    printf("%g %g\n", 0.125, linearcomp_Tcdf(-0.5) - linearcomp_Tcdf(-1.5));
-    printf("%g %g\n", 0.5, linearcomp_Tcdf(0.5) - linearcomp_Tcdf(-0.5));
-    printf("%g %g\n", 0.25, linearcomp_Tcdf(1.5) - linearcomp_Tcdf(0.5));
-    printf("%g %g\n", 0.0625, linearcomp_Tcdf(2.5) - linearcomp_Tcdf(1.5));
-    printf("%g %g\n", 0.020833, linearcomp_Tccdf(2.5));
+    return 0;
+}
+
+int test_linearcomp_cdf()
+{
+    printf("----- test_linearcomp_cdf -----\n");
+    printf("%g %g\n", 0.010417, sr_linearcomp_Tcdf(-2.5));
+    printf("%g %g\n", 0.03125, sr_linearcomp_Tcdf(-1.5) - sr_linearcomp_Tcdf(-2.5));
+    printf("%g %g\n", 0.125, sr_linearcomp_Tcdf(-0.5) - sr_linearcomp_Tcdf(-1.5));
+    printf("%g %g\n", 0.5, sr_linearcomp_Tcdf(0.5) - sr_linearcomp_Tcdf(-0.5));
+    printf("%g %g\n", 0.25, sr_linearcomp_Tcdf(1.5) - sr_linearcomp_Tcdf(0.5));
+    printf("%g %g\n", 0.0625, sr_linearcomp_Tcdf(2.5) - sr_linearcomp_Tcdf(1.5));
+    printf("%g %g\n", 0.020833, sr_linearcomp_Tccdf(2.5));
     return 0;
 }
 
@@ -328,6 +379,6 @@ int main()
     test_binocdf();
     test_norminv();
     test_radixsort64();
-    test_linearcomp();
+    test_linearcomp_cdf();
     return 0;
 }
