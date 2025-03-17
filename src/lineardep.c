@@ -159,8 +159,8 @@ TestResults matrixrank_test(GeneratorState *obj, const MatrixRankOptions *opts)
     } else {
         ans.penalty = PENALTY_MATRIXRANK;
     }
-    ans.p = chi2_pvalue(ans.x, 2); // exp(-0.5 * ans.x);
-    ans.alpha = chi2_cdf(ans.x, 2); // -expm1(-0.5 * ans.x);
+    ans.p = sr_chi2_pvalue(ans.x, 2); // exp(-0.5 * ans.x);
+    ans.alpha = sr_chi2_cdf(ans.x, 2); // -expm1(-0.5 * ans.x);
     obj->intf->printf("  Minimal observed rank: %lu\n", (unsigned long) min_rank);
     obj->intf->printf("  x = %g; p = %g; 1-p = %g\n", ans.x, ans.p, ans.alpha);
     obj->intf->printf("\n");
@@ -329,8 +329,8 @@ TestResults linearcomp_test(GeneratorState *obj, const LinearCompOptions *opts)
         T = ans.x - (double) opts->nbits / 2.0;
     }
     ans.penalty = PENALTY_LINEARCOMP;
-    ans.p = linearcomp_Tcdf(T);
-    ans.alpha = linearcomp_Tccdf(T);
+    ans.p = sr_linearcomp_Tcdf(T);
+    ans.alpha = sr_linearcomp_Tccdf(T);
     obj->intf->printf("  L = %g; T = %g; p = %g\n", ans.x, T, ans.p);
     obj->intf->printf("\n");
     free(s);

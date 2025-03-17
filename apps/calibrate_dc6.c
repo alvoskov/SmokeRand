@@ -189,7 +189,7 @@ static void calc_statistics(double *x, size_t len)
     qsort(x, len, sizeof(double), cmp_doubles);
     double D = 0.0;
     for (size_t i = 0; i < len; i++) {
-        double f = stdnorm_cdf(x[i]);
+        double f = sr_stdnorm_cdf(x[i]);
         double idbl = (double) i;
         double Dplus = (idbl + 1.0) / len - f;
         double Dminus = f - idbl / len;

@@ -170,8 +170,8 @@ void ResultsList_add_poisson(ResultsList *obj,
     TestResultEntry tres;
     strcpy(tres.name, name);
     tres.x = xemp;
-    tres.p = poisson_pvalue(tres.x, mu);
-    tres.alpha = poisson_cdf(tres.x, mu);
+    tres.p = sr_poisson_pvalue(tres.x, mu);
+    tres.alpha = sr_poisson_cdf(tres.x, mu);
     ResultsList_add(obj, &tres);
     printf("  %s: x = %g, p = %g\n", name, tres.x, tres.p);
 }
@@ -564,8 +564,8 @@ void linearcomp_test_c89(ResultsList *out, Generator32State *obj,
     }
     sprintf(tres.name, "linearcomp:%u", bitpos);
     tres.x = T;
-    tres.p = linearcomp_Tcdf(T);
-    tres.alpha = linearcomp_Tccdf(T);
+    tres.p = sr_linearcomp_Tcdf(T);
+    tres.alpha = sr_linearcomp_Tccdf(T);
     printf("  L = %g; T = %g; p = %g; 1 - p = %g\n\n",
         L, tres.x, tres.p, tres.alpha);
     ResultsList_add(out, &tres);
@@ -779,8 +779,8 @@ void gen_tests(ResultsList *out, Generator32State *obj)
     /* Analysis of byte frequency test */
     strcpy(tres.name, "bytefreq");
     tres.x = chi2emp;
-    tres.p = chi2_pvalue(chi2emp, 255);
-    tres.alpha = chi2_cdf(chi2emp, 255);
+    tres.p = sr_chi2_pvalue(chi2emp, 255);
+    tres.alpha = sr_chi2_cdf(chi2emp, 255);
     ResultsList_add(out, &tres);
     printf("  bytefreq: x = %g, p = %g\n", tres.x, tres.p);
     /* Free all buffers */

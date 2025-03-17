@@ -268,8 +268,8 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     }
     ans.penalty = PENALTY_BSPACE;
     ans.x = (double) ndups_total;
-    ans.p = poisson_pvalue(ans.x, lambda * opts->nsamples);
-    ans.alpha = poisson_cdf(ans.x, lambda * opts->nsamples);
+    ans.p = sr_poisson_pvalue(ans.x, lambda * opts->nsamples);
+    ans.alpha = sr_poisson_cdf(ans.x, lambda * opts->nsamples);
     obj->intf->printf("  x = %.0f; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
     return ans;
@@ -280,8 +280,8 @@ static void bspace4_8d_decimated_pvalue(TestResults *ans, const char *name,
     uint32_t *u, size_t len, double lambda, const CallerAPI *intf)
 {
     double x = (double) bspace_get_ndups32(u, len);
-    double p = poisson_pvalue(x, lambda);
-    double alpha = poisson_cdf(x, lambda);
+    double p = sr_poisson_pvalue(x, lambda);
+    double alpha = sr_poisson_cdf(x, lambda);
     intf->printf("  %-30s x = %6.0f; p = %g\n", name, x, p);
     if (p < ans->p && (p < 1e-10 || ans->p > 1.0)) {
         ans->p = p;
@@ -503,8 +503,8 @@ TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opt
         }
     }
     ans.x += Oi[2];
-    ans.p = poisson_pvalue(ans.x, mu * opts->nsamples);
-    ans.alpha = poisson_cdf(ans.x, mu * opts->nsamples);
+    ans.p = sr_poisson_pvalue(ans.x, mu * opts->nsamples);
+    ans.alpha = sr_poisson_cdf(ans.x, mu * opts->nsamples);
     // Frequency table
     double Ei = exp(-lambda) * nstates;
     obj->intf->printf("  Frequencies table (average per sample)\n");
@@ -593,8 +593,8 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
         ans.x += d * d / Ei;
     }
     free(Oi);
-    ans.p = chi2_pvalue(ans.x, (unsigned long) (nbins - 1));
-    ans.alpha = chi2_cdf(ans.x, (unsigned long) (nbins - 1));
+    ans.p = sr_chi2_pvalue(ans.x, (unsigned long) (nbins - 1));
+    ans.alpha = sr_chi2_cdf(ans.x, (unsigned long) (nbins - 1));
     obj->intf->printf("  Values processed: %llu (2^%.1f)\n",
         nvalues, sr_log2((double) nvalues));
     obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
@@ -646,7 +646,7 @@ static GapFrequencyArray *GapFrequencyArray_create(size_t nbins, double p)
         gapfreq->f[i].p_total = p_gap;
         p_gap *= 1.0 - p;
         if (i > 1) {
-            gapfreq->f[i].p_with0 = 1.0 - binomial_pdf(0, (unsigned long) i, p);
+            gapfreq->f[i].p_with0 = 1.0 - sr_binomial_pdf(0, (unsigned long) i, p);
         } else if (i == 1) {
             gapfreq->f[i].p_with0 = p;
         } else if (i == 0) {
@@ -681,21 +681,21 @@ static double GapFrequency_calc_z_with0(const GapFrequency *gf)
 {
     unsigned long ngaps_total = (unsigned long) gf->ngaps_total;
     unsigned long ngaps_with0 = (unsigned long) gf->ngaps_with0;
-    double alpha = binomial_cdf(ngaps_with0, ngaps_total, gf->p_with0);
-    double pvalue = binomial_pvalue(ngaps_with0, ngaps_total, gf->p_with0);
+    double alpha = sr_binomial_cdf(ngaps_with0, ngaps_total, gf->p_with0);
+    double pvalue = sr_binomial_pvalue(ngaps_with0, ngaps_total, gf->p_with0);
     // Check if discretization error is big enough to take it into account
     // It can be e.g. rather sensitive in the case of binopdf(1085, 1085, 0.992085)
     // when mathematical expectance is 1076.4 and standard deviation is 2.91.
     // It means that 1085 will give p-value 1 but is still inside 4sigma
     if (pvalue < 1e-10 || alpha < 1e-10) {
-        double p_discrete = binomial_pdf(ngaps_with0, ngaps_total, gf->p_with0);
+        double p_discrete = sr_binomial_pdf(ngaps_with0, ngaps_total, gf->p_with0);
         if (p_discrete > 1e-10) {
             pvalue = p_discrete;
             alpha = 1 - pvalue;
         }
     }
     // Convert to normal distribution
-    double z_w0 = (pvalue < 0.5) ? -stdnorm_inv(pvalue) : stdnorm_inv(alpha);
+    double z_w0 = (pvalue < 0.5) ? -sr_stdnorm_inv(pvalue) : sr_stdnorm_inv(alpha);
     if (z_w0 < -40.0) {
         z_w0 = -40.0;
     } else if (z_w0 > 40.0) {
@@ -719,7 +719,7 @@ static double GapFrequencyArray_sumsq_as_norm(const GapFrequencyArray *obj,
         double Ei = ngaps * obj->f[i].p_total;
         chi2emp += pow(Oi - Ei, 2.0) / Ei;
     }
-    return chi2_to_stdnorm_approx(chi2emp, (unsigned long) (obj->nbins - 1));
+    return sr_chi2_to_stdnorm_approx(chi2emp, (unsigned long) (obj->nbins - 1));
 }
 
 void gap16_count0_mainloop(GapFrequencyArray *gapfreq, GapFrequencyArray *gapfreq_rb,
@@ -820,11 +820,11 @@ static double gap16_z_bonferroni(double z, double p_gap)
 {
     double z_corr;
     if (z < 0) {
-        double p = stdnorm_cdf(z) / p_gap;
-        z_corr = (p < 0.5) ? stdnorm_inv(p) : 0.0;
+        double p = sr_stdnorm_cdf(z) / p_gap;
+        z_corr = (p < 0.5) ? sr_stdnorm_inv(p) : 0.0;
     } else {
-        double p = stdnorm_cdf(-z) / p_gap;
-        z_corr = (p < 0.5) ? -stdnorm_inv(p) : 0.0;
+        double p = sr_stdnorm_cdf(-z) / p_gap;
+        z_corr = (p < 0.5) ? -sr_stdnorm_inv(p) : 0.0;
     }
     // Filter out possible infinities
     if (z_corr < -40.0) {
@@ -889,7 +889,7 @@ TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
     // Computation of p-value for sum of squares
     double z_sumsq_total = GapFrequencyArray_sumsq_as_norm(gapfreq, ngaps);
     obj->intf->printf("  z from chi2emp: %g; p = %g\n",
-        z_sumsq_total, stdnorm_pvalue(z_sumsq_total));
+        z_sumsq_total, sr_stdnorm_pvalue(z_sumsq_total));
     // Computation of p-values for all frequencies
     // Note: a lot of printf may be messy but separate printf's for each line
     // are required to provide correct output in a multi-threaded environment.
@@ -897,17 +897,17 @@ TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
     GapFrequencyStats gf_rb = GapFrequencyArray_calc_maxfreq(gapfreq_rb, ngaps);
     obj->intf->printf("  Frequency analysis for [value ... value] gaps with '0' inside:\n");
     obj->intf->printf("    z_max = %g; p = %g; alpha = %g; index = %d\n",
-        gf.z_max_w0, stdnorm_pvalue(gf.z_max_w0), stdnorm_cdf(gf.z_max_w0), (int) gf.ind_w0);
+        gf.z_max_w0, sr_stdnorm_pvalue(gf.z_max_w0), sr_stdnorm_cdf(gf.z_max_w0), (int) gf.ind_w0);
     obj->intf->printf("    ngaps_total = %llu; ngaps_with0 = %llu\n",
         gapfreq->f[gf.ind_w0].ngaps_total, gapfreq->f[gf.ind_w0].ngaps_with0);
     obj->intf->printf("    p_total = %g; p_with0 = %g\n",
         gapfreq->f[gf.ind_w0].p_total, gapfreq->f[gf.ind_w0].p_with0);
     obj->intf->printf("  Frequency analysis for all [value ... value] gaps:\n");
     obj->intf->printf("    z_max = %g; p = %g; alpha = %g; index = %d\n",
-        gf.z_max_tot, stdnorm_pvalue(gf.z_max_tot), stdnorm_cdf(gf.z_max_tot), (int) gf.ind_tot);
+        gf.z_max_tot, sr_stdnorm_pvalue(gf.z_max_tot), sr_stdnorm_cdf(gf.z_max_tot), (int) gf.ind_tot);
     obj->intf->printf("  Frequency analysis for [0 ... value] gaps with 'value' inside:\n");
     obj->intf->printf("    z_max = %g; p = %g; alpha = %g; index = %d\n",
-        gf_rb.z_max_w0, stdnorm_pvalue(gf_rb.z_max_w0), stdnorm_cdf(gf_rb.z_max_w0), (int) gf_rb.ind_tot);
+        gf_rb.z_max_w0, sr_stdnorm_pvalue(gf_rb.z_max_w0), sr_stdnorm_cdf(gf_rb.z_max_w0), (int) gf_rb.ind_tot);
     obj->intf->printf("    ngaps_total = %llu; ngaps_with0 = %llu\n",
         gapfreq_rb->f[gf_rb.ind_w0].ngaps_total, gapfreq_rb->f[gf_rb.ind_w0].ngaps_with0);
     obj->intf->printf("    p_total = %g; p_with0 = %g\n",
@@ -915,7 +915,7 @@ TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
     obj->intf->printf("  Note: remember about Bonferroni correction!\n");
     obj->intf->printf("\n");
     // Make total p-value (with Bonferroni correction if required)
-    double z_bonferroni = -stdnorm_inv(1e-4 * p);
+    double z_bonferroni = -sr_stdnorm_inv(1e-4 * p);
     double zabs_max_w0 = fabs(gf.z_max_w0);
     double zabs_max_tot = fabs(gf.z_max_tot);
     double zabs_max_wrb = fabs(gf_rb.z_max_w0);
@@ -930,8 +930,8 @@ TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
         ans.x = gap16_z_bonferroni(gf_rb.z_max_w0, p);
     }
     ans.penalty = PENALTY_GAP16_COUNT0;
-    ans.p = stdnorm_pvalue(ans.x);
-    ans.alpha = stdnorm_cdf(ans.x);
+    ans.p = sr_stdnorm_pvalue(ans.x);
+    ans.alpha = sr_stdnorm_cdf(ans.x);
     // Output p-value
     obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
@@ -1038,8 +1038,8 @@ TestResults sumcollector_test(GeneratorState *obj, const SumCollectorOptions *op
         }
     }
     df--;
-    ans.p = chi2_pvalue(ans.x, df);
-    ans.alpha = chi2_cdf(ans.x, df);
+    ans.p = sr_chi2_pvalue(ans.x, df);
+    ans.alpha = sr_chi2_cdf(ans.x, df);
     // Output p-value
     obj->intf->printf("  Number of sums: %llu (2^%g)\n",
         Oi_sum, sr_log2((double) Oi_sum));
@@ -1090,9 +1090,9 @@ TestResults mod3_test(GeneratorState *obj, const Mod3Options *opts)
     }
     free(Oi);
     ans.penalty = PENALTY_MOD3;
-    ans.x = chi2_to_stdnorm_approx(ans.x, ntuples - 1);
-    ans.p = stdnorm_pvalue(ans.x);
-    ans.alpha = stdnorm_cdf(ans.x);
+    ans.x = sr_chi2_to_stdnorm_approx(ans.x, ntuples - 1);
+    ans.p = sr_stdnorm_pvalue(ans.x);
+    ans.alpha = sr_stdnorm_cdf(ans.x);
     obj->intf->printf("  z = %g; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
     return ans;
@@ -1137,8 +1137,8 @@ TestResults monobit_freq_test(GeneratorState *obj, const MonobitFreqOptions *opt
     }
     ans.penalty = PENALTY_FREQ;
     ans.x = fabs((double) bitsum) / sqrt((double) (len * obj->gi->nbits));
-    ans.p = stdnorm_pvalue(ans.x);
-    ans.alpha = stdnorm_cdf(ans.x);
+    ans.p = sr_stdnorm_pvalue(ans.x);
+    ans.alpha = sr_stdnorm_cdf(ans.x);
     obj->intf->printf("  sum = %lld; x = %g; p = %g\n",
         bitsum, ans.x, ans.p);
     obj->intf->printf("\n");
@@ -1201,7 +1201,7 @@ TestResults nbit_words_freq_test(GeneratorState *obj,
     qsort(chi2, opts->nblocks, sizeof(double), cmp_doubles);
     double D = 0.0;
     for (size_t i = 0; i < opts->nblocks; i++) {
-        double f = chi2_cdf(chi2[i], (unsigned long) (nbins - 1));
+        double f = sr_chi2_cdf(chi2[i], (unsigned long) (nbins - 1));
         double idbl = (double) i;
         double Dplus = (idbl + 1.0) / opts->nblocks - f;
         double Dminus = f - idbl / opts->nblocks;
@@ -1212,7 +1212,7 @@ TestResults nbit_words_freq_test(GeneratorState *obj,
     double K = sqrt_nblocks * D + 1.0 / (6.0 * sqrt_nblocks);
     ans.penalty = PENALTY_FREQ;
     ans.x = K;
-    ans.p = ks_pvalue(K);
+    ans.p = sr_ks_pvalue(K);
     ans.alpha = 1.0 - ans.p;
     obj->intf->printf("  K = %g, p = %g\n", K, ans.p);
     obj->intf->printf("\n");

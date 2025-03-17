@@ -78,12 +78,20 @@ gen_srcdir = generators
 ]])
 
 -- Make "all" section
-io.write("all: $(bindir)/smokerand.exe $(bindir)/sr_dos32.exe $(bindir)/srtiny16.exe")
+io.write("all: $(bindir)/smokerand.exe $(bindir)/sr_dos32.exe $(bindir)/test_funcs.exe $(bindir)/srtiny16.exe")
 for _, g in pairs(gen_sources) do
     local dllfile = " $(gen_bindir)/" .. g .. ".dll"
     io.write(dllfile)
 end
 io.write("\n")
+
+
+-- Prepare list of library core headers
+local lib_headers_str = "include/smokerand_core.h "
+for _, v in pairs(lib_headers) do
+    lib_headers_str = lib_headers_str .. " $(includedir)/" .. v
+end
+
 
 
 -- Make the program executable
@@ -106,16 +114,16 @@ objstr_dos32 = objstr_dos32 .. " $(objdir_dos32)/pe32loader.obj"
 io.write("$(bindir)/smokerand.exe:" .. objstr .. "\n")
 io.write("\twcl386 -4s -fe=$(bindir)/smokerand.exe " .. objstr .. "\n")
 
+io.write("$(bindir)/test_funcs.exe: $(objdir)/test_funcs.obj \n")
+io.write("\twcl386 -4s -fe=$(bindir)/test_funcs.exe $(objdir)/core.obj $(objdir)/specfuncs.obj $(objdir)/test_funcs.obj $(objdir)/entropy.obj $(objdir)/threads_intf.obj\n")
+
+io.write("$(objdir)/test_funcs.obj: $(appsrcdir)/test_funcs.c " .. lib_headers_str .. "\n")
+io.write("\twcc386 $(cflags) -fo=$(objdir)/test_funcs.obj $(appsrcdir)/test_funcs.c\n")
+
 io.write("$(bindir)/sr_dos32.exe:" .. objstr_dos32 .. "\n")
 io.write("\twcl386 -4s -fe=$(bindir)/sr_dos32.exe -bcl=" .. dosextender ..
     " " .. objstr_dos32 .. "\n")
 
-
--- Prepare list of library core headers
-local lib_headers_str = "include/smokerand_core.h "
-for _, v in pairs(lib_headers) do
-    lib_headers_str = lib_headers_str .. " $(includedir)/" .. v
-end
 
 ---------- Object file with the main() function ----------
 io.write("$(objdir)/smokerand.obj: $(appsrcdir)/smokerand.c " .. lib_headers_str .. "\n")
@@ -126,6 +134,10 @@ io.write("\twcc386 $(cflags_dos32) -fo=$(objdir_dos32)/smokerand.obj $(appsrcdir
 
 io.write("$(objdir_dos32)/pe32loader.obj: $(srcdir)/pe32loader.c " .. lib_headers_str .. "\n")
 io.write("\twcc386 $(cflags_dos32) -fo=$(objdir_dos32)/pe32loader.obj $(srcdir)/pe32loader.c\n")
+
+io.write("$(objdir_dos32)/test_funcs.obj: $(srcdir)/test_funcs.c " .. lib_headers_str .. "\n")
+io.write("\twcc386 $(cflags_dos32) -fo=$(objdir_dos32)/test_funcs.obj $(srcdir)/test_funcs.c\n")
+
 
 ---------- Compile the 16-bit version ----------
 io.write("$(bindir)/srtiny16.exe: $(objdir_dos32)/srtiny16.obj $(objdir_dos32)/spfunc16.obj\n")

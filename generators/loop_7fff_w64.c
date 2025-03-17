@@ -22,7 +22,7 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     (void) intf;
-    return NULL;
+    return intf->malloc(sizeof(uint64_t));
 }
 
 MAKE_UINT64_PRNG("loop_7fff_w64", NULL)

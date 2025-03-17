@@ -1,6 +1,7 @@
 #
-# SmokeRand `default` battery written as a script:
-# versions for 256 MiB of RAM
+# SmokeRand `default` battery written as a script: a version for 64 MiB of RAM.
+# The memory consumption is reduced mainly due to altered parameters of the
+# "Collision Over" tests.
 #
 
 # Frequency tests

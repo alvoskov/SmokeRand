@@ -297,6 +297,58 @@ void GeneratorModule_unload(GeneratorModule *mod)
 ///////////////////////////////
 
 
+static void insertsort(uint64_t *x, ptrdiff_t begin, ptrdiff_t end)
+{
+    ptrdiff_t i;
+    for (i = begin + 1; i <= end; i++) {
+        uint64_t xi = x[i];
+        ptrdiff_t j = i;
+        while (j > begin && x[j - 1] > xi) {
+            x[j] = x[j - 1];
+            j--;
+        }
+        x[j] = xi;
+    }
+}
+
+static void quicksort_range(uint64_t *v, ptrdiff_t begin, ptrdiff_t end)
+{
+    ptrdiff_t i = begin, j = end, med = (begin + end) / 2;
+    uint64_t pivot = v[med];
+    while (i <= j) {
+        if (v[i] < pivot) {
+            i++;
+        } else if (v[j] > pivot) {
+            j--;
+        } else {
+            uint64_t tmp = v[i];
+            v[i++] = v[j];
+            v[j--] = tmp;
+        }
+    }
+    if (begin < j) {
+        if (j - begin > 12) {
+            quicksort_range(v, begin, j);
+        } else {
+            insertsort(v, begin, j);
+        }
+    }
+    if (end > i) {
+        if (end - i > 12) {
+            quicksort_range(v, i, end);
+        } else {
+            insertsort(v, i, end);
+        }
+    }
+}
+
+
+void quicksort64(uint64_t *x, size_t len)
+{
+    quicksort_range(x, 0, len - 1);
+}
+
+
 /**
  * @brief 16-bit counting sort for 64-bit arrays.
  */
@@ -355,6 +407,13 @@ static void countsort32(uint32_t *out, const uint32_t *x, size_t len, unsigned i
 void radixsort64(uint64_t *x, size_t len)
 {
     uint64_t *out = calloc(len, sizeof(uint64_t));
+    if (out == NULL) {
+        // Not enough memory for a buffer: use another algorithm.
+        // May be useful for platforms with low amounts of RAM and no virtual
+        // memory such as 32-bit DOS extenders.
+        quicksort64(x, len);
+        return;
+    }
     countsort64(out, x,   len, 0);
     countsort64(x,   out, len, 16);
     countsort64(out, x,   len, 32);
@@ -368,6 +427,10 @@ void radixsort64(uint64_t *x, size_t len)
 void radixsort32(uint32_t *x, size_t len)
 {
     uint32_t *out = calloc(len, sizeof(uint32_t));
+    if (out == NULL) {
+        fprintf(stderr, "***** radixsort32: not enough memory *****\n");
+        exit(EXIT_FAILURE);
+    }
     countsort32(out, x,   len, 0);
     countsort32(x,   out, len, 16);
     free(out);
