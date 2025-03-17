@@ -71,14 +71,49 @@ Recommended configuration:
 
 The next compilers are supported: GCC (including MinGW), Clang (as zig cc), MSVC
 (Microsoft Visual C) and Open Watcom C. It allows to compile SmokeRand under
-Windows, UNIX-like systems and DOS.
+Windows, UNIX-like systems and DOS. 
 
 
 ## Compilation
 
-SmokeRand supports three software build systems: GNU Make, CMake and Ninja.
-Usage of Ninja requires Lua 5.x interpreter for generation of `build.ninja`
-script.
+SmokeRand supports four software build systems: GNU Make, CMake, Ninja and
+WMake (Open Watcom make). The manually written script for GNU Make is
+`Makefile.gnu` and doesn't require CMake. Usage of Ninja and WMake requires
+Lua 5.x interpreter for generation of `build.ninja` or `Makefile.wat` scripts
+respectively (see `cfg_ninja.lua` and `cfg_wmake.lua`). Features of each
+solution:
+
+- GNU Make: supports gcc, clang (as zig cc) but not MSVC or Open Watcom.
+  Has `install` and `uninstall` pseudotargets for GNU/Linux.
+- Ninja: supports gcc, clang (as zig cc) and MSVC but not Open Watcom.
+  Automatic resolution of `.h`-file dependencies is supported only for
+  English version of MSVC.
+- WMake: designed for Open Watcom C/C++, compiles for 32-bit Windows NT,
+  32-bit DOS (with extenders) and 16-bit DOS. The dynamic libraries with
+  PRNGs (DLLs) are shared between Windows and 32-bit DOS version.
+
+All pseudorandom number generators are built as dynamic libraries: `.dll`
+(dynamic linked libraries) for Windows and 32-bit DOS and `.so` (shared
+objects) for GNU/Linux and other UNIX-like systems. 32-bit DOS version
+uses a simplified custom DLL loader (see the `src/pe32loader.c` and 
+`include/pe32loader.h` files) that allows to use properly compiled plugins
+with PRNGs even without DOS extender with PE files support. 16-bit DOS
+version (see `apps/sr_tiny.c`) doesn't support dynamic libraries at all,
+tested generators should be embedded into its source code.
+
+Notes about running tests in an environment with limited amount of RAM,
+e.g. under 32-bit DOS extender:
+
+- `gap16_count0` may consume several MiB for gaps and frequencies tables.
+  Probably RAM consumption may be significantly reduces but it may slow down
+  and complicate a program for 64-bit environments.
+- `bspace` uses more than 64 MiB of memory for 64-bit values. Its 32-bit
+  variant needs less than 256 KiB of RAM.
+- `collover` may use about 0.5 GiB of memory in most batteries. It may be
+  significantly reduced but the test will be slower and less sensitive
+  for 64-bit systems.
+- `hamming_ot` uses relatively large (several MiB) frequency tables during
+  the run.
 
 ## About implemented tests
 
@@ -328,14 +363,17 @@ is applied, number of "birthdays" is adjusted to \f$ \lambda = 4 \f$ value.
 The test is repeated several times (`nsamples`), the number of duplicates
 from these runs are summed. This sum obeys Poisson distribution.
 
- Name        | nbits | ndim | `brief` | `default` | `full` 
--------------|-------|------|---------|-----------|--------
- bspace64_1d | 64    | 1    | 40      | 100       | 250
- bspace32_1d | 32    | 1    | 4096    | 8192      | 8192
- bspace32_2d | 32    | 2    | 5       | 10        | 250
- bspace21_3d | 21    | 3    | 5       | 10        | 250
- bspace16_4d | 16    | 4    | 5       | 10        | 250
- bspace8_8d  | 8     | 8    | 5       | 10        | 250
+ Name        | nbits | ndim | `express` | `brief` | `default` | `full` 
+-------------|-------|------|-----------|---------|-----------|--------
+ bspace64_1d | 64    | 1    | -         | 40      | 100       | 250
+ bspace32_1d | 32    | 1    | 1024      | 4096    | 8192      | 8192
+ bspace32_2d | 32    | 2    | -         | 5       | 10        | 250
+ bspace21_3d | 21    | 3    | -         | 5       | 10        | 250
+ bspace16_4d | 16    | 4    | -         | 5       | 10        | 250
+ bspace8_8d  | 8     | 8    | -         | 5       | 10        | 250
+-------------|-------|------|-----------|---------|-----------|--------
+ bspace8_4d  | 8     | 4    | 256       | -       | -         | -
+ bspace4_8d  | 4     | 8    | 128       | -       | -         | -
 
 1-dimensional tests are sensitive to 64-bit LCGs with prime modulus and lagged
 Fibonacci generators, 3-dimensional tests detect 32- and 64-bit MWC
@@ -512,6 +550,40 @@ borrow generators without luxury levels. Metropolis algorithm may detect LCGs
 with small state size. Of course, they are slower and less sensitive tha
 specialized statistical tests from `express`, `brief`, `default` and `full`
 batteries and have mainly historical and educational interest.
+
+
+# Plugins with generators
+
+The are two ways to test PRNGs using SmokeRand: through stdin/stdout pipes and
+by its implementation as a plugin, i.e. dynamic library. Usage of plugins allows
+to use all CPU cores for testing. The used API is rather simple and requires
+an export of only one function: `int gen_getinfo(GeneratorInfo *gi)` that should
+fill the `GeneratorInfo` structure. The `include/cinterface.h` file contains
+some macros that allow to avoid some boilerplate code. Numerous examples of
+plugins are available in the `generators` directory. Requirements to PRNGs
+source code in plugins:
+
+- Must be freestanding, i.e. don't use any libraries including C standard
+  library.
+- Must be reentrant, i.e. mustn't contain any mutable static or global
+  variable. PRNG state should be kept in dynamically allocated structures.
+
+Such requirements may seem unusual and too strict. But pseudorandom number
+generators should be small and fast programs that are trivially compilable
+into object code. Such approach greatly reduces dynamic libraries sizes,
+especially for Windows, and allows to load DLLs under DOS extenders.
+There are only two problematic situations:
+
+- Modulo operation on 64-bit numbers on 64-bit platforms and on 32-bit
+  numbers on 32-bit platforms: some compilers use their runtime libraries
+  for their implementation, at least in some cases. But such operations
+  are usually expensive and require a manual optimization anyway.
+- Operations with 64-bit numbers on some ancient 32-bit compilers such
+  as Open Watcom C/C++: it may use runtime for it. In SmokeRand there is
+  a workaround for it by means of some linking hacks in the autogenerated
+  `Makefile.wat` file.
+
+
 
 # Tests results
 

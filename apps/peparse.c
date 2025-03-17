@@ -20,33 +20,7 @@ int main(int argc, char *argv[])
     if (handle == NULL) {
         fprintf(stderr, "Error: %s\n", dlerror_pe32dos());
     }
-
-/*
-    FILE *fp = fopen(filename, "rb");
-    if (fp == NULL) {
-        fprintf(stderr, "Cannot open the file\n");
-        return 1;
-    }
-
-    uint32_t pe_offset = get_pe386_offset(fp); 
-
-    if (pe_offset == 0) {
-        fprintf(stderr, "Invalid PE file\n");
-        return 1;
-    }
-
-
-    PE32BasicInfo peinfo;
-    PE32BasicInfo_init(&peinfo, fp, pe_offset);
-    PE32BasicInfo_print(&peinfo);
-    PE32MemoryImage img = PE32BasicInfo_load(&peinfo, fp);
-    printf("Buffer size: %lX\n", (unsigned long) img.imgsize);
-    fclose(fp);
-*/
-
-    
-
-
+   
     int (*gen_getinfo)(GeneratorInfo *gi) = dlsym_pe32dos(handle, "gen_getinfo");
     if (gen_getinfo == NULL) {
         fprintf(stderr, "Cannot find the 'gen_getinfo' function\n");

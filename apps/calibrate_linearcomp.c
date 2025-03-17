@@ -1,3 +1,14 @@
+/**
+ * @file calibrate_linearcomp.c
+ * @brief Generate an empirical distribution for linear complexity using
+ * Monte-Carlo method and CSPRNGs.
+ *
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand_core.h"
 #include <stdio.h>
 #include <stdlib.h>
