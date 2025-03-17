@@ -24,9 +24,9 @@ static ThreadRetVal THREADFUNC_SPEC hamming_ot_run_test(void *udata)
 {
 //    HammingOtOptions opts = {.mode = HAMMING_OT_BYTES, .nbytes = 1000000000}; // 10^9 bytes
 //    HammingOtOptions opts = {.mode = HAMMING_OT_BYTES, .nbytes = 100000000};
-//      HammingOtOptions opts = {.mode = HAMMING_OT_BYTES, .nbytes = 10000000}; // 10^7 bytes
+      HammingOtOptions opts = {.mode = HAMMING_OT_BYTES, .nbytes = 10000000}; // 10^7 bytes
 //      HammingOtOptions opts = {.mode = HAMMING_OT_VALUES, .nbytes = 100000000}; // 10^8 bytes
-      HammingOtOptions opts = {.mode = HAMMING_OT_VALUES, .nbytes = 1000000000}; // 10^9 bytes
+//      HammingOtOptions opts = {.mode = HAMMING_OT_VALUES, .nbytes = 1000000000}; // 10^9 bytes
 //    HammingOtLongOptions opts = {.nvalues = 100000000, .wordsize = HAMMING_OT_W128};
 //    HammingOtLongOptions opts = {.nvalues = 10000000, .wordsize = HAMMING_OT_W128};
 
