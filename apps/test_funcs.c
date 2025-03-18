@@ -1,9 +1,36 @@
+/**
+ * @file test_funcs.c
+ * @brief Tests for some special functions implemented in SmokeRand.
+ * @details These special functions can be divided into three groups:
+ *
+ * - Sorting subroutines: radix sort and quicksort.
+ * - Reimplementation of C99 specific mathematical functions.
+ * - C.d.f, c.c.d.f. and p.d.f. for some distributions.
+ *
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
+
 #include "smokerand/core.h"
 #include "smokerand/specfuncs.h"
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
+
+void print_is_ok(int is_ok)
+{
+    if (is_ok) {
+        printf("--- Passed ---\n\n");
+    } else {
+        printf("--- Failed ---\n\n");
+    }
+}
+
 
 int is_array64_sorted(const uint64_t *x, size_t len)
 {
@@ -165,23 +192,32 @@ int test_ks()
         10.0,   2.767793053473475e-87,
         0.0
     };
-    printf("test_ks\n");
-    for (size_t i = 0; k_data[i] != 0.0; i += 2) {
+    int is_ok = 1;
+    printf("----- test_ks ----- \n");
+    printf("%16s %16s %16s %16s\n", "k", "fref", "fcalc", "relerr,%");
+    for (int i = 0; k_data[i] != 0.0; i += 2) {
         double k = k_data[i];
         double ccdf_ref = k_data[i + 1];
         double ccdf_calc = sr_ks_pvalue(k);
+        double relerr = (ccdf_calc - ccdf_ref)/ccdf_ref;
+        if (fabs(relerr) > 1e-15) {
+            is_ok = 0;
+        }
         printf("%16g %16g %16g %16g\n",
-            k, ccdf_ref, ccdf_calc,
-                100*(ccdf_calc - ccdf_ref)/ccdf_ref);
+            k, ccdf_ref, ccdf_calc, 100*relerr);
     }
-    return 0;
+    print_is_ok(is_ok);
+    return is_ok;
 }
 
 int test_hamming_weights()
 {
     uint64_t x = 0xDEADBEEFDEADBEEF;
-    printf("hamming weight = %d (ref.value is 48)\n", (int) get_uint64_hamming_weight(x));
-    return 0;
+    printf("----- test_hamming -----\n");
+    int hw = (int) get_uint64_hamming_weight(x), hw_ref = 48;
+    printf("hamming weight = %d (ref.value is %d)\n", hw, hw_ref);
+    print_is_ok(hw == hw_ref);
+    return hw == hw_ref;
 }
 
 int test_binopdf()
@@ -203,24 +239,35 @@ int test_expm1()
         -5.0, -0.5, -0.01, -0.001, -1e-14,
         1e-14, 0.001, 0.01, 0.5, 5.0
     };
-    printf("test_expm1\n");
+    int is_ok = 1;
+    printf("----- test_expm1 -----\n");
+    printf("%7s %25s %25s\n", "x", "f", "fref");
     for (int i = 0; i < 10; i++) {
         double x = xref[i];
-        double fref = expm1(x);
-        printf("%7.3f %25.16g %25.16g\n",
-            x, sr_expm1(x), fref);
+        double f = sr_expm1(x), fref = expm1(x);
+        printf("%7.3f %25.16g %25.16g\n", x, f, fref);
+        if (fabs(f - fref) > 1e-15) {
+            is_ok = 0;
+        }
     }
-    return 0;
+    print_is_ok(is_ok);
+    return is_ok;
 }
 
 int test_lgamma()
 {
-    printf("test_lgamma\n");
+    int is_ok = 1;
+    printf("----- test_lgamma -----\n");
+    printf("%8s %25s %25s\n", "x", "f", "fref");
     for (int i = 0; i < 10; i++) {
-        printf("%25.16g %25.16g\n", sr_lgamma(i), lgamma(i));
+        double f = sr_lgamma(i), fref = lgamma(i);
+        printf("%8d %25.16g %25.16g\n", i, f, fref);
+        if ((fref < 1e100 || f < 1e100) && fabs(f - fref) > 1e-12) {
+            is_ok = 0;
+        }
     }
-    printf("\n");
-    return 0;
+    print_is_ok(is_ok);
+    return is_ok;
 }
 
 int test_stdnorm()
@@ -233,14 +280,22 @@ int test_stdnorm()
          1.0,   8.413447460685429e-01,
          5.0,   9.999997133484281e-01
     };
-
+    int is_ok = 1;
+    printf("----- test_stdnorm ------\n");
+    printf("%7s %25s %25s %8s %8s\n", "x", "pcalc", "pref", "sum-1", "relerr");
     for (int i = 0; i < 5; i++) {
         double x = ref[2*i], pref = ref[2*i + 1];
-        printf("%7.3f %25.16g %25.16g %8.2e\n",
-            x, sr_stdnorm_cdf(x), pref,
-            sr_stdnorm_cdf(x) + sr_stdnorm_pvalue(x) - 1.0);
+        double pcalc = sr_stdnorm_cdf(x);
+        double sum_m_1 = pcalc + sr_stdnorm_pvalue(x) - 1.0;
+        double relerr = fabs((pcalc - pref) / pref);
+        printf("%7.3f %25.16g %25.16g %8.2e %8.2e\n",
+            x, pcalc, pref, sum_m_1, relerr);
+        if (relerr > 1e-13 || sum_m_1 > 1e-15) {
+            is_ok = 0;
+        }
     }
-    return 0;
+    print_is_ok(is_ok);
+    return is_ok;
 }
 
 int test_tdistr_cdf()
@@ -275,6 +330,9 @@ int test_tdistr_cdf()
          1e10, 100.0};
     double dfmax = -1, dfmean = 0.0;
     size_t indmax = 0, n = 0;
+    printf("----- test_tdistr_cdf -----\n");
+    printf("%10s %8s %15s %15s %15s %10s\n",
+        "t", "df", "pcalc", "pref", "pcalc_ccdf", "delta");
     for (size_t i = 0; dat[3*i] != 1e10; i++) {
         double t = dat[3*i];
         unsigned long f = (unsigned long) dat[3*i + 1];
@@ -284,13 +342,15 @@ int test_tdistr_cdf()
             dfmax = delta; indmax = i;
         }
         dfmean += delta; n++;
-        printf("t=%8g; f=%6lu; pcalc=%10g; pref=%10g; pcalc_ccdf=%10g; delta=%g\n",
+        printf("%10g %8lu %15g %15g %15g %10.3g\n",
             t, f, sr_t_cdf(t, f), p, sr_t_pvalue(t, f), delta);
     }
     dfmean /= (double) n;
     printf("test_tdistr_cdf; df(mean): %g; df(max): %g; ind(max): %d\n",
-        dfmean, dfmax, (int) indmax);    
-    return (dfmax < 1.0e-10);
+        dfmean, dfmax, (int) indmax);
+    int is_ok = (dfmax < 1.0e-10);
+    print_is_ok(is_ok);    
+    return is_ok;
 }
 
 
@@ -333,52 +393,92 @@ int test_norminv()
 
 int test_round()
 {
+    static const double data[][2] = {
+        {-3.0, -3.0}, {-3.3, -3.0}, {-3.8, -4.0}, {-0.6, -1.0}, {-0.5, -1.0},
+        {-0.4,  0.0}, { 0.0,  0.0}, { 0.1,  0.0}, { 0.4,  0.0}, { 0.5,  1.0},
+        { 0.6,  1.0}, { 5.1,  5.0}, { 5.5,  6.0}, { 5.9,  6.0},
+        {-10000.0, -10000.0}
+    };
+    int is_ok = 1;
+
     printf("----- test_round -----\n");
-    printf("%g %g\n", -3.0, sr_round(-3.0));
-    printf("%g %g\n", -3.3, sr_round(-3.3));
-    printf("%g %g\n", -3.8, sr_round(-3.8));
-    printf("%g %g\n", -0.6, sr_round(-0.6));
-    printf("%g %g\n", -0.5, sr_round(-0.5));
-    printf("%g %g\n", -0.4, sr_round(-0.4));
-    printf("%g %g\n", 0.0, sr_round(0.0));
-    printf("%g %g\n", 0.1, sr_round(0.1));
-    printf("%g %g\n", 0.4, sr_round(0.4));
-    printf("%g %g\n", 0.5, sr_round(0.5));
-    printf("%g %g\n", 0.6, sr_round(0.6));
-    printf("%g %g\n", 5.1, sr_round(5.1));
-    printf("%g %g\n", 5.5, sr_round(5.5));
-    printf("%g %g\n", 5.9, sr_round(5.9));
-    return 0;
+    printf("%8s %8s %8s\n", "x", "xrnd", "xrnd_ref");
+    for (int i = 0; data[i][0] > -10000.0; i++) {
+        double x = data[i][0], xrnd_ref = data[i][1];
+        double xrnd = sr_round(x);
+        if (xrnd != xrnd_ref) {
+            is_ok = 0;
+        }
+        printf("%8g %8g %8g\n", x, xrnd, xrnd_ref);
+    }
+    print_is_ok(is_ok);
+    return is_ok;
 }
 
 int test_linearcomp_cdf()
 {
-    printf("----- test_linearcomp_cdf -----\n");
-    printf("%g %g\n", 0.010417, sr_linearcomp_Tcdf(-2.5));
-    printf("%g %g\n", 0.03125, sr_linearcomp_Tcdf(-1.5) - sr_linearcomp_Tcdf(-2.5));
-    printf("%g %g\n", 0.125, sr_linearcomp_Tcdf(-0.5) - sr_linearcomp_Tcdf(-1.5));
-    printf("%g %g\n", 0.5, sr_linearcomp_Tcdf(0.5) - sr_linearcomp_Tcdf(-0.5));
-    printf("%g %g\n", 0.25, sr_linearcomp_Tcdf(1.5) - sr_linearcomp_Tcdf(0.5));
-    printf("%g %g\n", 0.0625, sr_linearcomp_Tcdf(2.5) - sr_linearcomp_Tcdf(1.5));
-    printf("%g %g\n", 0.020833, sr_linearcomp_Tccdf(2.5));
-    return 0;
+    static const double data[][3] = {
+        {0.010417, -2.5,    -10000.0},
+        {0.03125,  -1.5,    -2.5},
+        {0.125,    -0.5,    -1.5},
+        {0.5,       0.5,    -0.5},
+        {0.25,      1.5,     0.5},
+        {0.0625,    2.5,     1.5},
+        {0.020833,  10000.0, 2.5},
+        {0, 0, 0}
+    };
+    int is_ok = 1;
+    printf("----- test_linearcomp_cdf -----\n");   
+    printf("%10s %10s %8s\n", "Tref", "Tcalc", "dT");
+    for (int i = 0; data[i][0] != 0; i++) {
+        double Tref = data[i][0], xhigh = data[i][1], xlow = data[i][2];
+        double f_low = sr_linearcomp_Tcdf(xlow);
+        double f_high = sr_linearcomp_Tcdf(xhigh);
+        double Tcalc = f_high - f_low;
+        double dT = Tcalc - Tref;
+        if (dT > 1e-6) {
+            is_ok = 0;
+        }
+        printf("%10.7f %10.7f %8.2g\n", Tref, Tcalc, dT);
+    }   
+    print_is_ok(is_ok);
+    return is_ok;
 }
 
 
-int main()
+int main(int argc, char *argv[])
 {
-    test_chi2();
-    test_ks();
-    test_binopdf();
-    test_hamming_weights();
-    test_expm1();
-    test_lgamma();
-    test_stdnorm();
-    test_halfnormal();
-    test_tdistr_cdf();
-    test_binocdf();
-    test_norminv();
-    test_radixsort64();
-    test_linearcomp_cdf();
-    return 0;
+    if (argc < 2) {
+        printf("Usage: test_funcs test_group\n");
+        printf("  test_group: sort, specfuncs, distr\n");
+        return 0;
+    }
+    int is_ok = 1;
+    if (!strcmp(argv[1], "sort")) {
+        is_ok = is_ok & test_radixsort64();
+    } else if (!strcmp(argv[1], "specfuncs")) {
+        is_ok = is_ok & test_expm1();
+        is_ok = is_ok & test_lgamma();
+        is_ok = is_ok & test_hamming_weights();
+        is_ok = is_ok & test_round();
+    } else if (!strcmp(argv[1], "distr")) {
+        is_ok = is_ok & test_chi2();
+        is_ok = is_ok & test_ks();
+        is_ok = is_ok & test_binopdf();
+        is_ok = is_ok & test_stdnorm();
+        is_ok = is_ok & test_halfnormal();
+        is_ok = is_ok & test_tdistr_cdf();
+        is_ok = is_ok & test_binocdf();
+        is_ok = is_ok & test_norminv();
+        is_ok = is_ok & test_linearcomp_cdf();
+    } else {
+        fprintf(stderr, "Unknown test group '%s'\n", argv[1]);
+        is_ok = 0;
+    }
+    if (is_ok) {
+        printf("===== PASSED =====\n");
+    } else {
+        printf("===== FAILED =====\n");
+    }
+    return (is_ok) ? 1 : 0;
 }
