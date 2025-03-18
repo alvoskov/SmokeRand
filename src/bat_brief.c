@@ -67,6 +67,8 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
         linearcomp_mid  = {.nbits = 50000, .bitpos = LINEARCOMP_BITPOS_MID},
         linearcomp_high = {.nbits = 50000, .bitpos = LINEARCOMP_BITPOS_HIGH};
 
+    // mod3 test
+    static const Mod3Options mod3 = {.nvalues = 1ull << 26};
 
     static const TestDescription tests[] = {
         {"monobit_freq",      monobit_freq_test_wrap, &monobit},
@@ -91,6 +93,7 @@ void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
         {"linearcomp_high",   linearcomp_test_wrap, &linearcomp_high},
         {"linearcomp_mid",    linearcomp_test_wrap, &linearcomp_mid},
         {"linearcomp_low",    linearcomp_test_wrap, &linearcomp_low},
+        {"mod3",              mod3_test_wrap,       &mod3},
         {NULL, NULL, NULL}
     };
 

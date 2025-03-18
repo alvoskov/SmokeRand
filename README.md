@@ -284,7 +284,7 @@ Four batteries are implemented in SmokeRand:
  Battery | Number of tests | Bytes (32-bit PRNG) | Bytes (64-bit PRNG)
 ---------|-----------------|---------------------|---------------------
  express | 7               | 2^26                | 2^27
- brief   | 22              | 2^35                | 2^36
+ brief   | 23              | 2^35                | 2^36
  default | 40              | 2^37                | 2^38
  full    | 44              | 2^40                | 2^41
 
@@ -589,13 +589,13 @@ There are only two problematic situations:
 
  Algorithm         | Output | express | brief | default | full | cpb  | bday64 | Grade | TestU01 | PractRand 
 -------------------|--------|---------|-------|---------|------|------|--------|-------|---------|-----------
- aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      | 4     |         | >= 32 TiB
+ aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      | 5     |         | >= 32 TiB
  alfib             | u64    | 2       | 5     | 6       | 8    | 0.23 | +      | 0     | Small   | 128 MiB
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    | 3.75  | +       | 4 GiB
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 4     | +       | 1 TiB
- ara32             | u32    | +       | +     | 1       | 1    | 0.96 | +      | 2     | +       | 512 MiB
- chacha            | u32    | +       | +     | +       | +    | 2.0  | +      | 4     | +       | >= 1 TiB
- chacha_avx        | u32    | +       | +     | +       | +    | 0.7  | +      | 4     | +       | >= 2 TiB
+ ara32             | u32    | +       | 1     | 1       | 1    | 0.96 | +      | 2     | +       | 512 MiB
+ chacha            | u32    | +       | +     | +       | +    | 2.0  | +      | 5     | +       | >= 1 TiB
+ chacha_avx        | u32    | +       | +     | +       | +    | 0.7  | +      | 5     | +       | >= 2 TiB
  chacha_ctr32      | u32    | +       | +     | +       | 1    | 2.0  | N/A    | 0     | +       | 256 GiB
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | +      | 4     | +       | >= 32 TiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
@@ -603,9 +603,9 @@ There are only two problematic situations:
  des-ctr           | u64    | +       | +     | +       |      | 24   |        |       |         | >= 4 TiB
  drand48           | u32    | 3       | 12    | 20      | 22/23| 0.72 | -      | 0     | -       | 1 MiB
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 2 TiB
- isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 4     | +       | >= 32 TiB
- flea32x1          | u32    | +       | +     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
- hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 32 TiB
+ isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 5     | +       | >= 32 TiB
+ flea32x1          | u32    | +       | 1     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
+ hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 5     | +       | >= 32 TiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 16 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
@@ -706,8 +706,8 @@ There are only two problematic situations:
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | N/A    | 4(0)  |         | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  |         | >= 4 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
- speck128          | u64    | +       | +     | +       | +    | 3.1  | +      | 4     |         | >= 2 TiB
- speck128_avx      | u64    | +       | +     | +       | +    | 0.65 | +      | 4     |         | >= 16 TiB
+ speck128          | u64    | +       | +     | +       | +    | 3.1  | +      | 5     |         | >= 2 TiB
+ speck128_avx      | u64    | +       | +     | +       | +    | 0.65 | +      | 5     |         | >= 16 TiB
  speck128_r16_avx  | u64    | +       | +     | +       | +    | 0.33 | +      | 4     |         | >= 32 TiB
  splitmix          | u64    | +       | +     | +       | +    | 0.19 | -      | 3     | +       | >= 2 TiB
  splitmix32        | u32    | +       | 2     | 3       | 4/5  | 0.25 | -(>>10)| 0     | Small   | 1 GiB
