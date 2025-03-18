@@ -30,12 +30,19 @@
 --    provides the `express` battery for 16-bit computers.
 -- 3. 32-bit DOS version is compiled for DOS extenders such as DOS/32, PMODEW
 --    or CauseWay. It DOES SUPPORT loading of Win32 DLLs without exports:
---    it is made by a custom `pe32loader.c`.
+--    it is made by a custom `pe32loader.c`. It also supports DOS LFN API
+--    by means of the `lib386/dos/doslfn3s.lib` Open Watcom C static library.
+--    It may be autolinked by means of definiton of the `__WATCOM_LFN__`.
+--    macro. But an explicit linking is more reliable and clear.
 --
 -- An alternative way to build it under DOS is to use Windows NT build and
 -- software like HX DOS Extender, WDOSX or DOSWIN32 together with DOSLFN to
 -- obtain 32-bit implementation for DOS. But it may require proprietary DLLs
 -- such as MSVCRT.DLL.
+--
+-- Compilation and linking of SmokeRand for 32-bit DOS with DLL support is
+-- definetly possible even without HX DOS Extender but may be a little bit
+-- tricky and require makefiles customization. Enjoy!
 --
 -- (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University
 -- alvoskov@gmail.com
@@ -72,27 +79,29 @@ objdir_dos32 = dos32
 bindir = bin
 libdir = lib
 dll_runtime = $(%WATCOM)/lib386/dos/clib3s.lib
+dos32_runtime = $(%WATCOM)/lib386/dos/doslfn3s.lib
 includedir = include/smokerand
 gen_bindir = $(bindir)\\generators
 gen_srcdir = generators
 ]])
-
--- Make "all" section
-io.write("all: $(bindir)/smokerand.exe $(bindir)/sr_dos32.exe $(bindir)/test_funcs.exe $(bindir)/srtiny16.exe")
-for _, g in pairs(gen_sources) do
-    local dllfile = " $(gen_bindir)/" .. g .. ".dll"
-    io.write(dllfile)
-end
-io.write("\n")
-
 
 -- Prepare list of library core headers
 local lib_headers_str = "include/smokerand_core.h "
 for _, v in pairs(lib_headers) do
     lib_headers_str = lib_headers_str .. " $(includedir)/" .. v
 end
+io.write("lib_headers = " .. lib_headers_str .. "\n")
 
-
+-- Make "all" section
+io.write("all: $(bindir)/smokerand.exe $(bindir)/sr_dos32.exe $(bindir)/test_funcs.exe $(bindir)/srtiny16.exe &\n")
+for i = 1, #gen_sources do
+    local dllfile = "$(gen_bindir)/" .. gen_sources[i] .. ".dll "
+    io.write(dllfile)
+    if i % 3 == 0 and i ~= #gen_sources then
+        io.write(" &\n    ")
+    end
+end
+io.write("\n")
 
 -- Make the program executable
 -- a) Line with dependencies
@@ -117,27 +126,22 @@ io.write("\twcl386 -4s -fe=$(bindir)/smokerand.exe " .. objstr .. "\n")
 io.write("$(bindir)/test_funcs.exe: $(objdir)/test_funcs.obj \n")
 io.write("\twcl386 -4s -fe=$(bindir)/test_funcs.exe $(objdir)/core.obj $(objdir)/specfuncs.obj $(objdir)/test_funcs.obj $(objdir)/entropy.obj $(objdir)/threads_intf.obj\n")
 
-io.write("$(objdir)/test_funcs.obj: $(appsrcdir)/test_funcs.c " .. lib_headers_str .. "\n")
+io.write("$(objdir)/test_funcs.obj: $(appsrcdir)/test_funcs.c $(lib_headers)\n")
 io.write("\twcc386 $(cflags) -fo=$(objdir)/test_funcs.obj $(appsrcdir)/test_funcs.c\n")
 
 io.write("$(bindir)/sr_dos32.exe:" .. objstr_dos32 .. "\n")
 io.write("\twcl386 -4s -fe=$(bindir)/sr_dos32.exe -bcl=" .. dosextender ..
-    " " .. objstr_dos32 .. "\n")
-
+    " $(dos32_runtime) " .. objstr_dos32 .. "\n")
 
 ---------- Object file with the main() function ----------
-io.write("$(objdir)/smokerand.obj: $(appsrcdir)/smokerand.c " .. lib_headers_str .. "\n")
+io.write("$(objdir)/smokerand.obj: $(appsrcdir)/smokerand.c $(lib_headers)\n")
 io.write("\twcc386 $(cflags) -fo=$(objdir)/smokerand.obj $(appsrcdir)/smokerand.c\n")
 
-io.write("$(objdir_dos32)/smokerand.obj: $(appsrcdir)/smokerand.c " .. lib_headers_str .. "\n")
+io.write("$(objdir_dos32)/smokerand.obj: $(appsrcdir)/smokerand.c $(lib_headers)\n")
 io.write("\twcc386 $(cflags_dos32) -fo=$(objdir_dos32)/smokerand.obj $(appsrcdir)/smokerand.c\n")
 
-io.write("$(objdir_dos32)/pe32loader.obj: $(srcdir)/pe32loader.c " .. lib_headers_str .. "\n")
+io.write("$(objdir_dos32)/pe32loader.obj: $(srcdir)/pe32loader.c $(lib_headers)\n")
 io.write("\twcc386 $(cflags_dos32) -fo=$(objdir_dos32)/pe32loader.obj $(srcdir)/pe32loader.c\n")
-
-io.write("$(objdir_dos32)/test_funcs.obj: $(srcdir)/test_funcs.c " .. lib_headers_str .. "\n")
-io.write("\twcc386 $(cflags_dos32) -fo=$(objdir_dos32)/test_funcs.obj $(srcdir)/test_funcs.c\n")
-
 
 ---------- Compile the 16-bit version ----------
 io.write("$(bindir)/srtiny16.exe: $(objdir_dos32)/srtiny16.obj $(objdir_dos32)/spfunc16.obj\n")
@@ -152,7 +156,7 @@ io.write("\twcc -s -q -mc -otexanhi $(srcdir)/specfuncs.c -fo=$(objdir_dos32)/sp
 -- Compile the library core sources
 for _, v in pairs(lib_sources) do
     local cfile, objfile = "$(srcdir)/" .. v, "$(objdir)/" .. v:gsub("%.c", ".obj")
-    io.write(objfile .. ": " .. cfile .. " " .. lib_headers_str .. "\n")
+    io.write(objfile .. ": " .. cfile .. " $(lib_headers)\n")
     io.write("\twcc386 $(cflags) -fo=" .. objfile .. " " .. cfile .. "\n")
 end
 
@@ -161,14 +165,14 @@ for _, v in pairs(bat_sources) do
     local cfile   = "$(srcdir)/" .. v
     local objfile = "$(objdir)/" .. v:gsub("%.c", ".obj")
     local hfile   = "$(includedir)/" .. v:gsub("%.c", ".h")
-    io.write(objfile .. ": " .. cfile .. " " .. hfile .. " " .. lib_headers_str .. "\n")
+    io.write(objfile .. ": " .. cfile .. " " .. hfile .. " $(lib_headers)\n")
     io.write("\twcc386 $(cflags) -fo=" .. objfile .. " " .. cfile .. "\n")
 end
 
 ---------- Object files for DOS32 ----------
 for _, v in pairs(lib_sources) do
     local cfile, objfile = "$(srcdir)/" .. v, "$(objdir_dos32)/" .. v:gsub("%.c", ".obj")
-    io.write(objfile .. ": " .. cfile .. " " .. lib_headers_str .. "\n")
+    io.write(objfile .. ": " .. cfile .. " $(lib_headers)\n")
     io.write("\twcc386 $(cflags_dos32) -fo=" .. objfile .. " " .. cfile .. "\n")
 end
 
@@ -177,7 +181,7 @@ for _, v in pairs(bat_sources) do
     local cfile   = "$(srcdir)/" .. v
     local objfile = "$(objdir_dos32)/" .. v:gsub("%.c", ".obj")
     local hfile   = "$(includedir)/" .. v:gsub("%.c", ".h")
-    io.write(objfile .. ": " .. cfile .. " " .. hfile .. " " .. lib_headers_str .. "\n")
+    io.write(objfile .. ": " .. cfile .. " " .. hfile .. " $(lib_headers) \n")
     io.write("\twcc386 $(cflags_dos32) -fo=" .. objfile .. " " .. cfile .. "\n")
 end
 
@@ -191,7 +195,7 @@ for _, g in pairs(gen_sources) do
     local objfile = "$(gen_bindir)/obj/" .. g .. ".obj"
     local dllfile = "$(gen_bindir)/" .. g .. ".dll"
     --dllstr = dllstr .. dllfile
-    io.write(objfile .. ": " .. cfile .. " " .. lib_headers_str .. "\n")
+    io.write(objfile .. ": " .. cfile .. " $(lib_headers)\n")
     io.write("\twcc386 $(cflags) " .. cfile .. " -Iinclude -fo=" .. objfile .. "\n")
     io.write(dllfile .. ": " .. objfile .. "\n")
     io.write("\twcl386 " .. objfile .. " $(dll_runtime) -fe=" .. dllfile ..
@@ -201,6 +205,9 @@ end
 -- Make "clean" section
 io.write("clean: .SYMBOLIC\n")
 io.write("\tdel $(bindir)\\smokerand.exe\n")
+io.write("\tdel $(bindir)\\sr_dos32.exe\n")
+io.write("\tdel $(bindir)\\srtiny16.exe\n")
+io.write("\tdel $(bindir)\\test_funcs.exe\n")
 io.write("\tdel $(objdir)\\*.obj\n")
 io.write("\tdel $(gen_bindir)\\obj\\*.obj\n")
 io.write("\tdel $(gen_bindir)\\*.dll\n")
