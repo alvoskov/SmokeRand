@@ -37,3 +37,7 @@ hamming_ot_u128    test=hamming_ot_long wordsize=w128   nvalues=268435456 # 2^28
 linearcomp_high test=linearcomp nbits=50000 bitpos=high
 linearcomp_mid  test=linearcomp nbits=50000 bitpos=mid
 linearcomp_low  test=linearcomp nbits=50000 bitpos=low
+
+# Mod3 test
+mod3 test=mod3 nvalues=67108864 # 2^26
+ 
