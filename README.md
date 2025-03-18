@@ -25,7 +25,8 @@ PRNG that pass BigCrush or PractRand:
   128-bit LCG with truncated lower 96 bits (they pass BigCrush and PractRand).
 - SWBW: detected by PractRand but not by BigCrush.
 - Uniformly distributed 64-bit generators with 64-bit state such as
-  SplitMix, PCG64/64, rrmxmx: detected by an extra "birthday paradox" battery.
+  SplitMix, PCG64/64, rrmxmx, DES-CTR, MAGMA-CTR: detected by an extra
+  "birthday paradox" battery.
 - Additive and subtractive lagged Fibonacci generators with large lags, e.g.
   LFib(19937,9842+): the `gap16` (`rda16`) test is taken from gjrand.
 - RC4 obsolete CSPRNG: detected by PractRand but not by BigCrush. In SmokeRand
@@ -71,14 +72,15 @@ Recommended configuration:
 - Multithreading support: pthreads (POSIX threads) library of WinAPI threads.
 - CMake or Ninja + Lua 5.x for compilation by means of MSVC. Or Lua 5.x for
   compilation by means of Open Watcom C.
-- 64-bit CPU; in the case of x86-64 -- support of RDTSC, RDRAND and AVX2
-  instructions.
+- 64-bit CPU; in the case of x86-64 -- support of RDTSC and RDSEED instructions
+  and AVX2 instructions set.
 - 16 GiB of RAM, especially for multithreaded mode and/or `birthday` battery.
 
 The next compilers are supported: GCC (including MinGW), Clang (as zig cc), MSVC
 (Microsoft Visual C) and Open Watcom C. It allows to compile SmokeRand under
 Windows, UNIX-like systems and DOS. Slightly modified 16-bit version
-(`apps/sr_tiny.c`) can be compiled even by Borland Turbo C 2.0.
+(`apps/sr_tiny.c`) can be compiled even by Borland Turbo C 2.0 or any other
+ANSI C (C89) compiler.
 
 ## Compilation
 
@@ -208,9 +210,11 @@ be divided into several groups:
 
  Algorithm         | Description
 -------------------|-------------------------------------------------------------------------
+ aesni             | Hardware AES for x86-64 with 128-bit key support
  alfib             | \f$ LFib(+,2^{64},607,203) \f$
  alfib_mod         | \f$ LFib(+,2^{64},607,203) \f$ XORed by "Weyl sequence"
  chacha            | ChaCha12 CSPRNG: Cross-platform implementation
+ des               | DES block cipher with 64-bit block size
  coveyou64         | COVEYOU
  isaac64           | ISAAC64 64-bit CSPRNG
  kiss93            | KISS93 combined generator by G.Marsaglia
@@ -223,6 +227,7 @@ be divided into several groups:
  lcg128            | \f$ LCG(2^{128},18000690696906969069,1) \f$, returns upper 32/64 bits
  lcg69069          | \f$ LCG(2^{32},69069,1)\f$, returns whole 32 bits
  lfsr113,lfsr258   | A combination of several LFSRs
+ magma             | Magma (GOST R 34.12-2015) block cipher with 64-bit block size.
  minstd            | \f$ LCG(2^{31} - 1, 16807, 0)\f$ "minimial standard" obsolete generator.
  mlfib17_5         | \f$ LFib(x,2^{64},17,5) \f$
  mrg32k3a          | MRG32k3a
