@@ -1073,7 +1073,8 @@ TestResults mod3_test(GeneratorState *obj, const Mod3Options *opts)
     }
     uint32_t tuple = 0;
     obj->intf->printf("mod3 test\n");
-    obj->intf->printf("  Sample size: %llu values\n", opts->nvalues);
+    obj->intf->printf("  Sample size: %llu (2^%.2f) values\n",
+        opts->nvalues, sr_log2((double) opts->nvalues));
     for (int i = 0; i < 9; i++) {
         int d = obj->gi->get_bits(obj->state) % 3;
         tuple = (tuple * 3 + d) % ntuples;

@@ -89,12 +89,7 @@ add_executable(test_cpp11 apps/test_cpp11.cpp)
 target_include_directories(test_cpp11 PRIVATE include)
 target_link_libraries(test_cpp11 smokerand_bat smokerand_core ${COMMON_LIBS})
 
-# f) Embedded batteries
-add_executable(testgens apps/testgens.c)
-target_include_directories(testgens PRIVATE include)
-target_link_libraries(testgens smokerand_bat smokerand_core ${COMMON_LIBS})
-
-# g) crand uses standard library, so we can't link it as a freestanding
+# f) crand uses standard library, so we can't link it as a freestanding
 # dynamic linked (shared) library.
 add_executable(test_crand apps/test_crand.c)
 target_include_directories(test_crand PRIVATE include)

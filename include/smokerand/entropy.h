@@ -1,10 +1,38 @@
 /**
  * @file entropy.h
- * @brief Seeds generator that uses hardware random number generator (RDSEED)
- * when possible. These values are balanced by means of XXTEA block cipher.
- * If no hardware RNG is accessible then the PRNG output is encrypted.
+ * @brief Seeds generator based on XXTEA block cipher and TRNG from CPU.
+ * It uses hardware random number generator (RDSEED) when possible. These
+ * values are balanced by means of XXTEA block cipher. If no hardware RNG
+ * is accessible then the PRNG output is encrypted.
+ * @details It uses hardware random number generator (RDSEED) when possible.
+ * The algorithm is based on XXTEA block cipher (with 64-bit blocks) that
+ * processes an output from a simple 64-bit PRNG. If RDSEED instruction is
+ * available then its output is injected by XORing with:
  *
- * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * - 64-bit PRNG (before encryption with XXTEA).
+ * - 128-bit key for XXTEA.
+ *
+ * This seeds generator is resistant to the RDSEED failure. It uses
+ * the next backup entropy sources:
+ *
+ * - RDTSC instruction (built-in CPU clocks)
+ * - `time` function (from C99 standard).
+ * - Current process ID.
+ * - Tick count from the system clock.
+ * - Machine ID (an attempt to make unique seeds even RDSEED and RDTSC
+ *   are broken or unaccessible).
+ *
+ * DON'T USE IT FOR CRYPTOGRAPHY AND SECURITY PURPOSES! IT IS DESIGNED JUST
+ * TO MAKE GOOD RANDOM SEEDS FOR PRNG EMPIRICAL TESTING!
+ *
+ * Examples of RDRAND failure on some CPUs:
+ *
+ * - https://github.com/systemd/systemd/issues/11810#issuecomment-489727505
+ * - https://github.com/rust-random/getrandom/issues/228
+ * - https://news.ycombinator.com/item?id=19848953
+ *
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.

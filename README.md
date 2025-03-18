@@ -55,7 +55,12 @@ Minimal requirements:
   of 64-bit integers and `inline` keyword.
 - GNU make.
 - 32-bit CPU.
-- 2 GiB of RAM.
+- 1 GiB of RAM.
+
+NOTE: 32-bit DOS version was tested in VirtualBox virtual machine with 512 MiB
+of RAM, customization of "CollisionOver" tests allows to run SmokeRand even
+at 64 MiB of RAM. The version of `express` battery for 16-bit computers
+(`apps/sr_tiny.c`) can run even at 8086 with 640 KiB of RAM, tested in DosBOX.
 
 Recommended configuration:
 
@@ -64,15 +69,16 @@ Recommended configuration:
   They are required by some PRNGs such as 128-bit LCGs. In the case of x86-64
   intrinsics for RDTSC, RDRAND and AVX2 are highly recommended.
 - Multithreading support: pthreads (POSIX threads) library of WinAPI threads.
-- CMake for compilation under MSVC.
+- CMake or Ninja + Lua 5.x for compilation by means of MSVC. Or Lua 5.x for
+  compilation by means of Open Watcom C.
 - 64-bit CPU; in the case of x86-64 -- support of RDTSC, RDRAND and AVX2
   instructions.
 - 16 GiB of RAM, especially for multithreaded mode and/or `birthday` battery.
 
 The next compilers are supported: GCC (including MinGW), Clang (as zig cc), MSVC
 (Microsoft Visual C) and Open Watcom C. It allows to compile SmokeRand under
-Windows, UNIX-like systems and DOS. 
-
+Windows, UNIX-like systems and DOS. Slightly modified 16-bit version
+(`apps/sr_tiny.c`) can be compiled even by Borland Turbo C 2.0.
 
 ## Compilation
 
@@ -102,7 +108,7 @@ version (see `apps/sr_tiny.c`) doesn't support dynamic libraries at all,
 tested generators should be embedded into its source code.
 
 Notes about running tests in an environment with limited amount of RAM,
-e.g. under 32-bit DOS extender:
+e.g. under 32-bit DOS extenders:
 
 - `gap16_count0` may consume several MiB for gaps and frequencies tables.
   Probably RAM consumption may be significantly reduces but it may slow down
@@ -210,14 +216,13 @@ be divided into several groups:
  kiss93            | KISS93 combined generator by G.Marsaglia
  kiss99            | KISS99 combined generator by G.Marsaglia
  kiss64            | 64-bit version of KISS
- lcg32prime        |
+ lcg32prime        | \f$ LCG(2^{32}-5, 1588635695, 123 \f$
  lcg64             | \f$ LCG(2^{64},6906969069,1) \f$ that returns upper 32 bits
  lcg64prime        | \f$ LCG(2^{64}-59,a,0)\f$ that returns all 64 bits
  lcg96             | \f$ LCG(2^{96},a,1) \f$ that returns upper 32 bits
  lcg128            | \f$ LCG(2^{128},18000690696906969069,1) \f$, returns upper 32/64 bits
  lcg69069          | \f$ LCG(2^{32},69069,1)\f$, returns whole 32 bits
- lfsr113           |
- lfsr258           |
+ lfsr113,lfsr258   | A combination of several LFSRs
  minstd            | \f$ LCG(2^{31} - 1, 16807, 0)\f$ "minimial standard" obsolete generator.
  mlfib17_5         | \f$ LFib(x,2^{64},17,5) \f$
  mrg32k3a          | MRG32k3a
@@ -241,11 +246,11 @@ be divided into several groups:
  speck128          | Speck128/128 CSPRNG.
  speck128_avx      | Modification of `speck128` for AVX2.
  splitmix32        | 32-bit modification of SplitMix
- sqxor             |
- sqxor32           |
- superduper73      |
- superduper64      |
- superduper64_u32  |
+ sqxor             | Scrambled 64-bit "discrete Weyl sequence" (by A.L.Voskov) 
+ sqxor32           | Scrambled 32-bit "discrete Weyl sequence" (by A.L.Voskov)
+ superduper73      | A combination of 32-bit LCG and LFSR by G.Marsaglia.
+ superduper64      | A combination of 64-bit LCG and 64-bit LFSR by G.Marsaglia.
+ superduper64_u32  | `superduper64` with truncation of lower 32 bits.
  shr3              | xorshift32 generator by G.Marsaglia
  swb               | 32-bit SWB (Subtract with borrow) generator by G.Marsaglia
  swblux            | Modification of SWB with 'luxury levels' similar to RANLUX
@@ -334,7 +339,7 @@ and p-value is calculated as:
 
 \f[
 p = 1 - F(|X|) = 2\left(1 - \Phi\left(\frac{|X|}{\sqrt{n}}\right) \right) = 
-\erfc \left(\frac{|X|}{\sqrt{2n}}\right)
+\mathop{\textrm{erfc}} \left(\frac{|X|}{\sqrt{2n}}\right)
 \f]
 
 Most PRNGs pass it, but it may detect bias in hardware generated bits or some
@@ -371,7 +376,6 @@ from these runs are summed. This sum obeys Poisson distribution.
  bspace21_3d | 21    | 3    | -         | 5       | 10        | 250
  bspace16_4d | 16    | 4    | -         | 5       | 10        | 250
  bspace8_8d  | 8     | 8    | -         | 5       | 10        | 250
--------------|-------|------|-----------|---------|-----------|--------
  bspace8_4d  | 8     | 4    | 256       | -       | -         | -
  bspace4_8d  | 4     | 8    | 128       | -       | -         | -
 
@@ -634,16 +638,16 @@ There are only two problematic situations:
  lfib_par[2281-]   | u32    | 0/1     | 3     | 3       | 4    | 0.38 | +      | 0     | +       | 8 TiB
  lfib_par[3217+]   | u32    | +       | 1     | 1       | 1/2  | 0.39 | +      | 2     | +       | 16 TiB
  lfib_par[3217-]   | u32    | +       | 1     | 1       | 2/4  | 0.39 | +      | 2     | +       | 16 TiB
- lfib_par[4423+]   | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       |
- lfib_par[4423-]   | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       |
- lfib_par[9689+]   | u32    | +       | 1     | 1       | 1    | 0.47 | +      | 2     | +       |
- lfib_par[9689-]   | u32    | +       | 1     | 1       | 1    | 0.47 | +      | 2     | +       |
- lfib_par[19937+]  | u32    | +       | +     | 1       | 1    | 0.46 | +      | 2     | +       |
- lfib_par[19937-]  | u32    | +       | +     | 1       | 1    | 0.48 | +      | 2     | +       |
- lfib_par[44497+]  | u32    | +       | +     | 1       | 1    | 0.49 | +      | 2     | +       |
- lfib_par[44497-]  | u32    | +       | +     | 1       | 1    | 0.49 | +      | 2     | +       |
- lfib_par[110503+] | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       |
- lfib_par[110503-] | u32    | +       | +     | +       | +    | 0.50 | +      | 4     | +       |
+ lfib_par[4423+]   | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | ?
+ lfib_par[4423-]   | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | ?
+ lfib_par[9689+]   | u32    | +       | 1     | 1       | 1    | 0.47 | +      | 2     | +       | ?
+ lfib_par[9689-]   | u32    | +       | 1     | 1       | 1    | 0.47 | +      | 2     | +       | ?
+ lfib_par[19937+]  | u32    | +       | +     | 1       | 1    | 0.46 | +      | 2     | +       | ?
+ lfib_par[19937-]  | u32    | +       | +     | 1       | 1    | 0.48 | +      | 2     | +       | ?
+ lfib_par[44497+]  | u32    | +       | +     | 1       | 1    | 0.49 | +      | 2     | +       | ?
+ lfib_par[44497-]  | u32    | +       | +     | 1       | 1    | 0.49 | +      | 2     | +       | ?
+ lfib_par[110503+] | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | ?
+ lfib_par[110503-] | u32    | +       | +     | +       | +    | 0.50 | +      | 4     | +       | ?
  lfib4             | u32    | 1       | 1     | 3       | 4    | 0.37 | +      | 3     | +       | 32 MiB
  lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | +      | 4     |         | >= 32 TiB
  lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | +      | 2.25  | Small   | 32 KiB 
@@ -651,7 +655,7 @@ There are only two problematic situations:
  lrnd64            | u64    | 2       | 3     | 5       | 7    | 0.44 | +      | 2.25  |         | 4 MiB
  lxm_64x128        | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 32 TiB
  macmarsa          | u32    | 2       | 12    | 18      | 19   | 0.67 | -(>>10)| 0     |         | 128 KiB
- magma             | u64    | +       | +     | +       | +    | 25   |        |       |         |
+ magma             | u64    | +       | +     | +       | +    | 25   |        |       |         | ?
  magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      | 3     |         | >= 2 TiB
  magma_avx-cbc     | u64    | +       | +     | +       | +    | 7.1  | +      | 4     |         | >= 2 TiB
  minstd            | u32    | 6       | 20    | 38      | 42   | 2.4  | -(>>10)| 0     | -       | 1 KiB
@@ -811,6 +815,21 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 - Passed dieharder: lcg64, lfib(55,24,+,up32), lfib(607,203,+,up32), swb, xorwow
 
 # Versions history
+
+18.03.2025: SmokeRand 0.30
+
+- `testgens` removed because 32-bit DOS versions of SmokeRand supports DLLs now.
+  And for other platforms without shared library support the examples from
+  `apps/test_crand.c` and `apps/test_cpp11.cpp` are much more useful.
+- `apps/test_crand.c`: an example of PRNG testing using static linking with
+  SmokeRand core.
+- `brief` battery extended with the `mod3` test. It is fast but catches some
+  nonlinear generators such as `ara32` and `flea32x1`.
+- `radixsort64`: switches now to `quicksort64` if there is not enough memory
+  for the internal buffers.
+- 64-bit birthday paradox uses the custom `quicksort64` instead of `qsort`:
+  a slight improvement in performance was achieved.
+- Entropy module ror64 bugfix.
 
 16.03.2025: SmokeRand 0.29
 

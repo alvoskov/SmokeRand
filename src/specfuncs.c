@@ -151,7 +151,7 @@ static double gammainc_upper_contfrac(double a, double x)
     double f = p1/q1, f_old = p0/q0;
     double c = p1/p0, d = q0 / q1;
     long i;
-    for (i = 2; i < 1000000 && fabs(f - f_old) > DBL_EPSILON; i++) {
+    for (i = 2; i < 2000000 && fabs(f - f_old) > DBL_EPSILON; i++) {
         double bk = x + 2*i + 1 - a;
         double ak = i * (a - i);
         f_old = f;
@@ -212,7 +212,7 @@ double sr_betaln(double a, double b)
  */
 static long double betainc_frac(double x, double a, double b)
 {
-    long double f = 1 / (a - a*(a+b)/(a+1) * x); /* f=P1/Q1 */
+    long double f = 1 / (a - a*((long double) a+b)/(a+1.0L) * x); /* f=P1/Q1 */
     long double c = LDBL_MAX, d = f; /* c=P1/P0, d=Q0/Q1 */
     long double f_old, m;
     if (x != x) {
@@ -428,7 +428,7 @@ double sr_chi2_cdf(double x, unsigned long f)
         return sr_gammainc(0.5, x / 2.0); /* erf(sqrt(0.5 * x)); */
     } else if (f == 2) {
         return -sr_expm1(-0.5 * x);
-    } else if (f < 100000) {
+    } else if (f < 200000) {
         return sr_gammainc((double) f / 2.0, x / 2.0);
     } else {
         double z = sr_chi2_to_stdnorm_approx(x, f);

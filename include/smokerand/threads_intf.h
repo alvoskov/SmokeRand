@@ -104,7 +104,6 @@ typedef int ThreadRetVal;
 ///// Cross-platform part /////
 ///////////////////////////////
 
-//typedef THREADFUNC_SPEC ThreadRetVal (*ThreadFuncPtr)(void *);
 typedef ThreadRetVal (THREADFUNC_SPEC *ThreadFuncPtr)(void *);
 
 void init_thread_dispatcher(void);

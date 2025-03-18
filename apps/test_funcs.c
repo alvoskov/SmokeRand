@@ -138,6 +138,8 @@ int test_chi2()
         92000.0,    99999.0,    8.600953750430389e-76,
         100200.0,   99999.0,    0.673876059742346,
         92000.0,    100000.0,   8.248781517546660e-76,
+        300000.0,   300000.0,   0.500343354858959,
+        290000.0,   300000.0,   2.960662829110295e-39,
         0.0
     };
 
@@ -147,17 +149,26 @@ int test_chi2()
         0.0
     };
 
+    int is_ok = 1;
+    static const double RELERR_MAX = 1e-10;
+
+    printf("----- test_chi2 -----\n");
     printf("chi2cdf test\n");
-    printf("%10s %10s %16s %16s %16s\n",
-        "x", "f", "xref", "xcalc", "x+xc-1");
+    printf("%10s %10s %16s %16s %10s %16s\n",
+        "x", "f", "xref", "xcalc", "relerr", "x+xc-1");
     for (size_t i = 0; cdf_data[i] != 0; i += 3) {
         double x = cdf_data[i];
         unsigned long f = (unsigned long) cdf_data[i + 1];
         double x_ref = cdf_data[i + 2];
         double x_calc = sr_chi2_cdf(x, f);
         double xc_calc = sr_chi2_pvalue(x, f);
-        printf("%10g %10lu %16g %16g %16g\n",
-            x, f, x_ref, x_calc, x_calc + xc_calc - 1.0);
+        double relerr = fabs((x_calc - x_ref) / x_ref);
+        double sum_m_1 = x_calc + xc_calc - 1.0;
+        printf("%10g %10lu %16g %16g %10.2g %16g\n",
+            x, f, x_ref, x_calc, relerr, sum_m_1);
+        if ((relerr > RELERR_MAX || fabs(sum_m_1) > RELERR_MAX) && f < 50000) {
+            is_ok = 0;
+        }
     }
 
     printf("chi2ccdf test\n");
@@ -169,10 +180,16 @@ int test_chi2()
         double xc_ref = ccdf_data[i + 2];
         double x_calc = sr_chi2_cdf(x, f);
         double xc_calc = sr_chi2_pvalue(x, f);
+        double relerr = fabs((xc_calc - xc_ref) / xc_ref);
+        double sum_m_1 = x_calc + xc_calc - 1.0;
         printf("%10g %10lu %16g %16g %16g\n",
-            x, f, xc_ref, xc_calc, x_calc + xc_calc - 1.0);
+            x, f, xc_ref, xc_calc, sum_m_1);
+        if (relerr > RELERR_MAX || fabs(sum_m_1) > RELERR_MAX) {
+            is_ok = 0;
+        }
     }
-    return 0;
+    print_is_ok(is_ok);
+    return is_ok;
 }
 
 /**
@@ -222,15 +239,54 @@ int test_hamming_weights()
 
 int test_binopdf()
 {
+    static const double ref_256[] = {
+        1.0, 8.0, 28.0, 56.0, 70.0, 56.0, 28.0, 8.0, 1.0        
+    };
+    static const double ref_4_pow_9[] = {
+        19683.0, 59049.0, 78732.0, 61236.0, 30618.0, 10206.0, 2268.0, 324.0, 27.0
+    };
+    static const double MAX_RELERR = 1e-14;
+    int is_ok = 1;
+    printf("----- test_binopdf -----\n");
+    printf("Part 1. n = 8, p = 0.5\n");
+    printf("%3s %3s %10s %10s %10s\n", "k", "n", "calc", "ref", "relerr%");
     for (int i = 0; i < 8; i++) {
-        printf("%3d %3d %6g\n", i, 8, sr_binomial_pdf(i, 8, 0.5) * 256.0);
+        double coeff_calc = sr_binomial_pdf(i, 8, 0.5) * 256.0;
+        double coeff_ref = ref_256[i];
+        double relerr = fabs((coeff_calc - coeff_ref) / coeff_ref);
+        printf("%3d %3d %10g %10g %10.2g\n", i, 8, coeff_calc, coeff_ref, 100*relerr);
+        if (relerr > MAX_RELERR) {
+            is_ok = 0;
+        }
     }
     printf("\n");
+    printf("Part 2. n = 8, p = 0.5\n");
+    printf("%3s %3s %10s %10s %10s\n", "k", "n", "calc", "ref", "relerr%");
     for (int i = 0; i < 9; i++) {
-        printf("%3d %3d %6g\n", i, 8, sr_binomial_pdf(i, 9, 0.25) * pow(4.0, 9.0));
+        double coeff_calc = sr_binomial_pdf(i, 9, 0.25) * pow(4.0, 9.0);
+        double coeff_ref = ref_4_pow_9[i];
+        double relerr = fabs((coeff_calc - coeff_ref) / coeff_ref);
+        printf("%3d %3d %10g %10g %10.2g\n", i, 8, coeff_calc, coeff_ref, 100*relerr);
+        if (relerr > MAX_RELERR) {
+            is_ok = 0;
+        }
     }
-    printf("\n");
-    return 0;
+    printf("Part 3. Some arbitrary calls\n");
+    {
+        static const double p_ref_1 = 0.0, p_ref_2 = 0.013762612203149;
+        double p_calc_1 = sr_binomial_pdf(971, 1493, 0.036356);
+        double p_calc_2 = sr_binomial_pdf(128, 256, 0.45);
+        double abserr_1 = fabs(p_calc_1 - p_ref_1);
+        double abserr_2 = fabs(p_calc_2 - p_ref_2);
+        printf("%25s %25s %10s\n", "pcalc", "pref", "abserr");
+        printf("%25.16g %25.16g %10.2g\n", p_calc_1, p_ref_1, abserr_1);
+        printf("%25.16g %25.16g %10.2g\n", p_calc_2, p_ref_2, abserr_2);
+        if (abserr_1 > 1e-15 || abserr_2 > 1e-15) {
+            is_ok = 0;
+        }
+    }
+    print_is_ok(is_ok);
+    return is_ok;
 }
 
 int test_expm1()
@@ -254,18 +310,30 @@ int test_expm1()
     return is_ok;
 }
 
+static int test_lgamma_x(double x)
+{
+    double f = sr_lgamma(x), fref = lgamma(x);
+    double relerr = fabs((f - fref) / fref);
+    printf("%8.0f %25.16g %25.16g %10.3g\n", x, f, fref, relerr);
+    if ((fref < 1e100 || f < 1e100) && relerr > 1e-14) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
 int test_lgamma()
 {
     int is_ok = 1;
     printf("----- test_lgamma -----\n");
-    printf("%8s %25s %25s\n", "x", "f", "fref");
+    printf("%8s %25s %25s %10s\n", "x", "f", "fref", "relerr");
     for (int i = 0; i < 10; i++) {
-        double f = sr_lgamma(i), fref = lgamma(i);
-        printf("%8d %25.16g %25.16g\n", i, f, fref);
-        if ((fref < 1e100 || f < 1e100) && fabs(f - fref) > 1e-12) {
-            is_ok = 0;
-        }
+        is_ok = is_ok & test_lgamma_x(i);
     }
+    for (int i = 260; i < 280; i++) {
+        is_ok = is_ok & test_lgamma_x(i);
+    }
+    is_ok = is_ok & test_lgamma_x(100000.0);
     print_is_ok(is_ok);
     return is_ok;
 }
@@ -356,39 +424,83 @@ int test_tdistr_cdf()
 
 int test_halfnormal()
 {
-    double x = 2.8;
-    printf("%25.16g %25.16g\n", sr_halfnormal_pvalue(x), erfc(x / sqrt(2.0)));
-        
-    return 0;
+    int is_ok = 1;
+    printf("----- test_halfnormal -----\n");
+    printf("%10s %25s %25s %10s\n", "x", "pcalc", "pref", "relerr%");
+    for (double x = -3.0; x <= 3.0; x += 0.5) {
+        double pcalc = sr_halfnormal_pvalue(x);
+        double pref = erfc(x / sqrt(2.0));
+        double relerr = fabs((pcalc - pref) / pref);
+        printf("%10.5f %25.16g %25.16g %10.3g\n",
+            x, pcalc, pref, 100 * relerr);
+        if (relerr > 1e-14) {
+            is_ok = 0;
+        }
+    }
+    print_is_ok(is_ok);
+    return is_ok;
 }
 
 int test_binocdf()
 {
+    static const double data[][4] = {
+        {5.0,  10.0,     0.45, 0.738437299245508},
+        {128.0, 256.0,   0.5,  0.524909554967906},
+        {95.0, 100000.0, 1e-3, 0.331101644198284},
+        {0, 0, 0, 0}
+    };
+
     printf("----- test_binocdf -----\n");
-    printf("%g %g %g\n", sr_binomial_cdf(5,10,0.45), 0.738437299245508,
-        sr_binomial_cdf(5,10,0.45) + sr_binomial_pvalue(5,10,0.45));
-    printf("%g %g %g\n", sr_binomial_cdf(95,100000,1e-3), 0.331101644198284,
-        sr_binomial_cdf(95,100000,1e-3) + sr_binomial_pvalue(95,100000,1e-3));
-
-    printf("----- test_binopdf -----\n");
-    printf("%g %g\n", sr_binomial_pdf(971, 1493, 0.036356), 0.0);
-    printf("%g %g\n", sr_binomial_pdf(128, 256, 0.45), 0.013763);
-
+    printf("%6s %6s %25s %25s %10s %10s\n",
+        "k", "n", "fcalc", "fref", "relerr%", "f+fc-1");
+    for (int i = 0; data[i][0] != 0; i++) {
+        double k = data[i][0], n = data[i][1];
+        double p = data[i][2], f_ref = data[i][3];
+        double f_calc = sr_binomial_cdf(k, n, p);
+        double fc_calc = sr_binomial_pvalue(k, n, p);
+        double relerr = fabs((f_calc - f_ref) / f_ref);
+        double sum_m_1 = f_calc + fc_calc - 1.0;        
+        printf("%6.0f %6.0f %25.16g %25.16g %10.3g %10.3g\n",
+            k, n, f_calc, f_ref, 100*relerr, sum_m_1);
+    }
     return 0;
 }
 
 int test_norminv()
 {
+    int is_ok = 1;
+    static const double data[][2] = {
+        {1e-50,  -14.933337534788491},
+        {1e-10, -6.361340902404057},
+        {0.75,   0.674489750196082},
+        {1000.0, 0.0}
+    };    
+
+
     printf("----- test_norminv -----\n");
-    printf("%.15g %.15g\n", sr_stdnorm_inv(0.5 - 1e-8), sr_stdnorm_inv(0.5 + 1e-8));
-    printf("%.15g %.15g\n", sr_stdnorm_inv(0.5 - 1e-4), sr_stdnorm_inv(0.5 + 1e-4));
-    printf("%.15g %.15g\n", sr_stdnorm_inv(0.25), sr_stdnorm_inv(0.75));
-    printf("%.15g %.15g\n", sr_stdnorm_inv(1e-10), sr_stdnorm_inv(1 - 1e-10));
-
-    printf("%.15g\n", sr_stdnorm_inv(1e-50));
-
-    return 0;
-
+    printf("%10s %25s %25s %8s\n", "dx", "f(0.5-dx)", "f(0.5+dx)", "abserr");
+    for (double lg_dx = -10; lg_dx < -0.99; lg_dx += 1.0) {
+        double dx = pow(10.0, lg_dx);
+        double f_left = sr_stdnorm_inv(0.5 - dx);
+        double f_right = sr_stdnorm_inv(0.5 + dx);
+        double abserr = fabs(f_left + f_right);
+        printf("%10.4g %25.16g %25.16g %8.2g\n", dx, f_left, f_right, abserr);
+        if (abserr > 1e-15) {
+            is_ok = 0;
+        }
+    }
+    printf("\n%10s %25s %25s %8s\n", "p", "f_ref", "f_calc", "relerr%");
+    for (int i = 0; data[i][0] < 1.0; i++) {
+        double p = data[i][0], f_ref = data[i][1];
+        double f_calc = sr_stdnorm_inv(p);
+        double relerr = fabs((f_calc - f_ref) / f_ref);
+        printf("%10.4g %25.16g %25.16g %8.2g\n", p, f_ref, f_calc, relerr*100);
+        if (relerr > 1e-15) {
+            is_ok = 0;
+        }
+    }
+    print_is_ok(is_ok);
+    return is_ok;
 }
 
 int test_round()

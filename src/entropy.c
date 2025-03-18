@@ -1,6 +1,9 @@
 /**
  * @file entropy.c
  * @brief Seeds generator based on XXTEA block cipher and TRNG from CPU.
+ * It uses hardware random number generator (RDSEED) when possible. These
+ * values are balanced by means of XXTEA block cipher. If no hardware RNG
+ * is accessible then the PRNG output is encrypted.
  * @details It uses hardware random number generator (RDSEED) when possible.
  * The algorithm is based on XXTEA block cipher (with 64-bit blocks) that
  * processes an output from a simple 64-bit PRNG. If RDSEED instruction is
@@ -28,7 +31,8 @@
  * - https://github.com/rust-random/getrandom/issues/228
  * - https://news.ycombinator.com/item?id=19848953
  *
- * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -46,7 +50,7 @@
 
 static inline uint64_t ror64(uint64_t x, uint64_t r)
 {
-    return (x << r) | (x >> (64 - r));
+    return (x << (64 - r)) | (x >> r);
 }
 
 
@@ -354,4 +358,3 @@ void Entropy_print_seeds_log(const Entropy *obj, FILE *fp)
             (unsigned long long) obj->slog[i].seed);
     }
 }
-

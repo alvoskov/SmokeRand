@@ -86,7 +86,7 @@ BATLIB_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_express.h bat_brief.h bat_defau
 BATLIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(BATLIB_SOURCES)))
 # Executables
 EXEC_NAMES = smokerand sr_tiny calibrate_linearcomp calibrate_dc6 \
-    test_crand test_funcs test_rdseed testgens
+    test_crand test_funcs test_rdseed
 EXEC_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXEC_NAMES)))
 EXECXX_NAMES = test_cpp11
 EXECXX_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXECXX_NAMES)))
@@ -152,9 +152,6 @@ $(BINDIR)/test_funcs$(EXE): $(OBJDIR)/test_funcs.o $(CORE_LIB)
 
 $(BINDIR)/test_rdseed$(EXE): $(OBJDIR)/test_rdseed.o $(CORE_LIB)
 	$(CXX) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
-
-$(BINDIR)/testgens$(EXE): $(OBJDIR)/testgens.o $(CORE_LIB) $(BAT_LIB) $(BAT_HEADERS)
-	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
 
 $(LIB_OBJFILES) $(BATLIB_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.c $(LIB_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@

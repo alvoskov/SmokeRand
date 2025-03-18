@@ -4,7 +4,8 @@
  * different statistical criteria.
  * @details This file is designed for C89 (ANSI C)! Don't use features
  * from C99 and later!
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.

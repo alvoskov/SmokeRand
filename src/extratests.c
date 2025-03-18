@@ -62,16 +62,6 @@ static inline double BirthdayOptions_calc_lambda(const BirthdayOptions *opts,
 ///// 64-bit birthday test implementation /////
 ///////////////////////////////////////////////
 
-/*
-static int cmp_ints(const void *aptr, const void *bptr)
-{
-    uint64_t aval = *((uint64_t *) aptr), bval = *((uint64_t *) bptr);
-    if (aval < bval) { return -1; }
-    else if (aval == bval) { return 0; }
-    else { return 1; }
-}
-*/
-
 /**
  * @brief Generate truncated pseudorandom value
  */
@@ -173,8 +163,7 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
     // qsort is used instead of radix sort to prevent "out of memory" error:
     // 2^30 of u64 is 8GiB of data
     tic = time(NULL);
-    //qsort(x, opts->n, sizeof(uint64_t), cmp_ints); // Not radix: to prevent "out of memory"
-    quicksort64(x, opts->n);
+    quicksort64(x, opts->n); // Not radix: to prevent "out of memory"
     obj->intf->printf("  Time elapsed: ");
     print_elapsed_time(time(NULL) - tic);
     obj->intf->printf("\n");    
