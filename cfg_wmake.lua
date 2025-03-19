@@ -93,7 +93,8 @@ end
 io.write("lib_headers = " .. lib_headers_str .. "\n")
 
 -- Make "all" section
-io.write("all: $(bindir)/smokerand.exe $(bindir)/sr_dos32.exe $(bindir)/test_funcs.exe $(bindir)/srtiny16.exe &\n")
+io.write("all: $(bindir)/smokerand.exe $(bindir)/sr_dos32.exe " ..
+    "$(bindir)/test_funcs.exe $(bindir)/srtiny16.exe &\n")
 for i = 1, #gen_sources do
     local dllfile = "$(gen_bindir)/" .. gen_sources[i] .. ".dll "
     io.write(dllfile)
@@ -102,6 +103,7 @@ for i = 1, #gen_sources do
     end
 end
 io.write("\n")
+io.write("dos: $(bindir)/sr_dos32.exe $(bindir)/srtiny16.exe\n")
 
 -- Make the program executable
 -- a) Line with dependencies
@@ -124,7 +126,9 @@ io.write("$(bindir)/smokerand.exe:" .. objstr .. "\n")
 io.write("\twcl386 -4s -fe=$(bindir)/smokerand.exe " .. objstr .. "\n")
 
 io.write("$(bindir)/test_funcs.exe: $(objdir)/test_funcs.obj \n")
-io.write("\twcl386 -4s -fe=$(bindir)/test_funcs.exe $(objdir)/core.obj $(objdir)/specfuncs.obj $(objdir)/test_funcs.obj $(objdir)/entropy.obj $(objdir)/threads_intf.obj\n")
+io.write("\twcl386 -4s -fe=$(bindir)/test_funcs.exe $(objdir)/core.obj " ..
+    "$(objdir)/specfuncs.obj $(objdir)/test_funcs.obj $(objdir)/entropy.obj " ..
+    "$(objdir)/threads_intf.obj\n")
 
 io.write("$(objdir)/test_funcs.obj: $(appsrcdir)/test_funcs.c $(lib_headers)\n")
 io.write("\twcc386 $(cflags) -fo=$(objdir)/test_funcs.obj $(appsrcdir)/test_funcs.c\n")
