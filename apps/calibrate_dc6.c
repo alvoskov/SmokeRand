@@ -120,6 +120,9 @@ HwTestInfo get_test_info(const char *name)
         out.test_func = hamming_ot_test_wrap; out.opts = &opts;        
     } else if (!strcmp(name, "w8_1000m")) { // 10^9 bytes
         static HammingOtOptions opts = {.mode = HAMMING_OT_BYTES, .nbytes = 1000000000};
+        out.test_func = hamming_ot_test_wrap; out.opts = &opts;
+    } else if (!strcmp(name, "w8_10000m")) { // 10^10 bytes
+        static HammingOtOptions opts = {.mode = HAMMING_OT_BYTES, .nbytes = 10000000000};
         out.test_func = hamming_ot_test_wrap; out.opts = &opts;        
     } else if (!strcmp(name, "wv_10m")) { // 10^7 bytes
         static HammingOtOptions opts = {.mode = HAMMING_OT_VALUES, .nbytes = 10000000};        
@@ -222,7 +225,7 @@ int main(int argc, char *argv[])
     }
     if (argc >= 4) {
         nsamples = atoi(argv[3]);
-        if (nsamples < 100 || nsamples > 10000000) {
+        if (nsamples < 10 || nsamples > 10000000) {
             fprintf(stderr, "nsamples: invalid value\n");
             return 1;
         }
