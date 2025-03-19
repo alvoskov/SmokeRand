@@ -142,7 +142,17 @@ HwTestInfo get_test_info(const char *name)
     } else if (!strcmp(name, "w128_1000m")) { // 10^9 values
         static HammingOtLongOptions opts = {.wordsize = HAMMING_OT_W128, .nvalues = 1000000000};
         out.test_func = hamming_ot_long_test_wrap; out.opts = &opts;        
+    } else if (!strcmp(name, "w256_10m")) { // 10^7 values
+        static HammingOtLongOptions opts = {.wordsize = HAMMING_OT_W128, .nvalues = 10000000};
+        out.test_func = hamming_ot_long_test_wrap; out.opts = &opts;        
+    } else if (!strcmp(name, "w256_100m")) { // 10^8 values
+        static HammingOtLongOptions opts = {.wordsize = HAMMING_OT_W256, .nvalues = 100000000};
+        out.test_func = hamming_ot_long_test_wrap; out.opts = &opts;        
+    } else if (!strcmp(name, "w256_1000m")) { // 10^9 values
+        static HammingOtLongOptions opts = {.wordsize = HAMMING_OT_W256, .nvalues = 1000000000};
+        out.test_func = hamming_ot_long_test_wrap; out.opts = &opts;        
     }
+
     return out;
 }
 
@@ -232,6 +242,10 @@ int main(int argc, char *argv[])
     }
 
     HwTestInfo test_info = get_test_info(name);
+    if (test_info.test_func == NULL) {
+        fprintf(stderr, "subtest '%s' is not supported\n", name);
+        return 1;
+    }
     mod_name = (nbits == 32) ? "generators/chacha_avx.dll" : "generators/speck128_avx.dll";
     GeneratorModule mod = GeneratorModule_load(mod_name);
     if (!mod.valid) {
