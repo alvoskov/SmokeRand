@@ -130,6 +130,7 @@ uint64_t get_machine_id()
     uint64_t machine_id = 0;
     char value[64];
 #ifdef WINDOWS_PLATFORM
+    // Windows: get machine GUID from registry
     DWORD size = 64, type = REG_SZ;
     HKEY key;
     if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Cryptography",
@@ -144,8 +145,14 @@ uint64_t get_machine_id()
     //    printf("%c", (unsigned char) value[i]);
     //}
     RegCloseKey(key);
+#elif defined(__WATCOMC__) && defined(__386__) && defined(__DOS__)
+    // DOS: calculate ROM BIOS checksum
+    uint64_t *bios_data = (uint64_t *) 0xF0000;
+    for (int i = 0; i < 8192; i++) {
+        machine_id = (6906969069 * machine_id + 12345) ^ bios_data[i];
+    }
 #else
-    // Try to find a file with machine ID
+    // UNIX: try to find a file with machine ID
     FILE *fp = fopen("/etc/lib/dbus/machine-id", "r");
     if (fp == NULL) {
         fp = fopen("/etc/machine-id", "r");
