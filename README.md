@@ -609,7 +609,7 @@ There are only two problematic situations:
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | +      | 4     | +       | >= 32 TiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 16 TiB
- des-ctr           | u64    | +       | +     | +       |      | 24   |        |       |         | >= 4 TiB
+ des-ctr           | u64    | +       | +     | +       | +    | 24   |        |       |         | >= 4 TiB
  drand48           | u32    | 3       | 12    | 20      | 22/23| 0.72 | -      | 0     | -       | 1 MiB
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 2 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 5     | +       | >= 32 TiB
@@ -658,6 +658,7 @@ There are only two problematic situations:
  lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | +      | 2.25  | Small   | 32 KiB 
  lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | 2.25  | Small   | 1 MiB
  lrnd64            | u64    | 2       | 3     | 5       | 7    | 0.44 | +      | 2.25  |         | 4 MiB
+ lrnd64_255        | u64    | 2       | 5     |         |      |      |        |       |         | 512 KiB
  lxm_64x128        | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 32 TiB
  macmarsa          | u32    | 2       | 12    | 18      | 19   | 0.67 | -(>>10)| 0     |         | 128 KiB
  magma             | u64    | +       | +     | +       | +    | 25   |        |       |         | ?
@@ -667,8 +668,8 @@ There are only two problematic situations:
  mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 16 TiB
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | +      | 4     | +       | >= 32 TiB
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.50 | +      | 3.25  | Small   | 128 GiB
- mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | N/A    | 4     | +       | 2 TiB
- msws              | u32    | +       | +     | +       | +    | 0.72 | N/A    | 4     | +       | >= 2 TiB
+ mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | +      | 4     | +       | 2 TiB
+ msws              | u32    | +       | +     | +       | +    | 0.72 | +      | 4     | +       | >= 2 TiB
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 2 TiB
  mulberry32        | u32    | +       | 1     | 2       | 4    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
  mwc32x            | u32    | +       | 2     | 2       | 7    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
@@ -708,8 +709,8 @@ There are only two problematic situations:
  rc4ok             | u32    | +       | +     | +       | +    | 6.2  | N/A    | 4     | +       | >= 1 TiB
  romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      | 4(0)  |         | >= 1 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 2 TiB
- sapparot          | u32    | +       | 1     | 3       | 4    | 0.70 | N/A    | 0     | Crush   | 8 MiB
- sapparot2         | u32    | +       | +     | +       | +    | 0.42 | N/A    | 4(0)  | +       | 2 TiB
+ sapparot          | u32    | +       | 1     | 3       | 4    | 0.70 | +      | 0     | Crush   | 8 MiB
+ sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 4(0)  | +       | 2 TiB
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | N/A    | 0     | Crush   | >= 32 TiB
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | N/A    | 0     |         | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | N/A    | 4(0)  |         | 128 GiB(stdin32)*
