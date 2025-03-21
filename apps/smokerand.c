@@ -49,7 +49,7 @@ void print_help(void)
     "    interleaved32  Process 64-bit generator output as interleaving 32-bit words\n"
     "    high32, low32  Analyse higher/lower 32 bits of 64-bit generator\n"
     "  --report-brief Show only failures in the report\n"
-    "  --nthreads  Run battery in multithreaded mode (default number of threads\n"
+    "  --nthreads  Run battery in multithreaded mode (default number of threads)\n"
     "  --threads=n Run battery in multithreaded mode using n threads\n"
     "\n";
 
@@ -58,27 +58,27 @@ void print_help(void)
 
 
 typedef enum {
-    filter_none,
-    filter_reverse_bits,
-    filter_interleaved32,
-    filter_high32,
-    filter_low32,
-    filter_unknown
+    FILTER_NONE,
+    FILTER_REVERSE_BITS,
+    FILTER_INTERLEAVED32,
+    FILTER_HIGH32,
+    FILTER_LOW32,
+    FILTER_UNKNOWN
 } GeneratorFilter;
 
 
 GeneratorFilter GeneratorFilter_from_name(const char *name)
 {
     if (!strcmp("reverse-bits", name)) {
-        return filter_reverse_bits;
+        return FILTER_REVERSE_BITS;
     } else if (!strcmp("interleaved32", name)) {
-        return filter_interleaved32;
+        return FILTER_INTERLEAVED32;
     } else if (!strcmp("high32", name)) {
-        return filter_high32;
+        return FILTER_HIGH32;
     } else if (!strcmp("low32", name)) {
-        return filter_low32;
+        return FILTER_LOW32;
     } else {
-        return filter_unknown;
+        return FILTER_UNKNOWN;
     }
 }
 
@@ -100,7 +100,7 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
 {
     obj->nthreads = 1;
     obj->testid = TESTS_ALL;
-    obj->filter = filter_none;
+    obj->filter = FILTER_NONE;
     obj->report_type = REPORT_FULL;
     for (int i = 3; i < argc; i++) {
         char argname[32];
@@ -129,7 +129,7 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
             continue;
         } else if (!strcmp(argname, "filter")) {
             obj->filter = GeneratorFilter_from_name(eqpos + 1);
-            if (obj->filter == filter_unknown) {
+            if (obj->filter == FILTER_UNKNOWN) {
                 fprintf(stderr, "Unknown filter %s\n", eqpos + 1);
                 return 1;
             }
@@ -225,6 +225,40 @@ int print_battery_info(const char *battery_name)
     return 0;
 }
 
+
+static void apply_filter(GeneratorInfo **gi, GeneratorFilter filter, GeneratorInfo *filter_gen)
+{
+    switch (filter) {
+    case FILTER_REVERSE_BITS:
+        *filter_gen = define_reversed_generator(*gi);
+        *gi = filter_gen;
+        fprintf(stderr, "All tests will be run with the reverse bits order\n");
+        break;
+
+    case FILTER_INTERLEAVED32:
+        *filter_gen = define_interleaved_generator(*gi);
+        *gi = filter_gen;
+        fprintf(stderr, "All tests will be run with the interleaved\n");
+        break;
+
+    case FILTER_HIGH32:
+        *filter_gen = define_high32_generator(*gi);
+        *gi = filter_gen;
+        fprintf(stderr, "All tests will be applied to the higher 32 bits only\n");
+        break;
+
+    case FILTER_LOW32:
+        *filter_gen = define_low32_generator(*gi);
+        *gi = filter_gen;
+        fprintf(stderr, "All tests will be applied to the lower 32 bits only\n");
+        break;
+
+    case FILTER_NONE:
+    case FILTER_UNKNOWN:
+        break;
+    }
+}
+
 int main(int argc, char *argv[])
 {
     if (argc < 3) {
@@ -276,40 +310,43 @@ int main(int argc, char *argv[])
             return 1;
         }
         GeneratorInfo *gi = &mod.gen;
-        if (gi->nbits != 64 && (opts.filter == filter_interleaved32 ||
-            opts.filter == filter_high32 || opts.filter == filter_low32)) {
+        if (gi->nbits != 64 && (opts.filter == FILTER_INTERLEAVED32 ||
+            opts.filter == FILTER_HIGH32 || opts.filter == FILTER_LOW32)) {
             fprintf(stderr, "This filter is supported only for 64-bit generators\n");
             return 1;
         }
+        apply_filter(&gi, opts.filter, &filter_gen);
+/*
         switch (opts.filter) {
-        case filter_reverse_bits:
+        case FILTER_REVERSE_BITS:
             filter_gen = define_reversed_generator(gi);
             gi = &filter_gen;
             fprintf(stderr, "All tests will be run with the reverse bits order\n");
             break;
 
-        case filter_interleaved32:
+        case FILTER_INTERLEAVED32:
             filter_gen = define_interleaved_generator(gi);
             gi = &filter_gen;
             fprintf(stderr, "All tests will be run with the interleaved\n");
             break;
 
-        case filter_high32:
+        case FILTER_HIGH32:
             filter_gen = define_high32_generator(gi);
             gi = &filter_gen;
             fprintf(stderr, "All tests will be applied to the higher 32 bits only\n");
             break;
 
-        case filter_low32:
+        case FILTER_LOW32:
             filter_gen = define_low32_generator(gi);
             gi = &filter_gen;
             fprintf(stderr, "All tests will be applied to the lower 32 bits only\n");
             break;
 
-        case filter_none:
-        case filter_unknown:
+        case FILTER_NONE:
+        case FILTER_UNKNOWN:
             break;
         }
+*/
         GeneratorInfo_print(gi, is_stdout);
         CallerAPI intf = (opts.nthreads == 1) ? CallerAPI_init() : CallerAPI_init_mthr();
         int ans = run_battery(battery_name, gi, &intf, &opts);

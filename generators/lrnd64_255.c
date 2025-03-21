@@ -10,20 +10,20 @@
  * \f]
  *
  * where b are bits and + is addition modulo 2 (i.e. XOR). This optimized
- * implementation works with 64-bit chunks and a circular buffer. It
- * also can be represented as the next primitive GF(2) polynomial:
+ * implementation works with 64-bit chunks and a circular buffer. It also can
+ * be represented as the next primitive GF(2) polynomial:
  *
  * \f[
  * G(x) = x^{255} + x^{31} + x^{7} + x^{3} + 1
  * \f]
  *
- * The original implementation by M.V. Iakobovskii [3] is EXTREMELY SLOW,
- * about 100-200 times slower than hardware AES or AVX2 versions of ChaCha12.
- * Its default API is NOT REENTRANT. It is also proprietary (absence of license
- * file) and cannot be included in SmokeRand distribution. However, it doesn't
- * fail the `gap_inv512` test because its output is 32-bit. If our optimized
- * 64-bit implementation will be tested with the `--filter=interleaved32` key -
- * it will also pass this test.
+ * The original implementation by M.V. Iakobovskii [3] is rather slow, about
+ * 100-200 times slower than hardware AES or AVX2 versions of ChaCha12. Its
+ * default API is NOT REENTRANT (however, it is possible to make it reentrant).
+ * Because of absence of license file it cannot be included in SmokeRand
+ * distribution. However, it doesn't fail the `gap_inv512` test because its
+ * output is 32-bit. If our optimized 64-bit implementation will be tested with
+ * the `--filter=interleaved32` key - it will also pass this test.
  *
  * References:
  *
@@ -44,7 +44,7 @@
  *    Stirlingshire, UK, Paper 23, 2011. http://dx.doi.org/10.4203/ccp.95.23
  * 5. https://itprojects.narfu.ru/grid/materials2015/Yacobovskii.pdf
  *
- * @copyright The LRND algorithm is suggested by M.V. Iakobovski.
+ * @copyright The LRND algorithm is suggested by M.V. Iakobovskii.
  *
  * The optimized reentrant implementation for SmokeRand:
  *
@@ -81,6 +81,12 @@ void *create(const CallerAPI *intf)
     return obj;
 }
 
+/**
+ * @brief Implementation of the LFSR defined by the next recurrent formula:
+ * \f[
+ * b_{j+256} = b_{j+32} + b_{j+8} + b_{j+4} + b_{j+1}
+ * \f]
+ */
 static inline uint64_t get_bits_raw(void *state)
 {
     LRnd64x255State *obj = state;

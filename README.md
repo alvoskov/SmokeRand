@@ -658,7 +658,7 @@ There are only two problematic situations:
  lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | +      | 2.25  | Small   | 32 KiB 
  lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | 2.25  | Small   | 1 MiB
  lrnd64            | u64    | 2       | 3     | 5       | 7    | 0.44 | +      | 2.25  |         | 4 MiB
- lrnd64_255        | u64    | 2       | 5     |         |      |      |        |       |         | 512 KiB
+ lrnd64_255        | u64    | 2       | 5     | 9       | 14   | 0.45 | +      |       |         | 512 KiB
  lxm_64x128        | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 32 TiB
  macmarsa          | u32    | 2       | 12    | 18      | 19   | 0.67 | -(>>10)| 0     |         | 128 KiB
  magma             | u64    | +       | +     | +       | +    | 25   |        |       |         | ?
