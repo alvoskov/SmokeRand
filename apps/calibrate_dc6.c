@@ -73,6 +73,9 @@ double *generate_sample(GeneratorInfo *gi, int nsamples, const HwTestInfo *test_
     printf_mthr = intf.printf;
     intf.printf = printf_mute;
     int nthreads = get_cpu_numcores();
+    if (nthreads > 2) {
+        nthreads--;
+    }
     printf("Number of threads: %d\n", nthreads);
     double *z_ary = calloc(nsamples, sizeof(double));
     HammingThreadState *threads = calloc(nthreads, sizeof(HammingThreadState));
