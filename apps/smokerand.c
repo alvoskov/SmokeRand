@@ -316,37 +316,6 @@ int main(int argc, char *argv[])
             return 1;
         }
         apply_filter(&gi, opts.filter, &filter_gen);
-/*
-        switch (opts.filter) {
-        case FILTER_REVERSE_BITS:
-            filter_gen = define_reversed_generator(gi);
-            gi = &filter_gen;
-            fprintf(stderr, "All tests will be run with the reverse bits order\n");
-            break;
-
-        case FILTER_INTERLEAVED32:
-            filter_gen = define_interleaved_generator(gi);
-            gi = &filter_gen;
-            fprintf(stderr, "All tests will be run with the interleaved\n");
-            break;
-
-        case FILTER_HIGH32:
-            filter_gen = define_high32_generator(gi);
-            gi = &filter_gen;
-            fprintf(stderr, "All tests will be applied to the higher 32 bits only\n");
-            break;
-
-        case FILTER_LOW32:
-            filter_gen = define_low32_generator(gi);
-            gi = &filter_gen;
-            fprintf(stderr, "All tests will be applied to the lower 32 bits only\n");
-            break;
-
-        case FILTER_NONE:
-        case FILTER_UNKNOWN:
-            break;
-        }
-*/
         GeneratorInfo_print(gi, is_stdout);
         CallerAPI intf = (opts.nthreads == 1) ? CallerAPI_init() : CallerAPI_init_mthr();
         int ans = run_battery(battery_name, gi, &intf, &opts);
