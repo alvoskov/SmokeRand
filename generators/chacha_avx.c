@@ -330,4 +330,4 @@ static int run_self_test(const CallerAPI *intf)
     return 1;
 }
 
-MAKE_UINT32_PRNG("ChaCha12", run_self_test)
+MAKE_UINT32_PRNG("ChaCha12_AVX", run_self_test)

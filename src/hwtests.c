@@ -271,8 +271,10 @@ static void hamming_ot_test_print_info(GeneratorState *obj, const HammingOtOptio
     unsigned long long ntuples)
 {
     obj->intf->printf("Hamming weights based tests (overlapping tuples)\n");
-    obj->intf->printf("  Sample size, bytes:     %llu\n", opts->nbytes);
-    obj->intf->printf("  Tuples to be generated: %llu\n", ntuples);
+    obj->intf->printf("  Sample size, bytes:     %llu (2^%.2f or 10^%.2f)\n",
+        opts->nbytes, sr_log2((double) opts->nbytes), log10((double) opts->nbytes));
+    obj->intf->printf("  Tuples to be generated: %llu (2^%.2f or 10^%.2f)\n",
+        ntuples, sr_log2((double) ntuples), log10((double) ntuples));
     switch (opts->mode) {
     case HAMMING_OT_VALUES:
         obj->intf->printf("  Mode: process %d-bit words of PRNG output directly\n",
@@ -592,7 +594,8 @@ TestResults hamming_ot_long_test(GeneratorState *obj, const HammingOtLongOptions
     unsigned int values_per_word = bits_per_word / obj->gi->nbits;
     unsigned long long ntuples = opts->nvalues / values_per_word;
     obj->intf->printf("Hamming weights based test (overlapping tuples), long version\n");
-    obj->intf->printf("  Sample size, values:     %llu\n", opts->nvalues);
+    obj->intf->printf("  Sample size, values:     %llu (2^%.2f or 10^%.2f)\n",
+        opts->nvalues, sr_log2((double) opts->nvalues), log10((double) opts->nvalues));
     obj->intf->printf("  Word size, bits:         %u\n", bits_per_word);
     obj->intf->printf("  Used probabilities for codes:\n");
     for (int i = 0; i < 4; i++) {

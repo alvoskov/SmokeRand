@@ -136,6 +136,9 @@ HwTestInfo get_test_info(const char *name)
     } else if (!strcmp(name, "wv_1000m")) { // 10^9 bytes
         static HammingOtOptions opts = {.mode = HAMMING_OT_VALUES, .nbytes = 1000000000};
         out.test_func = hamming_ot_test_wrap; out.opts = &opts;        
+    } else if (!strcmp(name, "wv_10000m")) { // 10^10 bytes
+        static HammingOtOptions opts = {.mode = HAMMING_OT_VALUES, .nbytes = 10000000000};
+        out.test_func = hamming_ot_test_wrap; out.opts = &opts;        
     } else if (!strcmp(name, "w128_10m")) { // 10^7 values
         static HammingOtLongOptions opts = {.wordsize = HAMMING_OT_W128, .nvalues = 10000000};
         out.test_func = hamming_ot_long_test_wrap; out.opts = &opts;        
@@ -144,6 +147,9 @@ HwTestInfo get_test_info(const char *name)
         out.test_func = hamming_ot_long_test_wrap; out.opts = &opts;        
     } else if (!strcmp(name, "w128_1000m")) { // 10^9 values
         static HammingOtLongOptions opts = {.wordsize = HAMMING_OT_W128, .nvalues = 1000000000};
+        out.test_func = hamming_ot_long_test_wrap; out.opts = &opts;        
+    } else if (!strcmp(name, "w128_10000m")) { // 10^10 values
+        static HammingOtLongOptions opts = {.wordsize = HAMMING_OT_W128, .nvalues = 10000000000};
         out.test_func = hamming_ot_long_test_wrap; out.opts = &opts;        
     } else if (!strcmp(name, "w256_10m")) { // 10^7 values
         static HammingOtLongOptions opts = {.wordsize = HAMMING_OT_W128, .nvalues = 10000000};
@@ -154,7 +160,11 @@ HwTestInfo get_test_info(const char *name)
     } else if (!strcmp(name, "w256_1000m")) { // 10^9 values
         static HammingOtLongOptions opts = {.wordsize = HAMMING_OT_W256, .nvalues = 1000000000};
         out.test_func = hamming_ot_long_test_wrap; out.opts = &opts;        
+    } else if (!strcmp(name, "w256_10000m")) { // 10^10 values
+        static HammingOtLongOptions opts = {.wordsize = HAMMING_OT_W256, .nvalues = 10000000000};
+        out.test_func = hamming_ot_long_test_wrap; out.opts = &opts;        
     }
+
 
     return out;
 }

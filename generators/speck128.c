@@ -120,8 +120,9 @@ int run_self_test(const CallerAPI *intf)
     Speck128State_block(obj);
     intf->printf("Output:    0x%16llX 0x%16llX\n", obj->out[0], obj->out[1]);
     intf->printf("Reference: 0x%16llX 0x%16llX\n", out[0], out[1]);
+    int is_ok = obj->out[0] == out[0] && obj->out[1] == out[1];
     intf->free(obj);
-    return obj->out[0] == out[0] && obj->out[1] == out[1];
+    return is_ok;
 }
 
 
