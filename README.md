@@ -694,7 +694,7 @@ There are only two problematic situations:
  mulberry32        | u32    | +       | 1     | 2       | 4    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
  mwc32x            | u32    | +       | 2     | 2       | 7    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
  mwc32xxa8         | u32    | +       | 1     | 4       | 10   | 1.9  | -(>>10)| 0     |         | 256 MiB
- mwc40xxa8         | u32    | +       | +     | +       | 1    |      | -(>>10)| 0     |         | 16 GiB
+ mwc40xxa8         | u32    | +       | +     | +       | 1    | 2.1  | -(>>10)| 0     |         | 16 GiB
  mwc48xxa16        | u32    | +       | +     | +       | +    | 1.2  | +      | 4     |         |
  mwc64             | u32    | +       | 1     | 2       | 4    | 0.37 | -      | 0     | Small   | 1 TiB
  mwc64x            | u32    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 16 TiB
@@ -725,7 +725,7 @@ There are only two problematic situations:
  ranshi            | u64    | +       | 1     | 6       | 7    | 0.43 | +      |       |         | 32 KiB
  ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | N/A    |       |         | >= 2 TiB
  ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | N/A    |       |         | >= 1 TiB
- ranval            | u32    | +       | +     | +       | +    | 0.31 | N/A    | 4(0)  | +       | >= 4 TiB
+ ranval            | u32    | +       | +     | +       | +    | 0.31 | +      | 4(0)  | +       | >= 4 TiB
  r1279             | u32    | 2       | 5     | 7       | 10   | 0.47 | +      | 0     | Small   | 64 MiB
  ranlux[0]         | u32    | 1       | 6     | 9       | 12   | 6.8  | N/A    |       |         | 4 MiB
  ranlux[1]         | u32    | +       | +     | 2       | 3    | 13   | N/A    |       |         | 4 GiB
