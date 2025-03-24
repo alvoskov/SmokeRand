@@ -693,6 +693,8 @@ There are only two problematic situations:
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 2 TiB
  mulberry32        | u32    | +       | 1     | 2       | 4    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
  mwc32x            | u32    | +       | 2     | 2       | 7    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
+ mwc32xxa8         | u32    | +       | 1     | 4       |      | 1.9  |        | 0     |         | 256 MiB
+ mwc48xxa8         | u32    | +       | +     | +       | +    | 1.2  |        |       |         |
  mwc64             | u32    | +       | 1     | 2       | 4    | 0.37 | -      | 0     | Small   | 1 TiB
  mwc64x            | u32    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 16 TiB
  mwc128            | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 16 TiB
