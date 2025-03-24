@@ -21,8 +21,8 @@ local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
     'lxm_64x128', 'macmarsa', 'magma_avx', 'magma', 'minstd', 'mixmax',
     'mlfib17_5', 'mrg32k3a', 'msws_ctr', 'msws', 'mt19937', 'mulberry32',
     'mwc128x', 'mwc128', 'mwc128xxa32', 'mwc256xxa64', 'mwc1616x', 'mwc1616',
-    'mwc3232x', 'mwc32x', 'mwc4691', 'mwc64x', 'mwc64',
-    'pcg32', 'pcg32_xsl_rr', 'pcg64_64', 'pcg64_xsl_rr',
+    'mwc3232x', 'mwc32x', 'mwc32xxa8', 'mwc4691', 'mwc48xxa16', 'mwc64x',
+    'mwc64', 'pcg32', 'pcg32_xsl_rr', 'pcg64_64', 'pcg64_xsl_rr',
     'philox2x32', 'philox32', 'philox', 'r1279', 'randu', 'ranlux48', 'ranluxpp',
     'ranq1', 'ranq2', 'ranrot32', 'ranrot_bi', 'ranshi', 'ranval', 'ran',
     'rc4ok', 'rc4', 'romutrio', 'rrmxmx', 'sapparot2', 'sapparot', 'sezgin63',
@@ -39,9 +39,10 @@ local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
 -- List of non-portable generators that use compiler-specific extensions
 local gen_not_portable_sources = {'aesni', 'chacha_avx', 'lcg128',
     'lcg128_full', 'lcg128', 'lcg128_u32_full', 'lcg64prime', 'lcg96',
-    'magma_avx', 'mrg32k3a', 'mwc128x', 'mwc128', 'pcg64_xsl_rr', 'philox',
-    'sezgin63', 'speck128_avx', 'speck128_r16_avx', 'sqxor', 'threefry2x64_avx',
-    'wyrand', 'xoroshiro128pp_avx', 'xorshift128pp_avx'}
+    'magma_avx', 'mrg32k3a', 'mwc128x', 'mwc128', 'mwc256xxa64',
+    'pcg64_xsl_rr', 'philox', 'sezgin63', 'speck128_avx', 'speck128_r16_avx',
+    'sqxor', 'threefry2x64_avx', 'wyrand', 'xoroshiro128pp_avx',
+    'xorshift128pp_avx'}
 -- mrg32k3a, sezgin63
 
 local function exclude_non_portables()

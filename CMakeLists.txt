@@ -98,42 +98,45 @@ target_link_libraries(test_crand smokerand_bat smokerand_core ${COMMON_LIBS})
 # Generators list
 if (ONLY_PORTABLE)
     message("Only portable generators will be compiled")
-    set(GENERATORS alfib_lux alfib_mod alfib ara32 chacha cmwc4096 coveyou64
-    cwg64 des drand48 efiix64x48 flea32x1 hc256 isaac64 kiss64 kiss93 
-    kiss99 lcg128_u32_portable lcg32prime lcg64 lcg69069 lcg96_portable 
-    lfib4 lfib4_u64 lfib_par lfsr113 lfsr258 loop_7fff_w64 lrnd64_255 lrnd64_1023
-    lxm_64x128 macmarsa magma minstd mixmax mlfib17_5 mrg32k3a msws_ctr 
-    msws mt19937 mulberry32 mwc1616x mwc1616 mwc3232x mwc32x mwc4691 
-    mwc64x mwc64 mwc128xxa32 pcg32 pcg32_xsl_rr pcg64_64 philox2x32 
-    philox32 r1279 randu ranlux48 ranluxpp ranq1 ranq2 ranrot32 ranrot_bi 
-    ranshi ranval ran rc4ok rc4 romutrio rrmxmx sapparot2 sapparot 
-    sezgin63 sfc16 sfc32 sfc64 sfc8 shr3 speck128 splitmix32 splitmix 
-    sqxor32 stormdrop_old stormdrop superduper64 superduper64_u32 
-    superduper73 swblarge swblux swbw swb taus88 threefry2x64 threefry 
-    tinymt32 tinymt64 well1024a xorgens xoroshiro1024stst xoroshiro1024st 
-    xoroshiro128pp xoroshiro128pp_vec xoroshiro128p xorshift128p xorshift128
-    xorwow xoshiro128p xoshiro128pp xsh)
+    set(GENERATORS
+    alfib_lux alfib_mod alfib ara32 chacha cmwc4096 coveyou64 cwg64
+    des drand48 efiix64x48 flea32x1 hc256 isaac64 kiss64 kiss93 kiss99
+    lcg128_u32_portable lcg32prime lcg64 lcg69069 lcg96_portable
+    lfib4 lfib4_u64 lfib_par lfsr113 lfsr258 loop_7fff_w64 lrnd64_255
+    lrnd64_1023 lxm_64x128 macmarsa magma minstd mixmax mlfib17_5
+    msws_ctr msws mt19937 mulberry32 mwc128xxa32 mwc1616x mwc1616
+    mwc3232x mwc32x mwc32xxa8 mwc4691 mwc48xxa16 mwc64x mwc64 pcg32
+    pcg32_xsl_rr pcg64_64 philox2x32 philox32 r1279 randu ranlux48
+    ranluxpp ranq1 ranq2 ranrot32 ranrot_bi ranshi ranval ran rc4ok
+    rc4 romutrio rrmxmx sapparot2 sapparot sfc16 sfc32 sfc64 sfc8
+    shr3 speck64_128 speck128 splitmix32 splitmix sqxor32 stormdrop_old
+    stormdrop superduper64 superduper64_u32 superduper73 swblarge
+    swblux swbw swb taus88 threefry2x64 threefry tinymt32 tinymt64
+    well1024a xorgens xoroshiro1024stst xoroshiro1024st xoroshiro128pp
+    xoroshiro128pp_vec xoroshiro128p xorshift128p xorshift128 xorwow
+    xoshiro128p xoshiro128pp xsh)
 else()
     message("All generators will be compiled")
-    set(GENERATORS aesni alfib_lux alfib_mod alfib ara32 chacha_avx chacha cmwc4096 
-    coveyou64 cwg64 des drand48 efiix64x48 flea32x1 hc256 isaac64 
-    kiss64 kiss93 kiss99 lcg128_full lcg128 lcg128_u32_full lcg128_u32_portable 
-    lcg32prime lcg64prime lcg64 lcg69069 lcg96_portable lcg96 lfib4 
-    lfib4_u64 lfib_par lfsr113 lfsr258 loop_7fff_w64 lrnd64_255 lrnd64_1023 lxm_64x128 
-    macmarsa magma_avx magma minstd mixmax mlfib17_5 mrg32k3a msws_ctr 
-    msws mt19937 mulberry32 mwc128x mwc128 mwc128xxa32 mwc256xxa64
-    mwc1616x mwc1616 mwc3232x 
-    mwc32x mwc4691 mwc64x mwc64 pcg32 pcg32_xsl_rr 
-    pcg64_64 pcg64_xsl_rr philox2x32 philox32 philox r1279 randu 
-    ranlux48 ranluxpp ranq1 ranq2 ranrot32 ranrot_bi ranshi ranval 
-    ran rc4ok rc4 romutrio rrmxmx sapparot2 sapparot sezgin63 sfc16 
-    sfc32 sfc64 sfc8 shr3 speck128_avx speck128_r16_avx speck128 
-    splitmix32 splitmix sqxor32 sqxor stormdrop_old stormdrop superduper64 
-    superduper64_u32 superduper73 swblarge swblux swbw swb taus88 
-    threefry2x64_avx threefry2x64 threefry tinymt32 tinymt64 well1024a 
-    wyrand xorgens xoroshiro1024stst xoroshiro1024st xoroshiro128pp_avx 
-    xoroshiro128pp xoroshiro128pp_vec xoroshiro128p xorshift128pp_avx
-    xorshift128p xorshift128 xorwow xoshiro128p xoshiro128pp xsh)
+    set(GENERATORS
+    aesni alfib_lux alfib_mod alfib ara32 chacha_avx chacha cmwc4096
+    coveyou64 cwg64 des drand48 efiix64x48 flea32x1 hc256 isaac64
+    kiss64 kiss93 kiss99 lcg128_full lcg128 lcg128_u32_full lcg128_u32_portable
+    lcg32prime lcg64prime lcg64 lcg69069 lcg96_portable lcg96 lfib4
+    lfib4_u64 lfib_par lfsr113 lfsr258 loop_7fff_w64 lrnd64_255 lrnd64_1023
+    lxm_64x128 macmarsa magma_avx magma minstd mixmax mlfib17_5 mrg32k3a
+    msws_ctr msws mt19937 mulberry32 mwc128x mwc128 mwc128xxa32 mwc256xxa64
+    mwc1616x mwc1616 mwc3232x mwc32x mwc32xxa8 mwc4691 mwc48xxa16
+    mwc64x mwc64 pcg32 pcg32_xsl_rr pcg64_64 pcg64_xsl_rr philox2x32
+    philox32 philox r1279 randu ranlux48 ranluxpp ranq1 ranq2 ranrot32
+    ranrot_bi ranshi ranval ran rc4ok rc4 romutrio rrmxmx sapparot2
+    sapparot sezgin63 sfc16 sfc32 sfc64 sfc8 shr3 speck64_128 speck128_avx
+    speck128_r16_avx speck128 splitmix32 splitmix sqxor32 sqxor stormdrop_old
+    stormdrop superduper64 superduper64_u32 superduper73 swblarge
+    swblux swbw swb taus88 threefry2x64_avx threefry2x64 threefry
+    tinymt32 tinymt64 well1024a wyrand xorgens xoroshiro1024stst
+    xoroshiro1024st xoroshiro128pp xoroshiro128pp_avx xoroshiro128pp_vec
+    xoroshiro128p xorshift128pp_avx xorshift128p xorshift128 xorwow
+    xoshiro128p xoshiro128pp xsh)
 endif()
 
 
