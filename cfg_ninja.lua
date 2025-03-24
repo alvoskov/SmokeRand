@@ -127,6 +127,11 @@ rule cc89
     description = CC $out
     deps = msvc
 
+rule cpp
+    command = $cc /showIncludes $cxxflags /c /Iinclude $in /Fo:$out
+    description = CXX $out
+    deps = msvc
+
 rule cc_gen
     command = $cc /showIncludes $cflags /c /Iinclude $in /Fo:$out
     description = CC $out
@@ -139,6 +144,10 @@ rule ar
 rule link
     command = link $linkflags $in $libs /Out:$out
     description = LINK $out
+
+rule cpplink
+    command = link $linkflags $in $libs /Out:$out
+    description = CPPLINK $out
 ]]
 
 
@@ -180,6 +189,7 @@ elseif platform == 'msvc' then
     exe_ext = '.exe'
     -- /WX if treat warnings as errors
     stub = "cflags = /O2 /W3 /arch:AVX2 /D_CRT_SECURE_NO_WARNINGS\n" ..
+    "cxxflags = /O2 /W3 /arch:AVX2 /D_CRT_SECURE_NO_WARNINGS\n" ..
     "gen_cflags = $cflags\n" ..
     "cc = cl\n"..
     "exe_libs = advapi32.lib\n" ..

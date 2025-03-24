@@ -693,14 +693,15 @@ There are only two problematic situations:
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 2 TiB
  mulberry32        | u32    | +       | 1     | 2       | 4    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
  mwc32x            | u32    | +       | 2     | 2       | 7    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
- mwc32xxa8         | u32    | +       | 1     | 4       |      | 1.9  |        | 0     |         | 256 MiB
- mwc48xxa8         | u32    | +       | +     | +       | +    | 1.2  |        |       |         |
+ mwc32xxa8         | u32    | +       | 1     | 4       | 10   | 1.9  | -(>>10)| 0     |         | 256 MiB
+ mwc40xxa8         | u32    | +       | +     | +       | 1    |      | -(>>10)| 0     |         | 16 GiB
+ mwc48xxa16        | u32    | +       | +     | +       | +    | 1.2  | +      | 4     |         |
  mwc64             | u32    | +       | 1     | 2       | 4    | 0.37 | -      | 0     | Small   | 1 TiB
  mwc64x            | u32    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 16 TiB
  mwc128            | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 16 TiB
  mwc128x           | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 32 TiB
- mwc128xxa32       | u32    | +       | +     | +       |      | 0.26 |        |       |         |
- mwc256xxa64       | u64    | +       | +     | +       |      | 0.52 |        |       |         |
+ mwc128xxa32       | u32    | +       | +     | +       | +    | 0.52 | +      | 4     |         |
+ mwc256xxa64       | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 1 TiB
  mwc1616           | u32    | 1       | 10/11 | 12/18   | 19   | 0.48 | -      | 0     | -/Small | 16 MiB
  mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | +       | >= 32 TiB(?)
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 32 TiB
@@ -736,8 +737,8 @@ There are only two problematic situations:
  sapparot          | u32    | +       | 1     | 3       | 4    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 4(0)  | +       | 2 TiB
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | N/A    | 0     | Crush   | >= 32 TiB
- sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | N/A    | 0     |         | 128 MiB
- sfc16             | u32    | +       | +     | +       | +    | 0.93 | N/A    | 4(0)  |         | 128 GiB(stdin32)*
+ sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | -(>>10)| 0     |         | 128 MiB
+ sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 4(0)  |         | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  |         | >= 4 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
  speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         |
@@ -748,8 +749,8 @@ There are only two problematic situations:
  splitmix32        | u32    | +       | 2     | 3       | 4/5  | 0.25 | -(>>10)| 0     | Small   | 1 GiB
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | 4     | +       | >= 16 TiB
  sqxor32           | u32    | +       | 1     | 2       | 4    | 0.20 | -(>>10)| 0     | Small   | 16 GiB
- stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | N/A    | 0     |         | >= 8 TiB
- stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | N/A    | 3.5   | Small   | 1 MiB
+ stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | +      | 0     |         | >= 8 TiB
+ stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | +      | 3.5   | Small   | 1 MiB
  superduper73      | u32    | 3       | 9     | 15      | 18   | 0.64 | +      | 0     | -       | 32 KiB
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      | 2.75  |         | 512 KiB
  superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | +      | 4     |         | >= 32 TiB
@@ -757,7 +758,7 @@ There are only two problematic situations:
  swb               | u32    | 1       | 5     | 6       | 8    | 2.7  | N/A    | 0     | Small   | 128 MiB
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | 2     | Crush   | 4 TiB
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 2 TiB
- swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | N/A    | 0     | Crush   | 512 GiB
+ swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | +      | 0     | Crush   | 512 GiB
  swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | N/A    | 2     | +       | 4 GiB
  taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  | Small   | 32 KiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB

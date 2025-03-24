@@ -35,12 +35,11 @@ typedef struct {
     uint64_t c;
 } Mwc256xxa64State;
 
-//(X3 ^ X2) + (X1 ^ HI)
 static inline uint64_t get_bits_raw(void *state)
 {
     static const uint64_t MWC_A1 = 0xfeb344657c0af413;
     Mwc256xxa64State *obj = state;
-//#ifdef UINT128_ENABLED
+#ifdef UINT128_ENABLED
     __uint128_t t = MWC_A1 * (__uint128_t)obj->x[2];
     uint64_t ans = (obj->x[2] ^ obj->x[1]) + (obj->x[0] ^ (t >> 64));
     t += obj->c;
@@ -48,11 +47,16 @@ static inline uint64_t get_bits_raw(void *state)
     obj->x[1] = obj->x[0];
     obj->x[0] = t;
     obj->c = t >> 64;
-//#else
-//    uint64_t c_old = obj->c;
-//    obj->x = unsigned_mul128(MWC_A1, obj->x, &obj->c);
-//    obj->c += _addcarry_u64(0, obj->x, c_old, &obj->x);
-//#endif
+#else
+    uint64_t t_lo, t_hi, ans;
+    t_lo = unsigned_mul128(MWC_A1, obj->x[2], &t_hi);
+    ans = (obj->x[2] ^ obj->x[1]) + (obj->x[0] ^ t_hi);
+    t_hi += _addcarry_u64(0, t_lo, obj->c, &t_lo);
+    obj->x[2] = obj->x[1];
+    obj->x[1] = obj->x[0];
+    obj->x[0] = t_lo;
+    obj->c = t_hi;
+#endif
     return ans;
 }
 

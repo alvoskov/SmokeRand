@@ -1,5 +1,5 @@
 /**
- * @file mwc128xxa32.c
+ * @file mwc32xxa32.c
  * @brief MWC128XXA32.
  * @details Multiply-with-carry PRNG.
  *
