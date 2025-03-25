@@ -695,7 +695,7 @@ There are only two problematic situations:
  mwc32x            | u32    | +       | 2     | 2       | 7    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
  mwc32xxa8         | u32    | +       | 1     | 4       | 10   | 1.9  | -(>>10)| 0     |         | 256 MiB
  mwc40xxa8         | u32    | +       | +     | +       | 1    |      | -(>>10)| 0     |         | 16 GiB
- mwc48xxa16        | u32    | +       | +     | +       | +    | 1.2  | +      | 4     |         |
+ mwc48xxa16        | u32    | +       | +     | +       | +    | 1.2  | +      | 4     |         | 1 TiB
  mwc64             | u32    | +       | 1     | 2       | 4    | 0.37 | -      | 0     | Small   | 1 TiB
  mwc64x            | u32    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 16 TiB
  mwc128            | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 16 TiB
