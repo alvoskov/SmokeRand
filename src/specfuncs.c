@@ -170,7 +170,7 @@ static double gammainc_upper_contfrac(double a, double x)
  *
  * 1. U. Blahak. Efficient approximation of the incomplete gamma function
  *    for use in cloud model applications // Geosci. Model Dev. 2010. V.3,
- *    P. 329Ö336. https://doi.org/10.5194/gmd-3-329-2010
+ *    P. 329-336. https://doi.org/10.5194/gmd-3-329-2010
  * 2. https://functions.wolfram.com/GammaBetaErf/Gamma2/06/02/02/
  */
 double sr_gammainc(double a, double x)

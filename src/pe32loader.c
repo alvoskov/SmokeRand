@@ -51,23 +51,6 @@ static inline uint16_t read_u16(FILE *fp, unsigned int offset)
     return tmp;
 }
 
-void *PE32MemoryImage_get_func_addr(const PE32MemoryImage *img, const char *func_name)
-{
-    for (int i = 0; i < img->nexports; i++) {
-        int ord = img->exports_ords[i];
-        if (!strcmp(func_name, img->exports_names[i])) {
-            return img->exports_addrs[ord];
-        }
-    }
-    return NULL;
-}
-
-void PE32MemoryImage_free(PE32MemoryImage *obj)
-{
-    execbuffer_free(obj->img);
-}
-
-
 /**
  * @brief Checks some "magic" signatures of PE32 format and returns
  * an offset of PE header.
@@ -90,7 +73,16 @@ int get_pe386_offset(FILE *fp)
     return pe_offset;
 }
 
-
+/**
+ * @brief Read some information from PE32 executable headers. Mainly
+ * sections addresses and sizes, export/import tables, relocations. Also
+ * checks some "magic constants".
+ * @param peinfo    Pointer to the output buffer.
+ * @param fp        Opened file descriptior.
+ * @param pe_offset Offset of the PE header.
+ * @return 0/1 - failure/success.
+ * @relates PE32BasicInfo
+ */
 int PE32BasicInfo_init(PE32BasicInfo *peinfo, FILE *fp, uint32_t pe_offset)
 {
     peinfo->nsections = read_u16(fp, pe_offset + 0x06);
@@ -161,11 +153,52 @@ uint32_t PE32BasicInfo_get_membuf_size(PE32BasicInfo *info)
 ///// PE32MemoryImage class implementation /////
 ////////////////////////////////////////////////
 
+/**
+ * @brief Get unsigned 32-bit integer from the given RVA.
+ * @param obj  Preloaded PE32 file image.
+ * @param rva  Value RVA (Relative Virtual Address).
+ * @return Unsigned 32-bit integer.
+ * @relates PE32MemoryImage
+ */
 static inline uint32_t PE32MemoryImage_get_u32(const PE32MemoryImage *obj, uint32_t rva)
 {
     return *( (uint32_t *) (obj->img + rva) );
 }
 
+/**
+ * @brief Return the function address from the PE32 executable file export table.
+ * @param obj       Preloaded PE32 file image.
+ * @param func_name Function name as written in the export table (ASCIIZ string).
+ * @return Function address (not RVA, can be converted to the pointer).
+ * @relates PE32MemoryImage
+ */
+void *PE32MemoryImage_get_func_addr(const PE32MemoryImage *img, const char *func_name)
+{
+    for (int i = 0; i < img->nexports; i++) {
+        int ord = img->exports_ords[i];
+        if (!strcmp(func_name, img->exports_names[i])) {
+            return img->exports_addrs[ord];
+        }
+    }
+    return NULL;
+}
+
+/**
+ * @brief Deallocates all internal buffers.
+ * @relates PE32MemoryImage
+ */
+void PE32MemoryImage_free(PE32MemoryImage *obj)
+{
+    execbuffer_free(obj->img);
+}
+
+/**
+ * @brief Applies relocations in the preloaded PE32 executable file image.
+ * @param img   Preloaded image with relocations.
+ * @param info  Information about sections and directories.
+ * @return 0/1 - failure/success.
+ * @relates PE32MemoryImage
+ */
 int PE32MemoryImage_apply_relocs(PE32MemoryImage *img, PE32BasicInfo *info)
 {
     uint8_t *buf = img->img;
@@ -196,6 +229,7 @@ int PE32MemoryImage_apply_relocs(PE32MemoryImage *img, PE32BasicInfo *info)
 /**
  * @brief Fill export table in the PE32 preloaded image. Converts RVAs to real
  * addresses.
+ * @relates PE32MemoryImage
  */
 int PE32MemoryImage_apply_exports(PE32MemoryImage *img, PE32BasicInfo *info)
 {
@@ -236,6 +270,7 @@ int PE32MemoryImage_apply_exports(PE32MemoryImage *img, PE32BasicInfo *info)
  * is considered as an error (because it is not supported).
  * @return 0 - failure (imports are present), 1 - succes (imports are not
  * present).
+ * @relates PE32MemoryImage
  */
 int PE32MemoryImage_apply_imports(PE32MemoryImage *img, PE32BasicInfo *info)
 {
@@ -250,7 +285,15 @@ int PE32MemoryImage_apply_imports(PE32MemoryImage *img, PE32BasicInfo *info)
     return 1;
 }
 
+//////////////////////////////////////////////
+///// PE32BasicInfo class implementation /////
+//////////////////////////////////////////////
 
+/**
+ * @brief Load PE32 executable file to RAM using the preloaded PE32BasicInfo
+ * structure.
+ * @relates PE32BasicInfo
+ */
 PE32MemoryImage *PE32BasicInfo_load(PE32BasicInfo *info, FILE *fp)
 {
     PE32MemoryImage *img = calloc(sizeof(PE32MemoryImage), 1);

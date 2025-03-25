@@ -22,8 +22,9 @@
  * 3. https://www.schneier.com/academic/skein/threefish/
  * 4. https://pdebuyl.be/blog/2016/threefry-rng.html
  *
- * @copyright Threefry algorithm is proposed by J. K. Salmon, M. A. Moraes,
- * R. O. Dror and D. E. Shaw.
+ * @copyright Threefish block cipher was developed by Bruce Schneier et al.
+ * Threefry algorithm was proposed by J. K. Salmon, M. A. Moraes, R. O. Dror
+ * and D. E. Shaw.
  *
  * Implementation for SmokeRand:
  *

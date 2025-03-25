@@ -700,7 +700,7 @@ There are only two problematic situations:
  mwc64x            | u32    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 16 TiB
  mwc128            | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 16 TiB
  mwc128x           | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 32 TiB
- mwc128xxa32       | u32    | +       | +     | +       | +    | 0.52 | +      | 4     |         |
+ mwc128xxa32       | u32    | +       | +     | +       | +    | 0.52 | +      | 4     |         | ?
  mwc256xxa64       | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 1 TiB
  mwc1616           | u32    | 1       | 10/11 | 12/18   | 19   | 0.48 | -      | 0     | -/Small | 16 MiB
  mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | +       | >= 32 TiB(?)
@@ -741,7 +741,7 @@ There are only two problematic situations:
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 4(0)  |         | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  |         | >= 4 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
- speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         |
+ speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         | ?
  speck128          | u64    | +       | +     | +       | +    | 3.1  | +      | 5     |         | >= 2 TiB
  speck128_avx      | u64    | +       | +     | +       | +    | 0.65 | +      | 5     |         | >= 16 TiB
  speck128_r16_avx  | u64    | +       | +     | +       | +    | 0.33 | +      | 4     |         | >= 32 TiB
@@ -755,7 +755,7 @@ There are only two problematic situations:
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      | 2.75  |         | 512 KiB
  superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | +      | 4     |         | >= 32 TiB
  shr3              | u32    | 2       | 15    | 32      | 36   | 0.76 | -(>>10)| 0     | -       | 32 KiB
- swb               | u32    | 1       | 5     | 6       | 8    | 2.7  | N/A    | 0     | Small   | 128 MiB
+ swb               | u32    | 1       | 5     | 6       | 8    | 2.7  | +      | 0     | Small   | 128 MiB
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | 2     | Crush   | 4 TiB
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 2 TiB
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | +      | 0     | Crush   | 512 GiB
@@ -764,6 +764,8 @@ There are only two problematic situations:
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      | 3     |         | 32 GiB
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
+ threefry_avx      | u64    | +       | +     | +       | +    |      | +      | 4     |         | ?
+ threefish_avx     | u64    | +       | +     | +       | +    |      | +      | 4     |         | ?
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 32 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
