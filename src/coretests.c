@@ -4,7 +4,8 @@
  * birthday spacings and monkey tests, Knuth's gap test. Also includes
  * the mod3 test from gjrand.
  *
- * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -565,8 +566,10 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     TestResults ans = TestResults_create("Gap");
     obj->intf->printf("Gap test\n");
     obj->intf->printf("  alpha = 0.0; beta = %g; shl = %u;\n", p, opts->shl);
-    obj->intf->printf("  ngaps = %lu; nbins = %lu\n",
-        (unsigned long) ngaps, (unsigned long) nbins);
+    obj->intf->printf("  ngaps = %llu (2^%.2f or 10^%.2f); nbins = %llu\n",
+        (unsigned long long) ngaps,
+        sr_log2((double) ngaps), log10((double) ngaps),
+        (unsigned long long) nbins);
     if (!gap_test_guard(obj, opts)) {
         obj->intf->printf("  Generator output doesn't hit the gap! p <= 1e-15\n");
         ans.p = 1.0e-15;
@@ -882,8 +885,10 @@ TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
     GapFrequencyArray *gapfreq_rb = GapFrequencyArray_create(nbins, p);
     // Print test info
     obj->intf->printf("gap16_count0 test\n");
-    obj->intf->printf("  p = %g; ngaps = %llu; nbins = %lu\n",
-        p, ngaps, (unsigned long) nbins);
+    obj->intf->printf("  p = %g; ngaps = %llu (2^%.2f or 10^%.2f); nbins = %llu\n",
+        p, (unsigned long long) ngaps,
+        sr_log2((double) ngaps), log10(ngaps),
+        (unsigned long long) nbins);
     // Test main run
     gap16_count0_mainloop(gapfreq, gapfreq_rb, obj, ngaps);
     // Computation of p-value for sum of squares

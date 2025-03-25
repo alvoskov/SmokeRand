@@ -325,11 +325,11 @@ static void *create(const CallerAPI *intf)
     }
     Tf256VecState_init(obj, k);
     const char *param = intf->get_param();
-    if (!intf->strcmp(param, "ThreeFry") || !intf->strcmp(param, "")) {
-        intf->printf("ThreeFry4x64x20\n", param);
+    if (!intf->strcmp(param, "Threefry") || !intf->strcmp(param, "")) {
+        intf->printf("Threefry4x64x20\n", param);
         obj->block_func = Tf256VecState_block20;
-    } else if (!intf->strcmp(param, "ThreeFish")) {
-        intf->printf("ThreeFry4x64x72 (ThreeFish)\n", param);
+    } else if (!intf->strcmp(param, "Threefish")) {
+        intf->printf("Threefry4x64x72 (Threefish)\n", param);
         obj->block_func = Tf256VecState_block72;
     } else {
         intf->printf("Unknown parameter '%s'\n", param);

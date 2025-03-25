@@ -12,7 +12,7 @@
  * - https://www.cix.co.uk/~klockstone/teavect.htm
  * - https://tayloredge.com/reference/Mathematics/XTEA.pdf
  *
- * Results:
+ * Results in CTR mode:
  *
  * - 4*2=8 rounds: fails `express`
  * - 5*2=10 rounds: passes `express`, passes `default`, fails `full` batteries.

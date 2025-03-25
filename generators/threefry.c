@@ -40,15 +40,16 @@
 
 PRNG_CMODULE_PROLOG
 
-///////////////////////////////////
-///// Threefry implementation /////
-///////////////////////////////////
+/////////////////////////////////////////////
+///// Threefry/Threefish implementation /////
+/////////////////////////////////////////////
 
-typedef struct {
-    uint64_t k[Nw + 1]; // Key (+ extra word)
-    uint64_t p[Nw]; // Counter ("plain text")
-    uint64_t v[Nw]; // Output buffer
+typedef struct Tf256State_ {
+    uint64_t k[Nw + 1]; /// Key (+ extra word)
+    uint64_t p[Nw]; /// Counter ("plain text")
+    uint64_t v[Nw]; /// Output buffer
     size_t pos;
+    void (*block_func)(struct Tf256State_ *); ///< Scrambling/encryption function 
 } Tf256State;
 
 
@@ -239,7 +240,7 @@ static inline uint64_t get_bits_raw(void *state)
     Tf256State *obj = state;
     if (obj->pos >= Nw) {
         Tf256State_inc_counter(obj);
-        Tf256State_block20(obj);
+        obj->block_func(obj);//Tf256State_block20(obj);
         obj->pos = 0;
     }
     return obj->v[obj->pos++];
@@ -254,8 +255,20 @@ static void *create(const CallerAPI *intf)
         k[i] = intf->get_seed64();
     }
     Tf256State_init(obj, k);
+    const char *param = intf->get_param();
+    if (!intf->strcmp(param, "Threefry") || !intf->strcmp(param, "")) {
+        intf->printf("Threefry4x64x20\n", param);
+        obj->block_func = Tf256State_block20;
+    } else if (!intf->strcmp(param, "Threefish")) {
+        intf->printf("Threefry4x64x72 (Threefish)\n", param);
+        obj->block_func = Tf256State_block72;
+    } else {
+        intf->printf("Unknown parameter '%s'\n", param);
+        intf->free(obj);
+        return NULL;
+    }
     return (void *) obj;
 }
 
 
-MAKE_UINT64_PRNG("Threefry4x64x20", run_self_test)
+MAKE_UINT64_PRNG("Threefry4x64", run_self_test)

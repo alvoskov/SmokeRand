@@ -764,8 +764,9 @@ There are only two problematic situations:
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      | 3     |         | 32 GiB
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
- threefry_avx      | u64    | +       | +     | +       | +    |      | +      | 4     |         | ?
- threefish_avx     | u64    | +       | +     | +       | +    |      | +      | 4     |         | ?
+ threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | ?
+ threefish         | u64    | +       | +     | +       | +    | 4.3  |        |       |         | ?
+ threefish_avx     | u64    | +       | +     | +       | +    | 1.3  | +      | 5     |         | ?
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 32 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
@@ -783,6 +784,9 @@ There are only two problematic situations:
  xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      | 3     | +       | 8 MiB
  xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      | 4     | +       | >= 16 TiB
  xsh               | u64    | 2       | 8     | 13      | 17   | 0.43 | -      | 0     | -       | 32 KiB
+ xtea              | u64    | +       | +     | +       | +    | 27   |        |       |         | ?
+ xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 3.4  |        |       |         | ?
+ xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 3.4  | +      | 4     |         | ?
 
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
 e.g. changing `-O2` to `-O3` speeds up `mt19937` but slows down `philox`; gcc 10.3.0 (tdm64-1).
@@ -849,6 +853,14 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 - Passed dieharder: lcg64, lfib(55,24,+,up32), lfib(607,203,+,up32), swb, xorwow
 
 # Versions history
+
+26.03.2025: SmokeRand 0.31
+
+- The `mwc32xxa8`, `mwc40xxa8`, `mwc48xxa16`, `mwc128xxa32`, `mwc256xxa16`,
+  `threefry_avx`, `xtea` and `xtea_avx` generators were added.
+- `threefry` and `threefry_avx` generators now support `Threefry` and
+  `Threefish` modes as `--param=mode`.
+- Improved debug output in the `gap` and `gap16_count0` tests.
 
 18.03.2025: SmokeRand 0.30
 

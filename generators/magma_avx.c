@@ -57,8 +57,8 @@ typedef union {
  * @brief MAGMA-AVX-GOSTR34.12-2015 CSPRNG operation mode.
  */
 typedef enum {
-    magma_ctr, ///< Counter mode (CTR)
-    magma_cbc  ///< Cipher block chaining (CBC)
+    MAGMA_CTR, ///< Counter mode (CTR)
+    MAGMA_CBC  ///< Cipher block chaining (CBC)
 } MagmaMode;
 
 
@@ -85,7 +85,7 @@ void MagmaVecState_init(MagmaVecState *obj, const uint32_t *key)
         obj->out_a0.w32[i] = 0; // Needed for CBC mode
         obj->out_a1.w32[i] = 0;
     }
-    obj->mode = magma_ctr;
+    obj->mode = MAGMA_CTR;
     obj->pos = 8;
 }
 
@@ -95,10 +95,10 @@ static void *create(const CallerAPI *intf)
     MagmaMode mode;
     const char *mode_name = intf->get_param();
     if (!intf->strcmp(mode_name, "ctr") || !intf->strcmp(mode_name, "")) {
-        mode = magma_ctr;
+        mode = MAGMA_CTR;
         intf->printf("Operation mode: ctr\n");
     } else if (!intf->strcmp(mode_name, "cbc")) {
-        mode = magma_cbc;
+        mode = MAGMA_CBC;
         intf->printf("Operation mode: cbc\n");
     } else {
         intf->printf("Unknown operation mode '%s' (ctr or cbc are supported)",
@@ -266,7 +266,7 @@ static void MagmaVecState_encrypt(MagmaVecState *obj)
     __m256i a1 = Vector256_to_m256i(&(obj->ctr_a1));
     __m256i a0 = Vector256_to_m256i(&(obj->ctr_a0));
     // CBC mode: XOR input (counter) with the previous input
-    if (obj->mode == magma_cbc) {
+    if (obj->mode == MAGMA_CBC) {
         __m256i out_a1 = Vector256_to_m256i(&(obj->out_a1));
         __m256i out_a0 = Vector256_to_m256i(&(obj->out_a0));
         a1 = _mm256_xor_si256(a1, out_a1);
