@@ -23,15 +23,15 @@
 #include <stdio.h>
 #include <stdint.h>
 
-
 void *dlopen_pe32dos(const char *libname, int flag);
 void *dlsym_pe32dos(void *handle, const char *symname);
 void dlclose_pe32dos(void *handle);
 const char *dlerror_pe32dos(void);
 
-
-
-
+/**
+ * @brief Information about PE32 executable section.
+ * @details Its layout is different from the fields inside PE files.
+ */
 typedef struct {
     char name[9]; ///< ASCIIZ-string with section name.
     uint32_t virtual_size; ///< Size in RAM.
@@ -40,28 +40,39 @@ typedef struct {
     uint32_t physical_addr; ///< Section offset in the file.
 } PE32SectionInfo;
 
+/**
+ * @brief Keeps an image of PE32 executable loaded into RAM. It is very
+ * minimalistic, doesn't take into account a lot of fields and made
+ * solely for SmokeRand plugins loading.
+ */
 typedef struct {
     uint8_t *img; ///< Loaded image raw data.
-    size_t imgsize; ///< Loaded image size
-    void *entry_point;
-    int nexports;
-    void **exports_addrs;
-    char **exports_names;
-    uint16_t *exports_ords;
+    size_t imgsize; ///< Loaded image size, bytes.
+    void *entry_point; ///< Program entry point.
+    int nexports; ///< Number of exports.
+    void **exports_addrs; ///< Exports addresses (not RVAs)
+    char **exports_names; ///< Exports names (ASCIIZ strings)
+    uint16_t *exports_ords; ///< Exports ordinals.
 } PE32MemoryImage;
 
+/**
+ * @brief Information about PE32 executable section.
+ * @details Its layout is different from the fields inside PE files. It is very
+ * minimalistic, doesn't take into account a lot of fields and made solely for
+ * SmokeRand plugins loading.
+ */
 typedef struct {
-    uint32_t imagebase;
-    uint32_t entrypoint_rva;
-    uint32_t imagesize;
-    uint32_t headersize;
+    uint32_t imagebase; ///< PE image base.
+    uint32_t entrypoint_rva; ///< Entry point RVA.
+    uint32_t imagesize; ///< Image size, bytes.
+    uint32_t headersize; ///< PE header size, bytes.
 
-    uint32_t export_dir;
-    uint32_t import_dir;
-    uint32_t reloc_dir;
+    uint32_t export_dir; ///< Export directory RVA.
+    uint32_t import_dir; ///< Import directory RVA.
+    uint32_t reloc_dir; ///< Relocations (fixups) directory RVA.
 
-    int nsections;
-    PE32SectionInfo *sections;
+    int nsections; ///< Number of sections.
+    PE32SectionInfo *sections; ///< Sections table.
 } PE32BasicInfo;
 
 

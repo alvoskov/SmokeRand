@@ -4,7 +4,7 @@
  * Lagged Fibbonaci generator \f$ LFib(2^{64}, 17, 5, *) \f$.
  * @details It uses the next recurrent formula:
  * \f[
- * X_{n} = X_{n - 17} * X_{n - 5}
+ * X_{n} = X_{n - 17} * X_{n - 5} \mathop{\mathrm{mod}} 2^{64}
  * \f]
  * and returns the higher 32 bits The initial values in the ring buffer
  * are filled by the 64-bit PCG generator. Lower 32 bits of this PRNG

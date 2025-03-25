@@ -4,8 +4,8 @@
  * @details It consists of two multiple recurrence generators:
  * \f[
  * \begin{cases}
- * x_{1,n} = 1403580 x_{n-2} - 810728 x_{n-3} \mod m_1 \\
- * x_{2,n} = 527612 x_{n-1} - 1370589 x_{n-3} \mod m_2 \\
+ * x_{1,n} = 1403580 x_{n-2} - 810728 x_{n-3} \mathop{\mathrm{mod}} m_1 \\
+ * x_{2,n} = 527612 x_{n-1} - 1370589 x_{n-3} \mathop{\mathrm{mod}} m_2 \\
  * \end{cases}
  * \f]
  * where \f$ m_1 = 2^{32} - 209 \f$ and \f$ m_2 = 2^{32} - 22853 \f$ are
@@ -14,7 +14,7 @@
  * Output is obtained from a combination of \f$ x_{1,n} \f$ and \f$ x_{2,n}:
  *
  * \f[
- *   x_{n} = x_{1,n} - x_{2,n} \mod {m_1}
+ *   x_{n} = x_{1,n} - x_{2,n} \mathop{\mathrm{mod}} {m_1}
  * \f]
  *
  * The original implementation by P.L'Ecuyer was designed in the era of

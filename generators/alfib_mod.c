@@ -5,11 +5,11 @@
  * @details It uses the next recurrent formula:
  *
  * \f[
- *   Y_{n} = Y_{n - 607} + Y_{n - 273} \mod 2^{64}
+ *   Y_{n} = Y_{n - 607} + Y_{n - 273} \mathop{\mathrm{mod}} 2^{64}
  * \f]
  *
  * \f[
- *   W_{n} = W_{n - 1} + \gamma \mod 2^{64}
+ *   W_{n} = W_{n - 1} + \gamma \mathop{\mathrm{mod}} 2^{64}
  * \f]
  *
  * \f[

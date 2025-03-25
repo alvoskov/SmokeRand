@@ -6,7 +6,7 @@
  *
  * @details It uses the next recurrent formula:
  * \f[
- * X_{n} = X_{n - r} \pm X_{n - s}
+ * X_{n} = X_{n - r} \pm X_{n - s} \mathop{\mathrm{mod}} 2^{64}
  * \f]
  *
  * and returns higher 32 bits. The initial values in the ring buffer
