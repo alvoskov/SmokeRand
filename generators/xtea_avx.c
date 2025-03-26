@@ -36,22 +36,26 @@
 
 PRNG_CMODULE_PROLOG
 
+/**
+ * @brief Number of generator copies inside the state.
+ */
+#define XTEA_NCOPIES 16
 
 /**
- * @brief XTEA vectorized PRNG state. It contains 8 copies of XTEA and can work
+ * @brief XTEA vectorized PRNG state. It contains 16 copies of XTEA and can work
  * either in CTR or CBC operation mode.
  * @details The next layout is used for both input (plaintext) and output
  * (ciphertext):
  *
  * \f[
- * \left[ x^{low}_0, \ldots, x^{low}_7, x^{high}_0,\ldots,x^{high}_7 \right]
+ * \left[ x^{low}_0, \ldots, x^{low}_{15}, x^{high}_0,\ldots,x^{high}_{15} \right]
  * \f]
  */
 typedef struct {
-    uint32_t in[16]; ///< Counters (plaintext).
-    uint32_t out[16]; ///< Output (ciphertext).
+    uint32_t in[XTEA_NCOPIES * 2]; ///< Counters (plaintext).
+    uint32_t out[XTEA_NCOPIES * 2]; ///< Output (ciphertext).
     uint32_t key[4]; ///< 256-bit key.
-    int pos; ///< Current position in the buffer (from 0 to 7).
+    int pos; ///< Current position in the buffer (from 0 to 15).
     int is_cbc; ///< 0/1 - CTR/CBC operation mode.
 } XteaVecState;
 
@@ -71,24 +75,34 @@ void XteaVecState_block(XteaVecState *obj)
 {
     static const uint32_t DELTA = 0x9e3779b9;
     uint32_t sum = 0;
-    __m256i y = _mm256_loadu_si256((__m256i *) obj->in);
-    __m256i z = _mm256_loadu_si256((__m256i *) (obj->in + 8));
+    __m256i y_a = _mm256_loadu_si256((__m256i *) obj->in);
+    __m256i y_b = _mm256_loadu_si256((__m256i *) (obj->in + 8));
+    __m256i z_a = _mm256_loadu_si256((__m256i *) (obj->in + 16));
+    __m256i z_b = _mm256_loadu_si256((__m256i *) (obj->in + 24));
     // CBC mode: XOR input (counter) with the previous input
     if (obj->is_cbc) {
-        __m256i out0 = _mm256_loadu_si256((__m256i *) obj->out);
-        __m256i out1 = _mm256_loadu_si256((__m256i *) (obj->out + 8));
-        y = _mm256_xor_si256(y, out0);
-        z = _mm256_xor_si256(z, out1);
+        __m256i out0_a = _mm256_loadu_si256((__m256i *) obj->out);
+        __m256i out0_b = _mm256_loadu_si256((__m256i *) (obj->out + 8));
+        __m256i out1_a = _mm256_loadu_si256((__m256i *) (obj->out + 16));
+        __m256i out1_b = _mm256_loadu_si256((__m256i *) (obj->out + 24));
+        y_a = _mm256_xor_si256(y_a, out0_a);
+        y_b = _mm256_xor_si256(y_b, out0_b);
+        z_a = _mm256_xor_si256(z_a, out1_a);
+        z_b = _mm256_xor_si256(z_b, out1_b);
     }
     for (int i = 0; i < 32; i++) {
         __m256i keyA = _mm256_set1_epi32(sum + obj->key[sum & 3]);
-        y = _mm256_add_epi32(y, mix(z, keyA));
+        y_a = _mm256_add_epi32(y_a, mix(z_a, keyA));
+        y_b = _mm256_add_epi32(y_b, mix(z_b, keyA));
         sum += DELTA;
         __m256i keyB = _mm256_set1_epi32(sum + obj->key[(sum >> 11) & 3]);
-        z = _mm256_add_epi32(z, mix(y, keyB));
+        z_a = _mm256_add_epi32(z_a, mix(y_a, keyB));
+        z_b = _mm256_add_epi32(z_b, mix(y_b, keyB));
     }
-    _mm256_storeu_si256((__m256i *) obj->out, y);
-    _mm256_storeu_si256((__m256i *) (obj->out + 8), z);
+    _mm256_storeu_si256((__m256i *) obj->out, y_a);
+    _mm256_storeu_si256((__m256i *) (obj->out + 8), y_b);
+    _mm256_storeu_si256((__m256i *) (obj->out + 16), z_a);
+    _mm256_storeu_si256((__m256i *) (obj->out + 24), z_b);
 }
 
 /**
@@ -102,16 +116,16 @@ void XteaVecState_init(XteaVecState *obj, const uint32_t *key)
     for (int i = 0; i < 4; i++) {
         obj->key[i] = key[i];
     }
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < XTEA_NCOPIES; i++) {
         obj->in[i] = i;
     }
-    for (int i = 8; i < 16; i++) {
+    for (int i = XTEA_NCOPIES; i < 2 * XTEA_NCOPIES; i++) {
         obj->in[i] = 0;
     }
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < 2 * XTEA_NCOPIES; i++) {
         obj->out[i] = 0; // Needed for CBC mode
     }
-    obj->pos = 8;
+    obj->pos = XTEA_NCOPIES;
     obj->is_cbc = 0;
 }
 
@@ -122,12 +136,12 @@ void XteaVecState_init(XteaVecState *obj, const uint32_t *key)
  */
 static inline void XteaVecState_inc_ctr(XteaVecState *obj)
 {
-    for (int i = 0; i < 8; i++) {
-        obj->in[i] += 8;
+    for (int i = 0; i < XTEA_NCOPIES; i++) {
+        obj->in[i] += XTEA_NCOPIES;
     }
     // 32-bit counters overflow: increment the upper halves
     if (obj->in[0] == 0) {
-        for (int i = 8; i < 16; i++) {
+        for (int i = XTEA_NCOPIES; i < 2 * XTEA_NCOPIES; i++) {
             obj->in[i]++;
         }
     }
@@ -137,13 +151,13 @@ static inline void XteaVecState_inc_ctr(XteaVecState *obj)
 static inline uint64_t get_bits_raw(void *state)
 {
     XteaVecState *obj = state;
-    if (obj->pos >= 8) {
+    if (obj->pos >= XTEA_NCOPIES) {
         XteaVecState_block(obj);
         XteaVecState_inc_ctr(obj);
         obj->pos = 0;
     }
     uint64_t val = obj->out[obj->pos];
-    val |= ((uint64_t) obj->out[obj->pos + 8]) << 32;
+    val |= ((uint64_t) obj->out[obj->pos + XTEA_NCOPIES]) << 32;
     obj->pos++;
     return val;
 }
@@ -174,7 +188,6 @@ static void *create(const CallerAPI *intf)
     return (void *) obj;
 }
 
-
 static int run_self_test(const CallerAPI *intf)
 {
     XteaVecState *obj = intf->malloc(sizeof(XteaVecState));
@@ -182,11 +195,11 @@ static int run_self_test(const CallerAPI *intf)
     const uint32_t key[4] = {0x27F917B1, 0xC1DA8993, 0x60E2ACAA, 0xA6EB923D};
     uint64_t u;
     XteaVecState_init(obj, key);
-    for (int i = 0; i < 8; i++) {
-        obj->in[i]     = 0xAF20A390;
-        obj->in[i + 8] = 0x547571AA;
+    for (int i = 0; i < XTEA_NCOPIES; i++) {
+        obj->in[i]                = 0xAF20A390;
+        obj->in[i + XTEA_NCOPIES] = 0x547571AA;
     }
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < XTEA_NCOPIES; i++) {
         u = get_bits_raw(obj);
     }
     intf->printf("Results: out = %llX; ref = %llX\n",
