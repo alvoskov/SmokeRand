@@ -42,7 +42,7 @@ local gen_not_portable_sources = {'aesni', 'chacha_avx', 'lcg128',
     'lcg128_full', 'lcg128', 'lcg128_u32_full', 'lcg64prime', 'lcg96',
     'magma_avx', 'mrg32k3a', 'mwc128x', 'mwc128', 'mwc256xxa64',
     'pcg64_xsl_rr', 'philox', 'sezgin63', 'speck128_avx', 'speck128_r16_avx',
-    'sqxor', 'threefry2x64_avx', 'wyrand', 'xoroshiro128pp_avx',
+    'sqxor', 'threefry_avx', 'threefry2x64_avx', 'wyrand', 'xoroshiro128pp_avx',
     'xorshift128pp_avx', 'xtea_avx'}
 -- mrg32k3a, sezgin63
 
