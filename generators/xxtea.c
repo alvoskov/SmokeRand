@@ -8,6 +8,11 @@
  * 2. https://ia.cr/2010/254
  * 3. https://github.com/an0maly/Crypt-XXTEA/blob/master/reference/test-vector.t
  *
+ * Testing:
+ * - 2 rounds: fails `express` battery.
+ * - 3 rounds: fails `full` battery, `sumcollector` test.
+ * - 4 rounds: passes `full` battery.
+ *
  * @copyright Implementation for SmokeRand:
  *
  * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
@@ -31,6 +36,11 @@ PRNG_CMODULE_PROLOG
 #include <x86intrin.h>
 #endif
 #endif
+
+enum {
+    XXTEA_DELTA = 0x9e3779b9,
+    XXTEA_NROUNDS = 19
+};
 
 /**
  * @brief XXTEA PRNG state.
@@ -77,15 +87,12 @@ static inline uint32_t mix(uint32_t y, uint32_t z, uint32_t sum, uint32_t rk)
  */
 void XxteaState_block(XxteaState *obj)
 {
-    static const uint32_t DELTA = 0x9e3779b9;
-    static const int nrounds = 19;
     uint32_t y = obj->ctr[0], z = obj->ctr[3], sum = 0;
     for (int i = 0; i < 4; i++) {
         obj->out[i] = obj->ctr[i];
     }
-
-    for (int i = 0; i < nrounds; i++) {
-        sum += DELTA;
+    for (int i = 0; i < XXTEA_NROUNDS; i++) {
+        sum += XXTEA_DELTA;
         unsigned int e = (sum >> 2) & 3;
         y = obj->out[1]; 
         z = obj->out[0] += mix(y, z, sum, obj->key[0 ^ e]);
@@ -146,8 +153,6 @@ static inline __m256i mixv(__m256i y, __m256i z, __m256i sum, __m256i rk)
  */
 void XxteaVecState_block(XxteaVecState *obj)
 {
-    static const uint32_t DELTA = 0x9e3779b9;
-    static const int nrounds = 19;
     uint32_t sum = 0;
     __m256i out[4], y, z;
     out[0] = _mm256_loadu_si256((__m256i *) obj->ctr);
@@ -155,8 +160,8 @@ void XxteaVecState_block(XxteaVecState *obj)
     out[2] = _mm256_loadu_si256((__m256i *) (obj->ctr + 2*XXTEA_NCOPIES));
     out[3] = _mm256_loadu_si256((__m256i *) (obj->ctr + 3*XXTEA_NCOPIES));
     y = out[0], z = out[3];
-    for (int i = 0; i < nrounds; i++) {
-        sum += DELTA;
+    for (int i = 0; i < XXTEA_NROUNDS; i++) {
+        sum += XXTEA_DELTA;
         unsigned int e = (sum >> 2) & 3;
         __m256i sumv = _mm256_set1_epi32(sum);
         __m256i rk[4];

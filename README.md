@@ -646,7 +646,7 @@ There are only two problematic situations:
  lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | 3     | +       | 64 GiB
  lcg128_u32_full   | u32    | +       | +     | 1       | 1    | 0.75 | +      | 3     | +       | >= 32 TiB
  lcg69069          | u32    | 6       | 19    | 37/38   | 42   | 0.38 | -(>>10)| 0     | -       | 2 KiB
- lea128            | u32    | +       | +     | +       | +    | 5.0  | +      | 5     |         | ?
+ lea128            | u32    | +       | +     | +       | +    | 5.7  | +      | 5     |         | ?
  lea128_avx        | u32    | +       | +     | +       | +    | 1.2  | +      | 5     |         | ?
  lfib_par[31+]     | u32    | 1       | 5/6   | 6/7     | 10   | 0.70 | +      | 0     | -       | 32 MiB
  lfib_par[55+]     | u32    | 1       | 4     | 5       | 7    | 0.51 | +      | 0     | -       | 2 GiB
@@ -789,6 +789,8 @@ There are only two problematic situations:
  xtea              | u64    | +       | +     | +       | +    | 27   |        |       |         | ?
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  |        |       |         | ?
  xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     |         | ?
+ xxtea             | u32    |         |       |         |      | 18   |        |       |         | ?
+ xxtea_avx         | u32    | +       | +     | +       | +    | 2.7  |        |       |         | ?
 
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
 e.g. changing `-O2` to `-O3` speeds up `mt19937` but slows down `philox`; gcc 10.3.0 (tdm64-1).
