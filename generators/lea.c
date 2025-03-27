@@ -1,13 +1,20 @@
 /**
  * @file lea.c
- * @brief PRNG based on the LEA128 block cipher in the CTR mode.
- * @details Test vectors for LEA128 (as 32-bit words):
+ * @brief PRNG based on the LEA-128 block cipher in the CTR (counter) mode.
+ * @details The LEA-128 block cipher uses 128-bit blocks that is enough to avoid
+ * the `birthday` battery failure even in CTR mode. Test vectors for LEA-128
+ * in the form of 32-bit words (see [2,3]):
  *
  *     KEY:    0x3c2d1e0f, 0x78695a4b, 0xb4a59687, 0xf0e1d2c3
  *     RKEY0:  0x003a0fd4, 0x02497010, 0x194f7db1, 0x02497010, 0x090d0883, 0x02497010
  *     RKEY23: 0x0bf6adba, 0xdf69029d, 0x5b72305a, 0xdf69029d, 0xcb47c19f, 0xdf69029d
  *     INPUT:  0x13121110, 0x17161514, 0x1b1a1918, 0x1f1e1d1c
  *     OUTPUT: 0x354ec89f, 0x18c6c628, 0xa7c73255, 0xfd8b6404
+ *
+ * NOTE: byte order is different from the ordinary byte sequence. It is because
+ * packing/inpacking to/from 32-bit words in the LEA-128 specification [1-3] is made
+ * as for little-endian architectures like x86. More test vectors can be found
+ * in the Crypto++ library distribution [4].
  *
  * References:
  *
@@ -20,12 +27,13 @@
  *    - Lightweight cryptograpy. Part 2. Block ciphers.
  * 3. KS X 3246, 128-bit block cipher LEA (in Korean)
  *    https://www.rra.go.kr/ko/reference/kcsList_view.do?nb_seq=1923&nb_type=6
- * 4. https://github.com/weidai11/cryptopp/blob/master/TestVectors/lea.txt
+ * 4. Crypto++ library by Wei Dai et al. LEA-128 test vectors.
+ *    https://github.com/weidai11/cryptopp/blob/master/TestVectors/lea.txt
  *
  * Tests:
  *
  * - 8 rounds - fails `express` battery.
- * - 9 rounds - passes `express`, `default`, fails `full` battery.
+ * - 9 rounds - passes `express` and `default` batteries, fails `full` battery.
  * - 10 rounds - passes `full` battery.
  *
  * @copyright
@@ -34,7 +42,6 @@
  *
  * This software is licensed under the MIT license.
  */
-
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
@@ -67,7 +74,7 @@ PRNG_CMODULE_PROLOG
  * @details Used to emulate inheritance from an abstract class.
  */
 typedef struct {
-    void (*block_func)(void *); ///< Pointer to the block generation function.
+    void (*iter_func)(void *); ///< Pointer to the block generation function.
     int pos; ///< Current position in the buffer.
     int bufsize; ///< Buffer size in 32-bit words.
     uint32_t *out; ///< Pointer to the output buffer.
@@ -129,11 +136,15 @@ static void lea128_fill_round_keys(uint32_t *rk, const uint32_t *key)
     }
 }
 
+/////////////////////////////////////////
+///// LeaState class implementation /////
+/////////////////////////////////////////
+
 /**
  * @brief Encrypt block using preinitialized round keys.
  * @relates LeaState
  */
-static void LeaState_block(LeaState *obj)
+void LeaState_block(LeaState *obj)
 {
     uint32_t c[4];
     uint32_t *rk = obj->rk;
@@ -152,6 +163,52 @@ static void LeaState_block(LeaState *obj)
         obj->out[i] = c[i];
     }
 }
+
+/**
+ * @brief Increase the internal 64-bit counter.
+ * @relates LeaState
+ */
+static inline void LeaState_inc_counter(LeaState *obj)
+{
+    uint64_t *ctr = (uint64_t *) obj->ctr;
+    (*ctr)++;
+}
+
+/**
+ * @brief Generates a new block of pseudorandom numbers and updates
+ * internal counters.
+ * @relates LeaState.
+ */
+void LeaState_iter_func(void *data)
+{
+    LeaState *obj = data;
+    LeaState_block(obj);
+    LeaState_inc_counter(obj);
+    obj->intf.pos = 0;
+}
+
+/**
+ * @brief Initialize the LEA128 scalar PRNG state.
+ * @param obj The state to be initialized.
+ * @param key 128-bit key.
+ * @relates LeaState
+ */
+void LeaState_init(LeaState *obj, const uint32_t *key)
+{
+    lea128_fill_round_keys(obj->rk, key);
+    for (int i = 0; i < 4; i++) {
+        obj->ctr[i] = 0;
+    }
+    obj->intf.pos = 4;
+    obj->intf.bufsize = 4;
+    obj->intf.iter_func = LeaState_iter_func;
+    obj->intf.out = obj->out;
+}
+
+////////////////////////////////////////////
+///// LeaVecState class implementation /////
+////////////////////////////////////////////
+
 
 #ifdef LEA_VEC_ENABLED
 /**
@@ -204,7 +261,7 @@ static inline void leavec_round(__m256i *c, const __m256i *rka, __m256i rkb)
  * @brief Encrypt block using preinitialized round keys.
  * @relates LeaVecState
  */
-static void LeaVecState_block(LeaVecState *obj)
+void LeaVecState_block(LeaVecState *obj)
 {
 #ifdef LEA_VEC_ENABLED
     __m256i ca[4], cb[4];
@@ -229,15 +286,6 @@ static void LeaVecState_block(LeaVecState *obj)
 #endif
 }
 
-/**
- * @brief Increase the internal 64-bit counter.
- * @relates LeaState
- */
-static inline void LeaState_inc_counter(LeaState *obj)
-{
-    uint64_t *ctr = (uint64_t *) obj->ctr;
-    (*ctr)++;
-}
 
 /**
  * @brief Increase internal counters. There are `LEA_NCOPIES` 64-bit counters
@@ -260,16 +308,12 @@ static inline void LeaVecState_inc_counter(LeaVecState *obj)
     }
 }
 
-
-void LeaState_block_func(void *data)
-{
-    LeaState *obj = data;
-    LeaState_block(obj);
-    LeaState_inc_counter(obj);
-    obj->intf.pos = 0;
-}
-
-void LeaVecState_block_func(void *data)
+/**
+ * @brief Generates a new block of pseudorandom numbers and updates
+ * internal counters.
+ * @relates LeaVecState.
+ */
+void LeaVecState_iter_func(void *data)
 {
     LeaVecState *obj = data;
     LeaVecState_block(obj);
@@ -277,23 +321,6 @@ void LeaVecState_block_func(void *data)
     obj->intf.pos = 0;
 }
 
-/**
- * @brief Initialize the LEA128 scalar PRNG state.
- * @param obj The state to be initialized.
- * @param key 128-bit key.
- * @relates LeaState
- */
-static void LeaState_init(LeaState *obj, const uint32_t *key)
-{
-    lea128_fill_round_keys(obj->rk, key);
-    for (int i = 0; i < 4; i++) {
-        obj->ctr[i] = 0;
-    }
-    obj->intf.pos = 4;
-    obj->intf.bufsize = 4;
-    obj->intf.block_func = LeaState_block_func;
-    obj->intf.out = obj->out;
-}
 
 /**
  * @brief Initialize the LEA128 vectorized PRNG state.
@@ -301,7 +328,7 @@ static void LeaState_init(LeaState *obj, const uint32_t *key)
  * @param key 128-bit key.
  * @relates LeaVecState
  */
-static void LeaVecState_init(LeaVecState *obj, const uint32_t *key)
+void LeaVecState_init(LeaVecState *obj, const uint32_t *key)
 {
     lea128_fill_round_keys(obj->rk, key);
     for (int i = 0; i < LEA_NCOPIES; i++) {
@@ -312,20 +339,31 @@ static void LeaVecState_init(LeaVecState *obj, const uint32_t *key)
     }
     obj->intf.pos = 4 * LEA_NCOPIES;
     obj->intf.bufsize = 4 * LEA_NCOPIES;
-    obj->intf.block_func = LeaVecState_block_func;
+    obj->intf.iter_func = LeaVecState_iter_func;
     obj->intf.out = obj->out;
 }
 
+///////////////////////
+///// Interfaces  /////
+///////////////////////
 
+/**
+ * @brief Returns one pseudorandom number generated by the LEA-128 algorithm.
+ * It refills PRNG internal buffers if necessary.
+ */
 static inline uint64_t get_bits_raw(void *state)
 {
     LeaInterface *obj = state;
     if (obj->pos >= obj->bufsize) {
-        obj->block_func(obj);
+        obj->iter_func(obj);
     }
     return obj->out[obj->pos++];
 }
 
+/**
+ * @brief Creates the LEA-128 PRNG example. Its type, scalar or vectorized,
+ * depends on the command line arguments (`--param=scalar` or `--param=avx2`).
+ */
 static void *create(const CallerAPI *intf)
 {
     uint32_t seeds[4];
@@ -356,14 +394,23 @@ static void *create(const CallerAPI *intf)
     }
 }
 
+///////////////////////////////
+///// Internal self-tests /////
+///////////////////////////////
 
+/**
+ * @brief Compares a round key with its reference value.
+ * @param rk     128-bit key for checking.
+ * @param rk_ref 128-bit key reference value.
+ * @return 0/1 - failure/success.
+ */
 static int test_round_keys(const CallerAPI *intf, const uint32_t *rk, const uint32_t *rk_ref)
 {
     int is_ok = 1;
     intf->printf("Testing round keys\n");
-    intf->printf("%8s %8s\n", "rk", "rk(ref)");
+    intf->printf("%10s %10s\n", "RK23(calc)", "RK23(ref)");
     for (int i = 0; i < 4; i++) {
-        intf->printf("%8X %8X\n", rk[i], rk_ref[i]);
+        intf->printf("0x%.8X 0x%.8X\n", rk[i], rk_ref[i]);
         if (rk[i] != rk_ref[i]) {
             is_ok = 0;
         }
@@ -374,6 +421,7 @@ static int test_round_keys(const CallerAPI *intf, const uint32_t *rk, const uint
 /**
  * @brief An internal self-test for the scalar version of LEA128 with 128-bit key.
  * @details The test vectors from the original ISO were used.
+ * @return 0/1 - failure/success.
  */
 static int test_scalar(const CallerAPI *intf)
 {
@@ -389,8 +437,9 @@ static int test_scalar(const CallerAPI *intf)
     obj->ctr[0] = 0x13121110; obj->ctr[1] = 0x17161514;
     obj->ctr[2] = 0x1b1a1918; obj->ctr[3] = 0x1f1e1d1c;
     LeaState_block(obj);
+    intf->printf("%10s | %10s\n", "Out", "Ref");
     for (int i = 0; i < 4; i++) {
-        intf->printf("%8X | %8X\n", obj->out[i], out_ref[i]);
+        intf->printf("0x%.8X | 0x%.8X\n", obj->out[i], out_ref[i]);
         if (obj->out[i] != out_ref[i]) {
             is_ok = 0;
         }
@@ -418,7 +467,7 @@ static int test_scalar(const CallerAPI *intf)
  *
  * NOTE: these hexadecimal dump is for bytes, not for 32-bit words!
  */
-static int test_vector(const CallerAPI *intf)
+int test_vector(const CallerAPI *intf)
 {
     static const uint32_t
         key[4]     = {0x3c2d1e0f, 0x78695a4b, 0xb4a59687, 0xf0e1d2c3},
@@ -448,7 +497,7 @@ static int test_vector(const CallerAPI *intf)
         if (i % 4 == 0 && i > 0) {
             intf->printf("\n");
         }
-        intf->printf("(%8X | %8X) ", obj->out[i], u_ref);
+        intf->printf("(0x%.8X | 0x%.8X) ", obj->out[i], u_ref);
         if (obj->out[i] != u_ref) {
             is_ok = 0;
         }
@@ -496,7 +545,11 @@ static int run_self_test(const CallerAPI *intf)
 {
     int is_ok = 1;
     is_ok = is_ok & test_scalar(intf);
+#ifdef LEA_VEC_ENABLED
     is_ok = is_ok & test_vector(intf);
+#else
+    intf->printf("Vectorized version was not tested: AVX2 support not found\n");
+#endif
     return is_ok;
 }
 
