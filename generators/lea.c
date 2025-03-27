@@ -23,8 +23,9 @@
  * 4. https://github.com/weidai11/cryptopp/blob/master/TestVectors/lea.txt
  *
  * Tests:
+ *
  * - 8 rounds - fails `express` battery.
- * - 9 rounds - passes `express`, `default`, fails `full`
+ * - 9 rounds - passes `express`, `default`, fails `full` battery.
  * - 10 rounds - passes `full` battery.
  *
  * @copyright
@@ -38,9 +39,15 @@
 
 PRNG_CMODULE_PROLOG
 
+/**
+ * @brief Number of rounds (default value for 128-bit keys is used)
+ */
 #define LEA_NROUNDS 24
+
+/**
+ * @brief Alignment (number of 32-bit words) for round keys.
+ */
 #define LEA_RK_ALIGN 4
-#define LEA_NCOPIES 16
 
 #ifdef  __AVX2__
 #define LEA_VEC_ENABLED
@@ -54,14 +61,21 @@ PRNG_CMODULE_PROLOG
 #endif
 #endif
 
-
+/**
+ * @brief A generalized interface for both scalar and vectorized versions
+ * of the LEA128 PRNG. Should be placed at the beginning of the PRNG state.
+ * @details Used to emulate inheritance from an abstract class.
+ */
 typedef struct {
-    void (*block_func)(void *);
-    int pos;
-    int bufsize;
-    uint32_t *out;
+    void (*block_func)(void *); ///< Pointer to the block generation function.
+    int pos; ///< Current position in the buffer.
+    int bufsize; ///< Buffer size in 32-bit words.
+    uint32_t *out; ///< Pointer to the output buffer.
 } LeaInterface;
 
+/**
+ * @brief LEA128 generator state (scalar version).
+ */
 typedef struct {
     LeaInterface intf;
     uint32_t ctr[4]; ///< Counter (plaintext)
@@ -69,6 +83,16 @@ typedef struct {
     uint32_t rk[LEA_NROUNDS * LEA_RK_ALIGN]; ///< Round keys (0,2,4) | [1,3,5]
 } LeaState;
 
+/**
+ * @brief Number of the LEA128 generator copies in the `LeaVecState` structure.
+ * Note: its modification will require editing of the `LeaVecState_block`
+ * function!
+ */
+#define LEA_NCOPIES 16
+
+/**
+ * @brief LEA128 generator state (vectorized version).
+ */
 typedef struct {
     LeaInterface intf;
     uint32_t ctr[4 * LEA_NCOPIES]; ///< Counter (plaintext)
@@ -77,8 +101,13 @@ typedef struct {
 } LeaVecState;
 
 
-
-void lea128_fill_round_keys(uint32_t *rk, const uint32_t *key)
+/**
+ * @brief Calculate round keys for LEA128 with 128-bit keys.
+ * @param rk   Output buffer for round keys, each round key is 128-bit and has the
+ * `t[0],t[2],t[3],t[1]` layout.
+ * @param key  128-bit key.
+ */
+static void lea128_fill_round_keys(uint32_t *rk, const uint32_t *key)
 {
     static const uint32_t delta[8] = {
         0xc3efe9db, 0x44626b02, 0x79e27c8a, 0x78df30ec,
@@ -100,7 +129,11 @@ void lea128_fill_round_keys(uint32_t *rk, const uint32_t *key)
     }
 }
 
-void LeaState_block(LeaState *obj)
+/**
+ * @brief Encrypt block using preinitialized round keys.
+ * @relates LeaState
+ */
+static void LeaState_block(LeaState *obj)
 {
     uint32_t c[4];
     uint32_t *rk = obj->rk;
@@ -167,7 +200,11 @@ static inline void leavec_round(__m256i *c, const __m256i *rka, __m256i rkb)
 
 #endif
 
-void LeaVecState_block(LeaVecState *obj)
+/**
+ * @brief Encrypt block using preinitialized round keys.
+ * @relates LeaVecState
+ */
+static void LeaVecState_block(LeaVecState *obj)
 {
 #ifdef LEA_VEC_ENABLED
     __m256i ca[4], cb[4];
@@ -192,6 +229,10 @@ void LeaVecState_block(LeaVecState *obj)
 #endif
 }
 
+/**
+ * @brief Increase the internal 64-bit counter.
+ * @relates LeaState
+ */
 static inline void LeaState_inc_counter(LeaState *obj)
 {
     uint64_t *ctr = (uint64_t *) obj->ctr;
@@ -199,8 +240,11 @@ static inline void LeaState_inc_counter(LeaState *obj)
 }
 
 /**
- * @brief Increase internal counters. There are 8 64-bit counters in the AVX2
- * version of the LEA based PRNG.
+ * @brief Increase internal counters. There are `LEA_NCOPIES` 64-bit counters
+ * in the AVX2 version of the LEA based PRNG.
+ * @details We treat our counters as 64-bit despite the 128-bit block size.
+ * The upper half of the 128-bit block is not changed and may be used as
+ * a thread ID if desired)
  * @relates LeaVecState
  */
 static inline void LeaVecState_inc_counter(LeaVecState *obj)
@@ -209,8 +253,6 @@ static inline void LeaVecState_inc_counter(LeaVecState *obj)
         obj->ctr[i] += LEA_NCOPIES;
     }
     // 32-bit counters overflow: increment the upper halves
-    // We treat our counters as 64-bit, the upper half of the 128-bit block
-    // is not changed (may be used as a thread ID if desired)
     if (obj->ctr[0] == 0) {
         for (int i = LEA_NCOPIES; i < 2 * LEA_NCOPIES; i++) {
             obj->ctr[i]++;
@@ -235,8 +277,13 @@ void LeaVecState_block_func(void *data)
     obj->intf.pos = 0;
 }
 
-
-void LeaState_init(LeaState *obj, const uint32_t *key)
+/**
+ * @brief Initialize the LEA128 scalar PRNG state.
+ * @param obj The state to be initialized.
+ * @param key 128-bit key.
+ * @relates LeaState
+ */
+static void LeaState_init(LeaState *obj, const uint32_t *key)
 {
     lea128_fill_round_keys(obj->rk, key);
     for (int i = 0; i < 4; i++) {
@@ -248,7 +295,13 @@ void LeaState_init(LeaState *obj, const uint32_t *key)
     obj->intf.out = obj->out;
 }
 
-void LeaVecState_init(LeaVecState *obj, const uint32_t *key)
+/**
+ * @brief Initialize the LEA128 vectorized PRNG state.
+ * @param obj The state to be initialized.
+ * @param key 128-bit key.
+ * @relates LeaVecState
+ */
+static void LeaVecState_init(LeaVecState *obj, const uint32_t *key)
 {
     lea128_fill_round_keys(obj->rk, key);
     for (int i = 0; i < LEA_NCOPIES; i++) {
@@ -324,9 +377,10 @@ static int test_round_keys(const CallerAPI *intf, const uint32_t *rk, const uint
  */
 static int test_scalar(const CallerAPI *intf)
 {
-    static const uint32_t key[4] = {0x3c2d1e0f, 0x78695a4b, 0xb4a59687, 0xf0e1d2c3};    
-    static const uint32_t rk23[4] = {0x0bf6adba, 0x5b72305a, 0xcb47c19f, 0xdf69029d};
-    static const uint32_t out_ref[4] = {0x354ec89f, 0x18c6c628, 0xa7c73255, 0xfd8b6404};
+    static const uint32_t
+        key[4]     = {0x3c2d1e0f, 0x78695a4b, 0xb4a59687, 0xf0e1d2c3},
+        rk23[4]    = {0x0bf6adba, 0x5b72305a, 0xcb47c19f, 0xdf69029d},
+        out_ref[4] = {0x354ec89f, 0x18c6c628, 0xa7c73255, 0xfd8b6404};
     int is_ok = 1;
     LeaState *obj = intf->malloc(sizeof(LeaState));
     LeaState_init(obj, key);
@@ -366,19 +420,17 @@ static int test_scalar(const CallerAPI *intf)
  */
 static int test_vector(const CallerAPI *intf)
 {
-    static const uint32_t key[4] = {0x3c2d1e0f, 0x78695a4b, 0xb4a59687, 0xf0e1d2c3};    
-    static const uint32_t rk23[4] = {0x0bf6adba, 0x5b72305a, 0xcb47c19f, 0xdf69029d};
-    static const uint32_t out_ref[4] = {0x354ec89f, 0x18c6c628, 0xa7c73255, 0xfd8b6404};
-
-    static const uint32_t key2[4] = {0xD28D0654, 0x556BA468, 0xD4FC03CA, 0x1C2BC6F4};    
-    static const uint32_t in2[12] = {
-        0x9A062ED7, 0x1079307A, 0x8C5CCBE5, 0x9BB1983D,
-        0xBA26A330, 0x0DE27994, 0x547D824A, 0x1A509169,
-        0x2FF0BA98, 0x59F564BC, 0x47009ED4, 0xC6FCB720};
-    static const uint32_t out2[12] = {
-        0x2AD5836C, 0x46419B76, 0x6FFB7EF7, 0x9A3D1964,
-        0x403176B4, 0x740556CB, 0xD8882779, 0xF8A651D0,
-        0xA7C6A342, 0x8AD8A931, 0x59F9AAD0, 0xC30923F8};
+    static const uint32_t
+        key[4]     = {0x3c2d1e0f, 0x78695a4b, 0xb4a59687, 0xf0e1d2c3},
+        rk23[4]    = {0x0bf6adba, 0x5b72305a, 0xcb47c19f, 0xdf69029d},
+        out_ref[4] = {0x354ec89f, 0x18c6c628, 0xa7c73255, 0xfd8b6404},
+        key2[4]    = {0xD28D0654, 0x556BA468, 0xD4FC03CA, 0x1C2BC6F4},    
+        in2[12]    = {0x9A062ED7, 0x1079307A, 0x8C5CCBE5, 0x9BB1983D,
+                      0xBA26A330, 0x0DE27994, 0x547D824A, 0x1A509169,
+                      0x2FF0BA98, 0x59F564BC, 0x47009ED4, 0xC6FCB720},
+        out2[12]   = {0x2AD5836C, 0x46419B76, 0x6FFB7EF7, 0x9A3D1964,
+                      0x403176B4, 0x740556CB, 0xD8882779, 0xF8A651D0,
+                      0xA7C6A342, 0x8AD8A931, 0x59F9AAD0, 0xC30923F8};
     int is_ok = 1;
     LeaVecState *obj = intf->malloc(sizeof(LeaVecState));
     LeaVecState_init(obj, key);
