@@ -71,6 +71,7 @@ static void *create(const CallerAPI *intf)
     obj->key[1] = s0 >> 32;
     obj->key[2] = (uint32_t) s1;
     obj->key[3] = s1 >> 32;
+    obj->ctr = 0;
     return (void *) obj;
 }
 
