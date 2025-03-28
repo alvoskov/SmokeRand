@@ -724,9 +724,9 @@ There are only two problematic situations:
  ranrot32[7/3]     | u32    | +       | 1/2   | 4/5     | 5    | 0.58 | +      | 0     | Small   | 128 MiB
  ranrot32[17/9]    | u32    | +       | 1     | 2       | 3    | 0.68 | +      | 0     | +       | 1 GiB
  ranrot32[57/13]   | u32    | +       | +     | +       | 1    | 0.74 | +      | 2     | +       | 8 GiB
- ranshi            | u64    | +       | 1     | 6       | 7    | 0.43 | +      |       |         | 32 KiB
- ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | N/A    |       |         | >= 2 TiB
- ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | N/A    |       |         | >= 1 TiB
+ ranshi            | u64    | +       | 1     | 6       | 7    | 0.43 | +      | 0     |         | 32 KiB
+ ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 2 TiB
+ ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 1 TiB
  ranval            | u32    | +       | +     | +       | +    | 0.31 | +      | 4(0)  | +       | >= 4 TiB
  r1279             | u32    | 2       | 5     | 7       | 10   | 0.47 | +      | 0     | Small   | 64 MiB
  ranlux[0]         | u32    | 1       | 6     | 9       | 12   | 6.8  | N/A    |       |         | 4 MiB
@@ -790,9 +790,9 @@ There are only two problematic situations:
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  |        |       |         | ?
  xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     |         | ?
  xxtea128          | u32    | +       | +     | +       |      | 18   | +      |       |         | ?
- xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      |       |         | ?
- xxtea256          | u32    |         |       |         |      |      |        |       |         |
- xxtea256_avx      | u32    |         |       |         |      |      |        |       |         |
+ xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4     |         | ?
+ xxtea256          | u32    | +       | +     | +       | +    |      | +      | 4     |         | ?
+ xxtea256_avx      | u32    | +       | +     | +       | +    |      | +      | 4     |         | ?
 
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
 e.g. changing `-O2` to `-O3` speeds up `mt19937` but slows down `philox`; gcc 10.3.0 (tdm64-1).
@@ -859,6 +859,12 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 - Passed dieharder: lcg64, lfib(55,24,+,up32), lfib(607,203,+,up32), swb, xorwow
 
 # Versions history
+
+28.03.2025: SmokeRand 0.32
+
+- The variants of the `xxtea` algorithm with 128-bit and 256-bit blocks
+  were added (selected by means of the `--param=mode` command line option).
+  Options: `scalar-128`, `avx2-128`, `scalar-256`, `avx2-256`.
 
 26.03.2025: SmokeRand 0.31
 

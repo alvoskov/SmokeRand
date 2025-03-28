@@ -7,6 +7,9 @@
  * bits of `double` output in the original PRNG has a lower quality
  * than the `blk_spin` variable for the upper 32 bits.
  *
+ * In its 64-bit form it fails the `hamming_ot` and `hamming_ot_long` tests,
+ * also fails `matrixrank` test (but not linear complexity test).
+ *
  * 1. https://doi.org/10.1016/0010-4655(95)00005-Z
  * 2. https://geant4.kek.jp/lxr-dev/source/externals/clhep/src/RanshiEngine.cc
  * @copyright 
@@ -62,6 +65,5 @@ static void *create(const CallerAPI *intf)
     }
     return (void *) obj;
 }
-
 
 MAKE_UINT64_PRNG("ranshi", NULL)
