@@ -789,8 +789,8 @@ There are only two problematic situations:
  xtea              | u64    | +       | +     | +       | +    | 27   |        |       |         | ?
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  |        |       |         | ?
  xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     |         | ?
- xxtea             | u32    |         |       |         |      | 18   |        |       |         | ?
- xxtea_avx         | u32    | +       | +     | +       | +    | 2.7  |        |       |         | ?
+ xxtea             | u32    | +       | +     | +       |      | 18   | +      |       |         | ?
+ xxtea_avx         | u32    | +       | +     | +       | +    | 2.7  | +      |       |         | ?
 
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
 e.g. changing `-O2` to `-O3` speeds up `mt19937` but slows down `philox`; gcc 10.3.0 (tdm64-1).
