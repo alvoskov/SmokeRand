@@ -691,7 +691,7 @@ There are only two problematic situations:
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | +      | 4     | +       | >= 32 TiB
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.50 | +      | 3.25  | Small   | 128 GiB
  mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | +      | 4     | +       | 2 TiB
- msws              | u32    | +       | +     | +       | +    | 0.72 | +      | 4     | +       | >= 2 TiB
+ msws              | u32    | +       | +     | +       | +    | 0.72 | +      | 4     | +       | >= 16 TiB
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 2 TiB
  mulberry32        | u32    | +       | 1     | 2       | 4    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
  mwc32x            | u32    | +       | 2     | 2       | 7    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
@@ -703,7 +703,7 @@ There are only two problematic situations:
  mwc128            | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 16 TiB
  mwc128x           | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 32 TiB
  mwc128xxa32       | u32    | +       | +     | +       | +    | 0.52 | +      | 4     |         | >= 32 TiB
- mwc256xxa64       | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 16 TiB
+ mwc256xxa64       | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 32 TiB
  mwc1616           | u32    | 1       | 10/11 | 12/18   | 19   | 0.48 | -      | 0     | -/Small | 16 MiB
  mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | +       | >= 32 TiB(?)
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 32 TiB
