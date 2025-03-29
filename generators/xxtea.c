@@ -467,17 +467,17 @@ static void *create(const CallerAPI *intf)
     key[0] = (uint32_t) s0; key[1] = s0 >> 32;
     key[2] = (uint32_t) s1; key[3] = s1 >> 32;
     const char *ver = intf->get_param();
-    if (!intf->strcmp(ver, "scalar-128") || !intf->strcmp(ver, "")) {
+    if (!intf->strcmp(ver, "128-scalar") || !intf->strcmp(ver, "")) {
         Xxtea128State *obj = intf->malloc(sizeof(Xxtea128State));
         Xxtea128State_init(obj, key);
         intf->printf("XXTEA128-scalar\n");
         return obj;
-    } else if (!intf->strcmp(ver, "scalar-256") || !intf->strcmp(ver, "")) {
+    } else if (!intf->strcmp(ver, "256-scalar") || !intf->strcmp(ver, "")) {
         Xxtea256State *obj = intf->malloc(sizeof(Xxtea256State));
         Xxtea256State_init(obj, key);
         intf->printf("XXTEA256-scalar\n");
         return obj;
-    } else if (!intf->strcmp(ver, "avx2-128")) {
+    } else if (!intf->strcmp(ver, "128-avx2")) {
 #ifdef XXTEA_VEC_ENABLED
         Xxtea128VecState *obj = intf->malloc(sizeof(Xxtea128VecState));
         Xxtea128VecState_init(obj, key);
@@ -487,7 +487,7 @@ static void *create(const CallerAPI *intf)
         intf->printf("AVX2 is not supported on this platform\n");
         return NULL;
 #endif
-    } else if (!intf->strcmp(ver, "avx2-256")) {
+    } else if (!intf->strcmp(ver, "256-avx2")) {
 #ifdef XXTEA_VEC_ENABLED
         Xxtea256VecState *obj = intf->malloc(sizeof(Xxtea256VecState));
         Xxtea256VecState_init(obj, key);
@@ -498,7 +498,7 @@ static void *create(const CallerAPI *intf)
         return NULL;
 #endif
     } else {
-        intf->printf("Unknown version '%s' (scalar-128, scalar-256, avx2-128 or avx2-256 are supported)\n", ver);
+        intf->printf("Unknown version '%s' (128-scalar, 256-scalar, 128-avx2 or 256-avx2 are supported)\n", ver);
         return NULL;
     }
 }
