@@ -4,11 +4,13 @@
  * `default` and `full` batteries. These are 64-bit birthday paradox (not birthday
  * spacings!) test and 2D 16x16 Ising model tests.
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
  */
+#include "smokerand/entropy.h"
 #include "smokerand/extratests.h"
 #include "smokerand/specfuncs.h"
 #include <math.h>
@@ -117,25 +119,31 @@ static inline uint64_t birthday_gen_trvalue(GeneratorState *obj, uint64_t mask, 
 TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
 {
     TestResults ans = TestResults_create("birthday");
+    unsigned long long nvalues_raw = (opts->n << opts->e);
     unsigned int nbits_per_value = birthday_get_nbits_per_value(obj->gi);
     double lambda = BirthdayOptions_calc_lambda(opts, nbits_per_value);
-    obj->intf->printf("  Sample size: 2^%.2f values\n", sr_log2((double) opts->n));
+    obj->intf->printf("  Sample size:      2^%.2f values (2^%.2f bytes)\n",
+        sr_log2((double) opts->n), sr_log2(8.0 * (double) opts->n));
     if (opts->n < 8) {
         obj->intf->printf("  Sample size is too small");
         return ans;
     }
-    obj->intf->printf("  Shift:       %d bits\n", (int) opts->e);
+    obj->intf->printf("  Shift:            %d bits\n",   (int) opts->e);
+    obj->intf->printf("  Raw sample size:  2^%.2f values (2^%.2f bytes)\n",
+        sr_log2(nvalues_raw), sr_log2(8.0 * (double) nvalues_raw));
     obj->intf->printf("  lambda = %g\n", lambda);
     obj->intf->printf("  Filling the array with 'birthdays'\n");
     uint64_t mask = (1ull << opts->e) - 1;
     time_t tic = time(NULL);
+    uint64_t cpu_tic = cpuclock();
     uint64_t *x = calloc(opts->n, sizeof(uint64_t));
     if (x == NULL) {
         obj->intf->printf("  Not enough memory (2^%.0f bytes is required)\n",
             sr_log2(opts->n * 8.0));
         return ans;
     }
-    for (size_t i = 0; i < opts->n; i++) {
+    unsigned long long bytes_per_trvalue = 1ull << (opts->e + 3);
+    for (unsigned long long i = 0; i < opts->n; i++) {
         int is_ok;
         x[i] = birthday_gen_trvalue(obj, mask, &is_ok);
         if (!is_ok) {
@@ -148,12 +156,26 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
         }
         if (i % (opts->n / 1000) == 0) {
             unsigned long nseconds_total, nseconds_left;
+            double mib_per_sec, cpb;
+            uint64_t cpu_toc = cpuclock();
+            if (cpu_toc < cpu_tic) {
+                cpu_tic = cpu_toc;
+            }
+            cpb = (double) (cpu_toc - cpu_tic) / (double) (i * bytes_per_trvalue);
             nseconds_total = (unsigned long) (time(NULL) - tic);
             nseconds_left = (unsigned long) ( ((unsigned long long) nseconds_total * (opts->n - i)) / (i + 1) );
+            mib_per_sec = (double) (i * bytes_per_trvalue) / (double) nseconds_total / (1ul << 20);
             obj->intf->printf("\r    %.1f %% completed; ", 100.0 * i / (double) opts->n);
             obj->intf->printf("time elapsed: "); print_elapsed_time(nseconds_total);
-            obj->intf->printf("; time left: ");
+            obj->intf->printf(", left: ");
             print_elapsed_time(nseconds_left);
+            if (mib_per_sec > 1024.0) {
+                obj->intf->printf("; %.2f GiB/s (%.3g cpb)",
+                    mib_per_sec / 1024.0, cpb);
+            } else if (mib_per_sec == mib_per_sec && mib_per_sec < 1e100) {
+                obj->intf->printf("; %.1f MiB/s (%.3g cpb)",
+                    mib_per_sec, cpb);
+            }
             obj->intf->printf("    ");
         }
     }

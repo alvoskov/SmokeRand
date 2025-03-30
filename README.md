@@ -638,6 +638,7 @@ There are only two problematic situations:
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 16 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
+ kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 4.5   |         |
  lcg32prime        | u32    | 1       | 13    | 24      | 25/26| 2.2  | -(>>10)| 0     | -       | 512 MiB
  lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | +      | 0     | Small   | 16 MiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | 0     | +-      | >= 32 TiB
@@ -732,7 +733,7 @@ There are only two problematic situations:
  ranlux[0]         | u32    | 1       | 6     | 9       | 12   | 6.8  | N/A    |       |         | 4 MiB
  ranlux[1]         | u32    | +       | +     | 2       | 3    | 13   | N/A    |       |         | 4 GiB
  ranlux[2]         | u32    | +       | +     | +       | +    | 27   | N/A    |       |         | >= 128 GiB
- rc4               | u32    | +       | +     | +       | +    | 6.0  | N/A    | 3     | +       | 512 GiB
+ rc4               | u32    | +       | +     | +       | +    | 6.0  | +      | 3     | +       | 512 GiB
  rc4ok             | u32    | +       | +     | +       | +    | 6.2  | N/A    | 4     | +       | >= 1 TiB
  romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      | 4(0)  |         | >= 1 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 2 TiB
@@ -745,8 +746,8 @@ There are only two problematic situations:
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
  speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         | ?
  speck128          | u64    | +       | +     | +       | +    | 3.1  | +      | 5     |         | >= 2 TiB
- speck128_avx      | u64    | +       | +     | +       | +    | 0.65 | +      | 5     |         | >= 16 TiB
- speck128_r16_avx  | u64    | +       | +     | +       | +    | 0.33 | +      | 4     |         | >= 32 TiB
+ speck128_avx(full)| u64    | +       | +     | +       | +    | 0.75 | +      | 5     |         | >= 16 TiB
+ speck128_avx(r16) | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 32 TiB
  splitmix          | u64    | +       | +     | +       | +    | 0.19 | -      | 3     | +       | >= 2 TiB
  splitmix32        | u32    | +       | 2     | 3       | 4/5  | 0.25 | -(>>10)| 0     | Small   | 1 GiB
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | 4     | +       | >= 16 TiB
@@ -761,13 +762,13 @@ There are only two problematic situations:
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | 2     | Crush   | 4 TiB
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 2 TiB
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | +      | 0     | Crush   | 512 GiB
- swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | N/A    | 2     | +       | 4 GiB
+ swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | +      | 2     | +       | 4 GiB
  taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  | Small   | 32 KiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      | 3     |         | 32 GiB
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | ?
- threefish         | u64    | +       | +     | +       | +    | 4.3  |        |       |         | ?
+ threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | ?
  threefish_avx     | u64    | +       | +     | +       | +    | 1.3  | +      | 5     |         | ?
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 32 TiB
@@ -789,10 +790,10 @@ There are only two problematic situations:
  xtea              | u64    | +       | +     | +       | +    | 27   |        |       |         | ?
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  |        |       |         | ?
  xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     |         | ?
- xxtea128          | u32    | +       | +     | +       | +    | 18   | +      | 4     |         | ?
- xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4     |         | ?
- xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4     |         | ?
- xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4     |         | ?
+ xxtea128          | u32    | +       | +     | +       | +    | 18   | +      | 4.5   |         | ?
+ xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   |         | ?
+ xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   |         | ?
+ xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   |         | ?
 
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
 e.g. changing `-O2` to `-O3` speeds up `mt19937` but slows down `philox`; gcc 10.3.0 (tdm64-1).

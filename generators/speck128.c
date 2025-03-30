@@ -53,22 +53,15 @@ static inline void speck_round(uint64_t *x, uint64_t *y, const uint64_t k)
 }
 
 
-static void Speck128State_init(Speck128State *obj, const uint64_t *key, const CallerAPI *intf)
+static void Speck128State_init(Speck128State *obj, const uint64_t *key)
 {
     obj->ctr[0] = 0;
     obj->ctr[1] = 0;
-    if (key == NULL) {
-        obj->keys[0] = intf->get_seed64();
-        obj->keys[1] = intf->get_seed64();
-    } else {
-        obj->keys[0] = key[0];
-        obj->keys[1] = key[1];
-    }
+    obj->keys[0] = key[0];
+    obj->keys[1] = key[1];
     uint64_t a = obj->keys[0], b = obj->keys[1];
     for (size_t i = 0; i < NROUNDS - 1; i++) {
-        //intf.printf("%llX\n", obj->keys[i]);
         speck_round(&b, &a, i);
-        //R(b, a, i);
         obj->keys[i + 1] = a;
     }    
     obj->pos = 2;
@@ -80,14 +73,16 @@ static inline void Speck128State_block(Speck128State *obj)
     obj->out[1] = obj->ctr[1];
     for (size_t i = 0; i < NROUNDS; i++) {
         speck_round(&(obj->out[1]), &(obj->out[0]), obj->keys[i]);
-//        R(obj->out[1], obj->out[0], obj->keys[i]);
     }
 }
 
 static void *create(const CallerAPI *intf)
 {
     Speck128State *obj = intf->malloc(sizeof(Speck128State));
-    Speck128State_init(obj, NULL, intf);
+    uint64_t key[2];
+    key[0] = intf->get_seed64();
+    key[1] = intf->get_seed64();
+    Speck128State_init(obj, key);
     return (void *) obj;
 }
 
@@ -115,7 +110,7 @@ int run_self_test(const CallerAPI *intf)
     const uint64_t ctr[] = {0x7469206564616d20, 0x6c61766975716520};
     const uint64_t out[] = {0x7860fedf5c570d18, 0xa65d985179783265};
     Speck128State *obj = intf->malloc(sizeof(Speck128State));
-    Speck128State_init(obj, key, intf);
+    Speck128State_init(obj, key);
     obj->ctr[0] = ctr[0]; obj->ctr[1] = ctr[1];
     Speck128State_block(obj);
     intf->printf("Output:    0x%16llX 0x%16llX\n", obj->out[0], obj->out[1]);

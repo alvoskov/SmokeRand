@@ -1,43 +1,81 @@
 /**
  * @file kuzn.c
- * @brief
- * @details
+ * @brief "Kuznyechik" Block Cipher implementation (RFC7801/GOST R 34.12-2015)
+ * for pseudorandom numbers generation.
+ * @details This version uses optimizations based on lookup tables. L
+ * transformation of the algorithm can be represented as 16x16 matrix.
+ * \f$ L = R^{16} \f$.
+ *
+ * Testing:
+ *
+ * - 2 rounds - fails `express`.
+ * - 3 rounds - passes `express`, `brief` but fails `default`. The failed tests
+ *   are `matrixrank_4096` and `matrixrank_4096_low8` (but not `linearcomp`) tests.
+ *   In the `full` battery it also fails all `matrixrank` tests.
+ * - 4 rounds - passes `full` battery.
+ *
+ * This is better result than the 2 rounds distinguisher decribed by Klinec
+ * et al. [9].
+ * 
+ * References:
  * 
  * 1. RFC7801. GOST R 34.12-2015: Block Cipher "Kuznyechik"
  *    https://datatracker.ietf.org/doc/html/rfc7801
  * 2. GOST R 34.12-2015 (in Russian)
  *    https://tc26.ru/standard/gost/GOST_R_3412-2015.pdf
- * 3. https://rekovalev.site/kuznechik-crypto/#code
+ * 3. Rybkin A.S. On software implementation of Kuznyechik on Intel CPUs //
+ *    // Matem. Vopr. Kryptogr. 2018. V 9. N 2. P. 117-127 [in Russian]
+ *    https://doi.org/10.4213/mvk255
  * 4. Ищукова Е.А., Кошуцкий Р.А., Бабенко Л.К. Разработка и реализация
  *    высокоскоростного шифрования данных с использованием алгоритма
- *    Кузнечик // Auditorium. 2015. №4 (8).
+ *    Кузнечик // Auditorium. 2015. N 4 (8).
  *    https://cyberleninka.ru/article/n/razrabotka-i-realizatsiya-vysokoskorostnogo-shifrovaniya-dannyh-s-ispolzovaniem-algoritma-kuznechik
  * 5. Гафуров И. Р. Высокоскоростная программная реализация алгоритмов
  *    шифрования из ГОСТ Р 34.12-2015 // Ученые записки УлГУ. Серия "Математика
  *    и информационные технологии". 2022. N 2. P.38-48. http://mi.mathnet.ru/ulsu147.
- * 6. https://tosc.iacr.org/index.php/ToSC/article/view/7405/6577
- * 7. https://who.paris.inria.fr/Leo.Perrin/sbox-reverse-engineering.html
- * 8. https://who.paris.inria.fr/Leo.Perrin/pi.html
+ * 6. Perrin L. Partitions in the S-Box of Streebog and Kuznyechik // IACR
+ *    Transactions on Symmetric Cryptology. 2019. N 1. P. 302-329.
+ *    https://doi.org/10.13154/tosc.v2019.i1.302-329
+ * 7. Perrin L. On S-Box Reverse-Engineering.
+ *    https://who.paris.inria.fr/Leo.Perrin/sbox-reverse-engineering.html
+ * 8. Perrin L. On the S-Box of Streebog and Kuznyechik.
+ *    https://who.paris.inria.fr/Leo.Perrin/pi.html
+ * 9. Klinec D., Sýs M., Kubíček K., Švenda P., Matyáš V. Large-scale
+ *    Randomness Study of Security Margins for 100+ Cryptographic Functions //
+ *    Proceedings of the 19th International Conference on Security and
+ *    Cryptography - SECRYPT. 2022. ISBN 978-989-758-590-6; ISSN 2184-7711,
+ *    SciTePress, pages 134-146. DOI: https://doi.org/10.5220/0011267600003283
+ * 10. https://rekovalev.site/kuznechik-crypto/#code
+ *
+ * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 
+/**
+ * @brief 16x16 matrix of bytes.
+ */
 typedef struct {
     uint8_t a[16][16];
 } Mat16;
 
+/**
+ * @brief Vector of 16 bytes.
+ */
 typedef struct {
-    uint8_t a[16];
+    union {
+        uint8_t u8[16];
+        uint64_t u64[2];
+    } data;
 } Vec16;
 
-static Vec16 lookup_table_LS[16 * 256];
-
-typedef struct {
-    Vec16 lo; ///< Lower 128 bits of the key
-    Vec16 hi; ///< Higher 128 bits of the key
-} Key256;
-
+/**
+ * @brief "Kuznyechik" block cipher based PRNG state (GOST R 34.12-2015).
+ */
 typedef struct {
     Vec16 rk[10]; ///< Round keys
     Vec16 ctr; ///< Counter (plaintext)
@@ -45,8 +83,29 @@ typedef struct {
     int pos;
 } KuznState;
 
+/**
+ * @brief 256-bit key for "Kuznyechik" block cipher.
+ * @relates KuznState
+ */
+typedef struct {
+    Vec16 lo; ///< Lower 128 bits of the key
+    Vec16 hi; ///< Higher 128 bits of the key
+} Key256;
 
-uint8_t GF_256(uint8_t a, uint8_t b)
+/**
+ * @brief "Kuznyechik" lookup tables for the LS transformation.
+ * @relates KuznState
+ */
+static Vec16 lookup_table_LS[16 * 256];
+
+
+/**
+ * @brief Multiplication in the finite field GF(2)[x]/p(x)
+ * where p(x)=x^8+x^7+x^6+x+1 belongs to GF(2)[x].
+ * @details No lookup tables and other sophisticated optimizations are needed
+ * here: this function is used only in initialization subroutines. 
+ */
+uint8_t gf256_mul(uint8_t a, uint8_t b)
 {
     uint8_t result = 0;
     while (a && b) {
@@ -62,25 +121,23 @@ void mul_mat_vec(Vec16 *out, const Mat16 *mat, const Vec16 *vec)
     for (int i = 0; i < 16; i++) {
         uint8_t c = 0;
         for (int j = 0; j < 16; j++) {
-            c ^= GF_256(mat->a[i][j], vec->a[j]);
+            c ^= gf256_mul(mat->a[i][j], vec->data.u8[j]);
         }
-        out->a[i] = c;
+        out->data.u8[i] = c;
     }
 }
 
 
 static inline void Vec16_xor(Vec16 *obj, const Vec16 *in)
 {
-    const uint64_t *p_in = (const uint64_t *) ( in->a );
-    uint64_t *p_obj = (uint64_t *) ( obj->a );
-    p_obj[0] ^= p_in[0];
-    p_obj[1] ^= p_in[1];
+    obj->data.u64[0] ^= in->data.u64[0];
+    obj->data.u64[1] ^= in->data.u64[1];
 }
 
 void Vec16_print(const CallerAPI *intf, const Vec16 *vec)
 {
     for (int i = 0; i < 16; i++) {
-        intf->printf("%.2X ", vec->a[i]);
+        intf->printf("%.2X ", vec->data.u8[i]);
     }
     intf->printf("\n");
 }
@@ -88,7 +145,7 @@ void Vec16_print(const CallerAPI *intf, const Vec16 *vec)
 int Vec16_compare(const Vec16 *v1, const Vec16 *v2)
 {
     for (int i = 0; i < 16; i++) {
-        if (v1->a[i] != v2->a[i]) {
+        if (v1->data.u8[i] != v2->data.u8[i]) {
             return 0;
         }
     }
@@ -98,10 +155,10 @@ int Vec16_compare(const Vec16 *v1, const Vec16 *v2)
 
 void Key256_fill(Key256 *key, uint64_t *data)
 {
-    uint64_t *hi = (uint64_t *) key->hi.a;
-    uint64_t *lo = (uint64_t *) key->lo.a;
-    lo[0] = data[0]; lo[1] = data[1];
-    hi[0] = data[2]; hi[1] = data[3];
+    key->lo.data.u64[0] = data[0];
+    key->lo.data.u64[1] = data[1];
+    key->hi.data.u64[0] = data[2];
+    key->lo.data.u64[1] = data[3];
 }
 
 
@@ -152,15 +209,18 @@ void make_table_LS_for_byte(Vec16 *tbl, int byte_ind)
         225,  27, 131,  73,   76,  63, 248, 254,  141,  83, 170, 144,  202, 216, 133,  97,
          32, 113, 103, 164,   45,  43,   9,  91,  203, 155,  37, 208,  190, 229, 108,  82,
          89, 166, 116, 210,  230, 244, 180, 192,  209, 102, 175, 194,   57,  75 , 99, 182};
-    Vec16 v = {.a = {0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0}};    
+    Vec16 v = {.data = {.u8 = {0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0}}};
     for (int i = 0; i < 256; i++) {
-        v.a[byte_ind] = pi[i];
+        v.data.u8[byte_ind] = pi[i];
         apply_L(&tbl[i], &v);
     }
 }
 
-
-void make_table_LS()
+/**
+ * @brief Fill the lookup table for the LS transformation.
+ * @relates KuznState
+ */
+void KuznState_make_table_LS()
 {
     for (int i = 0; i < 16; i++) {
         make_table_LS_for_byte(lookup_table_LS + 256*i, i);
@@ -174,29 +234,30 @@ void make_table_LS()
  */
 static inline void apply_fast_LS(Vec16 *out, Vec16 in)
 {
-//    Vec16 in_copy = *in;
-    uint64_t *p_out = (uint64_t *) ( out->a );
-    p_out[0] = 0; p_out[1] = 0;
+    out->data.u64[0] = 0; out->data.u64[1] = 0;
     for (int i = 0; i < 16; i++) {
-        uint8_t b = in.a[i];
-        uint64_t *p_tbl = (uint64_t *) (lookup_table_LS[256*i + b].a);
-        p_out[0] ^= p_tbl[0];
-        p_out[1] ^= p_tbl[1];
+        uint8_t b = in.data.u8[i];
+        out->data.u64[0] ^= lookup_table_LS[256*i + b].data.u64[0];
+        out->data.u64[1] ^= lookup_table_LS[256*i + b].data.u64[1];
     }
 }
 
 
+/**
+ * @brief Expand key: calculate all round keys.
+ * @relates KuznState
+ */
 void KuznState_expand_key(KuznState *obj, const Key256 *key)
 {
     int pos = 0;
-    Vec16 c_in = {.a = {0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0}};
+    Vec16 c_in = {.data = {.u8 = {0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0}}};
     Vec16 c, tmp, f, k1 = key->hi, k2 = key->lo;
     for (int i = 1; i <= 33; i++) {
         if ((i - 1) % 8 == 0) {
             obj->rk[pos++] = k1;
             obj->rk[pos++] = k2;
         }
-        c_in.a[0] = i;
+        c_in.data.u8[0] = i;
         apply_L(&c, &c_in);
         tmp = k1;
         Vec16_xor(&tmp, &c);
@@ -208,154 +269,80 @@ void KuznState_expand_key(KuznState *obj, const Key256 *key)
     }
 }
 
-const CallerAPI *iii;
-
+/**
+ * @brief Encrypt counter: generate 128 bits of pseudorandom numbers.
+ * @relates KuznState
+ */
 void KuznState_block(KuznState *obj)
 {
+    static const int nrounds = 10;
     obj->out = obj->ctr;
-    for (int i = 0; i < 9; i++) {
-        //iii->printf("BEFORE: "); Vec16_print(iii, &obj->out);
+    for (int i = 0; i < nrounds - 1; i++) {
         Vec16_xor(&obj->out, &obj->rk[i]);
-        //iii->printf("XORED: "); Vec16_print(iii, &obj->out); // Essential for BUG!!!
         apply_fast_LS(&obj->out, obj->out);
-        //iii->printf("AFTER: "); Vec16_print(iii, &obj->out);
     }
-    Vec16_xor(&obj->out, &obj->rk[9]);
-    //iii->printf("*XORED: "); Vec16_print(iii, &obj->out);
-/*
-    Vec16 buf1, buf2;
-    buf1 = obj->ctr;
-    for (int i = 0; i < 9; i++) {
-        Vec16_xor(&buf1, &obj->rk[i]);
-        apply_fast_LS(&buf2, buf1);
-        buf1 = buf2;
-    }
-    Vec16_xor(&buf1, &obj->rk[9]);
-    obj->out = buf1;
-*/
-
+    Vec16_xor(&obj->out, &obj->rk[nrounds - 1]);
 }
 
+
+/**
+ * @brief Increase the 64-bit counter.
+ * @relates KuznState
+ */
 static inline void KuznState_inc_counter(KuznState *obj)
 {
-    uint64_t *ctr = (uint64_t *) (obj->ctr.a);
-    (*ctr)++;
+    obj->ctr.data.u64[0]++;
 }
 
+
+/**
+ * @brief Initialize PNG state: reset the counter and initialize round keys.
+ * @relates KuznState
+ */
 void KuznState_init(KuznState *obj, const Key256 *key)
 {
     KuznState_expand_key(obj, key);
     for (int i = 0; i < 16; i++) {
-        obj->ctr.a[i] = 0;
-        obj->out.a[i] = 0;
+        obj->ctr.data.u8[i] = 0;
+        obj->out.data.u8[i] = 0;
     }
     obj->pos = 2;
 }
 
-
-int test_block(const CallerAPI *intf)
-{
-    int is_ok = 1;
-    static const Key256 key = {
-        .lo = {{0xef, 0xcd, 0xab, 0x89,  0x67, 0x45, 0x23, 0x01,
-                0x10, 0x32, 0x54, 0x76,  0x98, 0xba, 0xdc, 0xfe}},
-        .hi = {{0x77, 0x66, 0x55, 0x44,  0x33, 0x22, 0x11, 0x00,
-                0xff, 0xee, 0xdd, 0xcc,  0xbb, 0xaa, 0x99, 0x88}}
-    };
-    static const Vec16 ctr = {.a = {
-        0x88, 0x99, 0xaa, 0xbb,  0xcc, 0xdd, 0xee, 0xff,
-        0x00, 0x77, 0x66, 0x55,  0x44, 0x33, 0x22, 0x11
-    }};
-    static const Vec16 out = {.a = {
-        0xcd, 0xed, 0xd4, 0xb9,  0x42, 0x8d, 0x46, 0x5a,
-        0x30, 0x24, 0xbc, 0xbe,  0x90, 0x9d, 0x67, 0x7f
-    }};
-    static const Vec16 rk[10] = {
-        {.a = {0x77, 0x66, 0x55, 0x44,  0x33, 0x22, 0x11, 0x00,
-               0xff, 0xee, 0xdd, 0xcc,  0xbb, 0xaa, 0x99, 0x88}},
-        {.a = {0xef, 0xcd, 0xab, 0x89,  0x67, 0x45, 0x23, 0x01,
-               0x10, 0x32, 0x54, 0x76,  0x98, 0xba, 0xdc, 0xfe}},
-        {.a = {0x44, 0x8c, 0xc7, 0x8c,  0xef, 0x6a, 0x8d, 0x22,
-               0x43, 0x43, 0x69, 0x15,  0x53, 0x48, 0x31, 0xdb}},
-        {.a = {0x04, 0xfd, 0x9f, 0x0a,  0xc4, 0xad, 0xeb, 0x15,
-               0x68, 0xec, 0xcf, 0xe9,  0xd8, 0x53, 0x45, 0x3d}},
-        {.a = {0xac, 0xf1, 0x29, 0xf4,  0x46, 0x92, 0xe5, 0xd3,
-               0x28, 0x5e, 0x4a, 0xc4,  0x68, 0x64, 0x64, 0x57}},
-        {.a = {0x1b, 0x58, 0xda, 0x34,  0x28, 0xe8, 0x32, 0xb5,
-               0x32, 0x64, 0x5c, 0x16,  0x35, 0x94, 0x07, 0xbd}},
-        {.a = {0xb1, 0x98, 0x00, 0x5a,  0x26, 0x27, 0x57, 0x70,
-               0xde, 0x45, 0x87, 0x7e,  0x75, 0x40, 0xe6, 0x51}},
-        {.a = {0x84, 0xf9, 0x86, 0x22,  0xa2, 0x91, 0x2a, 0xd7,
-               0x3e, 0xdd, 0x9f, 0x7b,  0x01, 0x25, 0x79, 0x5a}},
-        {.a = {0x17, 0xe5, 0xb6, 0xcd,  0x73, 0x2f, 0xf3, 0xa5,
-               0x23, 0x31, 0xc7, 0x78,  0x53, 0xe2, 0x44, 0xbb}},
-        {.a = {0x43, 0x40, 0x4a, 0x8e,  0xa8, 0xba, 0x5d, 0x75,
-               0x5b, 0xf4, 0xbc, 0x16,  0x74, 0xdd, 0xe9, 0x72}}
-    };
-
-    KuznState obj;
-    KuznState_init(&obj, &key);
-    obj.ctr = ctr;
-    KuznState_block(&obj);
-    intf->printf("----- test_block -----\n");
-
-    for (int i = 0; i < 10; i++) {
-        intf->printf("RK%d(out): ", i); Vec16_print(intf, &obj.rk[i]);
-        intf->printf("RK%d(ref): ", i); Vec16_print(intf, &rk[i]);
-        is_ok = is_ok & Vec16_compare(&obj.rk[i], &rk[i]);
-        if (!is_ok) {
-            intf->printf("^^^^ FAILURE ^^^^^\n");
-        }
-    }
-    if (is_ok) {
-        intf->printf("test_block (round keys): success\n");
-    } else {
-        intf->printf("test_block (round keys): failure\n");
-        return 0;
-    }
-
-    intf->printf("Output:    "); Vec16_print(intf, &obj.out);
-    intf->printf("Reference: "); Vec16_print(intf, &out);
-
-    is_ok = is_ok & Vec16_compare(&out, &obj.out);
-    if (is_ok) {
-        intf->printf("test_block (ciphertext): success\n");
-    } else {
-        intf->printf("test_block: failure\n");
-    }
-    return is_ok;
-}
-
+/**
+ * @brief Test L and LS transformations using test vectors from RFC7801
+ * and GOST R 34.12-2015.
+ */
 int test_LS(const CallerAPI *intf)
 {
     Vec16 v;
     // Test 1
-    Vec16 in1_for_L = {.a = {
+    Vec16 in1_for_L = {.data = {.u8 = {
         0x8a, 0x74, 0x1b, 0xe8,  0x5a, 0x4a, 0x8f, 0xb7,
         0xab, 0x7a, 0x94, 0xa7,  0x37, 0xca, 0x98, 0x09
-    }};
-    Vec16 in1_for_LS = {.a = {
+    }}};
+    Vec16 in1_for_LS = {.data = {.u8 = {
         0x76, 0xf2, 0xd1, 0x99,  0x23, 0x9f, 0x36, 0x5d,
         0x47, 0x94, 0x95, 0xa0,  0xc9, 0xdc, 0x3b, 0xe6
-    }};
-    Vec16 out1 = {.a = {
+    }}};
+    Vec16 out1 = {.data = {.u8 = {
         0xa6, 0x44, 0x61, 0x5e,  0x1d, 0x07, 0x57, 0x92,
         0x6a, 0x5d, 0xb7, 0x9d,  0x99, 0x40, 0x09, 0x3d
-    }};
+    }}};
     // Test 2
-    Vec16 in2_for_L = {.a = {
+    Vec16 in2_for_L = {.data = {.u8 = {
         0xb6, 0xb6, 0xb6, 0xb6,  0xb6, 0xb6, 0xb6, 0xb6,
         0xb6, 0xe8, 0x7d, 0xe8,  0xb6, 0xe8, 0x7d, 0xe8
-    }};
+    }}};
 
-    Vec16 in2_for_LS = {.a = {
+    Vec16 in2_for_LS = {.data = {.u8 = {
         0xff, 0xff, 0xff, 0xff,  0xff, 0xff, 0xff, 0xff,
         0xff, 0x99, 0xbb, 0x99,  0xff, 0x99, 0xbb, 0x99
-    }};
-    Vec16 out2 = {.a = {
+    }}};
+    Vec16 out2 = {.data = {.u8 = {
         0x30, 0x08, 0x14, 0x49,  0x92, 0x2f, 0x4a, 0xcf,
         0xa1, 0xb0, 0x55, 0xe3,  0x86, 0xb6, 0x97, 0xe2
-    }};
+    }}};
     int is_ok = 1;
     // Tests implementation
     intf->printf("----- test_LS -----\n");
@@ -398,10 +385,108 @@ int test_LS(const CallerAPI *intf)
     return is_ok;
 }
 
+/**
+ * @brief Test the block encryption subroutine using test vectors from RFC7801
+ * and GOST R 34.12-2015.
+ */
+int test_block(const CallerAPI *intf)
+{
+    int is_ok = 1;
+    static const Key256 key = {
+        .lo = {.data = { .u8 =
+            {0xef, 0xcd, 0xab, 0x89,  0x67, 0x45, 0x23, 0x01,
+             0x10, 0x32, 0x54, 0x76,  0x98, 0xba, 0xdc, 0xfe}}},
+        .hi = {.data = { .u8 =
+            {0x77, 0x66, 0x55, 0x44,  0x33, 0x22, 0x11, 0x00,
+             0xff, 0xee, 0xdd, 0xcc,  0xbb, 0xaa, 0x99, 0x88}}}
+    };
+    static const Vec16 ctr = {.data = {.u8 =
+            {0x88, 0x99, 0xaa, 0xbb,  0xcc, 0xdd, 0xee, 0xff,
+             0x00, 0x77, 0x66, 0x55,  0x44, 0x33, 0x22, 0x11
+    }}};
+    static const Vec16 out = {.data = {.u8 =
+            {0xcd, 0xed, 0xd4, 0xb9,  0x42, 0x8d, 0x46, 0x5a,
+             0x30, 0x24, 0xbc, 0xbe,  0x90, 0x9d, 0x67, 0x7f
+    }}};
+    static const Vec16 rk[10] = {
+        {.data = {.u8 = 
+            {0x77, 0x66, 0x55, 0x44,  0x33, 0x22, 0x11, 0x00,
+             0xff, 0xee, 0xdd, 0xcc,  0xbb, 0xaa, 0x99, 0x88}}},
+        {.data = {.u8 =
+            {0xef, 0xcd, 0xab, 0x89,  0x67, 0x45, 0x23, 0x01,
+             0x10, 0x32, 0x54, 0x76,  0x98, 0xba, 0xdc, 0xfe}}},
+        {.data = {.u8 =
+            {0x44, 0x8c, 0xc7, 0x8c,  0xef, 0x6a, 0x8d, 0x22,
+             0x43, 0x43, 0x69, 0x15,  0x53, 0x48, 0x31, 0xdb}}},
+        {.data = {.u8 = 
+            {0x04, 0xfd, 0x9f, 0x0a,  0xc4, 0xad, 0xeb, 0x15,
+             0x68, 0xec, 0xcf, 0xe9,  0xd8, 0x53, 0x45, 0x3d}}},
+        {.data = {.u8 =
+            {0xac, 0xf1, 0x29, 0xf4,  0x46, 0x92, 0xe5, 0xd3,
+             0x28, 0x5e, 0x4a, 0xc4,  0x68, 0x64, 0x64, 0x57}}},
+        {.data = {.u8 =
+            {0x1b, 0x58, 0xda, 0x34,  0x28, 0xe8, 0x32, 0xb5,
+             0x32, 0x64, 0x5c, 0x16,  0x35, 0x94, 0x07, 0xbd}}},
+        {.data = {.u8 =
+            {0xb1, 0x98, 0x00, 0x5a,  0x26, 0x27, 0x57, 0x70,
+             0xde, 0x45, 0x87, 0x7e,  0x75, 0x40, 0xe6, 0x51}}},
+        {.data = {.u8 =
+            {0x84, 0xf9, 0x86, 0x22,  0xa2, 0x91, 0x2a, 0xd7,
+             0x3e, 0xdd, 0x9f, 0x7b,  0x01, 0x25, 0x79, 0x5a}}},
+        {.data = {.u8 =
+            {0x17, 0xe5, 0xb6, 0xcd,  0x73, 0x2f, 0xf3, 0xa5,
+             0x23, 0x31, 0xc7, 0x78,  0x53, 0xe2, 0x44, 0xbb}}},
+        {.data = {.u8 =
+            {0x43, 0x40, 0x4a, 0x8e,  0xa8, 0xba, 0x5d, 0x75,
+             0x5b, 0xf4, 0xbc, 0x16,  0x74, 0xdd, 0xe9, 0x72}}}
+    };
+
+    KuznState obj;
+    KuznState_init(&obj, &key);
+    obj.ctr = ctr;
+    KuznState_block(&obj);
+    intf->printf("----- test_block -----\n");
+
+    for (int i = 0; i < 10; i++) {
+        intf->printf("RK%d(out): ", i); Vec16_print(intf, &obj.rk[i]);
+        intf->printf("RK%d(ref): ", i); Vec16_print(intf, &rk[i]);
+        is_ok = is_ok & Vec16_compare(&obj.rk[i], &rk[i]);
+        if (!is_ok) {
+            intf->printf("^^^^ FAILURE ^^^^^\n");
+        }
+    }
+    if (is_ok) {
+        intf->printf("test_block (round keys): success\n");
+    } else {
+        intf->printf("test_block (round keys): failure\n");
+        return 0;
+    }
+
+    intf->printf("Output:    "); Vec16_print(intf, &obj.out);
+    intf->printf("Reference: "); Vec16_print(intf, &out);
+
+    is_ok = is_ok & Vec16_compare(&out, &obj.out);
+    if (is_ok) {
+        intf->printf("test_block (ciphertext): success\n");
+    } else {
+        intf->printf("test_block: failure\n");
+    }
+    return is_ok;
+}
+
+
+
+static int run_self_test(const CallerAPI *intf)
+{
+    int is_ok = 1;
+    is_ok = is_ok & test_LS(intf);
+    is_ok = is_ok & test_block(intf);
+    return is_ok;
+}
+
 
 static void *create(const CallerAPI *intf)
 {
-    iii = intf;
     KuznState *obj = intf->malloc(sizeof(KuznState));
     Key256 key;
     uint64_t seeds[4];
@@ -417,7 +502,7 @@ static void *create(const CallerAPI *intf)
 static inline uint64_t get_bits_raw(void *state)
 {
     KuznState *obj = state;
-    uint64_t *out = (uint64_t *) (obj->out.a);
+    uint64_t *out = obj->out.data.u64;
     if (obj->pos >= 2) {
         KuznState_block(obj);
         KuznState_inc_counter(obj);
@@ -442,20 +527,11 @@ EXPORT uint64_t get_sum(void *state, size_t len)
 }
 
 
-static int run_self_test(const CallerAPI *intf)
-{
-    int is_ok = 1;
-    iii = intf;
-    is_ok = is_ok & test_LS(intf);
-    is_ok = is_ok & test_block(intf);
-    return is_ok;
-}
-
-
 int EXPORT gen_getinfo(GeneratorInfo *gi)
 {
-    make_table_LS();
-
+    // Initialize the lookup table for the LS transformation
+    KuznState_make_table_LS();
+    // Fill the output structure
     gi->name = "Kuznyechik";
     gi->description = NULL;
     gi->nbits = 64;
