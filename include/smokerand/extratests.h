@@ -18,7 +18,7 @@
  * @brief Settings for the birthday paradox test.
  */
 typedef struct {
-    size_t n; ///< Number of values
+    unsigned long long n; ///< Number of values
     unsigned int e; ///< Leave only values with zeros in lower (e - 1) bits
 } BirthdayOptions;
 

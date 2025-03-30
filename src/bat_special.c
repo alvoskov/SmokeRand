@@ -22,8 +22,8 @@ typedef struct
  * @brief Speed measurement mode.
  */
 typedef enum {
-    speed_uint, ///< Single value (emulates call of PRNG function)
-    speed_sum   ///< Sum of values (emulates usage of inline PRNG)
+    SPEED_UINT, ///< Single value (emulates call of PRNG function)
+    SPEED_SUM   ///< Sum of values (emulates usage of inline PRNG)
 } SpeedMeasurementMode;
 
 
@@ -41,7 +41,7 @@ static SpeedResults measure_speed(GeneratorInfo *gen, const CallerAPI *intf,
     for (size_t niter = 2; ns_total < 0.5e9; niter <<= 1) {
         clock_t tic = clock();
         uint64_t tic_proc = cpuclock();
-        if (mode == speed_uint) {
+        if (mode == SPEED_UINT) {
             uint64_t sum = 0;
             for (size_t i = 0; i < niter; i++) {
                 sum += obj.gi->get_bits(obj.state);
@@ -60,7 +60,7 @@ static SpeedResults measure_speed(GeneratorInfo *gen, const CallerAPI *intf,
         results.ns_per_call = ns_total / niter;
         results.ticks_per_call = (double) (toc_proc - tic_proc) / niter;
         // Convert to cpb
-        size_t block_size = (mode == speed_uint) ? 1 : SUM_BLOCK_SIZE;
+        size_t block_size = (mode == SPEED_UINT) ? 1 : SUM_BLOCK_SIZE;
         size_t nbytes = block_size * gen->nbits / 8;
         results.cpb = results.ticks_per_call / nbytes;
     }
@@ -120,7 +120,7 @@ SpeedResults battery_speed_test(GeneratorInfo *gen, const CallerAPI *intf,
     SpeedResults speed_full = measure_speed(gen, intf, mode);
     SpeedResults speed_dummy = measure_speed(&dummy_gen, intf, mode);
     SpeedResults speed_corr;
-    size_t block_size = (mode == speed_uint) ? 1 : SUM_BLOCK_SIZE;
+    size_t block_size = (mode == SPEED_UINT) ? 1 : SUM_BLOCK_SIZE;
     size_t nbytes = block_size * gen->nbits / 8;
     speed_corr.ns_per_call = speed_full.ns_per_call - speed_dummy.ns_per_call;
     speed_corr.ticks_per_call = speed_full.ticks_per_call - speed_dummy.ticks_per_call;
@@ -151,12 +151,12 @@ void battery_speed(GeneratorInfo *gen, const CallerAPI *intf)
 {
     printf("===== Generator speed measurements =====\n");
     printf("----- Speed test for uint generation -----\n");
-    SpeedResults res_uint = battery_speed_test(gen, intf, speed_uint);
+    SpeedResults res_uint = battery_speed_test(gen, intf, SPEED_UINT);
     printf("----- Speed test for uint sum generation -----\n");
     if (gen->get_sum == NULL) {
         printf("  Not implemented\n");
     } else {
-        SpeedResults res_sum = battery_speed_test(gen, intf, speed_sum);
+        SpeedResults res_sum = battery_speed_test(gen, intf, SPEED_SUM);
         double cpb_mean;
         if (res_uint.cpb < 0.25 && res_sum.cpb > 0.0 &&
             res_sum.cpb > res_uint.cpb) {

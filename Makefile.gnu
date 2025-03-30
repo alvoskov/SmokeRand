@@ -41,9 +41,9 @@ else ifeq ($(PLATFORM_NAME), GENERIC)
     IS_PORTABLE = 1
 endif
 #-----------------------------------------------------------------------------
-CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes
-CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 -O3 -Werror -Wall -Wextra -Wno-attributes
-CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes
+CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -Wstrict-aliasing
+CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 -O3 -Werror -Wall -Wextra -Wno-attributes -Wstrict-aliasing
+CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -Wstrict-aliasing
 LINKFLAGS = $(PLATFORM_FLAGS)
 INCLUDE = -Iinclude
 
@@ -97,7 +97,7 @@ GEN_CUSTOM_SOURCES = $(addsuffix .c,$(addprefix generators/, ranluxpp \
 ifeq ($(IS_PORTABLE), 1)
 GEN_ALL_SOURCES = $(addsuffix .c,$(addprefix generators/, \
     alfib_lux alfib_mod alfib ara32 chacha cmwc4096 coveyou64 cwg64 \
-    des drand48 efiix64x48 flea32x1 hc256 isaac64 kiss64 kiss93 kiss99 \
+    des drand48 efiix64x48 flea32x1 hc256 isaac64 kiss64 kiss93 kiss99 kuzn \
     lcg128_u32_portable lcg32prime lcg64 lcg69069 lcg96_portable lea \
     lfib4 lfib4_u64 lfib_par lfsr113 lfsr258 loop_7fff_w64 lrnd64_255 \
     lrnd64_1023 lxm_64x128 macmarsa magma minstd mixmax mlfib17_5 \
