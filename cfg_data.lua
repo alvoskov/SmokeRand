@@ -30,7 +30,7 @@ local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
     'speck128', 'splitmix32', 'splitmix', 'sqxor32',
     'sqxor', 'stormdrop_old', 'stormdrop', 'superduper64', 'superduper64_u32',
     'superduper73', 'swblarge', 'swblux', 'swbw', 'swb', 'taus88',
-    'threefry2x64_avx', 'threefry2x64', 'threefry', 'threefry_avx', 'tinymt32',
+    'threefry2x64_avx', 'threefry2x64', 'threefry', 'tinymt32',
     'tinymt64', 'well1024a', 'wyrand', 'xorgens', 'xoroshiro1024stst',
     'xoroshiro1024st', 'xoroshiro128pp', 'xoroshiro128pp_avx',
     'xoroshiro128pp_vec', 'xoroshiro128p', 'xorshift128pp_avx', 'xorshift128p',
@@ -42,7 +42,7 @@ local gen_not_portable_sources = {'aesni', 'chacha_avx', 'lcg128',
     'lcg128_full', 'lcg128', 'lcg128_u32_full', 'lcg64prime', 'lcg96',
     'magma_avx', 'mrg32k3a', 'mwc128x', 'mwc128', 'mwc256xxa64',
     'pcg64_xsl_rr', 'philox', 'sezgin63', 'speck128_avx',
-    'sqxor', 'threefry_avx', 'threefry2x64_avx', 'wyrand', 'xoroshiro128pp_avx',
+    'sqxor', 'threefry2x64_avx', 'wyrand', 'xoroshiro128pp_avx',
     'xorshift128pp_avx', 'xtea_avx'}
 -- mrg32k3a, sezgin63
 

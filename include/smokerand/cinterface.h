@@ -177,6 +177,31 @@ static inline uint64_t get_bits_raw(void *state) { \
 }
 
 
+/**
+ * @brief A generalized interface for both scalar and vectorized versions
+ * of the PRNG with buffer. Should be placed at the beginning of the PRNG
+ * state.
+ * @details Used to emulate inheritance from an abstract class.
+ */
+typedef struct {    
+    void (*iter_func)(void *); ///< Pointer to the block generation function.
+    int pos; ///< Current position in the buffer.
+    int bufsize; ///< Buffer size in 32-bit words.
+    uint64_t *out; ///< Pointer to the output buffer.
+} BufGen64Interface;
+
+/**
+ * @brief Declares the `get_bits_raw` inline function for the generator
+ * that uses the `BufGen64Interface` interface structure.
+ */
+#define BUFGEN64_DEFINE_GET_BITS_RAW \
+static inline uint64_t get_bits_raw(void *state) { \
+    BufGen64Interface *obj = state; \
+    if (obj->pos >= obj->bufsize) { \
+        obj->iter_func(obj); \
+    } \
+    return obj->out[obj->pos++]; \
+}
 
 ///////////////////////////////////////////////////////////////
 ///// Structures and functions for 128-bit implementation /////

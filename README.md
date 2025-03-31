@@ -771,7 +771,7 @@ There are only two problematic situations:
  threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | ?
  threefish_avx     | u64    | +       | +     | +       | +    | 1.3  | +      | 5     |         | ?
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
- threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 32 TiB
+ threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
  wyrand            | u64    | +       | +     | +       | +    | 0.08 | +      | 4     |         | >= 8 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
