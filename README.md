@@ -730,8 +730,8 @@ There are only two problematic situations:
  ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 1 TiB
  ranval            | u32    | +       | +     | +       | +    | 0.31 | +      | 4(0)  | +       | >= 4 TiB
  r1279             | u32    | 2       | 5     | 7       | 10   | 0.47 | +      | 0     | Small   | 64 MiB
- ranlux[0]         | u32    | 1       | 6     | 9       | 12   | 6.8  | N/A    |       |         | 4 MiB
- ranlux[1]         | u32    | +       | +     | 2       | 3    | 13   | N/A    |       |         | 4 GiB
+ ranlux[0]         | u32    | 1       | 6     | 9       | 12   | 6.8  | N/A    | 0     |         | 4 MiB
+ ranlux[1]         | u32    | +       | +     | 2       | 3    | 13   | N/A    | 0     |         | 4 GiB
  ranlux[2]         | u32    | +       | +     | +       | +    | 27   | N/A    |       |         | >= 128 GiB
  rc4               | u32    | +       | +     | +       | +    | 6.0  | +      | 3     | +       | 512 GiB
  rc4ok             | u32    | +       | +     | +       | +    | 6.2  | N/A    | 4     | +       | >= 1 TiB
@@ -787,8 +787,8 @@ There are only two problematic situations:
  xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      | 3     | +       | 8 MiB
  xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      | 4     | +       | >= 16 TiB
  xsh               | u64    | 2       | 8     | 13      | 17   | 0.43 | -      | 0     | -       | 32 KiB
- xtea              | u64    | +       | +     | +       | +    | 27   |        |       |         | ?
- xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  |        |       |         | ?
+ xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     |         | ?
+ xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     |         | ?
  xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     |         | ?
  xxtea128          | u32    | +       | +     | +       | +    | 18   | +      | 4.5   |         | ?
  xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   |         | ?
