@@ -35,11 +35,17 @@
 #define LFIB_A 98
 #define LFIB_B 33
 
+/*
+#define LFIB_A 63
+#define LFIB_B 31
+*/
+
+
 SHARED_ENTRYPOINT_CODE
 
 
-static const double c = 5566755282872655.0 / 9007199254740992.0; /**< shift */
-//static const double c = 362436069876.0 / 9007199254740992.0; /**< original shift */
+//static const double c = 5566755282872655.0 / 9007199254740992.0; /**< shift */
+static const double c = 362436069876.0 / 9007199254740992.0; /**< original shift */
 
 
 static inline double amb_mod_r(double a, double b)
