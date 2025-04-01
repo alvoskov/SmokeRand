@@ -130,9 +130,9 @@ else()
     philox32 philox r1279 randu ranlux48 ranluxpp ranq1 ranq2 ranrot32
     ranrot_bi ranshi ranval ran rc4ok rc4 romutrio rrmxmx sapparot2
     sapparot sezgin63 sfc16 sfc32 sfc64 sfc8 shr3 speck64_128 speck128_avx
-    speck128_r16_avx speck128 splitmix32 splitmix sqxor32 sqxor stormdrop_old
+    speck128 splitmix32 splitmix sqxor32 sqxor stormdrop_old
     stormdrop superduper64 superduper64_u32 superduper73 swblarge
-    swblux swbw swb taus88 threefry2x64_avx threefry2x64 threefry threefry_avx
+    swblux swbw swb taus88 threefry2x64_avx threefry2x64 threefry
     tinymt32 tinymt64 well1024a wyrand xorgens xoroshiro1024stst
     xoroshiro1024st xoroshiro128pp xoroshiro128pp_avx xoroshiro128pp_vec
     xoroshiro128p xorshift128pp_avx xorshift128p xorshift128 xorwow
