@@ -32,13 +32,16 @@
 #include "smokerand/cinterface.h"
 #include <limits.h>
 
+
+// Doesn't fail: hamming_ot         test=hamming_ot      mode=bytes_low1      nbytes=400000000000 # 2^30
 #define LFIB_A 98
 #define LFIB_B 33
 
-/*
-#define LFIB_A 63
-#define LFIB_B 31
-*/
+
+// Failure at:
+// hamming_ot         test=hamming_ot      mode=bytes_low1      nbytes=50000000000 # 2^30
+//#define LFIB_A 63
+//#define LFIB_B 31
 
 
 SHARED_ENTRYPOINT_CODE
