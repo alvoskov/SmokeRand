@@ -99,10 +99,15 @@ static int run_self_test_ext(const CallerAPI *intf)
 
 static void *create_ext(const GeneratorInfo *gi, const CallerAPI *intf)
 {
+#ifdef UMUL128_FUNC_ENABLED
     Lcg128State *obj = intf->malloc(sizeof(Lcg128State));
     Lcg128State_init(obj, 0, intf->get_seed64() | 0x1);
     (void) gi;
     return (void *) obj;
+#else
+    (void) gi; (void) intf;
+    return NULL;
+#endif
 }
 
 static void free_ext(void *state, const GeneratorInfo *gi, const CallerAPI *intf)

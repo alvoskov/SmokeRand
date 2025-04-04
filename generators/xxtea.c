@@ -77,15 +77,20 @@ static XxteaInfo XxteaInfo_get(const CallerAPI *intf)
 {
     const char *ver = intf->get_param();
     if (!intf->strcmp(ver, "128-scalar") || !intf->strcmp(ver, "")) {
-        return (XxteaInfo) {XXTEA128_SCALAR, "XXTEA128-scalar"};
+        XxteaInfo info = {XXTEA128_SCALAR, "XXTEA128-scalar"};
+        return info;
     } else if (!intf->strcmp(ver, "256-scalar")) {
-        return (XxteaInfo) {XXTEA256_SCALAR, "XXTEA256-scalar"};
+        XxteaInfo info = {XXTEA256_SCALAR, "XXTEA256-scalar"};
+        return info;
     } else if (!intf->strcmp(ver, "128-avx2")) {
-        return (XxteaInfo) {XXTEA128_AVX2, "XXTEA128-avx2"};
+        XxteaInfo info = {XXTEA128_AVX2, "XXTEA128-avx2"};
+        return info;
     } else if (!intf->strcmp(ver, "256-avx2")) {
-        return (XxteaInfo) {XXTEA256_AVX2, "XXTEA256-avx2"};
+        XxteaInfo info = {XXTEA256_AVX2, "XXTEA256-avx2"};
+        return info;
     } else {
-        return (XxteaInfo) {XXTEA_UNKNOWN, "XXTEA:unknown"};
+        XxteaInfo info = {XXTEA_UNKNOWN, "XXTEA:unknown"};
+        return info;
     }
 }
 
