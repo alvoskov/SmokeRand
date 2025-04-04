@@ -260,7 +260,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     mod_name = (nbits == 32) ? "generators/chacha_avx.dll" : "generators/speck128_avx.dll";
-    GeneratorModule mod = GeneratorModule_load(mod_name);
+    GeneratorModule mod = GeneratorModule_load(mod_name, NULL);
     if (!mod.valid) {
         CallerAPI_free();
         return 1;

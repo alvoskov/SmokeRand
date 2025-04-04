@@ -96,11 +96,16 @@ static void default_free(void *state, const GeneratorInfo *gi, const CallerAPI *
  * It also relies on default prolog (intf static variable, some exports etc.),
  * see PRNG_CMODULE_PROLOG
  */
-#define MAKE_UINT_PRNG(prng_name, selftest_func, numofbits) \
+#define MAKE_UINT_PRNG(prng_name, selftest_func, numofbits, get_prng_name_func) \
 EXPORT uint64_t get_bits(void *state) { return get_bits_raw(state); } \
 GET_SUM_FUNC \
-int EXPORT gen_getinfo(GeneratorInfo *gi) { \
-    gi->name = prng_name; \
+int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf) { (void) intf; \
+    if (intf != NULL && get_prng_name_func != NULL) { \
+        const char *(*getname)(const CallerAPI *) = get_prng_name_func; \
+        gi->name = getname(intf); \
+    } else { \
+        gi->name = prng_name; \
+    } \
     gi->description = GEN_DESCRIPTION; \
     gi->nbits = numofbits; \
     gi->get_bits = get_bits; \
@@ -117,14 +122,14 @@ int EXPORT gen_getinfo(GeneratorInfo *gi) { \
  * unsigned 32-bit numbers.
  */
 #define MAKE_UINT32_PRNG(prng_name, selftest_func) \
-    MAKE_UINT_PRNG(prng_name, selftest_func, 32)
+    MAKE_UINT_PRNG(prng_name, selftest_func, 32, NULL)
 
 /**
  * @brief Some default boilerplate code for scalar PRNG that returns
  * unsigned 64-bit numbers.
  */
 #define MAKE_UINT64_PRNG(prng_name, selftest_func) \
-    MAKE_UINT_PRNG(prng_name, selftest_func, 64)
+    MAKE_UINT_PRNG(prng_name, selftest_func, 64, NULL)
 
 
 ///////////////////////////////////////////////////////
@@ -267,18 +272,28 @@ static inline uint64_t Lcg128State_a128_iter(Lcg128State *obj,
 #endif
 }
 
+static inline void Lcg128State_init(Lcg128State *obj, uint64_t hi, uint64_t lo)
+{
+#ifdef UINT128_ENABLED
+    obj->x = hi;
+    obj->x <<= 64;
+    obj->x |= lo; 
+#else
+    obj->x_low = lo;
+    obj->x_hi  = hi;
+#endif
+}
+
 /**
  * @brier 128-bit LCG seeding procedure, suitable for MCGs (i.e. for c = 0)
  */
 static inline void Lcg128State_seed(Lcg128State *obj, const CallerAPI *intf)
 {
-#ifdef UINT128_ENABLED
-    obj->x = intf->get_seed64() | 0x1; // For MCG
-#else
-    obj->x_low = intf->get_seed64() | 0x1; // For MCG
-    obj->x_high = intf->get_seed64();
-#endif
+    uint64_t hi = intf->get_seed64();
+    uint64_t lo = intf->get_seed64() | 0x1; // For MCG
+    Lcg128State_init(obj, hi, lo);
 }
+
 
 #endif
 // end of UMUL128_FUNC_ENABLED ifdef

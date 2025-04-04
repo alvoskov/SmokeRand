@@ -58,7 +58,7 @@ typedef struct
     GeneratorInfo gen;
 } GeneratorModule;
 
-GeneratorModule GeneratorModule_load(const char *libname);
+GeneratorModule GeneratorModule_load(const char *libname, const CallerAPI *intf);
 void GeneratorModule_unload(GeneratorModule *mod);
 
 

@@ -46,7 +46,7 @@ int main()
 {
     CallerAPI intf = CallerAPI_init();
     intf.printf = printf_null;
-    GeneratorModule mod = GeneratorModule_load("generators/speck128_avx.dll");
+    GeneratorModule mod = GeneratorModule_load("generators/speck128_avx.dll", &intf);
     if (!mod.valid) {
         CallerAPI_free();
         return 1;

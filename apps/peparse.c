@@ -21,16 +21,16 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Error: %s\n", dlerror_pe32dos());
     }
    
-    int (*gen_getinfo)(GeneratorInfo *gi) = dlsym_pe32dos(handle, "gen_getinfo");
+    GenGetInfoFunc gen_getinfo = dlsym_pe32dos(handle, "gen_getinfo");
     if (gen_getinfo == NULL) {
         fprintf(stderr, "Cannot find the 'gen_getinfo' function\n");
         return 1;
     }
     //----------------------------------------------------
-    GeneratorInfo gi;
-    gen_getinfo(&gi);
-    GeneratorInfo_print(&gi, 1);
     CallerAPI intf = CallerAPI_init();
+    GeneratorInfo gi;
+    gen_getinfo(&gi, &intf);
+    GeneratorInfo_print(&gi, 1);
     if (!strcmp("express", argv[1])) {
         battery_express(&gi, &intf, TESTS_ALL, 1, REPORT_FULL);
     } else if (!strcmp("brief", argv[1])) {

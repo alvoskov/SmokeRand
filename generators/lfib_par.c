@@ -124,23 +124,21 @@ static inline uint64_t get_bits_raw(void *state)
 }
 
 
-static LFibDyn_State parse_parameters(const CallerAPI *intf)
+static LFibDynDescr parse_parameters(const CallerAPI *intf)
 {
-    LFibDyn_State obj = {.r = 0, .s = 0, .is_additive = 0};
+    LFibDynDescr obj = {.name = NULL, .r = 0, .s = 0, .is_additive = 0};
     const char *param = intf->get_param();
     for (const LFibDynDescr *ptr = generators; ptr->name != NULL; ptr++) {
-        if (!intf->strcmp(ptr->name, param)) { // from glibc
-            obj.r = ptr->r; obj.s = ptr->s;
-            obj.is_additive = ptr->is_additive;
+        if (!intf->strcmp(ptr->name, param)) {
+            obj = *ptr;
         }        
     }
-    obj.pos = obj.r;
     return obj;
 }
 
 static void *create(const CallerAPI *intf)
 {
-    LFibDyn_State par = parse_parameters(intf);
+    LFibDynDescr par = parse_parameters(intf);
     if (par.r == 0) {
         intf->printf("Unknown parameter %s\n", intf->get_param());
         return NULL;
@@ -148,9 +146,11 @@ static void *create(const CallerAPI *intf)
     intf->printf("LFib(%d,%d,%s)\n", par.r, par.s,
         par.is_additive ? "+" : "-");
     // Allocate buffers
-    size_t len = sizeof(LFibDyn_State) + (par.r + 2) * sizeof(uint64_t);    
+    size_t len = sizeof(LFibDyn_State) + (par.r + 2) * sizeof(uint64_t);
     LFibDyn_State *obj = intf->malloc(len);
-    *obj = par;
+    obj->r = par.r; obj->s = par.s;
+    obj->is_additive = par.is_additive;
+    obj->pos = obj->r;
     obj->u = (uint64_t *) ( (char *) obj + sizeof(LFibDyn_State) );
     // pcg_rxs_m_xs64 for initialization
     uint64_t state = intf->get_seed64();
@@ -160,4 +160,16 @@ static void *create(const CallerAPI *intf)
     return (void *) obj;
 }
 
-MAKE_UINT32_PRNG("LFib", NULL)
+
+static const char *param_to_name(const CallerAPI *intf)
+{    
+    LFibDynDescr descr = parse_parameters(intf);
+    if (descr.name == NULL) {
+        return "LFib:unknown";
+    } else {
+        return descr.name;
+    }
+}
+
+
+MAKE_UINT_PRNG("LFib", NULL, 32, param_to_name)
