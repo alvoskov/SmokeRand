@@ -81,15 +81,20 @@ static Tf256Info Tf256Info_get(const CallerAPI *intf)
 {
     const char *param = intf->get_param();
     if (!intf->strcmp(param, "threefry") || !intf->strcmp(param, "")) {
-        return (Tf256Info) {TF256_THREEFRY_SCALAR, "Threefry4x64x20"};
+        Tf256Info ti = {TF256_THREEFRY_SCALAR, "Threefry4x64x20"};
+        return ti;
     } else if (!intf->strcmp(param, "threefish")) {
-        return (Tf256Info) {TF256_THREEFISH_SCALAR, "Threefry4x64x72 (Threefish)"};
+        Tf256Info ti = {TF256_THREEFISH_SCALAR, "Threefry4x64x72 (Threefish)"};
+        return ti;
     } else if (!intf->strcmp(param, "threefry-avx2")) {
-        return (Tf256Info) {TF256_THREEFRY_AVX2, "Threefry4x64x20:AVX2"};
+        Tf256Info ti = {TF256_THREEFRY_AVX2, "Threefry4x64x20:AVX2"};
+        return ti;
     } else if (!intf->strcmp(param, "threefish-avx2")) {
-        return (Tf256Info) {TF256_THREEFISH_AVX2, "Threefry4x64x72:AVX2 (Threefish)"};
+        Tf256Info ti = {TF256_THREEFISH_AVX2, "Threefry4x64x72:AVX2 (Threefish)"};
+        return ti;
     } else {
-        return (Tf256Info) {TF256_UNKNOWN, "Threefry4x64:unknown"};
+        Tf256Info ti = {TF256_UNKNOWN, "Threefry4x64:unknown"};
+        return ti;
     }
 }
 
