@@ -629,7 +629,7 @@ There are only two problematic situations:
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | +      | 4     | +       | >= 32 TiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 16 TiB
- des-ctr           | u64    | +       | +     | +       | +    | 24   |        |       |         | >= 4 TiB
+ des-ctr           | u64    | +       | +     | +       | +    | 24   | -      | 3     |         | >= 4 TiB
  drand48           | u32    | 3       | 12    | 20      | 22/23| 0.72 | -      | 0     | -       | 1 MiB
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 2 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 5     | +       | >= 32 TiB
@@ -788,7 +788,7 @@ There are only two problematic situations:
  xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      | 4     | +       | >= 16 TiB
  xsh               | u64    | 2       | 8     | 13      | 17   | 0.43 | -      | 0     | -       | 32 KiB
  xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     |         | ?
- xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     |         | >= 16 TiB
+ xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     |         | >= 32 TiB
  xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     |         | ?
  xxtea128          | u32    | +       | +     | +       | +    | 18   | +      | 4.5   |         | ?
  xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   |         | ?

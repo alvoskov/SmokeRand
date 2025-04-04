@@ -115,7 +115,7 @@ typedef struct GeneratorInfo_ {
 } GeneratorInfo;
 
 
-typedef int (*GetGenInfoFunc)(GeneratorInfo *gi);
+typedef int (*GetGenInfoFunc)(GeneratorInfo *gi, const CallerAPI *intf);
 
 
 /**

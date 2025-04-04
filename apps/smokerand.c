@@ -305,19 +305,21 @@ int main(int argc, char *argv[])
         CallerAPI_free();
         return ans;
     } else {
-        GeneratorModule mod = GeneratorModule_load(generator_lib);
+        CallerAPI intf = (opts.nthreads == 1) ? CallerAPI_init() : CallerAPI_init_mthr();
+        GeneratorModule mod = GeneratorModule_load(generator_lib, &intf);
         if (!mod.valid) {
+            CallerAPI_free();
             return 1;
         }
         GeneratorInfo *gi = &mod.gen;
         if (gi->nbits != 64 && (opts.filter == FILTER_INTERLEAVED32 ||
             opts.filter == FILTER_HIGH32 || opts.filter == FILTER_LOW32)) {
             fprintf(stderr, "This filter is supported only for 64-bit generators\n");
+            CallerAPI_free();
             return 1;
         }
         apply_filter(&gi, opts.filter, &filter_gen);
         GeneratorInfo_print(gi, is_stdout);
-        CallerAPI intf = (opts.nthreads == 1) ? CallerAPI_init() : CallerAPI_init_mthr();
         int ans = run_battery(battery_name, gi, &intf, &opts);
         GeneratorModule_unload(&mod);
         CallerAPI_free();

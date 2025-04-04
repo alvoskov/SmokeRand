@@ -527,7 +527,7 @@ EXPORT uint64_t get_sum(void *state, size_t len)
 }
 
 
-int EXPORT gen_getinfo(GeneratorInfo *gi)
+int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
 {
     // Initialize the lookup table for the LS transformation
     KuznState_make_table_LS();
@@ -541,5 +541,6 @@ int EXPORT gen_getinfo(GeneratorInfo *gi)
     gi->get_sum = get_sum;
     gi->self_test = run_self_test;
     gi->parent = NULL;
+    (void) intf;
     return 1;
 }

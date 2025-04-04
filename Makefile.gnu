@@ -92,13 +92,12 @@ EXECXX_NAMES = test_cpp11
 EXECXX_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXECXX_NAMES)))
 
 # Generators
-GEN_CUSTOM_SOURCES = $(addsuffix .c,$(addprefix generators/, ranluxpp \
-    superduper64 superduper64_u32))
+GEN_CUSTOM_SOURCES = $(addsuffix .c,$(addprefix generators/, ranluxpp))
 ifeq ($(IS_PORTABLE), 1)
 GEN_ALL_SOURCES = $(addsuffix .c,$(addprefix generators/, \
     alfib_lux alfib_mod alfib ara32 chacha cmwc4096 coveyou64 cwg64 \
     des drand48 efiix64x48 flea32x1 hc256 isaac64 kiss64 kiss93 kiss99 kuzn \
-    lcg128_u32_portable lcg32prime lcg64 lcg69069 lcg96_portable lea \
+    lcg128_u32_portable lcg32prime lcg64 lcg69069 lcg96 lea \
     lfib4 lfib4_u64 lfib_par lfsr113 lfsr258 loop_7fff_w64 lrnd64_255 \
     lrnd64_1023 lxm_64x128 macmarsa magma minstd mixmax mlfib17_5 \
     msws_ctr msws mt19937 mulberry32 mwc128xxa32 mwc1616x mwc1616 \
@@ -107,7 +106,7 @@ GEN_ALL_SOURCES = $(addsuffix .c,$(addprefix generators/, \
     ranluxpp ranq1 ranq2 ranrot32 ranrot_bi ranshi ranval ran rc4ok \
     rc4 romutrio rrmxmx sapparot2 sapparot sfc16 sfc32 sfc64 sfc8 \
     shr3 speck64_128 speck128 splitmix32 splitmix sqxor32 stormdrop_old \
-    stormdrop superduper64 superduper64_u32 superduper73 swblarge \
+    stormdrop superduper64 superduper73 swblarge \
     swblux swbw swb taus88 threefry2x64 threefry tinymt32 tinymt64 \
     well1024a xorgens xoroshiro1024stst xoroshiro1024st xoroshiro128pp \
     xoroshiro128pp_vec xoroshiro128p xorshift128p xorshift128 xorwow \
@@ -179,14 +178,6 @@ $(GEN_OBJFILES): $(BINDIR)/generators/obj/%.o : generators/%.c $(INTERFACE_HEADE
 # into account in their dependency rules.
 $(GEN_BINDIR)/obj/ranluxpp.o : generators/ranluxpp.c \
     generators/ranluxpp_helpers.h generators/ranluxpp_mulmod.h $(INTERFACE_HEADERS)
-	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
-
-$(GEN_BINDIR)/obj/superduper64.o : generators/superduper64.c \
-    generators/superduper64_body.h $(INTERFACE_HEADERS)
-	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
-
-$(GEN_BINDIR)/obj/superduper64_u32.o : generators/superduper64_u32.c \
-    generators/superduper64_body.h $(INTERFACE_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@
 
 clean:

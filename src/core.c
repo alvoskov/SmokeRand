@@ -259,7 +259,7 @@ void GeneratorState_free(GeneratorState *obj, const CallerAPI *intf)
  * @brief Loads shared library (`.so` or `.dll`) with module that
  * implements pseudorandom number generator.
  */
-GeneratorModule GeneratorModule_load(const char *libname)
+GeneratorModule GeneratorModule_load(const char *libname, const CallerAPI *intf)
 {
     GeneratorModule mod = {.valid = 1};
     mod.lib = dlopen_wrap(libname);
@@ -272,7 +272,7 @@ GeneratorModule GeneratorModule_load(const char *libname)
         fprintf(stderr, "Cannot find the 'gen_getinfo' function\n");
         mod.valid = 0;
     } else {
-        int is_ok = gen_getinfo(&mod.gen);
+        int is_ok = gen_getinfo(&mod.gen, intf);
         if (!is_ok) {
             fprintf(stderr, "'gen_getinfo' function failed (%d returned)\n", is_ok);
             mod.valid = 0;

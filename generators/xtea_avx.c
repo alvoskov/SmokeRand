@@ -175,10 +175,8 @@ static void *create(const CallerAPI *intf)
     const char *mode_name = intf->get_param();
     if (!intf->strcmp(mode_name, "ctr") || !intf->strcmp(mode_name, "")) {
         obj->is_cbc = 0;
-        intf->printf("Operation mode: ctr\n");
     } else if (!intf->strcmp(mode_name, "cbc")) {
         obj->is_cbc = 1;
-        intf->printf("Operation mode: cbc\n");
     } else {
         intf->printf("Unknown operation mode '%s' (ctr or cbc are supported)",
             mode_name);
@@ -209,4 +207,16 @@ static int run_self_test(const CallerAPI *intf)
     return u == u_ref;    
 }
 
-MAKE_UINT64_PRNG("XTEA_AVX", run_self_test)
+static const char *param_to_name(const CallerAPI *intf)
+{
+    const char *mode_name = intf->get_param();
+    if (!intf->strcmp(mode_name, "ctr") || !intf->strcmp(mode_name, "")) {
+        return "XXTEA_AVX:ctr";
+    } else if (!intf->strcmp(mode_name, "cbc")) {
+        return "XXTEA_AVX:cbc";
+    } else {
+        return "XXTEA_AVX:unknown";
+    }
+}
+
+MAKE_UINT_PRNG("XTEA_AVX", run_self_test, 64, param_to_name)

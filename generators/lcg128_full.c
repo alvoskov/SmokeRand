@@ -38,11 +38,8 @@ static void *create(const CallerAPI *intf)
  */
 static int run_self_test(const CallerAPI *intf)
 {
-#ifdef UINT128_ENABLED
-    Lcg128State obj = {.x = 1234567890};
-#else
-    Lcg128State obj = { .x_low = 1234567890, .x_high = 0 };
-#endif
+    Lcg128State obj;
+    Lcg128State_init(&obj, 1234567890, 0);
     uint64_t u, u_ref = 0x23fe67ffa50c941f;
     for (size_t i = 0; i < 1000000; i++) {
         u = get_bits_raw(&obj);

@@ -58,6 +58,38 @@ enum {
     XXTEA256_NROUNDS = 12, ///< Number of rounds for 256-bit blocks.
 };
 
+typedef enum {
+    XXTEA_UNKNOWN,
+    XXTEA128_SCALAR,
+    XXTEA128_AVX2,
+    XXTEA256_SCALAR,
+    XXTEA256_AVX2
+} XxteaType;
+
+
+typedef struct {
+    XxteaType type;
+    const char *name;
+} XxteaInfo;
+
+
+static XxteaInfo XxteaInfo_get(const CallerAPI *intf)
+{
+    const char *ver = intf->get_param();
+    if (!intf->strcmp(ver, "128-scalar") || !intf->strcmp(ver, "")) {
+        return (XxteaInfo) {XXTEA128_SCALAR, "XXTEA128-scalar"};
+    } else if (!intf->strcmp(ver, "256-scalar")) {
+        return (XxteaInfo) {XXTEA256_SCALAR, "XXTEA256-scalar"};
+    } else if (!intf->strcmp(ver, "128-avx2")) {
+        return (XxteaInfo) {XXTEA128_AVX2, "XXTEA128-avx2"};
+    } else if (!intf->strcmp(ver, "256-avx2")) {
+        return (XxteaInfo) {XXTEA256_AVX2, "XXTEA256-avx2"};
+    } else {
+        return (XxteaInfo) {XXTEA_UNKNOWN, "XXTEA:unknown"};
+    }
+}
+
+
 /**
  * @brief XXTEA128 PRNG state: scalar version.
  */
@@ -466,39 +498,36 @@ static void *create(const CallerAPI *intf)
     uint64_t s1 = intf->get_seed64();
     key[0] = (uint32_t) s0; key[1] = s0 >> 32;
     key[2] = (uint32_t) s1; key[3] = s1 >> 32;
-    const char *ver = intf->get_param();
-    if (!intf->strcmp(ver, "128-scalar") || !intf->strcmp(ver, "")) {
+    XxteaInfo info = XxteaInfo_get(intf);
+    if (info.type == XXTEA128_SCALAR) {
         Xxtea128State *obj = intf->malloc(sizeof(Xxtea128State));
         Xxtea128State_init(obj, key);
-        intf->printf("XXTEA128-scalar\n");
         return obj;
-    } else if (!intf->strcmp(ver, "256-scalar") || !intf->strcmp(ver, "")) {
+    } else if (info.type == XXTEA256_SCALAR) {
         Xxtea256State *obj = intf->malloc(sizeof(Xxtea256State));
         Xxtea256State_init(obj, key);
-        intf->printf("XXTEA256-scalar\n");
         return obj;
-    } else if (!intf->strcmp(ver, "128-avx2")) {
+    } else if (info.type == XXTEA128_AVX2) {
 #ifdef XXTEA_VEC_ENABLED
         Xxtea128VecState *obj = intf->malloc(sizeof(Xxtea128VecState));
         Xxtea128VecState_init(obj, key);
-        intf->printf("XXTEA128-avx2\n");
         return obj;
 #else
         intf->printf("AVX2 is not supported on this platform\n");
         return NULL;
 #endif
-    } else if (!intf->strcmp(ver, "256-avx2")) {
+    } else if (info.type == XXTEA256_AVX2) {
 #ifdef XXTEA_VEC_ENABLED
         Xxtea256VecState *obj = intf->malloc(sizeof(Xxtea256VecState));
         Xxtea256VecState_init(obj, key);
-        intf->printf("XXTEA256-avx2\n");
         return obj;
 #else
         intf->printf("AVX2 is not supported on this platform\n");
         return NULL;
 #endif
     } else {
-        intf->printf("Unknown version '%s' (128-scalar, 256-scalar, 128-avx2 or 256-avx2 are supported)\n", ver);
+        intf->printf("Unknown version '%s' (128-scalar, 256-scalar, 128-avx2 or 256-avx2 are supported)\n",
+            intf->get_param());
         return NULL;
     }
 }
@@ -672,4 +701,10 @@ static int run_self_test(const CallerAPI *intf)
     return is_ok;
 }
 
-MAKE_UINT32_PRNG("XXTEA", run_self_test)
+
+static const char *get_prng_name(const CallerAPI *intf)
+{
+    return XxteaInfo_get(intf).name;
+}
+
+MAKE_UINT_PRNG("XXTEA", run_self_test, 32, get_prng_name)
