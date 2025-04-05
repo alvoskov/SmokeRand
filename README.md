@@ -638,7 +638,7 @@ There are only two problematic situations:
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 16 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
- kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 4.5   |         | ?
+ kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 4.5   |         | >= 1 TiB
  lcg32prime        | u32    | 1       | 13    | 24      | 25/26| 2.2  | -(>>10)| 0     | -       | 512 MiB
  lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | +      | 0     | Small   | 16 MiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | 0     | +-      | >= 32 TiB
