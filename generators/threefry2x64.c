@@ -412,6 +412,7 @@ static int self_test_compare_vector(const CallerAPI *intf,
  */
 static int run_self_test_vector(const CallerAPI *intf)
 {
+#ifdef TF128_VEC_ENABLED
     Threefry2x64AVXState obj;
     static const uint64_t k0_m1[4] = {-1, -1}, ctr_m1[4] = {-1, -1},
         ref20_m1[4] = {0xe02cb7c4d95d277aull, 0xd06633d0893b8b68ull},
@@ -439,6 +440,9 @@ static int run_self_test_vector(const CallerAPI *intf)
     if (!self_test_compare_vector(intf, obj.out, ref20_pi)) {
         return 0;
     }
+#else
+    intf->printf("----- Vectorized (AVX2) implementation is not available -----\n");
+#endif
     return 1;
 }
 
@@ -473,6 +477,7 @@ static void *create_scalar(const GeneratorInfo *gi, const CallerAPI *intf)
 
 static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
 {
+#ifdef TF128_VEC_ENABLED
     uint64_t k[NWORDS];
     Threefry2x64AVXState *obj = intf->malloc(sizeof(Threefry2x64AVXState));
     for (int i = 0; i < NWORDS; i++) {
@@ -481,25 +486,17 @@ static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
     Threefry2x64AVXState_init(obj, k);
     (void) gi;
     return obj;
+#else
+    (void) gi;
+    intf->printf("AVX2 is not available on this platform\n");
+    return NULL;
+#endif
 }
-
 
 static void *create(const CallerAPI *intf)
 {
     (void) intf;
     return NULL;
-}
-
-#define MAKE_GET_BITS_WRAPPERS(suffix) \
-static uint64_t get_bits_##suffix(void *state) { \
-    return get_bits_##suffix##_raw(state); \
-} \
-static uint64_t get_sum_##suffix(void *state, size_t len) { \
-    uint64_t sum = 0; \
-    for (size_t i = 0; i < len; i++) { \
-        sum += get_bits_##suffix##_raw(state); \
-    } \
-    return sum; \
 }
 
 static inline uint64_t get_bits_scalar_raw(void *state)

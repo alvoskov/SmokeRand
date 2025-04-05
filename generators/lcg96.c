@@ -40,7 +40,7 @@ PRNG_CMODULE_PROLOG
 /**
  * @brief A cross-compiler implementation of 96-bit LCG.
  */
-static inline uint64_t get_bits_raw_ext(void *state)
+static inline uint64_t get_bits_ext_raw(void *state)
 {
 #ifdef UMUL128_FUNC_ENABLED
     Lcg128State *obj = state;
@@ -60,19 +60,8 @@ static inline uint64_t get_bits_raw_ext(void *state)
 }
 
 
-static uint64_t get_bits_ext(void *state)
-{
-    return get_bits_raw_ext(state);
-}
+MAKE_GET_BITS_WRAPPERS(ext)
 
-static uint64_t get_sum_ext(void *state, size_t len)
-{
-    uint64_t sum = 0;
-    for (size_t i = 0; i < len; i++) {
-        sum += get_bits_raw_ext(state);
-    }
-    return sum;
-}
 
 /**
  * @brief Self-test to prevent problems during re-implementation
@@ -85,7 +74,7 @@ static int run_self_test_ext(const CallerAPI *intf)
     Lcg128State_init(&obj, 0, 1234567890);
     uint64_t u, u_ref = 0xea5267e2;
     for (size_t i = 0; i < 1000000; i++) {
-        u = get_bits_raw_ext(&obj);
+        u = get_bits_ext_raw(&obj);
     }
     intf->printf("---- Extended (128-bit) version -----\n");
     intf->printf("Result: %llX; reference value: %llX\n", u, u_ref);
@@ -109,13 +98,6 @@ static void *create_ext(const GeneratorInfo *gi, const CallerAPI *intf)
     return NULL;
 #endif
 }
-
-static void free_ext(void *state, const GeneratorInfo *gi, const CallerAPI *intf)
-{
-    (void) gi;
-    intf->free(state);
-}
-
 
 ////////////////////////////////
 ///// Portable C99 version /////
@@ -142,7 +124,7 @@ typedef struct {
 /**
  * @brief A portable implementation of 96-bit LCG.
  */
-static inline uint64_t get_bits_raw_c99(void *state)
+static inline uint64_t get_bits_c99_raw(void *state)
 {
     //                           lower        medium     high
     static const uint32_t a[] = {0x3bda4a15, 0xfa75832c, 0xf429e3c0};
@@ -169,20 +151,8 @@ static inline uint64_t get_bits_raw_c99(void *state)
 }
 
 
-static uint64_t get_bits_c99(void *state)
-{
-    return get_bits_raw_c99(state);
-}
+MAKE_GET_BITS_WRAPPERS(c99)
 
-
-static uint64_t get_sum_c99(void *state, size_t len)
-{
-    uint64_t sum = 0;
-    for (size_t i = 0; i < len; i++) {
-        sum += get_bits_raw_c99(state);
-    }
-    return sum;
-}
 
 static void *create_c99(const GeneratorInfo *gi, const CallerAPI *intf)
 {
@@ -193,12 +163,6 @@ static void *create_c99(const GeneratorInfo *gi, const CallerAPI *intf)
     obj->x[2] = 0;
     (void) gi;
     return (void *) obj;
-}
-
-static void free_c99(void *state, const GeneratorInfo *gi, const CallerAPI *intf)
-{
-    (void) gi;
-    intf->free(state);
 }
 
 
@@ -220,7 +184,7 @@ static int run_self_test_c99(const CallerAPI *intf)
     Lcg96x32State obj;
     obj.x[0] = 1234567890; obj.x[1] = 0; obj.x[2] = 0;
     for (size_t i = 0; i < 1000000; i++) {
-        u = get_bits_raw_c99(&obj);
+        u = get_bits_c99_raw(&obj);
     }
     intf->printf("---- Portable (C99) version -----\n");
     intf->printf("Result: %llX; reference value: %llX\n", u, u_ref);
@@ -258,24 +222,22 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
     const char *param = intf->get_param();
     gi->description = NULL;
     gi->nbits = 32;
+    gi->free = default_free;
     gi->self_test = run_self_test;
     gi->parent = NULL;
     if (!intf->strcmp(param, "ext") || !intf->strcmp(param, "")) {
         gi->name = "Lcg96:ext";
         gi->create = create_ext;
-        gi->free = free_ext;
         gi->get_bits = get_bits_ext;
         gi->get_sum = get_sum_ext;
     } else if (!intf->strcmp(param, "c99")) {
         gi->name = "Lcg96:c99";
         gi->create = create_c99;
-        gi->free = free_c99;
         gi->get_bits = get_bits_c99;
         gi->get_sum = get_sum_c99;
     } else {
         gi->name = "Lcg96:unknown";
         gi->create = default_create;
-        gi->free = default_free;
         gi->get_bits = NULL;
         gi->get_sum = NULL;
     }
