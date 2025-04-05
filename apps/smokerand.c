@@ -36,6 +36,7 @@ void print_help(void)
     "  - freq      8-bit and 16-bit words frequency adaptive tests.\n"  
     "  - @filename Load a custom battery from the file.\n"
     "  Special modes\n"
+    "  - help      Print a built-in PRNG help (if available).\n"
     "  - selftest  Runs PRNG internal self-test (if available).\n"
     "  - speed     Measure speed of the generator\n"
     "  - stdout    Sends PRNG output to stdout in the binary form.\n"
@@ -161,7 +162,7 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
 /**
  * @brief Run a battery of statistical test for a given generator.
  * @param battery_name  Name of tests battery: `default`, `express`, `brief`,
- * `full`, `selftest`, `speed`, `stdout`, `freq`, 'birthday`, `ising`.
+ * `full`, `help`, `selftest`, `speed`, `stdout`, `freq`, 'birthday`, `ising`.
  * @param gi   PRNG to be tested.
  * @param intf Pointers to API functions.
  * @param opts Pre-parsed command line options.
@@ -177,6 +178,12 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
         battery_full(gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else if (!strcmp(battery_name, "express")) {
         battery_express(gi, intf, opts->testid, opts->nthreads, opts->report_type);
+    } else if (!strcmp(battery_name, "help")) {
+        if (gi->description != NULL) {
+            printf("%s\n", gi->description);
+        } else {
+            printf("Built-in help not found\n");
+        }
     } else if (!strcmp(battery_name, "selftest")) {
         battery_self_test(gi, intf);
     } else if (!strcmp(battery_name, "speed")) {
