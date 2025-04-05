@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Error: %s\n", dlerror_pe32dos());
     }
    
-    GenGetInfoFunc gen_getinfo = dlsym_pe32dos(handle, "gen_getinfo");
+    GetGenInfoFunc gen_getinfo = dlsym_pe32dos(handle, "gen_getinfo");
     if (gen_getinfo == NULL) {
         fprintf(stderr, "Cannot find the 'gen_getinfo' function\n");
         return 1;

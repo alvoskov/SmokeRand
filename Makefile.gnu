@@ -105,7 +105,7 @@ GEN_ALL_SOURCES = $(addsuffix .c,$(addprefix generators/, \
     pcg32_xsl_rr pcg64_64 philox2x32 philox32 r1279 randu ranlux48 \
     ranluxpp ranq1 ranq2 ranrot32 ranrot_bi ranshi ranval ran rc4ok \
     rc4 romutrio rrmxmx sapparot2 sapparot sfc16 sfc32 sfc64 sfc8 \
-    shr3 speck64_128 speck128 splitmix32 splitmix sqxor32 stormdrop_old \
+    shr3 speck64_128 speck128 splitmix32 splitmix sqxor32 \
     stormdrop superduper64 superduper73 swblarge \
     swblux swbw swb taus88 threefry2x64 threefry tinymt32 tinymt64 \
     well1024a xorgens xoroshiro1024stst xoroshiro1024st xoroshiro128pp \

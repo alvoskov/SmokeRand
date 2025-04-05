@@ -39,23 +39,6 @@ static inline uint64_t superduper64_get_bits(void *state)
     return obj->lcg + obj->xs;
 }
 
-static void *superduper64_create(const GeneratorInfo *gi, const CallerAPI *intf)
-{
-    SuperDuper64State *obj = intf->malloc(sizeof(SuperDuper64State));
-    obj->lcg = intf->get_seed64();
-    do {
-        obj->xs = intf->get_seed64();
-    } while (obj->xs == 0);
-    (void) gi;
-    return (void *) obj;
-}
-
-static void superduper64_free(void *state, const GeneratorInfo *gi, const CallerAPI *intf)
-{
-    (void) gi;
-    intf->free(state);
-}
-
 ///////////////////////////////////
 ///// 64-bit output functions /////
 ///////////////////////////////////
@@ -100,16 +83,20 @@ static uint64_t get_sum_u32(void *state, size_t len)
 
 static void *create(const CallerAPI *intf)
 {
-    (void) intf;
-    return NULL;
+    SuperDuper64State *obj = intf->malloc(sizeof(SuperDuper64State));
+    obj->lcg = intf->get_seed64();
+    do {
+        obj->xs = intf->get_seed64();
+    } while (obj->xs == 0);
+    return (void *) obj;
 }
 
 int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
 {
     const char *param = intf->get_param();
     gi->description = NULL;
-    gi->create = superduper64_create;
-    gi->free = superduper64_free;
+    gi->create = default_create;
+    gi->free = default_free;
     gi->self_test = NULL;
     gi->parent = NULL;
     if (!intf->strcmp(param, "u64") || !intf->strcmp(param, "")) {
@@ -125,8 +112,6 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
     } else {
         gi->name = "SuperDuper:unknown";
         gi->nbits = 64;
-        gi->create = default_create;
-        gi->free = default_free;
         gi->get_bits = NULL;
         gi->get_sum = NULL;
     }
