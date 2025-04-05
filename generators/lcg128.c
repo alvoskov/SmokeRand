@@ -54,8 +54,12 @@ static void *create(const CallerAPI *intf)
  */
 static inline uint64_t get_bits_x64u64_raw(void *state)
 {
+#ifdef UMUL128_FUNC_ENABLED
     const uint64_t a = 18000690696906969069ull;
     return Lcg128State_a64_iter(state, a, 1ull);
+#else
+    return 0;
+#endif
 }
 
 MAKE_GET_BITS_WRAPPERS(x64u64)
@@ -77,7 +81,7 @@ static int run_self_test_x64u64(const CallerAPI *intf)
     return u == u_ref;
 #else
     intf->printf("x64u64 not supported on this platform\n");
-    return 0;
+    return 1;
 #endif
 }
 
@@ -117,7 +121,7 @@ static int run_self_test_x128u64(const CallerAPI *intf)
     return u == u_ref;
 #else
     intf->printf("x128u64 not supported on this platform\n");
-    return 0;
+    return 1;
 #endif
 }
 
@@ -160,7 +164,7 @@ static int run_self_test_x128u32(const CallerAPI *intf)
     return u == u_ref;
 #else
     intf->printf("x64u64 not supported on this platform\n");
-    return 0;
+    return 1;
 #endif
 }
 
