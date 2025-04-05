@@ -131,6 +131,22 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf) { (void) intf; 
 #define MAKE_UINT64_PRNG(prng_name, selftest_func) \
     MAKE_UINT_PRNG(prng_name, selftest_func, 64, NULL)
 
+/**
+ * @brief Generates two functions for a user defined `get_bits_SUFFIX_raw`:
+ * `get_bits_SUFFIX` and `get_sum_SUFFIX`. Useful for custom modules that
+ * contain several variants of the same generator.
+ */
+#define MAKE_GET_BITS_WRAPPERS(suffix) \
+static uint64_t get_bits_##suffix(void *state) { \
+    return get_bits_##suffix##_raw(state); \
+} \
+static uint64_t get_sum_##suffix(void *state, size_t len) { \
+    uint64_t sum = 0; \
+    for (size_t i = 0; i < len; i++) { \
+        sum += get_bits_##suffix##_raw(state); \
+    } \
+    return sum; \
+}
 
 ///////////////////////////////////////////////////////
 ///// Some predefined structures for PRNGs states /////
