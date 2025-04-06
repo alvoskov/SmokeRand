@@ -35,14 +35,14 @@ local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
     'xoroshiro1024st', 'xoroshiro128pp', 'xoroshiro128pp_avx',
     'xoroshiro128pp_vec', 'xoroshiro128p', 'xorshift128pp_avx', 'xorshift128p',
     'xorshift128', 'xorwow', 'xoshiro128p', 'xoshiro128pp', 'xsh',
-    'xtea', 'xtea_avx', 'xxtea'}
+    'xtea', 'xxtea'}
 
 -- List of non-portable generators that use compiler-specific extensions
 local gen_not_portable_sources = {'aesni', 'chacha_avx', 'lcg64prime',
     'magma_avx', 'mrg32k3a', 'mwc128x', 'mwc128', 'mwc256xxa64',
     'pcg64_xsl_rr', 'philox', 'sezgin63', 'speck128_avx',
     'sqxor', 'wyrand', 'xoroshiro128pp_avx',
-    'xorshift128pp_avx', 'xtea_avx'}
+    'xorshift128pp_avx'}
 -- mrg32k3a, sezgin63
 
 local function exclude_non_portables()
