@@ -46,8 +46,11 @@ static inline uint64_t get_bits_ext_raw(void *state)
     Lcg128State *obj = state;
     Lcg128State_a128_iter(obj, 0xdc879768, 0x60b11728995deb95, 1);
 #ifdef UINT128_ENABLED
+/*
     obj->x = ((obj->x << 32) >> 32); // mod 2^96
     return (uint64_t)(obj->x >> 64);
+*/
+    return 0;
 #else
     // mod 2^96
     obj->x_high = ((obj->x_high << 32) >> 32);

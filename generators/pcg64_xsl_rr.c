@@ -33,11 +33,11 @@ static inline uint64_t get_bits_raw(void *state)
     // Just ordinary 128-bit LCG
     (void) Lcg128State_a128_iter(state, 0x2360ED051FC65DA4, 0x4385DF649FCCF645, 1);    
     // Output XSL RR function
-#ifdef UINT128_ENABLED
-    uint64_t x_lo = (uint64_t) obj->x, x_hi = obj->x >> 64;
-#else
+//#ifdef UINT128_ENABLED
+//    uint64_t x_lo = (uint64_t) obj->x, x_hi = obj->x >> 64;
+//#else
     uint64_t x_lo = obj->x_low, x_hi = obj->x_high;
-#endif
+//#endif
     unsigned int rot = x_hi >> 58; // 64 - 6
     uint64_t xsl = x_hi ^ x_lo;
     return rotr64(xsl, rot);
@@ -57,11 +57,11 @@ static void *create(const CallerAPI *intf)
  */
 static int run_self_test(const CallerAPI *intf)
 {
-#ifdef UINT128_ENABLED
-    Lcg128State obj = {.x = 1234567890};
-#else
+//#ifdef UINT128_ENABLED
+//    Lcg128State obj = {.x = 1234567890};
+//#else
     Lcg128State obj = { .x_low = 1234567890, .x_high = 0 };
-#endif
+//#endif
     uint64_t u, u_ref = 0x8DE320BB801095E2;
     for (size_t i = 0; i < 1000000; i++) {
         u = get_bits_raw(&obj);
