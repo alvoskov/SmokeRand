@@ -18,7 +18,7 @@
 
 static inline void uadd_128p64_ary_c99(uint32_t *x, uint64_t c)
 {
-    static const uint64_t MASK32 = 0xFFFFFFFF;
+    static const uint32_t MASK32 = 0xFFFFFFFF;
     uint64_t sum = x[0] + (c & MASK32);     x[0] = sum & MASK32;
     sum = x[1] + ((c >> 32) + (sum >> 32)); x[1] = sum & MASK32;
     sum = x[2] + (sum >> 32);               x[2] = sum & MASK32;
@@ -37,23 +37,23 @@ static inline void uadd_128p64_ary_c99(uint32_t *x, uint64_t c)
 static inline uint64_t umuladd_64x64p64_c99(uint64_t a, uint64_t b, uint64_t c, uint64_t *hi)
 {
     static const uint64_t MASK32 = 0xFFFFFFFF;
-    uint32_t out[4], x_lo = b & MASK32, x_hi = b >> 32;
+    uint32_t out[4], x_lo = (uint32_t) b, x_hi = b >> 32;
     uint64_t mul, sum;
     uint64_t a_lo = a & MASK32, a_hi = a >> 32;
     // Row 0
     mul = a_lo * x_lo;
-    out[0] = mul & MASK32;
+    out[0] = (uint32_t) mul;
     mul = a_lo * x_hi + (mul >> 32);
-    out[1] = mul & MASK32; out[2] = mul >> 32;
+    out[1] = (uint32_t) mul; out[2] = mul >> 32;
     // Row 1
     mul = a_hi * x_lo;
     sum = (mul & MASK32) + out[1];
-    out[1] = sum & MASK32;
+    out[1] = (uint32_t) sum;
         
     mul = a_hi * x_hi + (mul >> 32);
     sum = (mul & MASK32) + out[2] + (sum >> 32);
-    out[2] = sum & MASK32;
-    out[3] = (sum >> 32) + (mul >> 32);
+    out[2] = (uint32_t) sum;
+    out[3] = (uint32_t) ((sum >> 32) + (mul >> 32));
     if (c != 0) {
         uadd_128p64_ary_c99(out, c);
     }
@@ -67,10 +67,9 @@ static inline uint64_t umuladd_64x64p64_c99(uint64_t a, uint64_t b, uint64_t c, 
  */
 static inline void uadd_128p64_c99(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
 {
-    static const uint64_t MASK32 = 0xFFFFFFFF;
     uint32_t out[4];
-    out[0] = (*a_lo) & MASK32; out[1] = (*a_lo) >> 32;
-    out[2] = (*a_hi) & MASK32; out[3] = (*a_hi) >> 32;
+    out[0] = (uint32_t) (*a_lo); out[1] = (*a_lo) >> 32;
+    out[2] = (uint32_t) (*a_hi); out[3] = (*a_hi) >> 32;
     uadd_128p64_ary_c99(out, b);
     (*a_hi) = ((uint64_t) out[2]) | (((uint64_t) out[3]) << 32);
     (*a_lo) = ((uint64_t) out[0]) | (((uint64_t) out[1]) << 32);
@@ -396,10 +395,10 @@ static inline void Lcg128State_init(Lcg128State *obj, uint64_t hi, uint64_t lo)
 #ifdef UINT128_ENABLED
     obj->x = hi;
     obj->x <<= 64;
-    obj->x |= lo; 
+    obj->x |= lo;
 #else
-    obj->x_low = lo;
-    obj->x_hi  = hi;
+    obj->x_low  = lo;
+    obj->x_high = hi;
 #endif
 }
 
