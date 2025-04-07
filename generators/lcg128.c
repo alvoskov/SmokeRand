@@ -67,7 +67,7 @@ static int run_self_test_x64u64(const CallerAPI *intf)
     for (size_t i = 0; i < 1000000; i++) {
         u = get_bits_x64u64_raw(&obj);
     }
-    intf->printf("x64u64 result: %llX; reference value: %llX\n", u, u_ref);
+    intf->printf("x64u64  result: %llX; reference value: %llX\n", u, u_ref);
     return u == u_ref;
 }
 
@@ -75,77 +75,12 @@ static int run_self_test_x64u64(const CallerAPI *intf)
 ///// 128-bit multiplier (output from upper 64 bits) /////
 //////////////////////////////////////////////////////////
 
-
-/**
- * @brief A portable implementation of the \f$ ax + c \f$ operation with 64-bit
- * arguments and 128-bit output. Useful for LCG and MWC generators.
- * @param[in] a Input value.
- * @param[in,out] x Input value that will be overwritten.
- * @param[in] c Input value.
- * @return Lower 64 bits.
- */
-static inline void umuladd_128x128p64_c99(uint32_t *a, uint32_t *x, uint64_t c)
-{
-    static const uint64_t MASK32 = 0xFFFFFFFF;
-    uint32_t out[4];
-    uint64_t mul, sum;
-    // Row 0
-    mul = 0;
-    for (int i = 0; i < 4; i++) {
-        mul = ((uint64_t) a[0]) * x[i] + (mul >> 32);
-        out[i] = (uint32_t) mul;
-    }
-    // Row 1
-    mul = 0, sum = 0;
-    for (int i = 0; i < 3; i++) {
-        mul = ((uint64_t) a[1]) * x[i] + (mul >> 32);
-        sum = (mul & MASK32) + out[i + 1] + (sum >> 32);
-        out[i + 1] = (uint32_t) sum;
-    }
-    // Row 2
-    mul = 0; sum = 0;
-    for (int i = 0; i < 2; i++) {
-        mul = ((uint64_t) a[2]) * x[i] + (mul >> 32);
-        sum = (mul & MASK32) + out[i + 2] + (sum >> 32);
-        out[i + 2] = (uint32_t) sum;
-    }
-    // Row 3
-    out[3] += a[3] * x[0];
-    if (c != 0) {
-        uadd_128p64_ary_c99(out, c);
-    }
-    // Update output
-    for (int i = 0; i < 4; i++) {
-        x[i] = out[i];
-    }
-}
-
-
-
 /**
  * @brief A cross-compiler implementation of 128-bit LCG.
  */
 static inline uint64_t get_bits_x128u64_raw(void *state)
 {
-#ifdef UMUL128_FUNC_ENABLED
     return Lcg128State_a128_iter(state, 0xdb36357734e34abb, 0x0050d0761fcdfc15, 1);
-#else
-    Lcg128State *obj = state;
-    uint64_t a_hi = 0xdb36357734e34abb, a_lo = 0x0050d0761fcdfc15;
-    uint32_t x[4];
-    uint32_t a[4]; 
-
-    x[0] = (uint32_t) (obj->x_low);  x[1] = (obj->x_low) >> 32;
-    x[2] = (uint32_t) (obj->x_high); x[3] = (obj->x_high) >> 32;
-    a[0] = (uint32_t) a_lo; a[1] = a_lo >> 32;
-    a[2] = (uint32_t) a_hi; a[3] = a_hi >> 32;
-
-    umuladd_128x128p64_c99(a, x, 1);
-
-    obj->x_high = ((uint64_t) x[2]) | (((uint64_t) x[3]) << 32);
-    obj->x_low  = ((uint64_t) x[0]) | (((uint64_t) x[1]) << 32);
-    return obj->x_high;
-#endif
 }
 
 
@@ -166,7 +101,7 @@ MAKE_GET_BITS_WRAPPERS(x128u64)
 static int run_self_test_x128u64(const CallerAPI *intf)
 {
     Lcg128State obj;
-    Lcg128State_init(&obj, 1234567890, 0);
+    Lcg128State_init(&obj, 0, 1234567890);
     uint64_t u, u_ref = 0x23fe67ffa50c941f;
     for (size_t i = 0; i < 1000000; i++) {
         u = get_bits_x128u64_raw(&obj);
@@ -187,12 +122,7 @@ static int run_self_test_x128u64(const CallerAPI *intf)
  */
 static inline uint64_t get_bits_x128u32_raw(void *state)
 {
-#ifdef UMUL128_FUNC_ENABLED
     return Lcg128State_a128_iter(state, 0xdb36357734e34abb, 0x0050d0761fcdfc15, 1) >> 32;
-#else
-    (void) state;
-    return 0;
-#endif
 }
 
 MAKE_GET_BITS_WRAPPERS(x128u32)
@@ -204,19 +134,14 @@ MAKE_GET_BITS_WRAPPERS(x128u32)
  */
 static int run_self_test_x128u32(const CallerAPI *intf)
 {
-#ifdef UMUL128_FUNC_ENABLED
     Lcg128State obj;
-    Lcg128State_init(&obj, 1234567890, 0);
+    Lcg128State_init(&obj, 0, 1234567890);
     uint64_t u, u_ref = 0x23fe67ff;// a50c941f;
     for (size_t i = 0; i < 1000000; i++) {
         u = get_bits_x128u32_raw(&obj);
     }
-    intf->printf("Result: %llX; reference value: %llX\n", u, u_ref);
+    intf->printf("x128u32 result: %llX; reference value: %llX\n", u, u_ref);
     return u == u_ref;
-#else
-    intf->printf("x64u64 not supported on this platform\n");
-    return 1;
-#endif
 }
 
 ////////////////////////////////
@@ -305,7 +230,7 @@ static int run_self_test_c99(const CallerAPI *intf)
     for (size_t i = 0; i < 1000000; i++) {
         u = get_bits_c99_raw(&obj);
     }
-    intf->printf("Result: %llX; reference value: %llX\n", u, u_ref);
+    intf->printf("Portable result: %llX; reference value: %llX\n", u, u_ref);
     return u == u_ref;
 }
 

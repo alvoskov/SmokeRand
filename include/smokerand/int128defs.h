@@ -15,9 +15,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
-///////////////////////////////
-///// 128-bit arithmetics /////
-///////////////////////////////
+///////////////////////////////////////////////////
+///// 128-bit arithmetics: portable functions /////
+///////////////////////////////////////////////////
 
 static inline void uadd_128p64_ary_c99(uint32_t *x, uint64_t c)
 {
@@ -78,6 +78,65 @@ static inline void uadd_128p64_c99(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
     (*a_lo) = ((uint64_t) out[0]) | (((uint64_t) out[1]) << 32);
 }
 
+/**
+ * @brief A portable implementation of the \f$ ax + c \f$ operation with 64-bit
+ * arguments and 128-bit output. Useful for LCG and MWC generators.
+ * @details
+ *
+ *          |x x x x     x * a[0]
+ *     +   x|x x x       x * a[1]
+ *       x x|x x         x * a[2]
+ *     x x x|x           x * a[3]
+ *     --------------
+ *          |x x x x
+ *
+ * @param[in] a Input value.
+ * @param[in,out] x Input value that will be overwritten.
+ * @param[in] c Input value.
+ * @return Lower 64 bits.
+ */
+static inline void umuladd_128x128p64_c99(const uint32_t *a, uint32_t *x, uint64_t c)
+{
+    static const uint64_t MASK32 = 0xFFFFFFFF;
+    uint32_t out[4];
+    uint64_t mul, sum;
+    // Row 0
+    mul = 0;
+    for (int i = 0; i < 4; i++) {
+        mul = ((uint64_t) a[0]) * x[i] + (mul >> 32);
+        out[i] = (uint32_t) mul;
+    }
+    // Row 1
+    mul = 0, sum = 0;
+    for (int i = 0; i < 3; i++) {
+        mul = ((uint64_t) a[1]) * x[i] + (mul >> 32);
+        sum = (mul & MASK32) + out[i + 1] + (sum >> 32);
+        out[i + 1] = (uint32_t) sum;
+    }
+    // Row 2
+    mul = 0; sum = 0;
+    for (int i = 0; i < 2; i++) {
+        mul = ((uint64_t) a[2]) * x[i] + (mul >> 32);
+        sum = (mul & MASK32) + out[i + 2] + (sum >> 32);
+        out[i + 2] = (uint32_t) sum;
+    }
+    // Row 3
+    out[3] += a[3] * x[0];
+    if (c != 0) {
+        uadd_128p64_ary_c99(out, c);
+    }
+    // Update output
+    for (int i = 0; i < 4; i++) {
+        x[i] = out[i];
+    }
+}
+
+
+////////////////////////////////////////////////////////////////
+///// 128-bit arithmetics: compiler-specific optimizations /////
+////////////////////////////////////////////////////////////////
+
+
 #if defined(_MSC_VER) && !defined(__clang__)
 // Begin of MSVC implementation of 128-bit arithmetics
 #include <intrin.h>
@@ -98,6 +157,19 @@ static inline uint64_t unsigned_muladd128(uint64_t a, uint64_t b, uint64_t c, ui
 static inline void unsigned_add128(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
 {
     *a_hi += _addcarry_u64(0, *a_lo, b, a_lo);
+}
+
+static inline void umuladd_128x128p64w(uint64_t a_hi, uint64_t a_lo,
+    uint64_t *x_hi, uint64_t *x_lo, uint64_t c)
+{
+    // Process lower part of a
+    uint64_t mul0_high, x_low_old = *x_lo;
+    *x_lo = _umul128(a_lo, *x_lo, &mul0_high);
+    *x_hi = a_lo * (*x_hi) + mul0_high;
+    // Process higher part of a
+    *x_hi += a_hi * x_low_old;
+    // Add constant
+    *x_hi += _addcarry_u64(0, *x_lo, c, x_lo);
 }
 
 // End of MSVC implementation of 128-bit arithmetics
@@ -125,6 +197,17 @@ static inline void unsigned_add128(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
     *a_lo = (uint64_t) t;
     *a_hi = (uint64_t) (t >> 64);
 }
+
+static inline void umuladd_128x128p64w(uint64_t a_hi, uint64_t a_lo,
+    uint64_t *x_hi, uint64_t *x_lo, uint64_t c)
+{
+    const __uint128_t a = ((__uint128_t) a_hi) << 64 | a_lo;
+    const __uint128_t x = ((__uint128_t) (*x_hi)) << 64 | (*x_lo);
+    __uint128_t t = a * x + c;
+    *x_lo = (uint64_t) t;
+    *x_hi = t >> 64;
+}
+
 // End of GCC implementation of 128-bit arithmetics
 #else
 // Begin of portable (C99) implementation of 128-bit arithmetics
@@ -142,8 +225,47 @@ static inline void unsigned_add128(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
 {
     uadd_128p64_c99(a_hi, a_lo, b);
 }
+
+static inline void umuladd_128x128p64w(uint64_t a_hi, uint64_t a_lo,
+    uint64_t *x_hi, uint64_t *x_lo, uint64_t c)
+{
+    uint32_t x[4], a[4];
+    x[0] = (uint32_t) (*x_lo); x[1] = (*x_lo) >> 32;
+    x[2] = (uint32_t) (*x_hi); x[3] = (*x_hi) >> 32;
+    a[0] = (uint32_t) a_lo; a[1] = a_lo >> 32;
+    a[2] = (uint32_t) a_hi; a[3] = a_hi >> 32;
+    umuladd_128x128p64_c99(a, x, c);
+    *x_hi = ((uint64_t) x[2]) | (((uint64_t) x[3]) << 32);
+    *x_lo  = ((uint64_t) x[0]) | (((uint64_t) x[1]) << 32);
+}
+
+
 // End of portable (C99) implementation of 128-bit arithmetics
 #endif
+
+
+
+/*
+    const unsigned __int128 a = ((unsigned __int128) a_high) << 64 | a_low;
+    obj->x = a * obj->x + c;
+    return (uint64_t) (obj->x >> 64);
+*/
+/*
+    (void) obj; (void) a_high; (void) a_low; (void) c;
+    return 0;
+#else
+    // Process lower part of a
+    uint64_t mul0_high, x_low_old = obj->x_low;
+    obj->x_low = unsigned_mul128(a_low, obj->x_low, &mul0_high);
+    obj->x_high = a_low * obj->x_high + mul0_high;
+    // Process higher part of a
+    obj->x_high += a_high * x_low_old;
+    // Add constant
+    obj->x_high += _addcarry_u64(0, obj->x_low, c, &obj->x_low);
+    // Return upper 64 bits
+    return obj->x_high;
+*/
+
 
 
 ///////////////////////////////////////////////////////////////
@@ -194,6 +316,9 @@ static inline void Lcg128State_seed(Lcg128State *obj, const CallerAPI *intf)
 static inline uint64_t Lcg128State_a64_iter(Lcg128State *obj, const uint64_t a, const uint64_t c)
 {
     uint64_t mul0_high;
+//    obj->x_low = unsigned_muladd128(a, obj->x_low, c, &obj->x_high);
+
+
     obj->x_low = unsigned_mul128(a, obj->x_low, &mul0_high);
     obj->x_high = a * obj->x_high + mul0_high;
     unsigned_add128(&obj->x_high, &obj->x_low, c);    
@@ -213,44 +338,14 @@ static inline uint64_t Lcg128State_a64_iter(Lcg128State *obj, const uint64_t a, 
 }
 
 
-
-#ifdef UMUL128_FUNC_ENABLED
-
-
 /**
- * @brief A cross-compiler implementation of 128-bit LCG with 128-bit multiplier.
+ * @brief A cross-platform implementation of 128-bit LCG with 128-bit multiplier.
  */
 static inline uint64_t Lcg128State_a128_iter(Lcg128State *obj,
     const uint64_t a_high, const uint64_t a_low, const uint64_t c)
 {
-#ifdef UINT128_ENABLED
-/*
-    const unsigned __int128 a = ((unsigned __int128) a_high) << 64 | a_low;
-    obj->x = a * obj->x + c;
-    return (uint64_t) (obj->x >> 64);
-*/
-    (void) obj; (void) a_high; (void) a_low; (void) c;
-    return 0;
-#else
-    // Process lower part of a
-    uint64_t mul0_high, x_low_old = obj->x_low;
-    obj->x_low = unsigned_mul128(a_low, obj->x_low, &mul0_high);
-    obj->x_high = a_low * obj->x_high + mul0_high;
-    // Process higher part of a
-    obj->x_high += a_high * x_low_old;
-    // Add constant
-    obj->x_high += _addcarry_u64(0, obj->x_low, c, &obj->x_low);
-    // Return upper 64 bits
+    umuladd_128x128p64w(a_high, a_low, &obj->x_high, &obj->x_low, c);
     return obj->x_high;
-#endif
 }
-
-
-
-
-#endif
-// end of UMUL128_FUNC_ENABLED ifdef
-
-
 
 #endif
