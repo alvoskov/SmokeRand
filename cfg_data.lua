@@ -5,8 +5,8 @@ local bat_sources = {'bat_express.c', 'bat_brief.c', 'bat_default.c',
     'bat_file.c', 'bat_full.c', 'bat_special.c'}
 
 local lib_headers = {'apidefs.h', 'cinterface.h', 'core.h', 'coretests.h',
-    'entropy.h', 'extratests.h', 'fileio.h', 'hwtests.h', 'lineardep.h', 
-    'specfuncs.h', 'threads_intf.h'}
+    'entropy.h', 'extratests.h', 'fileio.h', 'hwtests.h', 'int128defs.h',
+    'lineardep.h', 'specfuncs.h', 'threads_intf.h'}
 
 
 -- List of all generators; some of them are not portable, e.g. can require
@@ -38,8 +38,8 @@ local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
     'xtea', 'xxtea'}
 
 -- List of non-portable generators that use compiler-specific extensions
-local gen_not_portable_sources = {'aesni', 'chacha_avx', 'lcg64prime',
-    'magma_avx', 'mrg32k3a', 'pcg64_xsl_rr', 'sezgin63', 'speck128_avx',
+local gen_not_portable_sources = {'aesni', 'chacha_avx',
+    'magma_avx', 'pcg64_xsl_rr', 'speck128_avx',
     'xoroshiro128pp_avx', 'xorshift128pp_avx'}
 -- mrg32k3a, sezgin63
 

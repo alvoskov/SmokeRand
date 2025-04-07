@@ -54,13 +54,8 @@ static void *create(const CallerAPI *intf)
  */
 static inline uint64_t get_bits_x64u64_raw(void *state)
 {
-#ifdef UMUL128_FUNC_ENABLED
     const uint64_t a = 18000690696906969069ull;
     return Lcg128State_a64_iter(state, a, 1ull);
-#else
-    (void) state;
-    return 0;
-#endif
 }
 
 MAKE_GET_BITS_WRAPPERS(x64u64)
@@ -71,7 +66,6 @@ MAKE_GET_BITS_WRAPPERS(x64u64)
  */
 static int run_self_test_x64u64(const CallerAPI *intf)
 {
-#ifdef UMUL128_FUNC_ENABLED
     Lcg128State obj;
     Lcg128State_init(&obj, 0, 1234567890);
     uint64_t u, u_ref = 0x8E878929D96521D7;
@@ -80,15 +74,58 @@ static int run_self_test_x64u64(const CallerAPI *intf)
     }
     intf->printf("Result: %llX; reference value: %llX\n", u, u_ref);
     return u == u_ref;
-#else
-    intf->printf("x64u64 not supported on this platform\n");
-    return 1;
-#endif
 }
 
 //////////////////////////////////////////////////////////
 ///// 128-bit multiplier (output from upper 64 bits) /////
 //////////////////////////////////////////////////////////
+
+
+/**
+ * @brief A portable implementation of the \f$ ax + c \f$ operation with 64-bit
+ * arguments and 128-bit output. Useful for LCG and MWC generators.
+ * @param[in] a Input value.
+ * @param[in,out] x Input value that will be overwritten.
+ * @param[in] c Input value.
+ * @return Lower 64 bits.
+ */
+static inline void umuladd_128x128p64_c99(uint32_t *a, uint32_t *x, uint64_t c)
+{
+    static const uint64_t MASK32 = 0xFFFFFFFF;
+    uint32_t out[4];
+    uint64_t mul, sum;
+    // Row 0
+    mul = 0;
+    for (int i = 0; i < 4; i++) {
+        mul = (uint64_t) a[0] * x[i] + (mul >> 32);
+        out[i] = (uint32_t) mul;
+    }
+    // Row 1
+    mul = 0, sum = 0;
+    for (int i = 0; i < 3; i++) {
+        mul = (uint64_t) a[1] * x[i] + (mul >> 32);
+        sum = (mul * MASK32) + out[i + 1] + (sum >> 32);
+        out[i + 1] = (uint32_t) sum;
+    }
+    // Row 2
+    mul = 0; sum = 0;
+    for (int i = 0; i < 2; i++) {
+        mul = (uint64_t) a[2] * x[i] + (mul >> 32);
+        sum = (mul * MASK32) + out[i + 2] + (sum >> 32);
+        out[i + 2] = (uint32_t) sum;
+    }
+    // Row 3
+    out[3] += a[3] * x[0];
+    if (c != 0) {
+        uadd_128p64_ary_c99(out, c);
+    }
+    // Update output
+    for (int i = 0; i < 4; i++) {
+        x[i] = out[i];
+    }
+}
+
+
 
 /**
  * @brief A cross-compiler implementation of 128-bit LCG.

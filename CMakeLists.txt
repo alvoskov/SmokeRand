@@ -44,8 +44,9 @@ add_library(smokerand_core
     src/hwtests.c       include/smokerand/hwtests.h
     src/specfuncs.c     include/smokerand/specfuncs.h
     src/threads_intf.c  include/smokerand/threads_intf.h
-    include/smokerand/cinterface.h
     include/smokerand/apidefs.h
+    include/smokerand/cinterface.h
+    include/smokerand/int128defs.h
     include/smokerand_core.h
 )
 target_include_directories(smokerand_core PRIVATE include)

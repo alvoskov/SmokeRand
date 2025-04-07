@@ -151,40 +151,61 @@ rule cpplink
 ]]
 
 
-function make_gcc_stub(cflags, gen_cflags, so_lflags, gen_lflags, compilers)
-    if compilers == nil then
-        compilers = "cc = gcc\ncxx = g++\n"
-    end
-    return "cflags = -std=c99 -O3 -Werror -Wall -Wextra " .. cflags .. "\n" ..
-    "cxxflags = -std=c++11 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native " .. cflags .. "\n" ..
-    "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra " .. cflags .. "\n" ..
-    "exe_libs = -lm\nexe_linkflags = " .. so_lflags .. "\n" ..
-    compilers ..
-    "gen_cflags = $cflags -fPIC " .. gen_cflags .. "\n" ..
-    "so_linkflags = -shared " .. so_lflags .. "\n" ..
-    "gen_linkflags = -shared -fPIC " .. gen_lflags .. "\n"
+function make_gcc_stub_cfg()
+    return {
+        cflags = '',
+        gen_cflags = '',
+        so_lflags = '',
+        gen_lflags = '',
+        gen_libs = '',
+        compilers = 'cc = gcc\ncxx = g++\n'
+    }
+end
+
+
+function make_gcc_stub(cfg)
+    return "cflags = -std=c99 -O3 -Werror -Wall -Wextra " .. cfg.cflags .. "\n" ..
+    "cxxflags = -std=c++11 -O3 -Werror -Wall -Wextra -Wno-attributes -march=native " .. cfg.cflags .. "\n" ..
+    "cflags89 = -std=c89 -O3 -Werror -Wall -Wextra " .. cfg.cflags .. "\n" ..
+    "exe_libs = -lm\nexe_linkflags = " .. cfg.so_lflags .. "\n" ..
+    cfg.compilers ..
+    "gen_cflags = $cflags -fPIC " .. cfg.gen_cflags .. "\n" ..
+    "so_linkflags = -shared " .. cfg.so_lflags .. "\n" ..
+    "gen_linkflags = -shared -fPIC " .. cfg.gen_lflags .. "\n" ..
+    "gen_libs = -shared -fPIC " .. cfg.gen_libs .. "\n"
 end
 
 
 if platform == 'generic' then
-    local e_cflags = "-DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY";
-    stub = make_gcc_stub(e_cflags, "", "", "") .. gcc_rules
+    local sc = make_gcc_stub_cfg()
+    sc.cflags = "-DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY";
+    stub = make_gcc_stub(sc) .. gcc_rules
     gen_sources = cfg.get_gen_sources(true) -- Only portable generators are supported
 elseif platform == 'gcc' or platform == 'mingw' then
-    local e_cflags, gen_cflags = "-march=native", "-ffreestanding -nostdlib"
-    stub = make_gcc_stub(e_cflags, gen_cflags, "", gen_cflags) .. gcc_rules
+    local sc = make_gcc_stub_cfg()
+    sc.cflags = "-march=native"
+    sc.gen_cflags, sc.gen_lflags = "-ffreestanding", "-nostdlib"
+    stub = make_gcc_stub(sc) .. gcc_rules
 elseif platform == 'gcc32' then
-    local e_cflags, gen_cflags = "-march=i686 -m32", "-m32 -ffreestanding -nostdlib"
-    stub = make_gcc_stub(e_cflags, gen_cflags, "-m32", gen_cflags) .. gcc_rules
+    local sc = make_gcc_stub_cfg()
+    sc.cflags = "-march=i686 -m32"
+    sc.gen_cflags, sc.gen_lflags = "-ffreestanding", "-m32 -nostdlib"
+    sc.gen_libs, sc.so_lflags = "-lgcc -static-libgcc", "-m32"
+    stub = make_gcc_stub(sc) .. gcc_rules
     gen_sources = cfg.get_gen_sources(true) -- Only portable generators are supported
 elseif platform == 'mingw-hx' then
-    local e_cflags, gen_cflags = "-march=i686 -m32 -DUSE_WINTHREADS", "-m32"
-    stub = make_gcc_stub(e_cflags, gen_cflags, "-m32", gen_cflags) .. gcc_rules
+    local sc = make_gcc_stub_cfg()
+    sc.cflags = "-march=i686 -m32 -DUSE_WINTHREADS"
+    sc.gen_cflags, sc.gen_lflags = "-ffreestanding", "-m32 -nostdlib"
+    sc.gen_libs, sc.so_lflags = "-lgcc -static-libgcc", "-m32"
+    stub = make_gcc_stub(sc) .. gcc_rules
     gen_sources = cfg.get_gen_sources(true) -- Only portable generators are supported
 elseif platform == 'zigcc' then
-    local e_cflags, gen_cflags = "-march=native -DUSE_WINTHREADS", "-ffreestanding -nostdlib"
-    local compilers = "cc = zig cc\ncxx = zig c++\n"
-    stub = make_gcc_stub(e_cflags, gen_cflags, "", gen_cflags, compilers) .. gcc_rules
+    local cfg = make_gcc_stub_cfg()
+    sc.cflags = "-march=native -DUSE_WINTHREADS"
+    sc.get_cflags, sc.gen_lflags = "-ffreestanding", "-nostdlib"
+    sc.compilers = "cc = zig cc\ncxx = zig c++\n"
+    stub = make_gcc_stub(sc) .. gcc_rules
 elseif platform == 'msvc' then
     exe_ext = '.exe'
     -- /WX if treat warnings as errors
@@ -308,6 +329,7 @@ for _, f in pairs(gen_sources) do
     io.write("build $gen_bindir/obj/" .. f .. ".o: cc_gen $gen_srcdir/" .. f .. ".c\n")
     io.write("build " .. gen_fullname .. ": link $gen_bindir/obj/" .. f .. ".o\n")
     io.write("  linkflags=$gen_linkflags\n")
+    io.write("  libs=$gen_libs\n")
     table.insert(default_builds, gen_fullname)
 end
 

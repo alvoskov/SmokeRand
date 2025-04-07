@@ -74,7 +74,7 @@ CORE_LIB = $(LIBDIR)/libsmokerand_core.a
 LIB_SOURCES = $(addprefix $(SRCDIR)/, core.c coretests.c \
     entropy.c extratests.c fileio.c lineardep.c hwtests.c specfuncs.c threads_intf.c)
 LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, apidefs.h cinterface.h core.h coretests.h \
-    entropy.h extratests.h fileio.h lineardep.h hwtests.h specfuncs.h threads_intf.h) \
+    entropy.h extratests.h fileio.h lineardep.h hwtests.h int128defs.h specfuncs.h threads_intf.h) \
     include/smokerand_core.h
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
 INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/core.h
