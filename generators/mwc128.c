@@ -31,6 +31,33 @@ typedef struct {
 } MWC128State;
 
 
+#define HI64(x) ((x) >> 32)
+#define LO64(x) ((x) & 0xFFFFFFFF)
+#define MUL64(x,y) ((uint64_t)(x) * (uint64_t)(y))
+#define SUM64(x,y) ((uint64_t)(x) + (uint64_t)(y))
+
+
+static inline void mul_add_64x64(uint64_t a, uint32_t *x, uint64_t c)
+{
+    uint32_t row0[3], row1[3];
+    uint64_t mul, sum;
+    uint32_t a_lo = LO64(a), a_hi = HI64(a);
+    // Row 0
+    mul = MUL64(a_lo, x[0]); row0[0] = LO64(mul);
+    mul = MUL64(a_lo, x[1]) + HI64(mul); row0[1] = LO64(mul);
+    mul = MUL64(a_lo, x[2]) + HI64(mul); row0[2] = LO64(mul);
+    // Row 1
+    mul = MUL64(a_hi, x[0]); row1[0] = LO64(mul);
+    mul = MUL64(a_hi, x[1]) + HI64(mul); row1[1] = LO64(mul);
+    mul = MUL64(a_hi, x[2]) + HI64(mul); row1[2] = LO64(mul);
+    // Sum rows (update state)
+    sum = SUM64(row0[0], LO64(c));                       x[0] = LO64(sum);
+    sum = SUM64(row0[1], row1[0]) + HI64(c) + HI64(sum); x[1] = LO64(sum);
+    sum = SUM64(row0[2], row1[1]) + HI64(sum);           x[2] = LO64(sum);
+    sum = SUM64(HI64(sum), row1[2]);                     x[3] = LO64(sum);
+}
+
+
 /**
  * @brief MWC128 PRNG implementation.
  */
@@ -38,8 +65,13 @@ static inline uint64_t get_bits_raw(void *state)
 {
     static const uint64_t MWC_A1 = 0xffebb71d94fcdaf9;
     MWC128State *obj = state;
-
-#ifdef UINT128_ENABLED
+#ifndef UMUL128_FUNC_ENABLED
+    uint32_t x[4];
+    x[0] = LO64(obj->x); x[1] = HI64(obj->x); x[2] = 0; x[3] = 0;
+    mul_add_64x64(MWC_A1, x, c);
+    obj->x = ((uint64_t) x[0]) | (((uint64_t) x[1]) << 32);    
+    obj->c = ((uint64_t) x[2]) | (((uint64_t) x[3]) << 32);    
+#elseif defined(UINT128_ENABLED)
     const __uint128_t t = MWC_A1 * (__uint128_t)obj->x + obj->c;
     obj->x = t;
     obj->c = t >> 64;
