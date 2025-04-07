@@ -157,25 +157,25 @@ static inline void unsigned_add128(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
  * for 128-bit multiplication.
  */
 typedef struct {
-#ifdef UINT128_ENABLED
-    unsigned __int128 x;
-#else
+//#ifdef UINT128_ENABLED
+//    unsigned __int128 x;
+//#else
     uint64_t x_low;
     uint64_t x_high;
-#endif
+//#endif
 } Lcg128State;
 
 
 static inline void Lcg128State_init(Lcg128State *obj, uint64_t hi, uint64_t lo)
 {
-#ifdef UINT128_ENABLED
-    obj->x = hi;
-    obj->x <<= 64;
-    obj->x |= lo;
-#else
+//#ifdef UINT128_ENABLED
+//    obj->x = hi;
+//    obj->x <<= 64;
+//    obj->x |= lo;
+//#else
     obj->x_low  = lo;
     obj->x_high = hi;
-#endif
+//#endif
 }
 
 /**
@@ -183,7 +183,10 @@ static inline void Lcg128State_init(Lcg128State *obj, uint64_t hi, uint64_t lo)
  */
 static inline uint64_t Lcg128State_a64_iter(Lcg128State *obj, const uint64_t a, const uint64_t c)
 {
-    obj->x_low = unsigned_muladd128(a, obj->x_low, c, &obj->x_high);
+    uint64_t mul0_high;
+    obj->x_low = unsigned_mul128(a, obj->x_low, &mul0_high);
+    obj->x_high = a * obj->x_high + mul0_high;
+    unsigned_add128(&obj->x_high, &obj->x_low, c);    
     return obj->x_high;
 /*
 #ifdef UINT128_ENABLED
@@ -211,9 +214,13 @@ static inline uint64_t Lcg128State_a128_iter(Lcg128State *obj,
     const uint64_t a_high, const uint64_t a_low, const uint64_t c)
 {
 #ifdef UINT128_ENABLED
+/*
     const unsigned __int128 a = ((unsigned __int128) a_high) << 64 | a_low;
     obj->x = a * obj->x + c;
     return (uint64_t) (obj->x >> 64);
+*/
+    (void) obj; (void) a_high; (void) a_low; (void) c;
+    return 0;
 #else
     // Process lower part of a
     uint64_t mul0_high, x_low_old = obj->x_low;
