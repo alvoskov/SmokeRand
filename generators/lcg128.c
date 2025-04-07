@@ -58,6 +58,7 @@ static inline uint64_t get_bits_x64u64_raw(void *state)
     const uint64_t a = 18000690696906969069ull;
     return Lcg128State_a64_iter(state, a, 1ull);
 #else
+    (void) state;
     return 0;
 #endif
 }
@@ -97,6 +98,7 @@ static inline uint64_t get_bits_x128u64_raw(void *state)
 #ifdef UMUL128_FUNC_ENABLED
     return Lcg128State_a128_iter(state, 0xdb36357734e34abb, 0x0050d0761fcdfc15, 1);
 #else
+    (void) state;
     return 0;
 #endif
 }
@@ -140,6 +142,7 @@ static inline uint64_t get_bits_x128u32_raw(void *state)
 #ifdef UMUL128_FUNC_ENABLED
     return Lcg128State_a128_iter(state, 0xdb36357734e34abb, 0x0050d0761fcdfc15, 1) >> 32;
 #else
+    (void) state;
     return 0;
 #endif
 }

@@ -16,7 +16,68 @@
 ///// 128-bit arithmetics /////
 ///////////////////////////////
 
+static inline void uadd_128p64_ary_c99(uint32_t *x, uint64_t c)
+{
+    static const uint64_t MASK32 = 0xFFFFFFFF;
+    uint64_t sum = x[0] + (c & MASK32);     x[0] = sum & MASK32;
+    sum = x[1] + ((c >> 32) + (sum >> 32)); x[1] = sum & MASK32;
+    sum = x[2] + (sum >> 32);               x[2] = sum & MASK32;
+    sum = x[3] + (sum >> 32);               x[3] = sum & MASK32;
+}
+
+/**
+ * @brief A portable implementation of the \f$ ab + c \f$ operation with 64-bit
+ * arguments and 128-bit output. Useful for LCG and MWC generators.
+ * @param[in] a Input value.
+ * @param[in] b Input value.
+ * @param[in] c Input value.
+ * @param[out] hi Pointer to the buffer for upper 64 bits.
+ * @return Lower 64 bits.
+ */
+static inline uint64_t umuladd_64x64p64_c99(uint64_t a, uint64_t b, uint64_t c, uint64_t *hi)
+{
+    static const uint64_t MASK32 = 0xFFFFFFFF;
+    uint32_t out[4], x_lo = b & MASK32, x_hi = b >> 32;
+    uint64_t mul, sum;
+    uint64_t a_lo = a & MASK32, a_hi = a >> 32;
+    // Row 0
+    mul = a_lo * x_lo;
+    out[0] = mul & MASK32;
+    mul = a_lo * x_hi + (mul >> 32);
+    out[1] = mul & MASK32; out[2] = mul >> 32;
+    // Row 1
+    mul = a_hi * x_lo;
+    sum = (mul & MASK32) + out[1];
+    out[1] = sum & MASK32;
+        
+    mul = a_hi * x_hi + (mul >> 32);
+    sum = (mul & MASK32) + out[2] + (sum >> 32);
+    out[2] = sum & MASK32;
+    out[3] = (sum >> 32) + (mul >> 32);
+    if (c != 0) {
+        uadd_128p64_ary_c99(out, c);
+    }
+    (*hi) = ((uint64_t) out[2]) | (((uint64_t) out[3]) << 32);
+    return ((uint64_t) out[0]) | (((uint64_t) out[1]) << 32);
+}
+
+/**
+ * @brief A portable implementation of the `a += b` operation with 128-bit
+ * `a` and 64-bit `b`. Useful for LCG and MWC generators.
+ */
+static inline void uadd_128p64_c99(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
+{
+    static const uint64_t MASK32 = 0xFFFFFFFF;
+    uint32_t out[4];
+    out[0] = (*a_lo) & MASK32; out[1] = (*a_lo) >> 32;
+    out[2] = (*a_hi) & MASK32; out[3] = (*a_hi) >> 32;
+    uadd_128p64_ary_c99(out, b);
+    (*a_hi) = ((uint64_t) out[2]) | (((uint64_t) out[3]) << 32);
+    (*a_lo) = ((uint64_t) out[0]) | (((uint64_t) out[1]) << 32);
+}
+
 #if defined(_MSC_VER) && !defined(__clang__)
+// Begin of MSVC implementation of 128-bit arithmetics
 #include <intrin.h>
 #define UMUL128_FUNC_ENABLED
 #pragma intrinsic(_umul128)
@@ -24,7 +85,22 @@ static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 {
     return _umul128(a, b, high);
 }
+
+static inline uint64_t unsigned_muladd128(uint64_t a, uint64_t b, uint64_t c, uint64_t *high)
+{
+    uint64_t mul = _umul128(a, b, high), low;
+    *high += _addcarry_u64(0, mul, c, &low);
+    return low;
+}
+
+static inline void unsigned_add128(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
+{
+    *a_hi += _addcarry_u64(0, *a_lo, b, a_lo);
+}
+
+// End of MSVC implementation of 128-bit arithmetics
 #elif defined(__SIZEOF_INT128__)
+// Begin of GCC implementation of 128-bit arithmetics
 #define UINT128_ENABLED
 #define UMUL128_FUNC_ENABLED
 static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
@@ -33,13 +109,40 @@ static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
     *high = mul >> 64;
     return (uint64_t) mul;
 }
+
+static inline uint64_t unsigned_muladd128(uint64_t a, uint64_t b, uint64_t c, uint64_t *high)
+{
+    const __uint128_t t = a * ((__uint128_t) b) + c;
+    *high = t >> 64;
+    return (uint64_t) t;
+}
+
+static inline void unsigned_add128(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
+{
+    const __uint128_t t = (((uint128_t)(*a_hi) << 64) | (*a_lo)) + b;
+    a_lo = (uint64_t) t;
+    a_hi = (uint64_t) t >> 64;
+}
+// End of GCC implementation of 128-bit arithmetics
 #else
-#define unsigned_mul128 \
-\
-#pragma error "128-bit arithmetics is not supported by this compiler" \
-\
-//# pragma message ("128-bit arithmetics is not supported by this compiler")
+// Begin of portable (C99) implementation of 128-bit arithmetics
+static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
+{
+    return umuladd_64x64p64_c99(a, b, 0, high);
+}
+
+static inline uint64_t unsigned_muladd128(uint64_t a, uint64_t b, uint64_t c, uint64_t *high)
+{
+    return umuladd_64x64p64_c99(a, b, c, high);
+}
+
+static inline void unsigned_add128(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
+{
+    uadd_128p64_c99(a_hi, a_lo, b);
+}
+// End of portable (C99) implementation of 128-bit arithmetics
 #endif
+
 
 //////////////////////
 ///// Interfaces /////

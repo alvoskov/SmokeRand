@@ -240,7 +240,7 @@ static int run_self_test_scalar(const CallerAPI *intf)
  * @brief Initializes the PRNG state: fills the key schedule
  * and resets counters.
  */
-static void Threefry2x64AVXState_init(Threefry2x64AVXState *obj, const uint64_t *k)
+void Threefry2x64AVXState_init(Threefry2x64AVXState *obj, const uint64_t *k)
 {
     static const uint64_t C240 = 0x1BD11BDAA9FC1A22ULL;
     obj->k[NWORDS] = C240;
@@ -382,7 +382,7 @@ static inline void Threefry2x64AVXState_inc_counter(Threefry2x64AVXState *obj)
 /**
  * @brief Comparison of vectors for internal self-tests.
  */
-static int self_test_compare_vector(const CallerAPI *intf,
+int self_test_compare_vector(const CallerAPI *intf,
     const uint64_t *out, const uint64_t *ref)
 {
     intf->printf("OUT: ");

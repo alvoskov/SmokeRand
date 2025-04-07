@@ -39,8 +39,8 @@ local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
 
 -- List of non-portable generators that use compiler-specific extensions
 local gen_not_portable_sources = {'aesni', 'chacha_avx', 'lcg64prime',
-    'magma_avx', 'mrg32k3a', 'mwc128x', 'mwc128', 'mwc256xxa64',
-    'pcg64_xsl_rr', 'philox', 'sezgin63', 'speck128_avx',
+    'magma_avx', 'mrg32k3a',
+    'pcg64_xsl_rr', 'sezgin63', 'speck128_avx',
     'sqxor', 'wyrand', 'xoroshiro128pp_avx',
     'xorshift128pp_avx'}
 -- mrg32k3a, sezgin63

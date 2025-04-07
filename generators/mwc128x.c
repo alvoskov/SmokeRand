@@ -38,16 +38,7 @@ static inline uint64_t get_bits_raw(void *state)
 {
     static const uint64_t MWC_A1 = 0xffebb71d94fcdaf9;
     MWC128XState *obj = state;
-
-#ifdef UINT128_ENABLED
-    const __uint128_t t = MWC_A1 * (__uint128_t)obj->x + obj->c;
-    obj->x = t;
-    obj->c = t >> 64;
-#else
-    uint64_t c_old = obj->c;
-    obj->x = unsigned_mul128(MWC_A1, obj->x, &obj->c);
-    obj->c += _addcarry_u64(0, obj->x, c_old, &obj->x);
-#endif
+    obj->x = unsigned_muladd128(MWC_A1, obj->x, obj->c, &obj->c);
     return obj->x ^ obj->c;
 }
 
