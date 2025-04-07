@@ -22,7 +22,7 @@ typedef struct {
     uint64_t x;
 } WyRandState;
 
-uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(void *state)
 {
     uint64_t hi, lo;
     WyRandState *obj = state;
@@ -38,4 +38,16 @@ static void *create(const CallerAPI *intf)
     return (void *) obj;
 }
 
-MAKE_UINT64_PRNG("WyRand", NULL)
+static int run_self_test(const CallerAPI *intf)
+{
+    uint64_t u, u_ref = 0x1019967471850C04;
+    WyRandState obj = {.x = 0xDEADBEEF01234567};
+    for (int i = 0; i < 100000; i++) {
+        u = get_bits_raw(&obj);
+    }
+    intf->printf("Output: %llX; reference: %llX\n",
+        (unsigned long long) u, (unsigned long long) u_ref);
+    return u == u_ref;
+}
+
+MAKE_UINT64_PRNG("WyRand", run_self_test)
