@@ -179,6 +179,16 @@ static inline void Lcg128State_init(Lcg128State *obj, uint64_t hi, uint64_t lo)
 }
 
 /**
+ * @brier 128-bit LCG seeding procedure, suitable for MCGs (i.e. for c = 0)
+ */
+static inline void Lcg128State_seed(Lcg128State *obj, const CallerAPI *intf)
+{
+    uint64_t hi = intf->get_seed64();
+    uint64_t lo = intf->get_seed64() | 0x1; // For MCG
+    Lcg128State_init(obj, hi, lo);
+}
+
+/**
  * @brief A cross-platform implementation of 128-bit LCG with 64-bit multiplier.
  */
 static inline uint64_t Lcg128State_a64_iter(Lcg128State *obj, const uint64_t a, const uint64_t c)
@@ -236,15 +246,6 @@ static inline uint64_t Lcg128State_a128_iter(Lcg128State *obj,
 }
 
 
-/**
- * @brier 128-bit LCG seeding procedure, suitable for MCGs (i.e. for c = 0)
- */
-static inline void Lcg128State_seed(Lcg128State *obj, const CallerAPI *intf)
-{
-    uint64_t hi = intf->get_seed64();
-    uint64_t lo = intf->get_seed64() | 0x1; // For MCG
-    Lcg128State_init(obj, hi, lo);
-}
 
 
 #endif

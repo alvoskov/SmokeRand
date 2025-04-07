@@ -35,14 +35,9 @@ PRNG_CMODULE_PROLOG
 
 static void *create(const CallerAPI *intf)
 {
-#ifdef UMUL128_FUNC_ENABLED
     Lcg128State *obj = intf->malloc(sizeof(Lcg128State));
     Lcg128State_seed(obj, intf);
     return (void *) obj;
-#else
-    intf->printf("This platform doesn't support 128-bit arithmetics\n");
-    return NULL;
-#endif
 }
 
 /////////////////////////////
@@ -72,7 +67,7 @@ static int run_self_test_x64u64(const CallerAPI *intf)
     for (size_t i = 0; i < 1000000; i++) {
         u = get_bits_x64u64_raw(&obj);
     }
-    intf->printf("Result: %llX; reference value: %llX\n", u, u_ref);
+    intf->printf("x64u64 result: %llX; reference value: %llX\n", u, u_ref);
     return u == u_ref;
 }
 
@@ -97,21 +92,21 @@ static inline void umuladd_128x128p64_c99(uint32_t *a, uint32_t *x, uint64_t c)
     // Row 0
     mul = 0;
     for (int i = 0; i < 4; i++) {
-        mul = (uint64_t) a[0] * x[i] + (mul >> 32);
+        mul = ((uint64_t) a[0]) * x[i] + (mul >> 32);
         out[i] = (uint32_t) mul;
     }
     // Row 1
     mul = 0, sum = 0;
     for (int i = 0; i < 3; i++) {
-        mul = (uint64_t) a[1] * x[i] + (mul >> 32);
-        sum = (mul * MASK32) + out[i + 1] + (sum >> 32);
+        mul = ((uint64_t) a[1]) * x[i] + (mul >> 32);
+        sum = (mul & MASK32) + out[i + 1] + (sum >> 32);
         out[i + 1] = (uint32_t) sum;
     }
     // Row 2
     mul = 0; sum = 0;
     for (int i = 0; i < 2; i++) {
-        mul = (uint64_t) a[2] * x[i] + (mul >> 32);
-        sum = (mul * MASK32) + out[i + 2] + (sum >> 32);
+        mul = ((uint64_t) a[2]) * x[i] + (mul >> 32);
+        sum = (mul & MASK32) + out[i + 2] + (sum >> 32);
         out[i + 2] = (uint32_t) sum;
     }
     // Row 3
@@ -135,8 +130,21 @@ static inline uint64_t get_bits_x128u64_raw(void *state)
 #ifdef UMUL128_FUNC_ENABLED
     return Lcg128State_a128_iter(state, 0xdb36357734e34abb, 0x0050d0761fcdfc15, 1);
 #else
-    (void) state;
-    return 0;
+    Lcg128State *obj = state;
+    uint64_t a_hi = 0xdb36357734e34abb, a_lo = 0x0050d0761fcdfc15;
+    uint32_t x[4];
+    uint32_t a[4]; 
+
+    x[0] = (uint32_t) (obj->x_low);  x[1] = (obj->x_low) >> 32;
+    x[2] = (uint32_t) (obj->x_high); x[3] = (obj->x_high) >> 32;
+    a[0] = (uint32_t) a_lo; a[1] = a_lo >> 32;
+    a[2] = (uint32_t) a_hi; a[3] = a_hi >> 32;
+
+    umuladd_128x128p64_c99(a, x, 1);
+
+    obj->x_high = ((uint64_t) x[2]) | (((uint64_t) x[3]) << 32);
+    obj->x_low  = ((uint64_t) x[0]) | (((uint64_t) x[1]) << 32);
+    return obj->x_high;
 #endif
 }
 
@@ -146,22 +154,25 @@ MAKE_GET_BITS_WRAPPERS(x128u64)
 /**
  * @brief Self-test to prevent problems during re-implementation
  * in MSVC and other plaforms that don't support int128.
+ * @details Reference value may be obtained as:
+ *    
+ *    a = 0xdb36357734e34abb0050d0761fcdfc15
+ *    x = 1234567890
+ *    for i in range(0,1000000):
+ *        x = (a*x + 1) % 2**128
+ *    print(hex(x // 2**64))
+ *
  */
 static int run_self_test_x128u64(const CallerAPI *intf)
 {
-#ifdef UMUL128_FUNC_ENABLED
     Lcg128State obj;
     Lcg128State_init(&obj, 1234567890, 0);
     uint64_t u, u_ref = 0x23fe67ffa50c941f;
     for (size_t i = 0; i < 1000000; i++) {
         u = get_bits_x128u64_raw(&obj);
     }
-    intf->printf("Result: %llX; reference value: %llX\n", u, u_ref);
+    intf->printf("x128u64 result: %llX; reference value: %llX\n", u, u_ref);
     return u == u_ref;
-#else
-    intf->printf("x128u64 not supported on this platform\n");
-    return 1;
-#endif
 }
 
 
