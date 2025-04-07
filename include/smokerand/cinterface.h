@@ -119,9 +119,9 @@ static inline uint64_t unsigned_muladd128(uint64_t a, uint64_t b, uint64_t c, ui
 
 static inline void unsigned_add128(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
 {
-    const __uint128_t t = (((uint128_t)(*a_hi) << 64) | (*a_lo)) + b;
-    a_lo = (uint64_t) t;
-    a_hi = (uint64_t) t >> 64;
+    const __uint128_t t = (((__uint128_t)(*a_hi) << 64) | (*a_lo)) + b;
+    *a_lo = (uint64_t) t;
+    *a_hi = (uint64_t) (t >> 64);
 }
 // End of GCC implementation of 128-bit arithmetics
 #else
