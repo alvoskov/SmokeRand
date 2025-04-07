@@ -45,15 +45,15 @@ static inline uint64_t get_bits_raw(void *state)
     // r = lo + d*hi
     uint64_t r_lo, r_hi;
     r_lo = unsigned_mul128(d, hi, &r_hi);
-    r_hi += _addcarry_u64(0, lo, r_lo, &r_lo);
+    unsigned_add128(&r_hi, &r_lo, lo);
     int k = ((int) (r_hi)) - 1;
     if (k > 0) {
         // r -= (k << 64) - k*d
         uint64_t kd_hi, kd_lo;
         kd_lo = unsigned_mul128((uint64_t)k, d, &kd_hi);
         r_hi = 1;
-        unsigned char c = _addcarry_u64(0, r_lo, kd_lo, &r_lo);
-        r_hi += kd_hi + c;
+        unsigned_add128(&kd_hi, &r_lo, kd_lo);
+        r_hi += kd_hi;
     }
     if (r_hi != 0 || r_lo > m) { // r > m
         r_lo -= m; // We don't care about r_hi: it will be thrown out
