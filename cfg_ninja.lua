@@ -209,14 +209,14 @@ elseif platform == 'zigcc' then
 elseif platform == 'msvc' then
     exe_ext = '.exe'
     -- /WX if treat warnings as errors
-    stub = "cflags = /O2 /W3 /arch:AVX2 /D_CRT_SECURE_NO_WARNINGS\n" ..
+    stub = "cflags = /O2 /W3 /arch:AVX2 /D_CRT_SECURE_NO_WARNINGS /GS-\n" ..
     "cxxflags = /O2 /W3 /arch:AVX2 /D_CRT_SECURE_NO_WARNINGS\n" ..
     "gen_cflags = $cflags\n" ..
     "cc = cl\n"..
     "exe_libs = advapi32.lib\n" ..
     "exe_linkflags = /SUBSYSTEM:CONSOLE\n" ..
     "so_linkflags = /DLL\n" ..
-    "gen_linkflags = /DLL\n"
+    "gen_linkflags = /DLL /NODEFAULTLIB\n"
 
     stub = stub .. "\nmsvc_deps_prefix = Note: including file:\n"
     -- BEWARE OF LOCALES AND NON-ENGLISH OUTPUT FROM SOME INSTALLATIONS

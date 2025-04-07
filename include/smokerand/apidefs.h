@@ -54,12 +54,17 @@ static inline uint64_t rotr64(uint64_t x, int r)
 ////////////////////////////////////////////////////
 
 //#if !defined(__cplusplus) && (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(__clang__)
-#if !defined(NO_CUSTOM_DLLENTRY) && !defined(__cplusplus) && (defined(__MINGW32__) || defined(__MINGW64__))
+#if !defined(NO_CUSTOM_DLLENTRY) && !defined(__cplusplus) && (defined(__MINGW32__) || defined(__MINGW64__) || defined(_MSC_VER))
 // -- Beginning of custom DLL entry for freestanding libraries
 #ifdef __clang__
 #define SHARED_ENTRYPOINT_CODE \
 int __stdcall _DllMainCRTStartup(void *hinstDLL, uint32_t fdwReason, void *lpvReserved) { \
     (void) hinstDLL; (void) fdwReason; (void) lpvReserved; return 1; }
+#elif defined(_MSC_VER)
+#include <windows.h>
+#define SHARED_ENTRYPOINT_CODE \
+int WINAPI _DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) { \
+    (void) hinstDLL; (void) fdwReason; (void) lpvReserved; return TRUE; }
 #else
 #include <windows.h>
 #define SHARED_ENTRYPOINT_CODE \

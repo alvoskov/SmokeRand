@@ -11,7 +11,6 @@
 #ifndef __SMOKERAND_CINTERFACE_H
 #define __SMOKERAND_CINTERFACE_H
 #include "smokerand/apidefs.h"
-#include "smokerand/int128defs.h"
 
 //////////////////////
 ///// Interfaces /////
