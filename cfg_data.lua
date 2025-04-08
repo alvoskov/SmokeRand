@@ -16,10 +16,10 @@ local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
     'drand48', 'efiix64x48', 'flea32x1', 'hc256', 'isaac64', 'kiss64',
     'kiss93', 'kiss99', 'kuzn', 'lcg128',
     'lcg32prime', 'lcg64prime',  'lcg64', 'lcg69069',
-    'lcg96', 'lea', 'lfib4', 'lfib4_u64', 'lfib_par', 'lfsr113',
+    'lcg96', 'lea', 'lfib4', 'lfib4_u64', 'lfib_par', 'lfib_ranmar', 'lfsr113',
     'lfsr258', 'loop_7fff_w64', 'lrnd64_255', 'lrnd64_1023',
-    'lxm_64x128', 'macmarsa', 'magma_avx', 'magma', 'minstd', 'mixmax',
-    'mlfib17_5', 'mrg32k3a', 'msws_ctr', 'msws', 'mt19937', 'mulberry32',
+    'lxm_64x128', 'macmarsa', 'magma', 'minstd', 'mixmax',
+    'mlfib17_5', 'mrg32k3a', 'msws_ctr', 'msws', 'msws64', 'mt19937', 'mulberry32',
     'mwc128x', 'mwc128', 'mwc128xxa32', 'mwc256xxa64', 'mwc1616x', 'mwc1616',
     'mwc3232x', 'mwc32x', 'mwc32xxa8', 'mwc40xxa8', 'mwc4691', 'mwc48xxa16',
     'mwc64x', 'mwc64', 'pcg32', 'pcg32_xsl_rr', 'pcg64_64', 'pcg64_xsl_rr',
@@ -38,7 +38,7 @@ local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
     'xtea', 'xxtea'}
 
 -- List of non-portable generators that use compiler-specific extensions
-local gen_not_portable_sources = {'aesni', 'chacha_avx', 'magma_avx',
+local gen_not_portable_sources = {'aesni', 'chacha_avx',
     'speck128_avx', 'xoroshiro128pp_avx', 'xorshift128pp_avx'}
 
 local function exclude_non_portables()
