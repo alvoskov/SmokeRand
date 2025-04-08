@@ -34,6 +34,7 @@ typedef struct {
     uint32_t d;
 } RanvalState;
 
+
 static inline uint64_t get_bits_raw(void *state)
 {
     RanvalState *obj = state;
@@ -45,15 +46,43 @@ static inline uint64_t get_bits_raw(void *state)
     return obj->d;
 }
 
-static void *create(const CallerAPI *intf)
+
+static void RanvalState_init(RanvalState *obj, uint32_t seed)
 {
-    RanvalState *obj = intf->malloc(sizeof(RanvalState));
     obj->a = 0xf1ea5eed;
-    obj->b = obj->c = obj->d = intf->get_seed32();
+    obj->b = obj->c = obj->d = seed;
     for (int i = 0; i < 32; i++) {
         (void) get_bits_raw(obj);
     }
+}
+
+
+static void *create(const CallerAPI *intf)
+{
+    RanvalState *obj = intf->malloc(sizeof(RanvalState));
+    RanvalState_init(obj, intf->get_seed32());
     return (void *) obj;
 }
 
-MAKE_UINT32_PRNG("ranval", NULL)
+static int run_self_test(const CallerAPI *intf)
+{
+    static const uint32_t u_ref[2] = {0x202E7B45, 0x76B04772};
+    uint32_t u;
+    int is_ok = 1;
+    RanvalState obj;
+    RanvalState_init(&obj, 0x12345678);
+    for (int i = 0; i < 10000; i++) {
+        u = get_bits_raw(&obj);
+    }
+    for (int i = 0; i < 2; i++) {
+        intf->printf("Output: %.8X; reference: %.8X\n", u, u_ref[i]);
+        if (u != u_ref[i]) {
+            is_ok = 0;
+        }
+        u = get_bits_raw(&obj);
+    }        
+    return is_ok;
+}
+
+
+MAKE_UINT32_PRNG("ranval", run_self_test)
