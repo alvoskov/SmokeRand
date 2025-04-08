@@ -131,7 +131,7 @@ else()
     mwc64x mwc64 pcg32 pcg32_xsl_rr pcg64_64 pcg64_xsl_rr philox2x32
     philox32 philox r1279 randu ranlux48 ranluxpp ranq1 ranq2 ranrot32
     ranrot_bi ranshi ranval ran rc4ok rc4 romutrio rrmxmx sapparot2
-    sapparot sezgin63 sfc16 sfc32 sfc64 sfc8 shr3 speck64_128 speck128_avx
+    sapparot sezgin63 sfc16 sfc32 sfc64 sfc8 shr3 speck64_128
     speck128 splitmix32 splitmix sqxor32 sqxor stormdrop_old
     stormdrop superduper64 superduper73 swblarge
     swblux swbw swb taus88 threefry2x64 threefry

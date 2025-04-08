@@ -26,7 +26,7 @@ local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
     'philox2x32', 'philox32', 'philox', 'r1279', 'randu', 'ranlux48', 'ranluxpp',
     'ranq1', 'ranq2', 'ranrot32', 'ranrot_bi', 'ranshi', 'ranval', 'ran',
     'rc4ok', 'rc4', 'romutrio', 'rrmxmx', 'sapparot2', 'sapparot', 'sezgin63',
-    'sfc16', 'sfc32', 'sfc64', 'sfc8', 'shr3', 'speck64_128', 'speck128_avx',
+    'sfc16', 'sfc32', 'sfc64', 'sfc8', 'shr3', 'speck64_128',
     'speck128', 'splitmix32', 'splitmix', 'sqxor32',
     'sqxor', 'stormdrop', 'superduper64',
     'superduper73', 'swblarge', 'swblux', 'swbw', 'swb', 'taus88',
@@ -39,7 +39,7 @@ local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
 
 -- List of non-portable generators that use compiler-specific extensions
 local gen_not_portable_sources = {'aesni', 'chacha_avx',
-    'speck128_avx', 'xoroshiro128pp_avx', 'xorshift128pp_avx'}
+    'xoroshiro128pp_avx', 'xorshift128pp_avx'}
 
 local function exclude_non_portables()
     local np_inv, filtered = {}, {}
