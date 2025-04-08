@@ -33,11 +33,7 @@
 #endif
 
 #ifdef XTEA_VEC_ENABLED
-#if defined(_MSC_VER) && !defined(__clang__)
-#include <intrin.h>
-#else
-#include <x86intrin.h>
-#endif
+#include "smokerand/x86exts.h"
 #endif
 
 PRNG_CMODULE_PROLOG

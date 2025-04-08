@@ -47,6 +47,7 @@ add_library(smokerand_core
     include/smokerand/apidefs.h
     include/smokerand/cinterface.h
     include/smokerand/int128defs.h
+    include/smokerand/x86exts.h
     include/smokerand_core.h
 )
 target_include_directories(smokerand_core PRIVATE include)
