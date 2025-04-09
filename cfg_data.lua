@@ -12,7 +12,7 @@ local lib_headers = {'apidefs.h', 'cinterface.h', 'core.h', 'coretests.h',
 -- List of all generators; some of them are not portable, e.g. can require
 -- AVX or AESNI extensions, 128-bit arithmetics etc.
 local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
-    'chacha_avx',  'chacha', 'cmwc4096', 'coveyou64', 'cwg64', 'des',
+    'chacha', 'cmwc4096', 'coveyou64', 'cwg64', 'des',
     'drand48', 'efiix64x48', 'flea32x1', 'hc256', 'isaac64', 'kiss64',
     'kiss93', 'kiss99', 'kuzn', 'lcg128',
     'lcg32prime', 'lcg64prime',  'lcg64', 'lcg69069',
@@ -27,7 +27,7 @@ local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
     'ranq1', 'ranq2', 'ranrot32', 'ranrot_bi', 'ranshi', 'ranval', 'ran',
     'rc4ok', 'rc4', 'romutrio', 'rrmxmx', 'sapparot2', 'sapparot', 'sezgin63',
     'sfc16', 'sfc32', 'sfc64', 'sfc8', 'shr3', 'speck64_128',
-    'speck128', 'splitmix32', 'splitmix', 'sqxor32',
+    'speck128', 'speck128sc', 'splitmix32', 'splitmix', 'sqxor32',
     'sqxor', 'stormdrop', 'superduper64',
     'superduper73', 'swblarge', 'swblux', 'swbw', 'swb', 'taus88',
     'threefry2x64', 'threefry', 'tinymt32',
@@ -38,8 +38,7 @@ local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
     'xtea', 'xxtea'}
 
 -- List of non-portable generators that use compiler-specific extensions
-local gen_not_portable_sources = {'aesni', 'chacha_avx',
-    'xoroshiro128pp_avx', 'xorshift128pp_avx'}
+local gen_not_portable_sources = {'aesni', 'xoroshiro128pp_avx', 'xorshift128pp_avx'}
 
 local function exclude_non_portables()
     local np_inv, filtered = {}, {}
