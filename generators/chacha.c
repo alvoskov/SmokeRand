@@ -84,7 +84,7 @@ typedef struct {
     uint32_t out[64]; ///< Output state
     size_t ncycles; ///< Number of rounds / 2
     size_t pos;
-} ChaChaAVXState;
+} ChaChaVecState;
 
 
 /////////////////////////////////////////
@@ -397,7 +397,7 @@ MAKE_GET_BITS_WRAPPERS(avxctr32);
 /**
  * @brief Increase the value of 64-bit PRNG counter.
  */
-static inline void ChaChaAVX_inc_counter(ChaChaAVXState *obj)
+static inline void ChaChaVec_inc_counter(ChaChaVecState *obj)
 {
     // 128-bit counters
     uint64_t *cnt1 = (uint64_t *) &obj->x[24];
@@ -418,7 +418,7 @@ static inline void ChaChaAVX_inc_counter(ChaChaAVXState *obj)
  * @param nrounds Number of rounds (8, 12, 20).
  * @param seed    Pointer to array of 8 uint32_t values (seeds).
  */
-void EXPORT ChaChaAVX_init(ChaChaAVXState *obj, size_t nrounds, const uint32_t *seed)
+void EXPORT ChaChaVec_init(ChaChaVecState *obj, size_t nrounds, const uint32_t *seed)
 {
     // Fill input and output state with zeros
     for (size_t i = 0; i < 64; i++) {
@@ -456,7 +456,7 @@ void EXPORT ChaChaAVX_init(ChaChaAVXState *obj, size_t nrounds, const uint32_t *
         cnt = (uint64_t *) &obj->x[56]; cnt[0] = 2;
         cnt = (uint64_t *) &obj->x[60]; cnt[0] = 3;
     }
-    ChaChaAVX_inc_counter(obj);
+    ChaChaVec_inc_counter(obj);
     /* Number of rounds => Number of cycles */
     obj->ncycles = nrounds / 2;
     /* Output counter */
@@ -524,7 +524,7 @@ static inline void qround_avx2(__m256i *a, __m256i *b, __m256i *c, __m256i *d)
  *     | . . x . |    | . . . x |    | x . . . |    | . x . . |
  *     | . . . x |    | x . . . |    | . x . . |    | . . x . |
  */
-void EXPORT ChaChaAVX_block(ChaChaAVXState *obj)
+void EXPORT ChaChaVec_block(ChaChaVecState *obj)
 {
 #ifdef CHACHA_VECTOR_AVX2
     __m256i a = _mm256_loadu_si256((__m256i *) obj->x);
@@ -591,10 +591,10 @@ void EXPORT ChaChaAVX_block(ChaChaAVXState *obj)
 
 static uint64_t get_bits_vector_raw(void *state)
 {
-    ChaChaAVXState *obj = state;
+    ChaChaVecState *obj = state;
     if (obj->pos >= 64) {
-        ChaChaAVX_inc_counter(obj);
-        ChaChaAVX_block(obj);
+        ChaChaVec_inc_counter(obj);
+        ChaChaVec_block(obj);
         obj->pos = 0;
     }
     return obj->out[obj->pos++];
@@ -605,14 +605,14 @@ MAKE_GET_BITS_WRAPPERS(vector);
 static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
 {
 #ifdef CHACHA_VECTOR_AVX2
-    ChaChaAVXState *obj = intf->malloc(sizeof(ChaChaAVXState));
+    ChaChaVecState *obj = intf->malloc(sizeof(ChaChaVecState));
     uint32_t seeds[8];
     for (size_t i = 0; i < 4; i++) {
         uint64_t s = intf->get_seed64();
         seeds[2*i] = s & 0xFFFFFFF;
         seeds[2*i + 1] = s >> 32;
     }
-    ChaChaAVX_init(obj, 12, seeds);
+    ChaChaVec_init(obj, 12, seeds);
     (void) gi;
     return obj;
 #else
@@ -639,7 +639,7 @@ void print_matx(const CallerAPI *intf, uint32_t *x, size_t ncols, size_t nelem)
 /**
  * @brief Internal self-test. Based on reference values from RFC 7359.
  */
-static int run_self_test_vector(const CallerAPI *intf)
+int run_self_test_vector(const CallerAPI *intf)
 {
     uint32_t x_init[] = { // Input values
         0x03020100,  0x07060504,  0x0b0a0908,  0x0f0e0d0c,
@@ -663,9 +663,9 @@ static int run_self_test_vector(const CallerAPI *intf)
         12,13,14,15, 12,13,14,15
     };
 
-    ChaChaAVXState obj;
+    ChaChaVecState obj;
 
-    ChaChaAVX_init(&obj, 20, x_init);
+    ChaChaVec_init(&obj, 20, x_init);
     for (size_t i = 0; i < 4; i++) {
         obj.x[i + 8]  = obj.x[i + 12] = x_init[i]; // Row 2
         obj.x[i + 16] = obj.x[i + 20] = x_init[i + 4]; // Row 3
@@ -675,7 +675,7 @@ static int run_self_test_vector(const CallerAPI *intf)
         obj.x[i + 32] = obj.x[i];
     }
     intf->printf("Input:\n"); print_matx(intf, obj.x, 8, 64);
-    ChaChaAVX_block(&obj);
+    ChaChaVec_block(&obj);
     intf->printf("Output (real):\n"); print_matx(intf, obj.out, 8, 64);
     intf->printf("Output (reference):\n"); print_matx(intf, out_final, 4, 16);
     for (int i = 0; i < 64; i++) {
@@ -696,7 +696,7 @@ static int run_self_test_vector(const CallerAPI *intf)
 
 static void *create(const CallerAPI *intf)
 {
-    intf->printf("'%s' not implemented", intf->get_param());
+    intf->printf("'%s' not implemented\n", intf->get_param());
     return NULL;
 }
 
@@ -749,12 +749,16 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
         gi->get_sum = get_sum_c99ctr32;
     } else if (!intf->strcmp(param, "avx")) {
         gi->name = "ChaCha:avx";
+#ifdef CHACHA_VECTOR_INTR
         gi->create = create_scalar;
+#endif
         gi->get_bits = get_bits_avx;
         gi->get_sum = get_sum_avx;
     } else if (!intf->strcmp(param, "avx-ctr32")) {
         gi->name = "ChaCha:avx-ctr32";
+#ifdef CHACHA_VECTOR_INTR
         gi->create = create_scalar;
+#endif
         gi->get_bits = get_bits_avxctr32;
         gi->get_sum = get_sum_avxctr32;
     } else if (!intf->strcmp(param, "avx2")) {
