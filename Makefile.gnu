@@ -95,7 +95,7 @@ EXECXX_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXECXX_NAMES)))
 GEN_CUSTOM_SOURCES = $(addsuffix .c,$(addprefix generators/, ranluxpp))
 ifeq ($(IS_PORTABLE), 1)
 GEN_ALL_SOURCES = $(addsuffix .c,$(addprefix generators/, \
-    alfib_lux alfib_mod alfib ara32 chacha cmwc4096 coveyou64 cwg64 \
+    aesni alfib_lux alfib_mod alfib ara32 chacha cmwc4096 coveyou64 cwg64 \
     des drand48 efiix64x48 flea32x1 hc256 isaac64 kiss64 kiss93 kiss99 kuzn \
     lcg128_u32_portable lcg32prime lcg64 lcg69069 lcg96 lea \
     lfib4 lfib4_u64 lfib_par lfsr113 lfsr258 loop_7fff_w64 lrnd64_255 \
