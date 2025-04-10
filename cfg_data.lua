@@ -38,7 +38,7 @@ local gen_sources = {'aesni', 'alfib_lux', 'alfib_mod', 'alfib', 'ara32',
     'xtea', 'xxtea'}
 
 -- List of non-portable generators that use compiler-specific extensions
-local gen_not_portable_sources = {'aesni', 'xoroshiro128pp_avx', 'xorshift128pp_avx'}
+local gen_not_portable_sources = {'xoroshiro128pp_avx', 'xorshift128pp_avx'}
 
 local function exclude_non_portables()
     local np_inv, filtered = {}, {}
