@@ -37,14 +37,7 @@
 
 #ifdef  __AVX2__
 #define TF128_VEC_ENABLED
-#endif
-
-#ifdef TF128_VEC_ENABLED
-#if defined(_MSC_VER) && !defined(__clang__)
-#include <intrin.h>
-#else
-#include <x86intrin.h>
-#endif
+#include "smokerand/x86exts.h"
 #endif
 
 PRNG_CMODULE_PROLOG
@@ -256,15 +249,6 @@ void Threefry2x64AVXState_init(Threefry2x64AVXState *obj, const uint64_t *k)
 }
 
 #ifdef TF128_VEC_ENABLED
-/**
- * @brief Vectorized "rotate left" instruction for vector of 64-bit values.
- */
-static inline __m256i mm256_rotl_epi64_def(__m256i in, int r)
-{
-    return _mm256_or_si256(_mm256_slli_epi64(in, r), _mm256_srli_epi64(in, 64 - r));
-}
-
-
 /**
  * @brief Vectorized round function of Threefry2x64 (very similar to Threefish).
  */

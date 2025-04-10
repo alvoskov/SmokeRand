@@ -14,9 +14,5 @@ function gens_to_txt(gens, finline)
     return out_line
 end
 
-local finline = ""--"\\"
-print("# Not portable")
-print(gens_to_txt(cfg.get_gen_sources(false), finline))
-print("# Portable")
-print(gens_to_txt(cfg.get_gen_sources(true), finline))
-
+local finline = ""
+print(gens_to_txt(cfg.get_gen_sources(), finline))

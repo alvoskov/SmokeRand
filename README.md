@@ -619,6 +619,7 @@ There are only two problematic situations:
  Algorithm         | Output | express | brief | default | full | cpb  | bday64 | Grade | TestU01 | PractRand 
 -------------------|--------|---------|-------|---------|------|------|--------|-------|---------|-----------
  aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      | 5     |         | >= 32 TiB
+ aes128(c99)       | u64    |         |       |         |      |      |        |       |         | ?
  alfib             | u64    | 2       | 5     | 6       | 8    | 0.23 | +      | 0     | Small   | 128 MiB
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    | 3.75  | +       | 4 GiB
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 4     | +       | 1 TiB
@@ -774,10 +775,12 @@ There are only two problematic situations:
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
+ wob2m             | u64    | +       | +     | +       |      |      |        |       |         |
  wyrand            | u64    | +       | +     | +       | +    | 0.08 | +      | 4     |         | >= 8 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xorshift128       | u32    | 2       | 4     | 6/7     | 8    | 0.41 | +      | 1.25  | -       | 128 KiB
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      | 3.25  |         | 32 GiB
+ xorshift128pp     | u64    |         |       |         |      |      |        |       |         |
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 1 TiB
  xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      | 3.25  |         | 16 MiB
  xoroshiro128pp    | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 32 TiB
@@ -792,7 +795,7 @@ There are only two problematic situations:
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     |         | >= 32 TiB
  xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     |         | ?
  xxtea128          | u32    | +       | +     | +       | +    | 18   | +      | 4.5   |         | ?
- xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   |         | ?
+ xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   |         | >= 16 TiB
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   |         | ?
  xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   |         | >= 32 TiB
 
@@ -861,6 +864,15 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 - Passed dieharder: lcg64, lfib(55,24,+,up32), lfib(607,203,+,up32), swb, xorwow
 
 # Versions history
+
+10.04.2025: SmokeRand 0.33
+
+- All generators are either portable or at least have portable versions.
+- A portable implementation of 128-bit arithmetics subset was added to the
+  header files (see `include/smokerand/int128defs.h`). It is designed mainly
+  for 128-bit LCGs.
+- A new nonlinear generator `wob2m` by Bob Jenkins.
+- A portable software implementation of AES was added.
 
 28.03.2025: SmokeRand 0.32
 

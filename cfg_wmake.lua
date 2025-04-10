@@ -59,7 +59,7 @@ local dosextender = "dos32a"
 local lib_sources = cfg.get_lib_sources()
 local bat_sources = cfg.get_bat_sources()
 local lib_headers = cfg.get_lib_headers()
-local gen_sources = cfg.get_gen_sources(true)
+local gen_sources = cfg.get_gen_sources()
 
 local file = io.open("Makefile.wat", "w")
 io.output(file)

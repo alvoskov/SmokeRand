@@ -46,16 +46,8 @@
 
 #ifdef  __AVX2__
 #define THREEFRY_VEC_ENABLED
+#include "smokerand/x86exts.h"
 #endif
-
-#ifdef THREEFRY_VEC_ENABLED
-#if defined(_MSC_VER) && !defined(__clang__)
-#include <intrin.h>
-#else
-#include <x86intrin.h>
-#endif
-#endif
-
 
 enum {
     NWORDS = 4, ///< Number of words per state (DON'T CHANGE!)
@@ -258,15 +250,6 @@ typedef struct Tf256VecState_ {
 
 
 #ifdef THREEFRY_VEC_ENABLED
-
-/**
- * @brief Vectorized "rotate left" instruction for vector of 64-bit values.
- */
-static inline __m256i mm256_rotl_epi64_def(__m256i in, int r)
-{
-    return _mm256_or_si256(_mm256_slli_epi64(in, r), _mm256_srli_epi64(in, 64 - r));
-}
-
 static inline void mix4v(__m256i *xv, int d1, int d2)
 {
     // Not permuted

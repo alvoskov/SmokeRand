@@ -10,35 +10,30 @@ ifeq ($(PLATFORM_NAME), GCC)
     AR = ar
     GEN_CFLAGS = -fPIC -ffreestanding -nostdlib
     PLATFORM_FLAGS = -g -march=native
-    IS_PORTABLE = 0
 else ifeq ($(PLATFORM_NAME), GCC32)
     CC = gcc
     CXX = g++
     AR = ar
     GEN_CFLAGS = -fPIC  -DNO_CUSTOM_DLLENTRY
     PLATFORM_FLAGS = -m32 -march=native
-    IS_PORTABLE = 1
 else ifeq ($(PLATFORM_NAME), MINGW-HX)
     CC = gcc
     CXX = g++
     AR = ar
     GEN_CFLAGS = -fPIC -DNO_CUSTOM_DLLENTRY -DUSE_WINTHREADS
     PLATFORM_FLAGS = -m32 -march=i686
-    IS_PORTABLE = 1
 else ifeq ($(PLATFORM_NAME), ZIGCC)
     CC = zig cc
     CXX = zic c++
     AR = zig ar
     GEN_CFLAGS = -fPIC
     PLATFORM_FLAGS = -DUSE_WINTHREADS -march=native
-    IS_PORTABLE = 0
 else ifeq ($(PLATFORM_NAME), GENERIC)
     CC = gcc
     CXX = g++
     AR = ar
     GEN_CFLAGS = -fPIC
     PLATFORM_FLAGS = -DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY
-    IS_PORTABLE = 1
 endif
 #-----------------------------------------------------------------------------
 CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -Wstrict-aliasing
@@ -77,7 +72,8 @@ LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, apidefs.h cinterface.h core.h coretest
     entropy.h extratests.h fileio.h lineardep.h hwtests.h int128defs.h specfuncs.h threads_intf.h x86exts.h) \
     include/smokerand_core.h
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
-INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/core.h
+INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/cinterface.h \
+    $(INCLUDEDIR)/int128defs.h $(INCLUDEDIR)/x86exts.h
 # Battery
 BAT_LIB = $(LIBDIR)/libsmokerand_bat.a
 BATLIB_SOURCES = $(addprefix $(SRCDIR)/, bat_express.c bat_brief.c bat_default.c bat_file.c bat_full.c bat_special.c)
@@ -93,27 +89,7 @@ EXECXX_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXECXX_NAMES)))
 
 # Generators
 GEN_CUSTOM_SOURCES = $(addsuffix .c,$(addprefix generators/, ranluxpp))
-ifeq ($(IS_PORTABLE), 1)
-GEN_ALL_SOURCES = $(addsuffix .c,$(addprefix generators/, \
-    aesni alfib_lux alfib_mod alfib ara32 chacha cmwc4096 coveyou64 cwg64 \
-    des drand48 efiix64x48 flea32x1 hc256 isaac64 kiss64 kiss93 kiss99 kuzn \
-    lcg128_u32_portable lcg32prime lcg64 lcg69069 lcg96 lea \
-    lfib4 lfib4_u64 lfib_par lfsr113 lfsr258 loop_7fff_w64 lrnd64_255 \
-    lrnd64_1023 lxm_64x128 macmarsa magma minstd mixmax mlfib17_5 \
-    msws_ctr msws mt19937 mulberry32 mwc128xxa32 mwc1616x mwc1616 \
-    mwc3232x mwc32x mwc32xxa8 mwc40xxa8 mwc4691 mwc48xxa16 mwc64x mwc64 pcg32 \
-    pcg32_xsl_rr pcg64_64 philox2x32 philox32 r1279 randu ranlux48 \
-    ranluxpp ranq1 ranq2 ranrot32 ranrot_bi ranshi ranval ran rc4ok \
-    rc4 romutrio rrmxmx sapparot2 sapparot sfc16 sfc32 sfc64 sfc8 \
-    shr3 speck64_128 speck128 splitmix32 splitmix sqxor32 \
-    stormdrop superduper64 superduper73 swblarge \
-    swblux swbw swb taus88 threefry2x64 threefry tinymt32 tinymt64 \
-    well1024a xorgens xoroshiro1024stst xoroshiro1024st xoroshiro128pp \
-    xoroshiro128pp_vec xoroshiro128p xorshift128p xorshift128 xorwow \
-    xoshiro128p xoshiro128pp xsh xtea xxtea))
-else
 GEN_ALL_SOURCES = $(wildcard generators/*.c)
-endif
 GEN_SOURCES = $(filter-out $(GEN_CUSTOM_SOURCES), $(GEN_ALL_SOURCES))
 GEN_OBJFILES = $(patsubst %.c,%.o,$(subst generators/,$(BINDIR)/generators/obj/,$(GEN_SOURCES)))
 GEN_SHARED = $(patsubst %.c,%$(SO),$(subst generators/,$(BINDIR)/generators/, $(GEN_ALL_SOURCES)))

@@ -44,7 +44,7 @@ local lib_name = "$libdir/libsmokerand_core.a"
 local batlib_name = "$libdir/libsmokerand_bat.a"
 local lib_sources = cfg.get_lib_sources()
 local bat_sources = cfg.get_bat_sources()
-local gen_sources = cfg.get_gen_sources(false)
+local gen_sources = cfg.get_gen_sources()
 
 --------------------------------
 ----- Cross-platform rules -----
@@ -180,7 +180,6 @@ if platform == 'generic' then
     local sc = make_gcc_stub_cfg()
     sc.cflags = "-DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY";
     stub = make_gcc_stub(sc) .. gcc_rules
-    gen_sources = cfg.get_gen_sources(true) -- Only portable generators are supported
 elseif platform == 'gcc' or platform == 'mingw' then
     local sc = make_gcc_stub_cfg()
     sc.cflags = "-march=native"
@@ -192,14 +191,12 @@ elseif platform == 'gcc32' then
     sc.gen_cflags, sc.gen_lflags = "-ffreestanding", "-m32 -nostdlib"
     sc.gen_libs, sc.so_lflags = "-lgcc -static-libgcc", "-m32"
     stub = make_gcc_stub(sc) .. gcc_rules
-    gen_sources = cfg.get_gen_sources(true) -- Only portable generators are supported
 elseif platform == 'mingw-hx' then
     local sc = make_gcc_stub_cfg()
     sc.cflags = "-march=i686 -m32 -DUSE_WINTHREADS"
     sc.gen_cflags, sc.gen_lflags = "-ffreestanding", "-m32 -nostdlib"
     sc.gen_libs, sc.so_lflags = "-lgcc -static-libgcc", "-m32"
     stub = make_gcc_stub(sc) .. gcc_rules
-    gen_sources = cfg.get_gen_sources(true) -- Only portable generators are supported
 elseif platform == 'zigcc' then
     local cfg = make_gcc_stub_cfg()
     sc.cflags = "-march=native -DUSE_WINTHREADS"

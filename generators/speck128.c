@@ -178,23 +178,6 @@ int run_self_test_scalar(const CallerAPI *intf)
 
 #ifdef SPECK_VEC_ENABLED
 /**
- * @brief Vectorized "rotate left" instruction for vector of 64-bit values.
- */
-static inline __m256i mm256_rotl_epi64_def(__m256i in, int r)
-{
-    return _mm256_or_si256(_mm256_slli_epi64(in, r), _mm256_srli_epi64(in, 64 - r));
-}
-
-/**
- * @brief Vectorized "rotate right" instruction for vector of 64-bit values.
- */
-static inline __m256i mm256_rotr_epi64_def(__m256i in, int r)
-{
-    return _mm256_or_si256(_mm256_slli_epi64(in, 64 - r), _mm256_srli_epi64(in, r));
-}
-
-
-/**
  * @brief Vectorized round function for encryption procedure. Processes
  * 4 copies of Speck128/128 simultaneously.
  */

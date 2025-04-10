@@ -26,19 +26,20 @@
  * problems, then please contact the author to negotiate a special
  * agreement.
  */
-
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 
-#define wlen 64
-#define r    64
-#define s    53
-#define a    33
-#define b    26
-#define c    27
-#define d    29
-#define ws   27 
+enum {
+    wlen = 64,
+    r    = 64,
+    s    = 53,
+    a    = 33,
+    b    = 26,
+    c    = 27,
+    d    = 29,
+    ws   = 27 
+};
 
 
 typedef struct {
@@ -91,8 +92,6 @@ void xor4096i_init(Xorgens4096 *obj, uint64_t seed)
         (void) xor4096i_lfsr(obj);
     }
 }
-
-
 
 
 uint64_t get_bits_raw(void *state)

@@ -1,5 +1,5 @@
 /**
- * @file aesni.c
+ * @file aes128.c
  * @brief An implementation of PRNG based on AES128 block cipher in the
  * counter mode. Contains both hardware and software versions.
  * @details This file contains two different AES128 implementations:

@@ -215,10 +215,7 @@ static inline __m256i rotr32_vec(__m256i in, int r)
 {
     return _mm256_or_si256(_mm256_slli_epi32(in, 32 - r), _mm256_srli_epi32(in, r));
 }
-#endif
 
-
-#ifdef LEA_VEC_ENABLED
 static inline void leavec_load_ctr(__m256i *c, const uint32_t *ctr)
 {
     c[0] = _mm256_loadu_si256((__m256i *) ctr);
