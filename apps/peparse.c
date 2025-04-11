@@ -1,3 +1,13 @@
+/**
+ * @file peparse.c
+ * @brief A custom loader of 32-bit PE files (plugins with PRNGs) on such
+ * 32-bit platforms as Windows or DOS. Doesn't rely on system loaders.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/pe32loader.h"
 #include "smokerand_core.h"
 #include "smokerand_bat.h"
@@ -19,6 +29,7 @@ int main(int argc, char *argv[])
     void *handle = dlopen_pe32dos(filename, 0);
     if (handle == NULL) {
         fprintf(stderr, "Error: %s\n", dlerror_pe32dos());
+        return 1;
     }
    
     GetGenInfoFunc gen_getinfo = dlsym_pe32dos(handle, "gen_getinfo");

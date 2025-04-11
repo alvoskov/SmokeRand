@@ -67,20 +67,20 @@ Recommended configuration:
 
 - C99 compiler with 128-bit integers support either through `__uint128_t` type
   (GCC, Clang) or `_umul128`/`_addcarry_u64` intrinsics (Microsoft Visual C).
-  They are required by some PRNGs such as 128-bit LCGs. In the case of x86-64
-  intrinsics for RDTSC, RDRAND and AVX2 are highly recommended.
+  They will significantly improve performance of some PRNGs such as 128-bit
+  LCGs and MWCs, RANLUX++, wyrand etc.
+- 64-bit CPU; in the case of x86-64 -- support of RDTSC and RDSEED instructions
+  and AVX2 instructions set by a compiler.
 - Multithreading support: pthreads (POSIX threads) library of WinAPI threads.
 - CMake or Ninja + Lua 5.x for compilation by means of MSVC. Or Lua 5.x for
   compilation by means of Open Watcom C.
-- 64-bit CPU; in the case of x86-64 -- support of RDTSC and RDSEED instructions
-  and AVX2 instructions set.
 - 16 GiB of RAM, especially for multithreaded mode and/or `birthday` battery.
 
 The next compilers are supported: GCC (including MinGW), Clang (as zig cc), MSVC
 (Microsoft Visual C) and Open Watcom C. It allows to compile SmokeRand under
-Windows, UNIX-like systems and DOS. Slightly modified 16-bit version
-(`apps/sr_tiny.c`) can be compiled even by Borland Turbo C 2.0 or any other
-ANSI C (C89) compiler.
+Windows, UNIX-like systems and DOS. A slightly modified 16-bit version
+(`apps/sr_tiny.c`) of `express` battery can be compiled even by Borland
+Turbo C 2.0 or any other ANSI C (C89) compiler.
 
 ## Compilation
 
@@ -181,12 +181,13 @@ Extra tests:
 A lot of pseudorandom number generators are supplied with SmokeRand. They can
 be divided into several groups:
 
-- Cryptographically secure: chacha, chacha_avx (ChaCha12), hc256, isaac64,
-  speck128, speck128_avx (Speck128/128).
+- Cryptographically secure: aes128, chacha, chacha_avx (ChaCha12), hc256,
+  isaac64, kuzn, lea, speck128, speck128_avx (Speck128/128).
 - Obsolete CSPRNG: DES, GOST R 34.12-2015 "Magma", RC4.
 - Counter-based scramblers based on cryptographical primitives: philox,
   philox32, speck128_r16, threefry.
-- Lagged Fibonacci: alfib, alfib_lux, alfib_mod, mlfib17_5, lfib_par, r1279.
+- Lagged Fibonacci: alfib, alfib_lux, alfib_mod, mlfib17_5, lfib_par,
+  lfib_ranmar, r1279.
 - Linear congruental: cmwc4096, drand48, lcg32prime, lcg64, lcg64prime, lcg96,
   lcg128, lcg128_full, lcg128_u32_full, lcg69069, minstd, mwc1616, mwc64,
   mwc128, randu, ranluxpp, seizgin63.
@@ -775,12 +776,12 @@ There are only two problematic situations:
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
- wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 4 TiB
+ wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 8 TiB(?)
  wyrand            | u64    | +       | +     | +       | +    | 0.08 | +      | 4     |         | >= 8 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xorshift128       | u32    | 2       | 4     | 6/7     | 8    | 0.41 | +      | 1.25  | -       | 128 KiB
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      | 3.25  |         | 32 GiB
- xorshift128pp     | u64    | +       | +     | +       | +    | 0.29 | +      |       |         | ?
+ xorshift128pp     | u64    | +       | +     | +       | +    | 0.29 | +      | 4     |         | ?
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 1 TiB
  xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      | 3.25  |         | 16 MiB
  xoroshiro128pp    | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 32 TiB

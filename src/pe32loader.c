@@ -129,7 +129,7 @@ void PE32BasicInfo_print(const PE32BasicInfo *peinfo)
     }
 }
 
-void PE32BasicInfo_free(PE32BasicInfo *peinfo)
+void PE32BasicInfo_destruct(PE32BasicInfo *peinfo)
 {
     free(peinfo->sections);
 }
@@ -187,7 +187,7 @@ void *PE32MemoryImage_get_func_addr(const PE32MemoryImage *img, const char *func
  * @brief Deallocates all internal buffers.
  * @relates PE32MemoryImage
  */
-void PE32MemoryImage_free(PE32MemoryImage *obj)
+void PE32MemoryImage_destruct(PE32MemoryImage *obj)
 {
     execbuffer_free(obj->img);
 }
@@ -384,7 +384,7 @@ void *dlopen_pe32dos(const char *libname, int flag)
     PE32BasicInfo_init(&peinfo, fp, pe_offset);
     PE32MemoryImage *img = PE32BasicInfo_load(&peinfo, fp);
     fclose(fp);
-    PE32BasicInfo_free(&peinfo);
+    PE32BasicInfo_destruct(&peinfo);
     (void) flag;
     return img;
 }
@@ -411,7 +411,7 @@ void *dlsym_pe32dos(void *handle, const char *symname)
 void dlclose_pe32dos(void *handle)
 {
     if (handle != NULL) {
-        PE32MemoryImage_free(handle);
+        PE32MemoryImage_destruct(handle);
         free(handle);
     }
 }

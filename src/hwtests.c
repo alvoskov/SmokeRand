@@ -222,7 +222,7 @@ TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
     return ans;
 }
 
-void HammingTuplesTable_free(HammingTuplesTable *obj)
+void HammingTuplesTable_destruct(HammingTuplesTable *obj)
 {
     free(obj->tuples);
     obj->tuples = NULL;
@@ -495,7 +495,7 @@ TestResults hamming_ot_test(GeneratorState *obj, const HammingOtOptions *opts)
         (unsigned long long) table.len);
     obj->intf->printf("  zemp = %g, p = %g\n", res.x, res.p);
     obj->intf->printf("\n");
-    HammingTuplesTable_free(&table);
+    HammingTuplesTable_destruct(&table);
     return res;
 }
 
@@ -624,7 +624,7 @@ TestResults hamming_ot_long_test(GeneratorState *obj, const HammingOtLongOptions
         (unsigned long long) table.len);
     obj->intf->printf("  zemp = %g, p = %g\n", res.x, res.p);
     obj->intf->printf("\n");
-    HammingTuplesTable_free(&table);
+    HammingTuplesTable_destruct(&table);
     free(hw_to_code);
     return res;
 }

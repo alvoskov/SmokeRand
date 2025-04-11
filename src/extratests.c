@@ -247,7 +247,7 @@ void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
         ans.alpha = sr_poisson_pvalue(ans.x, lambda);
         intf->printf("  x = %g (ndups); p = %g; 1-p=%g\n", ans.x, ans.p, ans.alpha);
     }
-    GeneratorState_free(&obj, intf);
+    GeneratorState_destruct(&obj, intf);
     (void) ans;
 }
 
@@ -270,7 +270,7 @@ void BlockFrequency_init(BlockFrequency *obj)
     obj->nw16 = 0;
 }
 
-void BlockFrequency_free(BlockFrequency *obj)
+void BlockFrequency_destruct(BlockFrequency *obj)
 {
     free(obj->bytefreq);
     free(obj->w16freq);
@@ -373,8 +373,8 @@ void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf)
             break;
         }
     }
-    BlockFrequency_free(&freq);
-    GeneratorState_free(&obj, intf);
+    BlockFrequency_destruct(&freq);
+    GeneratorState_destruct(&obj, intf);
 }
 
 /////////////////////////////////////
@@ -443,7 +443,7 @@ void Ising2DLattice_print(Ising2DLattice *obj)
     }
 }
 
-void Ising2DLattice_free(Ising2DLattice *obj)
+void Ising2DLattice_destruct(Ising2DLattice *obj)
 {
     free(obj->s); obj->s = NULL;
     free(obj->nn); obj->nn = NULL;    
@@ -634,7 +634,7 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
     free(e);
     free(cv);
     // Ising2DLattice_print(&obj);
-    Ising2DLattice_free(&obj);
+    Ising2DLattice_destruct(&obj);
     // Fill results
     res.penalty = PENALTY_ISING2D;
     if (fabs(cv_z) > fabs(e_z)) {

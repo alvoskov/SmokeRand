@@ -59,7 +59,7 @@ static ThreadRetVal THREADFUNC_SPEC hamming_ot_run_test(void *udata)
         TestResults res = obj->test_info.test_func(&gen, obj->test_info.opts);
         obj->z_ary[i] = res.x;
     }
-    GeneratorState_free(&gen, obj->intf);
+    GeneratorState_destruct(&gen, obj->intf);
     return 0;
 }
 
@@ -69,7 +69,7 @@ double *generate_sample(GeneratorInfo *gi, int nsamples, const HwTestInfo *test_
     CallerAPI intf = CallerAPI_init_mthr();
     GeneratorState gen = GeneratorState_create(gi, &intf);
     (void) test_info->test_func(&gen, test_info->opts);    
-    GeneratorState_free(&gen, &intf);
+    GeneratorState_destruct(&gen, &intf);
     printf_mthr = intf.printf;
     intf.printf = printf_mute;
     int nthreads = get_cpu_numcores();

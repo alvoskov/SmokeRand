@@ -223,7 +223,7 @@ static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
 }
 
 
-static int run_self_test_vector(const CallerAPI *intf)
+int run_self_test_vector(const CallerAPI *intf)
 {
     // Reference values obtained from the original implementation of
     // the xorshift128++ PRNG

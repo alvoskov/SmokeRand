@@ -244,7 +244,7 @@ void GeneratorInfo_print(const GeneratorInfo *gi, int to_stderr)
     }
 }
 
-void GeneratorState_free(GeneratorState *obj, const CallerAPI *intf)
+void GeneratorState_destruct(GeneratorState *obj, const CallerAPI *intf)
 {
     obj->gi->free(obj->state, obj->gi, intf);
 }
@@ -519,7 +519,7 @@ void TestsDispatcher_init(TestsDispatcher *obj, const TestsBattery *bat,
     INIT_MUTEX(tests_dispatcher_mutex);
 }
 
-void TestsDispatcher_free(TestsDispatcher *obj)
+void TestsDispatcher_destruct(TestsDispatcher *obj)
 {
     free(obj->inds);
     free(obj->res_thrd_ord);
@@ -571,7 +571,7 @@ static ThreadRetVal THREADFUNC_SPEC battery_thread(void *data)
     }
     th_data->intf->printf("^^^^^^^^^^ Thread %u (ID %llu) finished ^^^^^^^^^^\n",
         thrd.ord, (unsigned long long) thrd.id);
-    GeneratorState_free(&obj, th_data->intf);
+    GeneratorState_destruct(&obj, th_data->intf);
     return 0;
 }
 
@@ -595,7 +595,7 @@ static void TestsBattery_run_threads(const TestsBattery *bat,
         ThreadObj_wait(&thrd[i]);
     }
     // Deallocate array
-    TestsDispatcher_free(&tdisp);
+    TestsDispatcher_destruct(&tdisp);
     free(thrd);
     (void) rtype;
 }
@@ -770,7 +770,7 @@ void TestsBattery_run(const TestsBattery *bat,
             results->name = bat->tests[testid - 1].name;
             results->id = testid;
         }
-        GeneratorState_free(&obj, intf);
+        GeneratorState_destruct(&obj, intf);
     } else {
        // Multithreaded version
        TestsBattery_run_threads(bat, gen, intf, nthreads, results, rtype);
