@@ -619,7 +619,7 @@ There are only two problematic situations:
  Algorithm         | Output | express | brief | default | full | cpb  | bday64 | Grade | TestU01 | PractRand 
 -------------------|--------|---------|-------|---------|------|------|--------|-------|---------|-----------
  aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      | 5     |         | >= 32 TiB
- aes128(c99)       | u64    | +       | +     | +       |      | 6.8  |        |       |         | ?
+ aes128(c99)       | u64    | +       | +     | +       | +    | 6.8  |        |       |         | ?
  alfib             | u64    | 2       | 5     | 6       | 8    | 0.23 | +      | 0     | Small   | 128 MiB
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    | 3.75  | +       | 4 GiB
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 4     | +       | 1 TiB
