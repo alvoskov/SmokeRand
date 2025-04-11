@@ -775,7 +775,7 @@ There are only two problematic situations:
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
- wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      |       |         | ?
+ wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | ?
  wyrand            | u64    | +       | +     | +       | +    | 0.08 | +      | 4     |         | >= 8 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xorshift128       | u32    | 2       | 4     | 6/7     | 8    | 0.41 | +      | 1.25  | -       | 128 KiB
@@ -795,7 +795,7 @@ There are only two problematic situations:
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     |         | >= 32 TiB
  xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     |         | ?
  xxtea128          | u32    | +       | +     | +       | +    | 18   | +      | 4.5   |         | ?
- xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   |         | >= 16 TiB
+ xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   |         | >= 32 TiB
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   |         | ?
  xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   |         | >= 32 TiB
 
