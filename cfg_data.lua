@@ -29,7 +29,7 @@ local gen_sources = {
     'speck128sc', 'speck64_128', 'splitmix', 'splitmix32', 'sqxor', 'sqxor32',
     'stormdrop', 'superduper64', 'superduper73', 'swb', 'swblarge', 'swblux',
     'swbw', 'taus88', 'threefry', 'threefry2x64', 'tinymt32', 'tinymt64',
-    'well1024a', 'wob2m', 'wyrand', 'xorgens', 'xoroshiro1024st',
+    'tylo64', 'well1024a', 'wob2m', 'wyrand', 'xorgens', 'xoroshiro1024st',
     'xoroshiro1024stst', 'xoroshiro128p', 'xoroshiro128pp',
     'xoroshiro128pp_vec', 'xorshift128', 'xorshift128p', 'xorshift128pp',
     'xorwow', 'xoshiro128p', 'xoshiro128pp', 'xsh', 'xtea', 'xxtea'
