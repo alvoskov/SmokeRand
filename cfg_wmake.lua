@@ -60,6 +60,7 @@ local lib_sources = cfg.get_lib_sources()
 local bat_sources = cfg.get_bat_sources()
 local lib_headers = cfg.get_lib_headers()
 local gen_sources_raw = cfg.get_gen_sources()
+local gen_asm_sources = {'mwc64x_nt32', 'mwc3232x_nt32', 'xoshiro128pp_nt32'}
 
 -- Filter out the floating point based generator: in WATCOM C
 -- it requires a runtime library.
@@ -106,10 +107,13 @@ io.write("lib_headers = " .. lib_headers_str .. "\n")
 -- Make "all" section
 io.write("all: $(bindir)/smokerand.exe $(bindir)/sr_dos32.exe " ..
     "$(bindir)/test_funcs.exe $(bindir)/srtiny16.exe &\n")
-for i = 1, #gen_sources do
-    local dllfile = "$(gen_bindir)/" .. gen_sources[i] .. ".dll "
+local gen_all_sources = {}
+for _, e in pairs(gen_sources) do table.insert(gen_all_sources, e) end
+for _, e in pairs(gen_asm_sources) do table.insert(gen_all_sources, e) end
+for i = 1, #gen_all_sources do
+    local dllfile = "$(gen_bindir)/" .. gen_all_sources[i] .. ".dll "
     io.write(dllfile)
-    if i % 3 == 0 and i ~= #gen_sources then
+    if i % 3 == 0 and i ~= #gen_all_sources then
         io.write(" &\n    ")
     end
 end
@@ -216,6 +220,19 @@ for _, g in pairs(gen_sources) do
     io.write("\twcl386 " .. objfile .. " $(dll_runtime) -fe=" .. dllfile ..
         " -q -bd -bcl=nt_dll -\"OPTION NODEFAULTLIBS\"\n")
 end
+
+
+---------- Compile the generators written in x86 assembly language ----------
+for _, g in pairs(gen_asm_sources) do
+    local dllfile = "$(gen_bindir)/" .. g .. ".dll"
+    local objfile = "$(gen_bindir)/obj/" .. g .. ".obj"
+    local asmfile = "$(gen_srcdir)/asm/" .. g .. ".asm"
+    io.write(dllfile .. ": " .. objfile .. "\n")
+    io.write("\twcl386 " .. objfile .. " -bcl=nt_dll -fe=" .. dllfile .. "\n")
+    io.write(objfile .. ": " .. asmfile .. " $(gen_srcdir)/asm/consts.inc\n")
+    io.write("\twasm " .. asmfile .. " -fo=" .. objfile .."\n")
+end
+
 
 -- Make "clean" section
 io.write("clean: .SYMBOLIC\n")
