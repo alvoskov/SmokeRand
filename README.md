@@ -775,9 +775,10 @@ There are only two problematic situations:
  threefish_avx     | u64    | +       | +     | +       | +    | 1.3  | +      | 5     |         | ?
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
+ tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | ?
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 8 TiB(?)
- wyrand            | u64    | +       | +     | +       | +    | 0.08 | +      | 4     |         | >= 8 TiB
+ wyrand            | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 8 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xorshift128       | u32    | 2       | 4     | 6/7     | 8    | 0.41 | +      | 1.25  | -       | 128 KiB
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      | 3.25  |         | 32 GiB
@@ -799,6 +800,12 @@ There are only two problematic situations:
  xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   |         | >= 32 TiB
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   |         | ?
  xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   |         | >= 32 TiB
+
+
+Ising2D speeds
+
+tylo64:                   00:11:12
+speck128/128-vector-full: 00:15:45
 
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
 e.g. changing `-O2` to `-O3` speeds up `mt19937` but slows down `philox`; gcc 10.3.0 (tdm64-1).
