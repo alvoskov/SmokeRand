@@ -99,6 +99,7 @@ typedef struct {
     void *(*malloc)(size_t len); ///< Pointer to malloc function
     void (*free)(void *); ///< Pointer to free function
     int (*printf)(const char *format, ... ); ///< Pointer to printf function
+    int (*snprintf)(char *buf, size_t bufsz, const char *format, ...); ///< Pointer to snprintf function
     int (*strcmp)(const char *lhs, const char *rhs); ///< Pointer to strcmp function
 } CallerAPI;
 

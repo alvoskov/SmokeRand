@@ -49,10 +49,12 @@ typedef struct {
     int is_additive;
     int r;
     int s;
+    char fullname_buf[64];
+    const char *fullname;
 } LFibDynDescr;
 
 
-static const LFibDynDescr generators[] = {
+static LFibDynDescr generators[] = {
     {.name = "31+",     .r = 31,     .s = 3,      .is_additive = 1}, // from glibc
     {.name = "55+",     .r = 55,     .s = 24,     .is_additive = 1},
     {.name = "55-",     .r = 55,     .s = 24,     .is_additive = 0},
@@ -143,8 +145,6 @@ static void *create(const CallerAPI *intf)
         intf->printf("Unknown parameter %s\n", intf->get_param());
         return NULL;
     }
-    intf->printf("LFib(%d,%d,%s)\n", par.r, par.s,
-        par.is_additive ? "+" : "-");
     // Allocate buffers
     size_t len = sizeof(LFibDyn_State) + (par.r + 2) * sizeof(uint64_t);
     LFibDyn_State *obj = intf->malloc(len);
@@ -161,15 +161,49 @@ static void *create(const CallerAPI *intf)
 }
 
 
-static const char *param_to_name(const CallerAPI *intf)
-{    
-    LFibDynDescr descr = parse_parameters(intf);
-    if (descr.name == NULL) {
-        return "LFib:unknown";
-    } else {
-        return descr.name;
-    }
+static const char description_begin[] = 
+    "64-bit additive/subtractive lagged Fibonacci generators that return upper\n"
+    "32 bits. The next generators are supported:\n"
+    " param      | description\n";
+
+static char description[4096] = "";
+
+
+EXPORT uint64_t get_bits(void *state)
+{
+    return get_bits_raw(state);
 }
 
+GET_SUM_FUNC
 
-MAKE_UINT_PRNG("LFib", NULL, 32, param_to_name)
+
+int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
+{
+    gi->description = description;
+    gi->create = default_create;
+    gi->free = default_free;
+    gi->self_test = NULL;
+    gi->parent = NULL;
+    gi->nbits = 32;
+    gi->get_bits = get_bits;
+    gi->get_sum = get_sum;
+
+
+    int pos = 0;
+    pos += intf->snprintf(description + pos, 4096 - pos, "%s", description_begin);
+    for (LFibDynDescr *gen = generators; gen->name != NULL; gen++) {
+        intf->snprintf(gen->fullname_buf, 64, "LFib(%d,%d,%s,2^32)",
+            gen->r, gen->s, (gen->is_additive) ? "+" : "-");
+        gen->fullname = gen->fullname_buf;
+        pos += intf->snprintf(description + pos, 4096 - pos, " %-10s | %s\n",
+            gen->name, gen->fullname_buf);
+    }
+    LFibDynDescr descr = parse_parameters(intf);
+    if (descr.name == NULL) {
+        gi->name = "LFib:unknown";
+    } else {
+        gi->name = descr.fullname;
+    }
+    return 1;
+}
+

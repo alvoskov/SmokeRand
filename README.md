@@ -775,7 +775,7 @@ There are only two problematic situations:
  threefish_avx     | u64    | +       | +     | +       | +    | 1.3  | +      | 5     |         | ?
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
- tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | ?
+ tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 2 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 8 TiB(?)
  wyrand            | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 8 TiB
@@ -803,9 +803,24 @@ There are only two problematic situations:
 
 
 Ising2D speeds
+                         | ising    | bday64   | usphere
+-------------------------|----------|----------|----------
+sfc64:                   | 00:10:56 | 00:03:41 | 00:03:36
+xoroshiro128++           | 00:11:04 | 00:03:13 | 00:03:45
+wyrand:                  | 00:11:01 |          | 00:03:23
+mwc256xxa64              | 00:11:28 |          | 00:03:43
+tylo64:                  | 00:11:11 | 00:03:52 | 00:04:00
+wob2m:                   | 00:11:48 |          | 00:03:21
+speck128/128-vector-full | 00:15:45 |          | 00:06:50
+aesni                    | 00:15:43 | 00:08:32 | 00:09:44
+speck128/128-scalar      | 00:31:18 |          | 00:23:19
+                         |          |          |
 
-tylo64:                   00:11:12
-speck128/128-vector-full: 00:15:45
+
+
+kiss99:                   00:12:48
+chacha:c99:               00:19:50
+
 
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
 e.g. changing `-O2` to `-O3` speeds up `mt19937` but slows down `philox`; gcc 10.3.0 (tdm64-1).

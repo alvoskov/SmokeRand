@@ -35,4 +35,8 @@ double sr_chi2_pvalue(double x, unsigned long f);
 double sr_chi2_to_stdnorm_approx(double x, unsigned long f);
 double sr_linearcomp_Tcdf(double k);
 double sr_linearcomp_Tccdf(double k);
+
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
 #endif

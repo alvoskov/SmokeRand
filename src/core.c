@@ -85,6 +85,7 @@ CallerAPI CallerAPI_init(void)
     intf.malloc = malloc;
     intf.free = free;
     intf.printf = printf_ser;
+    intf.snprintf = snprintf;
     intf.strcmp = strcmp;
     return intf;
 }
@@ -156,6 +157,7 @@ CallerAPI CallerAPI_init_mthr(void)
     intf.malloc = malloc;
     intf.free = free;
     intf.printf = printf_mt;
+    intf.snprintf = snprintf;
     intf.strcmp = strcmp;
     return intf;
 }

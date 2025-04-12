@@ -196,6 +196,8 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
         battery_birthday(gi, intf);
     } else if (!strcmp(battery_name, "ising")) {
         battery_ising(gi, intf, opts->testid, opts->nthreads, opts->report_type);
+    } else if (!strcmp(battery_name, "unitsphere")) {
+        battery_unit_sphere_volume(gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else if (!strcmp(battery_name, "dummy")) {
         fprintf(stderr, "Battery 'dummy': do nothing\n");
     } else if (battery_name[0] == '@') {

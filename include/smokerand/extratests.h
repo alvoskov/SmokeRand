@@ -41,16 +41,30 @@ typedef struct {
     unsigned int nsamples; ///< Number of samples for computation of E and C
 } Ising2DOptions;
 
+/**
+ * @brief Options for the PRNG test based on the volumes of n-dimensional
+ * unit spheres (Monte-Carlo computation of pi)
+ */
+typedef struct {
+    unsigned int ndims;
+    unsigned long long npoints;
+} UnitSphereOptions;
+
 
 TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts);
 TestResults ising2d_test(GeneratorState *obj, const Ising2DOptions *opts);
+TestResults unit_sphere_volume_test(GeneratorState *gs, const UnitSphereOptions *opts);
+
+TestResults ising2d_test_wrap(GeneratorState *obj, const void *udata);
+TestResults unit_sphere_volume_test_wrap(GeneratorState *gs, const void *udata);
+
 
 void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf);
 void battery_ising(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype);
 void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf);
+void battery_unit_sphere_volume(GeneratorInfo *gen, CallerAPI *intf,
+    unsigned int testid, unsigned int nthreads, ReportType rtype);
 
-
-TestResults ising2d_test_wrap(GeneratorState *obj, const void *udata);
 
 #endif

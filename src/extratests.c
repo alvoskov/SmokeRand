@@ -566,11 +566,11 @@ void Ising2DLattice_pass(Ising2DLattice *obj, GeneratorState *gs, IsingAlgorithm
  */
 TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
 {
+    static const double e_ref = 1.4530649029;
+    static const double cv_ref = 1.4987048885;
+    const double jc = log(1 + sqrt(2)) / 2;
     Ising2DLattice obj;
     Ising2DLattice_init(&obj, 16);
-    const double e_ref = 1.4530649029;
-    const double cv_ref = 1.4987048885;
-    const double jc = log(1 + sqrt(2)) / 2;
     TestResults res = TestResults_create("ising2d");
     if (opts->algorithm == ising_wolff) {
         res.name = "ising2d_wolff";
@@ -649,26 +649,92 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
     return res;
 }
 
-TestResults ising2d_wolff(GeneratorState *gs, const void *udata)
+
+//////////////////////////////////////
+///// Volume of unit sphere test /////
+//////////////////////////////////////
+
+/**
+ * @brief Calculate volume of the n-dimensional (hyper)sphere part situated
+ * inside the [0;1]^n n-dimensional hypercube.
+ */
+static double calc_usphere_volplus(unsigned int ndims)
 {
-    Ising2DOptions opts = {.sample_len = 5000000, .nsamples = 20, .algorithm = ising_wolff};
-    (void) udata;
-    return ising2d_test(gs, &opts);
+    double n_half = (double) ndims / 2.0;
+    return exp(n_half * log(M_PI) - lgamma(1.0 + n_half) - ndims*log(2.0));
 }
 
-TestResults ising2d_metropolis(GeneratorState *gs, const void *udata)
+/**
+ * @brief This test is based on computation of n-dimensional (n >= 2)
+ * (hyper)sphere volume by means of Monte-Carlo method.
+ * @details This test is not very sensitive and catches only some rare low-grade
+ * generators, e.g. RANDU and shr3 (xorshift32). It is useful for educational
+ * purposes and as a component of performance benchmarks.
+ */
+TestResults unit_sphere_volume_test(GeneratorState *gs, const UnitSphereOptions *opts)
 {
-    Ising2DOptions opts = {.sample_len = 5000000, .nsamples = 20, .algorithm = ising_metropolis};
-    (void) udata;
-    return ising2d_test(gs, &opts);
+    double tof_coeff = pow(2.0, -((int) gs->gi->nbits));
+    long long n_inside = 0;
+    TestResults ans = TestResults_create("usphere");
+    if (opts->ndims < 2 || opts->ndims > 20 || opts->npoints < 1000) {
+        return ans;
+    }
+    gs->intf->printf("UnitSphereVolume test\n");
+    gs->intf->printf("  ndims = %u; nvalues = %llu (10^%.2f or 2^%.2f)\n",
+        opts->ndims, opts->npoints,
+        log10((double) opts->npoints),
+        sr_log2((double) opts->npoints));
+    for (unsigned long long i = 0; i < opts->npoints; i++) {
+        double d = 0.0;
+        for (unsigned int j = 0; j < opts->ndims; j++) {
+            double x = gs->gi->get_bits(gs->state) * tof_coeff;
+            d += x * x;
+        }
+        if (d <= 1.0) {
+            n_inside++;
+        }
+    }
+    double v_theor = calc_usphere_volplus(opts->ndims);
+    double v_num = (double) n_inside / (double) opts->npoints;
+    double s_theor = sqrt(opts->npoints * v_theor * (1.0 - v_theor));
+    long long n_inside_theor = (long long) (v_theor * opts->npoints);
+    ans.x = (double) (n_inside - n_inside_theor) / s_theor;
+    ans.p = sr_stdnorm_pvalue(ans.x);
+    ans.alpha = sr_stdnorm_cdf(ans.x);
+    gs->intf->printf("  v_num = %.10g, v_theor = %.10g\n  z = %g, p = %g\n",
+        v_num, v_theor, ans.x, ans.p);
+    return ans;
 }
+
+///////////////////////////////////////////////
+///// Interfaces (wrappers) for batteries /////
+///////////////////////////////////////////////
+
+TestResults ising2d_test_wrap(GeneratorState *obj, const void *udata)
+{
+    return ising2d_test(obj, udata);
+}
+
+TestResults unit_sphere_volume_test_wrap(GeneratorState *gs, const void *udata)
+{
+    return unit_sphere_volume_test(gs, udata);
+}
+
+
+/////////////////////
+///// Batteries /////
+/////////////////////
 
 void battery_ising(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
+    static const Ising2DOptions
+        metr  = {.sample_len = 5000000, .nsamples = 20, .algorithm = ising_metropolis},
+        wolff = {.sample_len = 5000000, .nsamples = 20, .algorithm = ising_wolff};
+    
     static const TestDescription tests[] = {
-        {"ising16_metropolis", ising2d_metropolis, NULL},
-        {"ising16_wolff",      ising2d_wolff,      NULL},
+        {"ising16_metropolis", ising2d_test_wrap, &metr},
+        {"ising16_wolff",      ising2d_test_wrap, &wolff},
         {NULL, NULL, NULL}
     };
     const TestsBattery bat = {
@@ -681,11 +747,38 @@ void battery_ising(GeneratorInfo *gen, CallerAPI *intf,
     }
 }
 
-///////////////////////////////////////////////
-///// Interfaces (wrappers) for batteries /////
-///////////////////////////////////////////////
 
-TestResults ising2d_test_wrap(GeneratorState *obj, const void *udata)
+void battery_unit_sphere_volume(GeneratorInfo *gen, CallerAPI *intf,
+    unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
-    return ising2d_test(obj, udata);
+    static const UnitSphereOptions 
+        usphere_2d  = {.ndims = 2,  .npoints = 2000000000},
+        usphere_3d  = {.ndims = 3,  .npoints = 2000000000},
+        usphere_4d  = {.ndims = 4,  .npoints = 2000000000},
+        usphere_5d  = {.ndims = 5,  .npoints = 2000000000},
+        usphere_6d  = {.ndims = 6,  .npoints = 2000000000},
+        usphere_10d = {.ndims = 10, .npoints = 2000000000},
+        usphere_12d = {.ndims = 12, .npoints = 2000000000},
+        usphere_15d = {.ndims = 15, .npoints = 2000000000};
+
+
+    static const TestDescription tests[] = {
+        {"usphere_2d", unit_sphere_volume_test_wrap, &usphere_2d},
+        {"usphere_3d", unit_sphere_volume_test_wrap, &usphere_3d},
+        {"usphere_4d", unit_sphere_volume_test_wrap, &usphere_4d},
+        {"usphere_5d", unit_sphere_volume_test_wrap, &usphere_5d},
+        {"usphere_6d", unit_sphere_volume_test_wrap, &usphere_6d},
+        {"usphere_10d", unit_sphere_volume_test_wrap, &usphere_10d},
+        {"usphere_12d", unit_sphere_volume_test_wrap, &usphere_12d},
+        {"usphere_15d", unit_sphere_volume_test_wrap, &usphere_15d},
+        {NULL, NULL, NULL}
+    };
+    const TestsBattery bat = {
+        "unitsphere", tests
+    };
+    if (gen != NULL) {
+        TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
+    } else {
+        TestsBattery_print_info(&bat);
+    }
 }

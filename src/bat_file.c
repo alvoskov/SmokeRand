@@ -566,6 +566,21 @@ static int parse_ising2d(TestDescription *out, const TestInfo *obj, char *errmsg
 }
 
 
+static int parse_usphere(TestDescription *out, const TestInfo *obj, char *errmsg)
+{
+    GET_LIMITED_INTVALUE(ndims, 2, 20);
+    GET_LIMITED_INTVALUE(npoints, 1000, 1ull << 40ull);
+    UnitSphereOptions *opts = calloc(1, sizeof(UnitSphereOptions));
+    opts->ndims = (unsigned int) ndims;
+    opts->npoints = npoints;
+    out->name = obj->testname;
+    out->run = unit_sphere_volume_test_wrap;
+    out->udata = opts;
+    return 1;
+}
+
+
+
 
 
 typedef struct {
@@ -596,7 +611,8 @@ int battery_file(const char *filename, GeneratorInfo *gen, CallerAPI *intf,
         {"mod3", parse_mod3},
         {"monobit_freq", parse_monobit_freq},
         {"nbit_words_freq", parse_nbit_words_freq},
-        {"sumcollector", parse_sumcollector}, {NULL, NULL}
+        {"sumcollector", parse_sumcollector},
+        {"usphere", parse_usphere}, {NULL, NULL}
     };
     char errmsg[ERRMSG_BUF_SIZE];
     errmsg[0] = '\0';
