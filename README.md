@@ -636,6 +636,7 @@ There are only two problematic situations:
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 2 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 5     | +       | >= 32 TiB
  flea32x1          | u32    | +       | 1     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
+ gmwc128           | u64    | +       | +     | +       | +    | 0.72 | +      | 4     |         |
  hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 5     | +       | >= 32 TiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 16 TiB
@@ -754,7 +755,7 @@ There are only two problematic situations:
  speck128_avx(r16) | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 32 TiB
  splitmix          | u64    | +       | +     | +       | +    | 0.19 | -      | 3     | +       | >= 2 TiB
  splitmix32        | u32    | +       | 2     | 3       | 4/5  | 0.25 | -(>>10)| 0     | Small   | 1 GiB
- splitmix32cbc     | u32    | +       | +     | +       | +    |      |        |       |         | ?
+ splitmix32cbc     | u32    | +       | +     | +       | +    | 2.1  |        |       |         | ?
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | 4     | +       | >= 16 TiB
  sqxor32           | u32    | +       | 1     | 2       | 4    | 0.20 | -(>>10)| 0     | Small   | 16 GiB
  stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | +      | 0     |         | >= 8 TiB
