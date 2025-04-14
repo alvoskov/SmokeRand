@@ -19,6 +19,24 @@
  * theoretical issues of (C)MWC generators, at the price of one 128-bit
  * multiplication, one 64-bit multiplication, and one 128-bit sum.
  *
+ * Comments by A.L. Voskov. The next Python 3.8+ code allows to make
+ * a connection between constants in the code:
+ *
+ *     minus_a0 = 0x7d084a4d80885f
+ *     a1 = 0xff002aae7d81a646
+ *     a0 = (2**64 - minus_a0)
+ *     print("a0 = ", hex(a0))
+ *     a0inv = pow(a0, -1, 2**64)
+ *     print("a0inv = ", hex(a0inv))
+ *     m = a1*2**64 - a0
+ *     print("m = ", hex(m))
+ *
+ * The output is in a perfect agreement with constants suggested by Vigna.
+ *
+ *     a0 =  0xff82f7b5b27f77a1
+ *     a0inv =  0x9b1eea3792a42c61
+ *     m = 0xff002aae7d81a645007d084a4d80885f
+ *
  * @copyright The implementation is based on public domain code by
  * S.Vigna (vigna@acm.org).
  *
