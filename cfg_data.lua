@@ -26,7 +26,7 @@ local gen_sources = {
     'ran', 'randu', 'ranlux48', 'ranluxpp', 'ranq1', 'ranq2', 'ranrot32',   
     'ranrot_bi', 'ranshi', 'ranval', 'rc4', 'rc4ok', 'romutrio', 'rrmxmx',
     'sapparot', 'sapparot2', 'sezgin63', 'sfc16', 'sfc32', 'sfc64', 'sfc8',
-    'shr3', 'speck128', 'speck128sc', 'speck64_128', 'splitmix', 'splitmix32',
+    'shr3', 'speck128', 'speck128sc', 'speck64_128', 'splitmix', 'splitmix32', 'splitmix32cbc',
     'sqxor', 'sqxor32', 'stormdrop', 'superduper64', 'superduper73', 'swb',
     'swblarge', 'swblux', 'swbw', 'taus88', 'threefry', 'threefry2x64',
     'tinymt32', 'tinymt64', 'tylo64', 'well1024a', 'wob2m', 'wyrand', 'xorgens',

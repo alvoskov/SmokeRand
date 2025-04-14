@@ -697,7 +697,7 @@ There are only two problematic situations:
  msws              | u32    | +       | +     | +       | +    | 0.72 | +      | 4     | +       | >= 16 TiB
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 2 TiB
  msws64            | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 1 TiB
- msws64x           | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 1 TiB(?)
+ msws64x           | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 8 TiB
  mulberry32        | u32    | +       | 1     | 2       | 4    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
  mwc32x            | u32    | +       | 2     | 2       | 7    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
  mwc32xxa8         | u32    | +       | 1     | 4       | 10   | 1.9  | -(>>10)| 0     |         | 256 MiB
@@ -754,6 +754,7 @@ There are only two problematic situations:
  speck128_avx(r16) | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 32 TiB
  splitmix          | u64    | +       | +     | +       | +    | 0.19 | -      | 3     | +       | >= 2 TiB
  splitmix32        | u32    | +       | 2     | 3       | 4/5  | 0.25 | -(>>10)| 0     | Small   | 1 GiB
+ splitmix32cbc     | u32    | +       | +     | +       | +    |      |        |       |         | ?
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | 4     | +       | >= 16 TiB
  sqxor32           | u32    | +       | 1     | 2       | 4    | 0.20 | -(>>10)| 0     | Small   | 16 GiB
  stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | +      | 0     |         | >= 8 TiB
