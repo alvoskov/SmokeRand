@@ -1,22 +1,32 @@
 /**
  * @file mwc64x.c
- * @brief MWC64 - 64-bit MWC PRNG
- * @details Multiply-with-carry PRNG with a period about 2^63.
- * Passes SmallCrush, Crush and BigCrush tests.
+ * @brief MWC64X - 64-bit PRNG based on MWC method.
+ * @details Multiply-with-carry PRNG with a simple output function x ^ c.
+ * Has a period about 2^63. Passes SmallCrush, Crush and BigCrush tests.
  *
- * MWC itself is invented by G. Marsaglia. The A0 multiplier was selected by
- * A.L. Voskov using spectral test from TAOCP and SmallCrush.
- * 
+ * This PRNG is was proposed by David B. Thomas. MWC itself is invented
+ * by G. Marsaglia. The A0 multiplier was changed by A.L. Voskov using
+ * spectral test from TAOCP and SmallCrush for the version without XORing.
+ *
+ * Without XORing this PRNG fails "birthdayspacing t=3 (N12)" test from
+ * Crush battery. The similar problem was noticed by S.Vigna in MWC128,
+ * and he proposed a similar (but not the same) solution with XORing.
+ *
  * References:
- * 1. G. Marsaglia "Multiply-With-Carry (MWC) generators" (from DIEHARD
+ * 1. David B. Thomas. The MWC64X Random Number Generator.
+ *    https://cas.ee.ic.ac.uk/people/dt10/research/rngs-gpu-mwc64x.html
+ * 2. G. Marsaglia "Multiply-With-Carry (MWC) generators" (from DIEHARD
  *    CD-ROM) https://www.grc.com/otg/Marsaglia_MWC_Generators.pdf
- * 2. https://github.com/lpareja99/spectral-test-knuth
+ * 3. https://github.com/lpareja99/spectral-test-knuth
+ * 4. Sebastiano Vigna. MWC128. https://prng.di.unimi.it/MWC128.c
  *
  * @copyright
  * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * This software is licensed under the MIT license.
+ * All rights reserved.
+ *
+ * This software is provided under the Apache 2 License.
  */
 #include "smokerand/cinterface.h"
 
