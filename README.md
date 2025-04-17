@@ -697,7 +697,7 @@ There are only two problematic situations:
  mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | +      | 4     | +       | 2 TiB
  msws              | u32    | +       | +     | +       | +    | 0.72 | +      | 4     | +       | >= 16 TiB
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 2 TiB
- msws64            | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 1 TiB
+ msws64            | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 16 TiB
  msws64x           | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 32 TiB
  mulberry32        | u32    | +       | 1     | 2       | 4    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
  mwc32x            | u32    | +       | 2     | 2       | 7    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
