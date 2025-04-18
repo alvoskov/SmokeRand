@@ -39,4 +39,18 @@ static void *create(const CallerAPI *intf)
     return (void *) obj;
 }
 
-MAKE_UINT32_PRNG("PCG32", NULL)
+static int run_self_test(const CallerAPI *intf)
+{
+    Pcg32State obj = { .x = 0x123456789ABCDEF};
+    static const uint32_t x_ref = 0x62435AA4;
+    uint32_t x;
+    for (int i = 0; i < 10000; i++) {
+        x = get_bits_raw(&obj);
+    }
+    intf->printf("Output: 0x%lX; reference: 0x%lX\n",
+        (unsigned long) x, (unsigned long) x_ref);
+    return x == x_ref;
+
+}
+
+MAKE_UINT32_PRNG("PCG32", run_self_test)
