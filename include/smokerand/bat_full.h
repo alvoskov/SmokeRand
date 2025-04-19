@@ -10,6 +10,6 @@
 #ifndef __SMOKERAND_BAT_FULL_H
 #define __SMOKERAND_BAT_FULL_H
 #include "smokerand/core.h"
-void battery_full(GeneratorInfo *gen, CallerAPI *intf,
+void battery_full(const GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype);
 #endif

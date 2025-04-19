@@ -594,7 +594,7 @@ typedef struct {
  * @details File format:
  * test_name param1=value1 param2=value2
  */
-int battery_file(const char *filename, GeneratorInfo *gen, CallerAPI *intf,
+int battery_file(const char *filename, const GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
     static const TestFunc parsers[] = {

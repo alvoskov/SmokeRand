@@ -26,7 +26,7 @@
 /**
  * @brief SmokeRand `express` battery.
  */
-void battery_express(GeneratorInfo *gen, CallerAPI *intf,
+void battery_express(const GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
     static const BSpaceNDOptions

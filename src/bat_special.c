@@ -32,7 +32,7 @@ typedef enum {
  * @details Two modes are supported: measurement of one function call
  * and measurement of sum computation by PRNG inside the cycle.
  */
-static SpeedResults measure_speed(GeneratorInfo *gen, const CallerAPI *intf,
+static SpeedResults measure_speed(const GeneratorInfo *gen, const CallerAPI *intf,
     SpeedMeasurementMode mode)
 {
     GeneratorState obj = GeneratorState_create(gen, intf);
@@ -109,7 +109,7 @@ static uint64_t dummy_get_sum(void *state, size_t len)
 
 
 
-SpeedResults battery_speed_test(GeneratorInfo *gen, const CallerAPI *intf,
+SpeedResults battery_speed_test(const GeneratorInfo *gen, const CallerAPI *intf,
     SpeedMeasurementMode mode)
 {
     GeneratorInfo dummy_gen = {.name = "dummy", .description = "DUMMY",
@@ -147,7 +147,7 @@ SpeedResults battery_speed_test(GeneratorInfo *gen, const CallerAPI *intf,
     return speed_corr;    
 }
 
-void battery_speed(GeneratorInfo *gen, const CallerAPI *intf)
+void battery_speed(const GeneratorInfo *gen, const CallerAPI *intf)
 {
     printf("===== Generator speed measurements =====\n");
     printf("----- Speed test for uint generation -----\n");
@@ -169,7 +169,7 @@ void battery_speed(GeneratorInfo *gen, const CallerAPI *intf)
     }
 }
 
-void battery_self_test(GeneratorInfo *gen, const CallerAPI *intf)
+void battery_self_test(const GeneratorInfo *gen, const CallerAPI *intf)
 {
     if (gen->self_test == 0) {
         intf->printf("Internal self-test not implemented\n");

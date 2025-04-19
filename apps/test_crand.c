@@ -69,6 +69,7 @@ int main()
     };
 
     CallerAPI intf = CallerAPI_init_mthr();
+    battery_speed(&gen, &intf);
     battery_default(&gen, &intf, TESTS_ALL, 4, REPORT_FULL);
     CallerAPI_free();
     return 0;
