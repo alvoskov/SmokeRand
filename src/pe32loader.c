@@ -39,7 +39,9 @@ static inline uint32_t read_u32(FILE *fp, unsigned int offset)
 {
     uint32_t tmp;
     fseek(fp, offset, SEEK_SET);
-    fread(&tmp, sizeof(tmp), 1, fp);
+    if (fread(&tmp, sizeof(tmp), 1, fp) != 1) {
+        return 0;
+    }
     return tmp;
 }
 
@@ -47,7 +49,9 @@ static inline uint16_t read_u16(FILE *fp, unsigned int offset)
 {
     uint16_t tmp;
     fseek(fp, offset, SEEK_SET);
-    fread(&tmp, sizeof(tmp), 1, fp);
+    if (fread(&tmp, sizeof(tmp), 1, fp) != 1) {
+        return 0;
+    }
     return tmp;
 }
 
@@ -101,7 +105,9 @@ int PE32BasicInfo_init(PE32BasicInfo *peinfo, FILE *fp, uint32_t pe_offset)
     for (int i = 0; i < peinfo->nsections; i++) {
         PE32SectionInfo *sect = &peinfo->sections[i];
         fseek(fp, offset, SEEK_SET);
-        fread(sect->name, 8, 1, fp);
+        if (fread(sect->name, 8, 1, fp) != 1) {
+            return 0;
+        }
         sect->virtual_size = read_u32(fp, offset + 0x08);
         sect->virtual_addr = read_u32(fp, offset + 0x0C);
         sect->physical_size = read_u32(fp, offset + 0x10);
@@ -109,7 +115,7 @@ int PE32BasicInfo_init(PE32BasicInfo *peinfo, FILE *fp, uint32_t pe_offset)
         offset += 0x28; // To the next section
     }
     return 1;
-}    
+}
 
 
 void PE32BasicInfo_print(const PE32BasicInfo *peinfo)
