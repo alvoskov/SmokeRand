@@ -23,7 +23,7 @@
  * \f$2^{32}\f$ values and can detect any PRNG with 32-bit state. It also
  * detects additive/subtractive lagged Fibonacci generators.
  */
-void battery_brief(GeneratorInfo *gen, CallerAPI *intf,
+void battery_brief(const GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
     // Monobit frequency test options
