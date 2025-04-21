@@ -732,7 +732,7 @@ There are only two problematic situations:
  ranrot32[57/13]   | u32    | +       | +     | +       | 1    | 0.74 | +      | 2     | +       | 8 GiB
  ranshi            | u64    | +       | 1     | 6       | 7    | 0.43 | +      | 0     |         | 32 KiB
  ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | +      | 3.5   |         | 8 TiB
- ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 1 TiB
+ ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 4 TiB
  ranval            | u32    | +       | +     | +       | +    | 0.31 | +      | 4(0)  | +       | >= 32 TiB
  r1279             | u32    | 2       | 5     | 7       | 10   | 0.47 | +      | 0     | Small   | 64 MiB
  ranlux[0]         | u32    | 1       | 6     | 9       | 12   | 6.8  | N/A    | 0     |         | 4 MiB
