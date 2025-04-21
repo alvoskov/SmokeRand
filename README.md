@@ -623,7 +623,7 @@ There are only two problematic situations:
  aes128(c99)       | u64    | +       | +     | +       | +    | 6.8  | +      | 5     |         | ?
  alfib             | u64    | 2       | 5     | 6       | 8    | 0.23 | +      | 0     | Small   | 128 MiB
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    | 3.75  | +       | 4 GiB
- alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 4     | +       | 1 TiB
+ alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 1 TiB
  ara32             | u32    | +       | 1     | 1       | 1    | 0.96 | +      | 2(0)  | +       | 512 MiB
  chacha            | u32    | +       | +     | +       | +    | 2.0  | +      | 5     | +       | >= 1 TiB
  chacha_avx        | u32    | +       | +     | +       | +    | 0.7  | +      | 5     | +       | >= 2 TiB
@@ -714,7 +714,7 @@ There are only two problematic situations:
  mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | +       | >= 32 TiB(?)
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 1 GiB
- pcg32             | u32    | +       | +     | +       | +    | 0.44 | +      | 4     | +       | >= 32 TiB(?)
+ pcg32             | u32    | +       | +     | +       | +    | 0.44 | +      | 3.5   | +       | 32 TiB
  pcg32_xsl_rr      | u32    | +       | +     | +       | +    | 0.58 | +      | 4     |         | 256 GiB
  pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | 3     | +       | >= 2 TiB
  pcg64_xsl_rr      | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
@@ -731,7 +731,7 @@ There are only two problematic situations:
  ranrot32[17/9]    | u32    | +       | 1     | 2       | 3    | 0.68 | +      | 0     | +       | 1 GiB
  ranrot32[57/13]   | u32    | +       | +     | +       | 1    | 0.74 | +      | 2     | +       | 8 GiB
  ranshi            | u64    | +       | 1     | 6       | 7    | 0.43 | +      | 0     |         | 32 KiB
- ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     |         | 8 TiB
+ ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | +      | 3.5   |         | 8 TiB
  ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 1 TiB
  ranval            | u32    | +       | +     | +       | +    | 0.31 | +      | 4(0)  | +       | >= 32 TiB
  r1279             | u32    | 2       | 5     | 7       | 10   | 0.47 | +      | 0     | Small   | 64 MiB
@@ -743,7 +743,7 @@ There are only two problematic situations:
  romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      | 4(0)  |         | >= 1 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 2 TiB
  sapparot          | u32    | +       | 1     | 3       | 4    | 0.70 | +      | 0     | Crush   | 8 MiB
- sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 4(0)  | +       | 2 TiB
+ sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | -(>>10)| 0     |         | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 4(0)  |         | 128 GiB(stdin32)*
@@ -858,13 +858,32 @@ mode then it fails PractRand 0.94 at 256 GiB:
       [Low8/32]Gap-16:B                 R= +22.6  p =  3.2e-19    FAIL !
       ...and 282 test result(s) without anomalies
 
-Note about `pcg32`: suspicious results for TMFn test!
+Note about `pcg32`: it fails the TMFn test from PractRand at 64 TiB!
+
+Run 1:
 
     rng=RNG_stdin32, seed=unknown
     length= 32 terabytes (2^45 bytes), time= 105157 seconds
       Test Name                         Raw       Processed     Evaluation
       TMFn(2+11):wl                     R= +25.4  p~=   2e-8    very suspicious
       ...and 346 test result(s) without anomalies
+
+Run 2:
+
+    rng=RNG_stdin32, seed=unknown
+    length= 32 terabytes (2^45 bytes), time= 98476 seconds
+      Test Name                         Raw       Processed     Evaluation
+      TMFn(2+12):wl                     R= +21.1  p~=   2e-6    mildly suspicious
+      ...and 346 test result(s) without anomalies
+
+    rng=RNG_stdin32, seed=unknown
+    length= 64 terabytes (2^46 bytes), time= 196881 seconds
+      Test Name                         Raw       Processed     Evaluation
+      TMFn(2+11):wl                     R= +25.5  p~=   1e-8    very suspicious
+      TMFn(2+12):wl                     R= +47.6  p~=   1e-21     FAIL !!
+      TMFn(2+13):wl                     R= +20.6  p~=   3e-6    unusual
+      ...and 349 test result(s) without anomalies
+
 
 About `lcg64prime`: it passes BigCrush if upper 32 bits are returned, but
 fails it in interleaved mode (fails test N15 `BirthdaySpacings, t = 4`).
