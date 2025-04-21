@@ -5,7 +5,7 @@
  * number generators invented by M.E. O'Neill. The PCG32 is a version with
  * 32-bit output and with 64-bit state. It passes all batteries from SmokeRand
  * test suite. It also passes SmallCrush, Crush and BigCrush batteries from
- * TestU01.
+ * TestU01. However, it fails the TMFn test from PractRand 0.94 at 64 TiB.
  * 
  * @copyright The PCG32 algorithm is suggested by M.E. O'Neill
  * (https://pcg-random.org).
