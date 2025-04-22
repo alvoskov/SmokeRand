@@ -13,7 +13,7 @@ local lib_headers = {'apidefs.h', 'cinterface.h', 'core.h', 'coretests.h',
 -- cross-platform variants.
 local gen_sources = {
     'aes128', 'alfib', 'alfib_lux', 'alfib_mod', 'ara32', 'chacha', 'cmwc4096',
-    'coveyou64', 'cwg64', 'des', 'drand48', 'efiix64x48', 'flea32x1', 'gmwc128',
+    'coveyou64', 'cwg64', 'des', 'drand48', 'efiix64x48', 'flea32x1', 'gjrand64', 'gmwc128',
     'hc256', 'isaac64', 'kiss64', 'kiss93', 'kiss99', 'kuzn', 'lcg128', 'lcg32prime',
     'lcg64', 'lcg64prime', 'lcg69069', 'lcg96', 'lea', 'lfib4', 'lfib4_u64',
     'lfib_par', 'lfib_ranmar', 'lfsr113', 'lfsr258', 'loop_7fff_w64',
@@ -29,7 +29,7 @@ local gen_sources = {
     'shr3', 'speck128', 'speck128sc', 'speck64_128', 'splitmix', 'splitmix32', 'splitmix32cbc',
     'sqxor', 'sqxor32', 'stormdrop', 'superduper64', 'superduper73', 'swb',
     'swblarge', 'swblux', 'swbw', 'taus88', 'threefry', 'threefry2x64',
-    'tinymt32', 'tinymt64', 'tylo64', 'well1024a', 'wob2m', 'wyrand', 'xorgens',
+    'tinymt32', 'tinymt64', 'tylo64', 'v3b', 'well1024a', 'wob2m', 'wyrand', 'xorgens',
     'xoroshiro1024st', 'xoroshiro1024stst', 'xoroshiro128p', 'xoroshiro128pp',
     'xoroshiro128pp_vec', 'xorshift128', 'xorshift128p', 'xorshift128pp',
     'xorwow', 'xoshiro128p', 'xoshiro128pp', 'xsh', 'xtea', 'xxtea'
