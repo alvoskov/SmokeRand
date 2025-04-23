@@ -745,6 +745,7 @@ There are only two problematic situations:
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 2 TiB
  sapparot          | u32    | +       | 1     | 3       | 4    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
+ sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | >= 2 TiB
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | -(>>10)| 0     |         | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 4(0)  |         | 128 GiB(stdin32)*

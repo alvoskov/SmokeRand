@@ -109,7 +109,7 @@ set (GENERATORS
     mwc32xxa8 mwc40xxa8 mwc4691 mwc48xxa16 mwc64 mwc64x pcg32 pcg32_xsl_rr 
     pcg64_64 pcg64_xsl_rr philox philox2x32 philox32 r1279 ran randu 
     ranlux48 ranluxpp ranq1 ranq2 ranrot32 ranrot_bi ranshi ranval 
-    rc4 rc4ok romutrio rrmxmx sapparot sapparot2 sezgin63 sfc16 sfc32 
+    rc4 rc4ok romutrio rrmxmx sapparot sapparot2 sapparot2_64 sezgin63 sfc16 sfc32 
     sfc64 sfc8 shr3 speck128 speck128sc speck64_128 splitmix splitmix32 
     sqxor sqxor32 stormdrop superduper64 superduper73 swb swblarge 
     swblux swbw taus88 threefry threefry2x64 tinymt32 tinymt64 tylo64 v3b well1024a

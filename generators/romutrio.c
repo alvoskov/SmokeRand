@@ -36,21 +36,16 @@ typedef struct {
 } RomuTrioState;
 
 
-static inline uint64_t rotl(uint64_t x, uint64_t r)
-{
-    return (x << r) | (x >> (64 - r));
-}
-
-
 static inline uint64_t get_bits_raw(void *state)
 {
     RomuTrioState *obj = state;
     uint64_t x = obj->x, y = obj->y, z = obj->z;
     obj->x = 15241094284759029579ull * z;
-    obj->y = rotl(y - x, 12);
-    obj->z = rotl(z - y, 44);
+    obj->y = rotl64(y - x, 12);
+    obj->z = rotl64(z - y, 44);
     return x;
 }
+
 
 static void *create(const CallerAPI *intf)
 {
@@ -62,5 +57,6 @@ static void *create(const CallerAPI *intf)
     } while (obj->z == 0);
     return (void *) obj;
 }
+
 
 MAKE_UINT64_PRNG("RomuTrio", NULL)
