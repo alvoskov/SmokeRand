@@ -986,7 +986,7 @@ void GeneratorInfo_bits_to_file(GeneratorInfo *gen, const CallerAPI *intf, int m
 {
     set_bin_stdout();
     void *state = gen->create(gen, intf);
-    int shl = ((maxlen_log2 == 0) ? 63 : (maxlen_log2 - 10)); // For 32 bits
+    int shl = ((maxlen_log2 == 0) ? 62 : (maxlen_log2 - 10)); // For 32 bits
     if (shl < 1) {
         shl = 1;
     }
