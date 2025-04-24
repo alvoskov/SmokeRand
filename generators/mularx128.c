@@ -1,7 +1,7 @@
 /**
  * @file mularx128.c
  * @brief A simple counter-based generator that passes `full` battery and
- * 64-bit birthday paradox test.
+ * 64-bit birthday paradox test(?).
  *
  * References:
  *

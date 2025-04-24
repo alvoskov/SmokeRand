@@ -1,7 +1,7 @@
 /**
  * @file mularx256.c
- * @brief SplitMix generator based on scrambling of "discrete Weyl sequence"
- * by a modified MurMur3 hash output function.
+ * @brief A simple counter-based generator that passes `full` battery and
+ * 64-bit birthday paradox test.
  *
  * References:
  *
@@ -36,28 +36,22 @@ static inline void mulbox128(uint64_t *v, int i, int j)
     v[i] = v[i] ^ rotl64(v[j], 13);
 }
 
-static inline void arxbox128(uint64_t *v, int i, int j)
-{
-    v[j] = v[j] + rotl64(v[i], 46);
-    v[i] = v[i] ^ rotl64(v[j], 13);
-}
-
 static inline uint64_t get_bits_raw(void *state)
 {
     Mularx256State *obj = state;
     if (obj->pos == 4) {
         obj->pos = 0;
+        uint64_t g = 0;
         for (int i = 0; i < 4; i++) {
-            obj->out[i] = obj->x[i];
+            obj->out[i] = obj->x[i] ^ (g += 0x9E3779B97F4A7C15);
         }
-        obj->out[0] ^= 0x9E3779B97F4A7C15;
         mulbox128(obj->out, 0, 1);
-        mulbox128(obj->out, 1, 2);
         mulbox128(obj->out, 2, 3);
+        mulbox128(obj->out, 1, 2);
         mulbox128(obj->out, 3, 0);
 
-        arxbox128(obj->out, 1, 0);
-        arxbox128(obj->out, 3, 2);
+        mulbox128(obj->out, 1, 0);
+        mulbox128(obj->out, 3, 2);
 
         obj->x[0]++;
     }
