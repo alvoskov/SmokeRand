@@ -761,7 +761,7 @@ There are only two problematic situations:
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | 4     | +       | >= 16 TiB
  sqxor32           | u32    | +       | 1     | 2       | 4    | 0.20 | -(>>10)| 0     | Small   | 16 GiB
  stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | +      | 0     |         | >= 8 TiB
- stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | +      | 3.5   | Small   | 1 MiB
+ stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | +      | 3.5(0)| Small   | 1 MiB
  superduper73      | u32    | 3       | 9     | 15      | 18   | 0.64 | +      | 0     | -       | 32 KiB
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      | 2.75  |         | 512 KiB
  superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | +      | 4     |         | >= 32 TiB
@@ -776,12 +776,12 @@ There are only two problematic situations:
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      | 3     |         | 32 GiB
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 2 TiB
- threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | ?
+ threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | >= 32 TiB
  threefish_avx     | u64    | +       | +     | +       | +    | 1.3  | +      | 5     |         | >= 8 TiB
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 2 TiB
- v3b               | u32    | +       | +     | +       | +    | 0.78 | +      |       |         | >= 2 TiB
+ v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     |         | >= 2 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 8 TiB(?)
  wyrand            | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 8 TiB
@@ -812,12 +812,12 @@ Performance estimation for some 64-bit generators
 
  Generator                | ising    | bday64   | usphere  | default
 --------------------------|----------|----------|----------|----------
- sfc64:                   | 00:10:56 | 00:03:41 | 00:03:36 | 00:03:05
+ sfc64                    | 00:10:56 | 00:03:41 | 00:03:36 | 00:03:05
  xoroshiro128++           | 00:11:04 | 00:03:13 | 00:03:45 | 00:03:02
- wyrand:                  | 00:11:01 | 00:03:05 | 00:03:23 | 00:03:03
+ wyrand                   | 00:11:01 | 00:03:05 | 00:03:23 | 00:03:03
  mwc256xxa64              | 00:11:28 | 00:04:01 | 00:03:43 | 00:03:13
- tylo64:                  | 00:11:11 | 00:03:52 | 00:04:00 | 00:03:10
- wob2m:                   | 00:11:48 | 00:03:17 | 00:03:21 | 00:03:17
+ tylo64                   | 00:11:11 | 00:03:52 | 00:04:00 | 00:03:10
+ wob2m                    | 00:11:48 | 00:03:17 | 00:03:21 | 00:03:17
  pcg64_xsl_rr             | 00:12:01 | 00:04:22 | 00:05:22 | 00:03:30
  speck128/128-vector-full | 00:15:45 | 00:06:53 | 00:06:50 | 00:04:06
  aesni                    | 00:15:43 | 00:08:32 | 00:09:44 | 00:04:14
@@ -829,8 +829,8 @@ Performance estimation for some 32-bit generators
 
  Generator                | ising    | bday64   | usphere  | default
 --------------------------|----------|----------|----------|----------
- kiss99:                  | 00:12:48 |          |          |
- chacha:c99:              | 00:19:50 |          |          |
+ kiss99                   | 00:12:48 |          |          |
+ chacha:c99               | 00:19:50 |          |          |
 
 
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
@@ -915,6 +915,15 @@ Sensitivity of dieharder is lower than TestU01 and PractRand:
 
 - Failed dieharder: lcg69069, lcg32prime, minstd, randu, shr3, xsh, drand48, lfib31
 - Passed dieharder: lcg64, lfib(55,24,+,up32), lfib(607,203,+,up32), swb, xorwow
+
+Sensitivity of ENT for 1 GiB sample (at 4 GiB it fails on Win32 due to `long`
+and/or `int` data types overflow) is much lower than `express` battery. The most
+sensitive test from ENT is the byte frequency test. It also includes entropy
+test, arithmetic mean, Monte-Carlo pi and serial correlation tests. But they
+are less sensitive, e.g. entropy test catches only randu.
+
+- Failed ENT: randu, lcg69069, drand48, shr3
+- Passes ENT: lcg32prime, lcg64, lfib31, swb
 
 # Versions history
 

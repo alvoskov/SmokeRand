@@ -86,6 +86,7 @@ GeneratorFilter GeneratorFilter_from_name(const char *name)
 typedef struct {
     int nthreads;
     int testid;
+    int maxlen_log2; ///< log2(len) for stdout length in bytes
     GeneratorFilter filter;
     ReportType report_type;
 } SmokeRandSettings;
@@ -103,6 +104,7 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
     obj->testid = TESTS_ALL;
     obj->filter = FILTER_NONE;
     obj->report_type = REPORT_FULL;
+    obj->maxlen_log2 = 0;
     for (int i = 3; i < argc; i++) {
         char argname[32];
         int argval;
@@ -150,6 +152,12 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
                 fprintf(stderr, "Invalid value of argument '%s'\n", argname);
                 return 1;
             }
+        } else if (!strcmp(argname, "maxlen_log2")) {
+            if (argval < 12 || argval > 63) {
+                fprintf(stderr, "Invalid value of argument '%s'\n", argname);
+                return 1;
+            }
+            obj->maxlen_log2 = argval;
         } else {
             fprintf(stderr, "Unknown argument '%s'\n", argname);
             return 1;
@@ -189,7 +197,7 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
     } else if (!strcmp(battery_name, "speed")) {
         battery_speed(gi, intf);
     } else if (!strcmp(battery_name, "stdout")) {
-        GeneratorInfo_bits_to_file(gi, intf);
+        GeneratorInfo_bits_to_file(gi, intf, opts->maxlen_log2);
     } else if (!strcmp(battery_name, "freq")) {
         battery_blockfreq(gi, intf);
     } else if (!strcmp(battery_name, "birthday")) {

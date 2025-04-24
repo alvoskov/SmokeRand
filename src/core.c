@@ -982,23 +982,29 @@ void set_bin_stdin(void)
  * @brief Dump an output PRNG to the stdout in the format suitable
  * for PractRand.
  */
-void GeneratorInfo_bits_to_file(GeneratorInfo *gen, const CallerAPI *intf)
+void GeneratorInfo_bits_to_file(GeneratorInfo *gen, const CallerAPI *intf, int maxlen_log2)
 {
     set_bin_stdout();
     void *state = gen->create(gen, intf);
+    int shl = ((maxlen_log2 == 0) ? 63 : (maxlen_log2 - 10)); // For 32 bits
+    if (shl < 1) {
+        shl = 1;
+    }
     if (gen->nbits == 32) {
-        uint32_t buf[256];
-        while (1) {
-            for (size_t i = 0; i < 256; i++) {
-                buf[i] = (uint32_t) gen->get_bits(state);
+        uint32_t buf[256];        
+        long long nblocks = 1ll << shl;
+        for (long long i = 0; i < nblocks; i++) {
+            for (size_t j = 0; j < 256; j++) {
+                buf[j] = (uint32_t) gen->get_bits(state);
             }
             fwrite(buf, sizeof(uint32_t), 256, stdout);
         }
     } else {
         uint64_t buf[256];
-        while (1) {
-            for (size_t i = 0; i < 256; i++) {
-                buf[i] = gen->get_bits(state);
+        long long nblocks = 1ll << (--shl);
+        for (long long i = 0; i < nblocks; i++) {
+            for (size_t j = 0; j < 256; j++) {
+                buf[j] = gen->get_bits(state);
             }
             fwrite(buf, sizeof(uint64_t), 256, stdout);
         }

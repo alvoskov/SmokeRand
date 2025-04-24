@@ -151,7 +151,7 @@ void print_elapsed_time(unsigned long long nseconds_total);
 
 void set_bin_stdout(void);
 void set_bin_stdin(void);
-void GeneratorInfo_bits_to_file(GeneratorInfo *gen, const CallerAPI *intf);
+void GeneratorInfo_bits_to_file(GeneratorInfo *gen, const CallerAPI *intf, int maxlen_log2);
 
 ////////////////////////////////////////
 ///// Some useful inline functions /////
