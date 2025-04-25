@@ -58,12 +58,19 @@ typedef struct {
 } HammingOtLongOptions;
 
 
+typedef struct {
+    unsigned long long nvalues; ///< Number of pseudorandom values processed by the test.
+} HammingDistrOptions;
+
+
 TestResults hamming_ot_test(GeneratorState *obj, const HammingOtOptions *opts);
 TestResults hamming_ot_long_test(GeneratorState *obj, const HammingOtLongOptions *opts);
+TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *opts);
 
 // Unified interfaces that can be used for batteries composition
 TestResults hamming_ot_test_wrap(GeneratorState *obj, const void *udata);
 TestResults hamming_ot_long_test_wrap(GeneratorState *obj, const void *udata);
+TestResults hamming_distr_test_wrap(GeneratorState *obj, const void *udata);
 
 #endif
 

@@ -52,6 +52,10 @@ void battery_brief(const GeneratorInfo *gen, CallerAPI *intf,
     static const GapOptions gap_inv512 = {.shl = 9, .ngaps = 10000000};
     static const Gap16Count0Options gap16_count0 = {.ngaps = 100000000};
 
+    // Hamming weights distribution (histogram) test
+    static const HammingDistrOptions
+        hw_distr = {.nvalues = 1ull << 28};
+
     // Hamming weights based tests
     static const HammingOtOptions
         hw_ot_values = {.mode = HAMMING_OT_VALUES,     .nbytes = 1ull << 28},
@@ -87,6 +91,7 @@ void battery_brief(const GeneratorInfo *gen, CallerAPI *intf,
         {"collover5_8d",      collisionover_test_wrap, &collover5_8d},
         {"gap_inv512",        gap_test_wrap, &gap_inv512},
         {"gap16_count0",      gap16_count0_test_wrap, &gap16_count0},
+        {"hamming_distr",     hamming_distr_test_wrap, &hw_distr},
         {"hamming_ot_low1",   hamming_ot_test_wrap, &hw_ot_low1},
         {"hamming_ot_values", hamming_ot_test_wrap, &hw_ot_values},
         {"hamming_ot_u128",   hamming_ot_long_test_wrap, &hw_ot_long128},

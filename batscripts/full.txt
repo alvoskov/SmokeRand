@@ -39,6 +39,7 @@ gap_inv1024  test=gap shl=10   ngaps=100000000
 gap16_count0 test=gap16_count0 ngaps=1000000000
 
 # Hamming weights based tests
+hamming_distr      test=hamming_distr   nvalues=8589934592 # 2^33
 hamming_ot         test=hamming_ot      mode=bytes      nbytes=8589934592 # 2^33
 hamming_ot_low1    test=hamming_ot      mode=bytes_low1 nbytes=8589934592 # 2^33
 hamming_ot_low8    test=hamming_ot      mode=bytes_low8 nbytes=8589934592 # 2^33

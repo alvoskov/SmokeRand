@@ -400,6 +400,20 @@ static int parse_gap16_count0(TestDescription *out, const TestInfo *obj, char *e
 }
 
 
+static int parse_hamming_distr(TestDescription *out, const TestInfo *obj, char *errmsg)
+{
+    GET_LIMITED_INTVALUE(nvalues, 65536, 1ll << 50ll)
+    HammingDistrOptions *opts = calloc(1, sizeof(HammingDistrOptions));
+    if (opts == NULL) {
+        fprintf(stderr, "***** parse_hamming_distr: not enough memory *****");
+        exit(EXIT_FAILURE);
+    }
+    opts->nvalues = nvalues;
+    out->name = obj->testname;
+    out->run = hamming_distr_test_wrap;
+    out->udata = opts;
+    return 1;
+}
 
 
 
@@ -603,6 +617,7 @@ int battery_file(const char *filename, const GeneratorInfo *gen, CallerAPI *intf
         {"collisionover", parse_collisionover},
         {"gap", parse_gap},
         {"gap16_count0", parse_gap16_count0},
+        {"hamming_distr", parse_hamming_distr},
         {"hamming_ot", parse_hamming_ot},
         {"hamming_ot_long", parse_hamming_ot_long},
         {"ising2d", parse_ising2d},
