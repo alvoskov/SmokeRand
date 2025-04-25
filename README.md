@@ -295,9 +295,9 @@ Four batteries are implemented in SmokeRand:
  Battery | Number of tests | Bytes (32-bit PRNG) | Bytes (64-bit PRNG)
 ---------|-----------------|---------------------|---------------------
  express | 7               | 2^26                | 2^27
- brief   | 23              | 2^35                | 2^36
- default | 40              | 2^37                | 2^38
- full    | 44              | 2^40                | 2^41
+ brief   | 24              | 2^35                | 2^36
+ default | 41              | 2^37                | 2^38
+ full    | 45              | 2^40                | 2^41
 
 
 Batteries from TestU01 use the next number of values:
@@ -643,14 +643,14 @@ There are only two problematic situations:
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 16 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
  kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 4.5   |         | >= 1 TiB
- lcg32prime        | u32    | 1       | 13    | 24      | 25/26| 2.2  | -(>>10)| 0     | -       | 512 MiB
+ lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>10)| 0     | -       | 512 MiB
  lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | +      | 0     | Small   | 16 MiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | 0     | +-      | >= 32 TiB
  lcg96             | u32    | +       | 1     | 1       | 1    | 0.78 | +      | 3     | +       | 32 GiB
  lcg128            | u64    | +       | 1     | 1       | 1    | 0.35 | +      | 3     | +       | 64 GiB
  lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | 3     | +       | 64 GiB
  lcg128_u32_full   | u32    | +       | +     | 1       | 1    | 0.75 | +      | 3     | +       | >= 32 TiB
- lcg69069          | u32    | 6       | 19    | 37/38   | 42   | 0.38 | -(>>10)| 0     | -       | 2 KiB
+ lcg69069          | u32    | 6       | 20    | 38/39   | 43   | 0.38 | -(>>10)| 0     | -       | 2 KiB
  lea128            | u32    | +       | +     | +       | +    | 5.7  | +      | 5     |         | ?
  lea128_avx        | u32    | +       | +     | +       | +    | 1.2  | +      | 5     |         | >= 32 TiB
  lfib_par[31+]     | u32    | 1       | 5/6   | 6/7     | 10   | 0.70 | +      | 0     | -       | 32 MiB
@@ -700,8 +700,8 @@ There are only two problematic situations:
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 2 TiB
  msws64            | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 32 TiB
  msws64x           | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 32 TiB
- mulberry32        | u32    | +       | 1     | 2       | 4    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
- mwc32x            | u32    | +       | 2     | 2       | 7    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
+ mulberry32        | u32    | +       | 1     | 2/3     | 5    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
+ mwc32x            | u32    | +       | 3     | 4       | 8    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
  mwc32xxa8         | u32    | +       | 1     | 4       | 10   | 1.9  | -(>>10)| 0     |         | 256 MiB
  mwc40xxa8         | u32    | +       | +     | +       | 1    | 2.1  | -(>>10)| 0     |         | 16 GiB
  mwc48xxa16        | u32    | +       | +     | +       | +    | 1.2  | +      | 4     |         | 1 TiB
@@ -711,7 +711,7 @@ There are only two problematic situations:
  mwc128x           | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 32 TiB
  mwc128xxa32       | u32    | +       | +     | +       | +    | 0.52 | +      | 4     |         | >= 32 TiB
  mwc256xxa64       | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 32 TiB
- mwc1616           | u32    | 1       | 10/11 | 12/18   | 19   | 0.48 | -      | 0     | -/Small | 16 MiB
+ mwc1616           | u32    | 1       | 10/11 | 13/19   | 20   | 0.48 | -      | 0     | -/Small | 16 MiB
  mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | +       | >= 32 TiB(?)
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 1 GiB
@@ -725,7 +725,7 @@ There are only two problematic situations:
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      | 0     |         | 512 KiB
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      | 3.5   |         | 2 MiB
- randu             | u32    | 6       | 21    | 39      | 43   | 0.41 | -(>>10)| 0     | -       | 1 KiB
+ randu             | u32    | 6       | 22    | 40      | 44   | 0.41 | -(>>10)| 0     | -       | 1 KiB
  ranlux++          | u64    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 32 TiB
  ranrot_bi         | u64    | +       | +     | +       | 1/3  | 0.33 | +      | 0     |         | 8 GiB
  ranrot32[7/3]     | u32    | +       | 1/2   | 4/5     | 5    | 0.58 | +      | 0     | Small   | 128 MiB
@@ -745,7 +745,7 @@ There are only two problematic situations:
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 2 TiB
  sapparot          | u32    | +       | 1     | 3       | 4    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
- sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | >= 2 TiB
+ sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | >= 16 TiB
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | -(>>10)| 0     |         | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 4(0)  |         | 128 GiB(stdin32)*
@@ -756,10 +756,10 @@ There are only two problematic situations:
  speck128_avx(full)| u64    | +       | +     | +       | +    | 0.75 | +      | 5     |         | >= 16 TiB
  speck128_avx(r16) | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 32 TiB
  splitmix          | u64    | +       | +     | +       | +    | 0.19 | -      | 3     | +       | >= 2 TiB
- splitmix32        | u32    | +       | 2     | 3       | 4/5  | 0.25 | -(>>10)| 0     | Small   | 1 GiB
+ splitmix32        | u32    | +       | 3     | 4       | 5/6  | 0.25 | -(>>10)| 0     | Small   | 1 GiB
  splitmix32cbc     | u32    | +       | +     | +       | +    | 2.1  | -      | 3     |         | ?
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | 4     | +       | >= 16 TiB
- sqxor32           | u32    | +       | 1     | 2       | 4    | 0.20 | -(>>10)| 0     | Small   | 16 GiB
+ sqxor32           | u32    | +       | 2     | 3       | 5    | 0.20 | -(>>10)| 0     | Small   | 16 GiB
  stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | +      | 0     |         | >= 8 TiB
  stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | +      | 3.5(0)| Small   | 1 MiB
  superduper73      | u32    | 3       | 9     | 15      | 18   | 0.64 | +      | 0     | -       | 32 KiB
@@ -810,7 +810,7 @@ There are only two problematic situations:
 
 Performance estimation for some 64-bit generators
 
- Generator                | ising    | bday64   | usphere  | default
+ Generator                | ising    | bday64   | usphere  | default(!)
 --------------------------|----------|----------|----------|----------
  sfc64                    | 00:10:56 | 00:03:41 | 00:03:36 | 00:03:05
  xoroshiro128++           | 00:11:04 | 00:03:13 | 00:03:45 | 00:03:02

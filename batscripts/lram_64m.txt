@@ -46,6 +46,7 @@ hamming_ot_low8    test=hamming_ot      mode=bytes_low8 nbytes=1073741824 # 2^30
 hamming_ot_values  test=hamming_ot      mode=values     nbytes=1073741824 # 2^30
 
 # Hamming weights based "long" tests
+hamming_distr      test=hamming_distr   nvalues=1073741824 # 2^30
 hamming_ot_u128    test=hamming_ot_long wordsize=w128   nvalues=1073741824 # 2^30
 hamming_ot_u256    test=hamming_ot_long wordsize=w256   nvalues=1073741824 # 2^30
 hamming_ot_u512    test=hamming_ot_long wordsize=w512   nvalues=1073741824 # 2^30

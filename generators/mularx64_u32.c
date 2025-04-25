@@ -29,14 +29,13 @@ typedef struct {
 } Mularx64x32State;
 
 
-static inline void mulbox64(uint32_t *v, int i, int j)
+static inline void mulbox64(uint32_t *v, int i, int j, uint32_t a, int r1, int r2)
 {
-    const uint64_t a = 0xf9b25d65ull;
-    uint64_t mul = a * (v[i] ^ v[j]);
+    uint64_t mul = ((uint64_t) a) * (v[i] ^ v[j]);
     v[i] = (uint32_t) mul;
     v[j] ^= mul >> 32;
-    v[j] = v[j] + rotl32(v[i], 11);
-    v[i] = v[i] ^ rotl32(v[j], 20);
+    v[j] = v[j] + rotl32(v[i], r1);
+    v[i] = v[i] + rotl32(v[j], r2);
 }
 
 
@@ -48,9 +47,9 @@ static inline uint64_t get_bits_raw(void *state)
         for (int i = 0; i < 2; i++) {
             obj->out[i] = obj->ctr.u32[i];
         }
-        obj->out[0] ^= 0x243F6A88;
-        mulbox64(obj->out, 0, 1);
-        mulbox64(obj->out, 0, 1);
+        mulbox64(obj->out, 0, 1, 0xDCD34D59, 6, 2);
+        mulbox64(obj->out, 0, 1, 0xF22B8767, 24, 23);
+        mulbox64(obj->out, 0, 1, 0xC4CA0101, 18, 17);
         obj->ctr.u64++;
     }
     return obj->out[obj->pos++];
@@ -64,4 +63,4 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-MAKE_UINT32_PRNG("Mularx128_u32", NULL)
+MAKE_UINT32_PRNG("Mularx64_u32", NULL)

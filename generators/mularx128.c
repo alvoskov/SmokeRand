@@ -28,15 +28,15 @@ typedef struct {
 } Mularx128State;
 
 
-static inline void mulbox128(uint64_t *v, int i, int j)
+static inline void mulbox128(uint64_t *v, int i, int j, uint64_t mul, int r1, int r2)
 {
-    uint64_t a_hi = 0xfc0072fa0b15f4fd;
     uint64_t mul0_high;
-    v[i] = unsigned_mul128(a_hi, v[i] ^ v[j], &mul0_high);
+    v[i] = unsigned_mul128(mul, (v[i] ^ v[j]), &mul0_high);
     v[j] ^= mul0_high;
-    v[j] = v[j] + rotl64(v[i], 46);
-    v[i] = v[i] ^ rotl64(v[j], 13);
+    v[j] = v[j] + rotl64(v[i], r1);
+    v[i] = v[i] + rotl64(v[j], r2);
 }
+
 
 static inline uint64_t get_bits_raw(void *state)
 {
@@ -46,9 +46,8 @@ static inline uint64_t get_bits_raw(void *state)
         for (int i = 0; i < 2; i++) {
             obj->out[i] = obj->x[i];
         }
-        mulbox128(obj->out, 0, 1);
-        mulbox128(obj->out, 0, 1);
-        mulbox128(obj->out, 0, 1);
+        mulbox128(obj->out, 0, 1, 0x8A86E64ACEA02AFB, 6, 43);
+        mulbox128(obj->out, 0, 1, 0x43703AACE826543B, 28, 15);
         obj->x[0]++;
     }
     return obj->out[obj->pos++];
@@ -59,7 +58,7 @@ static void *create(const CallerAPI *intf)
     Mularx128State *obj = intf->malloc(sizeof(Mularx128State));
     obj->pos = 2;
     obj->x[0] = 0;
-    obj->x[1] = intf->get_seed64();
+    obj->x[1] = 0;//intf->get_seed64();
     return (void *) obj;
 }
 

@@ -630,6 +630,75 @@ TestResults hamming_ot_long_test(GeneratorState *obj, const HammingOtLongOptions
 }
 
 
+double hamming_distr_calc_zemp(unsigned long long *o, size_t nbits)
+{
+    double chi2emp = 0.0;
+    unsigned long long npoints = 0;
+    unsigned long df = 0;
+    for (size_t i = 0; i < nbits; i++) {
+        npoints += o[i];
+    }
+    for (size_t i = 0; i < nbits; i++) {
+        double e_i = npoints * sr_binomial_pdf(i, nbits, 0.5);
+        if (e_i > 25.0) {
+            chi2emp += pow(o[i] - e_i, 2.0) / e_i;
+            df++;
+        }
+    }
+    return sr_chi2_to_stdnorm_approx(chi2emp, df);
+}
+
+/**
+ * @brief This test computes Hamming weight for every member of a pseudorandom
+ * sequence and compares histograms (empirical distributions) with theoretical
+ * ones.
+ * @details Two histograms (empirical distributions) are constructed:
+ *
+ * 1. Histogram of Hamming weights of values.
+ * 2. Histogram of XORed Hamming weights of values. I.e. Hamming weights of
+ *    x1 ^ x2, x3 ^ x4, x5 ^ x6 are processed.
+ *
+ * The variant 2 (XORed) allows to catch 32-bit LCGs such as `lcg69069` or
+ * `randu`; also detects SplitMix with some bad gammas such as 1. The idea of
+ * the test is taken from avalanche effect estimation methods. Probably this
+ * test may be extended by XORing more distant values.
+ *
+ * It seems that this test can detect PRNG that exceeded its period during
+ * the testing (e.g. `splitmix32`).
+ */
+TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *opts)
+{
+    TestResults ans = TestResults_create("hamming_distr");
+    size_t nbits = obj->gi->nbits;
+    unsigned long long *o     = calloc(64, sizeof(unsigned long long));
+    unsigned long long *o_xor = calloc(64, sizeof(unsigned long long));
+    obj->intf->printf("Hamming weights distribution test (histogram)\n");
+    obj->intf->printf("  Sample size, values:     %llu (2^%.2f or 10^%.2f)\n",
+        opts->nvalues, sr_log2((double) opts->nvalues), log10((double) opts->nvalues));
+    for (unsigned long long i = 0; i < opts->nvalues; i += 2) {
+        uint64_t x1 = obj->gi->get_bits(obj->state);
+        uint64_t x2 = obj->gi->get_bits(obj->state);
+        o[get_uint64_hamming_weight(x1)]++;
+        o[get_uint64_hamming_weight(x2)]++;
+        o_xor[get_uint64_hamming_weight(x1 ^ x2)]++;
+    }
+    double z = hamming_distr_calc_zemp(o, nbits);
+    double p = sr_stdnorm_pvalue(z);
+    double z_xor = hamming_distr_calc_zemp(o_xor, nbits);
+    double p_xor = sr_stdnorm_pvalue(z_xor);
+    obj->intf->printf("  z     = %8.3f; p     = %.3g\n", z, p);
+    obj->intf->printf("  z_xor = %8.3f; p_xor = %.3g\n", z_xor, p_xor);
+    if (fabs(z) > fabs(z_xor)) {
+        ans.x = z; ans.p = p;
+    } else {
+        ans.x = z_xor; ans.p = p_xor;
+    }
+    ans.alpha = sr_stdnorm_cdf(ans.x);
+    free(o);
+    free(o_xor);
+    return ans;
+}
+
 ///////////////////////////////////////////////
 ///// Interfaces (wrappers) for batteries /////
 ///////////////////////////////////////////////
@@ -643,4 +712,10 @@ TestResults hamming_ot_long_test_wrap(GeneratorState *obj, const void *udata)
 {
     return hamming_ot_long_test(obj, udata);
 }
+
+TestResults hamming_distr_test_wrap(GeneratorState *obj, const void *udata)
+{
+    return hamming_distr_test(obj, udata);
+}
+
 
