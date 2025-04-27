@@ -3,7 +3,8 @@
  * @brief A simple counter-based generator that passes `full` battery and
  * 64-bit birthday paradox test(?).
  *
- * PractRand: >= 1 TiB
+ * PractRand: one round - fails BCFN at 4 TiB
+ * two rounds - ?
  *
  * References:
  *
@@ -46,7 +47,9 @@ static inline uint64_t get_bits_raw(void *state)
         for (int i = 0; i < 2; i++) {
             obj->out[i] = obj->x[i];
         }
-        mulbox128(obj->out, 0, 1, 0x8A86E64ACEA02AFB, 6, 43);
+        mulbox128(obj->out, 0, 1, 0x8A86E64ACEA02AFB, 6, 43); // Round 1
+        mulbox128(obj->out, 0, 1, 0x43703AACE826543B, 28, 15);
+        mulbox128(obj->out, 0, 1, 0x8A86E64ACEA02AFB, 6, 43); // Round 2
         mulbox128(obj->out, 0, 1, 0x43703AACE826543B, 28, 15);
         obj->x[0]++;
     }

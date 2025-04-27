@@ -29,14 +29,13 @@ typedef struct {
 } Mularx128x32State;
 
 
-static inline void mulbox64(uint32_t *v, int i, int j)
+static inline void mulbox64(uint32_t *v, int i, int j, uint32_t a, int r1, int r2)
 {
-    const uint64_t a = 0xf9b25d65ull;
-    uint64_t mul = a * (v[i] ^ v[j]);
+    uint64_t mul = ((uint64_t) a) * (v[i] ^ v[j]);
     v[i] = (uint32_t) mul;
     v[j] ^= mul >> 32;
-    v[j] = v[j] + rotl32(v[i], 11);
-    v[i] = v[i] ^ rotl32(v[j], 20);
+    v[j] = v[j] + rotl32(v[i], r1);
+    v[i] = v[i] + rotl32(v[j], r2);
 }
 
 
@@ -48,13 +47,16 @@ static inline uint64_t get_bits_raw(void *state)
         for (int i = 0; i < 4; i++) {
             obj->out[i] = obj->ctr.u32[i];
         }
-        obj->out[0] ^= 0x243F6A88;
-        mulbox64(obj->out, 0, 1);
-        mulbox64(obj->out, 2, 3);
-        mulbox64(obj->out, 1, 2);
-        mulbox64(obj->out, 3, 0);
-        mulbox64(obj->out, 1, 0);
-        mulbox64(obj->out, 3, 2);
+
+        mulbox64(obj->out, 0, 1, 0xDCD34D59, 6, 2);
+        mulbox64(obj->out, 2, 3, 0xDCD34D59, 6, 2);
+        mulbox64(obj->out, 1, 2, 0xDCD34D59, 6, 2);
+        mulbox64(obj->out, 3, 0, 0xDCD34D59, 6, 2);
+
+        mulbox64(obj->out, 0, 1, 0xF22B8767, 24, 23);
+        mulbox64(obj->out, 2, 3, 0xF22B8767, 24, 23);
+        mulbox64(obj->out, 1, 2, 0xF22B8767, 24, 23);
+        mulbox64(obj->out, 3, 0, 0xF22B8767, 24, 23);
         obj->ctr.u64[0]++;
     }
     return obj->out[obj->pos++];
