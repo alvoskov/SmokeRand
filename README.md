@@ -700,6 +700,9 @@ There are only two problematic situations:
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 2 TiB
  msws64            | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 32 TiB
  msws64x           | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 32 TiB
+ mularx128         | u64    |         |       |         |      |      |        |       |         | ?
+ mularx128_u32     | u32    |         |       |         |      |      |        |       |         | >= 16 TiB
+ mularx256         | u64    |         |       |         |      |      |        |       |         | >= 32 TiB
  mulberry32        | u32    | +       | 1     | 2/3     | 5    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
  mwc32x            | u32    | +       | 3     | 4       | 8    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
  mwc32xxa8         | u32    | +       | 1     | 4       | 10   | 1.9  | -(>>10)| 0     |         | 256 MiB
