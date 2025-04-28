@@ -19,7 +19,7 @@
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief SplitMix PRNG state.
+ * @brief Mularx256 PRNG state.
  */
 typedef struct {
     uint64_t x[4];
@@ -46,11 +46,12 @@ static inline uint64_t get_bits_raw(void *state)
         for (int i = 0; i < 4; i++) {
             obj->out[i] = obj->x[i];
         }
+        // Round 1 (fails PractRand 0.94 at 4 GiB)
         mulbox128(obj->out, 0, 1, 0x8A86E64ACEA02AFB,  6, 43);
         mulbox128(obj->out, 2, 3, 0x8A86E64ACEA02AFB,  6, 43);
         mulbox128(obj->out, 1, 2, 0x8A86E64ACEA02AFB,  6, 43);
         mulbox128(obj->out, 3, 0, 0x8A86E64ACEA02AFB,  6, 43);
-
+        // Round 2 (fails PractRand 0.94 at 4 GiB)
         mulbox128(obj->out, 0, 1, 0x43703AACE826543B, 28, 15);
         mulbox128(obj->out, 2, 3, 0x43703AACE826543B, 28, 15);
         mulbox128(obj->out, 1, 2, 0x43703AACE826543B, 28, 15);
