@@ -700,6 +700,7 @@ There are only two problematic situations:
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 2 TiB
  msws64            | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 32 TiB
  msws64x           | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 32 TiB
+ mularx64_u32      | u32    |         |       |         |      |      |        |       |         | ?
  mularx128         | u64    |         |       |         |      |      |        |       |         | ?
  mularx128_u32     | u32    |         |       |         |      |      |        |       |         | >= 16 TiB
  mularx256         | u64    |         |       |         |      |      |        |       |         | >= 32 TiB
@@ -715,7 +716,7 @@ There are only two problematic situations:
  mwc128xxa32       | u32    | +       | +     | +       | +    | 0.52 | +      | 4     |         | >= 32 TiB
  mwc256xxa64       | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 32 TiB
  mwc1616           | u32    | 1       | 10/11 | 13/19   | 20   | 0.48 | -      | 0     | -/Small | 16 MiB
- mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | +       | >= 32 TiB(?)
+ mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | +      | 3.5   | +       | 32 TiB
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 1 GiB
  pcg32             | u32    | +       | +     | +       | +    | 0.44 | +      | 3.5   | +       | 32 TiB
@@ -751,7 +752,7 @@ There are only two problematic situations:
  sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | >= 16 TiB
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | -(>>10)| 0     |         | 128 MiB
- sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 4(0)  |         | 128 GiB(stdin32)*
+ sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)|         | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  |         | >= 4 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
  speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         | ?
@@ -894,8 +895,9 @@ Run 2:
 About `lcg64prime`: it passes BigCrush if upper 32 bits are returned, but
 fails it in interleaved mode (fails test N15 `BirthdaySpacings, t = 4`).
 
-About `mwc1616x`: it passes until 32 TiB but it will probably fail at larger
-samples. Extra testing is required!
+About `mwc1616x`: it passes until 32 TiB but it fails the BCFN test at 64 TiB.
+
+Run 1:
 
     rng=RNG_stdin32, seed=unknown
     length= 8 terabytes (2^43 bytes), time= 28773 seconds
@@ -913,6 +915,61 @@ samples. Extra testing is required!
       BCFN(2+0,13-0,T)                  R= +10.8  p =  2.6e-5   mildly suspicious
       FPF-14+6/16:all                   R=  +4.8  p =  5.4e-4   unusual
       ...and 345 test result(s) without anomalies
+
+Run 2:
+
+    rng=RNG_stdin32, seed=unknown
+    length= 16 terabytes (2^44 bytes), time= 52634 seconds
+      Test Name                         Raw       Processed     Evaluation
+      BCFN(2+0,13-0,T)                  R=  +9.1  p =  2.0e-4   unusual
+      BCFN(2+28,13-8,T)                 R= +30.0  p =  1.5e-8   unusual
+      BCFN(2+29,13-9,T)                 R= +32.8  p =  1.7e-8   unusual
+      ...and 336 test result(s) without anomalies
+
+    rng=RNG_stdin32, seed=unknown
+    length= 32 terabytes (2^45 bytes), time= 106496 seconds
+      Test Name                         Raw       Processed     Evaluation
+      BCFN(2+0,13-0,T)                  R=  +8.9  p =  2.7e-4   unusual
+      BCFN(2+3,13-0,T)                  R= +10.5  p =  3.9e-5   unusual
+      BCFN(2+21,13-3,T)                 R= +15.4  p =  4.1e-7   unusual
+      BCFN(2+27,13-7,T)                 R= +26.9  p =  1.0e-8   unusual
+      BCFN(2+28,13-8,T)                 R= +31.5  p =  6.1e-9   unusual
+      BCFN(2+29,13-8,T)                 R= +40.0  p =  4.2e-11  suspicious
+      BCFN(2+30,13-9,T)                 R= +43.4  p =  7.2e-11  suspicious
+      BCFN(2+31,13-9,T)                 R= +44.0  p =  5.2e-11  suspicious
+      FPF-14+6/16:all                   R=  +5.9  p =  4.7e-5   mildly suspicious
+      ...and 338 test result(s) without anomalies
+    
+    rng=RNG_stdin32, seed=unknown
+    length= 64 terabytes (2^46 bytes), time= 213220 seconds
+      Test Name                         Raw       Processed     Evaluation
+      BCFN(2+0,13-0,T)                  R= +15.5  p =  8.1e-8   very suspicious
+      BCFN(2+1,13-0,T)                  R= +11.4  p =  1.2e-5   mildly suspicious
+      BCFN(2+2,13-0,T)                  R=  +9.4  p =  1.4e-4   unusual
+      BCFN(2+3,13-0,T)                  R=  +9.2  p =  1.8e-4   unusual
+      BCFN(2+4,13-0,T)                  R= +14.0  p =  5.0e-7   suspicious
+      BCFN(2+5,13-0,T)                  R= +11.7  p =  8.6e-6   mildly suspicious
+      BCFN(2+6,13-0,T)                  R= +12.9  p =  1.9e-6   mildly suspicious
+      BCFN(2+7,13-0,T)                  R= +11.9  p =  6.5e-6   mildly suspicious
+      BCFN(2+8,13-0,T)                  R= +13.6  p =  7.9e-7   mildly suspicious
+      BCFN(2+10,13-0,T)                 R= +11.3  p =  1.4e-5   unusual
+      BCFN(2+12,13-0,T)                 R= +12.2  p =  4.8e-6   unusual
+      BCFN(2+19,13-1,T)                 R= +15.0  p =  1.6e-7   unusual
+      BCFN(2+20,13-2,T)                 R= +19.4  p =  1.5e-9   suspicious
+      BCFN(2+21,13-3,T)                 R= +28.5  p =  2.7e-13   VERY SUSPICIOUS
+      BCFN(2+22,13-3,T)                 R= +23.9  p =  4.3e-11  very suspicious
+      BCFN(2+23,13-4,T)                 R= +31.9  p =  7.2e-14   VERY SUSPICIOUS
+      BCFN(2+24,13-5,T)                 R= +39.2  p =  1.6e-15    FAIL
+      BCFN(2+25,13-5,T)                 R= +38.1  p =  4.3e-15    FAIL
+      BCFN(2+26,13-6,T)                 R= +44.1  p =  1.5e-15    FAIL
+      BCFN(2+27,13-6,T)                 R= +46.9  p =  1.6e-16    FAIL
+      BCFN(2+28,13-7,T)                 R= +62.9  p =  1.5e-19    FAIL !
+      BCFN(2+29,13-8,T)                 R= +80.5  p =  2.2e-21    FAIL !
+      BCFN(2+30,13-8,T)                 R= +74.2  p =  9.1e-20    FAIL !
+      BCFN(2+31,13-9,T)                 R= +91.5  p =  1.1e-21    FAIL !
+      DC6-9x1Bytes-1                    R=  +7.0  p =  2.6e-3   unusual
+      FPF-14+6/16:all                   R= +11.3  p =  3.9e-10   VERY SUSPICIOUS
+      ...and 326 test result(s) without anomalies
 
 Sensitivity of dieharder is lower than TestU01 and PractRand:
 

@@ -45,4 +45,20 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-MAKE_UINT64_PRNG("gjrand64", NULL)
+static int run_self_test(const CallerAPI *intf)
+{
+    static const uint64_t u_ref = 0xB7C6758B43EA66EC;
+    uint64_t u;
+    Gjrand64State *obj = intf->malloc(sizeof(Gjrand64State));
+    Gjrand64State_init(obj, 0xDEADBEEF12345678);
+    for (int i = 0; i < 10000; i++) {
+        u = get_bits_raw(obj);
+    }
+    intf->printf("Output: 0x%llX; reference: 0x%llX\n",
+        (unsigned long long) u,
+        (unsigned long long) u_ref);
+    intf->free(obj);
+    return u == u_ref;
+}
+
+MAKE_UINT64_PRNG("gjrand64", run_self_test)
