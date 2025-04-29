@@ -702,7 +702,7 @@ There are only two problematic situations:
  msws64x           | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 32 TiB
  mularx64_u32      | u32    |         |       |         |      |      |        |       |         | ?
  mularx128         | u64    |         |       |         |      |      |        |       |         | ?
- mularx128_u32     | u32    |         |       |         |      |      |        |       |         | >= 16 TiB
+ mularx128_u32     | u32    |         |       |         |      |      |        |       |         | >= 32 TiB
  mularx256         | u64    |         |       |         |      |      |        |       |         | >= 32 TiB
  mulberry32        | u32    | +       | 1     | 2/3     | 5    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
  mwc32x            | u32    | +       | 3     | 4       | 8    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
@@ -787,7 +787,7 @@ There are only two problematic situations:
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 2 TiB
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     |         | >= 2 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
- wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 8 TiB(?)
+ wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 16 TiB
  wyrand            | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 8 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xorshift128       | u32    | 2       | 4     | 6/7     | 8    | 0.41 | +      | 1.25  | -       | 128 KiB
