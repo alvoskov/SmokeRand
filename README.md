@@ -632,7 +632,7 @@ There are only two problematic situations:
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 16 TiB
  des-ctr           | u64    | +       | +     | +       | +    | 24   | -      | 3     |         | >= 4 TiB
- drand48           | u32    | 3       | 12    | 20      | 22/23| 0.72 | -      | 0     | -       | 1 MiB
+ drand48           | u32    | 3       | 13    | 21      | 23/24| 0.72 | -      | 0     | -       | 1 MiB
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 16 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 5     | +       | >= 32 TiB
  flea32x1          | u32    | +       | 1     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
@@ -653,7 +653,7 @@ There are only two problematic situations:
  lcg69069          | u32    | 6       | 20    | 38/39   | 43   | 0.38 | -(>>10)| 0     | -       | 2 KiB
  lea128            | u32    | +       | +     | +       | +    | 5.7  | +      | 5     |         | ?
  lea128_avx        | u32    | +       | +     | +       | +    | 1.2  | +      | 5     |         | >= 32 TiB
- lfib_par[31+]     | u32    | 1       | 5/6   | 6/7     | 10   | 0.70 | +      | 0     | -       | 32 MiB
+ lfib_par[31+]     | u32    | 1       | 5/6   | 6/7     | 10/11| 0.70 | +      | 0     | -       | 32 MiB
  lfib_par[55+]     | u32    | 1       | 4     | 5       | 7    | 0.51 | +      | 0     | -       | 2 GiB
  lfib_par[55-]     | u32    | 1       | 4     | 5       | 7    | 0.51 | +      | 0     | -       | 2 GiB
  lfib_par[127+]    | u32    | 1       | 4     | 4       | 5    | 0.48 | +      | 0     | -/Small | 512 MiB
@@ -732,10 +732,10 @@ There are only two problematic situations:
  randu             | u32    | 6       | 22    | 40      | 44   | 0.41 | -(>>10)| 0     | -       | 1 KiB
  ranlux++          | u64    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 32 TiB
  ranrot_bi         | u64    | +       | +     | +       | 1/3  | 0.33 | +      | 0     |         | 8 GiB
- ranrot32[7/3]     | u32    | +       | 1/2   | 4/5     | 5    | 0.58 | +      | 0     | Small   | 128 MiB
- ranrot32[17/9]    | u32    | +       | 1     | 2       | 3    | 0.68 | +      | 0     | +       | 1 GiB
+ ranrot32[7/3]     | u32    | +       | 3     | 5/6     | 6    | 0.58 | +      | 0     | Small   | 128 MiB
+ ranrot32[17/9]    | u32    | +       | 1     | 2       | 4    | 0.68 | +      | 0     | +       | 1 GiB
  ranrot32[57/13]   | u32    | +       | +     | +       | 1    | 0.74 | +      | 2     | +       | 8 GiB
- ranshi            | u64    | +       | 1     | 6       | 7    | 0.43 | +      | 0     |         | 32 KiB
+ ranshi            | u64    | +       | 2     | 7       | 8    | 0.43 | +      | 0     |         | 32 KiB
  ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | +      | 3.5   |         | 8 TiB
  ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 32 TiB
  ranval            | u32    | +       | +     | +       | +    | 0.31 | +      | 4(0)  | +       | >= 32 TiB

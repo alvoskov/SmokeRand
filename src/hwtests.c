@@ -638,13 +638,16 @@ double hamming_distr_calc_zemp(unsigned long long *o, size_t nbits)
     for (size_t i = 0; i < nbits; i++) {
         npoints += o[i];
     }
+    double *p = calloc(nbits + 1, sizeof(double));
+    sr_binomial_pdf_all(p, nbits, 0.5);
     for (size_t i = 0; i < nbits; i++) {
-        double e_i = npoints * sr_binomial_pdf(i, nbits, 0.5);
+        double e_i = npoints * p[i];
         if (e_i > 25.0) {
             chi2emp += pow(o[i] - e_i, 2.0) / e_i;
             df++;
         }
     }
+    free(p);
     return sr_chi2_to_stdnorm_approx(chi2emp, df);
 }
 
@@ -741,42 +744,52 @@ static inline void calc_block_hw_xorsums(unsigned long long *hw_freq,
  */
 TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *opts)
 {
+/*
     enum {
-        NLEVELS = 10,
-        BLOCK_LEN = 32 // 2^10
+        NLEVELS = 12,
+        BLOCK_LEN = 4096 // 2^12
     };
+*/
     TestResults ans = TestResults_create("hamming_distr");
     size_t nbits = obj->gi->nbits;
-    HammingDistrHist h[NLEVELS];
-    for (int i = 0; i < NLEVELS; i++) {
+    obj->intf->printf("Hamming weights distribution test (histogram)\n");
+    if (opts->nlevels < 1) {
+        obj->intf->printf("  Invalid nlevels value\n");
+        return ans;
+    }
+    int block_len = 1 << opts->nlevels;
+    HammingDistrHist *h = calloc(opts->nlevels, sizeof(HammingDistrHist));
+    uint64_t *x = calloc(block_len, sizeof(uint64_t));
+    int *hw = calloc(block_len, sizeof(int));
+    for (int i = 0; i < opts->nlevels; i++) {
         HammingDistrHist_init(&h[i], nbits << i);
     }
-    obj->intf->printf("Hamming weights distribution test (histogram)\n");
     obj->intf->printf("  Sample size, values:     %llu (2^%.2f or 10^%.2f)\n",
         opts->nvalues, sr_log2((double) opts->nvalues), log10((double) opts->nvalues));
-    for (unsigned long long i = 0; i < opts->nvalues; i += BLOCK_LEN) {
-        uint64_t x[BLOCK_LEN];
-        int hw[BLOCK_LEN];
-        for (int j = 0; j < BLOCK_LEN; j++) {
+    for (unsigned long long i = 0; i < opts->nvalues; i += block_len) {
+        for (int j = 0; j < block_len; j++) {
             x[j] = obj->gi->get_bits(obj->state);
             hw[j] = get_uint64_hamming_weight(x[j]);
         }
         // 1-value blocks
-        for (int j = 0; j < BLOCK_LEN; j += 2) {
+        for (int j = 0; j < block_len; j += 2) {
             h[0].o[hw[j]]++; h[0].o[hw[j + 1]]++;
             h[0].o_xor[get_uint64_hamming_weight(x[j] ^ x[j + 1])]++;
         }
         // 2,4,8,16-value blocks
-        for (int j = 1; j < NLEVELS; j++) {
-            calc_block_hw_sums(h[j].o,        hw, 1 << j, BLOCK_LEN);
-            calc_block_hw_xorsums(h[j].o_xor, x,  1 << j, BLOCK_LEN);
+        for (int j = 1; j < opts->nlevels; j++) {
+            calc_block_hw_sums(h[j].o,        hw, 1 << j, block_len);
+            calc_block_hw_xorsums(h[j].o_xor, x,  1 << j, block_len);
         }
     }
     double zabs_max = -1.0;
-    for (int i = 0; i < NLEVELS; i++) {
+    obj->intf->printf("  Blocks analysis results\n");
+    obj->intf->printf("    %8s | %8s %10s | %8s %10s\n",
+        "bits", "z", "p", "z_xor", "p_xor");
+    for (int i = 0; i < opts->nlevels; i++) {
         HammingDistrHist_calc_stats(&h[i]);
-        obj->intf->printf("  Block size: %d bits\n", (int) ((1 << i) * nbits));
-        HammingDistrHist_print_stats(&h[i], obj->intf->printf);
+        obj->intf->printf("    %8d | %8.3f %10.3g | %8.3f %10.3f\n",
+            (int) ((1 << i) * nbits), h[i].z, h[i].p, h[i].z_xor, h[i].p_xor);
         if (fabs(h[i].z) > zabs_max) {
             zabs_max = fabs(h[i].z); ans.p = h[i].p; ans.x = h[i].z;
         }
@@ -787,9 +800,12 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
     ans.penalty = PENALTY_HAMMING_DISTR;
     ans.alpha = sr_stdnorm_cdf(ans.x);
     obj->intf->printf("  Final: z = %7.3f, p = %.3g\n", ans.x, ans.p);
-    for (int i = 0; i < NLEVELS; i++) {
+    for (int i = 0; i < opts->nlevels; i++) {
         HammingDistrHist_destruct(&h[i]);
-    }
+    }   
+    free(h);
+    free(x);
+    free(hw);
     return ans;
 }
 

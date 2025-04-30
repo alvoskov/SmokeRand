@@ -20,6 +20,7 @@ double sr_round(double x);
 double sr_ks_pvalue(double x);
 double sr_gammainc(double a, double x);
 double sr_binomial_pdf(unsigned long k, unsigned long n, double p);
+void sr_binomial_pdf_all(double *pdf, unsigned long n, double p);
 double sr_binomial_cdf(unsigned long k, unsigned long n, double p);
 double sr_binomial_pvalue(double k, double n, double p);
 double sr_poisson_cdf(double x, double lambda);
