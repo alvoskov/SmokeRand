@@ -648,8 +648,76 @@ double hamming_distr_calc_zemp(unsigned long long *o, size_t nbits)
     return sr_chi2_to_stdnorm_approx(chi2emp, df);
 }
 
+
+typedef struct {
+    unsigned long long *o;
+    unsigned long long *o_xor;
+    size_t nbits;
+    double z;
+    double p;
+    double z_xor;
+    double p_xor;
+} HammingDistrHist;
+
+void HammingDistrHist_init(HammingDistrHist *obj, size_t nbits)
+{
+    obj->o     = calloc(nbits, sizeof(unsigned long long));
+    obj->o_xor = calloc(nbits, sizeof(unsigned long long));
+    obj->nbits = nbits;
+    obj->z = NAN;     obj->p = NAN;
+    obj->z_xor = NAN; obj->p_xor = NAN;
+}
+
+void HammingDistrHist_calc_stats(HammingDistrHist *obj)
+{
+    obj->z = hamming_distr_calc_zemp(obj->o, obj->nbits);
+    obj->p = sr_stdnorm_pvalue(obj->z);
+    obj->z_xor = hamming_distr_calc_zemp(obj->o_xor, obj->nbits);
+    obj->p_xor = sr_stdnorm_pvalue(obj->z_xor);
+}
+
+
+void HammingDistrHist_print_stats(const HammingDistrHist *obj,
+    int (*printf_ptr)(const char *format, ... ))
+{
+    printf_ptr("    z     = %8.3f; p     = %.3g\n", obj->z, obj->p);
+    printf_ptr("    z_xor = %8.3f; p_xor = %.3g\n", obj->z_xor, obj->p_xor);
+}
+
+void HammingDistrHist_destruct(HammingDistrHist *obj)
+{
+    free(obj->o); obj->o = NULL;
+    free(obj->o_xor); obj->o_xor = NULL;
+}
+
+
+static inline void calc_block_hw_sums(unsigned long long *hw_freq,
+    const int *hw_vals, int block_len, int total_len)
+{
+    for (int i = 0; i < total_len; i += block_len) {
+        int hw_sum = 0;
+        for (int j = 0; j < block_len; j++) {
+            hw_sum += hw_vals[i + j];
+        }
+        hw_freq[hw_sum]++;
+    }
+}
+
+static inline void calc_block_hw_xorsums(unsigned long long *hw_freq,
+    const uint64_t *x, int block_len, int total_len)
+{
+    for (int i = 0; i < total_len; i += block_len * 2) {
+        int hw_xorsum = 0;
+        for (int j = 0; j < block_len; j++) {
+            uint64_t xored = x[i + j] ^ x[i + j + block_len];
+            hw_xorsum += get_uint64_hamming_weight(xored);
+        }
+        hw_freq[hw_xorsum]++;
+    }
+}
+
 /**
- * @brief This test computes Hamming weight for every member of a pseudorandom
+ * @brief This test computes Hamming weight for bit blocks of a pseudorandom
  * sequence and compares histograms (empirical distributions) with theoretical
  * ones.
  * @details Two histograms (empirical distributions) are constructed:
@@ -658,44 +726,70 @@ double hamming_distr_calc_zemp(unsigned long long *o, size_t nbits)
  * 2. Histogram of XORed Hamming weights of values. I.e. Hamming weights of
  *    x1 ^ x2, x3 ^ x4, x5 ^ x6 are processed.
  *
+ * The x values are bit blocks, i.e. 1, 2, 4 or 8 concatenated pseudorandom
+ * values.
+ *
  * The variant 2 (XORed) allows to catch 32-bit LCGs such as `lcg69069` or
  * `randu`; also detects SplitMix with some bad gammas such as 1. The idea of
  * the test is taken from avalanche effect estimation methods. Probably this
  * test may be extended by XORing more distant values.
  *
  * It seems that this test can detect PRNG that exceeded its period during
- * the testing (e.g. `splitmix32`).
+ * the testing (e.g. `splitmix32`). The test also detects some LFSRs with
+ * small sparse matrices (such as SHR3, XSH, xorshift128, lrnd64_255) and
+ * some obsolete combined generators such as SuperDuper73.
  */
 TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *opts)
 {
+    enum {
+        NLEVELS = 5,
+        BLOCK_LEN = 32 // 2^5
+    };
     TestResults ans = TestResults_create("hamming_distr");
     size_t nbits = obj->gi->nbits;
-    unsigned long long *o     = calloc(64, sizeof(unsigned long long));
-    unsigned long long *o_xor = calloc(64, sizeof(unsigned long long));
+    HammingDistrHist h[NLEVELS];
+    for (int i = 0; i < NLEVELS; i++) {
+        HammingDistrHist_init(&h[i], nbits << i);
+    }
     obj->intf->printf("Hamming weights distribution test (histogram)\n");
     obj->intf->printf("  Sample size, values:     %llu (2^%.2f or 10^%.2f)\n",
         opts->nvalues, sr_log2((double) opts->nvalues), log10((double) opts->nvalues));
-    for (unsigned long long i = 0; i < opts->nvalues; i += 2) {
-        uint64_t x1 = obj->gi->get_bits(obj->state);
-        uint64_t x2 = obj->gi->get_bits(obj->state);
-        o[get_uint64_hamming_weight(x1)]++;
-        o[get_uint64_hamming_weight(x2)]++;
-        o_xor[get_uint64_hamming_weight(x1 ^ x2)]++;
+    for (unsigned long long i = 0; i < opts->nvalues; i += BLOCK_LEN) {
+        uint64_t x[BLOCK_LEN];
+        int hw[BLOCK_LEN];
+        for (int j = 0; j < BLOCK_LEN; j++) {
+            x[j] = obj->gi->get_bits(obj->state);
+            hw[j] = get_uint64_hamming_weight(x[j]);
+        }
+        // 1-value blocks
+        for (int j = 0; j < BLOCK_LEN; j += 2) {
+            h[0].o[hw[j]]++; h[0].o[hw[j + 1]]++;
+            h[0].o_xor[get_uint64_hamming_weight(x[j] ^ x[j + 1])]++;
+        }
+        // 2,4,8,16-value blocks
+        for (int j = 1; j < NLEVELS; j++) {
+            calc_block_hw_sums(h[j].o,        hw, 1 << j, BLOCK_LEN);
+            calc_block_hw_xorsums(h[j].o_xor, x,  1 << j, BLOCK_LEN);
+        }
     }
-    double z = hamming_distr_calc_zemp(o, nbits);
-    double p = sr_stdnorm_pvalue(z);
-    double z_xor = hamming_distr_calc_zemp(o_xor, nbits);
-    double p_xor = sr_stdnorm_pvalue(z_xor);
-    obj->intf->printf("  z     = %8.3f; p     = %.3g\n", z, p);
-    obj->intf->printf("  z_xor = %8.3f; p_xor = %.3g\n", z_xor, p_xor);
-    if (fabs(z) > fabs(z_xor)) {
-        ans.x = z; ans.p = p;
-    } else {
-        ans.x = z_xor; ans.p = p_xor;
+    double zabs_max = -1.0;
+    for (int i = 0; i < NLEVELS; i++) {
+        HammingDistrHist_calc_stats(&h[i]);
+        obj->intf->printf("  Block size: %d bits\n", (int) ((1 << i) * nbits));
+        HammingDistrHist_print_stats(&h[i], obj->intf->printf);
+        if (fabs(h[i].z) > zabs_max) {
+            zabs_max = fabs(h[i].z); ans.p = h[i].p; ans.x = h[i].z;
+        }
+        if (fabs(h[i].z_xor) > zabs_max) {
+            zabs_max = fabs(h[i].z_xor); ans.p = h[i].p_xor; ans.x = h[i].z_xor;
+        }
     }
+    ans.penalty = PENALTY_HAMMING_DISTR;
     ans.alpha = sr_stdnorm_cdf(ans.x);
-    free(o);
-    free(o_xor);
+    obj->intf->printf("  Final: z = %7.3f, p = %.3g\n", ans.x, ans.p);
+    for (int i = 0; i < NLEVELS; i++) {
+        HammingDistrHist_destruct(&h[i]);
+    }
     return ans;
 }
 

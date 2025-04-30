@@ -747,7 +747,7 @@ There are only two problematic situations:
  rc4ok             | u32    | +       | +     | +       | +    | 6.2  | N/A    | 4.5   | +       | >= 1 TiB
  romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      | 4(0)  |         | >= 1 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 2 TiB
- sapparot          | u32    | +       | 1     | 3       | 4    | 0.70 | +      | 0     | Crush   | 8 MiB
+ sapparot          | u32    | +       | 1     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
  sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | >= 16 TiB
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB
@@ -755,7 +755,7 @@ There are only two problematic situations:
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)|         | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  |         | >= 4 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
- speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         | >= 2 TiB
+ speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         | >= 4 TiB
  speck128          | u64    | +       | +     | +       | +    | 3.8  | +      | 5     |         | >= 2 TiB
  speck128_avx(full)| u64    | +       | +     | +       | +    | 0.75 | +      | 5     |         | >= 16 TiB
  speck128_avx(r16) | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 32 TiB
@@ -766,7 +766,7 @@ There are only two problematic situations:
  sqxor32           | u32    | +       | 2     | 3       | 5    | 0.20 | -(>>10)| 0     | Small   | 16 GiB
  stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | +      | 0     |         | >= 8 TiB
  stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | +      | 3.5(0)| Small   | 1 MiB
- superduper73      | u32    | 3       | 9     | 15      | 18   | 0.64 | +      | 0     | -       | 32 KiB
+ superduper73      | u32    | 3       | 10    | 17      | 21   | 0.64 | +      | 0     | -       | 32 KiB
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      | 2.75  |         | 512 KiB
  superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | +      | 4     |         | >= 32 TiB
  shr3              | u32    | 2       | 15    | 32      | 36   | 0.76 | -(>>10)| 0     | -       | 32 KiB
@@ -790,7 +790,7 @@ There are only two problematic situations:
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 32 TiB
  wyrand            | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 8 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
- xorshift128       | u32    | 2       | 4     | 6/7     | 8    | 0.41 | +      | 1.25  | -       | 128 KiB
+ xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      | 3.25  |         | 32 GiB
  xorshift128pp     | u64    | +       | +     | +       | +    | 0.29 | +      | 4     |         | >= 2 TiB
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 1 TiB
@@ -802,7 +802,7 @@ There are only two problematic situations:
  xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | +      | 0     | Small   | 128 KiB
  xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      | 3     | +       | 8 MiB
  xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      | 4     | +       | >= 16 TiB
- xsh               | u64    | 2       | 8     | 13      | 17   | 0.43 | -      | 0     | -       | 32 KiB
+ xsh               | u64    | 2       | 9     | 14      | 18   | 0.43 | -      | 0     | -       | 32 KiB
  xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     |         | ?
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     |         | >= 32 TiB
  xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     |         | ?
