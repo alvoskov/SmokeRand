@@ -755,7 +755,7 @@ There are only two problematic situations:
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)|         | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  |         | >= 4 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
- speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         | ?
+ speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         | >= 2 TiB
  speck128          | u64    | +       | +     | +       | +    | 3.8  | +      | 5     |         | >= 2 TiB
  speck128_avx(full)| u64    | +       | +     | +       | +    | 0.75 | +      | 5     |         | >= 16 TiB
  speck128_avx(r16) | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 32 TiB

@@ -36,23 +36,24 @@ static inline void mulbox64(uint32_t *v, int i, int j, uint32_t a, int r1, int r
     uint64_t mul = ((uint64_t) a) * (v[i] ^ v[j]);
     v[i] = (uint32_t) mul;
     v[j] ^= mul >> 32;
-    v[j] = v[j] + rotl32(v[i], r1);
-    v[i] = v[i] + rotl32(v[j], r2);
+    //v[j] = v[j] + rotl32(v[i], r1);
+    //v[i] = v[i] + rotl32(v[j], r2);
+
     // Behaves slightly better in PractRand 0.94 (doesn't fail the gap test)
     // but requires re-optimization of constants.
-    //v[i] = v[i] + rotl32(v[j], r1);
-    //v[j] = v[j] + rotl32(v[i], r2);    
+    v[i] = v[i] + rotl32(v[j], r1);
+    v[j] = v[j] + rotl32(v[i], r2);    
 }
-
 
 static inline uint64_t get_bits_raw(void *state)
 {
     Mularx64x32State *obj = state;
     obj->ctr.u64++;
     obj->out.u64 = obj->ctr.u64;
-    mulbox64(obj->out.u32, 0, 1, 0xDCD34D59, 6, 2);
-    mulbox64(obj->out.u32, 0, 1, 0xF22B8767, 24, 23);
-    mulbox64(obj->out.u32, 0, 1, 0xC4CA0101, 18, 17);
+
+    mulbox64(obj->out.u32, 0, 1, 0xD7474D0B, 30, 6);
+    mulbox64(obj->out.u32, 0, 1, 0xE293A7BD, 26, 23);
+
     return obj->out.u64;
 }
 
