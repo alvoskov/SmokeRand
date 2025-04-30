@@ -742,8 +742,8 @@ static inline void calc_block_hw_xorsums(unsigned long long *hw_freq,
 TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *opts)
 {
     enum {
-        NLEVELS = 5,
-        BLOCK_LEN = 32 // 2^5
+        NLEVELS = 10,
+        BLOCK_LEN = 32 // 2^10
     };
     TestResults ans = TestResults_create("hamming_distr");
     size_t nbits = obj->gi->nbits;
