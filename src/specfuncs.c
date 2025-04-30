@@ -371,6 +371,24 @@ double sr_binomial_pdf(unsigned long k, unsigned long n, double p)
 }
 
 /**
+ * @brief Probability function for binomial distribution: return all values.
+ * @param n Total number of attempts.
+ * @param p Probability of success.
+ */
+void sr_binomial_pdf_all(double *pdf, unsigned long n, double p)
+{
+    double lnc = 0.0, ln_pdf, ln_p = log(p), ln_1mp = log(1.0 - p);
+    unsigned long i;
+    for (i = 0; i <= n; i++) {
+        if (i > 0) {
+            lnc += log(n + 1.0 - i) - log((double) i);
+        }
+        ln_pdf = lnc + i * ln_p + (n - i) * ln_1mp;
+        pdf[i] = exp(ln_pdf);
+    }
+}
+
+/**
  * @brief Cumulative distribution function for binomial distribution.
  * @param k Number of successful attempts.
  * @param n Total number of attempts.

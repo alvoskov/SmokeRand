@@ -69,7 +69,7 @@ void battery_full(const GeneratorInfo *gen, CallerAPI *intf,
 
     // Hamming weights distribution (histogram) test
     static const HammingDistrOptions
-        hw_distr = {.nvalues = 1ull << 33};
+        hw_distr = {.nvalues = 1ull << 33, .nlevels = 10};
 
     // Hamming weights based tests
     static const HammingOtOptions

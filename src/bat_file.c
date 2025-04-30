@@ -403,12 +403,14 @@ static int parse_gap16_count0(TestDescription *out, const TestInfo *obj, char *e
 static int parse_hamming_distr(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
     GET_LIMITED_INTVALUE(nvalues, 65536, 1ll << 50ll)
+    GET_LIMITED_INTVALUE(nlevels, 1, 20)
     HammingDistrOptions *opts = calloc(1, sizeof(HammingDistrOptions));
     if (opts == NULL) {
         fprintf(stderr, "***** parse_hamming_distr: not enough memory *****");
         exit(EXIT_FAILURE);
     }
     opts->nvalues = nvalues;
+    opts->nlevels = (int) nlevels;
     out->name = obj->testname;
     out->run = hamming_distr_test_wrap;
     out->udata = opts;

@@ -60,6 +60,7 @@ typedef struct {
 
 typedef struct {
     unsigned long long nvalues; ///< Number of pseudorandom values processed by the test.
+    int nlevels; ///< Number of blocks levels.
 } HammingDistrOptions;
 
 
