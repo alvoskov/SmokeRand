@@ -662,7 +662,7 @@ typedef struct {
     double p_xor;
 } HammingDistrHist;
 
-void HammingDistrHist_init(HammingDistrHist *obj, size_t nbits)
+static void HammingDistrHist_init(HammingDistrHist *obj, size_t nbits)
 {
     obj->o     = calloc(nbits, sizeof(unsigned long long));
     obj->o_xor = calloc(nbits, sizeof(unsigned long long));
@@ -671,7 +671,7 @@ void HammingDistrHist_init(HammingDistrHist *obj, size_t nbits)
     obj->z_xor = NAN; obj->p_xor = NAN;
 }
 
-void HammingDistrHist_calc_stats(HammingDistrHist *obj)
+static void HammingDistrHist_calc_stats(HammingDistrHist *obj)
 {
     obj->z = hamming_distr_calc_zemp(obj->o, obj->nbits);
     obj->p = sr_stdnorm_pvalue(obj->z);
@@ -680,14 +680,7 @@ void HammingDistrHist_calc_stats(HammingDistrHist *obj)
 }
 
 
-void HammingDistrHist_print_stats(const HammingDistrHist *obj,
-    int (*printf_ptr)(const char *format, ... ))
-{
-    printf_ptr("    z     = %8.3f; p     = %.3g\n", obj->z, obj->p);
-    printf_ptr("    z_xor = %8.3f; p_xor = %.3g\n", obj->z_xor, obj->p_xor);
-}
-
-void HammingDistrHist_destruct(HammingDistrHist *obj)
+static void HammingDistrHist_destruct(HammingDistrHist *obj)
 {
     free(obj->o); obj->o = NULL;
     free(obj->o_xor); obj->o_xor = NULL;
@@ -744,12 +737,6 @@ static inline void calc_block_hw_xorsums(unsigned long long *hw_freq,
  */
 TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *opts)
 {
-/*
-    enum {
-        NLEVELS = 12,
-        BLOCK_LEN = 4096 // 2^12
-    };
-*/
     TestResults ans = TestResults_create("hamming_distr");
     size_t nbits = obj->gi->nbits;
     obj->intf->printf("Hamming weights distribution test (histogram)\n");
@@ -788,7 +775,7 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
         "bits", "z", "p", "z_xor", "p_xor");
     for (int i = 0; i < opts->nlevels; i++) {
         HammingDistrHist_calc_stats(&h[i]);
-        obj->intf->printf("    %8d | %8.3f %10.3g | %8.3f %10.3f\n",
+        obj->intf->printf("    %8d | %8.3f %10.3g | %8.3f %10.3g\n",
             (int) ((1 << i) * nbits), h[i].z, h[i].p, h[i].z_xor, h[i].p_xor);
         if (fabs(h[i].z) > zabs_max) {
             zabs_max = fabs(h[i].z); ans.p = h[i].p; ans.x = h[i].z;

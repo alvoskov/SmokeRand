@@ -492,6 +492,22 @@ one-threaded mode. Linear complexity test is much faster in this case.
  matrixrank_8192      | 8192   | 32/64
  matrixrank_8192_low8 | 8192   | 8
 
+## Hamming weights histogram test
+
+This test divides an input stream into n-bit blocks and calculates Hamming
+weights for all blocks. These weights must obey the binomial distribution.
+The test is repeated for pairs of blocks: each pair is XORed and Hamming
+weights of that XORs are analysed, they also must obey binomial distribution.
+
+This test is designed mainly as basic sanity check for counter-based generator,
+it may detect evident flaws in avalanche characteristics. Pairwise XOR may
+detect such PRNGs as SplitMix with gamma equal to 1.
+
+The Hamming weights histogram test also catches 32-bit LCGs with modulo
+f\$ m={2^32}\f$, additive/subtractive lagged Fibonacci generators with small
+lags, ranrot32 with small lags, some small LFSR (shr3, xsh, xorshift128,
+lrnd64_255).
+
 ## Hamming weights tests based on overlapping tuples.
 
 This test is a modification of `DC6-9x1Bytes-1` test from PractRand by Chris
@@ -620,7 +636,7 @@ There are only two problematic situations:
  Algorithm         | Output | express | brief | default | full | cpb  | bday64 | Grade | TestU01 | PractRand 
 -------------------|--------|---------|-------|---------|------|------|--------|-------|---------|-----------
  aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      | 5     |         | >= 32 TiB
- aes128(c99)       | u64    | +       | +     | +       | +    | 6.8  | +      | 5     |         | ?
+ aes128(c99)       | u64    | +       | +     | +       | +    | 6.8  | +      | 5     |         | >= 32 TiB
  alfib             | u64    | 2       | 5     | 6       | 8    | 0.23 | +      | 0     | Small   | 128 MiB
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    | 3.75  | +       | 4 GiB
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 1 TiB
@@ -700,10 +716,11 @@ There are only two problematic situations:
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 8 TiB
  msws64            | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 32 TiB
  msws64x           | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 32 TiB
- mularx64_u32      | u32    |         |       |         |      |      |        |       |         | ?
- mularx128         | u64    |         |       |         |      |      |        |       |         | ?
- mularx128_u32     | u32    |         |       |         |      |      |        |       |         | >= 32 TiB
- mularx256         | u64    |         |       |         |      |      |        |       |         | >= 32 TiB
+ mularx64_r2       | u32    | +       | 1     | 1       | 1    |      | -      | 1     |         | ?
+ mularx64_u32      | u32    | +       | +     | +       | +    | 1.7  | -      | 3     |         | ?
+ mularx128         | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | ?
+ mularx128_u32     | u32    | +       | +     | +       | +    | 0.95 | +      | 4     |         | >= 32 TiB
+ mularx256         | u64    | +       | +     | +       | +    | 0.67 | +      | 4     |         | >= 32 TiB
  mulberry32        | u32    | +       | 1     | 2/3     | 5    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
  mwc32x            | u32    | +       | 3     | 4       | 8    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
  mwc32xxa8         | u32    | +       | 1     | 4       | 10   | 1.9  | -(>>10)| 0     |         | 256 MiB
@@ -785,7 +802,7 @@ There are only two problematic situations:
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 32 TiB
- v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     |         | >= 2 TiB
+ v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     |         | >= 4 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 32 TiB
  wyrand            | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 8 TiB
@@ -986,6 +1003,15 @@ are less sensitive, e.g. entropy test catches only randu.
 - Passes ENT: lcg32prime, lcg64, lfib31, swb
 
 # Versions history
+
+01.05.2025: SmokeRand 0.34
+
+- Several new generators.
+- The new `hamming_distr` test that is based on calculation of n-bit blocks
+  Hamming weights and analysis of their distribution. Also processes pairwise
+  XORs of that blocks. It was added to the `brief`, `default` and `full`
+  batteries.
+- 
 
 10.04.2025: SmokeRand 0.33
 

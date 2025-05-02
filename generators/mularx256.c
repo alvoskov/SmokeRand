@@ -33,8 +33,8 @@ static inline void mulbox128(uint64_t *v, int i, int j, uint64_t mul, int r1, in
     uint64_t mul0_high;
     v[i] = unsigned_mul128(mul, (v[i] ^ v[j]), &mul0_high);
     v[j] ^= mul0_high;
-    v[j] = v[j] + rotl64(v[i], r1);
-    v[i] = v[i] + rotl64(v[j], r2);
+    v[j] = v[j] + rotl64(v[i], r1); // Slightly different from mulbox for
+    v[i] = v[i] + rotl64(v[j], r2); // mularx128
 }
 
 
@@ -56,7 +56,6 @@ static inline uint64_t get_bits_raw(void *state)
         mulbox128(obj->out, 2, 3, 0x43703AACE826543B, 28, 15);
         mulbox128(obj->out, 1, 2, 0x43703AACE826543B, 28, 15);
         mulbox128(obj->out, 3, 0, 0x43703AACE826543B, 28, 15);
-
         obj->x[0]++;
     }
     return obj->out[obj->pos++];

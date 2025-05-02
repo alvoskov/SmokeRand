@@ -19,7 +19,7 @@
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief SplitMix PRNG state.
+ * @brief Mularx128 (32-bit version) PRNG state.
  */
 typedef struct {
     union {

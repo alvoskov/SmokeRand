@@ -1,8 +1,13 @@
 /**
  * @file mularx64_r2.c
- * @brief A simple counter-based generator.
+ * @brief A simple counter-based generator with relatively bad avalanche effect.
  * @details It passes BigCrush in the "interleaved" mode, i.e. passing 32-bit
- * chunks as separate values.
+ * chunks as separate values. It fails the `hamming_distr` test in the SmokeRand
+ * `brief`, `default` and `full` batteries.
+ *
+ * PractRand 0.94: fails at 2 TiB (BCFN test, stdin64). Systematic "suspiciuous"
+ * values of GAP-16:B test start at 128 GiB. In the case of stdin32 it fails the
+ * same test at 2 TiB.
  *
  *
  * References:
@@ -19,7 +24,7 @@
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief SplitMix PRNG state.
+ * @brief Mularx64 PRNG state.
  */
 typedef struct {
     union {
