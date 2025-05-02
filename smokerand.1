@@ -175,6 +175,13 @@ A modification of gap test suggested by G.Jones, the gjrand author, also known
 as \fBrda\fR (relative distance analysis).
 Requires only one parameter, \fBngaps\fR, the number of gaps.
 .TP
+.B hamming_distr
+This test calculates calculates Hamming weights of n-bit non-overlapping blocks
+and checks if they obey binomial distribution. It also repeats the same procedure
+for XOR of non-overlapping pairs of the blocks. It requires two parameters:
+\fBnvalues\fB, the number of processes values, and \fBnlevels\fB, number of
+blocks levels. The each next level doubles the size of block.
+.TP
 .B hamming_ot
 Hamming weights "overlapping tuples" based test that detects short and medium
 range correlations in bits frequencies.
