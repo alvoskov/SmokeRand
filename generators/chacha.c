@@ -37,7 +37,8 @@ PRNG_CMODULE_PROLOG
 #endif
 
 enum {
-    GEN_NROUNDS = 12
+    GEN_NROUNDS = 12, ///< Number of rounds for ChaCha12
+    GEN_NROUNDS_FULL = 20 ///< Number of rounds for ChaCha20
 };
 
 /**
@@ -256,7 +257,7 @@ static int run_self_test_scalar(const CallerAPI *intf, void (*blockfunc)(ChaChaS
        0xd19c12b5,  0xb94e16de,  0xe883d0cb,  0x4e3c50a2
     };
     ChaChaState obj;
-    ChaCha_init(&obj, 20, x_init); // 20 rounds
+    ChaCha_init(&obj, GEN_NROUNDS_FULL, x_init); // 20 rounds
     for (int i = 0; i < 12; i++) {
         obj.x[i + 4] = x_init[i];
     }
@@ -612,7 +613,7 @@ static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
         seeds[2*i] = s & 0xFFFFFFF;
         seeds[2*i + 1] = s >> 32;
     }
-    ChaChaVec_init(obj, 12, seeds);
+    ChaChaVec_init(obj, GEN_NROUNDS, seeds);
     (void) gi;
     return obj;
 #else
@@ -665,7 +666,7 @@ int run_self_test_vector(const CallerAPI *intf)
 
     ChaChaVecState obj;
 
-    ChaChaVec_init(&obj, 20, x_init);
+    ChaChaVec_init(&obj, GEN_NROUNDS_FULL, x_init);
     for (size_t i = 0; i < 4; i++) {
         obj.x[i + 8]  = obj.x[i + 12] = x_init[i]; // Row 2
         obj.x[i + 16] = obj.x[i + 20] = x_init[i + 4]; // Row 3
