@@ -763,7 +763,7 @@ There are only two problematic situations:
  rc4               | u32    | +       | +     | +       | +    | 6.0  | +      | 3     | +       | 512 GiB
  rc4ok             | u32    | +       | +     | +       | +    | 6.2  | N/A    | 4.5   | +       | >= 1 TiB
  romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      | 4(0)  |         | >= 1 TiB
- rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 2 TiB
+ rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
  sapparot          | u32    | +       | 1     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
  sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | >= 16 TiB
@@ -807,6 +807,7 @@ There are only two problematic situations:
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 32 TiB
  wyrand            | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 8 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
+ xorshift64st      | u64    | 1       | 1     | 3       | 5    |      | -      | 1.75  |         |
  xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      | 3.25  |         | 32 GiB
  xorshift128pp     | u64    | +       | +     | +       | +    | 0.29 | +      | 4     |         | >= 2 TiB
