@@ -3,6 +3,15 @@
  * @brief xorwow pseudorandom number generator.
  * @details Fails `bspace8_8d`, `linearcomp_low` and `matrixrank` tests.
  *
+ * BigCrush failures:
+ *
+ *           Test                          p-value
+ *     ----------------------------------------------
+ *      7  CollisionOver, t = 7            2.3e-5
+ *     27  SimpPoker, r = 27              4.0e-14
+ *     81  LinearComp, r = 29             1 - eps1
+ *     ----------------------------------------------
+ *
  * References:
  *
  * 1. Marsaglia G. Xorshift RNGs // Journal of Statistical Software. 2003.
