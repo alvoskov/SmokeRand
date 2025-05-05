@@ -641,8 +641,8 @@ There are only two problematic situations:
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    | 3.75  | +       | 4 GiB
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 1 TiB
  ara32             | u32    | +       | 1     | 1       | 1    | 0.96 | +      | 2(0)  | +       | 512 MiB
- chacha            | u32    | +       | +     | +       | +    | 2.0  | +      | 5     | +       | >= 1 TiB
- chacha_avx        | u32    | +       | +     | +       | +    | 0.7  | +      | 5     | +       | >= 2 TiB
+ chacha            | u32    | +       | +     | +       | +    | 2.0  | +      | 5     | +       | >= 4 TiB
+ chacha_avx2       | u32    | +       | +     | +       | +    | 0.7  | +      | 5     | +       | >= 2 TiB
  chacha_ctr32      | u32    | +       | +     | +       | 1    | 2.0  | -(>>10)| 0     | +       | 256 GiB
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | +      | 4     | +       | >= 32 TiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
@@ -807,7 +807,7 @@ There are only two problematic situations:
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 32 TiB
  wyrand            | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 8 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
- xorshift64st      | u64    | 1       | 1     | 3       | 5    |      | -      | 1.75  |         |
+ xorshift64st      | u64    | 1       | 1     | 3       | 5    |      | -      | 1.75  |         | 512 KiB
  xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      | 3.25  |         | 32 GiB
  xorshift128pp     | u64    | +       | +     | +       | +    | 0.29 | +      | 4     |         | >= 2 TiB
