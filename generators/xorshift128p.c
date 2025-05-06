@@ -3,6 +3,9 @@
  * @brief An implementation of 128-bit LSFR generator proposed by G. Marsaglia.
  * @details 
  *
+ * Note: its upper 32 bits (`--filter=high32`) fail the `hamming_distr` and
+ * `hamming_ot_values` test from the `full` battery.
+ *
  * References:
  * 
  * 1. Marsaglia G. Xorshift RNGs // Journal of Statistical Software. 2003.
