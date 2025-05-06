@@ -2,12 +2,17 @@
  * @file ranrot_bi.c
  * @brief RANROT_BI - a simple non-linear generator, it is not connected to
  * the classical RANROT by Agner Fog.
- * @details Fails Hamming weights based tests from `full` battery, mainly
- * `hamming_ot_values`. Also fails PractRand 0.94 at 16 GiB sample (BCFN test
- * based on Hamming weights).
+ * @details Fails `default` and `full` batteries:
+ *
+ * - `default`: Hamming weights based tests `hamming_distr`.
+ * - `full` : also `hamming_ot_values`.
+ *
+ * This PRNG also fails PractRand 0.94 at 16 GiB sample (BCFN test based on
+ * Hamming weights).
  *
  * WARNING! The minimal period of RANROT_BI is unknown! This PRNG shouldn't
- * be used in practice!
+ * be used in practice! However, it is interesting for checking tests that
+ * are aimed to find biases in Hamming weights.
  *
  * The generator is taken from:
  *

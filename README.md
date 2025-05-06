@@ -748,7 +748,7 @@ There are only two problematic situations:
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      | 3.5   |         | 2 MiB
  randu             | u32    | 6       | 22    | 40      | 44   | 0.41 | -(>>10)| 0     | -       | 1 KiB
  ranlux++          | u64    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 32 TiB
- ranrot_bi         | u64    | +       | +     | +       | 1/3  | 0.33 | +      | 0     |         | 8 GiB
+ ranrot_bi         | u64    | +       | +     | 1       | 2/4  | 0.33 | +      | 0     |         | 8 GiB
  ranrot32[7/3]     | u32    | +       | 3     | 5/6     | 6    | 0.58 | +      | 0     | Small   | 128 MiB
  ranrot32[17/9]    | u32    | +       | 1     | 2       | 4    | 0.68 | +      | 0     | +       | 1 GiB
  ranrot32[57/13]   | u32    | +       | +     | +       | 1    | 0.74 | +      | 2     | +       | 8 GiB
