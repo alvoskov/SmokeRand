@@ -667,7 +667,7 @@ There are only two problematic situations:
  lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | 3     | +       | 64 GiB
  lcg128_u32_full   | u32    | +       | +     | 1       | 1    | 0.75 | +      | 3     | +       | >= 32 TiB
  lcg69069          | u32    | 6       | 20    | 38/39   | 43   | 0.38 | -(>>10)| 0     | -       | 2 KiB
- lea128            | u32    | +       | +     | +       | +    | 5.7  | +      | 5     |         | ?
+ lea128            | u32    | +       | +     | +       | +    | 5.7  | +      | 5     |         | >= 1 TiB
  lea128_avx        | u32    | +       | +     | +       | +    | 1.2  | +      | 5     |         | >= 32 TiB
  lfib_par[31+]     | u32    | 1       | 5/6   | 6/7     | 10/11| 0.70 | +      | 0     | -       | 32 MiB
  lfib_par[55+]     | u32    | 1       | 4     | 5       | 7    | 0.51 | +      | 0     | -       | 2 GiB
@@ -778,7 +778,7 @@ There are only two problematic situations:
  speck128_avx(r16) | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 32 TiB
  splitmix          | u64    | +       | +     | +       | +    | 0.19 | -      | 3     | +       | >= 2 TiB
  splitmix32        | u32    | +       | 3     | 4       | 5/6  | 0.25 | -(>>10)| 0     | Small   | 1 GiB
- splitmix32cbc     | u32    | +       | +     | +       | +    | 2.1  | -      | 3     |         | ?
+ splitmix32cbc     | u32    | +       | +     | +       | +    | 2.1  | -      | 3     |         | >= 4 TiB(?)
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | 4     | +       | >= 16 TiB
  sqxor32           | u32    | +       | 2     | 3       | 5    | 0.20 | -(>>10)| 0     | Small   | 16 GiB
  stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | +      | 0     |         | >= 8 TiB
@@ -824,7 +824,7 @@ There are only two problematic situations:
  xsh               | u64    | 2       | 9     | 14      | 18   | 0.43 | -      | 0     | -       | 32 KiB
  xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     |         | ?
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     |         | >= 32 TiB
- xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     |         | ?
+ xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     |         | >= 1 TiB
  xxtea128          | u32    | +       | +     | +       | +    | 18   | +      | 4.5   |         | ?
  xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   |         | >= 32 TiB
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   |         | ?
