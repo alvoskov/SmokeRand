@@ -810,7 +810,7 @@ There are only two problematic situations:
  xorshift64st      | u64    | 1       | 1     | 3       | 5    |      | -      | 1.75  |         | 512 KiB
  xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      | 3.25  |         | 32 GiB
- xorshift128pp     | u64    | +       | +     | +       | +    | 0.29 | +      | 4     |         | >= 2 TiB
+ xorshift128pp     | u64    | +       | +     | +       | +    | 0.29 | +      | 4     |         | >= 16 TiB
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 1 TiB
  xoroshiro128      | u64    | 2       | 3     | 5       | 7    | 0.27 | +      | 2.25  |         | 256 KiB
  xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      | 3.25  |         | 16 MiB
