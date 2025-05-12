@@ -716,9 +716,9 @@ There are only two problematic situations:
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 8 TiB
  msws64            | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 32 TiB
  msws64x           | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 32 TiB
- mularx64_r2       | u32    | +       | 1     | 1       | 1    |      | -      | 1     |         | ?
- mularx64_u32      | u32    | +       | +     | +       | +    | 1.7  | -      | 3     |         | ?
- mularx128         | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | ?
+ mularx64_r2       | u32    | +       | 1     | 1       | 1    | 1.5  | -      | 1     |         | 1 TiB
+ mularx64_u32      | u32    | +       | +     | +       | +    | 1.7  | -      | 3     |         | >= 2 TiB
+ mularx128         | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 4 TiB
  mularx128_u32     | u32    | +       | +     | +       | +    | 0.95 | +      | 4     |         | >= 32 TiB
  mularx256         | u64    | +       | +     | +       | +    | 0.67 | +      | 4     |         | >= 32 TiB
  mulberry32        | u32    | +       | 1     | 2/3     | 5    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
@@ -807,7 +807,7 @@ There are only two problematic situations:
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 32 TiB
  wyrand            | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 8 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
- xorshift64st      | u64    | 1       | 1     | 3       | 5    |      | -      | 1.75  |         | 512 KiB
+ xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |         | 512 KiB
  xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      | 3.25  |         | 32 GiB
  xorshift128pp     | u64    | +       | +     | +       | +    | 0.29 | +      | 4     |         | >= 16 TiB
