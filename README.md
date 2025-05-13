@@ -136,10 +136,12 @@ The next tests are implemented in the SmokeRand core:
 7. Gap test on 16-bit words with zero counting (modified `rda16` from gjrand).
 8. Matrix rank test.
 9. Linear complexity test.
-10. Hamming weights tests based on overlapping tuples (similar to DC6 test
+10. Hamming weights frequency tests for non-overlapping blocks and their
+    pairwise XORs.
+11. Hamming weights tests based on overlapping tuples (similar to DC6 test
     from PractRand 0.94).
-11. Simplified `mod3` test from grand.
-12. SumCollector test.
+12. Simplified `mod3` test from gjrand.
+13. SumCollector test.
 
 Systematic failure of even one test means that PRNG is not suitable as a general
 purpose PRNG. However different tests have different impact on the PRNG quality:
@@ -805,7 +807,7 @@ There are only two problematic situations:
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     |         | >= 32 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 32 TiB
- wyrand            | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 8 TiB
+ wyrand            | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 32 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |         | 512 KiB
  xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB
