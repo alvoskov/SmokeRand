@@ -657,6 +657,8 @@ There are only two problematic situations:
  gjrand64          | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |         | >= 32 TiB
  gmwc128           | u64    | +       | +     | +       | +    | 0.72 | +      | 4(0)  |         | >= 32 TiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 5     | +       | >= 32 TiB
+ icg64             | u32    | +       | +     |         |      | 113  |        |       |         | ?
+ icg64_p2          | u32    | 1       | 2     | 3       |      | 5.1  |        | 0     |         | 32 MiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
@@ -805,8 +807,8 @@ There are only two problematic situations:
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 32 TiB
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     |         | >= 32 TiB
- wich1982          | u32    | +       | 5     | 11      | 13   |      |        | 0     |         | 256 GiB
- wich2006          | u32    | +       | +     | +       | +    |      |        |       |         | ?
+ wich1982          | u32    | +       | 5     | 11      | 13   | 2.3  |        | 0     |         | 256 GiB
+ wich2006          | u32    | +       | +     | +       | +    | 4.6  |        |       |         | ?
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 32 TiB
  wyrand            | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 32 TiB
@@ -833,7 +835,7 @@ There are only two problematic situations:
  xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   |         | >= 32 TiB
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   |         | ?
  xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   |         | >= 32 TiB
- ziff98            | u32    | +       | 3     | 3       | 3    |      |        | 3.25  |         | 32 GiB
+ ziff98            | u32    | +       | 3     | 3       | 3    | 0.47 |        | 3.25  |         | 32 GiB
 
 Performance estimation for some 64-bit generators
 
