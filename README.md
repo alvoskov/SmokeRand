@@ -783,7 +783,7 @@ There are only two problematic situations:
  splitmix32cbc     | u32    | +       | +     | +       | +    | 2.1  | -      | 3     |         | >= 4 TiB(?)
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | 4     | +       | >= 16 TiB
  sqxor32           | u32    | +       | 2     | 3       | 5    | 0.20 | -(>>10)| 0     | Small   | 16 GiB
- stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | +      | 0     |         | >= 8 TiB
+ stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | +      | 0     |         | >= 32 TiB
  stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | +      | 3.5(0)| Small   | 1 MiB
  superduper73      | u32    | 3       | 10    | 17      | 21   | 0.64 | +      | 0     | -       | 32 KiB
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      | 2.75  |         | 512 KiB
