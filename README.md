@@ -702,7 +702,7 @@ There are only two problematic situations:
  lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | +      | 4     |         | >= 32 TiB
  lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | +      | 2.25  | Small   | 32 KiB 
  lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | 2.25  | Small   | 1 MiB
- lrnd64_255        | u64    | 2       | 5     | 9       | 14   | 0.45 | +      | 0     |         | 512 KiB
+ lrnd64_255        | u64    | 2       | 5     | 10      | 15   | 0.45 | +      | 0     |         | 512 KiB
  lrnd64_1023       | u64    | 2       | 3     | 5       | 7    | 0.44 | +      | 2.25  |         | 4 MiB
  lxm_64x128        | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 32 TiB
  macmarsa          | u32    | 2       | 12    | 18      | 19   | 0.67 | -(>>10)| 0     |         | 128 KiB
@@ -805,6 +805,8 @@ There are only two problematic situations:
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 32 TiB
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     |         | >= 32 TiB
+ wich1982          | u32    | +       | 5     | 11      | 13   |      |        | 0     |         | 256 GiB
+ wich2006          | u32    | +       | +     | +       | +    |      |        |       |         | ?
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 32 TiB
  wyrand            | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 32 TiB
