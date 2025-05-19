@@ -833,7 +833,7 @@ There are only two problematic situations:
  xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   |         | >= 32 TiB
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   |         | ?
  xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   |         | >= 32 TiB
-
+ ziff98            | u32    | +       | 3     | 3       | 3    |      |        | 3.25  |         | 32 GiB
 
 Performance estimation for some 64-bit generators
 
