@@ -1,20 +1,34 @@
 /**
  * @file icg64_p2.c
  * @brief Inversive congruential generator with power of 2 modulus
- * @details 
+ * @details This algorithm is much faster than 63-bit ICG with prime modulus.
+ * But is still slower than hardware AES-128 or SIMD ChaCha12. Has a period
+ * around 2^63.
+ *
+ * Fails the `bspace8_8d`, `bspace4_8d_dec`, `bspace4_16d` tests.
  *
  * References:
  *
- * 1. https://lemire.me/blog/2017/09/18/computing-the-inverse-of-odd-integers/
- * 2. https://arxiv.org/pdf/1209.6626v2
- * 3. https://www.jstor.org/stable/1403647
+ * 1. Eichenauer-Herrmann J. Inversive Congruential Pseudorandom Numbers:
+ *    A Tutorial // International Statistical Review. 1992. V. 60. N 2.
+ *    P. 167-176. https://doi.org/10.2307/1403647
+ * 2. Lemire D. Computing the inverse of odd integers
+ *    https://lemire.me/blog/2017/09/18/computing-the-inverse-of-odd-integers/
+ * 3. Hurchalla J. An Improved Integer Modular Multiplicative Inverse
+ *    (modulo 2^w). 2022. https://arxiv.org/pdf/2204.04342
+ * 3. https://arxiv.org/pdf/1209.6626v2
+ *
+ * Python code for generating reference values:
  *
  *     x = 12345
- *     for i in range(0,10000):
+ *     for i in range(0, 10000):
  *         x = (6906969069 * pow(x, -1, 2**64) + 1234513250) % 2**64
  *     print(hex(x))
  *
- * Fails the `bspace8_8d`, `bspace4_8d_dec`, `bspace4_16d` tests.
+ * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 
