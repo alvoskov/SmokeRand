@@ -657,6 +657,8 @@ There are only two problematic situations:
  gjrand64          | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |         | >= 32 TiB
  gmwc128           | u64    | +       | +     | +       | +    | 0.72 | +      | 4(0)  |         | >= 32 TiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 5     | +       | >= 32 TiB
+ hicg64_u32        | u32    | 1       | 2     | 3       | 3    |      |        | 0     |         | 32 MiB
+ icg31x2           | u32    | +       | +     |         |      |      |        |       |         | ?
  icg64             | u32    | +       | +     |         |      | 113  |        |       |         | ?
  icg64_p2          | u32    | 1       | 2     | 3       |      | 5.1  |        | 0     |         | 32 MiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
@@ -711,6 +713,9 @@ There are only two problematic situations:
  magma             | u64    | +       | +     | +       | +    | 25   |        |       |         | >= 1 TiB
  magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      | 3     |         | >= 2 TiB
  magma_avx-cbc     | u64    | +       | +     | +       | +    | 7.1  | +      | 4     |         | >= 2 TiB
+ melg607           | u64    | 2       | 3     | 5       | 7    |      |        | 2.25  |         | 8 MiB
+ melg19937         | u64    | +       | 3     | 3       |      |      |        | 3.25  |         | 256 GiB
+ melg44497         | u64    | +       | +     | 3       |      |      |        | 3.25  |         | ?
  minstd            | u32    | 6       | 20    | 38      | 42   | 2.4  | -(>>10)| 0     | -       | 1 KiB
  mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 16 TiB
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | +      | 4     | +       | >= 32 TiB
@@ -740,6 +745,7 @@ There are only two problematic situations:
  mwc1616x          | u32    | +       | +     | +       | +    | 1.2  | +      | 3.5   | +       | 32 TiB
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 1 GiB
+ mwc8222           | u32    | +       | +     | +       | +    |      |        |       |         |
  pcg32             | u32    | +       | +     | +       | +    | 0.44 | +      | 3.5   | +       | 32 TiB
  pcg32_xsl_rr      | u32    | +       | +     | +       | +    | 0.58 | +      | 4     |         | 256 GiB
  pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | 3     | +       | >= 32 TiB
@@ -808,7 +814,7 @@ There are only two problematic situations:
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 32 TiB
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     |         | >= 32 TiB
  wich1982          | u32    | +       | 5     | 11      | 13   | 2.3  |        | 0     |         | 256 GiB
- wich2006          | u32    | +       | +     | +       | +    | 4.6  |        |       |         | ?
+ wich2006          | u32    | +       | +     | +       | +    | 4.6  |        |       |         | >= 16 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 32 TiB
  wyrand            | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 32 TiB
