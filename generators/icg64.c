@@ -1,14 +1,32 @@
 /**
  * @file icg64.c
  * @brief Inversive congruential generator with prime modulus.
- * @details
+ * @details This generator is very slow, much slower than DES, 3DES,
+ * Magma and Kuznyechik. Has a period around 2^63.
+ *
+ * The algorithm for modular inversion is taken from [2] (see algorithm 2.20).
+ * A similar algorithm is used in TestU01 sources.
+ *
+ * References:
+ *
+ * 1. Eichenauer-Herrmann J. Inversive Congruential Pseudorandom Numbers:
+ *    A Tutorial // International Statistical Review. 1992. V. 60. N 2.
+ *    P. 167-176. https://doi.org/10.2307/1403647
+ * 2. Hankerson D., Menezes A., Vanstone S. Guide to elliptic curve
+ *    cryptography. 2004. Springer-Verlag New York Inc.
+ *    https://doi.org/10.1007/b97644
+ *
+ * Python code for generating reference values:
  *
  *     x = 12345
- *     for i in range(0,10000):
+ *     for i in range(0, 10000):
  *         x = (pow(x, -1, 2**63 - 25) + 1) % (2**63 - 25)
  *     print(hex(x * 2))
  *
- * https://doi.org/10.1007/b97644 (algorithm 2.20)
+ * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 
@@ -22,28 +40,25 @@ typedef struct {
     uint64_t x;
 } Icg64State;
 
-/*
- * Compute the inverse of x mod M by the modified Euclide
- * algorithm (Knuth V2 p. 325).
+/**
+ * @brief Calculates \f$ f^{-1} \mod p \f$ using Algorithm 2.20 from
+ * Hankenson et al. [2].
  */
-int64_t modinv64(int64_t M, int64_t x)
+int64_t modinv64(int64_t p, int64_t a)
 {
-    int64_t u1 = 0, u3 = M, v1 = 1, v3 = x;
-    if (x == 0) return 0;
-
-    while (v3 != 0) {
-        int64_t qq = u3 / v3;
-        int64_t t1 = u1 - v1 * qq;
-        int64_t t3 = u3 - v3 * qq;
-        u1 = v1;
-        v1 = t1;
-        u3 = v3;
-        v3 = t3;
+    int64_t u = a, v = p, x1 = 1, x2 = 0;
+    if (a == 0) return 0;
+    while (u != 1) {
+        int64_t q = v / u;
+        int64_t r = v - q * u;
+        int64_t x = x2 - q * x1;
+        v = u; u = r; x2 = x1; x1 = x;
     }
-    if (u1 < 0)
-        u1 += M;
-    return u1;
+    if (x1 < 0)
+        x1 += p;
+    return x1;
 }
+
 
 static inline uint64_t get_bits_raw(void *state)
 {
