@@ -94,7 +94,7 @@ static void *create(const CallerAPI *intf)
     if (luxury == -1) {
         return NULL;
     }
-    intf->printf("SWB(42,22,2^32-5)[luxury=%d]\n", luxury);
+    intf->printf("SWB(43,22,2^32-5)[luxury=%d]\n", luxury);
     SwbLuxState *obj = intf->malloc(sizeof(SwbLuxState));
     for (int i = 1; i <= SWB_A; i++) {
         obj->x[i] = intf->get_seed32();
