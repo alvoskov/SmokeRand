@@ -766,6 +766,7 @@ There are only two problematic situations:
  ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | +      | 3.5   |         | 8 TiB
  ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 32 TiB
  ranval            | u32    | +       | +     | +       | +    | 0.31 | +      | 4(0)  | +       | >= 32 TiB
+ r250              | u32    | 3       | 7     | 10      | 13   | 0.50 | +      | 0     |         | 1 MiB
  r1279             | u32    | 2       | 5     | 7       | 10   | 0.47 | +      | 0     | Small   | 64 MiB
  ranlux[0]         | u32    | 1       | 6     | 9       | 12   | 6.8  | N/A    | 0     |         | 4 MiB
  ranlux[1]         | u32    | +       | +     | 2       | 3    | 13   | N/A    | 0     |         | 4 GiB
