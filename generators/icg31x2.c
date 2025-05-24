@@ -4,7 +4,7 @@
  * prime modulus.
  * @details This algorithm is slightly faster than 63-bit ICG with prime modulus
  * but is still much slower than AES-128 or ChaCha12. Has a period
- * around 2^62.
+ * around 2^62. Fails the `sumcollector` test from the `full` battery.
  *
  * References:
  *
