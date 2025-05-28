@@ -660,7 +660,7 @@ There are only two problematic situations:
  hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 5     | +       | >= 32 TiB
  hicg64_u32        | u32    | 1       | 2     | 3       | 3    | 5.4  |        | 0     |         | 32 MiB
  icg31x2           | u32    | +       | +     | +       | 1    | 87   |        |       |         | ?
- icg64             | u32    | +       | +     | +       | +    | 113  |        |       |         | ?
+ icg64             | u32    | +       | +     | +       | +    | 113  |        |       |         | >= 256 GiB
  icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  |        | 0     |         | 32 MiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
@@ -785,7 +785,7 @@ There are only two problematic situations:
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  |         | >= 4 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
  speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         | >= 4 TiB
- speck128          | u64    | +       | +     | +       | +    | 3.8  | +      | 5     |         | >= 16 TiB
+ speck128          | u64    | +       | +     | +       | +    | 3.8  | +      | 5     |         | >= 32 TiB
  speck128_avx(full)| u64    | +       | +     | +       | +    | 0.75 | +      | 5     |         | >= 16 TiB
  speck128_avx(r16) | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 32 TiB
  splitmix          | u64    | +       | +     | +       | +    | 0.19 | -      | 3     | +       | >= 2 TiB
