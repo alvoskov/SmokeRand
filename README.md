@@ -658,10 +658,10 @@ There are only two problematic situations:
  gjrand64          | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |         | >= 32 TiB
  gmwc128           | u64    | +       | +     | +       | +    | 0.72 | +      | 4(0)  |         | >= 32 TiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 5     | +       | >= 32 TiB
- hicg64_u32        | u32    | 1       | 2     | 3       | 3    | 5.4  |        | 0     |         | 32 MiB
+ hicg64_u32        | u32    | 1       | 2     | 3       | 3    | 5.4  | --     | 0     |         | 32 MiB
  icg31x2           | u32    | +       | +     | +       | 1    | 87   |        |       |         | 8 GiB
  icg64             | u32    | +       | +     | +       | +    | 113  |        |       |         | >= 512 GiB
- icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  |        | 0     |         | 32 MiB
+ icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  | +      | 0     |         | 32 MiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
@@ -774,7 +774,7 @@ There are only two problematic situations:
  ranlux[2]         | u32    | +       | +     | +       | +    | 27   | N/A    |       |         | >= 128 GiB
  rc4               | u32    | +       | +     | +       | +    | 6.0  | +      | 3     | +       | 512 GiB
  rc4ok             | u32    | +       | +     | +       | +    | 6.2  | N/A    | 4.5   | +       | >= 32 TiB
- romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      | 4(0)  |         | >= 1 TiB
+ romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      | 4(0)  |         | >= 2 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
  sapparot          | u32    | +       | 1     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
@@ -789,6 +789,7 @@ There are only two problematic situations:
  speck128_avx(full)| u64    | +       | +     | +       | +    | 0.75 | +      | 5     |         | >= 16 TiB
  speck128_avx(r16) | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 32 TiB
  splitmix          | u64    | +       | +     | +       | +    | 0.19 | -      | 3     | +       | >= 2 TiB
+ splitmix_g1       | u64    | +       | 1     | 1       | 2    |      | -      | 0.75  |         | 8 GiB
  splitmix32        | u32    | +       | 3     | 4       | 5/6  | 0.25 | -(>>10)| 0     | Small   | 1 GiB
  splitmix32cbc     | u32    | +       | +     | +       | +    | 2.1  | -      | 3     |         | >= 4 TiB(?)
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | 4     | +       | >= 16 TiB
@@ -816,7 +817,7 @@ There are only two problematic situations:
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 32 TiB
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     |         | >= 32 TiB
  wich1982          | u32    | +       | 5     | 11      | 13   | 2.3  | -      | 0     |         | 256 GiB
- wich2006          | u32    | +       | +     | +       | +    | 4.6  |        |       |         | >= 16 TiB
+ wich2006          | u32    | +       | +     | +       | +    | 4.6  | +      | 4     |         | >= 16 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |         | >= 32 TiB
  wyrand            | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 32 TiB
@@ -843,7 +844,7 @@ There are only two problematic situations:
  xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   |         | >= 32 TiB
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   |         | ?
  xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   |         | >= 32 TiB
- ziff98            | u32    | +       | 3     | 3       | 3    | 0.47 |        | 3.25  |         | 32 GiB
+ ziff98            | u32    | +       | 3     | 3       | 3    | 0.47 | +      | 3.25  |         | 32 GiB
 
 Performance estimation for some 64-bit generators
 

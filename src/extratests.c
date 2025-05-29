@@ -71,7 +71,7 @@ static inline uint64_t birthday_gen_trvalue(GeneratorState *obj, uint64_t mask, 
 {
     uint64_t u;
     long ctr = 0;
-    static const long ctr_max = 10000000;
+    static const long ctr_max = 100000000;
     if (obj->gi->nbits == 64) {
         do {            
             u = obj->gi->get_bits(obj->state);

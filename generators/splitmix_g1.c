@@ -1,7 +1,11 @@
 /**
  * @file splitmix_g1.c
  * @brief SplitMix generator based on scrambling of "discrete Weyl sequence"
- * by a modified MurMur3 hash output function.
+ * by a modified MurMur3 hash output function: a version with bad gamma.
+ *
+ * @details It fails the `hamming_distr` and `matrixrank_8192` tests
+ * from the `full` battery (but not linear complexity tests!). In PractRand 0.94
+ * it fails the BRank test at 16 GiB sample.
  *
  * References:
  *
@@ -39,4 +43,4 @@ static void *create(const CallerAPI *intf)
     return (void *) obj;
 }
 
-MAKE_UINT64_PRNG("SplitMix", NULL)
+MAKE_UINT64_PRNG("SplitMix_g1", NULL)
