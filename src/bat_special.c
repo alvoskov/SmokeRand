@@ -137,14 +137,16 @@ SpeedResults battery_speed_test(const GeneratorInfo *gen, const CallerAPI *intf,
     printf("  For empty 'dummy' PRNG:     %g\n", speed_dummy.ns_per_call);
     printf("  Corrected result:           %g\n", speed_corr.ns_per_call);
     printf("  Corrected result (GiB/sec): %g\n", gb_per_sec);
-    printf("CPU frequency:                %.1f MHz\n", speed_full.ticks_per_call / speed_full.ns_per_call * 1000.0);
+    printf("CPU frequency:                %.1f MHz\n",
+        speed_full.ticks_per_call / speed_full.ns_per_call * 1000.0);
     printf("CPU ticks per call:\n");
     printf("  Raw result:                 %g\n", speed_full.ticks_per_call);
+    printf("  Raw result (cpB):           %g\n", speed_full.cpb);
     printf("  For empty 'dummy' PRNG:     %g\n", speed_dummy.ticks_per_call);
     printf("  Corrected result:           %g\n", speed_corr.ticks_per_call);
     printf("  Corrected result (cpB):     %g\n\n", speed_corr.cpb);
     // Corrected results
-    return speed_corr;    
+    return speed_corr;
 }
 
 void battery_speed(const GeneratorInfo *gen, const CallerAPI *intf)

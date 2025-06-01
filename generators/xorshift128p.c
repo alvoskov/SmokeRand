@@ -6,6 +6,13 @@
  * Note: its upper 32 bits (`--filter=high32`) fail the `hamming_distr` and
  * `hamming_ot_values` test from the `full` battery.
  *
+ * 
+ *        # Test name                    xemp              p Interpretation  Thr#
+ *    -------------------------------------------------------------------------------
+ *       29 hamming_distr             7.79134       3.32e-15 FAIL               9
+ *       33 hamming_ot_values           3.122       8.98e-04 SUSPICIOUS         7
+ *    -------------------------------------------------------------------------------
+ *
  * References:
  * 
  * 1. Marsaglia G. Xorshift RNGs // Journal of Statistical Software. 2003.

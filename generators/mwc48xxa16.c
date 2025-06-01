@@ -69,4 +69,4 @@ static void *create(const CallerAPI *intf)
 }
 
 
-MAKE_UINT32_PRNG("Mwc32xxa8", NULL)
+MAKE_UINT32_PRNG("Mwc48xxa16", NULL)
