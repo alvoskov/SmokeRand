@@ -1031,6 +1031,11 @@ are less sensitive, e.g. entropy test catches only randu.
 
 # Versions history
 
+02.05.2025: SmokeRand 0.35
+
+- Several new generators: `biski64`, `melg19937`, `mwc8222`, `xabc`,
+  Wichmann-Hill (1982,2006), several inverse congruential generators.
+
 01.05.2025: SmokeRand 0.34
 
 - Several new generators.
