@@ -1,6 +1,6 @@
 /**
- * @file alfib16x4.c 
- * @brief A 3-tap additive lagged Fibonacci generator with output scrambler;
+ * @file alfib64x5.c 
+ * @brief A 4-tap additive lagged Fibonacci generator with output scrambler;
  * works only with bytes, doesn't use multiplication, may be used for 8-bit CPUs.
  * @details The next recurrent formula from [1] is used:
  *
@@ -11,17 +11,31 @@
  * The next output function is used:
  * 
  * \f[
- * u_i = a\left(x_i \oplus (x_i \gg 52) \right) \mod 2^64
+ * t_i = a\left(x_i \oplus (x_i \gg 52) \right) \mod 2^64
+ * \f]
+ *
+ * \f[
+ * u_i = a\left(x_i \oplus (x_i \gg 37) \right) \mod 2^64
  * \f]
  *
  * XOR hides low linear complexity of the lowest bits and multiplication ---
  * linear dependencies detected by the matrix rank tests. An initial state
  * is initialized by the custom modification of XABC generator from [2].
+ * The \f$ a \f$ multiplier is taken from xorshift64*.
+ *
+ * The second round is needed to prevent failures of `hamming_ot_low1` test
+ * on a very large samples.
+ *
+ * The PRNG is initialized by XABC64: a modification of chaotic XABC generator
+ * by Daniel Dunn [3].
  *
  * References:
  *
- * 1. https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=3532b8a75efb3fe454c0d4dd68c1b09309d8288c
- * 2. Daniel Dunn (aka EternityForest) The XABC Random Number Generator
+ * 1. Wu P.-C. Random number generation with primitive pentanomials //
+ *    ACM Trans. Model. Comput. Simul. 2001. V. 11. N 4. P.346-351.
+ *    https://doi.org/10.1145/508366.508368.
+ * 2. https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=3532b8a75efb3fe454c0d4dd68c1b09309d8288c
+ * 3. Daniel Dunn (aka EternityForest) The XABC Random Number Generator
  *    https://eternityforest.com/doku/doku.php?id=tech:the_xabc_random_number_generator
  *
  * @copyright
@@ -41,11 +55,12 @@ enum {
 typedef struct {
     uint64_t x[LF64X5_BUFSIZE];
     uint8_t pos;
-} Alfib64State;
+} Alfib64x5State;
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    Alfib64State *obj = state;
+    Alfib64x5State *obj = state;
+    uint64_t a = 2685821657736338717ULL;
     uint64_t *x = obj->x;
     obj->pos++;
     uint64_t u = x[(obj->pos - 61) & LF64X5_MASK]
@@ -54,15 +69,19 @@ static inline uint64_t get_bits_raw(void *state)
         + x[(obj->pos - 45) & LF64X5_MASK];
     x[obj->pos & LF64X5_MASK] = u;
     // Output scrambler
+    // Round 1: hides low inear complexity issues
     u = u ^ (u >> 52); // Hide low linear complexity of lower bits
-    u = 2685821657736338717ULL*u; // To prevent failure of matrix rank tests
-    u = u ^ (u >> 37); // Hide low linear complexity of lower bits
-    u = 2685821657736338717ULL*u; // To prevent failure of matrix rank tests
+    u = a * u;         // To prevent failure of matrix rank tests
+    // Round 2: removes Hamming weights correlations in the lower bits
+    u = u ^ (u >> 37);
+    u = a * u;
     return u;
 }
 
-
-static void Alfib64State_init(Alfib64State *obj, uint64_t seed)
+/**
+ * @brief Initializes the generator by means of the XABC64 chaotic PRNG.
+ */
+static void Alfib64x5State_init(Alfib64x5State *obj, uint64_t seed)
 {    
     uint64_t x = 0;
     uint64_t a = seed;
@@ -76,13 +95,14 @@ static void Alfib64State_init(Alfib64State *obj, uint64_t seed)
             obj->x[i - LF64X5_WARMUP] = c ^ b;
         }
     }
+    obj->x[0] |= 1; obj->x[1] &= 0;
     obj->pos = 0;
 }
 
 static void *create(const CallerAPI *intf)
 {
-    Alfib64State *obj = intf->malloc(sizeof(Alfib64State));
-    Alfib64State_init(obj, intf->get_seed64());
+    Alfib64x5State *obj = intf->malloc(sizeof(Alfib64x5State));
+    Alfib64x5State_init(obj, intf->get_seed64());
     return obj;
 }
 
