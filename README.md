@@ -826,7 +826,7 @@ There are only two problematic situations:
  xabc8             | u32    | +       | 8     | 15      | 22   | 3.7  | -(>>10)| 0     | -       | 8 MiB
  xabc16            | u32    | +       | +     | 1       | 1    | 1.6  | +      | 2     | Small   | 64 GiB
  xabc32            | u32    | +       | +     | +       | +    | 0.82 | +      | 4     | >=Crush | >= 1 TiB
- xabc64            | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | ?
+ xabc64            | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 1 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |         | 512 KiB
  xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB

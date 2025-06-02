@@ -56,8 +56,12 @@ static inline uint64_t get_bits8(Alfib8State *obj)
         + x[(obj->pos - 45) & LF8X5_MASK];
     x[obj->pos & LF8X5_MASK] = u;
     // Output scrambler
+    // Round 1
     u = u ^ (u >> 5); // Hide low linear complexity of lower bits
     u = u + (u << 1); // To prevent failure of matrix rank tests
+    // Round 2
+    u = u ^ (u >> 6);
+    u = u + (u << 3);
     return u;
 }
 
