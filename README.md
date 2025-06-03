@@ -645,6 +645,8 @@ There are only two problematic situations:
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    | 3.75  | +       | 4 GiB
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 1 TiB
  ara32             | u32    | +       | 1     | 1       | 1    | 0.96 | +      | 2(0)  | +       | 512 MiB
+ biski8            | u32    | 1       |       |         |      |      |        |       |         | ?
+ biski16           | u32    | +       | 2     | 3       |      |      |        | 0     |         | ?
  biski64           | u64    | +       | +     | +       | +    | 0.18 | +      | 4     |         | >= 2 TiB
  chacha            | u32    | +       | +     | +       | +    | 2.0  | +      | 5     | +       | >= 32 TiB
  chacha_avx2       | u32    | +       | +     | +       | +    | 0.7  | +      | 5     | +       | >= 16 TiB

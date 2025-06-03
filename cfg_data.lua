@@ -13,7 +13,8 @@ local lib_headers = {'apidefs.h', 'cinterface.h', 'core.h', 'coretests.h',
 -- cross-platform variants.
 local gen_sources = {
     'aes128',        'alfib',         'alfib64x5',     'alfib8x5',     'alfib_lux',   
-    'alfib_mod',     'ara32',         'biski64',       'chacha',       'cmwc4096',
+    'alfib_mod',     'ara32',         'biski8',        'biski16',      'biski64',
+    'biski64sh',     'chacha',        'cmwc4096',
     'coveyou64',     'cwg64',         'des',           'drand48',      'efiix64x48',
     'flea32x1',      'gjrand64',      'gmwc128',       'hc256',        'hicg64',
     'icg31x2',       'icg64',         'icg64_p2',      'isaac64',      'kiss64',
