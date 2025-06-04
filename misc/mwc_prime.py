@@ -9,7 +9,7 @@ def mwc64():
 
 mwc64()
 
-n = 8
+n = 4
 b, delta = 2**16, 50000
 for i in range(1, delta):
     a = b - i
