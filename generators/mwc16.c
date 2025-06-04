@@ -2,11 +2,32 @@
  * @file mwc16.c
  * @brief A simple multiply-with carry generator for 16-bit systems.
  * @details May be useful for retrocomputing. Passes the `express`, `brief`,
- * `default`, `full` batteries.
+ * `default`, `full` batteries. Uses a simple output scrambler to hide
+ * possible artefacts (inspired by MWC256XXA3, tuned for a very bad
+ * multiplier).
+ *
+ * Uses the next recurrent formula for updatings its internal state:
+ *
+ * \f[
+ * x_{i} = a x_{i - 8} + c_{i - 1} \mod 2^{16}
+ * \f]
+ *
+ *
+ * \f[
+ * c_{i} = \lfloor \frac{a x_{i - 8} + c_{i - 1}}{\mod 2^{16}} \rfloor
+ * \f]
+ *
+ * Uses the next output scrambler:
+ *
+ * \f[
+ * u_{i} = \left(x_i \oplus (x_{i-1} \lll 3) \right) + (x_{i-1} \lll 9) \mod 2^{16}
+ * \f]
  * 
  * @copyright
  * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 
@@ -59,15 +80,6 @@ static void *create(const CallerAPI *intf)
 {
     Mwc16State *obj = intf->malloc(sizeof(Mwc16State));
     Mwc16State_init(obj, intf->get_seed64());
-/*
-    for (int i = 0; i < 100; i++) {
-        for (int j = 0; j < 16; j++) {
-            intf->printf("%.2X ", (int) obj->x[j]);
-        }
-        intf->printf(" : %X ", (int) obj->c);
-        intf->printf("| %X \n ", (int) get_bits_raw(obj));
-    }
-*/
     return obj;
 }
 
