@@ -42,3 +42,14 @@ for i in range(0, 32):
 print(hex(m), hex(a_lcg))
 
 
+#---------------------------------------------------------
+
+print("----- 64-bit generator -----")
+x = 1
+a, b, r = 0xf21f494c589bf715, 2**64, 2
+
+m = a*b**r - 1
+a_lcg = pow(b, -1, m)
+for i in range(0, 32):
+    x = (a_lcg * x) % m
+    print(hex(x))

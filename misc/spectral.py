@@ -171,8 +171,25 @@ def main():
     #m = [0x620ffffffffffffffffffffffffffffffff]
 
 
-    a[0] = pow(a[0], 3, m[0])
-    print(a)
+    #a.append(pow(a[0], 2, m[0]));
+    #m.append(m[0])
+    #a.append(pow(a[0], 4, m[0]))
+    #m.append(m[0])
+    #print(a)
+
+    #b = 2**24
+    #m = b**24 - b**10 + 1
+    #a = m - (m - 1) // b
+    #a = pow(a, 46, m)
+
+    #a = [a]
+    #m = [m]
+    #print(a)
+    #print(m)
+
+    m = [2**64]
+    a = [pow(18000_69069_69069_69069, 2**40, 2**128)]
+    print(hex(a[0]))
 
 
     for i in range (len(a)):
