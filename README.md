@@ -797,7 +797,7 @@ There are only two problematic situations:
  splitmix          | u64    | +       | +     | +       | +    | 0.12 | -      | 3     | +       | >= 2 TiB
  splitmix_g1       | u64    | +       | 1     | 1       | 2    | 0.12 | -      | 0.75  |         | 8 GiB
  splitmix32        | u32    | +       | 3     | 4       | 5/6  | 0.25 | -(>>10)| 0     | Small   | 1 GiB
- splitmix32cbc     | u32    | +       | +     | +       | +    | 2.1  | -      | 3     | +       | >= 4 TiB(?)
+ splitmix32cbc     | u32    | +       | +     | +       | +    | 2.1  | -      | 3     | +       | 8 TiB
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | 4     | +       | >= 16 TiB
  sqxor32           | u32    | +       | 2     | 3       | 5    | 0.20 | -(>>10)| 0     | Small   | 16 GiB
  stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | +      | 0     |         | >= 32 TiB
