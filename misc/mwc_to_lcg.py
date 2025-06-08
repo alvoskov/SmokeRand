@@ -49,7 +49,31 @@ x = 1
 a, b, r = 0xf21f494c589bf715, 2**64, 2
 
 m = a*b**r - 1
+print(hex(m))
+print(hex(2**192 - m))
+print("-------------")
 a_lcg = pow(b, -1, m)
 for i in range(0, 32):
     x = (a_lcg * x) % m
     print(hex(x))
+
+# Experiments with modular reduction
+# https://habr.com/ru/articles/731038/
+# 
+print("================")
+omega = 2**192 - m
+a_lcg = pow(a_lcg, 10**20, m)
+print('omega = ', hex(omega), 'm = ', hex(m))
+print(hex(a_lcg), hex(x), hex(a_lcg * x % m))
+mul = a_lcg * x
+print(hex(mul))
+
+mul_high = mul >> 192
+while mul_high != 0:
+    mul = (mul % (2**192)) + omega * mul_high
+    mul_high = mul >> 192
+    print(hex(mul))
+
+print(hex(2**384))
+
+
