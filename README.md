@@ -649,11 +649,12 @@ There are only two problematic situations:
  biski16_mul       | u32    | +       | 2     | 3       | 6    | 1.6  |        | 0     |         | 16 GiB
  biski64_mul       | u64    | +       | +     | +       | +    | 0.18 | +      | 4     |         | >= 2 TiB
  biski8            | u32    | +       | 17    | 35      | 35   | 1.4  |        |       |         | 2 MiB
+ biski8_alt        | u32    | +       | 17    |         |      | 1.4  |        |       |         | 2 MiB
  biski16           | u32    | +       | +     | +       | 1    | 0.81 | +      | 2     |         | 1 TiB
- biski16_alt       | u32    | +       | +     |         |      |      |        |       |         | ?
+ biski16_alt       | u32    | +       | +     | +       |      | 1.1  |        |       |         | ?
  biski32           | u32    | +       | +     | +       | +    | 0.21 | +      | 3     |         | ?
  biski64           | u32    | +       | +     | +       | +    | <0.1 | +      | 3     |         | ?
- biski64_alt       | u32    |         |       |         |      |      |        |       |         | ?
+ biski64_alt       | u32    | +       | +     | +       |      | 0.15 |        |       |         | ?
  chacha            | u32    | +       | +     | +       | +    | 2.0  | +      | 5     | +       | >= 32 TiB
  chacha_avx2       | u32    | +       | +     | +       | +    | 0.7  | +      | 5     | +       | >= 16 TiB
  chacha_ctr32      | u32    | +       | +     | +       | 1    | 2.0  | -(>>10)| 0     | +       | 256 GiB

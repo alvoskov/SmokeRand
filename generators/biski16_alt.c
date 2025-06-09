@@ -44,4 +44,4 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-MAKE_UINT32_PRNG("biski16", NULL)
+MAKE_UINT32_PRNG("biski16_alt", NULL)

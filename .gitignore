@@ -1,3 +1,25 @@
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+Makefile.wat
+build.ninja
+html/
+latex/
+*.exe
+*.com
+*.bin
+.ninja_deps
+.ninja_log
+
+# Watcom
+*.mk
+*.lk1
+*.mk1
+*.sym
+*.tgt
+*.map
+
 # Prerequisites
 *.d
 
