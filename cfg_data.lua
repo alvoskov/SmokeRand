@@ -26,7 +26,7 @@ local gen_sources = {
     'minstd',        'mixmax',        'mlfib17_5',     'mrg32k3a',     'msws',
     'msws64',        'msws64x',       'msws_ctr',      'mt19937',      'mularx128',
     'mularx128_u32', 'mularx256',     'mularx64_r2',   'mularx64_u32', 'mulberry32',
-    'mwc128',        'mwc128x',       'mwc128xxa32',   'mwc1616',      'mwc1616x',
+    'mwc128',        'mwc128x',       'mwc128xxa32',   'mwc1616',      'mwc1616x', 'mwc16_32',
     'mwc256xxa64',   'mwc3232x',      'mwc32x',        'mwc32xxa8',    'mwc40xxa8',
     'mwc4691',       'mwc48xxa16',    'mwc64',         'mwc64x',       'mwc8222',
     'pcg32',         'pcg32_xsl_rr',  'pcg64_64',      'pcg64_xsl_rr', 'philox',
