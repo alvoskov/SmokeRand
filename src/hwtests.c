@@ -753,9 +753,14 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
     }
     obj->intf->printf("  Sample size, values:     %llu (2^%.2f or 10^%.2f)\n",
         opts->nvalues, sr_log2((double) opts->nvalues), log10((double) opts->nvalues));
+    uint64_t mask = (nbits == 64) ? 0xFFFFFFFFFFFFFFFF : 0xFFFFFFFF;
+    uint64_t not_mask = ~mask;
+    uint64_t bad_sum = 0;
     for (unsigned long long i = 0; i < opts->nvalues; i += block_len) {
         for (int j = 0; j < block_len; j++) {
-            x[j] = obj->gi->get_bits(obj->state);
+            uint64_t u = obj->gi->get_bits(obj->state);
+            x[j] = u & mask;
+            bad_sum += u & not_mask;
             hw[j] = get_uint64_hamming_weight(x[j]);
         }
         // 1-value blocks
@@ -768,6 +773,9 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
             calc_block_hw_sums(h[j].o,        hw, 1 << j, block_len);
             calc_block_hw_xorsums(h[j].o_xor, x,  1 << j, block_len);
         }
+    }
+    if (bad_sum != 0) {
+        obj->intf->printf("  Warning: generator output size exceeds its declared size\n");
     }
     double zabs_max = -1.0;
     obj->intf->printf("  Blocks analysis results\n");
