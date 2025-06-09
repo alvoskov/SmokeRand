@@ -422,6 +422,7 @@ static inline void *create(const CallerAPI *intf)
 int run_self_test(const CallerAPI *intf)
 {
     int is_ok = 1;
+    (void) get_bits_raw(NULL);
     intf->printf("----- Speck128/128: 32 rounds (scalar) -----\n");
     is_ok = is_ok & run_self_test_scalar(intf);
     intf->printf("----- Speck128/128: 32 rounds (vectorized) -----\n");

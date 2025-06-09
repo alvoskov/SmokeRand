@@ -198,7 +198,7 @@ elseif platform == 'mingw-hx' then
     sc.gen_libs, sc.so_lflags = "-lgcc -static-libgcc", "-m32"
     stub = make_gcc_stub(sc) .. gcc_rules
 elseif platform == 'zigcc' then
-    local cfg = make_gcc_stub_cfg()
+    local sc = make_gcc_stub_cfg()
     sc.cflags = "-march=native -DUSE_WINTHREADS"
     sc.get_cflags, sc.gen_lflags = "-ffreestanding", "-nostdlib"
     sc.compilers = "cc = zig cc\ncxx = zig c++\n"
