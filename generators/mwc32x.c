@@ -40,7 +40,7 @@ typedef struct {
  */
 static inline uint32_t get_bits16(void *state)
 {
-    const uint16_t A0 = 63885; // Selected from Knuth spectral test
+    const uint32_t A0 = 63885; // Selected from Knuth spectral test
     MWC32XState *obj = state;
     uint16_t c = obj->data >> 16;
     uint16_t x = obj->data & 0xFFFF;

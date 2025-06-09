@@ -22,7 +22,7 @@ PRNG_CMODULE_PROLOG
 static inline uint64_t get_bits_raw(void *state)
 {
     Lcg64State *obj = state;
-    obj->x = obj->x * 6906969069 + 1;
+    obj->x = obj->x * 6906969069ull + 1ull;
     // Slightly better version from TAOCP2
     //obj->x = obj->x * 6364136223846793005ull + 1442695040888963407ull;
     return obj->x >> 32;

@@ -47,8 +47,8 @@ static inline uint64_t get_bits_raw(void *state)
     Mwc3232xShared *obj = state;
     uint32_t z_lo = obj->z & 0xFFFFFFFF, z_hi = obj->z >> 32;
     uint32_t w_lo = obj->w & 0xFFFFFFFF, w_hi = obj->w >> 32;
-    obj->z = 4294441395 * z_lo + z_hi; // 2^32 - 525901
-    obj->w = 4294440669 * w_lo + w_hi; // 2^32 - 526627    
+    obj->z = 4294441395ull * z_lo + z_hi; // 2^32 - 525901
+    obj->w = 4294440669ull * w_lo + w_hi; // 2^32 - 526627    
     return ((obj->z << 32) | (obj->z >> 32)) ^ obj->w;
 }
 

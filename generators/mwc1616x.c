@@ -47,8 +47,8 @@ static inline uint64_t get_bits_raw(void *state)
     Mwc1616xShared *obj = state;
     uint16_t z_lo = obj->z & 0xFFFF, z_hi = obj->z >> 16;
     uint16_t w_lo = obj->w & 0xFFFF, w_hi = obj->w >> 16;
-    obj->z = 61578 * z_lo + z_hi;
-    obj->w = 63885 * w_lo + w_hi;
+    obj->z = (uint32_t)61578 * z_lo + z_hi;
+    obj->w = (uint32_t)63885 * w_lo + w_hi;
     uint32_t mwc = ((obj->z << 16) | (obj->z >> 16)) ^ obj->w;
     return mwc;
 }
