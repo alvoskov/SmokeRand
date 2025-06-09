@@ -664,8 +664,8 @@ typedef struct {
 
 static void HammingDistrHist_init(HammingDistrHist *obj, size_t nbits)
 {
-    obj->o     = calloc(nbits, sizeof(unsigned long long));
-    obj->o_xor = calloc(nbits, sizeof(unsigned long long));
+    obj->o     = calloc(nbits + 1, sizeof(unsigned long long));
+    obj->o_xor = calloc(nbits + 1, sizeof(unsigned long long));
     obj->nbits = nbits;
     obj->z = NAN;     obj->p = NAN;
     obj->z_xor = NAN; obj->p_xor = NAN;
