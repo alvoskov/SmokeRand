@@ -1,5 +1,22 @@
 // https://github.com/danielcota/biski64
 // passes `default`, vulnerable to hamming_distr xor test (128-bit blocks)
+/*
+Hamming weights distribution test (histogram)
+  Sample size, values:     137438953472 (2^37.00 or 10^11.14)
+  Blocks analysis results
+        bits |        z          p |    z_xor      p_xor
+          32 |   -0.400      0.656 |   -0.080      0.532
+          64 |    1.165      0.122 |   -0.754      0.775
+         128 |   -0.396      0.654 |    8.256   7.54e-17
+         256 |   -0.711      0.762 |    4.613   1.99e-06
+         512 |    0.625      0.266 |   -0.012      0.505
+        1024 |    0.936      0.175 |    2.203     0.0138
+        2048 |   -0.429      0.666 |    0.611      0.271
+        4096 |   -1.041      0.851 |   -1.367      0.914
+        8192 |   -1.407       0.92 |   -0.811      0.791
+       16384 |    0.457      0.324 |   -0.099      0.539
+  Final: z =   8.256, p = 7.54e-17
+*/
 
 #include "smokerand/cinterface.h"
 

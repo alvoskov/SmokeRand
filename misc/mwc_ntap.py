@@ -3,7 +3,21 @@ from sympy import *
 
 b = 2**64
 #dmin, dmin_inc = 2**64 - 100000, 99999
-dmin, dmin_inc = 5**26, 1000000
+
+b = 2**32
+dmin, dmin_inc = 2**32 - 100000, 99999 # For bad multiplier
+dmin, dmin_inc = 1000000, 100000 # For good multiplier
+
+
+
+b = 2**8
+dmin, dmin_inc = 1, 250
+
+
+b = 2**16
+dmin, dmin_inc = 1, 25000
+
+#dmin, dmin_inc = 5**26, 1000000
 
 for i in range(dmin, dmin + dmin_inc):
     a = (b - i)

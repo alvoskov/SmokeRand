@@ -191,6 +191,9 @@ def main():
     a = [pow(18000_69069_69069_69069, 2**40, 2**128)]
     print(hex(a[0]))
 
+    m = [2**16]
+    a = [62317]
+
 
     for i in range (len(a)):
         t = range(2, 9)
