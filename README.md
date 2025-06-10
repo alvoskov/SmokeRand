@@ -645,16 +645,16 @@ There are only two problematic situations:
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    | 3.75  | +       | 4 GiB
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 1 TiB
  ara32             | u32    | +       | 1     | 1       | 1    | 0.96 | +      | 2(0)  | +       | 512 MiB
- biski8_mul        | u32    | 1       | 19    | 33      |      | 2.2  |        |       |         | 512 KiB
+ biski8_mul        | u32    | 1       | 19    | 33      | 41   | 2.2  |        |       |         | 512 KiB
  biski16_mul       | u32    | +       | 2     | 3       | 6    | 1.6  |        | 0     |         | 16 GiB
  biski64_mul       | u64    | +       | +     | +       | +    | 0.18 | +      | 4     |         | >= 2 TiB
  biski8            | u32    | +       | 17    | 35      | 35   | 1.4  |        |       |         | 2 MiB
- biski8_alt        | u32    | +       | 17    |         |      | 1.4  |        |       |         | 2 MiB
+ biski8_alt        | u32    | +       | 17    | 31      | 31   | 1.4  |        | 0     |         | 2 MiB
  biski16           | u32    | +       | +     | +       | 1    | 0.81 | +      | 2     |         | 1 TiB
- biski16_alt       | u32    | +       | +     | +       |      | 1.1  |        |       |         | ?
+ biski16_alt       | u32    | +       | +     | +       | +    | 1.1  |        |       |         | 1 TiB
  biski32           | u32    | +       | +     | +       | +    | 0.21 | +      | 3     |         | ?
  biski64           | u32    | +       | +     | +       | +    | <0.1 | +      | 3     |         | ?
- biski64_alt       | u32    | +       | +     | +       |      | 0.15 |        |       |         | ?
+ biski64_alt       | u32    | +       | +     | +       | +    | 0.15 |        |       |         | ?
  chacha            | u32    | +       | +     | +       | +    | 2.0  | +      | 5     | +       | >= 32 TiB
  chacha_avx2       | u32    | +       | +     | +       | +    | 0.7  | +      | 5     | +       | >= 16 TiB
  chacha_ctr32      | u32    | +       | +     | +       | 1    | 2.0  | -(>>10)| 0     | +       | 256 GiB
@@ -741,7 +741,7 @@ There are only two problematic situations:
  mularx64_u32      | u32    | +       | +     | +       | +    | 1.7  | -      | 3     |         | >= 2 TiB
  mularx128         | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 4 TiB
  mularx128_u32     | u32    | +       | +     | +       | +    | 0.95 | +      | 4     |         | >= 32 TiB
- mularx128_str     | u64    | +       | +     | +       |      | 0.38 | +      |       |         | >= 32 TiB
+ mularx128_str     | u64    | +       | +     | +       | +    | 0.38 | +      |       |         | >= 32 TiB
  mularx256         | u64    | +       | +     | +       | +    | 0.67 | +      | 4     |         | >= 32 TiB
  mulberry32        | u32    | +       | 1     | 2/3     | 5    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
  mwc32x            | u32    | +       | 3     | 4       | 8    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
