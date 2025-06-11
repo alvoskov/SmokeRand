@@ -1,3 +1,22 @@
+/**
+ * @file sapparot2_64.c
+ * @brief Sapparot2 is a chaotic generator.
+ * @details References:
+ *
+ * 1. Ilya O. Levin. Sapparot-2 Fast Pseudo-Random Number Generator.
+ *    http://www.literatecode.com/sapparot2
+ *
+ * WARNING! IT HAS NO GUARANTEED MINIMAL PERIOD! BAD SEEDS ARE POSSIBLE!
+ * DON'T USE THIS PRNG FOR ANY SERIOUS WORK! The author uses rotations
+ * in the "discrete Weyl sequence" part without proof of a minimal cycle
+ * of an updated counter part.
+ *
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG

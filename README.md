@@ -652,8 +652,8 @@ There are only two problematic situations:
  biski8_alt        | u32    | +       | 17    | 31      | 31   | 1.4  |        | 0     |         | 2 MiB
  biski16           | u32    | +       | +     | +       | 1    | 0.81 | +      | 2(0)  |         | 1 TiB
  biski16_alt       | u32    | +       | +     | +       | +    | 1.1  |        |       |         | 1 TiB
- biski32           | u32    | +       | +     | +       | +    | 0.21 | +      | 3(0)  |         | ?
- biski32_alt       | u32    | +       | +     | +       | +    |      |        | 4(0)  |         | ?
+ biski32           | u32    | +       | +     | +       | +    | 0.32 | +      | 3(0)  |         | ?
+ biski32_alt       | u32    | +       | +     | +       | +    | 0.43 |        | 4(0)  |         | ?
  biski64           | u32    | +       | +     | +       | +    | <0.1 | +      | 3     |         | ?
  biski64_alt       | u32    | +       | +     | +       | +    | 0.15 | +      | 4     |         | ?
  chacha            | u32    | +       | +     | +       | +    | 2.0  | +      | 5     | +       | >= 32 TiB
@@ -686,7 +686,7 @@ There are only two problematic situations:
  lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | 3     | +       | 64 GiB
  lcg128_u32_full   | u32    | +       | +     | 1       | 1    | 0.75 | +      | 3     | +       | >= 32 TiB
  lcg69069          | u32    | 6       | 20    | 38/39   | 43   | 0.38 | -(>>10)| 0     | -       | 2 KiB
- lea128            | u32    | +       | +     | +       | +    | 5.7  | +      | 5     |         | >= 8 TiB
+ lea128            | u32    | +       | +     | +       | +    | 5.7  | +      | 5     |         | >= 16 TiB
  lea128_avx        | u32    | +       | +     | +       | +    | 1.2  | +      | 5     |         | >= 32 TiB
  lfib_par[31+]     | u32    | 1       | 5/6   | 6/7     | 10/11| 0.70 | +      | 0     | -       | 32 MiB
  lfib_par[55+]     | u32    | 1       | 4     | 5       | 7    | 0.51 | +      | 0     | -       | 2 GiB
@@ -791,12 +791,13 @@ There are only two problematic situations:
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
  sapparot          | u32    | +       | 1     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
- sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | >= 16 TiB
+ sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4(0)  |         | >= 16 TiB
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | -(>>10)| 0     |         | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)|         | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  |         | >= 4 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
+ smwc16x8          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 1 TiB
  smwc192bad        | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | ?
  speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         | >= 4 TiB
  speck128          | u64    | +       | +     | +       | +    | 3.8  | +      | 5     |         | >= 32 TiB
@@ -823,7 +824,7 @@ There are only two problematic situations:
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      | 3     |         | 32 GiB
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
- threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 2 TiB
+ threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 8 TiB
  threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | >= 32 TiB
  threefish_avx     | u64    | +       | +     | +       | +    | 1.3  | +      | 5     |         | >= 8 TiB
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB

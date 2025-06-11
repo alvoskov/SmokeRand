@@ -1,6 +1,6 @@
 /**
  * @file biski64_alt.c
- * @brief biski64 is a chaotic generator developed by Daniel Cota
+ * @brief biski64_alt is a chaotic generator developed by Daniel Cota
  * modified by A.L. Voskov.
  * @details Its design resembles one round of Feistel network. Biski64
  * passes the `express`, `brief`, `default` and `full` battery. A minor
