@@ -645,14 +645,14 @@ There are only two problematic situations:
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    | 3.75  | +       | 4 GiB
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 1 TiB
  ara32             | u32    | +       | 1     | 1       | 1    | 0.96 | +      | 2(0)  | +       | 512 MiB
- biski8_mul        | u32    | 1       | 19    | 33      | 41   | 2.2  |        |       |         | 512 KiB
+ biski8_mul        | u32    | 1       | 19    | 33      | 41   | 2.2  |        | 0     |         | 512 KiB
  biski16_mul       | u32    | +       | 2     | 3       | 6    | 1.6  |        | 0     |         | 16 GiB
  biski64_mul       | u64    | +       | +     | +       | +    | 0.18 | +      | 4     |         | >= 2 TiB
- biski8            | u32    | +       | 17    | 35      | 35   | 1.4  | -(>>10)|       |         | 2 MiB
+ biski8            | u32    | +       | 17    | 35      | 35   | 1.4  | -(>>10)| 0     |         | 2 MiB
  biski8_alt        | u32    | +       | 17    | 31      | 31   | 1.4  |        | 0     |         | 2 MiB
  biski16           | u32    | +       | +     | +       | 1    | 0.81 | +      | 2(0)  |         | 1 TiB
- biski16_alt       | u32    | +       | +     | +       | +    | 1.1  |        |       |         | 1 TiB
- biski32           | u32    | +       | +     | +       | +    | 0.32 | +      | 3(0)  |         | ?
+ biski16_alt       | u32    | +       | +     | +       | +    | 1.1  |        | 3.5(0)|         | 1 TiB
+ biski32           | u32    | +       | +     | +       | +    | 0.32 | +      | 3.5(0)|         | ?
  biski32_alt       | u32    | +       | +     | +       | +    | 0.43 |        | 4(0)  |         | ?
  biski64           | u32    | +       | +     | +       | +    | <0.1 | +      | 3     |         | ?
  biski64_alt       | u32    | +       | +     | +       | +    | 0.15 | +      | 4     |         | ?
@@ -670,7 +670,7 @@ There are only two problematic situations:
  gjrand64          | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |         | >= 32 TiB
  gmwc128           | u64    | +       | +     | +       | +    | 0.72 | +      | 4(0)  |         | >= 32 TiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 5     | +       | >= 32 TiB
- hicg64_u32        | u32    | 1       | 2     | 3       | 3    | 5.4  | --     | 0     |         | 32 MiB
+ hicg64_u32        | u32    | 1       | 2     | 3       | 3    | 5.4  | --     | 0     | Small   | 32 MiB
  icg31x2           | u32    | +       | +     | +       | 1    | 87   |        |       |         | 8 GiB
  icg64             | u32    | +       | +     | +       | +    | 113  |        |       |         | >= 512 GiB
  icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  | +      | 0     |         | 32 MiB
@@ -686,7 +686,7 @@ There are only two problematic situations:
  lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | 3     | +       | 64 GiB
  lcg128_u32_full   | u32    | +       | +     | 1       | 1    | 0.75 | +      | 3     | +       | >= 32 TiB
  lcg69069          | u32    | 6       | 20    | 38/39   | 43   | 0.38 | -(>>10)| 0     | -       | 2 KiB
- lea128            | u32    | +       | +     | +       | +    | 5.7  | +      | 5     |         | >= 16 TiB
+ lea128            | u32    | +       | +     | +       | +    | 5.7  | +      | 5     |         | >= 32 TiB
  lea128_avx        | u32    | +       | +     | +       | +    | 1.2  | +      | 5     |         | >= 32 TiB
  lfib_par[31+]     | u32    | 1       | 5/6   | 6/7     | 10/11| 0.70 | +      | 0     | -       | 32 MiB
  lfib_par[55+]     | u32    | 1       | 4     | 5       | 7    | 0.51 | +      | 0     | -       | 2 GiB
@@ -716,7 +716,7 @@ There are only two problematic situations:
  lfib_par[110503+] | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | ?
  lfib_par[110503-] | u32    | +       | +     | +       | +    | 0.50 | +      | 4     | +       | ?
  lfib4             | u32    | 1       | 1     | 3       | 4    | 0.37 | +      | 3     | +       | 32 MiB
- lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | +      | 4     |         | >= 32 TiB
+ lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | +      | 4     | +       | >= 32 TiB
  lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | +      | 2.25  | Small   | 32 KiB 
  lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | 2.25  | Small   | 1 MiB
  lrnd64_255        | u64    | 2       | 5     | 10      | 15   | 0.45 | +      | 0     | Small   | 512 KiB
@@ -742,7 +742,7 @@ There are only two problematic situations:
  mularx64_u32      | u32    | +       | +     | +       | +    | 1.7  | -      | 3     |         | >= 2 TiB
  mularx128         | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 4 TiB
  mularx128_u32     | u32    | +       | +     | +       | +    | 0.95 | +      | 4     |         | >= 32 TiB
- mularx128_str     | u64    | +       | +     | +       | +    | 0.38 | +      |       |         | >= 32 TiB
+ mularx128_str     | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 32 TiB
  mularx256         | u64    | +       | +     | +       | +    | 0.67 | +      | 4     |         | >= 32 TiB
  mulberry32        | u32    | +       | 1     | 2/3     | 5    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
  mwc32x            | u32    | +       | 3     | 4       | 8    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
@@ -765,7 +765,7 @@ There are only two problematic situations:
  pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | 3     | +       | >= 32 TiB
  pcg64_xsl_rr      | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
  philox            | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
- philox2x32        | u32    | +       | +     | +       | +    | 1.6  | -      | 3     |         | >= 32 TiB
+ philox2x32        | u32    | +       | +     | +       | +    | 1.6  | -      | 3     | +       | >= 32 TiB
  philox32          | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      | 0     |         | 512 KiB
@@ -841,7 +841,7 @@ There are only two problematic situations:
  xabc32            | u32    | +       | +     | +       | +    | 0.82 | +      | 4     | >=Crush | >= 1 TiB
  xabc64            | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | 4 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
- xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |         | 512 KiB
+ xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |S_lo/+_hi| 512 KiB
  xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      | 0     |         | 32 GiB
  xorshift128pp     | u64    | +       | +     | +       | +    | 0.29 | +      | 4     |         | >= 16 TiB
