@@ -24,18 +24,21 @@ typedef struct {
     uint8_t x[16];
     uint8_t c;
     uint8_t pos;
-} Mwc8State;
+} Smwc8x16State;
 
-static inline uint8_t get_bits8(Mwc8State *obj)
+static inline uint8_t get_bits8(Smwc8x16State *obj)
 {
-    static const uint16_t a = 108;
+    static const uint16_t a = 108u;
+    static const uint8_t a_lcg = 137u;
     obj->pos++;
     uint16_t p = a * (uint16_t) (obj->x[(obj->pos - 15) & 0xF]) + (uint16_t) obj->c;
     uint8_t x = (uint8_t) p;
     obj->x[obj->pos & 0xF] = x;
     obj->c = p >> 8;
-    x = (x << 5) | (x >> 3);
-    return (x ^ obj->x[(obj->pos - 1) & 0xF]) + obj->x[(obj->pos - 2) & 0xF];
+    uint8_t x_prev = obj->x[(obj->pos - 1) & 0xF];
+    return ((a_lcg * x) ^ ((x_prev << 3) | (x_prev >> 5))) + obj->x[(obj->pos - 2) & 0xF];
+//    x = (x << 5) | (x >> 3);
+//    return (x ^ obj->x[(obj->pos - 1) & 0xF]) + obj->x[(obj->pos - 2) & 0xF];
 }
 
 
@@ -51,7 +54,7 @@ static inline uint64_t get_bits_raw(void *state)
     return out.u32;    
 }
 
-static void Mwc8State_init(Mwc8State *obj, uint32_t seed)
+static void Smwc8x16State_init(Smwc8x16State *obj, uint32_t seed)
 {
     obj->c = 1;
     for (int i = 0; i < 16; i++) {
@@ -63,18 +66,9 @@ static void Mwc8State_init(Mwc8State *obj, uint32_t seed)
 
 static void *create(const CallerAPI *intf)
 {
-    Mwc8State *obj = intf->malloc(sizeof(Mwc8State));
-    Mwc8State_init(obj, intf->get_seed32());
-/*
-    for (int i = 0; i < 100; i++) {
-        for (int j = 0; j < 16; j++) {
-            intf->printf("%.2X ", (int) obj->x[j]);
-        }
-        intf->printf(" : %X ", (int) obj->c);
-        intf->printf("| %X \n ", (int) get_bits_raw(obj));
-    }
-*/
+    Smwc8x16State *obj = intf->malloc(sizeof(Smwc8x16State));
+    Smwc8x16State_init(obj, intf->get_seed32());
     return obj;
 }
 
-MAKE_UINT32_PRNG("Alfib8x5", NULL)
+MAKE_UINT32_PRNG("Smwc8x16", NULL)

@@ -192,7 +192,8 @@ def main():
     print(hex(a[0]))
 
     m = [2**16]
-    a = [62317]
+    a = [62517]
+    print(a[0] % 4, hex(a[0]))
 
 
     for i in range (len(a)):

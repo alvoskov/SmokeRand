@@ -15,17 +15,17 @@ dmin, dmin_inc = 1, 250
 
 
 b = 2**16
-dmin, dmin_inc = 1, 25000
+dmin, dmin_inc = 1, 65535
 
 #dmin, dmin_inc = 5**26, 1000000
 
 for i in range(dmin, dmin + dmin_inc):
     a = (b - i)
-    m = a*b**2 - 1
+    m = a*b**8 - 1
     if isprime(m) and isprime((m - 1) // 2):
         a_lcg = pow(b, -1, m)
         print(i)
-        print(hex(a), hex(a_lcg), hex(m))
+        print(a, hex(a), hex(a_lcg), hex(m))
 
 
 

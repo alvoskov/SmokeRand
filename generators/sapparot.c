@@ -1,7 +1,14 @@
 /**
  * @file sapparot.c
- * @brief http://www.literatecode.com/sapparot
- * @details
+ * @brief Sapparot is a chaotic generator.
+ * @details References:
+ *
+ * 1.Ilya O. Levin. Sapparot. http://www.literatecode.com/sapparot
+ *
+ * WARNING! IT HAS NO GUARANTEED MINIMAL PERIOD! BAD SEEDS ARE POSSIBLE!
+ * DON'T USE THIS PRNG FOR ANY SERIOUS WORK! The author uses rotations
+ * in the "discrete Weyl sequence" part without proof of a minimal cycle
+ * of an updated counter part.
  *
  * @copyright
  * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
