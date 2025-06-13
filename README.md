@@ -645,17 +645,17 @@ There are only two problematic situations:
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    | 3.75  | +       | 4 GiB
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 1 TiB
  ara32             | u32    | +       | 1     | 1       | 1    | 0.96 | +      | 2(0)  | +       | 512 MiB
- biski8_mul        | u32    | 1       | 19    | 33      | 41   | 2.2  |        | 0     |         | 512 KiB
+ biski8_mul        | u32    | 1       | 19    | 33      | 41   | 2.2  | -(>>10)| 0     |         | 512 KiB
  biski16_mul       | u32    | +       | 2     | 3       | 6    | 1.6  |        | 0     |         | 16 GiB
  biski64_mul       | u64    | +       | +     | +       | +    | 0.18 | +      | 4     |         | >= 2 TiB
  biski8            | u32    | +       | 17    | 35      | 35   | 1.4  | -(>>10)| 0     |         | 2 MiB
- biski8_alt        | u32    | +       | 17    | 31      | 31   | 1.4  |        | 0     |         | 2 MiB
+ biski8_alt        | u32    | +       | 17    | 31      | 31   | 1.4  | -(>>10)| 0     |         | 2 MiB
  biski16           | u32    | +       | +     | +       | 1    | 0.81 | +      | 2(0)  |         | 1 TiB
- biski16_alt       | u32    | +       | +     | +       | +    | 1.1  |        | 3.5(0)|         | 1 TiB
+ biski16_alt       | u32    | +       | +     | +       | +    | 1.1  | +      | 3.5(0)|         | 1 TiB
  biski32           | u32    | +       | +     | +       | +    | 0.32 | +      | 3.5(0)|         | ?
- biski32_alt       | u32    | +       | +     | +       | +    | 0.43 |        | 4(0)  |         | ?
+ biski32_alt       | u32    | +       | +     | +       | +    | 0.43 | +      | 4(0)  |         | >= 4 TiB(?)
  biski64           | u32    | +       | +     | +       | +    | <0.1 | +      | 3     |         | ?
- biski64_alt       | u32    | +       | +     | +       | +    | 0.15 | +      | 4     |         | ?
+ biski64_alt       | u32    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 8 TiB
  chacha            | u32    | +       | +     | +       | +    | 2.0  | +      | 5     | +       | >= 32 TiB
  chacha_avx2       | u32    | +       | +     | +       | +    | 0.7  | +      | 5     | +       | >= 16 TiB
  chacha_ctr32      | u32    | +       | +     | +       | 1    | 2.0  | -(>>10)| 0     | +       | 256 GiB
@@ -666,17 +666,22 @@ There are only two problematic situations:
  drand48           | u32    | 3       | 13    | 21      | 23/24| 0.72 | -      | 0     | -       | 1 MiB
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 16 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 5     | +       | >= 32 TiB
+ jkiss             | u32    | +       | +     | +       | +    | 0.80 | +      | 4     |         | ?
+ jkiss32           | u32    | +       | +     | +       | +    | 0.71 | +      | 4     |         | >= 1 TiB
+ jlkiss64          | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | ?
  flea32x1          | u32    | +       | 1     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
  gjrand64          | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |         | >= 32 TiB
  gmwc128           | u64    | +       | +     | +       | +    | 0.72 | +      | 4(0)  |         | >= 32 TiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 5     | +       | >= 32 TiB
  hicg64_u32        | u32    | 1       | 2     | 3       | 3    | 5.4  | --     | 0     | Small   | 32 MiB
  icg31x2           | u32    | +       | +     | +       | 1    | 87   |        |       |         | 8 GiB
- icg64             | u32    | +       | +     | +       | +    | 113  |        |       |         | >= 512 GiB
+ icg64             | u32    | +       | +     | +       | +    | 113  |        |       |         | >= 1 TiB
  icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  | +      | 0     |         | 32 MiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
+ kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     |         | ?
+ kiss11_64         | u64    | +       | +     | +       | +    | 0.60 | +      | 4     |         | >= 1 TiB
  kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 4.5   |         | >= 1 TiB
  lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>10)| 0     | -       | 512 MiB
  lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | +      | 0     | Small   | 16 MiB
@@ -780,7 +785,8 @@ There are only two problematic situations:
  ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | +      | 3.5   |         | 8 TiB
  ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 32 TiB
  ranval            | u32    | +       | +     | +       | +    | 0.31 | +      | 4(0)  | +       | >= 32 TiB
- r250              | u32    | 3       | 7     | 10      | 13   | 0.50 | +      | 0     |         | 1 MiB
+ ranval64          | u64    | +       | +     | +       | +    | 0.23 |        |       |         | ?
+ r250              | u32    | 3       | 7     | 10      | 13   | 0.50 | +      | 0     | -       | 1 MiB
  r1279             | u32    | 2       | 5     | 7       | 10   | 0.47 | +      | 0     | Small   | 64 MiB
  ranlux[0]         | u32    | 1       | 6     | 9       | 12   | 6.8  | N/A    | 0     |         | 4 MiB
  ranlux[1]         | u32    | +       | +     | 2       | 3    | 13   | N/A    | 0     |         | 4 GiB
@@ -797,6 +803,8 @@ There are only two problematic situations:
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)|         | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  |         | >= 4 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
+ skiss32           | u32    | +       | +     | +       | +    | 1.7  | +      |       |         | ?
+ skiss64           | u64    | +       | +     | +       | +    | 0.86 | +      |       |         | ?
  smwc16x8          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 1 TiB
  smwc192bad        | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | ?
  speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         | >= 4 TiB
@@ -809,7 +817,7 @@ There are only two problematic situations:
  splitmix32cbc     | u32    | +       | +     | +       | +    | 2.1  | -      | 3     | +       | 8 TiB
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | 4     | +       | >= 16 TiB
  sqxor32           | u32    | +       | 2     | 3       | 5    | 0.20 | -(>>10)| 0     | Small   | 16 GiB
- stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | +      | 0     |         | >= 32 TiB
+ stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | +      | 0     | +       | >= 32 TiB
  stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | +      | 3.5(0)| Small   | 1 MiB
  superduper73      | u32    | 3       | 10    | 17      | 21   | 0.64 | +      | 0     | -       | 32 KiB
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      | 2.75  | Small   | 512 KiB
@@ -841,16 +849,20 @@ There are only two problematic situations:
  xabc32            | u32    | +       | +     | +       | +    | 0.82 | +      | 4     | >=Crush | >= 1 TiB
  xabc64            | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | 4 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
+ xoroshiro32pp     | u32    | +       | 1     | 2       | 6/8  | 1.5  | -(>>10)| 0     |         | 256 MiB
+ xoroshiro64pp     | u32    | +       | +     | +       | +    | 0.52 | +      | 4     |         | ?
+ xoroshiro64st     | u32    | 1       | 1     | 3       | 5    | 0.51 | -      | 1.75  |         | 1 MiB
+ xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | ?
  xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |S_lo/+_hi| 512 KiB
  xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB
- xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      | 0     |         | 32 GiB
+ xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      | 0     |+lo/+hi  | 32 GiB
  xorshift128pp     | u64    | +       | +     | +       | +    | 0.29 | +      | 4     |         | >= 16 TiB
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 1 TiB
- xoroshiro128      | u64    | 2       | 3     | 5       | 7    | 0.27 | +      | 2.25  |         | 256 KiB
- xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      | 3.25  |         | 16 MiB
+ xoroshiro128      | u64    | 2       | 3     | 5       | 7    | 0.27 | +      | 2.25  | Small   | 256 KiB
+ xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      | 3.25  |+lo/+hi  | 16 MiB
  xoroshiro128pp    | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 32 TiB
  xoroshiro128pp_avx| u64    | +       | +     | +       | +    | 0.16 | +      | 4     |         | >= 1 TiB
- xoroshiro1024st   | u64    | 1       | 1     | 1       | 2    | 0.33 | +      | 3.5   |         | 128 GiB
+ xoroshiro1024st   | u64    | 1       | 1     | 1       | 2    | 0.33 | +      | 3.5   |+lo/+hi  | 128 GiB
  xoroshiro1024stst | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +       | >= 16 TiB
  xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | +      | 0     | Small   | 128 KiB
  xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      | 3     | +       | 8 MiB
