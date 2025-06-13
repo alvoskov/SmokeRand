@@ -44,7 +44,6 @@ static inline uint64_t get_bits_raw(void *state)
     const uint64_t s0 = obj->s[obj->p = (obj->p + 1) & 15];
     uint64_t s15 = obj->s[q];
     const uint64_t result = s0 * 0x9e3779b97f4a7c13;
-
     s15 ^= s0;
     obj->s[q] = rotl64(s0, 25) ^ s15 ^ (s15 << 27);
     obj->s[obj->p] = rotl64(s15, 36);

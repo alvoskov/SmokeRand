@@ -7,7 +7,7 @@
  * by Chris Doty-Humphrey.
  *
  * WARNING! THE MINIMAL PERIOD OF RANVAL IS UNKNOWN! Don't use it as a general
- * purpose pseudorandom number generator!
+ * purpose pseudorandom number generator! Bad seeds are possible!
  *
  * References:
  *
