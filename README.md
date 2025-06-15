@@ -682,7 +682,7 @@ There are only two problematic situations:
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
- kiss64_awc        | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | ?
+ kiss64_awc        | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 4 TiB
  kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     |         | >= 1 TiB
  kiss11_64         | u64    | +       | +     | +       | +    | 0.60 | +      | 4     |         | >= 1 TiB
  kiss4691          | u32    | +       | +     | +       | +    | 1.1  | +      | 4     |         | >= 1 TiB
@@ -807,8 +807,8 @@ There are only two problematic situations:
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)|         | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  |         | >= 4 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
- skiss32           | u32    | +       | +     | +       | +    | 1.7  | +      |       |         | ?
- skiss64           | u64    | +       | +     | +       | +    | 0.86 | +      |       |         | ?
+ skiss32           | u32    | +       | +     | +       | +    | 1.7  | +      |       |         | >= 1 TiB
+ skiss64           | u64    | +       | +     | +       | +    | 0.86 | +      |       |         | >= 1 TiB (?)
  smwc16x8          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 1 TiB
  smwc192bad        | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | ?
  speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         | >= 4 TiB
@@ -1061,6 +1061,22 @@ are less sensitive, e.g. entropy test catches only randu.
 - Passes ENT: lcg32prime, lcg64, lfib31, swb
 
 # Versions history
+
+15.06.2025: SmokeRand 0.36
+
+- Several new xoroshiro generators: `xoroshiro32pp`, `xoroshiro64pp`,
+  `xoroshiro64*`, `xoroshiro64**` etc.
+- Updated `biski64` generator, `biski64_alt` modification that passes the
+  `hamming_distr` test (pairwise xoring).
+- Several new KISS family generators including the custom `kiss64_awc`
+  generator that doesn't contain multiplications.
+- Several new MWC and SWB generator including the `cswb4288` generator
+  by G. Marsaglia; the `cswb4288` PRNG is interesting for `gap16_count0`
+  test checking (it fails this test). The `cmwc4827` also fails this test.
+- New custom SMWC (scrambled MWC) family: experimental.
+- `hamming_distr` test: bugfix, now it checks if PRNG output is wider
+  than declared. In earlier versions it causes segfaults.
+- `ranval64` chaotic generator by Bob Jenkins also known as RKISS.
 
 02.05.2025: SmokeRand 0.35
 

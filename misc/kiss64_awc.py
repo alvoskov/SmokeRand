@@ -1,3 +1,18 @@
+import sympy
+import math
+
+print("----- KISS64/AWC period estimation -----")
+m = (2**55)**2 + (2**55) - 1
+per = sympy.ntheory.n_order(2**55, m)
+print("m: ", m, "log2: ", math.log2(m))
+print("Is m prime:", sympy.isprime(m))
+print("AWC period: ", per, "log2: ", math.log2(per))
+
+per_full = math.lcm(per, 2**64 - 1, 2**64)
+print("Full period: ", per_full, "log2: ", math.log2(per_full))
+
+print("----- Test vectors generation -----")
+
 AWC_MASK = 2**55 - 1
 AWC_SH = 55
 WEYL_INC = 0x9E3779B97F4A7C15
@@ -25,3 +40,4 @@ for i in range(0, 1000000):
     
 
 print(hex(u))
+
