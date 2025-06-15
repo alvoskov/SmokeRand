@@ -2,7 +2,12 @@
  * @file shr3.c
  * @brief An implementation of SHR3 - classic 32-bit LSFR generator
  * proposed by G. Marsaglia.
- * @details Fails almost all statistical tests.
+ * @details Fails almost all statistical tests. Note: some versions of
+ * SHR3 contain a typo and use [17,13,5] instead of [13,17,5].
+ *
+ * References:
+ *
+ * - https://eprint.iacr.org/2011/007.pdf
  *
  * @copyright
  * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
@@ -25,8 +30,8 @@ typedef struct {
 static inline uint64_t get_bits_raw(void *state)
 {
     SHR3State *obj = state;
-    obj->x ^= (obj->x << 17);
-    obj->x ^= (obj->x >> 13);
+    obj->x ^= (obj->x << 13);
+    obj->x ^= (obj->x >> 17);
     obj->x ^= (obj->x << 5);
     return obj->x;
 }

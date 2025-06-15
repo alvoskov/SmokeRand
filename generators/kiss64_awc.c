@@ -18,7 +18,8 @@
  *
  * References:
  *
- * 1. https://groups.google.com/g/comp.lang.fortran/c/5Bi8cFoYwPE
+ * 1. George Marsaglia. Fortran and C: United with a KISS. 2007.
+ *    https://groups.google.com/g/comp.lang.fortran/c/5Bi8cFoYwPE
  * 2. George Marsaglia, Arif Zaman. A New Class of Random Number Generators //
  *    Ann. Appl. Probab. 1991. V. 1. N.3. P. 462-480
  *    https://doi.org/10.1214/aoap/1177005878

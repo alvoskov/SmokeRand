@@ -14,6 +14,9 @@
  *
  * - https://groups.google.com/group/sci.stat.math/msg/b555f463a2959bb7/
  * - http://www0.cs.ucl.ac.uk/staff/d.jones/GoodPracticeRNG.pdf
+ * - https://eprint.iacr.org/2011/007.pdf
+ * - Marsaglia G. Xorshift RNGs // Journal of Statistical Software. 2003.
+ *   V. 8. N. 14. P.1-6. https://doi.org/10.18637/jss.v008.i14
  *
  * @copyright The KISS99 algorithm is developed by George Marsaglia.
  *

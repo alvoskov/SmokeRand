@@ -789,7 +789,7 @@ There are only two problematic situations:
  ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | +      | 3.5   |         | 8 TiB
  ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 32 TiB
  ranval            | u32    | +       | +     | +       | +    | 0.31 | +      | 4(0)  | +       | >= 32 TiB
- ranval64          | u64    | +       | +     | +       | +    | 0.23 | +      | 4(0)  |         | ?
+ ranval64          | u64    | +       | +     | +       | +    | 0.23 | +      | 4(0)  |         | >= 2 TiB
  r250              | u32    | 3       | 7     | 10      | 13   | 0.50 | +      | 0     | -       | 1 MiB
  r1279             | u32    | 2       | 5     | 7       | 10   | 0.47 | +      | 0     | Small   | 64 MiB
  ranlux[0]         | u32    | 1       | 6     | 9       | 12   | 6.8  | N/A    | 0     |         | 4 MiB
@@ -826,7 +826,7 @@ There are only two problematic situations:
  superduper73      | u32    | 3       | 11    | 17      | 21   | 0.64 | +      | 0     | -       | 32 KiB
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      | 2.75  | Small   | 512 KiB
  superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | +      | 4     | +       | >= 32 TiB
- shr3              | u32    | 2       | 15    | 32      | 36   | 0.76 | -(>>10)| 0     | -       | 32 KiB
+ shr3              | u32    | 2       | 17    | 33      | 37(?)| 0.76 | -(>>10)| 0     | -       | 32 KiB
  swb               | u32    | 1       | 5     | 6       | 8    | 2.7  | +      | 0     | Small   | 128 MiB
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | 2     | Crush   | 4 TiB
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 2 TiB
@@ -852,6 +852,7 @@ There are only two problematic situations:
  xabc16            | u32    | +       | +     | 1       | 1    | 1.6  | +      | 2     | Small   | 64 GiB
  xabc32            | u32    | +       | +     | +       | +    | 0.82 | +      | 4     | >=Crush | >= 1 TiB
  xabc64            | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | 4 TiB
+ xkiss16_awc       | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | ?
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xoroshiro32pp     | u32    | +       | 1     | 2       | 6/8  | 1.5  | -(>>10)| 0     | Small   | 256 MiB
  xoroshiro64pp     | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 8 TiB
