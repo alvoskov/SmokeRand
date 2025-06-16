@@ -824,6 +824,7 @@ There are only two problematic situations:
  stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | +      | 0     | +       | >= 32 TiB
  stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | +      | 3.5(0)| Small   | 1 MiB
  superduper73      | u32    | 3       | 11    | 17      | 21   | 0.64 | +      | 0     | -       | 32 KiB
+ superduper96      | u32    | 1       | 2     | 5/6     |      | 0.71 | +      | 0     |         | 128 KiB
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      | 2.75  | Small   | 512 KiB
  superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | +      | 4     | +       | >= 32 TiB
  shr3              | u32    | 2       | 17    | 33      | 37(?)| 0.76 | -(>>10)| 0     | -       | 32 KiB
