@@ -853,6 +853,7 @@ There are only two problematic situations:
  xabc16            | u32    | +       | +     | 1       | 1    | 1.6  | +      | 2     | Small   | 64 GiB
  xabc32            | u32    | +       | +     | +       | +    | 0.82 | +      | 4     | +       | >= 1 TiB
  xabc64            | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | 4 TiB
+ xkiss8_awc        | u32    | +       | +     | +       | +    | 3.2  |        |       |         | ?
  xkiss16_awc       | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 2 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xoroshiro32pp     | u32    | +       | 1     | 2       | 6/8  | 1.5  | -(>>10)| 0     | Small   | 256 MiB
