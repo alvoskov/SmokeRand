@@ -18,23 +18,9 @@
  * \f]
  * where \f$ b=2^32 \f$ and \f$ B = 2^{64} \f$.
  *
- * It passes the `express` battery but fails the `gap16_count0` test from
- * `brief`, `default` and `full` batteries (this test is taken from gjrand).
- * In the `full` battery it also fails 2-dimensional birthday spacings tests.
- * It fails Crush battery from TestU01 but passes PractRand 0.94 at 16 TiB sample.
- *
- * Quality estimation by G.Marsaglia:
- *
- *     Yes, running just CSWB() from the C code below yields no significant
- *     extremes among the 230 p-values returned from the Diehard Battery of
- *     Tests.
- *     But for extra safety, I prefer a Keep-It-Simple-Stupid approach, via
- *     macros KISS = CSWB() + CNG + XS.
- *
- * Comment by A.L.Voskov: KISS approach probably will be quite reasonable here
- * but not tested here. CSWB alone must be never used as a general purpose
- * generator: it is too flawed for any scientific/engineering work and too
- * bulky for TETRIS.
+ * The behaviour is similar to the original 32-bit version of CSWB4288. It fails
+ * `gap16_count0`, `bspace64_1d`, `bspace32_2d`, `bspace32_2d_high` tests that
+ * still makes it too flawed for scientific/engineering applications.
  *
  * References:
  * 
@@ -49,8 +35,7 @@
  *    https://doi.org/10.1214/aoap/1177005878
  *
  * @copyright The CSWB4288 algorithm was developed by G. Marsaglia.
- *
- * Adaptation for SmokeRand:
+ * 64-bit version and reentrant implementation for SmokeRand:
  *
  * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
@@ -70,6 +55,7 @@ typedef struct {
     int c;
     int ind;
 } Cswb4288x64State;
+
 
 static inline uint64_t get_bits_raw(void *state)
 {
@@ -94,6 +80,11 @@ static inline uint64_t get_bits_raw(void *state)
     }
 }
 
+/**
+ * @brief Initialize the generator state using SuperDuper64 PRNG.
+ * The original 32-bit version of CSWB4288 uses a later version
+ * of SuperDuper32.
+ */
 static void Cswb4288x64State_init(Cswb4288x64State *obj, uint64_t xcng, uint64_t xs)
 {
     for (int i = 0; i < CSWB64_LAGR; i++) {
@@ -104,7 +95,7 @@ static void Cswb4288x64State_init(Cswb4288x64State *obj, uint64_t xcng, uint64_t
         obj->q[i] = xcng + xs;
     }
     obj->c = 0;
-    obj->ind = 4287;
+    obj->ind = CSWB64_LAGR;
 }
 
 
@@ -120,10 +111,10 @@ static void *create(const CallerAPI *intf)
 
 static int run_self_test(const CallerAPI *intf)
 {
-    uint64_t x, x_ref = 836315212;
+    uint64_t x, x_ref = 0x3397364FD667C011;
     Cswb4288x64State *obj = intf->malloc(sizeof(Cswb4288x64State));
     Cswb4288x64State_init(obj, 262436069, 532456711); 
-    for (unsigned long i = 0; i < 10000000; i++) {
+    for (unsigned long i = 0; i < 20000000; i++) {
         x = get_bits_raw(obj);
     }
     intf->printf("x = %20.16llX; x_ref = %20.16llX\n",

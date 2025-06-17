@@ -102,9 +102,9 @@ set (GENERATORS
     aes128 alfib alfib64x5 alfib8x5 alfib_lux alfib_mod ara32 biski16 
     biski16_alt biski16_mul biski32 biski32_alt biski64 biski64sh 
     biski64_alt biski64_mul biski8 biski8_alt biski8_mul chacha cmwc4096 
-    cmwc4827 coveyou64 cswb4288 cwg64 des drand48 efiix64x48 flea32x1 
-    gjrand64 gmwc128 hc256 hicg64 icg31x2 icg64 icg64_p2 isaac64 
-    jkiss jkiss32 jlkiss64 kiss11_32 kiss11_64 kiss64 kiss64_awc 
+    cmwc4827 coveyou64 cswb4288 cswb4288_64 cwg64 des drand48 efiix64x48 
+    flea32x1 gjrand64 gmwc128 hc256 hicg64 icg31x2 icg64 icg64_p2 
+    isaac64 jkiss jkiss32 jlkiss64 kiss11_32 kiss11_64 kiss64 kiss64_awc 
     kiss93 kiss99 kiss4691 kuzn lcg128 lcg32prime lcg64 lcg64prime 
     lcg69069 lcg96 lea lfib4 lfib4_u64 lfib_par lfib_ranmar lfsr113 
     lfsr258 loop_7fff_w64 lrnd64_1023 lrnd64_255 lxm_64x128 macmarsa 
@@ -126,7 +126,7 @@ set (GENERATORS
     xorgens xoroshiro1024st xoroshiro1024stst xoroshiro128 xoroshiro128p 
     xoroshiro128pp xoroshiro128pp_vec xoroshiro32pp xoroshiro64pp 
     xoroshiro64st xoroshiro64stst xorshift128 xorshift128p xorshift128pp 
-    xorshift64st xorwow xoshiro128p xoshiro128pp xsh xtea xxtea ziff98     
+    xorshift64st xorwow xoshiro128p xoshiro128pp xsh xtea xxtea ziff98 
 )
 
 # Examples of plugins, i.e. modules with PRNGs
