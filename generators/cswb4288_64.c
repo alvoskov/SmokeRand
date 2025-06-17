@@ -1,15 +1,15 @@
 /**
- * @file cswb4288.c
- * @brief CSWB4288 generator by G. Marsaglia.
+ * @file cswb4288_64.c
+ * @brief CSWB4288 generator by G. Marsaglia: 64-bit version.
  * @details It is a complementary subtract-with-borrow generator based on
  * the next recurrent formula:
  * \f[
- * x_n = (2^{32} - 1) - x_{n-4288} - x_{n-4160} - c_{n-1} \mod 2^{32}
+ * x_n = (2^{64} - 1) - x_{n-2144} - x_{n-2080} - c_{n-1} \mod 2^{64}
  * \f]
  * \f[
  * c_n = \begin{cases}
- * 1 & \textrm{ if } x_{n-4288} - x_{n-4160} - c_{n-1} < 0
- * 0 & \textrm{ if } x_{n-4288} - x_{n-4160} - c_{n-1} \ge 0
+ * 1 & \textrm{ if } x_{n-2144} - x_{n-2080} - c_{n-1} < 0
+ * 0 & \textrm{ if } x_{n-2144} - x_{n-2080} - c_{n-1} \ge 0
  * \end{cases}
  * \f]
  * It is based on the next prime:
@@ -59,30 +59,33 @@
 
 PRNG_CMODULE_PROLOG
 
+#define CSWB64_LAGR 2144
+#define CSWB64_LAGS 2080
+
 /**
- * @brief CSWB4288 state.
+ * @brief CSWB4288/64 state.
  */
 typedef struct {
-    uint32_t q[4288];
+    uint64_t q[CSWB64_LAGR];
     int c;
     int ind;
-} Cswb4288State;
+} Cswb4288x64State;
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    Cswb4288State *obj = state;
-    if (obj->ind < 4288) {
+    Cswb4288x64State *obj = state;
+    if (obj->ind < CSWB64_LAGR) {
         return obj->q[obj->ind++];
     } else {
-        for (int i = 0; i < 4160; i++) {
-            uint32_t t = obj->q[i];
-            uint32_t h = obj->q[i + 128] + obj->c;
+        for (int i = 0; i < CSWB64_LAGS; i++) {
+            uint64_t t = obj->q[i];
+            uint64_t h = obj->q[i + (CSWB64_LAGR - CSWB64_LAGS)] + obj->c;
             obj->c = t < h;
             obj->q[i] = h - t - 1;
         }
-        for (int i = 4160; i < 4288; i++) {
-            uint32_t t = obj->q[i];
-            uint32_t h = obj->q[i - 4160] + obj->c;
+        for (int i = CSWB64_LAGS; i < CSWB64_LAGR; i++) {
+            uint64_t t = obj->q[i];
+            uint64_t h = obj->q[i - CSWB64_LAGS] + obj->c;
             obj->c = t < h;
             obj->q[i] = h - t - 1;
         }
@@ -91,13 +94,13 @@ static inline uint64_t get_bits_raw(void *state)
     }
 }
 
-static void Cswb4288State_init(Cswb4288State *obj, uint32_t xcng, uint32_t xs)
+static void Cswb4288x64State_init(Cswb4288x64State *obj, uint64_t xcng, uint64_t xs)
 {
-    for (int i = 0; i < 4288; i++) {
-        xcng = 69069u * xcng + 123u;
+    for (int i = 0; i < CSWB64_LAGR; i++) {
+        xcng = 6906969069ull * xcng + 1234567ull;
         xs ^= (xs << 13);
         xs ^= (xs >> 17);
-        xs ^= (xs << 5);
+        xs ^= (xs << 43);
         obj->q[i] = xcng + xs;
     }
     obj->c = 0;
@@ -107,26 +110,28 @@ static void Cswb4288State_init(Cswb4288State *obj, uint32_t xcng, uint32_t xs)
 
 static void *create(const CallerAPI *intf)
 {
-    Cswb4288State *obj = intf->malloc(sizeof(Cswb4288State));
-    uint64_t seed = intf->get_seed64();
-    Cswb4288State_init(obj, seed >> 32, (seed & 0xFFFFFFFF) | 1);
+    Cswb4288x64State *obj = intf->malloc(sizeof(Cswb4288x64State));
+    uint64_t seed1 = intf->get_seed64();
+    uint64_t seed2 = intf->get_seed64();
+    Cswb4288x64State_init(obj, seed1, seed2);
     return (void *) obj;
 }
 
 
 static int run_self_test(const CallerAPI *intf)
 {
-    uint32_t x, x_ref = 836315212;
-    Cswb4288State *obj = intf->malloc(sizeof(Cswb4288State));
-    Cswb4288State_init(obj, 262436069, 532456711); 
-    for (unsigned long i = 0; i < 1000000000; i++) {
-        x = (uint32_t) get_bits_raw(obj);
+    uint64_t x, x_ref = 836315212;
+    Cswb4288x64State *obj = intf->malloc(sizeof(Cswb4288x64State));
+    Cswb4288x64State_init(obj, 262436069, 532456711); 
+    for (unsigned long i = 0; i < 10000000; i++) {
+        x = get_bits_raw(obj);
     }
-    intf->printf("x = %22u; x_ref = %22u\n", x, x_ref);
+    intf->printf("x = %20.16llX; x_ref = %20.16llX\n",
+        (unsigned long long) x,
+        (unsigned long long) x_ref);
     intf->free(obj);
     return x == x_ref;
 }
 
 
-MAKE_UINT32_PRNG("Cswb4288", run_self_test)
-
+MAKE_UINT64_PRNG("Cswb4288/64", run_self_test)
