@@ -113,7 +113,10 @@ static void *create(const CallerAPI *intf)
     return (void *) obj;
 }
 
-
+/**
+ * @brief An internal self-test with values obtained from the original
+ * code by G. Marsaglia.
+ */
 static int run_self_test(const CallerAPI *intf)
 {
     uint32_t x, x_ref = 836315212;
