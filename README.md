@@ -663,7 +663,7 @@ There are only two problematic situations:
  cmwc4827          | u32    | +       | 1     | 1       | 1    | 0.44 | +      | 2     | +       | 512 MiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
  cswb4288          | u32    | +       | 1     | 1       | 4/5  | 0.90 | +      | 0     | Crush   | >= 16 TiB
- cswb4288_64       | u64    | +       | 1     | 2       | 4/5  |      | +      | 0     |         | ?
+ cswb4288_64       | u64    | +       | 1     | 2       | 4/5  | 0.52 | +      | 0     |         | ?
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 16 TiB
  des-ctr           | u64    | +       | +     | +       | +    | 24   | -      | 3     |         | >= 4 TiB
  drand48           | u32    | 3       | 13    | 21      | 23/24| 0.72 | -      | 0     | -       | 1 MiB
@@ -808,8 +808,8 @@ There are only two problematic situations:
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)|         | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  |         | >= 4 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
- skiss32           | u32    | +       | +     | +       | +    | 1.7  | +      |       |         | >= 1 TiB
- skiss64           | u64    | +       | +     | +       | +    | 0.86 | +      |       |         | >= 1 TiB (?)
+ skiss32           | u32    | +       | +     | +       | +    | 1.7  | +      | 4     |         | >= 1 TiB
+ skiss64           | u64    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 1 TiB (?)
  smwc16x8          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 1 TiB
  smwc192bad        | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | ?
  speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         | >= 4 TiB
@@ -854,7 +854,7 @@ There are only two problematic situations:
  xabc16            | u32    | +       | +     | 1       | 1    | 1.6  | +      | 2     | Small   | 64 GiB
  xabc32            | u32    | +       | +     | +       | +    | 0.82 | +      | 4     | +       | >= 1 TiB
  xabc64            | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | 4 TiB
- xkiss8_awc        | u32    | +       | +     | +       | +    | 3.2  |        |       |         | ?
+ xkiss8_awc        | u32    | +       | +     | +       | +    | 3.2  | +      | 4     | +       | >= 2 TiB
  xkiss16_awc       | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 2 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xoroshiro32pp     | u32    | +       | 1     | 2       | 6/8  | 1.5  | -(>>10)| 0     | Small   | 256 MiB
