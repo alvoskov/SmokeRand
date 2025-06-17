@@ -12,17 +12,29 @@
  * 0 & \textrm{ if } x_{n-4288} - x_{n-4160} - c_{n-1} \ge 0
  * \end{cases}
  * \f]
- * It is called SWB-II flavour in the work by Tezuka et al. [2] and is based
- * on the next prime:
+ * It is based on the next prime:
  * \f[
- * p = 2^{137210} - 2^{133114} + 1 = b^{4288} - b^{4160} + 1 = B^{2144} - B^{2080} + 1.
+ * p = 2^{137216} - 2^{133120} + 1 = b^{4288} - b^{4160} + 1 = B^{2144} - B^{2080} + 1.
  * \f]
  * where \f$ b=2^32 \f$ and \f$ B = 2^{64} \f$.
  *
  * It passes the `express` battery but fails the `gap16_count0` test from
  * `brief`, `default` and `full` batteries (this test is taken from gjrand).
  * In the `full` battery it also fails 2-dimensional birthday spacings tests.
- * Also fails PractRand 0.94.
+ * It fails Crush battery from TestU01 but passes PractRand 0.94 at 16 TiB sample.
+ *
+ * Quality estimation by G.Marsaglia:
+ *
+ *     Yes, running just CSWB() from the C code below yields no significant
+ *     extremes among the 230 p-values returned from the Diehard Battery of
+ *     Tests.
+ *     But for extra safety, I prefer a Keep-It-Simple-Stupid approach, via
+ *     macros KISS = CSWB() + CNG + XS.
+ *
+ * Comment by A.L.Voskov: KISS approach probably will be quite reasonable here
+ * but not tested here. CSWB alone must be never used as a general purpose
+ * generator: it is too flawed for any scientific/engineering work and too
+ * bulky for TETRIS.
  *
  * References:
  * 

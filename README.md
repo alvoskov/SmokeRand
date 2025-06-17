@@ -662,7 +662,7 @@ There are only two problematic situations:
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | +      | 4     | +       | >= 32 TiB
  cmwc4827          | u32    | +       | 1     | 1       | 1    | 0.44 | +      | 2     | +       | 512 MiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
- cswb4288          | u32    | +       | 1     | 1       | 4/5  | 0.90 | +      | 0     | Crush   | >= 4 TiB
+ cswb4288          | u32    | +       | 1     | 1       | 4/5  | 0.90 | +      | 0     | Crush   | >= 16 TiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 16 TiB
  des-ctr           | u64    | +       | +     | +       | +    | 24   | -      | 3     |         | >= 4 TiB
  drand48           | u32    | 3       | 13    | 21      | 23/24| 0.72 | -      | 0     | -       | 1 MiB
