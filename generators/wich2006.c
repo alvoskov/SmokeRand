@@ -28,29 +28,27 @@ typedef struct {
     uint32_t s[4];
 } Wich2006State;
 
-enum {
+static const uint64_t
     WH06_A0 = 11600, WH06_MOD0 = 2147483579,
     WH06_A1 = 47003, WH06_MOD1 = 2147483543,
     WH06_A2 = 23000, WH06_MOD2 = 2147483423,
-    WH06_A3 = 33000, WH06_MOD3 = 2147483123
-};
+    WH06_A3 = 33000, WH06_MOD3 = 2147483123;
 
 static uint64_t get_bits_raw(void *state)
 {
     Wich2006State *obj = state;
     // Update generator state
-    uint64_t s[4] = {obj->s[0], obj->s[1], obj->s[2], obj->s[3]};
+    uint32_t *s = obj->s;
     s[0] = (WH06_A0 * s[0]) % WH06_MOD0;
     s[1] = (WH06_A1 * s[1]) % WH06_MOD1;
     s[2] = (WH06_A2 * s[2]) % WH06_MOD2;
     s[3] = (WH06_A3 * s[3]) % WH06_MOD3;
-    obj->s[0] = s[0]; obj->s[1] = s[1]; obj->s[2] = s[2]; obj->s[3] = s[3];    
     // Output function
-    s[0] = (s[0] << 32) / WH06_MOD0;
-    s[1] = (s[1] << 32) / WH06_MOD1;
-    s[2] = (s[2] << 32) / WH06_MOD2;
-    s[3] = (s[3] << 32) / WH06_MOD3;
-    return (s[0] + s[1] + s[2] + s[3]) & 0xFFFFFFFF;
+    uint64_t s0 = ((uint64_t) s[0] << 32) / WH06_MOD0;
+    uint64_t s1 = ((uint64_t) s[1] << 32) / WH06_MOD1;
+    uint64_t s2 = ((uint64_t) s[2] << 32) / WH06_MOD2;
+    uint64_t s3 = ((uint64_t) s[3] << 32) / WH06_MOD3;
+    return (s0 + s1 + s2 + s3) & 0xFFFFFFFF;
 }
 
 static void *create(const CallerAPI *intf)
