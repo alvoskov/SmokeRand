@@ -670,7 +670,7 @@ There are only two problematic situations:
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 16 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 5     | +       | >= 32 TiB
  jkiss             | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 1 TiB 
- jkiss32           | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 8 TiB
+ jkiss32           | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  jlkiss64          | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 1 TiB
  flea32x1          | u32    | +       | 1     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
  gjrand64          | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |         | >= 32 TiB
