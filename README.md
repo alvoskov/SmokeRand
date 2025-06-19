@@ -670,7 +670,7 @@ There are only two problematic situations:
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 16 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 5     | +       | >= 32 TiB
  jkiss             | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 1 TiB 
- jkiss32           | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 8 TiB
+ jkiss32           | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  jlkiss64          | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 1 TiB
  flea32x1          | u32    | +       | 1     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
  gjrand64          | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |         | >= 32 TiB
@@ -683,7 +683,6 @@ There are only two problematic situations:
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
- kiss64_awc        | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 4 TiB
  kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     |         | >= 1 TiB
  kiss11_64         | u64    | +       | +     | +       | +    | 0.60 | +      | 4     |         | >= 1 TiB
  kiss4691          | u32    | +       | +     | +       | +    | 1.1  | +      | 4     |         | >= 1 TiB
@@ -857,6 +856,9 @@ There are only two problematic situations:
  xabc64            | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | 4 TiB
  xkiss8_awc        | u32    | +       | +     | +       | +    | 3.2  | +      | 4     | +       | >= 2 TiB
  xkiss16_awc       | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 2 TiB
+ xkiss32_awc       | u32    | +       | +     | +       |      |      |        |       |         | ?
+ xkiss32sh_awc     | u32    | +       | +     | +       | +    |      | +      | 4     |         | >= 1 TiB
+ xkiss64_awc       | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 4 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xoroshiro32pp     | u32    | +       | 1     | 2       | 6/8  | 1.5  | -(>>10)| 0     | Small   | 256 MiB
  xoroshiro64pp     | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 8 TiB
