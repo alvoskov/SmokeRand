@@ -103,13 +103,13 @@ set (GENERATORS
     biski16_alt biski16_mul biski32 biski32_alt biski64 biski64sh 
     biski64_alt biski64_mul biski8 biski8_alt biski8_mul chacha cmwc4096 
     cmwc4827 coveyou64 cswb4288 cswb4288_64 cwg64 des drand48 efiix64x48 
-    flea32x1 gjrand64 gmwc128 hc256 hicg64 icg31x2 icg64 icg64_p2 
-    isaac64 jkiss jkiss32 jlkiss64 kiss11_32 kiss11_64 kiss64 kiss64_awc 
-    kiss93 kiss99 kiss4691 kuzn lcg128 lcg32prime lcg64 lcg64prime 
-    lcg69069 lcg96 lea lfib4 lfib4_u64 lfib_par lfib_ranmar lfsr113 
-    lfsr258 loop_7fff_w64 lrnd64_1023 lrnd64_255 lxm_64x128 macmarsa 
-    magma melg19937 melg44497 melg607 minstd mixmax mlfib17_5 mrg32k3a 
-    msws msws64 msws64x msws_ctr mt19937 mularx128 mularx128_str 
+    flea32x1 gjrand64 gmwc128 hc256 hicg64 icg31x2 ia ia64 ibaa icg64 
+    icg64_p2 isaac64 jkiss jkiss32 jlkiss64 kiss11_32 kiss11_64 kiss64 
+    kiss64_awc kiss93 kiss99 kiss4691 kuzn lcg128 lcg32prime lcg64 
+    lcg64prime lcg69069 lcg96 lea lfib4 lfib4_u64 lfib_par lfib_ranmar 
+    lfsr113 lfsr258 loop_7fff_w64 lrnd64_1023 lrnd64_255 lxm_64x128 
+    macmarsa magma melg19937 melg44497 melg607 minstd mixmax mlfib17_5 
+    mrg32k3a msws msws64 msws64x msws_ctr mt19937 mularx128 mularx128_str 
     mularx128_u32 mularx256 mularx64_r2 mularx64_u32 mulberry32 mwc128 
     mwc128x mwc128xxa32 mwc1616 mwc1616x mwc16_32 mwc256xxa64 mwc3232x 
     mwc32x mwc32xxa8 mwc40xxa8 mwc4691 mwc48xxa16 mwc64 mwc64x mwc64_2p58 
@@ -127,7 +127,6 @@ set (GENERATORS
     xoroshiro128pp xoroshiro128pp_vec xoroshiro32pp xoroshiro64pp 
     xoroshiro64st xoroshiro64stst xorshift128 xorshift128p xorshift128pp 
     xorshift64 xorshift64st xorwow xoshiro128p xoshiro128pp xsh xtea 
-    xxtea ziff98 
 )
 
 # Examples of plugins, i.e. modules with PRNGs
