@@ -66,50 +66,15 @@ free proc
     ret
 free endp
 
-
-get_bits16 proc
-    ; AWC (add with carry) part
-    xor ax, ax
-    mov bx, [ebp + 6]  ; obj->awc_x0
-    mov dx, [ebp + 8]  ; obj->awc_x1
-    mov di, [ebp + 10] ; obj->awc_c
-    mov cx, bx         ; t = obj->awc_x0 + obj->awc_x1 + obj->awc_c
-    add cx, dx         ;   + obj->awc_x1
-    adc ax, 0          ;     ...
-    add cx, di         ;   + obj->awc_c
-    adc ax, 0          ;     ...
-    mov [ebp + 6], cx  ; obj->awc_x0 = t & 0xFFFF
-    mov [ebp + 8], bx  ; obj->awc_x1 = obj->awc_x0
-    mov [ebp + 10], ax ; obj->c = t >> 16
-    mov ax, cx         ; out += obj->awc_x0
-    ; Discrete Weyl sequence part
-    mov dx, [ebp]
-    add dx, 9E39h
-    mov [ebp], dx
-    add ax, dx ; out += obj->weyl
-    ; xoroshiro32+ part
-    mov bx, [ebp + 2] ; s0 = obj->s[0]
-    mov dx, [ebp + 4] ; s1 = obj->s[1]
-    xor dx, bx        ; s1 ^= s0    
-    mov cl, 13
-    rol bx, 13        ; rotl16(s0, 13)
-    xor bx, dx        ; rotl16(s0, 13) ^ s1
-    mov di, dx        ; (s1 << 5)
-    mov cl, 5
-    shl di, cl
-    xor bx, di        ; rotl16(s0, 13) ^ s1 ^ (s1 << 5)
-    mov cl, 10
-    rol dx, cl        ; rotl16(s1, 10)
-    mov [ebp + 2], bx
-    mov [ebp + 4], dx
-    add ax, bx        ; out += obj->s[0]
-    add ax, dx        ; out += obj->s[1]
-    ret
-get_bits16 endp
-
-
+;
 ; uint64_t get_bits(void *state)
-; Generate one 32-bit unsigned integer.
+;
+; Generate one 32-bit unsigned integer, initially in the dx:ax pair that
+; is shrinked into the eax register. Such solution allows to make the code
+; portable to 8086 and other ancient 16-bit processors.
+;
+; This procedure just calls the 16-bit PRNG twice to generate the upper half
+; and the lower half of the output 32-bit value.
 ;
 ; The used algorithm consists of xoroshiro32+, AWC (add with carry)
 ; and discrete Weyl sequence parts.
@@ -121,15 +86,72 @@ get_bits proc
     push esi
     push ebx
     mov  ebp, [esp + 20]  ; Get pointer to the PRNG state
-    ; PRNG calls
-    xor esi, esi
-    call get_bits16
-    mov si, ax
-    shl esi, 16
-    call get_bits16
-    mov si, ax
-    ; Output function
-    mov  eax, esi
+    xor  eax, eax
+    ; ----- AWC (add with carry) part
+    ; HI part: [bx si di] => [cx bx ax]
+    mov bx, [ebp + 6]  ; obj->awc_x0
+    mov si, [ebp + 8]  ; obj->awc_x1
+    mov di, [ebp + 10] ; obj->awc_c
+    mov cx, bx         ; t = obj->awc_x0
+    add cx, si         ;   + obj->awc_x1
+    adc ax, 0          ;     ...
+    add cx, di         ;   + obj->awc_c
+    adc ax, 0          ;     ...
+    mov dx, cx         ; out = obj->awc_x0 (HI)
+    ; LO part
+    xor di, di
+    mov si, cx         ; t = obj->awc_x0
+    add si, bx         ;   + obj->awc_x1
+    adc di, 0
+    add si, ax         ;   + obj->awc_c
+    adc di, 0
+    mov [ebp + 6],  si  ; obj->awc_x0 = t & 0xFFFF
+    mov [ebp + 8],  cx  ; obj->awc_x1 = obj->awc_x0
+    mov [ebp + 10], di  ; obj->c = t >> 16
+    mov ax, si          ; out += obj->awc_x0
+    ; ----- Discrete Weyl sequence part
+    mov si, [ebp]
+    mov bx, 9E39h
+    add si, bx
+    add dx, si ; out += obj->weyl (HI)
+    add si, bx
+    add ax, si ; out += obj->weyl (LO)
+    mov [ebp], si
+    ; ----- xoroshiro32+ part
+    mov bx, [ebp + 2] ; s0 = obj->s[0]
+    mov si, [ebp + 4] ; s1 = obj->s[1]
+    ; HI part
+    xor si, bx        ; s1 ^= s0    
+    mov cl, 13
+    rol bx, cl        ; rotl16(s0, 13)
+    xor bx, si        ; rotl16(s0, 13) ^ s1
+    mov di, si        ; (s1 << 5)
+    mov cl, 5
+    shl di, cl
+    xor bx, di        ; rotl16(s0, 13) ^ s1 ^ (s1 << 5)
+    mov cl, 10
+    rol si, cl        ; rotl16(s1, 10)
+    add dx, bx        ; out += obj->s[0] (HI)
+    add dx, si        ; out += obj->s[1] (HI)
+    ; LO part
+    xor si, bx        ; s1 ^= s0    
+    mov cl, 13
+    rol bx, cl        ; rotl16(s0, 13)
+    xor bx, si        ; rotl16(s0, 13) ^ s1
+    mov di, si        ; (s1 << 5)
+    mov cl, 5
+    shl di, cl
+    xor bx, di        ; rotl16(s0, 13) ^ s1 ^ (s1 << 5)
+    mov cl, 10
+    rol si, cl        ; rotl16(s1, 10)
+    add ax, bx        ; out += obj->s[0] (LO)
+    add ax, si        ; out += obj->s[1] (LO)
+    ; Save state
+    mov [ebp + 2], bx
+    mov [ebp + 4], si
+    ; ----- Output
+    shl  edx, 16
+    or   eax, edx
     xor  edx, edx
     pop  ebx
     pop  esi
@@ -195,8 +217,8 @@ gen_getinfo endp
 ; Data section. We need it because PRNG state for an internal self-test
 ; should be mutable.
 .data
-    prng_name  db 'XKISS16_AWC', 0
-    prng_descr db 'XKISS16_AWC implementation for 80386', 0
+    prng_name  db 'XKISS16/AWC-ASM', 0
+    prng_descr db 'XKISS16/AWC implementation for 80386', 0
     printf_fmt db 'Output: %X, reference: %X', 13, 10, 0
     prng_test_obj dw 1234, 8765, 4321, 3, 2, 1
     out_ref dd 0BC84B06Eh
