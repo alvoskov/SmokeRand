@@ -1,6 +1,6 @@
 /**
- * @file kiss64_awc.c
- * @brief KISS64/AWC is a 64-bit modificaiton of 32-bit KISS algorithm
+ * @file xkiss64_awc.c
+ * @brief XKISS64/AWC is a 64-bit modificaiton of 32-bit KISS algorithm
  * (2007 version) by G. Marsaglia with parameters tuned by A.L. Voskov.
  * The initial 32-bit version with slightly altered parameters is known
  * as JKISS32 (see the paper by David Jones [1]).
@@ -104,4 +104,4 @@ static int run_self_test(const CallerAPI *intf)
     return u == u_ref;
 }
 
-MAKE_UINT64_PRNG("KISS64/AWC", run_self_test)
+MAKE_UINT64_PRNG("XKISS64/AWC", run_self_test)
