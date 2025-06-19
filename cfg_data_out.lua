@@ -21,7 +21,7 @@ function gens_to_lua_txt(gens, finline)
         if i % 4 == 0 then
             cur_line= cur_line .. string.format("'%s', ", e)
         else
-            cur_line = cur_line .. string.format("%-22s", string.format("'%s', ", e))
+            cur_line = cur_line .. string.format("%-22s", string.format("'%s',", e))
         end
         if i % 4 == 0 then
             out_line = out_line .. "    " .. cur_line .. finline .. "\n"
