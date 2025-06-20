@@ -671,7 +671,7 @@ There are only two problematic situations:
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 5     | +       | >= 32 TiB
  jkiss             | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 1 TiB 
  jkiss32           | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
- jlkiss64          | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 1 TiB
+ jlkiss64          | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 16 TiB
  flea32x1          | u32    | +       | 1     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
  gjrand64          | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |         | >= 32 TiB
  gmwc128           | u64    | +       | +     | +       | +    | 0.72 | +      | 4(0)  |         | >= 32 TiB
@@ -856,7 +856,8 @@ There are only two problematic situations:
  xabc64            | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | 4 TiB
  xkiss8_awc        | u32    | +       | +     | +       | +    | 3.2  | +      | 4     | +       | >= 2 TiB
  xkiss16_awc       | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 2 TiB
- xkiss32_awc       | u32    | +       | +     | +       |      |      |        |       |         | ?
+ xkiss16sh_awc     | u32    | +       | +     | +       | 1    |      | -(>>10)| 0     |         | 16 GiB
+ xkiss32_awc       | u32    | +       | +     | +       | +    |      | +      | 4     |         | >= 1 TiB
  xkiss32sh_awc     | u32    | +       | +     | +       | +    |      | +      | 4     |         | >= 1 TiB
  xkiss64_awc       | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 4 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB

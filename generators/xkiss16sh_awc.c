@@ -54,11 +54,11 @@ PRNG_CMODULE_PROLOG
  * @brief XKISS16/AWC state.
  */
 typedef struct {
-    uint16_t weyl;
     uint16_t xs; ///< xorshift16
     uint16_t awc_x0; ///< AWC state, \f$ x_{n-1}) \f$.
     uint16_t awc_x1; ///< AWC state, \f$ x_{n-2}) \f$.
-    uint16_t awc_c; ///< AWC state, carry.
+    uint8_t awc_c; ///< AWC state, carry.
+    uint8_t weyl;
 } Xkiss16AwcState;
 
 
@@ -83,9 +83,9 @@ static inline uint16_t Xkiss16AwcState_get_bits(Xkiss16AwcState *obj)
     obj->awc_x1 = obj->awc_x0;
     obj->awc_c  = t >> K16_AWC_SH;
     obj->awc_x0 = t & K16_AWC_MASK;
-    obj->weyl += K16_WEYL_INC;
+    obj->weyl += 151;//K16_WEYL_INC;
     // Combined output
-    return (rotl16(obj->awc_x0, 3) ^ (obj->awc_x1)) + rotl16(obj->xs + obj->weyl, obj->awc_x1);
+    return (rotl16(obj->awc_x0, 3) ^ (obj->awc_x1)) + rotl16(obj->xs + obj->weyl, obj->awc_x1 & 0xF);
 }
 
 static inline uint64_t get_bits_raw(void *state)
