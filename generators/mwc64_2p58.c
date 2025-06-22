@@ -41,7 +41,7 @@ static void *create(const CallerAPI *intf)
     const uint64_t mask58 = 0x3FFFFFFFFFFFFFFULL;
     Mwc64State *obj = intf->malloc(sizeof(Mwc64State));
     do { obj->x = intf->get_seed64(); } while (obj->x == 0);
-    do { obj->c = intf->get_seed64() & mask58; } while (obj->c == 0);
+    obj->c = 0;
     return (void *) obj;
 }
 

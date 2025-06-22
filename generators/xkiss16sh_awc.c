@@ -57,8 +57,8 @@ typedef struct {
     uint16_t xs; ///< xorshift16
     uint16_t awc_x0; ///< AWC state, \f$ x_{n-1}) \f$.
     uint16_t awc_x1; ///< AWC state, \f$ x_{n-2}) \f$.
-    uint8_t awc_c; ///< AWC state, carry.
-    uint8_t weyl;
+    uint16_t awc_c; ///< AWC state, carry.
+    uint16_t weyl;
 } Xkiss16AwcState;
 
 
@@ -72,20 +72,20 @@ static inline uint16_t Xkiss16AwcState_get_bits(Xkiss16AwcState *obj)
 {
     // xorshift16
     // https://gist.github.com/t-mat/8b2c183ae50480c7998f4d9ab2271b1d
-    // 3,13,9 - 5/3
-    // 1,15,7 - 9/3
-    // 5,11,6 - 5/4
-    obj->xs ^= obj->xs << 3;
-    obj->xs ^= obj->xs >> 13;
-    obj->xs ^= obj->xs << 9;
+    // http://www.retroprogramming.com/2017/07/xorshift-pseudorandom-numbers-in-z80.html
+    obj->xs ^= obj->xs << 7;
+    obj->xs ^= obj->xs >> 9;
+    obj->xs ^= obj->xs << 8;
     // AWC (add with carry) part
     uint32_t t = obj->awc_x0 + obj->awc_x1 + obj->awc_c;
     obj->awc_x1 = obj->awc_x0;
     obj->awc_c  = t >> K16_AWC_SH;
     obj->awc_x0 = t & K16_AWC_MASK;
-    obj->weyl += 151;//K16_WEYL_INC;
+    obj->weyl += K16_WEYL_INC;
     // Combined output
-    return (rotl16(obj->awc_x0, 3) ^ (obj->awc_x1)) + rotl16(obj->xs + obj->weyl, obj->awc_x1 & 0xF);
+    uint16_t awc = rotl16(obj->awc_x0, 3) ^ (obj->awc_x1);
+    return awc + rotl16(obj->xs + obj->weyl, obj->awc_x0 & 0xF);
+//    return rotl16(awc, obj->xs) + rotl16(obj->xs + obj->weyl, obj->awc_x1 & 0xF);
 }
 
 static inline uint64_t get_bits_raw(void *state)
@@ -111,24 +111,4 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-/**
- * @brief Test values were obtained from Python code.
- */
-/*
-static int run_self_test(const CallerAPI *intf)
-{
-    static const uint32_t u_ref = 0xBC84B06E;
-    uint32_t u;
-    Xkiss16AwcState obj = {
-        .weyl = 1234, .s  = {8765, 4321},
-        .awc_x0 = 3, .awc_x1 = 2, .awc_c = 1};
-    for (int i = 0; i < 10000; i++) {
-        u = get_bits_raw(&obj);
-    }
-    intf->printf("Output: 0x%X; reference: 0x%X\n",
-        (unsigned int) u, (unsigned int) u_ref);
-    return u == u_ref;
-}
-*/
-
-MAKE_UINT32_PRNG("XKISS16/AWC", NULL)
+MAKE_UINT32_PRNG("XKISS16/SHORT/AWC", NULL)

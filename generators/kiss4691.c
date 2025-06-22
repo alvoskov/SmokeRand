@@ -2,9 +2,8 @@
  * @file kiss4691.c
  * @brief KISS4691 generator by G. Marsaglia.
  * @details A part of combined KISS4691 generator that includes SuperDuper
- * (LCG32 + xorshift32) and MWC4691 subgenerators. It allows to hide a 
- * numerous flaws of SuperDuper and failure of the `gap16_count0` test
- * of MWC4691.
+ * (LCG32 + xorshift32) and MWC4691 subgenerators. It allows to hide numerous
+ * flaws of SuperDuper and failure of the `gap16_count0` test of MWC4691.
  *
  * Description from G.Marsaglia:
  *
