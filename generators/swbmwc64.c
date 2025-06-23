@@ -26,7 +26,12 @@
  *
  * The r = 13 and s = 7 lags are selected by A.L. Voskov to provide the
  * \f$ m = 2^{64*13} - 2^{64*7} + 1 \f$ prime modulus. The MWC multiplier
- * \f$ a = 2^{32} - 10001272 \f$ was also selected by A.L. Voskov.
+ * \f$ a = 2^{32} - 10001272 \f$ was also selected by A.L. Voskov. The
+ * modulus m is Proth prime:
+ *
+ *     b = 2**64
+ *     m = b**13 - b**7 + 1
+ *     a = 23; pow(a, (m - 1) // 2, m) - (-1 % m)
  *
  * Although the used SWB and MWC generators themselves have a low quality,
  * its combination passes SmokeRand tests batteries.
