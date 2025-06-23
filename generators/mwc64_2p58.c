@@ -38,10 +38,9 @@ static inline uint64_t get_bits_raw(void *state)
 
 static void *create(const CallerAPI *intf)
 {
-    const uint64_t mask58 = 0x3FFFFFFFFFFFFFFULL;
     Mwc64State *obj = intf->malloc(sizeof(Mwc64State));
-    do { obj->x = intf->get_seed64(); } while (obj->x == 0);
-    obj->c = 0;
+    do {obj->x = intf->get_seed64(); } while (obj->x == 0);    
+    obj->c = intf->get_seed64() >> 16;
     return (void *) obj;
 }
 

@@ -30,7 +30,7 @@ PRNG_CMODULE_PROLOG
 #define SWB_B 22
 
 /**
- * @brief 32-bit LCG state.
+ * @brief 32-bit SWB state.
  */
 typedef struct {    
     uint32_t x[SWB_A + 1];
@@ -43,20 +43,17 @@ typedef struct {
 static inline uint64_t get_bits_raw(void *state)
 {
     SwbState *obj = state;
-    uint32_t x;
-    int64_t xj = obj->x[obj->j], xi = obj->x[obj->i];
-    int64_t t = xj - xi - (int64_t) obj->c;
-    if (t >= 0) {
-        x = (uint32_t) t;
-        obj->c = 0;
-    } else {
-        x = (uint32_t) (t + 0xFFFFFFFB);
+    uint32_t t = obj->x[obj->j] - obj->x[obj->i] - obj->c;
+    if (obj->x[obj->j] < t) {
+        t -= 5; // The base is 2^{32} - 5
         obj->c = 1;
+    } else {
+        obj->c = 0;
     }
-    obj->x[obj->i] = x;
-    if (--obj->i == 0) obj->i = SWB_A;
-	if (--obj->j == 0) obj->j = SWB_A;
-    return x;
+    obj->x[obj->i] = t;
+    if (--obj->i == 0) { obj->i = SWB_A; }
+	if (--obj->j == 0) { obj->j = SWB_A; }
+    return t;
 }
 
 
@@ -65,12 +62,14 @@ static void *create(const CallerAPI *intf)
     SwbState *obj = intf->malloc(sizeof(SwbState));
     for (size_t i = 1; i <= SWB_A; i++) {
         obj->x[i] = intf->get_seed32();
+        if (obj->x[i] >= 0xFFFFFFFB) {
+            obj->x[i] = 0xFFFFFFFA;
+        }
     }
     obj->c = 1;
-    obj->x[1] |= 1;
-    obj->x[2] = (obj->x[2] >> 1) << 1;
+    obj->x[1] = (obj->x[1] >> 1) << 1;
     obj->i = SWB_A; obj->j = SWB_B;
-    return (void *) obj;
+    return obj;
 }
 
 
