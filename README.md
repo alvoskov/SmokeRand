@@ -661,7 +661,7 @@ There are only two problematic situations:
  chacha_ctr32      | u32    | +       | +     | +       | 1    | 2.0  | -(>>10)| 0     | +       | 256 GiB
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | +      | 4     | +       | >= 32 TiB
  cmwc4827          | u32    | +       | 1     | 1       | 1    | 0.44 | +      | 2     | +       | 512 MiB
- combo             | u32    | +       | 4     | 6       |      |      |        | 0     |         | 4 GiB
+ combo             | u32    | +       | 4     | 6       | 8    | 0.75 |        | 0     |         | 4 GiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
  cswb4288          | u32    | +       | 1     | 1       | 4/5  | 0.90 | +      | 0     | Crush   | >= 32 TiB
  cswb4288_64       | u64    | +       | 1     | 2       | 4/5  | 0.52 | +      | 0     | +hi/+lo | >= 2 TiB
@@ -682,7 +682,7 @@ There are only two problematic situations:
  icg64             | u32    | +       | +     | +       | +    | 113  |        |       |         | >= 1 TiB
  icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  | +      | 0     |         | 32 MiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
- kiss96            | u32    | +       | +     | +       |      |      |        |       |         | ?
+ kiss96            | u32    | +       | +     | +       | +    | 0.80 | +      | 4     |         | ?
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
  kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     | +       | >= 1 TiB
@@ -772,7 +772,7 @@ There are only two problematic situations:
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 1 GiB
  mwc8222           | u32    | +       | +     | +       | +    | 0.59 | +      | 4     | +       | >= 32 TiB
- ncombo            | u32    | 2       | 5     | 8/9     |      |      |        | 0     |         | 64 KiB
+ ncombo            | u32    | 2       | 5     | 8/9     |      | 1.4  |        | 0     |         | 64 KiB
  pcg32             | u32    | +       | +     | +       | +    | 0.44 | +      | 3.5   | +       | 32 TiB
  pcg32_xsl_rr      | u32    | +       | +     | +       | +    | 0.58 | +      | 4     |         | 256 GiB
  pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | 3     | +       | >= 32 TiB
@@ -836,8 +836,8 @@ There are only two problematic situations:
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | 2     | Crush   | 4 TiB
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 2 TiB
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | +      | 0     | Crush   | 512 GiB
- swbmwc32          | u32    | +       | +     | +       |      |      |        |       |         | ?
- swbmwc64          | u64    | +       | +     | +       | +    |      | +      | 4     |         | ?
+ swbmwc32          | u32    | +       | +     | +       | +    | 0.87 | +      | 4     |         | ?
+ swbmwc64          | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | ?
  swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | +      | 2     | +       | 4 GiB
  taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  | Small   | 32 KiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
@@ -849,8 +849,8 @@ There are only two problematic situations:
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 32 TiB
- ultra             | u32    | +       | +     | +       |      |      |        |       |         | ?
- ultra64           | u64    | +       | +     | +       | +    |      |        |       |         | ?
+ ultra             | u32    | +       | +     | +       | 1    | 1.2  |        | 2     |         | 4 GiB
+ ultra64           | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |         | ?
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     | +       | >= 32 TiB
  wich1982          | u32    | +       | 5     | 11      | 13   | 2.3  | -      | 0     | -       | 256 GiB
  wich2006          | u32    | +       | +     | +       | +    | 4.6  | +      | 4     | +       | >= 16 TiB
@@ -880,6 +880,7 @@ There are only two problematic situations:
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 1 TiB
  xorshift128rp     | u64    | +       | +     | 1       | 3/5  | 0.21 | +      | 0     | Small   | 4 GiB
  xoroshiro128      | u64    | 2       | 3     | 5       | 7    | 0.27 | +      | 2.25  | Small   | 256 KiB
+ xoroshiro128aox   | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | ?
  xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      | 3.25  |+lo/+hi  | 16 MiB
  xoroshiro128pp    | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 32 TiB
  xoroshiro128pp_avx| u64    | +       | +     | +       | +    | 0.16 | +      | 4     |         | >= 1 TiB
