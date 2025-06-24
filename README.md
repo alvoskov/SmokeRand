@@ -832,12 +832,12 @@ There are only two problematic situations:
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      | 2.75  | Small   | 512 KiB
  superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | +      | 4     | +       | >= 32 TiB
  shr3              | u32    | 2       | 17    | 33      | 37(?)| 0.76 | -(>>10)| 0     | -       | 32 KiB
- swb               | u32    | 1       | 5     | 6       | 8    | 2.7  | +      | 0     | Small   | 128 MiB
+ swb               | u32    | 1       | 5     | 6       | 8    | 3.2  | +      | 0     | Small   | 128 MiB
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | 2     | Crush   | 4 TiB
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 2 TiB
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | +      | 0     | Crush   | 512 GiB
  swbmwc32          | u32    | +       | +     | +       | +    | 0.87 | +      | 4     |         | ?
- swbmwc64          | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | ?
+ swbmwc64          | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 1 TiB
  swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | +      | 2     | +       | 4 GiB
  taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  | Small   | 32 KiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
@@ -849,7 +849,7 @@ There are only two problematic situations:
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 32 TiB
- ultra             | u32    | +       | +     | +       | 1    | 1.2  |        | 2     |         | 4 GiB
+ ultra             | u32    | +       | +     | +       | 1    | 1.2  | +      | 2     |         | 4 GiB
  ultra64           | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |         | ?
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     | +       | >= 32 TiB
  wich1982          | u32    | +       | 5     | 11      | 13   | 2.3  | -      | 0     | -       | 256 GiB
