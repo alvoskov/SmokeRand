@@ -62,11 +62,6 @@ typedef struct {
 } Xkiss16AwcState;
 
 
-static inline uint16_t rotl16(uint16_t x, int r)
-{
-    return (x << r) | (x >> (16 - r));
-}
-
 static inline uint16_t Xkiss16AwcState_get_bits(Xkiss16AwcState *obj)
 {
     // xoroshiro32+ part

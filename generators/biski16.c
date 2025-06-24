@@ -11,12 +11,6 @@ typedef struct {
 } Biski16State;
 
 
-
-static inline uint16_t rotl16(uint16_t x, int r)
-{
-    return (x << r) | (x >> (16 - r));
-}
-
 // biski64 generator function
 static inline uint16_t Biski16State_get_bits(Biski16State *obj)
 {

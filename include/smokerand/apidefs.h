@@ -19,6 +19,10 @@
 ///// Circular shifts /////
 ///////////////////////////
 
+static inline uint16_t rotl16(uint16_t x, int r)
+{
+    return (x << r) | (x >> ((-r) & 15));
+}
 
 static inline uint32_t rotl32(uint32_t x, int r)
 {

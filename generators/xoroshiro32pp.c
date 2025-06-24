@@ -28,11 +28,6 @@ typedef struct {
 } Xoroshiro32PPState;
 
 
-static inline uint16_t rotl16(uint16_t x, int r)
-{
-    return (x << r) | (x >> (16 - r));
-}
-
 static inline uint16_t Xoroshiro32PPState_get_bits(Xoroshiro32PPState *obj)
 {
     const uint16_t s0 = obj->s[0];

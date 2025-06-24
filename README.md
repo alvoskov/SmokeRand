@@ -682,7 +682,7 @@ There are only two problematic situations:
  icg64             | u32    | +       | +     | +       | +    | 113  |        |       |         | >= 1 TiB
  icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  | +      | 0     |         | 32 MiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
- kiss96            | u32    | +       | +     | +       | +    | 0.80 | +      | 4     |         | ?
+ kiss96            | u32    | +       | +     | +       | +    | 0.80 | +      | 4     |         | >= 2 TiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
  kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     | +       | >= 1 TiB
@@ -744,6 +744,9 @@ There are only two problematic situations:
  mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 16 TiB
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | +      | 4     | +       | >= 32 TiB
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.50 | +      | 3.25  | Small   | 128 GiB
+ mtc16             | u32    | +       | +     | +       | +    |      |        | (0)   |         | 512 GiB(stdin32)*
+ mtc32             | u32    | +       | +     |         |      |      |        | (0)   |         | ?
+ mtc64             | u64    |         |       |         |      |      |        |       |         | ?
  mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | +      | 4     | +       | 2 TiB
  msws              | u32    | +       | +     | +       | +    | 0.72 | +      | 4     | +       | >= 16 TiB
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 8 TiB
@@ -836,7 +839,7 @@ There are only two problematic situations:
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | 2     | Crush   | 4 TiB
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 2 TiB
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | +      | 0     | Crush   | 512 GiB
- swbmwc32          | u32    | +       | +     | +       | +    | 0.87 | +      | 4     |         | ?
+ swbmwc32          | u32    | +       | +     | +       | +    | 0.87 | +      | 3.5   |         | 128 GiB
  swbmwc64          | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 1 TiB
  swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | +      | 2     | +       | 4 GiB
  taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  | Small   | 32 KiB
@@ -850,7 +853,7 @@ There are only two problematic situations:
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 32 TiB
  ultra             | u32    | +       | +     | +       | 1    | 1.2  | +      | 2     |         | 4 GiB
- ultra64           | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |         | ?
+ ultra64           | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |         | >= 2 TiB
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     | +       | >= 32 TiB
  wich1982          | u32    | +       | 5     | 11      | 13   | 2.3  | -      | 0     | -       | 256 GiB
  wich2006          | u32    | +       | +     | +       | +    | 4.6  | +      | 4     | +       | >= 16 TiB
@@ -859,7 +862,7 @@ There are only two problematic situations:
  wyrand            | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 32 TiB
  xabc8             | u32    | +       | 8     | 15      | 22   | 3.7  | -(>>10)| 0     | -       | 8 MiB
  xabc16            | u32    | +       | +     | 1       | 1    | 1.6  | +      | 2     | Small   | 64 GiB
- xabc32            | u32    | +       | +     | +       | +    | 0.82 | +      | 4(0)  | +       | >= 8 TiB(?)
+ xabc32            | u32    | +       | +     | +       | +    | 0.82 | +      | 4(0)  | +       | 16 TiB
  xabc64            | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | 4 TiB
  xkiss8_awc        | u32    | +       | +     | +       | +    | 3.2  | +      | 4     | +       | >= 2 TiB
  xkiss16_awc       | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 2 TiB
@@ -935,6 +938,9 @@ e.g. changing `-O2` to `-O3` speeds up `mt19937` but slows down `philox`; gcc 10
 
 Note about `mrg32k3a`: it fails the `FPF-14+6/16:cross` test from PractRand at 4 TiB sample.
 The failure is systematic and reproducible.
+
+Note about `mtc16`: if its output is processed as `stdin16` by PractRand 0.94 then it
+fails after 256 GiB, not after 512 GiB.
 
 Note about `sfc16`: if its output is processed as `stdin16` by PractRand 0.94
 then it passes it at >= 1 TiB. But if it is tested as 32-bit PRNG in `stdin32`

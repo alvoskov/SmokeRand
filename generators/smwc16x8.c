@@ -41,10 +41,6 @@ typedef struct {
     uint8_t pos;
 } Smwc16x8State;
 
-static inline uint16_t rotl16(uint16_t x, int r)
-{
-    return (x << r) | (x >> (16 - r));
-}
 
 static inline uint16_t get_bits16(Smwc16x8State *obj)
 {
