@@ -110,26 +110,26 @@ set (GENERATORS
     lfib_ranmar lfsr113 lfsr258 loop_7fff_w64 lrnd64_1023 lrnd64_255 
     lxm_64x128 macmarsa magma melg19937 melg44497 melg607 minstd 
     mixmax mlfib17_5 mrg32k3a msws msws64 msws64x msws_ctr mt19937 
-    mularx128 mularx128_str mularx128_u32 mularx256 mularx64_r2 mularx64_u32 
-    mulberry32 mwc128 mwc128x mwc128xxa32 mwc1616 mwc1616x mwc16_32 
-    mwc256xxa64 mwc3232x mwc32x mwc32xxa8 mwc40xxa8 mwc4691 mwc48xxa16 
-    mwc64 mwc64x mwc64_2p58 mwc8222 pcg32 pcg32_xsl_rr ncombo pcg64_64 
-    pcg64_xsl_rr philox philox2x32 philox32 r1279 r250 ran randu 
-    ranlux48 ranluxpp ranq1 ranq2 ranrot32 ranrot_bi ranshi ranval 
-    ranval64 rc4 rc4ok romutrio rrmxmx sapparot sapparot2 sapparot2_64 
-    sezgin63 sfc16 sfc32 sfc64 sfc8 shr3 skiss32 skiss64 smwc16x8 
-    smwc192 smwc192lux smwc24 smwc48 smwc48lux smwc8x16 smwc96 speck128 
-    speck128sc speck64_128 splitmix splitmix32 splitmix32cbc splitmix_g1 
-    sqxor sqxor32 stormdrop superduper64 superduper73 superduper96 
-    swb swblarge swblux swbmwc32 swbmwc64 swbw taus88 threefry threefry2x64 
-    tinymt32 tinymt64 tylo64 ultra ultra64 v3b well1024a weyl wich1982 
-    wich2006 wob2m wyrand xabc16 xabc32 xabc64 xabc8 xkiss8_awc xkiss16_awc 
-    xkiss16sh_awc xkiss32_awc xkiss32sh_awc xorgens xoroshiro1024st 
-    xoroshiro1024stst xoroshiro128 xoroshiro128aox xoroshiro128p 
-    xoroshiro128pp xoroshiro128pp_vec xoroshiro32pp xoroshiro64pp 
-    xoroshiro64st xoroshiro64stst xorshift128 xorshift128p xorshift128pp 
-    xorshift128rp xorshift64 xorshift64st xorwow xoshiro128p xoshiro128pp 
-    xsh xtea xxtea ziff98 
+    mtc16 mtc32 mtc64 mtc64hi mularx128 mularx128_str mularx128_u32 
+    mularx256 mularx64_r2 mularx64_u32 mulberry32 mwc128 mwc128x 
+    mwc128xxa32 mwc1616 mwc1616x mwc16_32 mwc256xxa64 mwc3232x mwc32x 
+    mwc32xxa8 mwc40xxa8 mwc4691 mwc48xxa16 mwc64 mwc64x mwc64_2p58 
+    mwc8222 pcg32 pcg32_xsl_rr ncombo pcg64_64 pcg64_xsl_rr philox 
+    philox2x32 philox32 r1279 r250 ran randu ranlux48 ranluxpp ranq1 
+    ranq2 ranrot32 ranrot_bi ranshi ranval ranval64 rc4 rc4ok romutrio 
+    rrmxmx sapparot sapparot2 sapparot2_64 sezgin63 sfc16 sfc32 sfc64 
+    sfc8 shr3 skiss32 skiss64 smwc16x8 smwc192 smwc192lux smwc24 
+    smwc48 smwc48lux smwc8x16 smwc96 speck128 speck128sc speck64_128 
+    splitmix splitmix32 splitmix32cbc splitmix_g1 sqxor sqxor32 stormdrop 
+    superduper64 superduper73 superduper96 swb swblarge swblux swbmwc32 
+    swbmwc64 swbw taus88 threefry threefry2x64 tinymt32 tinymt64 
+    tylo64 ultra ultra64 v3b well1024a weyl wich1982 wich2006 wob2m 
+    wyrand xabc16 xabc32 xabc64 xabc8 xkiss8_awc xkiss16_awc xkiss16sh_awc 
+    xkiss32_awc xkiss32sh_awc xorgens xoroshiro1024st xoroshiro1024stst 
+    xoroshiro128 xoroshiro128aox xoroshiro128p xoroshiro128pp xoroshiro128pp_vec 
+    xoroshiro32pp xoroshiro64pp xoroshiro64st xoroshiro64stst xorshift128 
+    xorshift128p xorshift128pp xorshift128rp xorshift64 xorshift64st 
+    xorwow xoshiro128p xoshiro128pp xsh xtea xxtea ziff98 
 )
 
 # Examples of plugins, i.e. modules with PRNGs

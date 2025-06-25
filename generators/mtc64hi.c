@@ -1,5 +1,5 @@
 /**
- * @file mtc64.c
+ * @file mtc64hi.c
  * @brief A very fast multiplication-based chaotic PRNG by Chris Doty-Humphrey.
  * @details References:
  *
@@ -16,6 +16,7 @@
  * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
+#include "smokerand/int128defs.h"
 
 PRNG_CMODULE_PROLOG
 
@@ -26,22 +27,23 @@ typedef struct {
     uint64_t a;
     uint64_t b;
     uint64_t ctr;
-} Mtc64State;
+} Mtc64HiState;
 
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    Mtc64State *obj = state;
-    uint64_t old = obj->a + obj->b;
-    obj->a = (obj->b * 0x9e3779b97f4a7c15ull) ^ ++obj->ctr;
-    obj->b = rotl64(old, 23);
+    Mtc64HiState *obj = state;
+    uint64_t hi, old;
+    old = unsigned_mul128(obj->a, 0x9e3779b97f4a7c15ull, &hi);
+    obj->a = hi ^ obj->b;
+    obj->b = old + ++obj->ctr;
     return obj->a;
 }
 
 
 static void *create(const CallerAPI *intf)
 {
-    Mtc64State *obj = intf->malloc(sizeof(Mtc64State));
+    Mtc64HiState *obj = intf->malloc(sizeof(Mtc64HiState));
     obj->a = intf->get_seed64();
     obj->b = intf->get_seed64();
     obj->ctr = intf->get_seed64();
@@ -49,4 +51,4 @@ static void *create(const CallerAPI *intf)
 }
 
 
-MAKE_UINT64_PRNG("Mtc64", NULL)
+MAKE_UINT64_PRNG("Mtc64Hi", NULL)
