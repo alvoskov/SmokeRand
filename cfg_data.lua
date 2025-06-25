@@ -33,6 +33,7 @@ local gen_sources = {
     'melg19937',          'melg44497',          'melg607',            'minstd', 
     'mixmax',             'mlfib17_5',          'mrg32k3a',           'msws', 
     'msws64',             'msws64x',            'msws_ctr',           'mt19937', 
+    'mtc16',              'mtc32',              'mtc64',              'mtc64hi',
     'mularx128',          'mularx128_str',      'mularx128_u32',      'mularx256', 
     'mularx64_r2',        'mularx64_u32',       'mulberry32',         'mwc128', 
     'mwc128x',            'mwc128xxa32',        'mwc1616',            'mwc1616x', 
