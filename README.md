@@ -746,8 +746,8 @@ There are only two problematic situations:
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.50 | +      | 3.25  | Small   | 128 GiB
  mtc16             | u32    | +       | +     | +       | +    | 1.3  | +      | 3.5(0)|         | 512 GiB(stdin32)*
  mtc32             | u32    | +       | +     | +       | +    | 0.39 | +      | 4(0)  |         | >= 1 TiB
- mtc64             | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | ?
- mtc64hi           | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | ?
+ mtc64             | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 4 TiB
+ mtc64hi           | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 2 TiB
  mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | +      | 4     | +       | 2 TiB
  msws              | u32    | +       | +     | +       | +    | 0.72 | +      | 4     | +       | >= 16 TiB
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 8 TiB
@@ -884,7 +884,7 @@ There are only two problematic situations:
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 1 TiB
  xorshift128rp     | u64    | +       | +     | 1       | 3/5  | 0.21 | +      | 0     | Small   | 4 GiB
  xoroshiro128      | u64    | 2       | 3     | 5       | 7    | 0.27 | +      | 2.25  | Small   | 256 KiB
- xoroshiro128aox   | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | ?
+ xoroshiro128aox   | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | >= 2 TiB
  xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      | 3.25  |+lo/+hi  | 16 MiB
  xoroshiro128pp    | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 32 TiB
  xoroshiro128pp_avx| u64    | +       | +     | +       | +    | 0.16 | +      | 4     |         | >= 1 TiB
@@ -933,6 +933,32 @@ Performance estimation for some 32-bit generators
 Note about `xorshift128+`: an initial rating was 3.25, manually corrected to 0
 because the upper 32 bits systematically fail the `hamming_ot_distr` and
 `hamming_ot_value` tests from the `full` battery.
+
+Note about `kiss96`: probably it has some subtle artefacts, PractRand 0.94
+returned `unusual` and `mildly suspicious` values at 8-32 TiB samples, extra
+testing is required.
+
+    rng=RNG_stdin32, seed=unknown
+    length= 4 terabytes (2^42 bytes), time= 12681 seconds
+      no anomalies in 323 test result(s)
+
+    rng=RNG_stdin32, seed=unknown
+    length= 8 terabytes (2^43 bytes), time= 25328 seconds
+      Test Name                         Raw       Processed     Evaluation
+      [Low8/32]FPF-14+6/16:cross        R=  -2.5  p =1-2.2e-4   unusual
+      ...and 330 test result(s) without anomalies
+
+    rng=RNG_stdin32, seed=unknown
+    length= 16 terabytes (2^44 bytes), time= 50520 seconds
+      Test Name                         Raw       Processed     Evaluation
+      [Low8/32]FPF-14+6/16:cross        R=  -2.7  p =1-5.7e-5   mildly suspicious
+      ...and 338 test result(s) without anomalies
+
+    rng=RNG_stdin32, seed=unknown
+    length= 32 terabytes (2^45 bytes), time= 102780 seconds
+      Test Name                         Raw       Processed     Evaluation
+      [Low8/32]FPF-14+6/16:cross        R=  -2.7  p =1-3.9e-5   mildly suspicious
+      ...and 346 test result(s) without anomalies
 
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
 e.g. changing `-O2` to `-O3` speeds up `mt19937` but slows down `philox`; gcc 10.3.0 (tdm64-1).
