@@ -661,7 +661,7 @@ There are only two problematic situations:
  chacha_ctr32      | u32    | +       | +     | +       | 1    | 2.0  | -(>>10)| 0     | +       | 256 GiB
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | +      | 4     | +       | >= 32 TiB
  cmwc4827          | u32    | +       | 1     | 1       | 1    | 0.44 | +      | 2     | +       | 512 MiB
- combo             | u32    | +       | 4     | 6       | 8    | 0.75 |        | 0     |         | 4 GiB
+ combo             | u32    | +       | 4     | 6       | 8    | 0.75 |        | 0     | Small   | 4 GiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
  cswb4288          | u32    | +       | 1     | 1       | 4/5  | 0.90 | +      | 0     | Crush   | >= 32 TiB
  cswb4288_64       | u64    | +       | 1     | 2       | 4/5  | 0.52 | +      | 0     | +hi/+lo | >= 2 TiB
@@ -674,6 +674,9 @@ There are only two problematic situations:
  jkiss32           | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  jlkiss64          | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 16 TiB
  flea32x1          | u32    | +       | 1     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
+ gjrand8           | u32    | +       | 3     | 10      | >=14 | 3.5  |        | 0     |         | 128 MiB
+ gjrand16          | u32    | +       | +     | +       | +    | 2.6  |        |       |         | ?
+ gjrand32          | u32    | +       | +     | +       | +    | 0.69 |        |       |         | ?
  gjrand64          | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |         | >= 32 TiB
  gmwc128           | u64    | +       | +     | +       | +    | 0.72 | +      | 4(0)  |         | >= 32 TiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 5     | +       | >= 32 TiB
@@ -744,6 +747,7 @@ There are only two problematic situations:
  mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 16 TiB
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | +      | 4     | +       | >= 32 TiB
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.50 | +      | 3.25  | Small   | 128 GiB
+ mtc8              | u32    | 1       | 20/21 | 35      |      | 1.9  |        | 0     |         | 2 MiB
  mtc16             | u32    | +       | +     | +       | +    | 1.3  | +      | 3.5(0)|         | 512 GiB(stdin32)*
  mtc32             | u32    | +       | +     | +       | +    | 0.39 | +      | 4(0)  |         | >= 1 TiB
  mtc64             | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 4 TiB
@@ -776,6 +780,7 @@ There are only two problematic situations:
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 1 GiB
  mwc8222           | u32    | +       | +     | +       | +    | 0.59 | +      | 4     | +       | >= 32 TiB
+ mzran13           | u32    | 1       | 4     | 8/9     |      | 1.2  |        | 0     |         | 64 KiB
  ncombo            | u32    | 2       | 5     | 8/9     |      | 1.4  |        | 0     |         | 64 KiB
  pcg32             | u32    | +       | +     | +       | +    | 0.44 | +      | 3.5   | +       | 32 TiB
  pcg32_xsl_rr      | u32    | +       | +     | +       | +    | 0.58 | +      | 4     |         | 256 GiB
@@ -853,7 +858,7 @@ There are only two problematic situations:
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 32 TiB
- ultra             | u32    | +       | +     | +       | 1    | 1.2  | +      | 2     |         | 4 GiB
+ ultra             | u32    | +       | +     | +       | 1    | 1.2  | +      | 2     | +       | 4 GiB
  ultra64           | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |         | >= 2 TiB
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     | +       | >= 32 TiB
  wich1982          | u32    | +       | 5     | 11      | 13   | 2.3  | -      | 0     | -       | 256 GiB
