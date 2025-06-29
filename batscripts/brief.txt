@@ -24,6 +24,7 @@ collover8_5d  test=collisionover nbits_per_dim=8  ndims=5 nsamples=3 n=50000000 
 collover5_8d  test=collisionover nbits_per_dim=5  ndims=8 nsamples=3 n=50000000 get_lower=1
 
 # Gap tests
+gap_inv8     test=gap shl=3    ngaps=200000000
 gap_inv512   test=gap shl=9    ngaps=10000000
 gap16_count0 test=gap16_count0 ngaps=100000000
  

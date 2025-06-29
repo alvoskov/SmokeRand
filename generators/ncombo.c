@@ -1,5 +1,5 @@
 /**
- * @file combo.c
+ * @file ncombo.c
  * @brief A combined generator made from a tiny multiplicative lagged Fibonacci
  * generator and MWC generator with base 2^{16}.
  * @details This PRNG suggested by G. Marsaglia and posted by Scott Nelson [1].
@@ -29,7 +29,7 @@
  * @copyright The original algorithm was suggested by G. Marsaglia.
  * Reentrant implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.

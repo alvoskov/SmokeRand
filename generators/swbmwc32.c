@@ -2,11 +2,13 @@
  * @file swbmwc32.c
  * @brief A combined 32-bit generator made from subtract-with-borrow (SWB) and
  * multiply-with-carry PRNG.
- * @details Taken from DIEHARD test suite.
+ * @details Taken from DIEHARD test suite. It fails the `gap_inv8` test from
+ * `brief`, `default` and `full` batteries that makes it unsuitable as a general
+ * purpose pseudorandom number generator.
  *
- * 1. https://doi.org/10.1103/PhysRevLett.69.3382
- * 2. https://doi.org/10.1016/0010-4655(90)90033-W
- * 3. https://doi.org/10.1214/aoap/1177005878
+ * 1. George Marsaglia, Arif Zaman. A New Class of Random Number Generators //
+ *    Ann. Appl. Probab. 1991. V. 1. N.3. P. 462-480
+ *    https://doi.org/10.1214/aoap/1177005878
  *
  * @copyright The SWB algorithm was suggested by G.Marsaglia and A.Zaman.
  *

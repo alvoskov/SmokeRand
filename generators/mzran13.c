@@ -1,9 +1,22 @@
 /**
-Marsaglia G., Zaman A. Some portable very-long-period random number generators //
-Comput. Phys. 1994. V. 8. N 1. P. 117-121. https://doi.org/10.1063/1.168514},
-*/
-
-
+ * @file mzran13.c
+ * @brief A combined PRNG suggested by Marsaglia and Zaman.
+ * @details This combined generator is probably better than `69069` but still
+ * obsolete and fails a lot of tests, especially in its lower bits.
+ *
+ * References:
+ *
+ * 1. Marsaglia G., Zaman A. Some portable very-long-period random number generators //
+ *    Comput. Phys. 1994. V. 8. N 1. P. 117-121. https://doi.org/10.1063/1.168514},
+ *
+ * @copyright The original algorithm was suggested by G. Marsaglia and A. Zaman.
+ * Reentrant implementation for SmokeRand:
+ *
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 

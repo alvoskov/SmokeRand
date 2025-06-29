@@ -297,9 +297,9 @@ Four batteries are implemented in SmokeRand:
  Battery | Number of tests | Bytes (32-bit PRNG) | Bytes (64-bit PRNG)
 ---------|-----------------|---------------------|---------------------
  express | 7               | 2^26                | 2^27
- brief   | 24              | 2^35                | 2^36
- default | 41              | 2^37                | 2^38
- full    | 45              | 2^40                | 2^41
+ brief   | 25              | 2^35                | 2^36
+ default | 42              | 2^37                | 2^38
+ full    | 46              | 2^40                | 2^41
 
 
 Batteries from TestU01 use the next number of values:
@@ -674,9 +674,9 @@ There are only two problematic situations:
  jkiss32           | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  jlkiss64          | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 16 TiB
  flea32x1          | u32    | +       | 1     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
- gjrand8           | u32    | +       | 3     | 10      | >=14 | 3.5  | -(>>10)| 0     |         | 128 MiB
+ gjrand8           | u32    | +       | 4     | 11      | >=15 | 3.5  | -(>>10)| 0     |         | 128 MiB
  gjrand16          | u32    | +       | +     | +       | +    | 2.6  | +      | 4(0)  |         | >= 2 TiB
- gjrand32          | u32    | +       | +     | +       | +    | 0.69 | +      | 4(0)  |         | ?
+ gjrand32          | u32    | +       | +     | +       | +    | 0.69 | +      | 4(0)  |         | >= 1 TiB
  gjrand64          | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |         | >= 32 TiB
  gmwc128           | u64    | +       | +     | +       | +    | 0.72 | +      | 4     |         | >= 32 TiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 5     | +       | >= 32 TiB
@@ -685,7 +685,7 @@ There are only two problematic situations:
  icg64             | u32    | +       | +     | +       | +    | 113  |        |       |         | >= 1 TiB
  icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  | +      | 0     |         | 32 MiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
- kiss96            | u32    | +       | +     | +       | +    | 0.80 | +      | 4     |         | >= 32 TiB(?)
+ kiss96            | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 32 TiB(?)
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
  kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     | +       | >= 1 TiB
@@ -699,12 +699,12 @@ There are only two problematic situations:
  lcg128            | u64    | +       | 1     | 1       | 1    | 0.35 | +      | 3     | +       | 64 GiB
  lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | 3     | +       | 64 GiB
  lcg128_u32_full   | u32    | +       | +     | 1       | 1    | 0.75 | +      | 3     | +       | >= 32 TiB
- lcg69069          | u32    | 6       | 20    | 38/39   | 43   | 0.38 | -(>>10)| 0     | -       | 2 KiB
+ lcg69069          | u32    | 6       | 20    | 38/39   | 43/44| 0.38 | -(>>10)| 0     | -       | 2 KiB
  lea128            | u32    | +       | +     | +       | +    | 5.7  | +      | 5     |         | >= 32 TiB
  lea128_avx        | u32    | +       | +     | +       | +    | 1.2  | +      | 5     |         | >= 32 TiB
- lfib_par[31+]     | u32    | 1       | 5/6   | 6/7     | 10/11| 0.70 | +      | 0     | -       | 32 MiB
- lfib_par[55+]     | u32    | 1       | 4     | 5       | 7    | 0.51 | +      | 0     | -       | 2 GiB
- lfib_par[55-]     | u32    | 1       | 4     | 5       | 7    | 0.51 | +      | 0     | -       | 2 GiB
+ lfib_par[31+]     | u32    | 1       | 6/7   | 8/0     | 11/12| 0.70 | +      | 0     | -       | 32 MiB
+ lfib_par[55+]     | u32    | 1       | 5     | 6       | 8    | 0.51 | +      | 0     | -       | 2 GiB
+ lfib_par[55-]     | u32    | 1       | 5     | 6       | 8    | 0.51 | +      | 0     | -       | 2 GiB
  lfib_par[127+]    | u32    | 1       | 4     | 4       | 5    | 0.48 | +      | 0     | -/Small | 512 MiB
  lfib_par[127-]    | u32    | 1       | 4     | 4       | 5    | 0.48 | +      | 0     | -/Small | 512 MiB
  lfib_par[258+]    | u32    | 1       | 4     | 4       | 5    | 0.44 | +      | 0     | Small   | 8 GiB
@@ -747,12 +747,12 @@ There are only two problematic situations:
  mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 16 TiB
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | +      | 4     | +       | >= 32 TiB
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.50 | +      | 3.25  | Small   | 128 GiB
- mtc8              | u32    | 1       | 20/21 | 35      |      | 1.9  |        | 0     |         | 2 MiB
+ mtc8              | u32    | 1       | 20/21 | 35      | 39   | 1.9  |        | 0     |         | 2 MiB
  mtc16             | u32    | +       | +     | +       | +    | 1.3  | +      | 3.5(0)|         | 512 GiB(stdin32)*
  mtc32             | u32    | +       | +     | +       | +    | 0.39 | +      | 4(0)  |         | >= 1 TiB
  mtc64             | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 4 TiB
  mtc64hi           | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 2 TiB
- mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | +      | 4     | +       | 2 TiB
+ mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | +      | 3.5   | +       | 2 TiB
  msws              | u32    | +       | +     | +       | +    | 0.72 | +      | 4     | +       | >= 16 TiB
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 8 TiB
  msws64            | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 32 TiB
@@ -780,8 +780,8 @@ There are only two problematic situations:
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 1 GiB
  mwc8222           | u32    | +       | +     | +       | +    | 0.59 | +      | 4     | +       | >= 32 TiB
- mzran13           | u32    | 1       | 4     | 8/9     | 11   | 1.2  | +      | 0     |         | 64 KiB
- ncombo            | u32    | 2       | 5     | 8/9     | 11   | 1.4  | +      | 0     |         | 64 KiB
+ mzran13           | u32    | 1       | 4     | 8/9     | 11   | 1.2  | +      | 0     | Small   | 64 KiB
+ ncombo            | u32    | 2       | 5     | 8/9     | 11   | 1.4  | +      | 0     | Small   | 64 KiB
  pcg32             | u32    | +       | +     | +       | +    | 0.44 | +      | 3.5   | +       | 32 TiB
  pcg32_xsl_rr      | u32    | +       | +     | +       | +    | 0.58 | +      | 4     |         | 256 GiB
  pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | 3     | +       | >= 32 TiB
@@ -792,7 +792,7 @@ There are only two problematic situations:
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      | 0     |         | 512 KiB
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      | 3.5   |         | 2 MiB
- randu             | u32    | 6       | 22    | 40      | 44   | 0.41 | -(>>10)| 0     | -       | 1 KiB
+ randu             | u32    | 6       | 23    | 41      | 45   | 0.41 | -(>>10)| 0     | -       | 1 KiB
  ranlux++          | u64    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 32 TiB
  ranrot_bi         | u64    | +       | +     | 1       | 2/4  | 0.33 | +      | 0     |         | 8 GiB
  ranrot32[7/3]     | u32    | +       | 3     | 5/6     | 6    | 0.58 | +      | 0     | Small   | 128 MiB
@@ -830,7 +830,7 @@ There are only two problematic situations:
  speck128_avx(r16) | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 32 TiB
  splitmix          | u64    | +       | +     | +       | +    | 0.12 | -      | 3     | +       | >= 2 TiB
  splitmix_g1       | u64    | +       | 1     | 1       | 2    | 0.12 | -      | 0.75  |         | 8 GiB
- splitmix32        | u32    | +       | 3     | 4       | 5/6  | 0.25 | -(>>10)| 0     | Small   | 1 GiB
+ splitmix32        | u32    | +       | 3     | 4       | 5/7  | 0.25 | -(>>10)| 0     | Small   | 1 GiB
  splitmix32cbc     | u32    | +       | +     | +       | +    | 2.1  | -      | 3     | +       | 8 TiB
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | 4     | +       | >= 16 TiB
  sqxor32           | u32    | +       | 2     | 3       | 5    | 0.20 | -(>>10)| 0     | Small   | 16 GiB
@@ -841,12 +841,12 @@ There are only two problematic situations:
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      | 2.75  | Small   | 512 KiB
  superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | +      | 4     | +       | >= 32 TiB
  shr3              | u32    | 2       | 17    | 33      | 37(?)| 0.76 | -(>>10)| 0     | -       | 32 KiB
- swb               | u32    | 1       | 5     | 6       | 8    | 3.2  | +      | 0     | Small   | 128 MiB
+ swb               | u32    | 1       | 6     | 7       | 9    | 3.2  | +      | 0     | Small   | 128 MiB
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | 2     | Crush   | 4 TiB
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 2 TiB
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | +      | 0     | Crush   | 512 GiB
- swbmwc32          | u32    | +       | +     | +       | +    | 0.87 | +      | 3.5   |         | 128 GiB
- swbmwc64          | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 1 TiB
+ swbmwc32          | u32    | +       | 1     | 1       | 1    | 0.87 | +      | 0     | Small   | 128 GiB
+ swbmwc64          | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 4 TiB
  swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | +      | 2     | +       | 4 GiB
  taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  | Small   | 32 KiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
@@ -1117,6 +1117,16 @@ are less sensitive, e.g. entropy test catches only randu.
 - Passes ENT: lcg32prime, lcg64, lfib31, swb
 
 # Versions history
+
+28.06.2025: SmokeRand 0.37
+
+- The `gap_inv8` test was added to the `brief`, `default` and `full` batteries,
+  it is required to catch the `swbmwc32` generator and probably other scrambled
+  subtract-with-borrow generators. The test is not very sensitive but may also
+  detect additive/subtractive lagged Fibonacci generators with small states.
+- Some new generators were added: e.g. `combo`, `ncombo`, `mzran13`,
+  `mtc8/16/32/64`, `kiss96` (and other KISSes), `swbmwc32`, `swbmwc64`, reduced
+  versions of `gjrand` etc.
 
 15.06.2025: SmokeRand 0.36
 

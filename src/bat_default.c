@@ -55,7 +55,9 @@ void battery_default(const GeneratorInfo *gen, CallerAPI *intf,
         collover20_2d_high = {.nbits_per_dim = 20, .ndims = 2, COLLOVER_HI_PROPS};
 
     // Gap test
-    static const GapOptions gap_inv512 = {.shl = 9, .ngaps = 10000000};
+    static const GapOptions
+        gap_inv8   = {.shl = 3, .ngaps = 500000000},
+        gap_inv512 = {.shl = 9, .ngaps = 10000000};
     static const Gap16Count0Options gap16_count0 = {.ngaps = 500000000};
 
     // Hamming weights distribution (histogram) test
@@ -115,6 +117,7 @@ void battery_default(const GeneratorInfo *gen, CallerAPI *intf,
         {"collover8_5d_high",    collisionover_test_wrap, &collover8_5d_high},
         {"collover5_8d",         collisionover_test_wrap, &collover5_8d},
         {"collover5_8d_high",    collisionover_test_wrap, &collover5_8d_high},
+        {"gap_inv8",             gap_test_wrap, &gap_inv8},
         {"gap_inv512",           gap_test_wrap, &gap_inv512},
         {"gap16_count0",         gap16_count0_test_wrap, &gap16_count0},
         {"hamming_distr",        hamming_distr_test_wrap, &hw_distr},

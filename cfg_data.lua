@@ -20,7 +20,7 @@ local gen_sources = {
     'cmwc4096',           'cmwc4827',           'combo',              'coveyou64', 
     'cswb4288',           'cswb4288_64',        'cwg64',              'des', 
     'drand48',            'efiix64x48',         'flea32x1',           'gjrand8', 
-    'grand16',            'gjrand32',           'gjrand64',           'gmwc128', 
+    'gjrand16',           'gjrand32',           'gjrand64',           'gmwc128', 
     'hc256',              'hicg64',             'icg31x2',            'ia', 
     'ia64',               'ibaa',               'icg64',              'icg64_p2', 
     'isaac64',            'jkiss',              'jkiss32',            'jlkiss64', 

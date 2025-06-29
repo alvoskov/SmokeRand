@@ -103,7 +103,7 @@ set (GENERATORS
     biski16_alt biski16_mul biski32 biski32_alt biski64 biski64sh 
     biski64_alt biski64_mul biski8 biski8_alt biski8_mul chacha cmwc4096 
     cmwc4827 combo coveyou64 cswb4288 cswb4288_64 cwg64 des drand48 
-    efiix64x48 flea32x1 gjrand8 grand16 gjrand32 gjrand64 gmwc128 
+    efiix64x48 flea32x1 gjrand8 gjrand16 gjrand32 gjrand64 gmwc128 
     hc256 hicg64 icg31x2 ia ia64 ibaa icg64 icg64_p2 isaac64 jkiss 
     jkiss32 jlkiss64 kiss11_32 kiss11_64 kiss64 kiss93 kiss96 kiss99 
     kiss4691 kuzn lcg128 lcg32prime lcg64 lcg64prime lcg69069 lcg96 
