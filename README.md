@@ -681,7 +681,7 @@ There are only two problematic situations:
  gmwc128           | u64    | +       | +     | +       | +    | 0.72 | +      | 4     |         | >= 32 TiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 5     | +       | >= 32 TiB
  hicg64_u32        | u32    | 1       | 2     | 3       | 3    | 5.4  | +      | 0     | Small   | 32 MiB
- icg31x2           | u32    | +       | +     | +       | 1    | 87   |        |       |         | 8 GiB
+ icg31x2           | u32    | +       | +     | +       | 1    | 87   |        | 2     |         | 8 GiB
  icg64             | u32    | +       | +     | +       | +    | 113  |        |       |         | >= 1 TiB
  icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  | +      | 0     |         | 32 MiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
@@ -777,6 +777,7 @@ There are only two problematic situations:
  mwc128xxa32       | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 32 TiB
  mwc256xxa64       | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 32 TiB
  mwc1616           | u32    | 1       | 10/11 | 13/19   | 20   | 0.48 | -      | 0     | -/Small | 16 MiB
+ mwc1616p          | u32    | +       | +     | +       | +    |      | +      | 4     |         | >= 2 TiB
  mwc1616x          | u32    | +       | +     | +       | +    | 0.60 | +      | 3.5   | +       | 32 TiB
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 1 GiB
