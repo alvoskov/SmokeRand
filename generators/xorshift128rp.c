@@ -38,14 +38,14 @@ typedef struct {
 static inline uint64_t get_bits_raw(void *state)
 {
     Xorshift128RpState *obj = state;
-	uint64_t x = obj->s[0];
-	uint64_t const y = obj->s[1];
-	obj->s[0] = y;
-	x ^= x << 23;
-	x ^= x >> 17;
-	x ^= y;
-	obj->s[1] = x + y;
-	return x;
+    uint64_t x = obj->s[0];
+    uint64_t const y = obj->s[1];
+    obj->s[0] = y;
+    x ^= x << 23;
+    x ^= x >> 17;
+    x ^= y;
+    obj->s[1] = x + y;
+    return x;
 }
 
 
