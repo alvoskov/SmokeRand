@@ -1,12 +1,29 @@
 /**
- * @details
+ * @file gjrand64.c
+ * @brief Implementation of gjrand64 nonlinear chaotic generator.
+ * @details The gjrand32 algorithm is designed by D. Blackman (aka G. Jones),
+ * its period is at least \f$ 2^{32} \f$.
+ *
+ * References:
+ *
  * 1. https://sourceforge.net/p/gjrand/discussion/446985/thread/3f92306c58/
  * 2. https://gist.github.com/imneme/7a783e20f71259cc13e219829bcea4ac
+ *
+ * @copyright The gjrand64 algorithm is designed by D. Blackman (aka G. Jones).
+ * Reentrant implementation for SmokeRand:
+ *
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 
+/**
+ * @brief gjrand64 generator state.
+ */
 typedef struct {
     uint32_t a;
     uint32_t b;

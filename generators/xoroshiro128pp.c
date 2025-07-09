@@ -101,12 +101,12 @@ typedef struct {
 static inline uint64_t get_bits_scalar_raw(void *state)
 {
     Xoroshiro128PPState *obj = state;
-	const uint64_t s0 = obj->s[0];
-	uint64_t s1 = obj->s[1];
-	const uint64_t result = rotl64(s0 + s1, 17) + s0;
-	s1 ^= s0;
-	obj->s[0] = rotl64(s0, 49) ^ s1 ^ (s1 << 21); // a, b
-	obj->s[1] = rotl64(s1, 28); // c
+    const uint64_t s0 = obj->s[0];
+    uint64_t s1 = obj->s[1];
+    const uint64_t result = rotl64(s0 + s1, 17) + s0;
+    s1 ^= s0;
+    obj->s[0] = rotl64(s0, 49) ^ s1 ^ (s1 << 21); // a, b
+    obj->s[1] = rotl64(s1, 28); // c
     return result;
 }
 

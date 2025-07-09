@@ -71,9 +71,9 @@ typedef struct {
 static inline uint64_t get_bits_scalar_raw(void *state)
 {
     Xorshift128PPState *obj = state;
-	const uint64_t s0 = obj->s[1];
-	uint64_t s1 = obj->s[0];
-	const uint64_t result = rotl64(s0 + s1, 17) + s0;
+    const uint64_t s0 = obj->s[1];
+    uint64_t s1 = obj->s[0];
+    const uint64_t result = rotl64(s0 + s1, 17) + s0;
     obj->s[0] = s0;
     s1 ^= s1 << 23;
     obj->s[1] = s1 ^ s0 ^ (s1 >> 18) ^ (s0 >> 5);

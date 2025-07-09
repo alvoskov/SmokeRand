@@ -39,12 +39,12 @@ typedef struct {
 static inline uint64_t get_bits_raw(void *state)
 {
     Xoroshiro128State *obj = state;
-	const uint64_t s0 = obj->s[0];
-	uint64_t s1 = obj->s[1];
-	s1 ^= s0;
-	obj->s[0] = rotl64(s0, 24) ^ s1 ^ (s1 << 16); // a, b
-	obj->s[1] = rotl64(s1, 37); // c
-	return s0;
+    const uint64_t s0 = obj->s[0];
+    uint64_t s1 = obj->s[1];
+    s1 ^= s0;
+    obj->s[0] = rotl64(s0, 24) ^ s1 ^ (s1 << 16); // a, b
+    obj->s[1] = rotl64(s1, 37); // c
+    return s0;
 }
 
 
