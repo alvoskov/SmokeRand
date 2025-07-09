@@ -881,7 +881,7 @@ There are only two problematic situations:
  xoroshiro32pp     | u32    | +       | 1     | 2       | 6/8  | 1.5  | -(>>10)| 0     | Small   | 256 MiB
  xoroshiro64pp     | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 8 TiB
  xoroshiro64st     | u32    | 1       | 1     | 3       | 5    | 0.51 | -      | 1.75  | Small   | 1 MiB
- xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 1 TiB
+ xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 4 TiB
  xorshift64        | u64    | 2       | 6     | 12      | 15/16| 0.49 | -      | 0     | -       | 32 KiB
  xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |S_lo/+_hi| 512 KiB
  xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB
