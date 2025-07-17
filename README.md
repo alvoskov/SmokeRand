@@ -749,7 +749,7 @@ There are only two problematic situations:
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.50 | +      | 3.25  | Small   | 128 GiB
  mtc8              | u32    | 1       | 20/21 | 35      | 39   | 1.9  |        | 0     |         | 2 MiB
  mtc16             | u32    | +       | +     | +       | +    | 1.3  | +      | 3.5(0)|         | 512 GiB(stdin32)*
- mtc32             | u32    | +       | +     | +       | +    | 0.39 | +      | 4(0)  |         | >= 1 TiB
+ mtc32             | u32    | +       | +     | +       | +    | 0.39 | +      | 4(0)  |         | >= 4 TiB
  mtc64             | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 4 TiB
  mtc64hi           | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 2 TiB
  mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | +      | 3.5   | +       | 2 TiB
@@ -803,7 +803,7 @@ There are only two problematic situations:
  ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | +      | 3.5   |         | 8 TiB
  ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 32 TiB
  ranval            | u32    | +       | +     | +       | +    | 0.31 | +      | 4(0)  | +       | >= 32 TiB
- ranval64          | u64    | +       | +     | +       | +    | 0.23 | +      | 4(0)  |         | >= 2 TiB
+ ranval64          | u64    | +       | +     | +       | +    | 0.23 | +      | 4(0)  |         | >= 16 TiB
  r250              | u32    | 3       | 7     | 10      | 13   | 0.50 | +      | 0     | -       | 1 MiB
  r1279             | u32    | 2       | 5     | 7       | 10   | 0.47 | +      | 0     | Small   | 64 MiB
  ranlux[0]         | u32    | 1       | 6     | 9       | 12   | 6.8  | N/A    | 0     |         | 4 MiB
