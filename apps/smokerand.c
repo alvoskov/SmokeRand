@@ -91,6 +91,28 @@ typedef struct {
     ReportType report_type;
 } SmokeRandSettings;
 
+/**
+ * @brief Returns a default number of threads suitable for the current
+ * hardware configuration.
+ * @details General principles:
+ *
+ * 1) Maximal number of threads is the number of CPU cores.
+ * 2) For 32-bit systems - not more than 2 threads.
+ * 3) If number of cores is more than 4 then leave one unloaded core.
+ */
+static int get_default_nthreads(int *ncores)
+{
+    int nthreads = get_cpu_numcores();
+    if (ncores != NULL) {
+        *ncores = nthreads;
+    }
+    if (sizeof(size_t) == 4 * sizeof(char) && nthreads > 2) {
+        nthreads = 2;
+    }
+    if (nthreads > 4)
+        nthreads--;
+    return nthreads;
+}
 
 /**
  * @brief Process command line arguments to extract settings.
@@ -111,8 +133,10 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
         char *eqpos = strchr(argv[i], '=');
         size_t len = strlen(argv[i]);
         if (!strcmp(argv[i], "--threads")) {
-            obj->nthreads = get_cpu_numcores();
-            fprintf(stderr, "%d CPU cores detected\n", obj->nthreads);
+            int ncores;
+            obj->nthreads = get_default_nthreads(&ncores);
+            fprintf(stderr, "%d CPU cores detected\n", ncores);
+            fprintf(stderr, "%d threads would be created\n", obj->nthreads);
             continue;
         }
         if (!strcmp(argv[i], "--report-brief")) {
