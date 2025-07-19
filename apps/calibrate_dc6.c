@@ -259,8 +259,10 @@ int main(int argc, char *argv[])
         fprintf(stderr, "subtest '%s' is not supported\n", name);
         return 1;
     }
-    mod_name = (nbits == 32) ? "generators/chacha_avx.dll" : "generators/speck128_avx.dll";
-    GeneratorModule mod = GeneratorModule_load(mod_name, NULL);
+    set_cmd_param("avx2");
+    CallerAPI intf = CallerAPI_init_mthr();
+    mod_name = (nbits == 32) ? "generators/chacha.dll" : "generators/speck128_avx.dll";
+    GeneratorModule mod = GeneratorModule_load(mod_name, &intf);
     if (!mod.valid) {
         CallerAPI_free();
         return 1;

@@ -1,5 +1,5 @@
 /**
- * @file mwc8.c 
+ * @file smwc8x16.c 
  * @brief
  * @details
 from sympy import *

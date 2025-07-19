@@ -41,6 +41,18 @@ enum {
     GEN_NROUNDS_FULL = 20 ///< Number of rounds for ChaCha20
 };
 
+
+/**
+ * @brief ChaCha scalar version data chunk that is friendly to strict aliasing.
+ */
+typedef union {
+    uint32_t w32[16];
+    uint64_t w64[8];
+#ifdef __AVX__
+    __m128i w128[4];
+#endif
+} ChaChaData;
+
 /**
  * @brief Contains the ChaCha state.
  * @details The next memory layout in 1D array is used:
@@ -51,11 +63,25 @@ enum {
  *     | 12 13 14 15 |
  */
 typedef struct {
-    uint32_t x[16]; ///< Working state
-    uint32_t out[16]; ///< Output state
+    ChaChaData x;   ///< Working state
+    ChaChaData out; ///< Output state
     size_t ncycles; ///< Number of rounds / 2
     size_t pos;
 } ChaChaState;
+
+
+
+/**
+ * @brief ChaCha vectorized version data chunk that is friendly
+ * to strict aliasing. Designed to keep 4 copies of ChaCha PRNG.
+ */
+typedef union {
+    uint32_t w32[64];
+    uint64_t w64[32];
+#ifdef __AVX2__
+    __m256i w256[8];
+#endif
+} ChaChaVecData;
 
 
 /**
@@ -81,9 +107,9 @@ typedef struct {
  * 
  */
 typedef struct {
-    uint32_t x[64]; ///< Working state
-    uint32_t out[64]; ///< Output state
-    size_t ncycles; ///< Number of rounds / 2
+    ChaChaVecData x;   ///< Working state
+    ChaChaVecData out; ///< Output state
+    size_t ncycles;    ///< Number of rounds / 2
     size_t pos;
 } ChaChaVecState;
 
@@ -122,23 +148,23 @@ static inline void qround(uint32_t *x, size_t ai, size_t bi, size_t ci, size_t d
 void ChaCha_block_c99(ChaChaState *obj)
 {
     for (size_t k = 0; k < 16; k++) {
-        obj->out[k] = obj->x[k];
+        obj->out.w32[k] = obj->x.w32[k];
     }
 
     for (size_t k = 0; k < obj->ncycles; k++) {
         /* Vertical qrounds */
-        qround(obj->out, 0, 4, 8,12);
-        qround(obj->out, 1, 5, 9,13);
-        qround(obj->out, 2, 6,10,14);
-        qround(obj->out, 3, 7,11,15);
+        qround(obj->out.w32, 0, 4, 8,12);
+        qround(obj->out.w32, 1, 5, 9,13);
+        qround(obj->out.w32, 2, 6,10,14);
+        qround(obj->out.w32, 3, 7,11,15);
         /* Diagonal qrounds */
-        qround(obj->out, 0, 5,10,15);
-        qround(obj->out, 1, 6,11,12);
-        qround(obj->out, 2, 7, 8,13);
-        qround(obj->out, 3, 4, 9,14);
+        qround(obj->out.w32, 0, 5,10,15);
+        qround(obj->out.w32, 1, 6,11,12);
+        qround(obj->out.w32, 2, 7, 8,13);
+        qround(obj->out.w32, 3, 4, 9,14);
     }
     for (size_t i = 0; i < 16; i++) {
-        obj->out[i] += obj->x[i];
+        obj->out.w32[i] += obj->x.w32[i];
     }
 }
 
@@ -148,12 +174,7 @@ void ChaCha_block_c99(ChaChaState *obj)
  */
 static inline void ChaCha_inc_counter(ChaChaState *obj)
 {
-    // Variant with 32-bit counter for testing purposes
-    // (will fail gap test!)
-    //obj->x[12]++;
-    // 128-bit counter
-    uint64_t *cnt = (uint64_t *) &obj->x[12];
-    if (++cnt[0] == 0) ++cnt[1];
+    if (++obj->x.w64[6] == 0) ++obj->x.w64[7];
 }
 
 /**
@@ -163,7 +184,7 @@ static inline void ChaCha_inc_counter(ChaChaState *obj)
  */
 static inline void ChaCha_inc_counter32(ChaChaState *obj)
 {
-    obj->x[12]++;
+    obj->x.w32[12]++;
 }
 
 
@@ -173,26 +194,27 @@ static inline void ChaCha_inc_counter32(ChaChaState *obj)
  * @param obj     The state to be initialized.
  * @param nrounds Number of rounds (8, 12, 20).
  * @param seed    Pointer to array of 8 uint32_t values (seeds).
+ * @memberof ChaChaState
  */
 void ChaCha_init(ChaChaState *obj, size_t nrounds, const uint32_t *seed)
 {
     /* Constants: the upper row of the matrix */
-    obj->x[0] = 0x61707865; obj->x[1] = 0x3320646e;
-    obj->x[2] = 0x79622d32; obj->x[3] = 0x6b206574;
+    obj->x.w32[0] = 0x61707865; obj->x.w32[1] = 0x3320646e;
+    obj->x.w32[2] = 0x79622d32; obj->x.w32[3] = 0x6b206574;
     /* Rows 1-2: seed (key) */
     for (size_t i = 0; i < 8; i++) {
-        obj->x[i + 4] = seed[i];
+        obj->x.w32[i + 4] = seed[i];
     }
     /* Row 3: counter and nonce */
     for (size_t i = 12; i <= 15; i++) {
-        obj->x[i] = 0;
+        obj->x.w32[i] = 0;
     }
     ChaCha_inc_counter(obj);
     /* Number of rounds => Number of cycles */
     obj->ncycles = nrounds / 2;
     /* Output state */
     for (size_t i = 0; i < 16; i++) {
-        obj->out[i] = 0;
+        obj->out.w32[i] = 0;
     }
     /* Output counter */
     obj->pos = 16;
@@ -207,7 +229,7 @@ static inline uint64_t get_bits_c99_raw(void *state)
         ChaCha_block_c99(obj);
         obj->pos = 0;
     }
-    return obj->out[obj->pos++];
+    return obj->out.w32[obj->pos++];
 }
 
 MAKE_GET_BITS_WRAPPERS(c99);
@@ -220,7 +242,7 @@ static inline uint64_t get_bits_c99ctr32_raw(void *state)
         ChaCha_block_c99(obj);
         obj->pos = 0;
     }
-    return obj->out[obj->pos++];
+    return obj->out.w32[obj->pos++];
 }
 
 MAKE_GET_BITS_WRAPPERS(c99ctr32);
@@ -259,14 +281,14 @@ static int run_self_test_scalar(const CallerAPI *intf, void (*blockfunc)(ChaChaS
     ChaChaState obj;
     ChaCha_init(&obj, GEN_NROUNDS_FULL, x_init); // 20 rounds
     for (int i = 0; i < 12; i++) {
-        obj.x[i + 4] = x_init[i];
+        obj.x.w32[i + 4] = x_init[i];
     }
-    intf->printf("Input:\n"); print_mat16(intf, obj.x);
+    intf->printf("Input:\n"); print_mat16(intf, obj.x.w32);
     blockfunc(&obj);
-    intf->printf("Output (real):\n"); print_mat16(intf, obj.out);
+    intf->printf("Output (real):\n"); print_mat16(intf, obj.out.w32);
     intf->printf("Output (reference):\n"); print_mat16(intf, out_final);
     for (int i = 0; i < 16; i++) {
-        if (out_final[i] != obj.out[i]) {
+        if (out_final[i] != obj.out.w32[i]) {
             intf->printf("TEST FAILED!\n");
             return 0;
         }        
@@ -330,10 +352,10 @@ static inline void qround_avx(__m128i *a, __m128i *b, __m128i *c, __m128i *d)
 void ChaCha_block_avx(ChaChaState *obj)
 {
 #ifdef CHACHA_VECTOR_INTR
-    __m128i a = _mm_loadu_si128((__m128i *) obj->x);
-    __m128i b = _mm_loadu_si128((__m128i *) (obj->x + 4));
-    __m128i c = _mm_loadu_si128((__m128i *) (obj->x + 8));
-    __m128i d = _mm_loadu_si128((__m128i *) (obj->x + 12));
+    __m128i a = _mm_loadu_si128(&obj->x.w128[0]); // words 0..3
+    __m128i b = _mm_loadu_si128(&obj->x.w128[1]); // words 4..7
+    __m128i c = _mm_loadu_si128(&obj->x.w128[2]); // words 8..11
+    __m128i d = _mm_loadu_si128(&obj->x.w128[3]); // words 12..15
     __m128i ax = a, bx = b, cx = c, dx = d;
     for (size_t k = 0; k < obj->ncycles; k++) {
         /* Vertical qround */
@@ -352,10 +374,10 @@ void ChaCha_block_avx(ChaChaState *obj)
     c = _mm_add_epi32(c, cx);
     d = _mm_add_epi32(d, dx);
 
-    _mm_storeu_si128((__m128i *) obj->out, a);
-    _mm_storeu_si128((__m128i *) (obj->out + 4), b);
-    _mm_storeu_si128((__m128i *) (obj->out + 8), c);
-    _mm_storeu_si128((__m128i *) (obj->out + 12), d);
+    _mm_storeu_si128(&obj->out.w128[0], a);
+    _mm_storeu_si128(&obj->out.w128[1], b);
+    _mm_storeu_si128(&obj->out.w128[2], c);
+    _mm_storeu_si128(&obj->out.w128[3], d);
 #else
     (void) obj;
 #endif
@@ -371,7 +393,7 @@ static inline uint64_t get_bits_avx_raw(void *state)
         ChaCha_block_avx(obj);
         obj->pos = 0;
     }
-    return obj->out[obj->pos++];
+    return obj->out.w32[obj->pos++];
 }
 
 MAKE_GET_BITS_WRAPPERS(avx);
@@ -385,7 +407,7 @@ static inline uint64_t get_bits_avxctr32_raw(void *state)
         ChaCha_block_avx(obj);
         obj->pos = 0;
     }
-    return obj->out[obj->pos++];
+    return obj->out.w32[obj->pos++];
 }
 
 MAKE_GET_BITS_WRAPPERS(avxctr32);
@@ -400,16 +422,10 @@ MAKE_GET_BITS_WRAPPERS(avxctr32);
  */
 static inline void ChaChaVec_inc_counter(ChaChaVecState *obj)
 {
-    // 128-bit counters
-    uint64_t *cnt1 = (uint64_t *) &obj->x[24];
-    uint64_t *cnt2 = (uint64_t *) &obj->x[28];
-    uint64_t *cnt3 = (uint64_t *) &obj->x[56];
-    uint64_t *cnt4 = (uint64_t *) &obj->x[60];
-
-    *cnt1 += 4;
-    *cnt2 += 4;
-    *cnt3 += 4;
-    *cnt4 += 4;
+    obj->x.w64[12] += 4; // words 24,25
+    obj->x.w64[14] += 4; // words 28,29
+    obj->x.w64[28] += 4; // words 56,57
+    obj->x.w64[30] += 4; // words 60,61
 }
 
 /**
@@ -423,14 +439,14 @@ void EXPORT ChaChaVec_init(ChaChaVecState *obj, size_t nrounds, const uint32_t *
 {
     // Fill input and output state with zeros
     for (size_t i = 0; i < 64; i++) {
-        obj->x[i] = 0;
-        obj->out[i] = 0;
+        obj->x.w32[i] = 0;
+        obj->out.w32[i] = 0;
     }
     /* Constants: the upper row of the matrix */
-    obj->x[0] = 0x61707865; obj->x[1] = 0x3320646e;
-    obj->x[2] = 0x79622d32; obj->x[3] = 0x6b206574;
+    obj->x.w32[0] = 0x61707865; obj->x.w32[1] = 0x3320646e;
+    obj->x.w32[2] = 0x79622d32; obj->x.w32[3] = 0x6b206574;
     for (size_t i = 0; i < 4; i++) { // From gen.1 to gen.0
-        obj->x[i + 4] = obj->x[i];
+        obj->x.w32[i + 4] = obj->x.w32[i];
     }
     /* Rows 1-2: seed (key) */
     // | 8   9 10 11 | 12 13 14 15 | <- gen.0-1
@@ -441,21 +457,18 @@ void EXPORT ChaChaVec_init(ChaChaVecState *obj, size_t nrounds, const uint32_t *
     //    obj->x[i + 8] = 0xFF;
     //}
     for (size_t i = 0; i < 4; i++) {
-        obj->x[i + 8]  = seed[i];     obj->x[i + 12] = seed[i];
-        obj->x[i + 16] = seed[i + 4]; obj->x[i + 20] = seed[i + 4];
+        obj->x.w32[i + 8]  = seed[i];     obj->x.w32[i + 12] = seed[i];
+        obj->x.w32[i + 16] = seed[i + 4]; obj->x.w32[i + 20] = seed[i + 4];
     }
-
-
     // Copy constant and key from gen.0-1 to gen.2-3
     for (size_t i = 0; i < 24; i++) {
-        obj->x[i + 32] = obj->x[i];
+        obj->x.w32[i + 32] = obj->x.w32[i];
     }
-
     // Row 3: counter and nonce
     {
-        uint64_t *cnt = (uint64_t *) &obj->x[28]; cnt[0] = 1;
-        cnt = (uint64_t *) &obj->x[56]; cnt[0] = 2;
-        cnt = (uint64_t *) &obj->x[60]; cnt[0] = 3;
+        obj->x.w64[14] = 1; // words 28,29
+        obj->x.w64[28] = 2; // words 56,57
+        obj->x.w64[30] = 3; // words 60,61
     }
     ChaChaVec_inc_counter(obj);
     /* Number of rounds => Number of cycles */
@@ -528,15 +541,15 @@ static inline void qround_avx2(__m256i *a, __m256i *b, __m256i *c, __m256i *d)
 void EXPORT ChaChaVec_block(ChaChaVecState *obj)
 {
 #ifdef CHACHA_VECTOR_AVX2
-    __m256i a = _mm256_loadu_si256((__m256i *) obj->x);
-    __m256i b = _mm256_loadu_si256((__m256i *) (obj->x + 8));
-    __m256i c = _mm256_loadu_si256((__m256i *) (obj->x + 16));
-    __m256i d = _mm256_loadu_si256((__m256i *) (obj->x + 24));
+    __m256i a = _mm256_loadu_si256(&obj->x.w256[0]); // words 0..7
+    __m256i b = _mm256_loadu_si256(&obj->x.w256[1]); // words 8..15
+    __m256i c = _mm256_loadu_si256(&obj->x.w256[2]); // words 16..23
+    __m256i d = _mm256_loadu_si256(&obj->x.w256[3]); // words 24..31
 
-    __m256i a2 = _mm256_loadu_si256((__m256i *) (obj->x + 32));
-    __m256i b2 = _mm256_loadu_si256((__m256i *) (obj->x + 40));
-    __m256i c2 = _mm256_loadu_si256((__m256i *) (obj->x + 48));
-    __m256i d2 = _mm256_loadu_si256((__m256i *) (obj->x + 56));
+    __m256i a2 = _mm256_loadu_si256(&obj->x.w256[4]); // words 32..39
+    __m256i b2 = _mm256_loadu_si256(&obj->x.w256[5]); // words 40..47
+    __m256i c2 = _mm256_loadu_si256(&obj->x.w256[6]); // words 48..55
+    __m256i d2 = _mm256_loadu_si256(&obj->x.w256[7]); // words 56..63
 
     __m256i ax = a, bx = b, cx = c, dx = d;
     __m256i ax2 = a2, bx2 = b2, cx2 = c2, dx2 = d2;
@@ -575,14 +588,15 @@ void EXPORT ChaChaVec_block(ChaChaVecState *obj)
     d2 = _mm256_add_epi32(d2, dx2);
 
 
-    _mm256_storeu_si256((__m256i *) obj->out, a);
-    _mm256_storeu_si256((__m256i *) (obj->out + 8), b);
-    _mm256_storeu_si256((__m256i *) (obj->out + 16), c);
-    _mm256_storeu_si256((__m256i *) (obj->out + 24), d);
-    _mm256_storeu_si256((__m256i *) (obj->out + 32), a2);
-    _mm256_storeu_si256((__m256i *) (obj->out + 40), b2);
-    _mm256_storeu_si256((__m256i *) (obj->out + 48), c2);
-    _mm256_storeu_si256((__m256i *) (obj->out + 56), d2);
+    _mm256_storeu_si256(&obj->out.w256[0], a);
+    _mm256_storeu_si256(&obj->out.w256[1], b);
+    _mm256_storeu_si256(&obj->out.w256[2], c);
+    _mm256_storeu_si256(&obj->out.w256[3], d);
+
+    _mm256_storeu_si256(&obj->out.w256[4], a2);
+    _mm256_storeu_si256(&obj->out.w256[5], b2);
+    _mm256_storeu_si256(&obj->out.w256[6], c2);
+    _mm256_storeu_si256(&obj->out.w256[7], d2);
 #else
     (void) obj;
 #endif
@@ -598,7 +612,7 @@ static uint64_t get_bits_vector_raw(void *state)
         ChaChaVec_block(obj);
         obj->pos = 0;
     }
-    return obj->out[obj->pos++];
+    return obj->out.w32[obj->pos++];
 }
 
 MAKE_GET_BITS_WRAPPERS(vector);
@@ -668,19 +682,19 @@ int run_self_test_vector(const CallerAPI *intf)
 
     ChaChaVec_init(&obj, GEN_NROUNDS_FULL, x_init);
     for (size_t i = 0; i < 4; i++) {
-        obj.x[i + 8]  = obj.x[i + 12] = x_init[i]; // Row 2
-        obj.x[i + 16] = obj.x[i + 20] = x_init[i + 4]; // Row 3
-        obj.x[i + 24] = obj.x[i + 28] = x_init[i + 8]; // Row 4
+        obj.x.w32[i + 8]  = obj.x.w32[i + 12] = x_init[i]; // Row 2
+        obj.x.w32[i + 16] = obj.x.w32[i + 20] = x_init[i + 4]; // Row 3
+        obj.x.w32[i + 24] = obj.x.w32[i + 28] = x_init[i + 8]; // Row 4
     }
     for (size_t i = 0; i < 32; i++) {
-        obj.x[i + 32] = obj.x[i];
+        obj.x.w32[i + 32] = obj.x.w32[i];
     }
-    intf->printf("Input:\n"); print_matx(intf, obj.x, 8, 64);
+    intf->printf("Input:\n"); print_matx(intf, obj.x.w32, 8, 64);
     ChaChaVec_block(&obj);
-    intf->printf("Output (real):\n"); print_matx(intf, obj.out, 8, 64);
+    intf->printf("Output (real):\n"); print_matx(intf, obj.out.w32, 8, 64);
     intf->printf("Output (reference):\n"); print_matx(intf, out_final, 4, 16);
     for (int i = 0; i < 64; i++) {
-        if (out_final[mat32_map[i]] != obj.out[i]) {
+        if (out_final[mat32_map[i]] != obj.out.w32[i]) {
             intf->printf("TEST FAILED!\n");
             return 0;
         }        

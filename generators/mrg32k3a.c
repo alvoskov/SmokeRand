@@ -11,7 +11,7 @@
  * where \f$ m_1 = 2^{32} - 209 \f$ and \f$ m_2 = 2^{32} - 22853 \f$ are
  * primes sligtly less than \f$ 2^{32} \f$.
  *
- * Output is obtained from a combination of \f$ x_{1,n} \f$ and \f$ x_{2,n}:
+ * Output is obtained from a combination of \f$ x_{1,n} \f$ and \f$ x_{2,n} \f$:
  *
  * \f[
  *   x_{n} = x_{1,n} - x_{2,n} \mathop{\mathrm{mod}} {m_1}

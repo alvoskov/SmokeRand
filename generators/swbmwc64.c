@@ -28,8 +28,8 @@
  * to provide the \f$ m = 2^{64*13} - 2^{64*7} + 1 \f$ prime modulus. The
  * MWC multiplier \f$ a = 2^{32} - 10001272 \f$ was also selected by
  * A.L. Voskov. The modulus m is Proth prime. The period of the SWB64 generator
- * is about \f$ 10^{246} or \f$ 2^{818} \f$ and can be estimated by the next
- * Python 3.x program:
+ * is about \f$ 10^{246} \f$ or \f$ 2^{818} \f$ and can be estimated
+ * by the next Python 3.x program:
  *
  *    import sympy, math
  *    b = 2**64

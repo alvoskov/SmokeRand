@@ -27,52 +27,53 @@
  *
  * `brief` battery results:
  *
- *        # Test name                    xemp              p Interpretation
+ *        # Test name                    xemp              p Interpretation 
  *    ----------------------------------------------------------------------
- *       15 gap_inv512                4857.11       2.08e-25 FAIL
- *       16 gap16_count0                   40              0 FAIL
- *       21 linearcomp_high               255              0 FAIL
- *       22 linearcomp_mid                255              0 FAIL
- *       23 linearcomp_low                255              0 FAIL
+ *       16 gap_inv512                   5082       2.95e-36 FAIL           
+ *       17 gap16_count0                   40              0 FAIL           
+ *       21 hamming_ot_u128           3.94041       4.07e-05 SUSPICIOUS     
+ *       22 linearcomp_high               255              0 FAIL           
+ *       23 linearcomp_mid                255              0 FAIL           
+ *       24 linearcomp_low                255              0 FAIL           
  *    ----------------------------------------------------------------------
- * 
+ *
  * `default` battery results:
  *
- *        # Test name                    xemp              p Interpretation
+ *        # Test name                    xemp              p Interpretation 
  *    ----------------------------------------------------------------------
- *       26 gap_inv512                4918.02       3.54e-28 FAIL
- *       27 gap16_count0                   40              0 FAIL
- *       32 hamming_ot_values         5.20744       9.57e-08 SUSPICIOUS
- *       33 hamming_ot_u128           9.34391       4.64e-21 FAIL
- *       34 hamming_ot_u256           4.11907       1.90e-05 SUSPICIOUS
- *       36 linearcomp_high               255              0 FAIL
- *       37 linearcomp_mid                255              0 FAIL
- *       38 linearcomp_low                255              0 FAIL
- *       39 matrixrank_4096            434.11       5.42e-95 FAIL
- *       40 matrixrank_4096_low8       434.11       5.42e-95 FAIL
+ *       27 gap_inv512                4948.54       1.30e-29 FAIL           
+ *       28 gap16_count0                   40              0 FAIL           
+ *       33 hamming_ot_values         4.29411       8.77e-06 SUSPICIOUS     
+ *       34 hamming_ot_u128           10.4518       7.19e-26 FAIL           
+ *       35 hamming_ot_u256           4.55318       2.64e-06 SUSPICIOUS     
+ *       37 linearcomp_high               255              0 FAIL           
+ *       38 linearcomp_mid                255              0 FAIL           
+ *       39 linearcomp_low                255              0 FAIL           
+ *       40 matrixrank_4096            434.11       5.42e-95 FAIL           
+ *       41 matrixrank_4096_low8       434.11       5.42e-95 FAIL           
  *    ----------------------------------------------------------------------
  *
  * `full` battery results:
  *
- *        # Test name                    xemp              p Interpretation
+ *        # Test name                    xemp              p Interpretation 
  *    ----------------------------------------------------------------------
- *       26 gap_inv512                4850.86       3.93e-25 FAIL
- *       27 gap_inv1024                 26095              0 FAIL
- *       28 gap16_count0                   40              0 FAIL
- *       29 hamming_distr             9.88611       2.39e-23 FAIL
- *       33 hamming_ot_values          38.631              0 FAIL
- *       34 hamming_ot_u128           68.6381              0 FAIL
- *       35 hamming_ot_u256             21.41      5.39e-102 FAIL
- *       36 hamming_ot_u512           15.3116       3.20e-53 FAIL
- *       37 linearcomp_high               255              0 FAIL
- *       38 linearcomp_mid                255              0 FAIL
- *       39 linearcomp_low                255              0 FAIL
- *       40 matrixrank_4096            434.11       5.42e-95 FAIL
- *       41 matrixrank_4096_low8       434.11       5.42e-95 FAIL
- *       42 matrixrank_8192            434.11       5.42e-95 FAIL
- *       43 matrixrank_8192_low8       434.11       5.42e-95 FAIL
- *       44 mod3                      -3.1972   1 - 6.94e-04 SUSPICIOUS
+ *       27 gap_inv512                4911.98       6.76e-28 FAIL           
+ *       28 gap_inv1024               26101.3              0 FAIL           
+ *       29 gap16_count0                   40              0 FAIL           
+ *       30 hamming_distr             8.12459       2.24e-16 FAIL           
+ *       34 hamming_ot_values         38.8409              0 FAIL           
+ *       35 hamming_ot_u128             67.53              0 FAIL           
+ *       36 hamming_ot_u256           18.0376       4.94e-73 FAIL           
+ *       37 hamming_ot_u512           18.0687       2.81e-73 FAIL           
+ *       38 linearcomp_high               255              0 FAIL           
+ *       39 linearcomp_mid                255              0 FAIL           
+ *       40 linearcomp_low                255              0 FAIL           
+ *       41 matrixrank_4096            434.11       5.42e-95 FAIL           
+ *       42 matrixrank_4096_low8       434.11       5.42e-95 FAIL           
+ *       43 matrixrank_8192            434.11       5.42e-95 FAIL           
+ *       44 matrixrank_8192_low8       434.11       5.42e-95 FAIL           
  *    ----------------------------------------------------------------------
+ *
  *
  * References:
  *

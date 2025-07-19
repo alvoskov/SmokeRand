@@ -2,7 +2,7 @@
  * @file kiss11_64.c
  * @brief A 64-bit modification of KISS from 2011 with huge period
  * and huge state.
- * @detais It uses a combination of SuperDuper64 and MWC (multiply-with-carry).
+ * @details It uses a combination of SuperDuper64 and MWC (multiply-with-carry).
  * An exact period is unknown but Marsaglia estimates it larger than 10^{40000000}
  * The MWC generator in this 64-bit version uses the next modulus:
  *
