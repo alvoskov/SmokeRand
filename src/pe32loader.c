@@ -85,7 +85,7 @@ int get_pe386_offset(FILE *fp)
  * @param fp        Opened file descriptior.
  * @param pe_offset Offset of the PE header.
  * @return 0/1 - failure/success.
- * @relates PE32BasicInfo
+ * @memberof PE32BasicInfo
  */
 int PE32BasicInfo_init(PE32BasicInfo *peinfo, FILE *fp, uint32_t pe_offset)
 {
@@ -164,7 +164,7 @@ uint32_t PE32BasicInfo_get_membuf_size(PE32BasicInfo *info)
  * @param obj  Preloaded PE32 file image.
  * @param rva  Value RVA (Relative Virtual Address).
  * @return Unsigned 32-bit integer.
- * @relates PE32MemoryImage
+ * @memberof PE32MemoryImage
  */
 static inline uint32_t PE32MemoryImage_get_u32(const PE32MemoryImage *obj, uint32_t rva)
 {
@@ -176,14 +176,14 @@ static inline uint32_t PE32MemoryImage_get_u32(const PE32MemoryImage *obj, uint3
  * @param obj       Preloaded PE32 file image.
  * @param func_name Function name as written in the export table (ASCIIZ string).
  * @return Function address (not RVA, can be converted to the pointer).
- * @relates PE32MemoryImage
+ * @memberof PE32MemoryImage
  */
-void *PE32MemoryImage_get_func_addr(const PE32MemoryImage *img, const char *func_name)
+void *PE32MemoryImage_get_func_addr(const PE32MemoryImage *obj, const char *func_name)
 {
     for (int i = 0; i < img->nexports; i++) {
-        int ord = img->exports_ords[i];
+        int ord = obj->exports_ords[i];
         if (!strcmp(func_name, img->exports_names[i])) {
-            return img->exports_addrs[ord];
+            return obj->exports_addrs[ord];
         }
     }
     return NULL;
@@ -191,7 +191,7 @@ void *PE32MemoryImage_get_func_addr(const PE32MemoryImage *img, const char *func
 
 /**
  * @brief Deallocates all internal buffers.
- * @relates PE32MemoryImage
+ * @memberof PE32MemoryImage
  */
 void PE32MemoryImage_destruct(PE32MemoryImage *obj)
 {
@@ -203,7 +203,7 @@ void PE32MemoryImage_destruct(PE32MemoryImage *obj)
  * @param img   Preloaded image with relocations.
  * @param info  Information about sections and directories.
  * @return 0/1 - failure/success.
- * @relates PE32MemoryImage
+ * @memberof PE32MemoryImage
  */
 int PE32MemoryImage_apply_relocs(PE32MemoryImage *img, PE32BasicInfo *info)
 {
@@ -235,7 +235,7 @@ int PE32MemoryImage_apply_relocs(PE32MemoryImage *img, PE32BasicInfo *info)
 /**
  * @brief Fill export table in the PE32 preloaded image. Converts RVAs to real
  * addresses.
- * @relates PE32MemoryImage
+ * @memberof PE32MemoryImage
  */
 int PE32MemoryImage_apply_exports(PE32MemoryImage *img, PE32BasicInfo *info)
 {
@@ -276,7 +276,7 @@ int PE32MemoryImage_apply_exports(PE32MemoryImage *img, PE32BasicInfo *info)
  * is considered as an error (because it is not supported).
  * @return 0 - failure (imports are present), 1 - succes (imports are not
  * present).
- * @relates PE32MemoryImage
+ * @memberof PE32MemoryImage
  */
 int PE32MemoryImage_apply_imports(PE32MemoryImage *img, PE32BasicInfo *info)
 {
@@ -298,7 +298,7 @@ int PE32MemoryImage_apply_imports(PE32MemoryImage *img, PE32BasicInfo *info)
 /**
  * @brief Load PE32 executable file to RAM using the preloaded PE32BasicInfo
  * structure.
- * @relates PE32BasicInfo
+ * @memberof PE32BasicInfo
  */
 PE32MemoryImage *PE32BasicInfo_load(PE32BasicInfo *info, FILE *fp)
 {

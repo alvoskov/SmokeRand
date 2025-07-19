@@ -34,29 +34,49 @@ enum {
     Z98_MASK = 0x3FFF
 };
 
+/**
+ * @brief Ziff98 pseudorandom number generator state.
+ * @details It is based on the next recurrent relations for the 32-bit words:
+ *
+ * \f[
+ * x_{n} = x_{n - 471} \oplus x_{n - 1586} \oplus x_{n - 6988} \oplus x_{n - 9689)
+ * \f]
+ */
 typedef struct {
-    uint32_t x[Z98_BUFSIZE];
-    unsigned int pos;
+    uint32_t x[Z98_BUFSIZE]; ///< Generator state.
+    unsigned int pos; ///< Current position (for output).
 } Ziff98State;
 
-static inline uint64_t get_bits_raw(void *state)
-{
-    Ziff98State *obj = state;
-    uint32_t *x = obj->x;
-    obj->pos++;
-    return x[obj->pos & Z98_MASK] =
-        x[(obj->pos - 471) & Z98_MASK] ^ 
-        x[(obj->pos - 1586) & Z98_MASK] ^ 
-        x[(obj->pos - 6988) & Z98_MASK] ^ 
-        x[(obj->pos - 9689) & Z98_MASK];
-}
-
+/**
+ * @brief Initialized the generator state.
+ * @memberof Ziff98State
+ */
 static void Ziff98State_init(Ziff98State *obj, uint64_t seed)
 {
     for (int i = 0; i < Z98_BUFSIZE; i++) {
         obj->x[i] = (uint32_t) pcg_bits64(&seed);
     }
     obj->pos = 0;
+}
+
+
+/**
+ * @brief Generate a new pseudorandom number.
+ * @memberof Ziff98State
+ */
+static inline uint32_t Ziff98State_get_bits(Ziff98State *obj)
+{
+    obj->pos++;
+    return obj->x[obj->pos & Z98_MASK] =
+        obj->x[(obj->pos - 471) & Z98_MASK] ^ 
+        obj->x[(obj->pos - 1586) & Z98_MASK] ^ 
+        obj->x[(obj->pos - 6988) & Z98_MASK] ^ 
+        obj->x[(obj->pos - 9689) & Z98_MASK];
+}
+
+static inline uint64_t get_bits_raw(void *state)
+{
+    return Ziff98State_get_bits(state);
 }
 
 static void *create(const CallerAPI *intf)

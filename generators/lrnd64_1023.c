@@ -1,5 +1,5 @@
 /**
- * @file lrnd64.c
+ * @file lrnd64_1023.c
  * @brief A simple LFSR generator with 1024 bits of state and based on
  * 64-bit arithmetics. Fails linear complexity and matrix rank tests.
  * @details It is based on the next recurrent formula:

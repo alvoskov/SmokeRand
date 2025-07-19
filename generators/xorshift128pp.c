@@ -1,5 +1,5 @@
 /**
- * @file xorshift128pp_avx.c
+ * @file xorshift128pp.c
  * @brief xorshift128++ pseurorandom number generator.
  * @details The implementation is based on public domain code by D.Blackman
  * and S.Vigna (vigna@acm.org). This PRNG is a modification of xorshift128+

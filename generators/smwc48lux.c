@@ -1,5 +1,5 @@
 /**
- * @file smwc48.c
+ * @file smwc48lux.c
  * @brief MWC128 - 128-bit PRNG based on MWC method.
  * @details Multiply-with-carry PRNG with a period about 2^127.
  * Passes SmallCrush, Crush and BigCrush tests.

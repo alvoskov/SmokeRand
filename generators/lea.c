@@ -155,7 +155,7 @@ void LeaState_block(LeaState *obj)
 
 /**
  * @brief Increase the internal 64-bit counter.
- * @relates LeaState
+ * @memberof LeaState
  */
 static inline void LeaState_inc_counter(LeaState *obj)
 {
@@ -166,7 +166,7 @@ static inline void LeaState_inc_counter(LeaState *obj)
 /**
  * @brief Generates a new block of pseudorandom numbers and updates
  * internal counters.
- * @relates LeaState.
+ * @memberof LeaState
  */
 void LeaState_iter_func(void *data)
 {
@@ -180,7 +180,7 @@ void LeaState_iter_func(void *data)
  * @brief Initialize the LEA128 scalar PRNG state.
  * @param obj The state to be initialized.
  * @param key 128-bit key.
- * @relates LeaState
+ * @memberof LeaState
  */
 void LeaState_init(LeaState *obj, const uint32_t *key)
 {
@@ -245,7 +245,7 @@ static inline void leavec_round(__m256i *c, const __m256i *rka, __m256i rkb)
 
 /**
  * @brief Encrypt block using preinitialized round keys.
- * @relates LeaVecState
+ * @memberof LeaVecState
  */
 void LeaVecState_block(LeaVecState *obj)
 {
@@ -279,7 +279,7 @@ void LeaVecState_block(LeaVecState *obj)
  * @details We treat our counters as 64-bit despite the 128-bit block size.
  * The upper half of the 128-bit block is not changed and may be used as
  * a thread ID if desired)
- * @relates LeaVecState
+ * @memberof LeaVecState
  */
 static inline void LeaVecState_inc_counter(LeaVecState *obj)
 {
@@ -297,7 +297,7 @@ static inline void LeaVecState_inc_counter(LeaVecState *obj)
 /**
  * @brief Generates a new block of pseudorandom numbers and updates
  * internal counters.
- * @relates LeaVecState.
+ * @memberof LeaVecState
  */
 void LeaVecState_iter_func(void *data)
 {
@@ -312,7 +312,7 @@ void LeaVecState_iter_func(void *data)
  * @brief Initialize the LEA128 vectorized PRNG state.
  * @param obj The state to be initialized.
  * @param key 128-bit key.
- * @relates LeaVecState
+ * @memberof LeaVecState
  */
 void LeaVecState_init(LeaVecState *obj, const uint32_t *key)
 {

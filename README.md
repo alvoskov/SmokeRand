@@ -506,7 +506,7 @@ it may detect evident flaws in avalanche characteristics. Pairwise XOR may
 detect such PRNGs as SplitMix with gamma equal to 1.
 
 The Hamming weights histogram test also catches 32-bit LCGs with modulo
-f\$ m={2^32}\f$, additive/subtractive lagged Fibonacci generators with small
+\f$ m={2^32}\f$, additive/subtractive lagged Fibonacci generators with small
 lags, ranrot32 with small lags, some small LFSR (shr3, xsh, xorshift128,
 lrnd64_255).
 
@@ -537,7 +537,7 @@ additive/subtractive lagged Fibonacci generators.
  128              | 10^10 / 10B   |     1'000 |-0.040 | 1.257 | +
  256              | 10^8  / 100M  |    10'000 | 0.076 | 1.288 | +
  256              | 10^9  / 1000M |    35'000 | 0.067 | 1.274 | +
- 256              | 10^10 / 10B   |           |       |       |
+ 256              | 10^10 / 10B   |     1'000 | 0.079 | 1.263 | +
 
 # Extra tests description
 

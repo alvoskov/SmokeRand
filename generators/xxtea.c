@@ -168,6 +168,7 @@ static inline __m256i mixv(__m256i y, __m256i z, __m256i sum, __m256i rk)
 
 /**
  * @brief XXTEA encryption subroutine.
+ * @memberof Xxtea128State
  */
 void Xxtea128State_block(Xxtea128State *obj)
 {
@@ -191,6 +192,7 @@ void Xxtea128State_block(Xxtea128State *obj)
 
 /**
  * @brief Increase the internal 64-bit counter.
+ * @memberof Xxtea128State
  */
 static inline void Xxtea128State_inc_counter(Xxtea128State *obj)
 {
@@ -201,7 +203,7 @@ static inline void Xxtea128State_inc_counter(Xxtea128State *obj)
 /**
  * @brief Generates a new block of pseudorandom numbers and updates
  * internal counters.
- * @relates LeaState.
+ * @memberof Xxtea128State
  */
 void Xxtea128State_iter_func(void *data)
 {
@@ -215,7 +217,7 @@ void Xxtea128State_iter_func(void *data)
  * @brief Initializes an example of XXTEA scalar PRNG with 128-bit block.
  * @param obj Pointer to the generator to be initialized.
  * @param key 128-bit key.
- * @relates XteaVecState
+ * @memberof Xxtea128State
  */
 void Xxtea128State_init(Xxtea128State *obj, const uint32_t *key)
 {
@@ -238,6 +240,7 @@ void Xxtea128State_init(Xxtea128State *obj, const uint32_t *key)
 
 /**
  * @brief XXTEA encryption subroutine.
+ * @memberof Xxtea128VecState
  */
 void Xxtea128VecState_block(Xxtea128VecState *obj)
 {
@@ -278,6 +281,7 @@ void Xxtea128VecState_block(Xxtea128VecState *obj)
 
 /**
  * @brief Increase the internal 64-bit counter.
+ * @memberof Xxtea128VecState
  */
 static inline void Xxtea128VecState_inc_counter(Xxtea128VecState *obj)
 {
@@ -295,7 +299,7 @@ static inline void Xxtea128VecState_inc_counter(Xxtea128VecState *obj)
 /**
  * @brief Generates a new block of pseudorandom numbers and updates
  * internal counters.
- * @relates LeaState.
+ * @relates Xxtea128VecState
  */
 void Xxtea128VecState_iter_func(void *data)
 {
@@ -309,7 +313,7 @@ void Xxtea128VecState_iter_func(void *data)
  * @brief Initializes an example of XXTEA vectorized PRNG.
  * @param obj Pointer to the generator to be initialized.
  * @param key 256-bit key.
- * @relates XteaVecState
+ * @relates Xxtea128VecState
  */
 void Xxtea128VecState_init(Xxtea128VecState *obj, const uint32_t *key)
 {
@@ -334,6 +338,7 @@ void Xxtea128VecState_init(Xxtea128VecState *obj, const uint32_t *key)
 
 /**
  * @brief XXTEA encryption subroutine.
+ * @memberof Xxtea256State
  */
 void Xxtea256State_block(Xxtea256State *obj)
 {
@@ -355,6 +360,7 @@ void Xxtea256State_block(Xxtea256State *obj)
 
 /**
  * @brief Increase the internal 64-bit counter.
+ * @memberof Xxtea256State
  */
 static inline void Xxtea256State_inc_counter(Xxtea256State *obj)
 {
@@ -365,7 +371,7 @@ static inline void Xxtea256State_inc_counter(Xxtea256State *obj)
 /**
  * @brief Generates a new block of pseudorandom numbers and updates
  * internal counters.
- * @relates LeaState.
+ * @memberof Xxtea256State
  */
 void Xxtea256State_iter_func(void *data)
 {
@@ -379,7 +385,7 @@ void Xxtea256State_iter_func(void *data)
  * @brief Initializes an example of XXTEA scalar PRNG with 256-bit block.
  * @param obj Pointer to the generator to be initialized.
  * @param key 128-bit key.
- * @relates XteaVecState
+ * @relates Xxtea256VecState
  */
 void Xxtea256State_init(Xxtea256State *obj, const uint32_t *key)
 {
@@ -401,6 +407,7 @@ void Xxtea256State_init(Xxtea256State *obj, const uint32_t *key)
 
 /**
  * @brief XXTEA encryption subroutine.
+ * @memberof Xxtea256VecState
  */
 void Xxtea256VecState_block(Xxtea256VecState *obj)
 {
@@ -435,6 +442,7 @@ void Xxtea256VecState_block(Xxtea256VecState *obj)
 
 /**
  * @brief Increase the internal 64-bit counter.
+ * @memberof Xxtea256VecState
  */
 static inline void Xxtea256VecState_inc_counter(Xxtea256VecState *obj)
 {
@@ -452,7 +460,7 @@ static inline void Xxtea256VecState_inc_counter(Xxtea256VecState *obj)
 /**
  * @brief Generates a new block of pseudorandom numbers and updates
  * internal counters.
- * @relates LeaState.
+ * @memberof Xxtea256VecState
  */
 void Xxtea256VecState_iter_func(void *data)
 {
@@ -466,7 +474,7 @@ void Xxtea256VecState_iter_func(void *data)
  * @brief Initializes an example of XXTEA vectorized PRNG.
  * @param obj Pointer to the generator to be initialized.
  * @param key 128-bit key.
- * @relates XteaVecState
+ * @relates Xxtea256VecState
  */
 void Xxtea256VecState_init(Xxtea256VecState *obj, const uint32_t *key)
 {

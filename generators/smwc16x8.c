@@ -1,5 +1,5 @@
 /**
- * @file mwc16x8.c
+ * @file smwc16x8.c
  * @brief A simple multiply-with carry generator for 16-bit systems.
  * @details May be useful for retrocomputing. Passes the `express`, `brief`,
  * `default`, `full` batteries. Uses a simple output scrambler to hide

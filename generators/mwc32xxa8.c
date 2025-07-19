@@ -1,6 +1,6 @@
 /**
- * @file mwc32xxa32.c
- * @brief MWC128XXA32.
+ * @file mwc32xxa8.c
+ * @brief MWC128XXA8 geenerator.
  * @details Multiply-with-carry PRNG.
  *
  * \f[
@@ -26,12 +26,11 @@ PRNG_CMODULE_PROLOG
 
 /**
  * @brief MWC32XXA8 state. Cannot be initialized to (0, 0, 0, 0) or to
- * (2^64 - 1, 2^32 - 1, 2^32 - 1, 2^64 - 1). Default initialization
- * is (seed, seed, seed, 1) as suggested by S. Vigna.
+ * (255, 255, 255, 227). Default initialization is (seed, seed, seed, 1).
  */
 typedef struct {
-    uint8_t x[3];
-    uint8_t c;
+    uint8_t x[3]; ///< \f$ x_i \f$ buffer.
+    uint8_t c;    ///< Carry value.
 } Mwc32xxa8State;
 
 static inline uint64_t get_bits_raw(void *state)
@@ -52,6 +51,12 @@ static inline uint64_t get_bits_raw(void *state)
     return ans;
 }
 
+/**
+ * @brief Initialize the generator state.
+ * @param obj   Generator state to be initialized.
+ * @param seed  Will be used for filling the generator state.
+ * @memberof Mwc32xxa8State
+ */
 static void Mwc32xxa8State_init(Mwc32xxa8State *obj, uint32_t seed)
 {
     obj->x[0] = seed & 0xFF;

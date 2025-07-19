@@ -632,6 +632,7 @@ TestResults hamming_ot_long_test(GeneratorState *obj, const HammingOtLongOptions
 
 double hamming_distr_calc_zemp(unsigned long long *o, size_t nbits)
 {
+    static const double NORM_STD = 1.3; // Empirical standard deviation
     double chi2emp = 0.0;
     unsigned long long npoints = 0;
     unsigned long df = 0;
@@ -648,20 +649,30 @@ double hamming_distr_calc_zemp(unsigned long long *o, size_t nbits)
         }
     }
     free(p);
-    return sr_chi2_to_stdnorm_approx(chi2emp, df);
+    return sr_chi2_to_stdnorm_approx(chi2emp, df) / NORM_STD;
 }
 
-
+/**
+ * @brief Keeps empirical frequencies (histograms), empirical random values
+ * obtained from the chi2 criterion and the corresponding p-values for the
+ * `hamming_distr` statistical test.
+ */
 typedef struct {
-    unsigned long long *o;
-    unsigned long long *o_xor;
-    size_t nbits;
-    double z;
-    double p;
-    double z_xor;
-    double p_xor;
+    unsigned long long *o; ///< Frequencies for Hamming weights of blocks.
+    unsigned long long *o_xor; ///< Frequencies for Hamming weights of blocks pairwise XORs.
+    size_t nbits; ///< Number of bits in the block.
+    double z; ///< chi2 test result (standard normal distribution) for `o`.
+    double p; ///< p-value obtained from `z`.
+    double z_xor; ///< chi2 test result (standard normal distribution) for `o_xor`.
+    double p_xor; ///< p-value obtained from `p_xor`.
 } HammingDistrHist;
 
+/**
+ * @brief Initializes the HammingDistrHist struct.
+ * @param obj    Pointer to the structure to be initialized.
+ * @param nbits  Number of bits per block.
+ * @memberof HammingDistrHist
+ */
 static void HammingDistrHist_init(HammingDistrHist *obj, size_t nbits)
 {
     obj->o     = calloc(nbits + 1, sizeof(unsigned long long));
@@ -671,6 +682,11 @@ static void HammingDistrHist_init(HammingDistrHist *obj, size_t nbits)
     obj->z_xor = NAN; obj->p_xor = NAN;
 }
 
+/**
+ * @brief Calculate all statistics for histograms/frequencies kept
+ * inside the structure.
+ * @memberof HammingDistrHist
+ */
 static void HammingDistrHist_calc_stats(HammingDistrHist *obj)
 {
     obj->z = hamming_distr_calc_zemp(obj->o, obj->nbits);

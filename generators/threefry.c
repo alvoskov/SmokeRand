@@ -99,6 +99,10 @@ PRNG_CMODULE_PROLOG
 ///// Threefry/Threefish scalar implementation /////
 ////////////////////////////////////////////////////
 
+/**
+ * @brief Threefry4x64xN scalar pseudorandom number generator state, it doesn't
+ * rely on SIMD and is cross-platform.
+ */
 typedef struct Tf256State_ {
     BufGen64Interface intf;
     uint64_t k[NWORDS + 1]; /// Key (+ extra word)
@@ -106,7 +110,9 @@ typedef struct Tf256State_ {
     uint64_t v[NWORDS]; /// Output buffer
 } Tf256State;
 
-
+/**
+ * @brief Threefish/Threefry mixing function.
+ */
 static inline void mix4(uint64_t *x, int d1, int d2)
 {
     // Not permuted
@@ -118,6 +124,10 @@ static inline void mix4(uint64_t *x, int d1, int d2)
     x[1] = ( (x3 << d2) | (x3 >> (64 - d2)) ) ^ x[2];
 }
 
+/**
+ * @brief Generates round keys for Threefry and Threefish.
+ * @memberof Tf256State_
+ */
 static inline void Tf256State_key_schedule(Tf256State *obj, uint64_t *out,
     size_t s, size_t s0, size_t s1, size_t s2, size_t s3)
 {    
@@ -138,6 +148,11 @@ static inline void Tf256State_key_schedule(Tf256State *obj, uint64_t *out,
     mix4(v, Rj0[6], Rj1[6]); mix4(v, Rj0[7], Rj1[7]); }
 
 
+/**
+ * @brief Generate the 256-bit block using a simplified 72-round version
+ * of ThreeFish.
+ * @memberof Tf256State_
+ */
 EXPORT void Tf256State_block72(Tf256State *obj)
 {
     static const int N_ROUNDS = 72;
@@ -163,6 +178,11 @@ EXPORT void Tf256State_block72(Tf256State *obj)
     }
 }
 
+/**
+ * @brief Generate the 256-bit block using Threefry (20-round version
+ * of ThreeFish)
+ * @memberof Tf256State_
+ */
 EXPORT void Tf256State_block20(Tf256State *obj)
 {
     static const int N_ROUNDS = 20;
@@ -183,16 +203,20 @@ EXPORT void Tf256State_block20(Tf256State *obj)
 }
 
 
-
+/**
+ * @brief Increases an internal counter, required for generation
+ * of the next block.
+ * @memberof Tf256State_
+ */
 static inline void Tf256State_inc_counter(Tf256State *obj)
 {
     if (++obj->p[0] == 0) obj->p[1]++;
 }
 
 /**
- * @brief Generates a new block of pseudorandom numbers and updates
- * internal counters.
- * @relates LeaState.
+ * @brief Generates a new block of pseudorandom numbers using the 72-round
+ * simplified version of ThreeFish and updates internal counters.
+ * @memberof Tf256State_
  */
 void Tf256State_iter_func_72(void *data)
 {
@@ -203,9 +227,9 @@ void Tf256State_iter_func_72(void *data)
 }
 
 /**
- * @brief Generates a new block of pseudorandom numbers and updates
- * internal counters.
- * @relates LeaState.
+ * @brief Generates a new block of pseudorandom numbers using the 20-round
+ * version of ThreeFish (ThreeFry) and updates internal counters.
+ * @memberof Tf256State_
  */
 void Tf256State_iter_func_20(void *data)
 {
@@ -215,6 +239,14 @@ void Tf256State_iter_func_20(void *data)
     obj->intf.pos = 0;
 }
 
+/**
+ * @brief Initialized the Threefry/Threefish pseudorandom number generator
+ * internal state.
+ * @param obj      Generator state to be initialized.
+ * @param k        Pointer to the 256-bit key (seed).
+ * @param is_full  0 - initialize as Threefry, 1 - initialize as Threefish. 
+ * @memberof Tf256State_
+ */
 static void Tf256State_init(Tf256State *obj, const uint64_t *k, int is_full)
 {
     obj->k[NWORDS] = C240;
@@ -363,7 +395,7 @@ static inline void Tf256VecState_inc_counter(Tf256VecState *obj)
 /**
  * @brief Generates a new block of pseudorandom numbers and updates
  * internal counters.
- * @relates LeaState.
+ * @relates Tf256VecState
  */
 void Tf256VecState_iter_func_72(void *data)
 {
@@ -376,7 +408,7 @@ void Tf256VecState_iter_func_72(void *data)
 /**
  * @brief Generates a new block of pseudorandom numbers and updates
  * internal counters.
- * @relates LeaState.
+ * @relates Tf256VecState
  */
 void Tf256VecState_iter_func_20(void *data)
 {
