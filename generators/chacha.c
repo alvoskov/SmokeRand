@@ -48,9 +48,6 @@ enum {
 typedef union {
     uint32_t w32[16];
     uint64_t w64[8];
-#ifdef __AVX__
-    __m128i w128[4];
-#endif
 } ChaChaData;
 
 /**
@@ -78,9 +75,6 @@ typedef struct {
 typedef union {
     uint32_t w32[64];
     uint64_t w64[32];
-#ifdef __AVX2__
-    __m256i w256[8];
-#endif
 } ChaChaVecData;
 
 
@@ -352,10 +346,12 @@ static inline void qround_avx(__m128i *a, __m128i *b, __m128i *c, __m128i *d)
 void ChaCha_block_avx(ChaChaState *obj)
 {
 #ifdef CHACHA_VECTOR_INTR
-    __m128i a = _mm_loadu_si128(&obj->x.w128[0]); // words 0..3
-    __m128i b = _mm_loadu_si128(&obj->x.w128[1]); // words 4..7
-    __m128i c = _mm_loadu_si128(&obj->x.w128[2]); // words 8..11
-    __m128i d = _mm_loadu_si128(&obj->x.w128[3]); // words 12..15
+    const __m128i *w128x = (__m128i *) (&obj->x.w32[0]);
+    __m128i *w128o = (__m128i *) (&obj->out.w32[0]);
+    __m128i a = _mm_loadu_si128(&w128x[0]); // words 0..3
+    __m128i b = _mm_loadu_si128(&w128x[1]); // words 4..7
+    __m128i c = _mm_loadu_si128(&w128x[2]); // words 8..11
+    __m128i d = _mm_loadu_si128(&w128x[3]); // words 12..15
     __m128i ax = a, bx = b, cx = c, dx = d;
     for (size_t k = 0; k < obj->ncycles; k++) {
         /* Vertical qround */
@@ -374,10 +370,10 @@ void ChaCha_block_avx(ChaChaState *obj)
     c = _mm_add_epi32(c, cx);
     d = _mm_add_epi32(d, dx);
 
-    _mm_storeu_si128(&obj->out.w128[0], a);
-    _mm_storeu_si128(&obj->out.w128[1], b);
-    _mm_storeu_si128(&obj->out.w128[2], c);
-    _mm_storeu_si128(&obj->out.w128[3], d);
+    _mm_storeu_si128(&w128o[0], a);
+    _mm_storeu_si128(&w128o[1], b);
+    _mm_storeu_si128(&w128o[2], c);
+    _mm_storeu_si128(&w128o[3], d);
 #else
     (void) obj;
 #endif
@@ -453,9 +449,6 @@ void EXPORT ChaChaVec_init(ChaChaVecState *obj, size_t nrounds, const uint32_t *
     // | 16 17 18 19 | 20 21 22 23 |
     // | 40 41 42 43 | 44 45 46 47 | <- gen.2-3
     // | 48 49 50 51 | 52 53 54 55 |
-    //for (size_t i = 0; i < 24; i++) {
-    //    obj->x[i + 8] = 0xFF;
-    //}
     for (size_t i = 0; i < 4; i++) {
         obj->x.w32[i + 8]  = seed[i];     obj->x.w32[i + 12] = seed[i];
         obj->x.w32[i + 16] = seed[i + 4]; obj->x.w32[i + 20] = seed[i + 4];
@@ -465,11 +458,9 @@ void EXPORT ChaChaVec_init(ChaChaVecState *obj, size_t nrounds, const uint32_t *
         obj->x.w32[i + 32] = obj->x.w32[i];
     }
     // Row 3: counter and nonce
-    {
-        obj->x.w64[14] = 1; // words 28,29
-        obj->x.w64[28] = 2; // words 56,57
-        obj->x.w64[30] = 3; // words 60,61
-    }
+    obj->x.w64[14] = 1; // words 28,29
+    obj->x.w64[28] = 2; // words 56,57
+    obj->x.w64[30] = 3; // words 60,61
     ChaChaVec_inc_counter(obj);
     /* Number of rounds => Number of cycles */
     obj->ncycles = nrounds / 2;
@@ -541,15 +532,17 @@ static inline void qround_avx2(__m256i *a, __m256i *b, __m256i *c, __m256i *d)
 void EXPORT ChaChaVec_block(ChaChaVecState *obj)
 {
 #ifdef CHACHA_VECTOR_AVX2
-    __m256i a = _mm256_loadu_si256(&obj->x.w256[0]); // words 0..7
-    __m256i b = _mm256_loadu_si256(&obj->x.w256[1]); // words 8..15
-    __m256i c = _mm256_loadu_si256(&obj->x.w256[2]); // words 16..23
-    __m256i d = _mm256_loadu_si256(&obj->x.w256[3]); // words 24..31
+    const __m256i *w256x = (__m256i *) (&obj->x.w32[0]);
+    __m256i *w256o = (__m256i *) (&obj->out.w32[0]);
+    __m256i a = _mm256_loadu_si256(&w256x[0]); // words 0..7
+    __m256i b = _mm256_loadu_si256(&w256x[1]); // words 8..15
+    __m256i c = _mm256_loadu_si256(&w256x[2]); // words 16..23
+    __m256i d = _mm256_loadu_si256(&w256x[3]); // words 24..31
 
-    __m256i a2 = _mm256_loadu_si256(&obj->x.w256[4]); // words 32..39
-    __m256i b2 = _mm256_loadu_si256(&obj->x.w256[5]); // words 40..47
-    __m256i c2 = _mm256_loadu_si256(&obj->x.w256[6]); // words 48..55
-    __m256i d2 = _mm256_loadu_si256(&obj->x.w256[7]); // words 56..63
+    __m256i a2 = _mm256_loadu_si256(&w256x[4]); // words 32..39
+    __m256i b2 = _mm256_loadu_si256(&w256x[5]); // words 40..47
+    __m256i c2 = _mm256_loadu_si256(&w256x[6]); // words 48..55
+    __m256i d2 = _mm256_loadu_si256(&w256x[7]); // words 56..63
 
     __m256i ax = a, bx = b, cx = c, dx = d;
     __m256i ax2 = a2, bx2 = b2, cx2 = c2, dx2 = d2;
@@ -588,15 +581,15 @@ void EXPORT ChaChaVec_block(ChaChaVecState *obj)
     d2 = _mm256_add_epi32(d2, dx2);
 
 
-    _mm256_storeu_si256(&obj->out.w256[0], a);
-    _mm256_storeu_si256(&obj->out.w256[1], b);
-    _mm256_storeu_si256(&obj->out.w256[2], c);
-    _mm256_storeu_si256(&obj->out.w256[3], d);
+    _mm256_storeu_si256(&w256o[0], a);
+    _mm256_storeu_si256(&w256o[1], b);
+    _mm256_storeu_si256(&w256o[2], c);
+    _mm256_storeu_si256(&w256o[3], d);
 
-    _mm256_storeu_si256(&obj->out.w256[4], a2);
-    _mm256_storeu_si256(&obj->out.w256[5], b2);
-    _mm256_storeu_si256(&obj->out.w256[6], c2);
-    _mm256_storeu_si256(&obj->out.w256[7], d2);
+    _mm256_storeu_si256(&w256o[4], a2);
+    _mm256_storeu_si256(&w256o[5], b2);
+    _mm256_storeu_si256(&w256o[6], c2);
+    _mm256_storeu_si256(&w256o[7], d2);
 #else
     (void) obj;
 #endif
@@ -639,7 +632,7 @@ static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
 /**
  * @brief Print the ncols matrix of uint32_t from the ChaCha PRNG state.
  * @param x      Pointer to the matrix (C-style)
- * @param ncols  Number of columns.
+ * @param ncols  Number of columns.                       n
  * @param nelem  Number of elements.
  */
 void print_matx(const CallerAPI *intf, uint32_t *x, size_t ncols, size_t nelem)

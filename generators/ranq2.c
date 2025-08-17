@@ -36,7 +36,7 @@ static inline uint64_t get_bits_raw(void *state)
     obj->v ^= obj->v >> 17;
     obj->v ^= obj->v << 31;
     obj->v ^= obj->v >> 8;
-    obj->w = 4294957665U * (obj->w & 0xFFFFFFFF) + (obj->w >> 32);
+    obj->w = 4294957665ULL * (obj->w & 0xFFFFFFFF) + (obj->w >> 32);
     return obj->w ^ obj->v;
 }
 

@@ -51,6 +51,7 @@ GeneratorState GeneratorState_create(const GeneratorInfo *gi,
     const CallerAPI *intf);
 void GeneratorInfo_print(const GeneratorInfo *gi, int to_stderr);
 void GeneratorState_destruct(GeneratorState *obj, const CallerAPI *intf);
+int GeneratorState_check_size(const GeneratorState *obj);
 
 typedef struct
 {

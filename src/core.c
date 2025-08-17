@@ -251,6 +251,25 @@ void GeneratorState_destruct(GeneratorState *obj, const CallerAPI *intf)
     obj->gi->free(obj->state, obj->gi, intf);
 }
 
+/**
+ * @brief Checks if the generator output size is consistent
+ * with the number of bits.
+ */
+int GeneratorState_check_size(const GeneratorState *obj)
+{
+    if (obj->gi->nbits == 64) {
+        return 1;
+    } else {
+        for (size_t i = 0; i < 1000; i++) {
+            uint64_t x = obj->gi->get_bits(obj->state);
+            if (x >> obj->gi->nbits != 0) {
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
+
 
 //////////////////////////////////////////////////
 ///// Subroutines for working with C modules /////
@@ -577,6 +596,7 @@ static ThreadRetVal THREADFUNC_SPEC battery_thread(void *data)
     return 0;
 }
 
+
 /**
  * @brief Run the test battery in the multithreaded mode.
  */
@@ -753,11 +773,19 @@ void TestsBattery_run(const TestsBattery *bat,
         fprintf(stderr, "***** TestsBattery_run: not enough memory *****\n");
         exit(EXIT_FAILURE);
     }
+    // Create a PRNG example: either for one-threaded version or for basic
+    // sanity check for multithreaded version.
+    GeneratorState obj = GeneratorState_create(gen, intf);
+    if (GeneratorState_check_size(&obj) == 0) {
+        GeneratorState_destruct(&obj, intf);
+        free(results);
+        fprintf(stderr, "***** TestsBattery_run: invalid generator output size *****\n");
+        return;            
+    }
     // Run the tests
     tic = time(NULL);
     if (nthreads == 1 || testid != TESTS_ALL) {
         // One-threaded version
-        GeneratorState obj = GeneratorState_create(gen, intf);
         if (testid == TESTS_ALL) {
             for (size_t i = 0; i < ntests; i++) {
                 intf->printf("----- Test %u of %u (%s)\n",
@@ -774,8 +802,9 @@ void TestsBattery_run(const TestsBattery *bat,
         }
         GeneratorState_destruct(&obj, intf);
     } else {
-       // Multithreaded version
-       TestsBattery_run_threads(bat, gen, intf, nthreads, results, rtype);
+        // Multithreaded version
+        GeneratorState_destruct(&obj, intf);
+        TestsBattery_run_threads(bat, gen, intf, nthreads, results, rtype);
     }
     toc = time(NULL);
     printf("\n");
