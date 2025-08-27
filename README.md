@@ -830,7 +830,7 @@ There are only two problematic situations:
  speck128          | u64    | +       | +     | +       | +    | 3.8  | +      | 5     |         | >= 32 TiB
  speck128_avx(full)| u64    | +       | +     | +       | +    | 0.75 | +      | 5     |         | >= 16 TiB
  speck128_avx(r16) | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 32 TiB
- splitmix          | u64    | +       | +     | +       | +    | 0.12 | -      | 3     | +       | >= 2 TiB
+ splitmix          | u64    | +       | +     | +       | +    | 0.12 | -      | 3     | +       | >= 8 TiB
  splitmix_g1       | u64    | +       | 1     | 1       | 2    | 0.12 | -      | 0.75  |         | 8 GiB
  splitmix32        | u32    | +       | 3     | 4       | 5/7  | 0.25 | -(>>10)| 0     | Small   | 1 GiB
  splitmix32cbc     | u32    | +       | +     | +       | +    | 2.1  | -      | 3     | +       | 8 TiB
@@ -877,7 +877,7 @@ There are only two problematic situations:
  xkiss16sh_awc     | u32    | +       | +     | +       | +    | 2.1  | +      | 3     | +       | 16 GiB
  xkiss32_awc       | u32    | +       | +     | +       | +    | 0.66 | +      | 4     | +       | >= 32 TiB
  xkiss32sh_awc     | u32    | +       | +     | +       | +    | 0.99 | +      | 4     | +       | >= 4 TiB
- xkiss64_awc       | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 4 TiB
+ xkiss64_awc       | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xoroshiro32       | u32    | 2       | 14    | 28/29   | 37/39| 1.4  | -(>>10)| 0     |         | 32 KiB
  xoroshiro32pp     | u32    | +       | 1     | 2       | 6/8  | 1.5  | -(>>10)| 0     | Small   | 256 MiB
