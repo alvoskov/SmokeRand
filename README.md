@@ -739,7 +739,7 @@ There are only two problematic situations:
  lxm_64x128        | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 32 TiB
  macmarsa          | u32    | 2       | 12    | 18      | 19   | 0.67 | -(>>10)| 0     | -       | 128 KiB
  magma             | u64    | +       | +     | +       | +    | 25   |        |       |         | >= 1 TiB
- magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      | 3     |         | >= 2 TiB
+ magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      | 3     |         | >= 16 TiB
  magma_avx-cbc     | u64    | +       | +     | +       | +    | 7.1  | +      | 4     |         | >= 2 TiB
  melg607           | u64    | 2       | 3     | 5       | 7    | 0.73 | +      | 2.25  | Small   | 8 MiB
  melg19937         | u64    | +       | 3     | 3       | 3    | 0.73 | +      | 3.25  | Small   | 256 GiB
@@ -822,7 +822,7 @@ There are only two problematic situations:
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)|         | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  | +       | >= 4 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
- skiss32           | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 4 TiB
+ skiss32           | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 16 TiB
  skiss64           | u64    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 4 TiB
  smwc16x8          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 4 TiB
  smwc192bad        | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 2 TiB
@@ -876,7 +876,7 @@ There are only two problematic situations:
  xkiss16_awc       | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
  xkiss16sh_awc     | u32    | +       | +     | +       | +    | 2.1  | +      | 3     | +       | 16 GiB
  xkiss32_awc       | u32    | +       | +     | +       | +    | 0.66 | +      | 4     | +       | >= 32 TiB
- xkiss32sh_awc     | u32    | +       | +     | +       | +    | 0.99 | +      | 4     | +       | >= 4 TiB
+ xkiss32sh_awc     | u32    | +       | +     | +       | +    | 0.99 | +      | 4     | +       | >= 16 TiB
  xkiss64_awc       | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xoroshiro32       | u32    | 2       | 14    | 28/29   | 37/39| 1.4  | -(>>10)| 0     |         | 32 KiB
