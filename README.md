@@ -823,7 +823,7 @@ There are only two problematic situations:
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  | +       | >= 4 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
  skiss32           | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 16 TiB
- skiss64           | u64    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 4 TiB
+ skiss64           | u64    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 8 TiB
  smwc16x8          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 4 TiB
  smwc192bad        | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 2 TiB
  speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         | >= 4 TiB
