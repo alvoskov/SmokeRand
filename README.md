@@ -689,7 +689,7 @@ There are only two problematic situations:
  kiss96            | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 32 TiB(?)
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
- kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     | +       | >= 4 TiB
+ kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     | +       | >= 16 TiB
  kiss11_64         | u64    | +       | +     | +       | +    | 0.60 | +      | 4     |         | >= 32 TiB
  kiss4691          | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 8 TiB
  kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 4.5   |         | >= 4 TiB
@@ -825,7 +825,7 @@ There are only two problematic situations:
  skiss32           | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 16 TiB
  skiss64           | u64    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 8 TiB
  smwc16x8          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 4 TiB
- smwc192bad        | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 2 TiB
+ smwc192bad        | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 16 TiB(?)
  speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         | >= 4 TiB
  speck128          | u64    | +       | +     | +       | +    | 3.8  | +      | 5     |         | >= 32 TiB
  speck128_avx(full)| u64    | +       | +     | +       | +    | 0.75 | +      | 5     |         | >= 16 TiB
