@@ -109,25 +109,25 @@ $(BINDIR)/sr_tiny$(EXE): $(APPSRCDIR)/sr_tiny.c $(SRCDIR)/specfuncs.c include/sm
 	$(CC) $(CFLAGS89) $(LINKFLAGS) $(APPSRCDIR)/sr_tiny.c $(SRCDIR)/specfuncs.c -o $@ -lm $(INCLUDE) 
 
 $(BINDIR)/smokerand$(EXE): $(OBJDIR)/smokerand.o $(CORE_LIB) $(BAT_LIB) $(BAT_HEADERS)
-	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
+	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
-$(BINDIR)/calibrate_dc6$(EXE): $(OBJDIR)/calibrate_dc6.o $(CORE_LIB)
-	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
+$(BINDIR)/calibrate_dc6$(EXE): $(OBJDIR)/calibrate_dc6.o $(CORE_LIB) $(BAT_LIB)
+	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
 $(BINDIR)/calibrate_linearcomp$(EXE): $(OBJDIR)/calibrate_linearcomp.o $(CORE_LIB)
-	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
+	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
-$(BINDIR)/test_cpp11$(EXE): $(OBJDIR)/test_cpp11.o $(CORE_LIB)
-	$(CXX) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
+$(BINDIR)/test_cpp11$(EXE): $(OBJDIR)/test_cpp11.o $(CORE_LIB) $(BAT_LIB)
+	$(CXX) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
-$(BINDIR)/test_crand$(EXE): $(OBJDIR)/test_crand.o $(CORE_LIB)
-	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
+$(BINDIR)/test_crand$(EXE): $(OBJDIR)/test_crand.o $(CORE_LIB) $(BAT_LIB)
+	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
+                          
+$(BINDIR)/test_funcs$(EXE): $(OBJDIR)/test_funcs.o $(CORE_LIB) $(BAT_LIB)
+	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
-$(BINDIR)/test_funcs$(EXE): $(OBJDIR)/test_funcs.o $(CORE_LIB)
-	$(CC) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
-
-$(BINDIR)/test_rdseed$(EXE): $(OBJDIR)/test_rdseed.o $(CORE_LIB)
-	$(CXX) $(LINKFLAGS) $< $(BAT_OBJFILES) -o $@ $(LFLAGS) $(INCLUDE)
+$(BINDIR)/test_rdseed$(EXE): $(OBJDIR)/test_rdseed.o $(CORE_LIB) $(BAT_LIB)
+	$(CXX) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
 $(LIB_OBJFILES) $(BATLIB_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.c $(LIB_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
