@@ -180,9 +180,9 @@ static inline uint32_t PE32MemoryImage_get_u32(const PE32MemoryImage *obj, uint3
  */
 void *PE32MemoryImage_get_func_addr(const PE32MemoryImage *obj, const char *func_name)
 {
-    for (int i = 0; i < img->nexports; i++) {
+    for (int i = 0; i < obj->nexports; i++) {
         int ord = obj->exports_ords[i];
-        if (!strcmp(func_name, img->exports_names[i])) {
+        if (!strcmp(func_name, obj->exports_names[i])) {
             return obj->exports_addrs[ord];
         }
     }
