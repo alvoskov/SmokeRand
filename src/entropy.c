@@ -1,35 +1,20 @@
 /**
  * @file entropy.c
- * @brief Seeds generator based on XXTEA block cipher and TRNG from CPU.
- * It uses hardware random number generator (RDSEED) when possible. These
- * values are balanced by means of XXTEA block cipher. If no hardware RNG
- * is accessible then the PRNG output is encrypted.
- * @details It uses hardware random number generator (RDSEED) when possible.
- * The algorithm is based on XXTEA block cipher (with 64-bit blocks) that
- * processes an output from a simple 64-bit PRNG. If RDSEED instruction is
- * available then its output is injected by XORing with:
+ * @brief Generates seeds for PRNGs using the ChaCha20 based counter-based PRNG
+ * seeded with external entropy sources. NOT FOR CRYPTOGRAPHY!
+ * @details Seeds for ChaCha20 generator are taken from the system CSPRNG
+ * such as `/dev/urandom/`. If it is unaccessible - then it will rely only on
+ * its built-in entropy sources:
  *
- * - 64-bit PRNG (before encryption with XXTEA).
- * - 128-bit key for XXTEA.
+ * - RDRAND instruction (if available)
+ * - System time: `time`, `RDTSC`, higher-resolution system clock.
+ * - System info: computer ID, process id etc.
  *
- * This seeds generator is resistant to the RDSEED failure. It uses
- * the next backup entropy sources:
+ * Even if all hardware sources of entropy except time are excluded --- it will
+ * still return high-quality pseudorandom seeds.
  *
- * - RDTSC instruction (built-in CPU clocks)
- * - `time` function (from C99 standard).
- * - Current process ID.
- * - Tick count from the system clock.
- * - Machine ID (an attempt to make unique seeds even RDSEED and RDTSC
- *   are broken or unaccessible).
- *
- * DON'T USE IT FOR CRYPTOGRAPHY AND SECURITY PURPOSES! IT IS DESIGNED JUST
- * TO MAKE GOOD RANDOM SEEDS FOR PRNG EMPIRICAL TESTING!
- *
- * Examples of RDRAND failure on some CPUs:
- *
- * - https://github.com/systemd/systemd/issues/11810#issuecomment-489727505
- * - https://github.com/rust-random/getrandom/issues/228
- * - https://news.ycombinator.com/item?id=19848953
+ * DON'T USE FOR THIS GENERATOR FOR CRYPTOGRAPHY, E.G. GENERATION OF KEYS FOR
+ * ENCRYPTION! IT IS DESIGNED ONLY FOR STATISTCAL TESTS AND PRNG SEEDING!
  *
  * @copyright
  * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
@@ -46,6 +31,12 @@
 #include "smokerand/entropy.h"
 #include <time.h>
 #include <stdlib.h>
+
+
+static inline uint32_t rotl32(uint32_t x, int r)
+{
+    return (x << r) | (x >> ((-r) & 31));
+}
 
 
 static inline uint64_t ror64(uint64_t x, uint64_t r)
@@ -80,6 +71,115 @@ uint64_t str_hash(const char *str)
     }
     return mix_hash(hash);
 }
+
+//////////////////////////////////////////////
+///// ChaCha20State class implementation /////
+//////////////////////////////////////////////
+
+static inline void chacha_qround(uint32_t *x, size_t ai, size_t bi, size_t ci, size_t di)
+{
+    x[ai] += x[bi]; x[di] ^= x[ai]; x[di] = rotl32(x[di], 16);
+    x[ci] += x[di]; x[bi] ^= x[ci]; x[bi] = rotl32(x[bi], 12);
+    x[ai] += x[bi]; x[di] ^= x[ai]; x[di] = rotl32(x[di], 8);
+    x[ci] += x[di]; x[bi] ^= x[ci]; x[bi] = rotl32(x[bi], 7);
+}
+
+void ChaCha20State_init(ChaCha20State *obj, const uint32_t *key)
+{
+    // Constants: the upper row of the matrix
+    obj->x[0] = 0x61707865; obj->x[1] = 0x3320646e;
+    obj->x[2] = 0x79622d32; obj->x[3] = 0x6b206574;
+    // Rows 1-2: key (seed)
+    for (size_t i = 0; i < 8; i++) {
+        obj->x[i + 4] = key[i];
+    }
+    // Row 3: counter and nonce
+    for (size_t i = 12; i <= 15; i++) {
+        obj->x[i] = 0;
+    }
+    // Output counter
+    obj->pos = 16;
+}
+
+void ChaCha20State_generate(ChaCha20State *obj)
+{
+    for (size_t k = 0; k < 16; k++) {
+        obj->out[k] = obj->x[k];
+    }
+    for (size_t k = 0; k < 10; k++) {
+        // Vertical qrounds
+        chacha_qround(obj->out, 0, 4, 8,12);
+        chacha_qround(obj->out, 1, 5, 9,13);
+        chacha_qround(obj->out, 2, 6,10,14);
+        chacha_qround(obj->out, 3, 7,11,15);
+        // Diagonal qrounds
+        chacha_qround(obj->out, 0, 5,10,15);
+        chacha_qround(obj->out, 1, 6,11,12);
+        chacha_qround(obj->out, 2, 7, 8,13);
+        chacha_qround(obj->out, 3, 4, 9,14);
+    }
+    for (size_t i = 0; i < 16; i++) {
+        obj->out[i] += obj->x[i];
+    }
+}
+
+static void ChaCha20State_inc_counter(ChaCha20State *obj)
+{
+    if (++obj->x[12] == 0) {
+        obj->x[13]++;
+    }
+}
+
+static void ChaCha20State_set_nonce(ChaCha20State *obj, uint64_t nonce)
+{
+    obj->x[14] = (uint32_t) nonce;
+    obj->x[15] = (uint32_t) (nonce >> 32);
+}
+
+uint32_t ChaCha20State_next32(ChaCha20State *obj)
+{
+    if (obj->pos >= 16) {
+        ChaCha20State_inc_counter(obj);
+        ChaCha20State_generate(obj);
+        obj->pos = 0;
+    }
+    return obj->out[obj->pos++];
+}
+
+uint64_t ChaCha20State_next64(ChaCha20State *obj)
+{
+    uint64_t lo = ChaCha20State_next32(obj);
+    uint64_t hi = ChaCha20State_next32(obj);
+    return (hi << 32) | lo;
+}
+
+int chacha20_test(void)
+{
+    static const uint32_t x_init[] = { // Input values
+        0x03020100,  0x07060504,  0x0b0a0908,  0x0f0e0d0c,
+        0x13121110,  0x17161514,  0x1b1a1918,  0x1f1e1d1c,
+        0x00000001,  0x09000000,  0x4a000000,  0x00000000
+    };
+    static const uint32_t out_final[] = { // Refernce values from RFC 7359
+       0xe4e7f110,  0x15593bd1,  0x1fdd0f50,  0xc47120a3,
+       0xc7f4d1c7,  0x0368c033,  0x9aaa2204,  0x4e6cd4c3,
+       0x466482d2,  0x09aa9f07,  0x05d7c214,  0xa2028bd9,
+       0xd19c12b5,  0xb94e16de,  0xe883d0cb,  0x4e3c50a2
+    };
+    ChaCha20State obj;
+    ChaCha20State_init(&obj, x_init);
+    for (size_t i = 0; i < 4; i++) {
+        obj.x[i + 12] = x_init[i + 8];
+    }
+    ChaCha20State_generate(&obj);
+    for (int i = 0; i < 16; i++) {
+        if (out_final[i] != obj.out[i]) {
+            return 0;
+        }        
+    }
+    return 1;
+}
+
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
 #include <windows.h>
@@ -206,6 +306,12 @@ uint64_t __rdtsc(void);
 #endif
 /**
  * @brief XORs input with output of hardware RNG in CPU (rdseed).
+ * @details It is good but not very reliable source of entropy. Examples of
+ * RDRAND failure on some CPUs:
+ *
+ * - https://github.com/systemd/systemd/issues/11810#issuecomment-489727505
+ * - https://github.com/rust-random/getrandom/issues/228
+ * - https://news.ycombinator.com/item?id=19848953
  */
 uint64_t mix_rdseed(const uint64_t x)
 {
@@ -231,73 +337,90 @@ uint64_t cpuclock(void)
 }
 #endif
 
-/////////////////////////////////////////////
-///// XXTEA block cipher implementation /////
-/////////////////////////////////////////////
-
 /**
- * @brief XXTEA mixing function.
+ * @brief Gains access to the system CSPRNG and XORs content of the output
+ * buffer with output of this generator.
+ * @param[out] out  Output buffer.
+ * @param[in]  len  Size of output buffer in 64-bit words.
+ * @return 0/1 - failure/success.
  */
-#define MX(p) (((z>>5^y<<2) + (y>>3^z<<4)) ^ ((sum^y) + (key[((p)&3)^e] ^ z)))
-
-/**
- * @brief XXTEA encryption subroutine for 64-bit block. Used for
- * generation of seeds from 64-bit state.
- */
-uint64_t xxtea_encrypt(const uint64_t inp, const uint32_t *key)
+static int inject_rand(uint64_t *out, size_t len)
 {
-    static const uint32_t DELTA = 0x9e3779b9;
-    static const unsigned int nrounds = 32;
-    uint32_t y, z, sum = 0;
-    union {
-        uint32_t v[2];
-        uint64_t x;
-    } out;
-    out.x = inp;
-    z = out.v[1];
-    for (unsigned int i = 0; i < nrounds; i++) {
-        sum += DELTA;
-        unsigned int e = (sum >> 2) & 3;
-        y = out.v[1]; 
-        z = out.v[0] += MX(0);
-        y = out.v[0];
-        z = out.v[1] += MX(1);
+#ifdef WINDOWS_PLATFORM
+    HCRYPTPROV hCryptProv;
+    DWORD nbytes = sizeof(uint64_t) * len;
+    // Acquire a cryptographic provider context
+    // CRYPT_VERIFYCONTEXT for a temporary context
+    if (!CryptAcquireContext(&hCryptProv, NULL, NULL,
+        PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+        return 0;
     }
-    return out.x;
+    // Generate random bytes
+    uint64_t *buf = malloc(nbytes);
+    if (buf == NULL || !CryptGenRandom(hCryptProv, nbytes, (BYTE *) buf)) {
+        CryptReleaseContext(hCryptProv, 0);
+        free(buf);
+        return 0;
+    }
+    // Inject the bytes into the output buffer with XOR
+    for (size_t i = 0; i < len; i++) {
+        //printf("%llX\n", buf[i]);
+        out[i] ^= buf[i];
+    }
+    free(buf);
+    // Release the cryptographic provider context
+    CryptReleaseContext(hCryptProv, 0);
+    return 1;
+#else
+    (void) out; (void) len;
+    return 0;
+#endif
 }
 
 
-
-
-/**
- * @brief Generates the next state and returns it in the hashed form.
- * It is essentially SplitMix PRNG that will be used as an input of XXTEA.
- */
-static uint64_t Entropy_nextstate(Entropy *obj)
-{
-    obj->state += 0x9E3779B97F4A7C15;
-    return mix_rdseed(mix_hash(obj->state));
-}
 
 void Entropy_init(Entropy *obj)
 {
+    uint64_t seed[4];
+    uint32_t key[8];
+    uint64_t timestamp = time(NULL);
     uint64_t mid = get_machine_id();
-    uint64_t seed0 = mix_rdseed(mix_hash(time(NULL)) ^ mix_hash(get_tick_count()));
-    uint64_t seed1 = mix_rdseed(mix_hash(get_current_process_id()));
-    seed1 ^= mix_rdseed(mix_hash(cpuclock()));
-    seed0 ^= mid; seed1 ^= mid;
-    obj->key[0] = (uint32_t) seed0; obj->key[1] = seed0 >> 32;
-    obj->key[2] = (uint32_t) seed1; obj->key[3] = seed1 >> 32;
-    obj->state = mix_hash(time(NULL) ^ mid);
+    uint64_t tic = get_tick_count();
+    uint64_t pid = get_current_process_id();
+    uint64_t cpu = cpuclock();
+
+    seed[0] = mix_rdseed(mix_hash(timestamp)) ^ mix_hash(tic) ^ mid;
+    seed[1] = mix_rdseed(mix_hash(pid)) ^ mix_rdseed(mix_hash(cpu)) ^ mid;
+    seed[2] = mix_rdseed(mix_hash(~pid));
+    seed[3] = mix_rdseed(mix_hash(~pid));
+    if (!inject_rand(seed, 8)) {
+        fprintf(stderr,
+            "Warning: system CSPRNG is unaccessible. Internal seeder will be used.\n");
+    }
+    for (size_t i = 0; i < 4; i++) {
+        key[2*i] = (uint32_t) seed[i];
+        key[2*i + 1] = (uint32_t) (seed[i] >> 32);
+    }
+    ChaCha20State_init(&obj->gen, key);
+    uint64_t nonce = timestamp ^ (cpu << 40);
+    ChaCha20State_set_nonce(&obj->gen, nonce);
     obj->slog_len = 1 << 8;
     obj->slog_maxlen = 1 << 20;
     obj->slog = calloc(obj->slog_len, sizeof(SeedLogEntry));
     obj->slog_pos = 0;
     fprintf(stderr, "Entropy pool (seed generator) initialized\n");
-    fprintf(stderr, "  machine_id: 0x%16.16llX\n", (unsigned long long) mid);
-    fprintf(stderr, "  seed0:      0x%16.16llX\n", (unsigned long long) seed0);
-    fprintf(stderr, "  seed1:      0x%16.16llX\n", (unsigned long long) seed1);
-    fprintf(stderr, "  state:      0x%16.16llX\n", (unsigned long long) obj->state);
+    fprintf(stderr, "ChaCha20 initial state\n");
+    for (size_t i = 0; i < 4; i++) {
+        for (size_t j = 0; j < 4; j++) {
+            size_t ind = 4 * i + j;
+            fprintf(stderr, "%.8lX ", (unsigned long) obj->gen.x[ind]);
+        }
+        fprintf(stderr, "\n");
+    }
+    for (size_t i = 0; i < 4; i++) {
+        fprintf(stderr, "Output %d: 0x%16.16llX\n",
+            (int) i, (unsigned long long) ChaCha20State_next64(&obj->gen));
+    }
 }
 
 void Entropy_free(Entropy *obj)
@@ -306,37 +429,13 @@ void Entropy_free(Entropy *obj)
     obj->slog = NULL;
 }
 
-
-/**
- * @brief Tests 64-bit XXTEA implementation correctness
- */
-int xxtea_test(void)
-{
-    static const uint64_t OUT0 = 0x575d8c80053704ab;
-    static const uint64_t OUT1 = 0xc4cc7f1cc007378c;
-    uint32_t key[4] = {0, 0, 0, 0};
-    // Test 1
-    if (xxtea_encrypt(0, key) != OUT0) {
-        //fprintf(stderr, "0: %llX %llX", xxtea_encrypt(0, key), OUT0);
-        return 0;
-    }
-    // Test 2
-    key[0] = 0x08040201; key[1] = 0x80402010;
-    key[2] = 0xf8fcfeff; key[3] = 0x80c0e0f0; 
-    if (xxtea_encrypt(0x80c0e0f0f8fcfeff, key) != OUT1) {
-        //fprintf(stderr, "0: %llX %llX", xxtea_encrypt(0x80c0e0f0f8fcfeff, key), OUT1);
-        return 0;
-    }
-    return 1;
-}
-
 /**
  * @brief Returns 64-bit random seed. Hardware RNG is used
  * when possible. WARNING! THIS FUNCTION IS NOT THREAD SAFE!
  */
 uint64_t Entropy_seed64(Entropy *obj, uint64_t thread_id)
 {
-    uint64_t seed = xxtea_encrypt(Entropy_nextstate(obj), obj->key);
+    uint64_t seed = ChaCha20State_next64(&obj->gen);
     if (obj->slog_pos != obj->slog_maxlen - 1) {
         // Check if buffer resizing is needed
         if (obj->slog_pos >= obj->slog_len - 1) {

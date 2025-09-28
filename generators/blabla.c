@@ -3,9 +3,9 @@
  * @brief BlaBla counter-based pseudorandom number generator.
  * @details It was developed by JP Aumasson, one of the developers of the
  * BLAKE/BLAKE2/BLAKE3 hash functions and it is based on its cryptographic
- * compression function. The design is very similar to ChaCha stream cipher
- * but it is unknown if BlaBla is a cryptographically strong PRNG (but it
- * probably may be).
+ * compression function. The design is very similar to the ChaCha stream
+ * cipher. But BlaBla cryptographic analysis has not been not published
+ * and its real cryptographic quality is unknown.
  *
  * References:
  * 1. https://github.com/veorq/blabla/blob/master/BlaBla.swift
@@ -24,12 +24,14 @@
  * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
+#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
 
 enum {
     GEN_NROUNDS_REDUCED = 2,
+    GEN_NROUNDS_MONTECARLO = 4,
     GEN_NROUNDS_FULL = 10
 };
 
@@ -272,6 +274,31 @@ static void *create_reduced(const GeneratorInfo *gi, const CallerAPI *intf)
     return create_generic(intf, GEN_NROUNDS_REDUCED);    
 }
 
+static void *create_montecarlo(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+    return create_generic(intf, GEN_NROUNDS_MONTECARLO);
+}
+
+
+static int compare_data(const CallerAPI *intf, BlaBlaState *obj,
+    uint64_t (*get_bits)(void *state), const uint64_t *ref_data, size_t len)
+{
+    int is_ok = 1;
+    for (size_t i = 0; i < len; i++) {
+        uint64_t u = get_bits(obj);
+        intf->printf("%3d %16" PRIx64 " %16" PRIx64, (int) i, u, ref_data[i]);
+        if (ref_data[i] != u) {
+            is_ok = 0;
+            intf->printf(" <--\n");
+        } else {
+            intf->printf("\n");
+        }
+    }
+    return is_ok;
+}
+
+
 /**
  * @brief An internal self-test for BlaBla PRNG (the original 10-round version)
  * @details The constants were dumped from the reference implementation written
@@ -311,33 +338,14 @@ static int run_self_test(const CallerAPI *intf)
         0x704b71035bfcc609, 0xcc8b25946643dc2c, 0xc8b05535a4c0871e, 0x06e8049d2270f063
     };
 
-    int is_ok = 1;
     intf->printf("----- Checking the scalar (C99) version -----\n");
     BlaBlaState_init(obj, key);
     BlaBlaState_block_scalar(obj);
-    for (size_t i = 0; i < 64; i++) {
-        uint64_t u = get_bits_scalar_raw(obj);
-        intf->printf("%3d %16llX %16llX", (int) i, u, data[i]);
-        if (data[i] != u) {
-            is_ok = 0;
-            intf->printf(" <--\n");
-        } else {
-            intf->printf("\n");
-        }
-    }
+    int is_ok = compare_data(intf, obj, get_bits_scalar, data, 64);
     intf->printf("----- Checking the vectorized (AVX2) version -----\n");
     BlaBlaState_init(obj, key);
     BlaBlaState_block_vector(obj);
-    for (size_t i = 0; i < 64; i++) {
-        uint64_t u = get_bits_vector_raw(obj);
-        intf->printf("%3d %16llX %16llX", (int) i, u, data[i]);
-        if (data[i] != u) {
-            is_ok = 0;
-            intf->printf(" <--\n");
-        } else {
-            intf->printf("\n");
-        }
-    }
+    is_ok = is_ok & compare_data(intf, obj, get_bits_vector, data, 64);
     intf->free(obj);
     return is_ok;
 }
@@ -347,10 +355,12 @@ static const char description[] =
 "BlaBla counter-based PRNG based on BLAKE2b compression function, suggested\n"
 "by J.P. Aumasson. Essentially a modification of ChaCha for 64-bit words.\n"
 "The next param values are supported:\n"
-"  c99          - portable BlaBla version (default, slower): 10 rounds\n"
-"  avx2         - AVX2 BlaBla version (fastest): 10 rounds\n"
-"  c99-reduced  - c99 with reduced number of rounds: 2 rounds\n"
-"  avx2-reduced - avx2 with reduced number of rounds: 2 rounds\n";
+"  c99             - portable BlaBla version (default, slower): 10 rounds\n"
+"  avx2            - AVX2 BlaBla version (fastest): 10 rounds\n"
+"  c99-montecarlo  - c99 with reduced number of rounds: 4 rounds\n"
+"  avx2-montecarlo - avx2 with reduced number of rounds: 4 rounds\n"
+"  c99-reduced     - c99 with reduced number of rounds: 2 rounds\n"
+"  avx2-reduced    - avx2 with reduced number of rounds: 2 rounds\n";
 
 
 int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
@@ -370,7 +380,17 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
         gi->name = "BlaBla:avx2";
         gi->get_bits = get_bits_vector;
         gi->get_sum = get_sum_vector;
-    } else if (!intf->strcmp(param, "c99-reduced") || !intf->strcmp(param, "")) {
+    } else if (!intf->strcmp(param, "c99-montecarlo")) {
+        gi->name = "BlaBla:c99:montecarlo";
+        gi->create = create_montecarlo;
+        gi->get_bits = get_bits_scalar;
+        gi->get_sum = get_sum_scalar;
+    } else if (!intf->strcmp(param, "avx2-montecarlo")) {
+        gi->name = "BlaBla:avx2:montecarlo";
+        gi->create = create_montecarlo;
+        gi->get_bits = get_bits_vector;
+        gi->get_sum = get_sum_vector;
+    } else if (!intf->strcmp(param, "c99-reduced")) {
         gi->name = "BlaBla:c99:reduced";
         gi->create = create_reduced;
         gi->get_bits = get_bits_scalar;

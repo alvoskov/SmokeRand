@@ -1,35 +1,20 @@
 /**
  * @file entropy.h
- * @brief Seeds generator based on XXTEA block cipher and TRNG from CPU.
- * It uses hardware random number generator (RDSEED) when possible. These
- * values are balanced by means of XXTEA block cipher. If no hardware RNG
- * is accessible then the PRNG output is encrypted.
- * @details It uses hardware random number generator (RDSEED) when possible.
- * The algorithm is based on XXTEA block cipher (with 64-bit blocks) that
- * processes an output from a simple 64-bit PRNG. If RDSEED instruction is
- * available then its output is injected by XORing with:
+ * @brief Generates seeds for PRNGs using the ChaCha20 based counter-based PRNG
+ * seeded with external entropy sources. NOT FOR CRYPTOGRAPHY!
+ * @details Seeds for ChaCha20 generator are taken from the system CSPRNG
+ * such as `/dev/urandom/`. If it is unaccessible - then it will rely only on
+ * its built-in entropy sources:
  *
- * - 64-bit PRNG (before encryption with XXTEA).
- * - 128-bit key for XXTEA.
+ * - RDRAND instruction (if available)
+ * - System time: `time`, `RDTSC`, higher-resolution system clock.
+ * - System info: computer ID, process id etc.
  *
- * This seeds generator is resistant to the RDSEED failure. It uses
- * the next backup entropy sources:
+ * Even if all hardware sources of entropy except time are excluded --- it will
+ * still return high-quality pseudorandom seeds.
  *
- * - RDTSC instruction (built-in CPU clocks)
- * - `time` function (from C99 standard).
- * - Current process ID.
- * - Tick count from the system clock.
- * - Machine ID (an attempt to make unique seeds even RDSEED and RDTSC
- *   are broken or unaccessible).
- *
- * DON'T USE IT FOR CRYPTOGRAPHY AND SECURITY PURPOSES! IT IS DESIGNED JUST
- * TO MAKE GOOD RANDOM SEEDS FOR PRNG EMPIRICAL TESTING!
- *
- * Examples of RDRAND failure on some CPUs:
- *
- * - https://github.com/systemd/systemd/issues/11810#issuecomment-489727505
- * - https://github.com/rust-random/getrandom/issues/228
- * - https://news.ycombinator.com/item?id=19848953
+ * DON'T USE FOR THIS GENERATOR FOR CRYPTOGRAPHY, E.G. GENERATION OF KEYS FOR
+ * ENCRYPTION! IT IS DESIGNED ONLY FOR STATISTCAL TESTS AND PRNG SEEDING!
  *
  * @copyright
  * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
@@ -50,33 +35,47 @@ typedef struct {
     uint64_t seed;
 } SeedLogEntry;
 
+
 /**
- * @brief Generates seeds for PRNGs using some entropy sources: current time
- * in seconds, RDTSC instruction and RDSEED built-in hardware RNG. Everything
- * is mixed with PRNG counter and encrypted by XXTEA block cipher.
- *
- * DON'T USE FOR THIS CLASS FOR CRYPTOGRAPHY, E.G. GENERATION OF KEYS FOR
- * ENCRYPTION! IT IS DESIGNED ONLY FOR STATISTCAL TESTS AND PRNG SEEDING!
- *
- * @details. It uses the next algorithm of generation of seeds:
- *
- * - RND(x) function is defined as RND(SplitMixHash(x) ^ RDSEED) where
- *   RDSEED is RDSEED instruction, hardware RNG in CPU.
- * - Internal counter CTR is "Weyl sequence" from SplitMix.
- * - Output function is XXTEA(RND(CTR)) where XXTEA is block cipher with
- *   64-bit block and 128-bit key.
- * - XXTEA keys are made as RND(time(NULL)) and RND(~time(NULL)) ^ RND(RDTSC)
- *
- * XORing with RDSEED can be excluded if CPU doesn't support that instruction.
- * RDTSC can be excluded if CPU doesn't support this instruction. Even if all
- * hardware sources of entropy except time are excluded --- it will return
- * high-quality pseudorandom seeds.
- *
- * Usage of XXTEA over RDSEED is also intended to exclude any biases.
+ * @brief Contains the ChaCha20 state.
+ * @details The next memory layout in 1D array is used:
+ * 
+ *     | 0   1  2  3 |
+ *     | 4   5  6  7 |
+ *     | 8   9 10 11 |
+ *     | 12 13 14 15 |
  */
 typedef struct {
-    uint32_t key[4]; ///< XXTEA key
-    uint64_t state; ///< Internal PRNG state
+    uint32_t x[16];   ///< Working state
+    uint32_t out[16]; ///< Output state
+    size_t pos; ///< Current position inside the output buffer
+} ChaCha20State;
+
+void ChaCha20State_init(ChaCha20State *obj, const uint32_t *key);
+void ChaCha20State_generate(ChaCha20State *obj);
+uint32_t ChaCha20State_next32(ChaCha20State *obj);
+uint64_t ChaCha20State_next64(ChaCha20State *obj);
+int chacha20_test(void);
+
+/**
+ * @brief Generates seeds for PRNGs using the ChaCha20 based counter-based PRNG
+ * seeded with external entropy sources. NOT FOR CRYPTOGRAPHY!
+ * @details Seeds for ChaCha20 generator are taken from the system CSPRNG
+ * such as `/dev/urandom/`. If it is unaccessible - then it will rely only on
+ * its built-in entropy sources:
+ *
+ * - RDRAND instruction (if available)
+ * - System time: `time`, `RDTSC`, higher-resolution system clock.
+ * - System info: computer ID, process id etc.
+ *
+ * Even if all hardware sources of entropy except time are excluded --- it will
+ * still return high-quality pseudorandom seeds.
+ *
+ * DON'T USE FOR THIS GENERATOR FOR CRYPTOGRAPHY, E.G. GENERATION OF KEYS FOR
+ * ENCRYPTION! IT IS DESIGNED ONLY FOR STATISTCAL TESTS AND PRNG SEEDING!
+ */
+typedef struct {
+    ChaCha20State gen; ///< ChaCha20 generator state.
     SeedLogEntry *slog; ///< Log of returned seeds
     size_t slog_pos; ///< Current position inside the seeds log
     size_t slog_len; ///< Current length of the log
@@ -84,8 +83,6 @@ typedef struct {
 } Entropy;
 
 
-uint64_t xxtea_encrypt(const uint64_t inp, const uint32_t *key);
-int xxtea_test(void);
 void Entropy_init(Entropy *obj);
 void Entropy_free(Entropy *obj);
 uint64_t Entropy_seed64(Entropy *obj, uint64_t thread_id);

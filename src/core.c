@@ -25,7 +25,10 @@
 #include <io.h>
 #endif
 
-static Entropy entropy = {{0, 0, 0, 0}, 0, NULL, 0, 0, 0};
+static Entropy entropy = {
+    {{0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0},
+     {0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0}, 0},
+    NULL, 0, 0, 0};
 static char cmd_param[128] = {0};
 static int use_stderr_for_printf = 0;
 
@@ -76,7 +79,7 @@ static int printf_ser(const char *format, ...)
 CallerAPI CallerAPI_init(void)
 {
     CallerAPI intf;
-    if (entropy.state == 0) {
+    if (entropy.gen.x[0] == 0) {
         Entropy_init(&entropy);
     }
     intf.get_seed32 = get_seed32;
@@ -147,7 +150,7 @@ static int printf_mt(const char *format, ...)
 CallerAPI CallerAPI_init_mthr(void)
 {
     CallerAPI intf;
-    if (entropy.state == 0) {
+    if (entropy.gen.x[0] == 0) {
         Entropy_init(&entropy);
         init_mutexes();
     }
@@ -808,8 +811,10 @@ void TestsBattery_run(const TestsBattery *bat,
     }
     toc = time(NULL);
     printf("\n");
-    printf("==================== Seeds logger report ====================\n");
-    Entropy_print_seeds_log(&entropy, stdout);
+    if (rtype == REPORT_FULL) {
+        printf("==================== Seeds logger report ====================\n");
+        Entropy_print_seeds_log(&entropy, stdout);
+    }
     if (testid == TESTS_ALL) {
         printf("==================== '%s' battery report ====================\n", bat->name);
     } else {
