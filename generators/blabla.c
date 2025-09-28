@@ -271,7 +271,7 @@ static void *create(const CallerAPI *intf)
 static void *create_reduced(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     (void) gi;
-    return create_generic(intf, GEN_NROUNDS_REDUCED);    
+    return create_generic(intf, GEN_NROUNDS_REDUCED);
 }
 
 static void *create_montecarlo(const GeneratorInfo *gi, const CallerAPI *intf)
@@ -380,6 +380,10 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
         gi->name = "BlaBla:avx2";
         gi->get_bits = get_bits_vector;
         gi->get_sum = get_sum_vector;
+#ifndef __AVX2__
+        intf->printf("Not implemented\n");
+        return 0;
+#endif
     } else if (!intf->strcmp(param, "c99-montecarlo")) {
         gi->name = "BlaBla:c99:montecarlo";
         gi->create = create_montecarlo;
@@ -390,6 +394,10 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
         gi->create = create_montecarlo;
         gi->get_bits = get_bits_vector;
         gi->get_sum = get_sum_vector;
+#ifndef __AVX2__
+        intf->printf("Not implemented\n");
+        return 0;
+#endif
     } else if (!intf->strcmp(param, "c99-reduced")) {
         gi->name = "BlaBla:c99:reduced";
         gi->create = create_reduced;
@@ -400,10 +408,15 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
         gi->create = create_reduced;
         gi->get_bits = get_bits_vector;
         gi->get_sum = get_sum_vector;
+#ifndef __AVX2__
+        intf->printf("Not implemented\n");
+        return 0;
+#endif
     } else {
         gi->name = "BlaBla:unknown";
         gi->get_bits = NULL;
         gi->get_sum = NULL;
+        return 0;
     }
     return 1;
 }

@@ -175,7 +175,7 @@ int chacha20_test(void)
     for (int i = 0; i < 16; i++) {
         if (out_final[i] != obj.out[i]) {
             return 0;
-        }        
+        }
     }
     return 1;
 }
@@ -364,12 +364,32 @@ static int inject_rand(uint64_t *out, size_t len)
     }
     // Inject the bytes into the output buffer with XOR
     for (size_t i = 0; i < len; i++) {
-        //printf("%llX\n", buf[i]);
+        //printf("%llX\n", (unsigned long long) buf[i]);
         out[i] ^= buf[i];
     }
     free(buf);
     // Release the cryptographic provider context
     CryptReleaseContext(hCryptProv, 0);
+    return 1;
+#elif !defined(NO_POSIX)
+    FILE *fp = fopen("/dev/urandom", "r");
+    if (fp == NULL) {
+        return 0;
+    }
+
+    size_t nbytes = sizeof(uint64_t) * len;
+    uint64_t *buf = malloc(nbytes);
+    if (buf == NULL || fgets((char *) buf, nbytes, fp) == NULL) {
+        fclose(fp);
+        free(buf);
+        return 0;
+    }
+    for (size_t i = 0; i < len; i++) {
+        //printf("%llX\n", (unsigned long long) buf[i]);
+        out[i] ^= buf[i];
+    }
+    free(buf);
+    fclose(fp);
     return 1;
 #else
     (void) out; (void) len;
