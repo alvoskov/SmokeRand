@@ -1,12 +1,21 @@
 /**
  * @file isaac.c
- * @brief Implementation of ISAAC CSPRNG developed by Bob Jenkins.
+ * @brief Implementation of ISAAC cryptographical PRNG developed by Bob Jenkins.
  * @details It is an adaptation of the original implementation by Bob Jenkins
  * to the multi-threaded environment and C99 standard. References:
  *
  * 1. https://www.burtleburtle.net/bob/rand/isaacafa.html
  * 2. R.J. Jenkins Jr. ISAAC // Fast Software Encryption. Third International
  *    Workshop Proceedings. Cambridge, UK, Februrary 21-23, 1996. P.41-49.
+ * 3. J.-P. Aumasson. On the pseudo-random generator ISAAC // Cryptology ePrint
+ *    Archive. 2006. Paper 2006/438. https://eprint.iacr.org/2006/438
+ * 4. M. Pudovkina. A known plaintext attack on the ISAAC keystream generator.
+ *    Cryptology ePrint Archive. 2001. Paper 2001/049.2001.
+ *    https://eprint.iacr.org/2001/049
+ *
+ * NOTE: in this implementation it is seeded by means of PCG64/64 using one
+ * 64-bit seed. It is suitable for statistical testing but unacceptable for
+ * cryptographic purposes. DON'T USE FOR CRYPTOGRAPHY!
  *
  * @copyright Based on public domain code by Bob Jenkins (1996).
  *
@@ -26,7 +35,7 @@ PRNG_CMODULE_PROLOG
 #define RANDSIZ    (1<<RANDSIZL)
 
 /**
- * @brief ISAAC CSPRNG state.
+ * @brief ISAAC cruptographical PRNG state.
  */
 typedef struct {
     uint32_t randrsl[RANDSIZ]; ///< Results
@@ -43,24 +52,26 @@ static inline uint32_t ind(uint32_t *mm, uint32_t x)
     return mm[x & ((uint32_t) (RANDSIZ - 1))];
 }
 
-#define rngstep(mix, a, b, mm, m, m2, r, x) \
+#define rngstep(mix, a, b, mm, m, m2, r) \
 { \
+    uint32_t x, y; \
     x = *m;  \
     a = (a ^ (mix)) + *(m2++); \
-    *(m++) = y = ind(mm,x >> 2) + a + b; \
-    *(r++) = b = ind(mm,y >> (2 + RANDSIZL)) + x; \
+    *(m++) = y = ind(mm, x >> 2) + a + b; \
+    *(r++) = b = ind(mm, y >> (2 + RANDSIZL)) + x; \
 }
 
-#define mix(a, b, c, d, e, f, g, h) \
-{ \
-    a ^= b << 11; d += a; b += c; \
-    b ^= c >> 2;  e += b; c += d; \
-    c ^= d << 8;  f += c; d += e; \
-    d ^= e >> 16; g += d; e += f; \
-    e ^= f << 10; h += e; f += g; \
-    f ^= g >> 4;  a += f; g += h; \
-    g ^= h << 8;  b += g; h += a; \
-    h ^= a >> 9;  c += h; a += b; \
+
+static inline void mix(uint32_t *x)
+{
+    x[0] ^= x[1] << 11; x[3] += x[0]; x[1] += x[2];
+    x[1] ^= x[2] >> 2;  x[4] += x[1]; x[2] += x[3];
+    x[2] ^= x[3] << 8;  x[5] += x[2]; x[3] += x[4];
+    x[3] ^= x[4] >> 16; x[6] += x[3]; x[4] += x[5];
+    x[4] ^= x[5] << 10; x[7] += x[4]; x[5] += x[6];
+    x[5] ^= x[6] >> 4;  x[0] += x[5]; x[6] += x[7];
+    x[6] ^= x[7] << 8;  x[1] += x[6]; x[7] += x[0];
+    x[7] ^= x[0] >> 9;  x[2] += x[7]; x[0] += x[1];
 }
 
 /**
@@ -68,24 +79,21 @@ static inline uint32_t ind(uint32_t *mm, uint32_t x)
  */
 void IsaacState_block(IsaacState *obj)
 {    
-    uint32_t *mm = obj->mm;
-    uint32_t *m = obj->mm, *r = obj->randrsl;
+    uint32_t *mm = obj->mm, *m = obj->mm, *m2, *mend;
+    uint32_t *r = obj->randrsl;
     uint32_t a = obj->aa, b = obj->bb + (++obj->cc);
-    uint32_t x, y, *m2, *mend;
 
-    for (m = mm, mend = m2 = m + (RANDSIZ/2); m < mend;)
-    {
-        rngstep( a<<13, a, b, mm, m, m2, r, x);
-        rngstep( a>>6 , a, b, mm, m, m2, r, x);
-        rngstep( a<<2 , a, b, mm, m, m2, r, x);
-        rngstep( a>>16, a, b, mm, m, m2, r, x);
+    for (m = mm, mend = m2 = m + (RANDSIZ/2); m < mend;) {
+        rngstep(a << 13, a, b, mm, m, m2, r);
+        rngstep(a >> 6 , a, b, mm, m, m2, r);
+        rngstep(a << 2 , a, b, mm, m, m2, r);
+        rngstep(a >> 16, a, b, mm, m, m2, r);
     }
-    for (m2 = mm; m2 < mend; )
-    {
-        rngstep( a<<13, a, b, mm, m, m2, r, x);
-        rngstep( a>>6 , a, b, mm, m, m2, r, x);
-        rngstep( a<<2 , a, b, mm, m, m2, r, x);
-        rngstep( a>>16, a, b, mm, m, m2, r, x);
+    for (m2 = mm; m2 < mend; ) {
+        rngstep(a << 13, a, b, mm, m, m2, r);
+        rngstep(a >> 6,  a, b, mm, m, m2, r);
+        rngstep(a << 2,  a, b, mm, m, m2, r);
+        rngstep(a >> 16, a, b, mm, m, m2, r);
     }
     obj->bb = b; obj->aa = a;
 }
@@ -97,14 +105,15 @@ void IsaacState_block(IsaacState *obj)
  */
 void IsaacState_init(IsaacState *obj, uint64_t seed)
 {
-    static const uint32_t phi = 0x9e3779b9; // The golden ratio
-    uint32_t a, b, c, d, e, f, g, h;
+    uint32_t x[8];
     uint32_t *mm = obj->mm, *r = obj->randrsl;
     obj->aa = obj->bb = obj->cc = 0;
-    a = b = c = d = e = f = g = h = phi;
+    for (size_t i = 0; i < 8; i++) {
+        x[i] = 0x9e3779b9; // The golden ratio
+    }
     // Scramble it
     for (size_t i = 0; i < 4; i++) {
-        mix(a, b, c, d, e, f, g, h);
+        mix(x);
     }
     // Fill mm[] array with zeros
     for (size_t i = 0; i < RANDSIZ; i++) {
@@ -121,19 +130,15 @@ void IsaacState_init(IsaacState *obj, uint64_t seed)
     }
     // Fill in mm[] with messy stuff
     for (size_t i = 0; i < RANDSIZ; i += 8) { 
-        a += r[i  ]; b += r[i + 1]; c += r[i + 2]; d += r[i + 3];
-        e += r[i+4]; f += r[i + 5]; g += r[i + 6]; h += r[i + 7];
-        mix(a, b, c, d, e, f, g, h);
-        mm[i]     = a; mm[i + 1] = b; mm[i + 2] = c; mm[i + 3] = d;
-        mm[i + 4] = e; mm[i + 5] = f; mm[i + 6] = g; mm[i + 7] = h;
+        for (size_t j = 0; j < 8; j++) { x[j] += r[i + j]; }
+        mix(x);
+        for (size_t j = 0; j < 8; j++) { mm[i + j] = x[j]; }
     }
     // Do a second pass to make all of the seed affect all of mm
     for (size_t i = 0; i < RANDSIZ; i += 8) {
-        a += mm[i  ];   b += mm[i + 1]; c += mm[i + 2]; d += mm[i + 3];
-        e += mm[i + 4]; f += mm[i + 5]; g += mm[i + 6]; h += mm[i + 7];
-        mix(a, b, c, d, e, f, g, h);
-        mm[i]     = a; mm[i + 1] = b; mm[i + 2] = c; mm[i + 3] = d;
-        mm[i + 4] = e; mm[i + 5] = f; mm[i + 6] = g; mm[i + 7] = h;
+        for (size_t j = 0; j < 8; j++) { x[j] += mm[i + j]; }
+        mix(x);
+        for (size_t j = 0; j < 8; j++) { mm[i + j] = x[j]; }
     }
     IsaacState_block(obj); // fill in the first set of results
     obj->pos = RANDSIZ; // prepare to use the first set of results
