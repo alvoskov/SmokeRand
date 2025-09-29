@@ -673,7 +673,7 @@ There are only two problematic situations:
  des-ctr           | u64    | +       | +     | +       | +    | 24   | -      | 3     |         | >= 4 TiB
  drand48           | u32    | 3       | 13    | 21      | 23/24| 0.72 | -      | 0     | -       | 1 MiB
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 16 TiB
- isaac             | u32    | +       | +     | +       |      | 1.6  |        | 5     |         | ?
+ isaac             | u32    | +       | +     | +       | +    | 1.6  | +      | 5     |         | >= 4 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 5     | +       | >= 32 TiB
  jkiss             | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 16 TiB 
  jkiss32           | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
@@ -725,7 +725,7 @@ There are only two problematic situations:
  lfib_par[2281-]   | u32    | 0/1     | 3     | 3       | 4    | 0.38 | +      | 0     | +       | 8 TiB
  lfib_par[3217+]   | u32    | +       | 1     | 1       | 1/2  | 0.39 | +      | 2     | +       | 16 TiB
  lfib_par[3217-]   | u32    | +       | 1     | 1       | 2/4  | 0.39 | +      | 2     | +       | 16 TiB
- lfib_par[4423+]   | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | >= 64 TiB
+ lfib_par[4423+]   | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 128 TiB(?)
  lfib_par[4423-]   | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | ?
  lfib_par[9689+]   | u32    | +       | 1     | 1       | 1    | 0.47 | +      | 2     | +       | ?
  lfib_par[9689-]   | u32    | +       | 1     | 1       | 1    | 0.47 | +      | 2     | +       | ?
@@ -1033,6 +1033,20 @@ Run 2:
 
 About `lcg64prime`: it passes BigCrush if upper 32 bits are returned, but
 fails it in interleaved mode (fails test N15 `BirthdaySpacings, t = 4`).
+
+About `lfib_par`: `LFib(4423,2098,+)` passes PractRand even at 128 TiB. However
+the observed `unusual` is typical for additive/subtractive lagged Fibonacci
+generators prior failure. The failure is expected at 0.25-0.5 PiB.
+
+    rng=RNG_stdin32, seed=unknown
+    length= 64 terabytes (2^46 bytes), time= 205527 seconds
+      no anomalies in 352 test result(s)
+
+    rng=RNG_stdin32, seed=unknown
+    length= 128 terabytes (2^47 bytes), time= 405531 seconds
+      Test Name                         Raw       Processed     Evaluation
+      [Low1/32]BCFN(2+5,13-0,T)         R=  +9.3  p =  1.6e-4   unusual
+      ...and 357 test result(s) without anomalies
 
 About `mwc1616x`: it passes until 32 TiB but it fails the BCFN test at 64 TiB.
 
