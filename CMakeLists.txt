@@ -101,15 +101,15 @@ target_link_libraries(test_crand smokerand_bat smokerand_core ${COMMON_LIBS})
 set (GENERATORS
     aes128 alfib alfib64x5 alfib8x5 alfib_lux alfib_mod ara32 biski16 
     biski16_alt biski16_mul biski32 biski32_alt biski64 biski64sh 
-    biski64_alt biski64_mul biski8 biski8_alt biski8_mul chacha cmwc4096 
-    cmwc4827 combo coveyou64 cswb4288 cswb4288_64 cwg64 des drand48 
-    efiix64x48 flea32x1 gjrand8 gjrand16 gjrand32 gjrand64 gmwc128 
-    hc256 hicg64 icg31x2 ia ia64 ibaa icg64 icg64_p2 isaac64 jkiss 
-    jkiss32 jlkiss64 kiss11_32 kiss11_64 kiss64 kiss93 kiss96 kiss99 
-    kiss4691 kuzn lcg128 lcg32prime lcg42 lcg64 lcg64prime lcg69069 
-    lcg96 lea lfib4 lfib4_u64 lfib_par lfib_ranmar lfsr113 lfsr258 
-    loop_7fff_w64 lrnd64_1023 lrnd64_255 lxm_64x128 macmarsa magma 
-    melg19937 melg44497 melg607 minstd mixmax mlfib17_5 mrg32k3a 
+    biski64_alt biski64_mul biski8 biski8_alt biski8_mul blabla chacha 
+    cmwc4096 cmwc4827 combo coveyou64 cswb4288 cswb4288_64 cwg64 
+    des drand48 efiix64x48 flea32x1 gjrand8 gjrand16 gjrand32 gjrand64 
+    gmwc128 hc256 hicg64 icg31x2 ia ia64 ibaa icg64 icg64_p2 isaac64 
+    jkiss jkiss32 jlkiss64 kiss11_32 kiss11_64 kiss64 kiss93 kiss96 
+    kiss99 kiss4691 kuzn lcg128 lcg32prime lcg42 lcg64 lcg64prime 
+    lcg69069 lcg96 lea lfib4 lfib4_u64 lfib_par lfib_ranmar lfsr113 
+    lfsr258 loop_7fff_w64 lrnd64_1023 lrnd64_255 lxm_64x128 macmarsa 
+    magma melg19937 melg44497 melg607 minstd mixmax mlfib17_5 mrg32k3a 
     msws msws64 msws64x msws_ctr mt19937 mtc8 mtc16 mtc32 mtc64 mtc64hi 
     mularx128 mularx128_str mularx128_u32 mularx256 mularx64_r2 mularx64_u32 
     mulberry32 mwc128 mwc128x mwc128xxa32 mwc1616 mwc1616p mwc1616x 
@@ -118,8 +118,8 @@ set (GENERATORS
     ncombo pcg64_64 pcg64_xsl_rr philox philox2x32 philox32 r1279 
     r250 ran randu ranlux48 ranluxpp ranq1 ranq2 ranrot32 ranrot_bi 
     ranshi ranval ranval64 rc4 rc4ok romutrio rrmxmx sapparot sapparot2 
-    sapparot2_64 sezgin63 sfc16 sfc32 sfc64 sfc8 shr3 skiss32 skiss64 
-    smwc16x8 smwc192 smwc192lux smwc24 smwc48 smwc48lux smwc8x16 
+    sapparot2_64 seed sezgin63 sfc16 sfc32 sfc64 sfc8 shr3 skiss32 
+    skiss64 smwc16x8 smwc192 smwc192lux smwc24 smwc48 smwc48lux smwc8x16 
     smwc96 speck128 speck128sc speck64_128 splitmix splitmix32 splitmix32cbc 
     splitmix_g1 sqxor sqxor32 stormdrop superduper64 superduper73 
     superduper96 swb swblarge swblux swbmwc32 swbmwc64 swbw taus88 
