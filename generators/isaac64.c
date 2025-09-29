@@ -38,13 +38,18 @@ typedef struct {
 } Isaac64State;
 
 
-#define ind(mm,x)  (*(uint64_t *)((uint8_t *)(mm) + ((x) & ((RANDSIZ-1)<<3))))
+static inline uint64_t ind(uint64_t *mm, uint64_t x)
+{
+    return mm[x & ((uint64_t) (RANDSIZ - 1))];
+}
+
+
 #define rngstep(mix, a, b, mm, m, m2, r, x) \
 { \
     x = *m;  \
     a = (mix) + *(m2++); \
-    *(m++) = y = ind(mm,x) + a + b; \
-    *(r++) = b = ind(mm,y>>RANDSIZL) + x; \
+    *(m++) = y = ind(mm, x >> 3) + a + b; \
+    *(r++) = b = ind(mm, y >> (3 + RANDSIZL)) + x; \
 }
 
 #define mix(a, b, c, d, e, f, g, h) \
