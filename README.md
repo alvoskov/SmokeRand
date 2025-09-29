@@ -675,6 +675,8 @@ There are only two problematic situations:
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 16 TiB
  isaac             | u32    | +       | +     | +       | +    | 1.6  | +      | 5     |         | >= 4 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 5     | +       | >= 32 TiB
+ jctr32            | u32    | +       | +     | +       | +    | 2.4  |        |       |         | ?
+ jctr64            | u64    | +       | +     | +       | +    | 1.1  |        |       |         | ?
  jkiss             | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 16 TiB 
  jkiss32           | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  jlkiss64          | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 16 TiB
