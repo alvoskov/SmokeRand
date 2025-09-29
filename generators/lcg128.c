@@ -285,7 +285,7 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
         gi->get_bits = get_bits_x128u64;
         gi->get_sum = get_sum_x128u64;
     } else if (!intf->strcmp(param, "x128u32")) {
-        gi->name = "Lcg128:x128u64";
+        gi->name = "Lcg128:x128u32";
         gi->nbits = 32;
         gi->get_bits = get_bits_x128u32;
         gi->get_sum = get_sum_x128u32;

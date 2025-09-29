@@ -658,7 +658,7 @@ There are only two problematic situations:
  biski64_alt       | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 8 TiB
  blabla2           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 16 TiB
  blabla4           | u64    | +       | +     | +       | +    | 0.58 | +      | 4     |         | >= 8 TiB
- blabla10          | u64    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 2 TiB
+ blabla10          | u64    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 4 TiB
  chacha            | u32    | +       | +     | +       | +    | 3.3  | +      | 5     | +       | >= 32 TiB
  chacha_avx        | u32    | +       | +     | +       | +    | 2.4  | +      | 5     | +       | >= 32 TiB
  chacha_avx2       | u32    | +       | +     | +       | +    | 1.0  | +      | 5     | +       | >= 16 TiB
@@ -697,7 +697,7 @@ There are only two problematic situations:
  kiss4691          | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 32 TiB
  kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 4.5   |         | >= 4 TiB
  lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>10)| 0     | -       | 512 MiB
- lcg42             | u32    | 5       | 17    | 34      |      |      |        | 0     |         | 16 KiB
+ lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     |         | 16 KiB
  lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | +      | 0     | Small   | 16 MiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | 0     | +-      | >= 32 TiB
  lcg96             | u32    | +       | 1     | 1       | 1    | 0.78 | +      | 3     | +       | 32 GiB
@@ -1145,6 +1145,14 @@ are less sensitive, e.g. entropy test catches only randu.
 - Passes ENT: lcg32prime, lcg64, lfib31, swb
 
 # Versions history
+
+28.09.2025: SmokeRand 0.38
+
+- New seeds generator, now it is based on ChaCha20 and uses `/dev/urandom`
+  or MS Windows built-in CSPRNG for seeding (if available).
+- New generators were added: `blabla` (experimental 64-bit version of `chacha`),
+  `lcg42` and some other generators.
+- Some bugfixes.
 
 28.06.2025: SmokeRand 0.37
 
