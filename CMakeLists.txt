@@ -104,9 +104,9 @@ set (GENERATORS
     biski64_alt biski64_mul biski8 biski8_alt biski8_mul blabla chacha 
     cmwc4096 cmwc4827 combo coveyou64 cswb4288 cswb4288_64 cwg64 
     des drand48 efiix64x48 flea32x1 gjrand8 gjrand16 gjrand32 gjrand64 
-    gmwc128 hc256 hicg64 icg31x2 ia ia64 ibaa icg64 icg64_p2 isaac64 
-    jkiss jkiss32 jlkiss64 kiss11_32 kiss11_64 kiss64 kiss93 kiss96 
-    kiss99 kiss4691 kuzn lcg128 lcg32prime lcg42 lcg64 lcg64prime 
+    gmwc128 hc256 hicg64 icg31x2 ia ia64 ibaa icg64 icg64_p2 isaac 
+    isaac64 jkiss jkiss32 jlkiss64 kiss11_32 kiss11_64 kiss64 kiss93 
+    kiss96 kiss99 kiss4691 kuzn lcg128 lcg32prime lcg42 lcg64 lcg64prime 
     lcg69069 lcg96 lea lfib4 lfib4_u64 lfib_par lfib_ranmar lfsr113 
     lfsr258 loop_7fff_w64 lrnd64_1023 lrnd64_255 lxm_64x128 macmarsa 
     magma melg19937 melg44497 melg607 minstd mixmax mlfib17_5 mrg32k3a 
