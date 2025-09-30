@@ -188,17 +188,18 @@ be divided into several groups:
 - Obsolete CSPRNG: DES, GOST R 34.12-2015 "Magma", RC4.
 - Counter-based scramblers based on cryptographical primitives: philox,
   philox32, speck128_r16, threefry.
+- Other counter-based PRNGs: blabla, jctr32, jctr64
 - Lagged Fibonacci: alfib, alfib_lux, alfib_mod, mlfib17_5, lfib_par,
   lfib_ranmar, r1279.
-- Linear congruental: cmwc4096, drand48, lcg32prime, lcg64, lcg64prime, lcg96,
-  lcg128, lcg128_full, lcg128_u32_full, lcg69069, minstd, mwc1616, mwc64,
-  mwc128, randu, ranluxpp, seizgin63.
+- Linear congruental: cmwc4096, drand48, lcg32prime, lcg42, lcg64, lcg64prime,
+  lcg96, lcg128, lcg69069, minstd, mwc1616, mwc64, mwc128, randu, ranluxpp,
+  seizgin63.
 - Linear congruental with output scrambling: mwc64x, mwc128x, mwc1616x,
   mwc3232x, pcg32, pcg64, pcg64_xsl_rr.
 - "Weyl sequence" (LCG with a=1) with output scrambling: mulberry32, rrmxmx,
   splitmix, splitmix32, sqxor, sqxor32, wyrand.
 - "Weyl sequence" injected into reversible nonlinear transformation: sfc8,
-  sfc16, sfc32, sfc64.
+  sfc16, sfc32, sfc64, v3b, wob2m.
 - "Weyl sequence" injected into irreversible nonlinear transformation: cwg64,
   msws, stormdrop, stormdrop_old.
 - Subtract with borrow: swb, swblarge, swblux, swbw.
@@ -207,7 +208,7 @@ be divided into several groups:
   xoroshiro128pp, xoroshiro1024st, xoroshiro1024stst, xorwow.
 - GSFR: mt19937, tinymt32, tinymt64.
 - Combined generators: kiss93, kiss99, kiss64, lxm_64x128, superduper73,
-  superduper64, superduper64_u32.
+  superduper64, superduper96, swbmwc32, swbmwc64 etc.
 - Other: coveyou64, mrg32k3a, romutrio.
 
 
@@ -216,13 +217,15 @@ be divided into several groups:
  aesni             | Hardware AES for x86-64 with 128-bit key support
  alfib             | \f$ LFib(+,2^{64},607,203) \f$
  alfib_mod         | \f$ LFib(+,2^{64},607,203) \f$ XORed by "Weyl sequence"
+ blabla            | A 64-bit modification of ChaCha by J.P. Aumasson.
  chacha            | ChaCha12 CSPRNG: Cross-platform implementation
  des               | DES block cipher with 64-bit block size
  coveyou64         | COVEYOU
- isaac64           | ISAAC64 64-bit CSPRNG
+ isaac/isaac64     | ISAAC and ISAAC64 64-bit cryptographical PRNG by Bob Jenkins.
  kiss93            | KISS93 combined generator by G.Marsaglia
  kiss99            | KISS99 combined generator by G.Marsaglia
  kiss64            | 64-bit version of KISS
+ lea128            | LEA128 block cipher in CTR mode.
  lcg32prime        | \f$ LCG(2^{32}-5, 1588635695, 123 \f$
  lcg64             | \f$ LCG(2^{64},6906969069,1) \f$ that returns upper 32 bits
  lcg64prime        | \f$ LCG(2^{64}-59,a,0)\f$ that returns all 64 bits
@@ -675,10 +678,10 @@ There are only two problematic situations:
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 16 TiB
  isaac             | u32    | +       | +     | +       | +    | 1.6  | +      | 5     |         | >= 16 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 5     | +       | >= 32 TiB
- jctr32            | u32    | +       | +     | +       | +    | 2.4  |        |       |         | ?
- jctr32_avx2       | u32    | +       | +     | +       |      | ?    | +      |       |         | ?
- jctr64            | u64    | +       | +     | +       | +    | 1.1  |        |       |         | ?
- jctr64_avx2       | u64    | +       | +     | +       |      | ?    | +      |       |         | ?
+ jctr32            | u32    | +       | +     | +       | +    | 2.4  | +      | 4     |         | ?
+ jctr32_avx2       | u32    | +       | +     | +       | +    | 0.51 | +      | 4     |         | ?
+ jctr64            | u64    | +       | +     | +       | +    | 1.1  | +      | 4     |         | ?
+ jctr64_avx2       | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | ?
  jkiss             | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 16 TiB 
  jkiss32           | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  jlkiss64          | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 16 TiB
