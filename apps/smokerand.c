@@ -323,16 +323,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if (!chacha20_test()) {
+    if (!entfuncs_test()) {
         fprintf(stderr, "Seed generator self-test failed\n");
         return 1;
     }
-    /*
-    if (!xxtea_test()) {
-        fprintf(stderr, "Seed generator self-test failed\n");
-        return 1;
-    }
-    */
 
     if (!strcmp(generator_lib, "list")) {
         return print_battery_info(battery_name);

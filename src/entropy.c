@@ -29,8 +29,10 @@
 #endif
 
 #include "smokerand/entropy.h"
+#include "smokerand/blake2s.h"
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 static inline uint32_t rotl32(uint32_t x, int r)
@@ -153,6 +155,28 @@ uint64_t ChaCha20State_next64(ChaCha20State *obj)
     return (hi << 32) | lo;
 }
 
+
+int blake2s_test(void)
+{
+    static const char in[] = "The quick brown fox jumps over the lazy dog|"
+        "The quick brown fox jumps over the lazy dog";
+    static const uint8_t ref[32] = {
+        0xad, 0xd6, 0x41, 0x6a,  0x0c, 0x13, 0xa8, 0x35,
+        0xf0, 0xba, 0xe3, 0x53,  0x69, 0x8b, 0x1c, 0x02,
+        0x52, 0x70, 0x34, 0xaa,  0xd4, 0x60, 0x08, 0x5d,
+        0x02, 0x74, 0x5b, 0x78,  0xc9, 0x65, 0x92, 0x84
+    };
+    uint8_t out[32];    
+    blake2s(out, 32, NULL, 0, in, strlen(in));
+    int is_ok = 1;
+    for (size_t i = 0; i < 32; i++) {
+        if (out[i] != ref[i])
+            is_ok = 0;
+    }
+    return is_ok;
+}
+
+
 int chacha20_test(void)
 {
     static const uint32_t x_init[] = { // Input values
@@ -180,6 +204,11 @@ int chacha20_test(void)
     return 1;
 }
 
+
+int entfuncs_test(void)
+{
+    return chacha20_test() && blake2s_test();
+}
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
 #include <windows.h>
@@ -398,29 +427,37 @@ static int inject_rand(uint64_t *out, size_t len)
 }
 
 
+typedef union {
+    uint64_t u64[16];
+    uint8_t u8[128];
+} EntropyBuffer;
+
 
 void Entropy_init(Entropy *obj)
 {
-    uint64_t seed[4];
-    uint32_t key[8];
+    EntropyBuffer *ent_buf = calloc(1, sizeof(EntropyBuffer));
+    uint32_t key[8] = {0, 0, 0, 0,  0, 0, 0, 0};
     uint64_t timestamp = time(NULL);
-    uint64_t mid = get_machine_id();
-    uint64_t tic = get_tick_count();
-    uint64_t pid = get_current_process_id();
     uint64_t cpu = cpuclock();
-
-    seed[0] = mix_rdseed(mix_hash(timestamp)) ^ mix_hash(tic) ^ mid;
-    seed[1] = mix_rdseed(mix_hash(pid)) ^ mix_rdseed(mix_hash(cpu)) ^ mid;
-    seed[2] = mix_rdseed(mix_hash(~pid));
-    seed[3] = mix_rdseed(mix_hash(~pid));
-    if (!inject_rand(seed, 8)) {
+    // 256 bits of entropy from system CSPRNG
+    if (!inject_rand(&ent_buf->u64[0], 4)) {
         fprintf(stderr,
-            "Warning: system CSPRNG is unaccessible. Internal seeder will be used.\n");
+            "Warning: system CSPRNG is unaccessible. An internal seeder will be used.\n");
     }
-    for (size_t i = 0; i < 4; i++) {
-        key[2*i] = (uint32_t) seed[i];
-        key[2*i + 1] = (uint32_t) (seed[i] >> 32);
+    // 256 bits of entropy from RDSEED
+    for (size_t i = 4; i < 8; i++) {
+        ent_buf->u64[i] = mix_rdseed(0);
     }
+    // Some fallback entropy sources
+    ent_buf->u64[8] = timestamp;
+    ent_buf->u64[9] = cpu;
+    ent_buf->u64[10] = get_machine_id();
+    ent_buf->u64[11] = get_tick_count();
+    ent_buf->u64[12] = get_current_process_id();
+    // Make a key using the cryptographic hash function
+    blake2s(key, 32, NULL, 0, &ent_buf->u8[0], 128);
+    free(ent_buf);
+    // Initialize the seed generator
     ChaCha20State_init(&obj->gen, key);
     uint64_t nonce = timestamp ^ (cpu << 40);
     ChaCha20State_set_nonce(&obj->gen, nonce);

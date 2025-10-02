@@ -55,7 +55,7 @@ void ChaCha20State_init(ChaCha20State *obj, const uint32_t *key);
 void ChaCha20State_generate(ChaCha20State *obj);
 uint32_t ChaCha20State_next32(ChaCha20State *obj);
 uint64_t ChaCha20State_next64(ChaCha20State *obj);
-int chacha20_test(void);
+int entfuncs_test(void);
 
 /**
  * @brief Generates seeds for PRNGs using the ChaCha20 based counter-based PRNG

@@ -1,12 +1,14 @@
-local lib_sources = {'core.c', 'coretests.c', 'entropy.c', 'extratests.c',
-    'fileio.c', 'lineardep.c', 'hwtests.c', 'specfuncs.c', 'threads_intf.c'}
+local lib_sources = {'core.c', 'coretests.c', 'blake2s.c', 'entropy.c',
+    'extratests.c', 'fileio.c', 'lineardep.c', 'hwtests.c', 'specfuncs.c',
+    'threads_intf.c'}
 
 local bat_sources = {'bat_express.c', 'bat_brief.c', 'bat_default.c',
     'bat_file.c', 'bat_full.c', 'bat_special.c'}
 
-local lib_headers = {'apidefs.h', 'cinterface.h', 'core.h', 'coretests.h',
-    'entropy.h', 'extratests.h', 'fileio.h', 'hwtests.h', 'int128defs.h',
-    'lineardep.h', 'specfuncs.h', 'threads_intf.h', 'x86exts.h'}
+local lib_headers = {'apidefs.h', 'cinterface.h', 'blake2s.h', 'core.h',
+    'coretests.h', 'entropy.h', 'extratests.h', 'fileio.h', 'hwtests.h',
+    'int128defs.h', 'lineardep.h', 'specfuncs.h', 'threads_intf.h',
+    'x86exts.h'}
 
 
 -- List of all generators; all of them are portable and have at least some
