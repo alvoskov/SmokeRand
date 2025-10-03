@@ -1,6 +1,7 @@
-// blake2s.h
-// BLAKE2s Hashing Context and API Prototypes
-
+/**
+ * @file blake2s.h
+ * @brief BLAKE2s Hashing Context and API Prototypes
+ */
 #ifndef BLAKE2S_H
 #define BLAKE2S_H
 
