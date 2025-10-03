@@ -661,7 +661,7 @@ There are only two problematic situations:
  biski64_alt       | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 8 TiB
  blabla2           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 16 TiB
  blabla4           | u64    | +       | +     | +       | +    | 0.58 | +      | 4     |         | >= 8 TiB
- blabla10          | u64    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 4 TiB
+ blabla10          | u64    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 16 TiB
  chacha            | u32    | +       | +     | +       | +    | 3.3  | +      | 5     | +       | >= 32 TiB
  chacha_avx        | u32    | +       | +     | +       | +    | 2.4  | +      | 5     | +       | >= 32 TiB
  chacha_avx2       | u32    | +       | +     | +       | +    | 1.0  | +      | 5     | +       | >= 16 TiB
