@@ -1,44 +1,43 @@
 /**
  * @file blake2s.c
  * @brief A simple blake2s Reference Implementation.
+ * @details https://datatracker.ietf.org/doc/html/rfc7693.html
  */
 
 #include "smokerand/blake2s.h"
 
-// Cyclic right rotation.
-
-#ifndef ROTR32
-#define ROTR32(x, y)  (((x) >> (y)) ^ ((x) << (32 - (y))))
-#endif
+static inline uint32_t rotr32(uint32_t x, int r)
+{
+    return (x << ((-r) & 31)) | (x >> r);
+}
 
 // Little-endian byte access.
-#define B2S_GET32(p)                            \
-    (((uint32_t) ((uint8_t *) (p))[0]) ^        \
-    (((uint32_t) ((uint8_t *) (p))[1]) << 8) ^  \
-    (((uint32_t) ((uint8_t *) (p))[2]) << 16) ^ \
-    (((uint32_t) ((uint8_t *) (p))[3]) << 24))
-
-
-// Mixing function G.
-#define B2S_G(a, b, c, d, x, y) {   \
-    v[a] = v[a] + v[b] + x;         \
-    v[d] = ROTR32(v[d] ^ v[a], 16); \
-    v[c] = v[c] + v[d];             \
-    v[b] = ROTR32(v[b] ^ v[c], 12); \
-    v[a] = v[a] + v[b] + y;         \
-    v[d] = ROTR32(v[d] ^ v[a], 8);  \
-    v[c] = v[c] + v[d];             \
-    v[b] = ROTR32(v[b] ^ v[c], 7); }
-
-// Initialization Vector.
-static const uint32_t blake2s_iv[8] =
+static uint32_t b2s_get32(const void *src)
 {
-    0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
-    0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
-};
+    const uint8_t *p = (const uint8_t *) src;
+    return ((uint32_t) (p[0]) ^
+           ((uint32_t) (p[1]) << 8) ^
+           ((uint32_t) (p[2]) << 16) ^
+           ((uint32_t) (p[3]) << 24));
+}
 
-// Compression function. "last" flag indicates last block.
-static void blake2s_compress(blake2s_ctx *ctx, int last)
+
+static inline void b2s_g(uint32_t *v,
+    int a, int b, int c, int d,
+    uint32_t x, uint32_t y)
+{
+    v[a] = v[a] + v[b] + x;
+    v[d] = rotr32(v[d] ^ v[a], 16);
+    v[c] = v[c] + v[d];
+    v[b] = rotr32(v[b] ^ v[c], 12);
+    v[a] = v[a] + v[b] + y;
+    v[d] = rotr32(v[d] ^ v[a], 8);
+    v[c] = v[c] + v[d];
+    v[b] = rotr32(v[b] ^ v[c], 7);
+}
+
+
+static inline void b2s_round(uint32_t *v, const uint32_t *m, int i)
 {
     static const uint8_t sigma[10][16] = {
         { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
@@ -52,6 +51,30 @@ static void blake2s_compress(blake2s_ctx *ctx, int last)
         { 6, 15, 14, 9, 11, 3, 0, 8, 12, 2, 13, 7, 1, 4, 10, 5 },
         { 10, 2, 8, 4, 7, 6, 1, 5, 15, 11, 9, 14, 3, 12, 13, 0 }
     };
+    b2s_g(v,  0, 4,  8, 12, m[sigma[i][ 0]], m[sigma[i][ 1]]);
+    b2s_g(v,  1, 5,  9, 13, m[sigma[i][ 2]], m[sigma[i][ 3]]);
+    b2s_g(v,  2, 6, 10, 14, m[sigma[i][ 4]], m[sigma[i][ 5]]);
+    b2s_g(v,  3, 7, 11, 15, m[sigma[i][ 6]], m[sigma[i][ 7]]);
+    b2s_g(v,  0, 5, 10, 15, m[sigma[i][ 8]], m[sigma[i][ 9]]);
+    b2s_g(v,  1, 6, 11, 12, m[sigma[i][10]], m[sigma[i][11]]);
+    b2s_g(v,  2, 7,  8, 13, m[sigma[i][12]], m[sigma[i][13]]);
+    b2s_g(v,  3, 4,  9, 14, m[sigma[i][14]], m[sigma[i][15]]);
+}
+
+/**
+ * @brief Initialization Vector.
+ */
+static const uint32_t blake2s_iv[8] =
+{
+    0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
+    0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
+};
+
+/**
+ * @brief Compression function. "last" flag indicates last block.
+ */
+static void blake2s_compress(blake2s_ctx *ctx, int last)
+{
     uint32_t v[16], m[16];
 
     for (int i = 0; i < 8; i++) {       // init work variables
@@ -66,27 +89,20 @@ static void blake2s_compress(blake2s_ctx *ctx, int last)
 
 
     for (int i = 0; i < 16; i++)        // get little-endian words
-        m[i] = B2S_GET32(&ctx->b[4 * i]);
+        m[i] = b2s_get32(&ctx->b[4 * i]);
 
-    for (int i = 0; i < 10; i++) {      // ten rounds
-        B2S_G( 0, 4,  8, 12, m[sigma[i][ 0]], m[sigma[i][ 1]]);
-        B2S_G( 1, 5,  9, 13, m[sigma[i][ 2]], m[sigma[i][ 3]]);
-        B2S_G( 2, 6, 10, 14, m[sigma[i][ 4]], m[sigma[i][ 5]]);
-        B2S_G( 3, 7, 11, 15, m[sigma[i][ 6]], m[sigma[i][ 7]]);
-        B2S_G( 0, 5, 10, 15, m[sigma[i][ 8]], m[sigma[i][ 9]]);
-        B2S_G( 1, 6, 11, 12, m[sigma[i][10]], m[sigma[i][11]]);
-        B2S_G( 2, 7,  8, 13, m[sigma[i][12]], m[sigma[i][13]]);
-        B2S_G( 3, 4,  9, 14, m[sigma[i][14]], m[sigma[i][15]]);
-    }
+    for (int i = 0; i < 10; i++)        // ten rounds
+        b2s_round(v, m, i);
         
     for (int i = 0; i < 8; i++)
         ctx->h[i] ^= v[i] ^ v[i + 8];
 }
 
-// Initialize the hashing context "ctx" with optional key "key".
-//      1 <= outlen <= 32 gives the digest size in bytes.
-//      Secret key (also <= 32 bytes) is optional (keylen = 0).
-
+/**
+ * @brief Initialize the hashing context "ctx" with optional key "key".
+ * 1 <= outlen <= 32 gives the digest size in bytes.
+ * Secret key (also <= 32 bytes) is optional (keylen = 0).
+ */
 int blake2s_init(blake2s_ctx *ctx, size_t outlen,
     const void *key, size_t keylen)     // (keylen=0: no key)
 {
@@ -113,8 +129,9 @@ int blake2s_init(blake2s_ctx *ctx, size_t outlen,
 }
 
 
-
-// Add "inlen" bytes from "in" into the hash.
+/**
+ * @brief Add "inlen" bytes from "in" into the hash.
+ */
 void blake2s_update(blake2s_ctx *ctx,
     const void *in, size_t inlen)       // data bytes
 {
@@ -130,9 +147,10 @@ void blake2s_update(blake2s_ctx *ctx,
     }
 }
 
-// Generate the message digest (size given in init).
-//      Result placed in "out".
-
+/**
+ * @brief Generate the message digest (size given in init).
+ * Result placed in "out".
+ */
 void blake2s_final(blake2s_ctx *ctx, void *out)
 {
     ctx->t[0] += ctx->c;                // mark last block offset
@@ -150,8 +168,9 @@ void blake2s_final(blake2s_ctx *ctx, void *out)
     }
 }
 
-// Convenience function for all-in-one computation.
-
+/**
+ * @brief Convenience function for all-in-one computation.
+ */
 int blake2s(void *out, size_t outlen,
     const void *key, size_t keylen,
     const void *in, size_t inlen)
