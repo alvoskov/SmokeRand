@@ -658,7 +658,7 @@ There are only two problematic situations:
  biski32           | u32    | +       | +     | +       | +    | 0.32 | +      | 3.5(0)| +       | >= 8 TiB
  biski32_alt       | u32    | +       | +     | +       | +    | 0.43 | +      | 4(0)  | +       | >= 16 TiB
  biski64           | u64    | +       | +     | +       | +    | <0.1 | +      | 3     |         | >= 8 TiB
- biski64_alt       | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 8 TiB
+ biski64_alt       | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 16 TiB
  blabla2           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 16 TiB
  blabla4           | u64    | +       | +     | +       | +    | 0.58 | +      | 4     |         | >= 8 TiB
  blabla10          | u64    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 16 TiB
