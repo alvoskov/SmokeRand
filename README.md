@@ -680,7 +680,7 @@ There are only two problematic situations:
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 5     | +       | >= 32 TiB
  jctr32            | u32    | +       | +     | +       | +    | 2.4  | +      | 4     |         | >= 2 TiB
  jctr32_avx2       | u32    | +       | +     | +       | +    | 0.51 | +      | 4     |         | >= 32 TiB
- jctr64            | u64    | +       | +     | +       | +    | 1.1  | +      | 4     |         | >= 2 TiB
+ jctr64            | u64    | +       | +     | +       | +    | 1.1  | +      | 4     |         | >= 16 TiB
  jctr64_avx2       | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 16 TiB
  jkiss             | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 16 TiB 
  jkiss32           | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
