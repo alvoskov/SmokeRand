@@ -286,7 +286,6 @@ uint64_t get_machine_id()
     if (fp == NULL) {
         fp = fopen("/etc/machine-id", "r");
         if (fp == NULL) {
-            fclose(fp);
             return machine_id;
         }
     }
