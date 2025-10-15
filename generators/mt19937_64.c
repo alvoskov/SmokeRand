@@ -57,7 +57,7 @@ static inline void mt_iter(uint64_t *x, int i0, int i1, int m0, int m1, int m2)
 }
 
 
-uint64_t MT19937x64State_next(MT19937x64State *obj)
+static inline uint64_t MT19937x64State_next(MT19937x64State *obj)
 {
     static const int M0 = 63, M1 = 151, M2 = 224;
     if (obj->pos >= NN) {
@@ -117,12 +117,12 @@ void MT19937x64State_init_brief(MT19937x64State *obj, uint64_t seed)
 static inline void mt_iter_brief(uint64_t *x, int i0, int i1, int m0)
 {
     static const uint64_t mag01[2] = {0ULL, 0xB5026F5AA96619E9ULL};
-    uint64_t x_new = (x[i0] & UMASK) | ((size_t) x[i1] & LMASK);
-    x[i0] = x[m0] ^ (x_new >> 1) ^ mag01[(int) (x_new & 1ULL)];
+    uint64_t x_new = (x[i0] & UMASK) | (x[i1] & LMASK);
+    x[i0] = x[m0] ^ (x_new >> 1) ^ mag01[(size_t) (x_new & 1ULL)];
 }
 
 
-uint64_t MT19937x64State_next_brief(MT19937x64State *obj)
+static inline uint64_t MT19937x64State_next_brief(MT19937x64State *obj)
 {
     static const int MM = 156;
     if (obj->pos >= NN) {
