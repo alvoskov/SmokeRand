@@ -52,8 +52,12 @@
 enum {
     NWORDS = 4, ///< Number of words per state (DON'T CHANGE!)
     NCOPIES = 4, ///< Number of generator copies (DON'T CHANGE!)
+};
+
+enum {
     C240 = 0x1BD11BDAA9FC1A22ULL
 };
+
 
 
 typedef enum {

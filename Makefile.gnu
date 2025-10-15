@@ -171,17 +171,17 @@ ifeq ($(OS), Windows_NT)
 	del $(BINDIR)\generators\obj\*.o
 	del $(BINDIR)\generators\*.a /q
 else
-	rm $(BINDIR)/smokerand
-	rm $(BINDIR)/calibrate_dc6
-	rm $(BINDIR)/calibrate_linearcomp
-	rm $(BINDIR)/sr_tiny
-	rm $(BINDIR)/test_funcs
-	rm $(BINDIR)/test_cpp11
-	rm $(BINDIR)/test_rdseed
-	rm $(OBJDIR)/*.o
-	rm $(LIBDIR)/*
-	rm $(BINDIR)/generators/*.so
-	rm $(BINDIR)/generators/obj/*.o
+	rm -f $(BINDIR)/smokerand
+	rm -f $(BINDIR)/calibrate_dc6
+	rm -f $(BINDIR)/calibrate_linearcomp
+	rm -f $(BINDIR)/sr_tiny
+	rm -f $(BINDIR)/test_funcs
+	rm -f $(BINDIR)/test_cpp11
+	rm -f $(BINDIR)/test_rdseed
+	rm -f $(OBJDIR)/*.o
+	rm -f $(LIBDIR)/*
+	rm -f $(BINDIR)/generators/*.so
+	rm -f $(BINDIR)/generators/obj/*.o
 endif
 
 install:
@@ -224,27 +224,27 @@ uninstall:
 ifeq ($(OS), Windows_NT)
 	echo `make uninstall` is supported only for UNIX-like systems.
 else
-	rm $(DESTDIR)$(PREFIX)/bin/smokerand
-	rm $(DESTDIR)$(PREFIX)/lib/libsmokerand_bat.a
-	rm $(DESTDIR)$(PREFIX)/lib/libsmokerand_core.a
-	rm $(DESTDIR)$(PREFIX)/man/man1/smokerand.1.gz
-	rm $(DESTDIR)$(PREFIX)/include/smokerand/*
-	rm $(DESTDIR)$(PREFIX)/include/smokerand_bat.h
-	rm $(DESTDIR)$(PREFIX)/include/smokerand_core.h
-	rm -d $(DESTDIR)$(PREFIX)/include/smokerand
-	rm $(DESTDIR)$(PREFIX)/lib/smokerand/generators/*.so
-	rm -d $(DESTDIR)$(PREFIX)/lib/smokerand/generators
-	rm -d $(DESTDIR)$(PREFIX)/lib/smokerand
+	rm -f  $(DESTDIR)$(PREFIX)/bin/smokerand
+	rm -f  $(DESTDIR)$(PREFIX)/lib/libsmokerand_bat.a
+	rm -f  $(DESTDIR)$(PREFIX)/lib/libsmokerand_core.a
+	rm -f  $(DESTDIR)$(PREFIX)/man/man1/smokerand.1.gz
+	rm -f  $(DESTDIR)$(PREFIX)/include/smokerand/*
+	rm -f  $(DESTDIR)$(PREFIX)/include/smokerand_bat.h
+	rm -f  $(DESTDIR)$(PREFIX)/include/smokerand_core.h
+	rm -fd $(DESTDIR)$(PREFIX)/include/smokerand
+	rm -f  $(DESTDIR)$(PREFIX)/lib/smokerand/generators/*.so
+	rm -fd $(DESTDIR)$(PREFIX)/lib/smokerand/generators
+	rm -fd $(DESTDIR)$(PREFIX)/lib/smokerand
 
-	rm $(DESTDIR)$(PREFIX)/src/smokerand/generators/*
-	rm -d $(DESTDIR)$(PREFIX)/src/smokerand/generators
-	rm $(DESTDIR)$(PREFIX)/src/smokerand/src/*
-	rm -d $(DESTDIR)$(PREFIX)/src/smokerand/src
-	rm $(DESTDIR)$(PREFIX)/src/smokerand/apps/*
-	rm -d $(DESTDIR)$(PREFIX)/src/smokerand/apps
-	rm $(DESTDIR)$(PREFIX)/src/smokerand/*
-	rm -d $(DESTDIR)$(PREFIX)/src/smokerand
+	rm -f  $(DESTDIR)$(PREFIX)/src/smokerand/generators/*
+	rm -fd $(DESTDIR)$(PREFIX)/src/smokerand/generators
+	rm -f  $(DESTDIR)$(PREFIX)/src/smokerand/src/*
+	rm -fd $(DESTDIR)$(PREFIX)/src/smokerand/src
+	rm -f  $(DESTDIR)$(PREFIX)/src/smokerand/apps/*
+	rm -fd $(DESTDIR)$(PREFIX)/src/smokerand/apps
+	rm -f  $(DESTDIR)$(PREFIX)/src/smokerand/*
+	rm -fd $(DESTDIR)$(PREFIX)/src/smokerand
 
-	rm $(DESTDIR)$(PREFIX)/etc/smokerand/*.txt
-	rm -d $(DESTDIR)$(PREFIX)/etc/smokerand
+	rm -f  $(DESTDIR)$(PREFIX)/etc/smokerand/*.txt
+	rm -fd $(DESTDIR)$(PREFIX)/etc/smokerand
 endif

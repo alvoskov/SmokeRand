@@ -49,6 +49,9 @@ PRNG_CMODULE_PROLOG
 
 enum {
     XXTEA_DELTA = 0x9e3779b9, ///< Increment for round keys.
+};
+
+enum {
     XXTEA_NCOPIES = 8, ///< Number of generator copies inside the state.
     XXTEA128_NROUNDS = 19, ///< Number of rounds for 128-bit blocks.
     XXTEA256_NROUNDS = 12, ///< Number of rounds for 256-bit blocks.
