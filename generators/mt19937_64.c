@@ -1,23 +1,31 @@
 /**
  * @file mt19937_64.c
  * @brief MT19937: 64-bit version of Mersenne Twister
- * @details
- * 1. 64-bit Mersenne Twisters // ACM Transactions on Modeling and Computer Simulation, Vol. 10, No. 4, October 2000.
+ * @details It contains two versions of the generator: `brief` (default, faster
+ * and more widespread) and `full` (slightly slower but with denser polynomials)
+ *
+ * References:
+ *
+ * 1. https://www.math.sci.hiroshima-u.ac.jp/m-mat/MT/emt64.html
+ * 2. Takuji Nishimura. 64-bit Mersenne Twisters // ACM Transactions on Modeling
+ *    and Computer Simulation, Vol. 10, No. 4, October 2000.
  *    https://doi.org/10.1145/369534.369540
- * 2. https://www.math.sci.hiroshima-u.ac.jp/m-mat/MT/emt64.html
- * 
  */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 
-// Period parameters
+// Buffer size
 #define NN 312
-// Most significant 33 bits
+// Mask for higher 33 bits
 #define UMASK 0xFFFFFFFF80000000ULL
-// Least significant 31 bits
+// Mask for lower 31 bits
 #define LMASK 0x7FFFFFFFULL
 
+/**
+ * @brief MT19937-64 (64-bit version of Mersenne twister) pseudorandom number
+ * generator state.
+ */
 typedef struct {
     uint64_t x[NN];
     int pos;
@@ -44,24 +52,22 @@ static inline void mt_iter(uint64_t *x, int i0, int i1, int m0, int m1, int m2)
 {
     static const uint64_t mag01[2] = {0ULL, 0xB3815B624FC82E2FULL};
     uint64_t x_new = (x[i0] & UMASK) | (x[i1] & LMASK);
-    x[i0] = (x_new >> 1) ^ mag01[(int) (x_new & 1ULL)];
+    x[i0] = (x_new >> 1) ^ mag01[(size_t) (x_new & 1ULL)];
     x[i0] ^= x[m0] ^ x[m1] ^ x[m2];
 }
 
+
 uint64_t MT19937x64State_next(MT19937x64State *obj)
 {
-    static const int M0 = 63;
-    static const int M1 = 151;
-    static const int M2 = 224;
+    static const int M0 = 63, M1 = 151, M2 = 224;
     if (obj->pos >= NN) {
-        int i;
-        for (i = 0; i < NN - M2; i++)
+        for (int i = 0; i < NN - M2; i++)
             mt_iter(obj->x, i, i + 1, i + M0, i + M1, i + M2);
-        for (; i < NN - M1; i++)
+        for (int i = NN - M2; i < NN - M1; i++)
             mt_iter(obj->x, i, i + 1, i + M0, i + M1, i + M2 - NN);
-        for (; i < NN - M0; i++)
+        for (int i = NN - M1; i < NN - M0; i++)
             mt_iter(obj->x, i, i + 1, i + M0, i + M1 - NN, i + M2 - NN);
-        for (; i < NN - 1; i++) 
+        for (int i = NN - M0; i < NN - 1; i++) 
             mt_iter(obj->x, i, i + 1, i + M0 - NN, i + M1 - NN, i + M2 - NN);
         mt_iter(obj->x, NN - 1, 0, M0 - 1, M1 - 1, M2 - 1);
         obj->pos = 0;
@@ -108,24 +114,21 @@ void MT19937x64State_init_brief(MT19937x64State *obj, uint64_t seed)
 }
 
 
-
 static inline void mt_iter_brief(uint64_t *x, int i0, int i1, int m0)
 {
     static const uint64_t mag01[2] = {0ULL, 0xB5026F5AA96619E9ULL};
-    uint64_t x_new = (x[i0] & UMASK) | (x[i1] & LMASK);
+    uint64_t x_new = (x[i0] & UMASK) | ((size_t) x[i1] & LMASK);
     x[i0] = x[m0] ^ (x_new >> 1) ^ mag01[(int) (x_new & 1ULL)];
 }
-
 
 
 uint64_t MT19937x64State_next_brief(MT19937x64State *obj)
 {
     static const int MM = 156;
     if (obj->pos >= NN) {
-        int i;
-        for (i = 0; i < NN - MM; i++)
+        for (int i = 0; i < NN - MM; i++)
             mt_iter_brief(obj->x, i, i + 1, i + MM);
-        for (; i < NN - 1; i++)
+        for (int i = NN - MM; i < NN - 1; i++)
             mt_iter_brief(obj->x, i, i + 1, i + (MM - NN));
         mt_iter_brief(obj->x, NN - 1, 0, MM - 1);
         obj->pos = 0;
@@ -146,7 +149,6 @@ static inline uint64_t get_bits_brief_raw(void *state)
 }
 
 MAKE_GET_BITS_WRAPPERS(brief);
-
 
 
 void *create_brief(const GeneratorInfo *gi, const CallerAPI *intf)
@@ -215,9 +217,10 @@ int run_self_test(const CallerAPI *intf)
 }
 
 static const char description[] =
-"MT19937-64\n"
-"  brief     - \n"
-"  full      - \n";
+"MT19937-64\n: a 64-bit version of Mersenne twister.\n"
+"The next param values are supported:\n"
+"  brief     - a default and faster version with sparser polynomials.\n"
+"  full      - a slower version with denser polynomials.\n";
 
 
 
