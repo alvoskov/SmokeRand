@@ -759,9 +759,9 @@ There are only two problematic situations:
  minstd            | u32    | 6       | 20    | 38      | 42   | 2.4  | -(>>10)| 0     | -       | 1 KiB
  mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 16 TiB
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | +      | 4     | +       | >= 32 TiB
- mt19937           | u32    | +       | 3     | 3       | 3    | 0.64 | +      | 3.25  | Small   | 128 GiB
- mt19937_64        | u64    | +       | 3     | 3       | 3    | 0.55 | +      | 3.25  |         | 256 GiB
- mt19937_64_full   | u64    | +       | 3     | 3       | 3    | 0.55 | +      | 3.25  |         | 256 GiB
+ mt19937           | u32    | +       | 3     | 3       | 3    | 0.59 | +      | 3.25  | Small   | 128 GiB
+ mt19937_64        | u64    | +       | 3     | 3       | 3    | 0.45 | +      | 3.25  |         | 256 GiB
+ mt19937_64_full   | u64    | +       | 3     | 3       | 3    | 0.46 | +      | 3.25  |         | 256 GiB
  mtc8              | u32    | 1       | 20/21 | 35      | 39   | 1.9  |        | 0     |         | 2 MiB
  mtc16             | u32    | +       | +     | +       | +    | 1.3  | +      | 3.5(0)|         | 512 GiB(stdin32)*
  mtc32             | u32    | +       | +     | +       | +    | 0.39 | +      | 4(0)  |         | >= 4 TiB
@@ -1169,6 +1169,14 @@ are less sensitive, e.g. entropy test catches only randu.
 - Passes ENT: lcg32prime, lcg64, lfib31, swb
 
 # Versions history
+
+15.10.2025: SmokeRand 0.39
+
+- `mt19937`: code cleanup and additon of a test vector.
+- `mt19937_64`: a 64-bit version of Mersenne Twister, two modifications.
+- Custom `jctr32` and `jctr64` generators based on experimental block ciphers
+  by Bob Jenkins. These block ciphers were turned to the construction
+  resembling the ChaCha20 stream cipher.
 
 28.09.2025: SmokeRand 0.38
 
