@@ -211,10 +211,11 @@ int entfuncs_test(void)
 }
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
-#include <windows.h>
-#define WINDOWS_PLATFORM
+    #include <windows.h>
+    #define WINDOWS_PLATFORM
 #else
-#include <unistd.h>
+    #include <fcntl.h>
+    #include <unistd.h>
 #endif
 
 ////////////////////////////////////////////////////////////////////
@@ -400,25 +401,25 @@ static int inject_rand(uint64_t *out, size_t len)
     CryptReleaseContext(hCryptProv, 0);
     return 1;
 #elif !defined(NO_POSIX)
-    FILE *fp = fopen("/dev/urandom", "r");
-    if (fp == NULL) {
+    int fd = open("/dev/urandom", O_RDONLY);
+    if (fd == -1) {
         return 0;
     }
 
     size_t nbytes = sizeof(uint64_t) * len;
     uint64_t *buf = malloc(nbytes);
 
-    if (buf == NULL || fread(buf, sizeof(uint64_t), len, fp) != len) {
-        fclose(fp);
+    if (buf == NULL || read(fd, buf, nbytes) != (ssize_t) nbytes) {
+        close(fd);
         free(buf);
         return 0;
     }
     for (size_t i = 0; i < len; i++) {
-        //printf("%llX\n", (unsigned long long) buf[i]);
+        //printf("-->%llX\n", (unsigned long long) buf[i]);
         out[i] ^= buf[i];
     }
     free(buf);
-    fclose(fp);
+    close(fd);
     return 1;
 #else
     (void) out; (void) len;
