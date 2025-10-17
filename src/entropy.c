@@ -407,7 +407,8 @@ static int inject_rand(uint64_t *out, size_t len)
 
     size_t nbytes = sizeof(uint64_t) * len;
     uint64_t *buf = malloc(nbytes);
-    if (buf == NULL || fgets((char *) buf, nbytes, fp) == NULL) {
+
+    if (buf == NULL || fread(buf, sizeof(uint64_t), len, fp) != len) {
         fclose(fp);
         free(buf);
         return 0;
