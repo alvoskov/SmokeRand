@@ -218,6 +218,11 @@ int entfuncs_test(void)
     #include <unistd.h>
 #endif
 
+
+#if defined(__WATCOMC__) && defined(__386__) && defined(__DOS__)
+    #define DOS386_PLATFORM
+#endif
+
 ////////////////////////////////////////////////////////////////////
 ///// Functions for collecting entropy from system information /////
 ////////////////////////////////////////////////////////////////////
@@ -275,7 +280,7 @@ uint64_t get_machine_id()
     //    printf("%c", (unsigned char) value[i]);
     //}
     RegCloseKey(key);
-#elif defined(__WATCOMC__) && defined(__386__) && defined(__DOS__)
+#elif defined(DOS386_PLATFORM)
     // DOS: calculate ROM BIOS checksum
     uint64_t *bios_data = (uint64_t *) 0xF0000;
     for (int i = 0; i < 8192; i++) {
@@ -366,6 +371,77 @@ uint64_t cpuclock(void)
 }
 #endif
 
+
+#ifdef DOS386_PLATFORM
+
+/**
+ * @brief Calculate number of bits required to represent the input value
+ * without leading zeros.
+ */
+static int dos386_get_nbits(uint64_t value)
+{
+    int nbits = 0;
+    while (value != 0) {
+        value >>= 1;
+        nbits++;
+    }
+    return nbits;
+}
+
+
+/**
+ * @brief Extracts entropy bits from an interaction of RDTSC instruction
+ * and PIT (Programmable Interval Timer). Used as a fallback for DOS32
+ * platform where the system-level CSPRNG such as /dev/urandom is not
+ * implemented.
+ * @param      fp   File descriptor (e.g. stderr) for diagnostic output.
+ * @param[out] out  Output buffer.
+ * @param[in]  len  Size of output buffer in 64-bit words.
+ */
+static int dos386_random_rdtsc(FILE *fp, uint64_t *out, size_t len)
+{
+    volatile uint32_t *bios_timer = (uint32_t *) 0x46C;
+    uint64_t rdtsc_prev = __rdtsc(), delta_prev = 0;
+    uint64_t accum = *bios_timer;
+    for (size_t i = 0; i < len; i++) {
+        int nbits_total = 0;
+        for (int j = 0; j < 64 && nbits_total < 128; j++) {
+            // Wait for the next tick of the PIT
+            for (uint32_t t = *bios_timer; t == *bios_timer; ) {
+                for (uint64_t ct = __rdtsc(); ct % 1021 == 0; ct = __rdtsc()) {
+                }
+            }
+            // Extract random bits as "delta of the delta"
+            uint64_t rdtsc_cur =  __rdtsc();
+            uint64_t delta_cur = rdtsc_cur - rdtsc_prev;
+            uint64_t rndbits;
+            if (delta_cur > delta_prev) {
+                rndbits = delta_cur - delta_prev;
+            } else {
+                rndbits = delta_prev - delta_cur;
+            }
+            rdtsc_prev = rdtsc_cur;
+            delta_prev = delta_cur;
+            // Add extracted bits to the accumulator
+            int nbits = dos386_get_nbits(rndbits);
+            nbits_total += nbits;
+            if (nbits != 0) {
+                accum = (accum << nbits) | (accum >> (64 - nbits));
+                accum ^= rndbits;
+            }
+            // Diagnostic output (also slightly increases entropy)
+            fprintf(fp, "\rCollecting entropy: %d of %d bits collected  ",
+                (int) (i * 64 + nbits_total / 2), (int) (64 * len));
+            fflush(fp);
+        }
+        out[i] = accum;
+    }
+    fprintf(fp, "\n");
+    return 1;
+}
+
+#endif
+
 /**
  * @brief Gains access to the system CSPRNG and XORs content of the output
  * buffer with output of this generator.
@@ -444,6 +520,9 @@ void Entropy_init(Entropy *obj)
     if (!inject_rand(&ent_buf->u64[0], 4)) {
         fprintf(stderr,
             "Warning: system CSPRNG is unaccessible. An internal seeder will be used.\n");
+#ifdef DOS386_PLATFORM
+        dos386_random_rdtsc(stderr, &ent_buf->u64[0], 2);
+#endif
     }
     // 256 bits of entropy from RDSEED
     for (size_t i = 4; i < 8; i++) {
