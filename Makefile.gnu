@@ -3,7 +3,7 @@
 # Supports GCC and Clang (as Zig CC) compilers.
 #
 
-PLATFORM_NAME=DJGPP
+PLATFORM_NAME=GCC
 LIB_SOURCES_EXTRA =
 LIB_HEADERS_EXTRA =
 GEN_LFLAGS = 
