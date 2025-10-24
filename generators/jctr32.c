@@ -285,6 +285,7 @@ static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
     Jctr32VecState_init(obj, key, 0);
     return obj;
 #else
+    (void) gi; (void) intf;
     return NULL;
 #endif
 }

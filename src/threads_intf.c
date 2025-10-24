@@ -96,13 +96,18 @@ ThreadObj ThreadObj_current(void)
 
 //-------------------------------------------------------------
 
+#ifdef __DJGPP__
+#define USE_PE32_DOS
+#endif
+
+
 #ifdef USE_LOADLIBRARY
-#include <windows.h>
-#elif !defined(NO_POSIX)
-#include <unistd.h>
-#include <dlfcn.h>
+    #include <windows.h>
 #elif defined(USE_PE32_DOS)
-#include "smokerand/pe32loader.h"
+    #include "smokerand/pe32loader.h"
+#elif !defined(NO_POSIX)
+    #include <unistd.h>
+    #include <dlfcn.h>
 #endif
 
 void *dlopen_wrap(const char *libname)
@@ -124,16 +129,16 @@ void *dlopen_wrap(const char *libname)
         lib = 0;
     }
     return (void *) lib;
-#elif !defined(NO_POSIX)
-    void *lib = dlopen(libname, RTLD_LAZY);
-    if (lib == NULL) {
-        fprintf(stderr, "dlopen() error: %s\n", dlerror());
-    };
-    return lib;
 #elif defined(USE_PE32_DOS)
     void *lib = dlopen_pe32dos(libname, 0);
     if (lib == NULL) {
         fprintf(stderr, "dlopen() error: %s\n", dlerror_pe32dos());
+    };
+    return lib;
+#elif !defined(NO_POSIX)
+    void *lib = dlopen(libname, RTLD_LAZY);
+    if (lib == NULL) {
+        fprintf(stderr, "dlopen() error: %s\n", dlerror());
     };
     return lib;
 #else
@@ -150,10 +155,10 @@ void *dlsym_wrap(void *handle, const char *symname)
 {
 #ifdef USE_LOADLIBRARY
     return (void *) GetProcAddress(handle, symname);
-#elif !defined(NO_POSIX)
-    return dlsym(handle, symname);
 #elif defined(USE_PE32_DOS)
     return dlsym_pe32dos(handle, symname);
+#elif !defined(NO_POSIX)
+    return dlsym(handle, symname);
 #else
     return NULL;
 #endif
@@ -164,10 +169,10 @@ void dlclose_wrap(void *handle)
 {
 #ifdef USE_LOADLIBRARY
     FreeLibrary((HANDLE) handle);
+#elif defined(USE_PE32_DOS) || defined(__DJGPP__)
+    dlclose_pe32dos(handle);
 #elif !defined(NO_POSIX)
     dlclose(handle);
-#elif defined(USE_PE32_DOS)
-    dlclose_pe32dos(handle);
 #else
     (void) handle;
 #endif
@@ -180,6 +185,8 @@ int get_cpu_numcores(void)
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
     return sysinfo.dwNumberOfProcessors;
+#elif defined(__DJGPP__)
+    return 1;
 #elif !defined(NO_POSIX)
     return sysconf(_SC_NPROCESSORS_ONLN);
 #else

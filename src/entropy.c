@@ -248,12 +248,14 @@ uint32_t get_tick_count()
 {
 #ifdef WINDOWS_PLATFORM
     return (uint32_t) GetTickCount();
+#elif defined(__DJGPP__)
+    return (uint32_t) (time(NULL) * 69069u);
 #elif !defined(NO_POSIX)
     struct timespec t;
     clock_gettime(CLOCK_REALTIME, &t);
     return (uint32_t) t.tv_nsec;
 #else
-    return (uint32_t) (time(NULL) * 69069);
+    return (uint32_t) (time(NULL) * 69069u);
 #endif
 }
 

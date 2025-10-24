@@ -59,7 +59,8 @@ static inline uint64_t get_bits32_raw(void *state)
         StdinCollector_fill_buffer(obj);
         obj->pos = 0;
     }
-    uint32_t x = *( (uint32_t *) (obj->buffer + obj->pos) );
+    void *ptr = (void *) (obj->buffer + obj->pos);
+    uint32_t x = *( (uint32_t *) ptr );
     obj->pos += sizeof(uint32_t);
     return x;
 }
@@ -89,7 +90,8 @@ static inline uint64_t get_bits64_raw(void *state)
         StdinCollector_fill_buffer(obj);
         obj->pos = 0;
     }
-    uint64_t x = *( (uint64_t *) (obj->buffer + obj->pos) );
+    void *ptr = (void *) (obj->buffer + obj->pos);
+    uint64_t x = *( (uint64_t *) ptr );
     obj->pos += sizeof(uint64_t);
     return x;    
 }

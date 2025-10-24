@@ -121,17 +121,19 @@ int PE32BasicInfo_init(PE32BasicInfo *peinfo, FILE *fp, uint32_t pe_offset)
 void PE32BasicInfo_print(const PE32BasicInfo *peinfo)
 {
     printf("nsections:  %d\n", (int) peinfo->nsections);
-    printf("ep rva:     %X\n", (unsigned int) peinfo->entrypoint_rva);
-    printf("imagebase:  %X\n", (unsigned int) peinfo->imagebase);
-    printf("export_dir: %X\n", (unsigned int) peinfo->export_dir);
-    printf("import_dir: %X\n", (unsigned int) peinfo->import_dir);
-    printf("reloc_dir:  %X\n", (unsigned int) peinfo->reloc_dir);
+    printf("ep rva:     %lX\n", (unsigned long) peinfo->entrypoint_rva);
+    printf("imagebase:  %lX\n", (unsigned long) peinfo->imagebase);
+    printf("export_dir: %lX\n", (unsigned long) peinfo->export_dir);
+    printf("import_dir: %lX\n", (unsigned long) peinfo->import_dir);
+    printf("reloc_dir:  %lX\n", (unsigned long) peinfo->reloc_dir);
 
     for (int i = 0; i < peinfo->nsections; i++) {
         PE32SectionInfo *sect = &peinfo->sections[i];
-        printf("%s: %X %X %X %X\n", sect->name,
-            sect->virtual_size, sect->virtual_addr,
-            sect->physical_size, sect->physical_addr);
+        printf("%s: %lX %lX %lX %lX\n", sect->name,
+            (unsigned long) sect->virtual_size,
+            (unsigned long) sect->virtual_addr,
+            (unsigned long) sect->physical_size,
+            (unsigned long) sect->physical_addr);
     }
 }
 
@@ -215,16 +217,19 @@ int PE32MemoryImage_apply_relocs(PE32MemoryImage *img, PE32BasicInfo *info)
         uint32_t rva = r[0];
         uint32_t nbytes = r[1];
         uint32_t nrelocs = (r[1] - 8) / 2;
-        printf("Reloc. chunk: rva=%X, nbytes=%X, nrelocs=%X\n",
-            rva, nbytes, nrelocs);
+        printf("Reloc. chunk: rva=%lX, nbytes=%lX, nrelocs=%lX\n",
+            (unsigned long) rva,
+            (unsigned long) nbytes,
+            (unsigned long) nrelocs);
         uint16_t *re = (uint16_t *) (r + 2);
         for (uint32_t i = 0; i < nrelocs; i++) {
             if (re[i] >> 12 == 3) {
                 uint32_t reloc_rva = rva + (re[i] & 0x0FFF);
                 uint32_t *reloc_place = (uint32_t *) (buf + reloc_rva);
-                printf("  Reloc: rva=%X, before=%X, ", reloc_rva, *reloc_place);
+                printf("  Reloc: rva=%lX, before=%lX, ",
+                    (unsigned long) reloc_rva, (unsigned long) *reloc_place);
                 *reloc_place += offset;
-                printf("after: %X\n", *reloc_place);
+                printf("after: %lX\n", (unsigned long) *reloc_place);
             }
         }
         r += (nbytes) / sizeof(uint32_t);
@@ -247,9 +252,9 @@ int PE32MemoryImage_apply_exports(PE32MemoryImage *img, PE32BasicInfo *info)
     uint32_t *func_addrs_rva = (uint32_t *) &img->img[func_addrs_array_rva];
     img->exports_ords = (uint16_t *) &img->img[ord_array_rva];
     printf("nexports: %d\n", img->nexports);
-    printf("addrs rva: %X\n", func_addrs_array_rva);
-    printf("names rva: %X\n", func_names_array_rva);
-    printf("ord rva: %X\n", ord_array_rva);
+    printf("addrs rva: %lX\n", (unsigned long) func_addrs_array_rva);
+    printf("names rva: %lX\n", (unsigned long) func_names_array_rva);
+    printf("ord rva: %lX\n", (unsigned long) ord_array_rva);
     // Patch RVAs
     uint32_t imagebase_real = (uint32_t) ((size_t) img->img);
     for (int i = 0; i < img->nexports; i++) {
