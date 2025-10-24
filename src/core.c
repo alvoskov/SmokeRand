@@ -79,9 +79,6 @@ static int printf_ser(const char *format, ...)
 CallerAPI CallerAPI_init(void)
 {
     CallerAPI intf;
-    if (entropy.gen.x[0] == 0) {
-        Entropy_init(&entropy);
-    }
     intf.get_seed32 = get_seed32;
     intf.get_seed64 = get_seed64;
     intf.get_param = get_cmd_param;
