@@ -22,14 +22,14 @@
 ///// Selection of default multi-threading API /////
 ////////////////////////////////////////////////////
 
-#if !defined(NOTHREADS) && defined(_MSC_VER) && !defined (__clang__)
-#define USE_WINTHREADS
-#endif
+#ifndef NOTHREADS
+    #if defined(_MSC_VER) && !defined (__clang__)
+    #define USE_WINTHREADS
+    #endif
 
-#if !defined(NOTHREADS) && (defined(__GNUC__) || defined(__MINGW32__) || defined(__MINGW64__)) && !defined(__clang__)
-#ifndef USE_WINTHREADS
-#define USE_PTHREADS
-#endif
+    #if (defined(__GNUC__) || defined(__MINGW32__) || defined(__MINGW64__)) && !defined(__clang__) && !defined(USE_WINTHREADS)
+    #define USE_PTHREADS
+    #endif
 #endif
 
 //////////////////////////////////

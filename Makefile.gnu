@@ -3,7 +3,9 @@
 # Supports GCC and Clang (as Zig CC) compilers.
 #
 
-PLATFORM_NAME=GCC
+PLATFORM_NAME=DJGPP
+LIB_SOURCES_EXTRA =
+LIB_HEADERS_EXTRA =
 ifeq ($(PLATFORM_NAME), GCC)
     CC = gcc
     CXX = g++
@@ -16,6 +18,14 @@ else ifeq ($(PLATFORM_NAME), GCC32)
     AR = ar
     GEN_CFLAGS = -fPIC  -DNO_CUSTOM_DLLENTRY
     PLATFORM_FLAGS = -m32 -march=native
+else ifeq ($(PLATFORM_NAME), DJGPP)
+    CC = gcc
+    CXX = g++
+    AR = ar
+    GEN_CFLAGS = -fPIC  -DNO_CUSTOM_DLLENTRY
+    PLATFORM_FLAGS = -m32  -DNOTHREADS -march=i686 -U__STRICT_ANSI__
+    LIB_SOURCES_EXTRA = pe32loader.c
+    LIB_HEADERS_EXTRA = pe32loader.h
 else ifeq ($(PLATFORM_NAME), MINGW-HX)
     CC = gcc
     CXX = g++
@@ -66,9 +76,9 @@ endif
 
 # Core library
 CORE_LIB = $(LIBDIR)/libsmokerand_core.a
-LIB_SOURCES = $(addprefix $(SRCDIR)/, core.c coretests.c \
+LIB_SOURCES = $(addprefix $(SRCDIR)/, $(LIB_SOURCES_EXTRA) core.c coretests.c \
     blake2s.c entropy.c extratests.c fileio.c lineardep.c hwtests.c specfuncs.c threads_intf.c)
-LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, apidefs.h cinterface.h core.h coretests.h \
+LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, $(LIB_HEADERS_EXTRA) apidefs.h cinterface.h core.h coretests.h \
     blake2s.h entropy.h extratests.h fileio.h lineardep.h hwtests.h int128defs.h specfuncs.h threads_intf.h x86exts.h) \
     include/smokerand_core.h
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
