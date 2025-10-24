@@ -572,6 +572,9 @@ void Entropy_free(Entropy *obj)
  */
 uint64_t Entropy_seed64(Entropy *obj, uint64_t thread_id)
 {
+    if (obj->gen.x[0] == 0) {
+        Entropy_init(obj);
+    }
     uint64_t seed = ChaCha20State_next64(&obj->gen);
     if (obj->slog_pos != obj->slog_maxlen - 1) {
         // Check if buffer resizing is needed
