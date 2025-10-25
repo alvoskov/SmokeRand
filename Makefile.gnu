@@ -87,8 +87,9 @@ PREFIX = /usr/local
 endif
 endif
 
-# Support of DJGPP DXE3 modules
+# DJGPP specific extensions: DXE3 modules and .exe for executables
 ifeq ($(PLATFORM_NAME), DJGPP)
+EXE = .exe
 SO = .dxe
 endif
 
