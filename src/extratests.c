@@ -530,9 +530,9 @@ void Ising2DLattice_pass_metropolis(Ising2DLattice *obj, GeneratorState *gs)
 
 void Ising2DLattice_pass(Ising2DLattice *obj, GeneratorState *gs, IsingAlgorithm alg)
 {
-    if (alg == ising_wolff) {
+    if (alg == ISING_WOLFF) {
         Ising2DLattice_flip_wolff(obj, gs->gi->get_bits(gs->state) % obj->N, gs);
-    } else if (alg == ising_metropolis) {
+    } else if (alg == ISING_METROPOLIS) {
         Ising2DLattice_pass_metropolis(obj, gs);
     } else {
         fprintf(stderr, "Ising2DLattice_pass internal error: unknown algorithm\n");
@@ -572,9 +572,9 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
     Ising2DLattice obj;
     Ising2DLattice_init(&obj, 16);
     TestResults res = TestResults_create("ising2d");
-    if (opts->algorithm == ising_wolff) {
+    if (opts->algorithm == ISING_WOLFF) {
         res.name = "ising2d_wolff";
-    } else if (opts->algorithm == ising_metropolis) {
+    } else if (opts->algorithm == ISING_METROPOLIS) {
         res.name = "ising2d_metropolis";
     } else {
         res.name = "ising2d_unknown";
@@ -729,8 +729,8 @@ void battery_ising(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
     static const Ising2DOptions
-        metr  = {.sample_len = 5000000, .nsamples = 20, .algorithm = ising_metropolis},
-        wolff = {.sample_len = 5000000, .nsamples = 20, .algorithm = ising_wolff};
+        metr  = {.sample_len = 5000000, .nsamples = 20, .algorithm = ISING_METROPOLIS},
+        wolff = {.sample_len = 5000000, .nsamples = 20, .algorithm = ISING_WOLFF};
     
     static const TestDescription tests[] = {
         {"ising16_metropolis", ising2d_test_wrap, &metr},

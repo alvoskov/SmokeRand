@@ -1,4 +1,4 @@
-.TH smokerand 1  "April 10, 2025" "version 0.33" "USER COMMANDS"
+.TH smokerand 1  "October 15, 2025" "version 0.40" "USER COMMANDS"
 .SH NAME
 smokerand \- a test suite for pseudorandom numbers generators
 .SH SYNOPSIS
@@ -468,7 +468,7 @@ typedef struct {
 static inline uint64_t get_bits_raw(void *state)
 {
     LcgState *obj = state;
-    obj->x = obj->x * 6906969069 + 1;
+    obj->x = obj->x * 6906969069ull + 1ull;
     return obj->x >> 32;
 }
 

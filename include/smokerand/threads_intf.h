@@ -41,9 +41,10 @@
 // pthreads version
 #include <pthread.h>
 #define DECLARE_MUTEX(mutex) static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-#define INIT_MUTEX(mutex)
-#define MUTEX_LOCK(mutex) pthread_mutex_lock(&mutex);
-#define MUTEX_UNLOCK(mutex) pthread_mutex_unlock(&mutex);
+#define INIT_MUTEX(mutex) pthread_mutex_init(&(mutex), NULL);
+#define MUTEX_LOCK(mutex) pthread_mutex_lock(&(mutex));
+#define MUTEX_UNLOCK(mutex) pthread_mutex_unlock(&(mutex));
+#define MUTEX_DESTROY(mutex) pthread_mutex_destroy(&(mutex));
 
 typedef struct {
     pthread_t id;
@@ -62,12 +63,15 @@ typedef void* ThreadRetVal;
 #include <stdlib.h>
 #define DECLARE_MUTEX(mutex) static HANDLE mutex = NULL;
 #define INIT_MUTEX(mutex) if (mutex == NULL) { mutex = CreateMutex(NULL, FALSE, "\""#mutex"\""); }
-#define MUTEX_LOCK(mutex) DWORD dwResult = WaitForSingleObject(mutex, INFINITE); \
+#define MUTEX_LOCK(mutex) { \
+    DWORD dwResult = WaitForSingleObject(mutex, INFINITE); \
     if (dwResult != WAIT_OBJECT_0) { \
         fprintf(stderr, "get_seed64_mt internal error"); \
         exit(EXIT_FAILURE); \
-    }
+    } \
+}
 #define MUTEX_UNLOCK(mutex) ReleaseMutex(mutex);
+#define MUTEX_DESTROY(mutex) CloseHandle(mutex);
 
 typedef struct {
     DWORD id;
@@ -89,6 +93,7 @@ typedef DWORD ThreadRetVal;
 #define INIT_MUTEX(mutex)
 #define MUTEX_LOCK(mutex)
 #define MUTEX_UNLOCK(mutex)
+#define MUTEX_DESTROY(mutex)
 
 typedef struct {
     uint64_t id;

@@ -25,12 +25,11 @@
 #include <io.h>
 #endif
 
-static Entropy entropy = {
-    {{0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0},
-     {0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0}, 0},
-    NULL, 0, 0, 0};
+static Entropy entropy = ENTROPY_INITIALIZER;
 static char cmd_param[128] = {0};
 static int use_stderr_for_printf = 0;
+static int use_mutexes = 0;
+
 
 static const char *get_cmd_param(void)
 {
@@ -79,6 +78,7 @@ static int printf_ser(const char *format, ...)
 CallerAPI CallerAPI_init(void)
 {
     CallerAPI intf;
+    use_mutexes = 0;
     intf.get_seed32 = get_seed32;
     intf.get_seed64 = get_seed64;
     intf.get_param = get_cmd_param;
@@ -88,11 +88,6 @@ CallerAPI CallerAPI_init(void)
     intf.snprintf = snprintf;
     intf.strcmp = strcmp;
     return intf;
-}
-
-void CallerAPI_free(void)
-{
-    Entropy_free(&entropy);
 }
 
 /////////////////////////////
@@ -106,6 +101,12 @@ static void init_mutexes()
 {
     INIT_MUTEX(get_seed64_mt_mutex)
     INIT_MUTEX(printf_mt_mutex)
+}
+
+static void destroy_mutexes()
+{
+    MUTEX_DESTROY(get_seed64_mt_mutex)
+    MUTEX_DESTROY(printf_mt_mutex)    
 }
 
 static uint64_t get_seed64_mt(void)
@@ -147,10 +148,8 @@ static int printf_mt(const char *format, ...)
 CallerAPI CallerAPI_init_mthr(void)
 {
     CallerAPI intf;
-    if (entropy.gen.x[0] == 0) {
-        Entropy_init(&entropy);
-        init_mutexes();
-    }
+    init_mutexes();
+    use_mutexes = 1;
     intf.get_seed32 = get_seed32_mt;
     intf.get_seed64 = get_seed64_mt;
     intf.get_param = get_cmd_param;
@@ -161,6 +160,20 @@ CallerAPI CallerAPI_init_mthr(void)
     intf.strcmp = strcmp;
     return intf;
 }
+
+///////////////////////////////////////////////////////////////////////////
+///// Universal API (for both single- and multithreaded environments) /////
+///////////////////////////////////////////////////////////////////////////
+
+void CallerAPI_free(void)
+{
+    Entropy_free(&entropy);
+    if (use_mutexes) {
+        destroy_mutexes();
+    }
+}
+
+
 
 ////////////////////////////////////////////
 ///// TestResults class implementation /////

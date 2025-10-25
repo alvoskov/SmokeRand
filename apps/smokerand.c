@@ -301,6 +301,7 @@ static void apply_filter(GeneratorInfo **gi, GeneratorFilter filter, GeneratorIn
     }
 }
 
+
 int main(int argc, char *argv[])
 {
     if (argc < 3) {

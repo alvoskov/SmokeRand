@@ -76,10 +76,10 @@ Recommended configuration:
   compilation by means of Open Watcom C.
 - 16 GiB of RAM, especially for multithreaded mode and/or `birthday` battery.
 
-The next compilers are supported: GCC (including MinGW), Clang (as zig cc), MSVC
-(Microsoft Visual C) and Open Watcom C. It allows to compile SmokeRand under
-Windows, UNIX-like systems and DOS. A slightly modified 16-bit version
-(`apps/sr_tiny.c`) of `express` battery can be compiled even by Borland
+The next compilers are supported: GCC (including MinGW and DJGPP), Clang (as
+zig cc), MSVC (Microsoft Visual C) and Open Watcom C. It allows to compile
+SmokeRand under Windows, UNIX-like systems and DOS. A slightly modified 16-bit
+version (`apps/sr_tiny.c`) of `express` battery can be compiled even by Borland
 Turbo C 2.0 or any other ANSI C (C89) compiler.
 
 ## Compilation
@@ -122,6 +122,18 @@ e.g. under 32-bit DOS extenders:
   for 64-bit systems.
 - `hamming_ot` uses relatively large (several MiB) frequency tables during
   the run.
+
+Notes about DJGPP:
+
+- All plugins with PRNGs are compiled as DXE3 modules using the `dxe3gen`
+  linker that is specific to DJGPP. It is possible to make SmokeRand DJGPP
+  build to use DLLs but it will require a cross-compilation of plugins with
+  MinGW or Open Watcom that is not too practical.
+- SmokeRand man page can be converted to the overstrike based format using
+  the next commands:
+
+    $ groff -mandoc -Tascii -P-cBoU smokerand.1 > smokerand.dos
+    $ less smokerand.dos
 
 ## About implemented tests
 
@@ -1169,6 +1181,14 @@ are less sensitive, e.g. entropy test catches only randu.
 - Passes ENT: lcg32prime, lcg64, lfib31, swb
 
 # Versions history
+
+25.10.2025: SmokeRand 0.40
+
+- DJGPP preliminary support; plugins with pseudorandom number generators are
+  compiled as DXE3 modules using the `dxe3gen` linker from DJGPP.
+- Custom entropy collector based on RDTSC and the system PIC for such platforms
+  as Open Watcom DOS32 and DJGPP.
+- Some bugfixes and code cleanup.
 
 15.10.2025: SmokeRand 0.39
 
