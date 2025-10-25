@@ -27,8 +27,8 @@ typedef struct {
  * @brief Algorithms for the PRNG test based on Ising model.
  */
 typedef enum {
-    ising_wolff, ///< Wolff algorithm
-    ising_metropolis ///< Metropolis algorithm
+    ISING_WOLFF, ///< Wolff algorithm
+    ISING_METROPOLIS ///< Metropolis algorithm
 } IsingAlgorithm;
 
 

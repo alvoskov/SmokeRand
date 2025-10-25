@@ -51,6 +51,11 @@ typedef struct {
     size_t pos; ///< Current position inside the output buffer
 } ChaCha20State;
 
+#define CHACHA20STATE_INITIALIZER { \
+    {0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0}, \
+    {0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0}, 0 \
+}
+
 void ChaCha20State_init(ChaCha20State *obj, const uint32_t *key);
 void ChaCha20State_generate(ChaCha20State *obj);
 uint32_t ChaCha20State_next32(ChaCha20State *obj);
@@ -81,6 +86,15 @@ typedef struct {
     size_t slog_len; ///< Current length of the log
     size_t slog_maxlen; ///< Maximal length of the log
 } Entropy;
+
+
+#define ENTROPY_INITIALIZER { CHACHA20STATE_INITIALIZER, NULL, 0, 0, 0 }
+
+static inline int Entropy_is_init(const Entropy *obj)
+{
+    return obj->gen.x[0] == 0x61707865 && obj->gen.x[1] == 0x3320646e &&
+           obj->gen.x[2] == 0x79622d32 && obj->gen.x[3] == 0x6b206574;
+}
 
 
 void Entropy_init(Entropy *obj);

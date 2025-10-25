@@ -14,7 +14,7 @@ PRNG_CMODULE_PROLOG
 static inline uint64_t get_bits_raw(void *state)
 {
     Lcg32State *obj = state;
-    obj->x = (uint32_t)65539 * obj->x + 12345;
+    obj->x = (uint32_t)65539u * obj->x + 12345u;
     return obj->x;
 }
 

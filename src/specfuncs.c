@@ -413,8 +413,8 @@ double sr_binomial_pvalue(double k, double n, double p)
 }
 
 /**
- * @brief Transforms a chi2-distributed variable to the normally distributed value
- * (standard normal distribution).
+ * @brief Transforms a chi2-distributed variable to the normally distributed
+ * value (standard normal distribution).
  * @details Based on the asymptotic approximation by Wilson and Hilferty.
  * References:
  *

@@ -560,7 +560,7 @@ static int parse_ising2d(TestDescription *out, const TestInfo *obj, char *errmsg
     GET_LIMITED_INTVALUE(nsamples, 3, 100000);
     int is_ok;
     const char *alg_txt[] = {"wolff", "metropolis", NULL};
-    const int alg_codes[] = {ising_wolff, ising_metropolis, 0};
+    const int alg_codes[] = {ISING_WOLFF, ISING_METROPOLIS, 0};
     IsingAlgorithm algorithm = TestInfo_value_to_code(obj, "algorithm",
         alg_txt, alg_codes, errmsg, &is_ok);
     if (!is_ok) {
