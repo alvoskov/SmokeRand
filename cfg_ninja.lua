@@ -44,7 +44,22 @@ local lib_name = "$libdir/libsmokerand_core.a"
 local batlib_name = "$libdir/libsmokerand_bat.a"
 local lib_sources = cfg.get_lib_sources()
 local bat_sources = cfg.get_bat_sources()
-local gen_sources = cfg.get_gen_sources()
+local gen_sources_raw = cfg.get_gen_sources()
+
+-- Filter out the floating point based generator: in MSVC
+-- it requires a runtime library.
+local gen_sources = {}
+if platform == 'msvc' then
+    for i=1,#gen_sources_raw do
+        local gen = gen_sources_raw[i]
+        if gen ~= "lfib_ranmar" then
+            table.insert(gen_sources, gen)
+        end
+    end
+else
+    gen_sources = gen_sources_raw
+end
+
 
 --------------------------------
 ----- Cross-platform rules -----

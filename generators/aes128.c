@@ -59,9 +59,9 @@
 PRNG_CMODULE_PROLOG
 
 
-#ifdef __AES__
-#define AESNI_ENABLED
-#include "smokerand/x86exts.h"
+#if defined(__AES__) || (defined(_MSC_VER) && !defined(__clang__) && defined(__AVX2__))
+    #define AESNI_ENABLED
+    #include "smokerand/x86exts.h"
 #endif
 
 /**
