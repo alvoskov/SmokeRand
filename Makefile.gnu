@@ -3,10 +3,11 @@
 # Supports GCC and Clang (as Zig CC) compilers.
 #
 
-PLATFORM_NAME=GCC
+PLATFORM_NAME ?= DJGPP
 LIB_SOURCES_EXTRA =
 LIB_HEADERS_EXTRA =
 GEN_LFLAGS = 
+GEN_DISABLED =
 ifeq ($(PLATFORM_NAME), GCC)
     CC = gcc
     CXX = g++
@@ -21,11 +22,13 @@ else ifeq ($(PLATFORM_NAME), GCC32)
     PLATFORM_FLAGS = -m32 -march=native
 else ifeq ($(PLATFORM_NAME), DJGPP)
     CC = gcc
-    CXX = g++
+    CXX = gpp
     AR = ar
-    GEN_CFLAGS = -fPIC -nostdlib
+    GEN_CFLAGS = -nostdlib
     GEN_LFLAGS = -static-libgcc -lgcc
-    PLATFORM_FLAGS = -m32  -DNOTHREADS -march=i686 -U__STRICT_ANSI__
+    # NOTE: threefry xxtea may be refactored!
+    GEN_DISABLED = icg64 mrg32k3a sezgin63 threefry wich1982 wich2006 xxtea
+    PLATFORM_FLAGS = -m32 -march=i586 -DNOTHREADS -U__STRICT_ANSI__
     LIB_SOURCES_EXTRA = pe32loader.c
     LIB_HEADERS_EXTRA = pe32loader.h
 else ifeq ($(PLATFORM_NAME), MINGW-HX)
@@ -48,9 +51,9 @@ else ifeq ($(PLATFORM_NAME), GENERIC)
     PLATFORM_FLAGS = -DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY
 endif
 #-----------------------------------------------------------------------------
-CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wno-attributes -Wstrict-aliasing
-CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 -O3 -Werror -Wall -Wextra -Wno-attributes -Wstrict-aliasing
-CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wno-attributes -Wstrict-aliasing
+CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O2 -Werror -Wall -Wextra -Wstrict-aliasing
+CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 -O2 -Werror -Wall -Wextra -Wstrict-aliasing
+CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O2 -Werror -Wall -Wextra -Wstrict-aliasing
 LINKFLAGS = $(PLATFORM_FLAGS)
 INCLUDE = -Iinclude
 
@@ -60,7 +63,7 @@ OBJDIR = obj
 BINDIR = bin
 LIBDIR = lib
 INCLUDEDIR = include/smokerand
-LFLAGS =  -L$(LIBDIR) -lsmokerand_bat -lsmokerand_core -lm 
+LFLAGS =  -L$(LIBDIR) -lsmokerand_bat -lsmokerand_core -lm
 ifeq ($(OS), Windows_NT)
 #GEN_LFLAGS = 
 #-Wl,--exclude-all-symbols
@@ -75,6 +78,10 @@ PREFIX = /usr/local
 endif
 endif
 
+# Support of DJGPP DXE3 modules
+ifeq ($(PLATFORM_NAME), DJGPP)
+SO = .dxe
+endif
 
 # Core library
 CORE_LIB = $(LIBDIR)/libsmokerand_core.a
@@ -101,7 +108,8 @@ EXECXX_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXECXX_NAMES)))
 
 # Generators
 GEN_CUSTOM_SOURCES = $(addsuffix .c,$(addprefix generators/, ranluxpp))
-GEN_ALL_SOURCES = $(wildcard generators/*.c)
+GEN_DISABLED_SOURCES = $(addsuffix .c,$(addprefix generators/, $(GEN_DISABLED)))
+GEN_ALL_SOURCES = $(filter-out $(GEN_DISABLED_SOURCES), $(wildcard generators/*.c))
 GEN_SOURCES = $(filter-out $(GEN_CUSTOM_SOURCES), $(GEN_ALL_SOURCES))
 GEN_OBJFILES = $(patsubst %.c,%.o,$(subst generators/,$(BINDIR)/generators/obj/,$(GEN_SOURCES)))
 GEN_SHARED = $(patsubst %.c,%$(SO),$(subst generators/,$(BINDIR)/generators/, $(GEN_ALL_SOURCES)))
@@ -139,7 +147,7 @@ $(BINDIR)/test_funcs$(EXE): $(OBJDIR)/test_funcs.o $(CORE_LIB) $(BAT_LIB)
 	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
 $(BINDIR)/test_rdseed$(EXE): $(OBJDIR)/test_rdseed.o $(CORE_LIB) $(BAT_LIB)
-	$(CXX) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
+	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
 $(LIB_OBJFILES) $(BATLIB_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.c $(LIB_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
@@ -156,8 +164,13 @@ $(EXECXX_OBJFILES): $(OBJDIR)/%.o : $(APPSRCDIR)/%.cpp $(LIB_HEADERS)
 generators: $(GEN_SHARED)
 
 # Generic rules for linking PRNG plugins
+ifeq ($(PLATFORM_NAME), DJGPP)
+$(GEN_BINDIR)/%$(SO): $(GEN_BINDIR)/obj/%.o
+	dxe3gen $< -o $@
+else
 $(GEN_BINDIR)/%$(SO): $(GEN_BINDIR)/obj/%.o
 	$(CC) $(LINKFLAGS) -shared $(GEN_CFLAGS) $< -s $(GEN_LFLAGS) -o $@
+endif
 
 $(GEN_OBJFILES): $(BINDIR)/generators/obj/%.o : generators/%.c $(INTERFACE_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(GEN_CFLAGS) -c $< -o $@

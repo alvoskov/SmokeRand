@@ -18,7 +18,7 @@
 
 
 #ifdef __AVX2__
-#pragma message ("AVX2 version will be compiled")
+//#pragma message ("AVX2 version will be compiled")
 #if defined(_MSC_VER) && !defined(__clang__)
 #include <intrin.h>
 #else
@@ -36,7 +36,7 @@ static inline void xorbits(VECINT *a_j, const VECINT *a_i, size_t i1, size_t i2)
     }
 }
 #else
-#pragma message ("X64-64 version will be compiled")
+//#pragma message ("X64-64 version will be compiled")
 #define VECINT_NBITS 64
 typedef uint64_t VECINT;
 static inline void xorbits(VECINT *a_j, const VECINT *a_i, size_t i1, size_t i2)

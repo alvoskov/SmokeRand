@@ -33,7 +33,10 @@
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
-
+#ifdef __DJGPP__
+    #include <go32.h>
+    #include <sys/farptr.h>
+#endif
 
 static inline uint32_t rotl32(uint32_t x, int r)
 {
@@ -219,7 +222,7 @@ int entfuncs_test(void)
 #endif
 
 
-#if defined(__WATCOMC__) && defined(__386__) && defined(__DOS__)
+#if (defined(__WATCOMC__) && defined(__386__) && defined(__DOS__)) || defined(__DJGPP__)
     #define DOS386_PLATFORM
 #endif
 
@@ -282,12 +285,22 @@ uint64_t get_machine_id()
     //    printf("%c", (unsigned char) value[i]);
     //}
     RegCloseKey(key);
+#elif defined(__DJGPP__)
+    // DJGPP DOS: calculate ROM BIOS checksum
+    for (int i = 0; i < 8192; i++) {
+        uint64_t lo = _farpeekl(_dos_ds, 0xF0000 + 8*i);
+        uint64_t hi = _farpeekl(_dos_ds, 0xF0000 + 8*i + 4);
+        uint64_t bios_data = (hi << 32) | lo;
+        machine_id = (6906969069ull * machine_id + 12345ull) ^ bios_data;
+    }
+    (void) value;
 #elif defined(DOS386_PLATFORM)
     // DOS: calculate ROM BIOS checksum
     uint64_t *bios_data = (uint64_t *) 0xF0000;
     for (int i = 0; i < 8192; i++) {
-        machine_id = (6906969069 * machine_id + 12345) ^ bios_data[i];
+        machine_id = (6906969069ull * machine_id + 12345ull) ^ bios_data[i];
     }
+    (void) value;
 #else
     // UNIX: try to find a file with machine ID
     FILE *fp = fopen("/etc/lib/dbus/machine-id", "r");
@@ -300,7 +313,7 @@ uint64_t get_machine_id()
     // Read the line with machine ID
     machine_id = fgets(value, 64, fp) ? str_hash(value) : 0;
     fclose(fp);
-#endif
+#endif    
     return machine_id;
 }
 
@@ -390,6 +403,18 @@ static int dos386_get_nbits(uint64_t value)
     return nbits;
 }
 
+/**
+ * @brief Get the current 32-bit number of ticks from PIT (Programmable
+ * Interval Timer).
+ */
+static inline uint32_t dos386_get_bios_pit(void)
+{
+#ifdef __DJGPP__
+    return _farpeekl(_dos_ds, 0x46C);
+#else
+    return *(volatile uint32_t *) 0x46C;
+#endif
+}
 
 /**
  * @brief Extracts entropy bits from an interaction of RDTSC instruction
@@ -402,14 +427,13 @@ static int dos386_get_nbits(uint64_t value)
  */
 static int dos386_random_rdtsc(FILE *fp, uint64_t *out, size_t len)
 {
-    volatile uint32_t *bios_timer = (uint32_t *) 0x46C;
     uint64_t rdtsc_prev = __rdtsc(), delta_prev = 0;
-    uint64_t accum = *bios_timer;
+    uint64_t accum = dos386_get_bios_pit();
     for (size_t i = 0; i < len; i++) {
         int nbits_total = 0;
         for (int j = 0; j < 64 && nbits_total < 128; j++) {
             // Wait for the next tick of the PIT
-            for (uint32_t t = *bios_timer; t == *bios_timer; ) {
+            for (uint32_t t = dos386_get_bios_pit(); t == dos386_get_bios_pit(); ) {
                 for (uint64_t ct = __rdtsc(); ct % 1021 == 0; ct = __rdtsc()) {
                 }
             }

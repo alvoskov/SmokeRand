@@ -82,7 +82,7 @@ typedef DWORD ThreadRetVal;
 //---------------------------------------------------------------------------------
 // Stubs for a plaform without threads
 #else
-#pragma message ("Note: no known multithreading API is present")
+//#pragma message ("Note: no known multithreading API is present")
 #include <stdint.h>
 
 #define DECLARE_MUTEX(mutex)

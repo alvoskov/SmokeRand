@@ -10,6 +10,8 @@
  */
 #include "smokerand/threads_intf.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define NTHREADS_MAX 128
 
@@ -96,10 +98,10 @@ ThreadObj ThreadObj_current(void)
 
 //-------------------------------------------------------------
 
-#ifdef __DJGPP__
-#define USE_PE32_DOS
-#endif
-
+// Uncomment if you want to use PE32 loader instead of DXE3 loader in DJGPP
+// #ifdef __DJGPP__
+// #define USE_PE32_DOS
+// #endif
 
 #ifdef USE_LOADLIBRARY
     #include <windows.h>
@@ -157,6 +159,17 @@ void *dlsym_wrap(void *handle, const char *symname)
     return (void *) GetProcAddress(handle, symname);
 #elif defined(USE_PE32_DOS)
     return dlsym_pe32dos(handle, symname);
+#elif defined(__DJGPP__)
+    size_t len = strlen(symname);
+    char *mangled_symname = calloc(len + 2, sizeof(char));    
+    mangled_symname[0] = '_';
+    memcpy(mangled_symname + 1, symname, len);
+    void *lib = dlsym(handle, mangled_symname);
+    free(mangled_symname);
+    if (lib == NULL) {
+        fprintf(stderr, "dlopen() error: %s\n", dlerror());
+    };
+    return lib;
 #elif !defined(NO_POSIX)
     return dlsym(handle, symname);
 #else
@@ -169,7 +182,7 @@ void dlclose_wrap(void *handle)
 {
 #ifdef USE_LOADLIBRARY
     FreeLibrary((HANDLE) handle);
-#elif defined(USE_PE32_DOS) || defined(__DJGPP__)
+#elif defined(USE_PE32_DOS)
     dlclose_pe32dos(handle);
 #elif !defined(NO_POSIX)
     dlclose(handle);
