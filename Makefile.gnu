@@ -2,8 +2,18 @@
 # Classic makefile for SmokeRand.
 # Supports GCC and Clang (as Zig CC) compilers.
 #
+# Usage:
+# make -f Makefile.gnu
+# make -f Makefile.gnu PLATFORM_NAME=GCC
+#
+# Supported platforms: GCC, GCC32, DJGPP, MINGW-HX, ZIGCC
+# Note: GCC includes MinGW.
+#
+# DJGPP platform compiles all generators as DXE3 modules using the dxe3gen
+# experimental linker supplied with DJGPP.
+#
 
-PLATFORM_NAME ?= DJGPP
+PLATFORM_NAME ?= GCC
 LIB_SOURCES_EXTRA =
 LIB_HEADERS_EXTRA =
 GEN_LFLAGS = 
@@ -24,8 +34,7 @@ else ifeq ($(PLATFORM_NAME), DJGPP)
     CC = gcc
     CXX = gpp
     AR = ar
-    GEN_CFLAGS = -nostdlib
-    GEN_LFLAGS = -static-libgcc -lgcc
+    GEN_CFLAGS = -ffreestanding -nostdlib
     # NOTE: threefry xxtea may be refactored!
     GEN_DISABLED = icg64 mrg32k3a sezgin63 threefry wich1982 wich2006 xxtea
     PLATFORM_FLAGS = -m32 -march=i586 -DNOTHREADS -U__STRICT_ANSI__
@@ -51,9 +60,9 @@ else ifeq ($(PLATFORM_NAME), GENERIC)
     PLATFORM_FLAGS = -DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY
 endif
 #-----------------------------------------------------------------------------
-CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O2 -Werror -Wall -Wextra -Wstrict-aliasing
-CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 -O2 -Werror -Wall -Wextra -Wstrict-aliasing
-CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O2 -Werror -Wall -Wextra -Wstrict-aliasing
+CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wstrict-aliasing
+CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 -O3 -Werror -Wall -Wextra -Wstrict-aliasing
+CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wstrict-aliasing
 LINKFLAGS = $(PLATFORM_FLAGS)
 INCLUDE = -Iinclude
 

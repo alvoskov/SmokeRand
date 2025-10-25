@@ -26,20 +26,20 @@ void print_help(void)
     "Usage: smokerand battery generator_lib [keys]\n"
     "battery: battery name; supported batteries:\n"
     "  General purpose batteries\n"
-    "  - express   Express battery (32-64 MiB of data)\n"
-    "  - brief     Fast battery (64-128 GiB of data)\n"
-    "  - default   Slower but more sensitive battery (128-256 GiB of data)\n"
-    "  - full      The slowest battery (1-2 TiB of data)\n"
+    "  - express    Express battery (32-64 MiB of data)\n"
+    "  - brief      Fast battery (64-128 GiB of data)\n"
+    "  - default    Slower but more sensitive battery (128-256 GiB of data)\n"
+    "  - full       The slowest battery (1-2 TiB of data)\n"
     "  Special batteries\n"
-    "  - birthday  64-bit birthday paradox based test.\n"
-    "  - ising     Ising model based tests: Wolff and Metropolis algorithms.\n"
-    "  - freq      8-bit and 16-bit words frequency adaptive tests.\n"  
-    "  - @filename Load a custom battery from the file.\n"
+    "  - birthday   64-bit birthday paradox based test.\n"
+    "  - ising      Ising model based tests: Wolff and Metropolis algorithms.\n"
+    "  - freq       8-bit and 16-bit words frequency adaptive tests.\n"  
+    "  - f=filename Load a custom battery from the file.\n"
     "  Special modes\n"
-    "  - help      Print a built-in PRNG help (if available).\n"
-    "  - selftest  Runs PRNG internal self-test (if available).\n"
-    "  - speed     Measure speed of the generator\n"
-    "  - stdout    Sends PRNG output to stdout in the binary form.\n"
+    "  - help       Print a built-in PRNG help (if available).\n"
+    "  - selftest   Runs PRNG internal self-test (if available).\n"
+    "  - speed      Measure speed of the generator\n"
+    "  - stdout     Sends PRNG output to stdout in the binary form.\n"
     "generator_lib: name of dynamic library with PRNG or special mode name.\n"
     "  Special modes names:\n"
     "  - stdin32, stdin64  Get random sequence from stdin\n"
@@ -232,12 +232,13 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
         battery_unit_sphere_volume(gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else if (!strcmp(battery_name, "dummy")) {
         fprintf(stderr, "Battery 'dummy': do nothing\n");
-    } else if (battery_name[0] == '@') {
-        if (battery_name[1] == '\0') {
+    } else if (strlen(battery_name) > 1 &&
+        battery_name[0] == 'f' && battery_name[1] == '=') {
+        if (battery_name[2] == '\0') {
             fprintf(stderr, "File name cannot be empty");
             return 1;
         }
-        const char *filename = battery_name + 1;
+        const char *filename = battery_name + 2;
         return battery_file(filename, gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else {
         fprintf(stderr, "Unknown battery %s\n", battery_name);

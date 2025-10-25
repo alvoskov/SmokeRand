@@ -252,7 +252,7 @@ number generator. Batteries are either predefined sets of statistical tests or
 special operation modes. There are general purpose batteries (\fBexpress\fR,
 \fBbrief\fR, \fBdefault\fR, \fBfull\fR), specialized batteries (\fBbirthday\fR,
 \fBising\fR, \fBfreq\fR), special operation modes (\fBselftest\fR, \fBspeed\fR,
-\fBstdout\fR), custom batteries from user-defined scripts (\fB@\fIfilename\fR).
+\fBstdout\fR), custom batteries from user-defined scripts (\fBf=\fIfilename\fR).
 .TP
 \fIgenerator_lib\fR is the name of dynamic library (.so or .dll) with an
 implementation of pseudorandom number generator or a special mode name.
@@ -352,9 +352,9 @@ Send the PRNG output to the stdout in the binary format. Endianness is
 platform-dependent.
 .SS Custom batteries
 Custom batteries are defined by users in a human-readable text format.
-In this case the name of battery is the name of file with the \fB@\fR prefix.
+In this case the name of battery is the name of file with the \fBf=\fR prefix.
 .TP
-.B @\fIfilename\fR Load a custom battery from a file with \fIfilename\fR name.
+.B f=\fIfilename\fR Load a custom battery from a file with \fIfilename\fR name.
 .SS Optional keys
 Optional command line \fIkeys\fR are used for multithreading, applying filters
 to the PRNG output, management of the final report layout etc. 
