@@ -127,7 +127,7 @@ set (GENERATORS
     swblarge swblux swbmwc32 swbmwc64 swbw taus88 threefry threefry2x64 
     tinymt32 tinymt64 tylo64 ultra ultra64 v3b well1024a weyl wich1982 
     wich2006 wob2m wyrand xabc16 xabc32 xabc64 xabc8 xkiss8_awc xkiss16_awc 
-    xkiss16sh_awc xkiss32_awc xkiss32sh_awc xorgens xoroshiro1024st 
+    xkiss16sh_awc xkiss32_awc xkiss32sh_awc xkiss64_awc xorgens xoroshiro1024st 
     xoroshiro1024stst xoroshiro128 xoroshiro128aox xoroshiro128p 
     xoroshiro128pp xoroshiro128pp_vec xoroshiro32 xoroshiro32pp xoroshiro64pp 
     xoroshiro64st xoroshiro64stst xorshift128 xorshift128p xorshift128pp 

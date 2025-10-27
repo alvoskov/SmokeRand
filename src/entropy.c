@@ -33,6 +33,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #ifdef __DJGPP__
     #include <go32.h>
     #include <sys/farptr.h>
@@ -68,11 +69,11 @@ static uint64_t mix_hash(uint64_t z)
  * @brief A simple non-cryptographic hash for ASCIIZ strings.
  * @details It is a modification of DJB2 algorithm.
  */
-uint64_t str_hash(const char *str)
+static uint64_t str_hash(const char *str)
 {
-    uint64_t hash = 0xB7E151628AED2A6B;
+    uint64_t hash = 0xB7E151628AED2A6BULL;
     for (unsigned char c = *str; c != 0; c = *str++) {
-        hash = (6906969069 * hash + 12345) ^ c;
+        hash = (6906969069ULL * hash + 12345ULL) ^ c;
     }
     return mix_hash(hash);
 }
@@ -251,13 +252,20 @@ uint32_t get_tick_count()
 {
 #ifdef WINDOWS_PLATFORM
     return (uint32_t) GetTickCount();
-#elif defined(__DJGPP__)
-    return (uint32_t) (time(NULL) * 69069u);
+#elif defined(__DJGPP__) && defined(DOS386_PLATFORM)
+    // Get tick count from PIT (BIOS data area) for DJGPP
+    // Works only under DOS!
+    return _farpeekl(_dos_ds, 0x46C);
+#elif defined(__WATCOM__) && defined(DOS386_PLATFORM)
+    // Get tick count from PIT (BIOS data area) for Open Watcom
+    // Works only under DOS!
+    return *(volatile uint32_t *) 0x46C;
 #elif !defined(NO_POSIX)
     struct timespec t;
     clock_gettime(CLOCK_REALTIME, &t);
     return (uint32_t) t.tv_nsec;
 #else
+    // Just make some noisy stuff
     return (uint32_t) (time(NULL) * 69069u);
 #endif
 }
@@ -542,8 +550,9 @@ void Entropy_init(Entropy *obj)
     uint32_t key[8] = {0, 0, 0, 0,  0, 0, 0, 0};
     uint64_t timestamp = time(NULL);
     uint64_t cpu = cpuclock();
+    int csprng_present = inject_rand(&ent_buf->u64[0], 4);
     // 256 bits of entropy from system CSPRNG
-    if (!inject_rand(&ent_buf->u64[0], 4)) {
+    if (!csprng_present) {
         fprintf(stderr,
             "Warning: system CSPRNG is unaccessible. An internal seeder will be used.\n");
 #ifdef DOS386_PLATFORM
@@ -560,6 +569,13 @@ void Entropy_init(Entropy *obj)
     ent_buf->u64[10] = get_machine_id();
     ent_buf->u64[11] = get_tick_count();
     ent_buf->u64[12] = get_current_process_id();
+    if (!csprng_present) {
+        fprintf(stderr, "Time stamp:   0x%.16" PRIx64 "; ", timestamp);
+        fprintf(stderr, "CPU ticks:    0x%.16" PRIx64 "\n", cpu);
+        fprintf(stderr, "Machine ID:   0x%.16" PRIx64 "; ", ent_buf->u64[10]);
+        fprintf(stderr, "System timer: 0x%.16" PRIx64 "\n", ent_buf->u64[11]);
+        fprintf(stderr, "Process ID:   0x%.16" PRIx64 "\n", ent_buf->u64[12]);
+    }
     // Make a key using the cryptographic hash function
     blake2s(key, 32, NULL, 0, &ent_buf->u8[0], 128);
     free(ent_buf);
