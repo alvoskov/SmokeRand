@@ -107,7 +107,7 @@ io.write("lib_headers = " .. lib_headers_str .. "\n")
 
 -- Make "all" section
 io.write("all: $(bindir)/smokerand.exe $(bindir)/sr_dos32.exe " ..
-    "$(bindir)/test_funcs.exe $(bindir)/srtiny16.exe &\n")
+    "$(bindir)/test_funcs.exe $(bindir)/srtiny16.exe $(bindir)/setvesa.com &\n")
 local gen_all_sources = {}
 for _, e in pairs(gen_sources) do table.insert(gen_all_sources, e) end
 for _, e in pairs(gen_asm_sources) do table.insert(gen_all_sources, e) end
@@ -234,6 +234,14 @@ for _, g in pairs(gen_asm_sources) do
     io.write("\twasm " .. asmfile .. " -fo=" .. objfile .."\n")
 end
 
+
+---------- Compile some utilities written in x86 assembly language ----------
+io.write("$(bindir)/setvesa.com: $(objdir)/setvesa.obj\n")
+io.write("\twcl -q $(objdir)/setvesa.obj -fe=$(bindir)/setvesa.exe\n")
+io.write("\texe2bin -q $(bindir)/setvesa.exe $(bindir)/setvesa.com\n")
+io.write("\tdel $(bindir)\\setvesa.exe\n")
+io.write("$(objdir)/setvesa.obj: $(appsrcdir)/setvesa.asm\n")
+io.write("\twasm -q $(appsrcdir)/setvesa.asm -fo=$(objdir)/setvesa.obj\n")
 
 -- Make "clean" section
 io.write("clean: .SYMBOLIC\n")
