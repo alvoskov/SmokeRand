@@ -381,7 +381,7 @@ supported:
 .IP \[bu]
 \fBreverse\-bits\fR  Reverse bits in the generator output.
 .SH FILES
-.I /usr/local/etc/smokerand/*.txt
+.I /usr/local/etc/smokerand/*.cfg
 .RS
 Text files with examples of custom batteries of statistical tests.
 .RE
@@ -407,12 +407,21 @@ An example of applying the \fBexpress\fR test battery to the PRNG from the
 $ smokerand express generators/liblcg64.so
 Generator name:    LCG64
 Output size, bits: 32
-Entropy pool (seed generator) initialized
-  machine_id: 0xD213188D886F34A3
-  seed0:      0x8DA7D540740F7D92
-  seed1:      0xFC3610CF7B495369
-  state:      0x081B353B65E5DA8F
 ===== Starting 'express' battery =====
+Entropy pool (seed generator) initialized
+ChaCha20 initial state
+61707865 3320646E 79622D32 6B206574
+80A70E42 804E2C68 27233A41 8A1F4C89
+CA41D7F5 DE234CCB 605E5FCC E75B2E87
+00000000 00000000 69080118 0513F400
+Output 0: 0x06E0D65C00F45A6D
+Output 1: 0xB602D1A996B77928
+Output 2: 0x00E0335A5CF5433E
+Output 3: 0xF15F29B2AA918B59
+----- Test 1 of 7 (byte_freq)
+Byte frequency test
+  nblocks = 256; block_len = 16384
+  K = 0.882961, p = 0.416682
 
 [skipped output]
 
@@ -429,6 +438,13 @@ Output size, bits: 32
     5 bspace4_8d_dec          1013         0 FAIL               0
     6 linearcomp_high         5000     0.667 Ok                 0
     7 linearcomp_low          5000     0.667 Ok                 0
+    1 byte_freq           0.882961     0.417 Ok                 0
+    2 bspace32_1d             4206     0.043 Ok                 0
+    3 bspace8_4d              1024     0.492 Ok                 0
+    4 bspace4_8d               503     0.644 Ok                 0
+    5 bspace4_8d_dec          1014         0 FAIL               0
+    6 linearcomp_high         5001     0.667 Ok                 0
+    7 linearcomp_low          5001     0.667 Ok                 0
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 Passed:       6
 Suspicious:   0
@@ -443,13 +459,37 @@ script.
 #
 # SmokeRand `express` battery written as a script
 #
-byte_freq   test=nbit_words_freq bits_per_word=8  average_freq=256 nblocks=256
-bspace32_1d test=bspace_nd nbits_per_dim=32 ndims=1 nsamples=1024 get_lower=1
-bspace8_4d  test=bspace_nd nbits_per_dim=8  ndims=4 nsamples=256  get_lower=1
-bspace4_8d  test=bspace_nd nbits_per_dim=4  ndims=8 nsamples=128  get_lower=1
-bspace4_8d_dec  test=bspace4_8d_decimated  step=128
-linearcomp_high test=linearcomp            nbits=10000 bitpos=high
-linearcomp_low  test=linearcomp            nbits=10000 bitpos=low
+# Frequency tests
+byte_freq
+    test=nbit_words_freq
+    bits_per_word=8  average_freq=256 nblocks=256
+end
+
+# Birthday spacings tests
+bspace32_1d
+    test=bspace_nd 
+    nbits_per_dim=32  ndims=1 
+    nsamples=1024     get_lower=1
+end
+
+bspace8_4d
+    test=bspace_nd
+    nbits_per_dim=8   ndims=4
+    nsamples=256      get_lower=1
+end
+
+bspace4_8d
+    test=bspace_nd
+    nbits_per_dim=4   ndims=8
+    nsamples=128      get_lower=1
+end
+
+# Birthday spacings test with decimation
+bspace4_8d_dec   test=bspace4_8d_decimated  step=128 end
+
+# Linear complexity tests
+linearcomp_high  test=linearcomp  nbits=10000  bitpos=high  end
+linearcomp_low   test=linearcomp  nbits=10000  bitpos=low   end
 .EE
 .SS External modules
 .PP

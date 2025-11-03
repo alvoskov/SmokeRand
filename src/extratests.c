@@ -701,8 +701,8 @@ TestResults unit_sphere_volume_test(GeneratorState *gs, const UnitSphereOptions 
     ans.x = (double) (n_inside - n_inside_theor) / s_theor;
     ans.p = sr_stdnorm_pvalue(ans.x);
     ans.alpha = sr_stdnorm_cdf(ans.x);
-    gs->intf->printf("  v_num = %.10g, v_theor = %.10g\n  z = %g, p = %g\n",
-        v_num, v_theor, ans.x, ans.p);
+    gs->intf->printf("  v_num = %.10g, v_theor = %.10g\n", v_num, v_theor);
+    gs->intf->printf("  z = %g, p = %g\n", ans.x, ans.p);
     return ans;
 }
 

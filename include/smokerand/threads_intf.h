@@ -128,5 +128,6 @@ void *dlopen_wrap(const char *libname);
 void *dlsym_wrap(void *handle, const char *symname);
 void dlclose_wrap(void *handle);
 int get_cpu_numcores(void);
+long long get_ram_size(void);
 
 #endif

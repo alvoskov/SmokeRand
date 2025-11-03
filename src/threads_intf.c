@@ -206,3 +206,23 @@ int get_cpu_numcores(void)
     return 1;
 #endif
 }
+
+//-------------------------------------------------------------
+
+
+long long get_ram_size(void)
+{
+#ifdef USE_LOADLIBRARY
+    MEMORYSTATUSEX statex;
+    statex.dwLength = sizeof(statex);
+    GlobalMemoryStatusEx(&statex);
+    return (long long) statex.ullTotalPhys;
+#elif !defined(NO_POSIX)
+    const long long pages = sysconf(_SC_PHYS_PAGES);
+    const long long page_size = sysconf(_SC_PAGESIZE);
+    const long long total_ram_bytes = pages * page_size;
+    return total_ram_bytes;
+#else
+    return -1;
+#endif
+}

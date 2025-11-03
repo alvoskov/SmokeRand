@@ -47,6 +47,16 @@ void set_use_stderr_for_printf(int val)
     use_stderr_for_printf = val;
 }
 
+static void CallerAPI_set_ram_info(CallerAPI *intf)
+{
+    long long ramsize = get_ram_size();
+    if (ramsize > 0) {
+        intf->printf("RAM size: %lld MiB\n", ramsize / (1ull << 20));
+    } else {
+        intf->printf("RAM size: unknown\n", ramsize);
+    }
+}
+
 ///////////////////////////////
 ///// Single-threaded API /////
 ///////////////////////////////
@@ -87,6 +97,7 @@ CallerAPI CallerAPI_init(void)
     intf.printf = printf_ser;
     intf.snprintf = snprintf;
     intf.strcmp = strcmp;
+    CallerAPI_set_ram_info(&intf);
     return intf;
 }
 
@@ -158,6 +169,7 @@ CallerAPI CallerAPI_init_mthr(void)
     intf.printf = printf_mt;
     intf.snprintf = snprintf;
     intf.strcmp = strcmp;
+    CallerAPI_set_ram_info(&intf);
     return intf;
 }
 
