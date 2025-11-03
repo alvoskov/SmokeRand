@@ -252,7 +252,7 @@ else
 	install -m 644 generators/*.h $(DESTDIR)$(PREFIX)/src/smokerand/generators
 
 	install -d $(DESTDIR)$(PREFIX)/etc/smokerand
-	install -m 644 batscripts/*.txt $(DESTDIR)$(PREFIX)/etc/smokerand
+	install -m 644 batscripts/*.cfg $(DESTDIR)$(PREFIX)/etc/smokerand
 endif
 
 uninstall:
@@ -280,6 +280,6 @@ else
 	rm -f  $(DESTDIR)$(PREFIX)/src/smokerand/*
 	rm -fd $(DESTDIR)$(PREFIX)/src/smokerand
 
-	rm -f  $(DESTDIR)$(PREFIX)/etc/smokerand/*.txt
+	rm -f  $(DESTDIR)$(PREFIX)/etc/smokerand/*.cfg
 	rm -fd $(DESTDIR)$(PREFIX)/etc/smokerand
 endif

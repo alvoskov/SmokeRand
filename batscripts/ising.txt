@@ -1,5 +1,0 @@
-#
-# SmokeRand `ising` battery written as a script
-#
-ising2d_wolff      test=ising2d sample_len=5000000 nsamples=20 algorithm=wolff
-ising2d_metropolis test=ising2d sample_len=5000000 nsamples=20 algorithm=metropolis

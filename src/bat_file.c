@@ -46,12 +46,37 @@ static void xstrcpy_s(char *dest, size_t dlen, const char *src)
     dest[i] = '\0';
 }
 
+static void erase_comments(char *linetxt, size_t len)
+{
+    for (size_t i = 0; i < len && linetxt[i] != '\0'; i++) {
+        if (linetxt[i] == '#') {
+            linetxt[i] = '\0';
+            break;
+        } else if (linetxt[i] < 32) {
+            linetxt[i] = ' ';
+        }
+    }
+}
+
+/////////////////////////////////////////
+///// TestInfo class implementation /////
+/////////////////////////////////////////
+
 void TestInfo_init(TestInfo *obj, const char *testname)
 {
     obj->args = malloc(sizeof(TestArgument));
     obj->nargs = 0;
     xstrcpy_s(obj->testname, 64, testname);
 }
+
+
+void TestInfo_destruct(TestInfo *obj)
+{
+    free(obj->args);
+    obj->args = NULL;
+    obj->nargs = 0;
+}
+
 
 void TestInfo_addarg(TestInfo *obj, const char *name, const char *value)
 {
@@ -65,6 +90,7 @@ void TestInfo_addarg(TestInfo *obj, const char *name, const char *value)
     xstrcpy_s(obj->args[obj->nargs - 1].value, 64, value);
 }
 
+
 const char *TestInfo_get_value(const TestInfo *obj, const char *name)
 {
     for (size_t i = 0; i < obj->nargs; i++) {
@@ -76,17 +102,30 @@ const char *TestInfo_get_value(const TestInfo *obj, const char *name)
 }
 
 
-long long TestInfo_get_intvalue(const TestInfo *obj, const char *name)
+static long long txtvalue_to_int(const char *txtvalue)
 {
-    const char *txtvalue = TestInfo_get_value(obj, name);
     long long value;
     if (txtvalue == NULL) {
         return LLONG_MAX;
     }
-    if (sscanf(txtvalue, "%lld", &value) != 1) {
-        return LLONG_MAX;
+    size_t buflen = strlen(txtvalue) + 1;
+    char *stripped = malloc(buflen);
+    xstrcpy_s(stripped, buflen, txtvalue);
+    for (size_t i = 0, j = 0; i < buflen - 1; i++) {
+        while (stripped[j] == '_') j++;
+        stripped[i] = stripped[j];
+        if (stripped[j++] == '\0') break;
     }
-    return value;
+    int ans = sscanf(stripped, "%lld", &value);
+    free(stripped);
+    return (ans == 1) ? value : LLONG_MAX;
+}
+
+
+long long TestInfo_get_intvalue(const TestInfo *obj, const char *name)
+{
+    const char *txtvalue = TestInfo_get_value(obj, name);    
+    return txtvalue_to_int(txtvalue);
 }
 
 
@@ -94,22 +133,23 @@ static long long TestInfo_get_limited_intvalue(const TestInfo *obj, const char *
     long long xmin, long long xmax, char *errmsg)
 {
     const char *txtvalue = TestInfo_get_value(obj, name);
-    long long value;
     errmsg[0] = '\0';
     if (txtvalue == NULL) {
         snprintf(errmsg, ERRMSG_BUF_SIZE, "Argument '%s' not found", name);
         return LLONG_MAX;
     }
-    if (sscanf(txtvalue, "%lld", &value) != 1) {
+    const long long value = txtvalue_to_int(txtvalue);
+    if (value == LLONG_MAX) {
         snprintf(errmsg, ERRMSG_BUF_SIZE, "Argument '%s' must be an integer", name);
         return LLONG_MAX;
-    }
-    if (value < xmin || value > xmax) {
-        snprintf(errmsg, ERRMSG_BUF_SIZE, "'%s' value must be between %lld and %lld",
-            name, xmin, xmax);
+    } else if (value < xmin || value > xmax) {
+        snprintf(errmsg, ERRMSG_BUF_SIZE,
+            "'%s' value must be between %lld and %lld (it is %lld)",
+            name, xmin, xmax, value);
         return LLONG_MAX;
+    } else {
+        return value;
     }
-    return value;
 }
 
 
@@ -135,12 +175,6 @@ int TestInfo_value_to_code(const TestInfo *obj, const char *name,
 }
 
 
-
-void TestInfo_free(TestInfo *obj)
-{
-    free(obj->args);
-}
-
 void TestInfo_print(const TestInfo *obj)
 {
     printf("%s ", obj->testname);
@@ -150,18 +184,6 @@ void TestInfo_print(const TestInfo *obj)
     printf("\n");
 }
 
-
-static void erase_comments(char *linetxt, size_t len)
-{
-    for (size_t i = 0; i < len && linetxt[i] != '\0'; i++) {
-        if (linetxt[i] == '#') {
-            linetxt[i] = '\0';
-            break;
-        } else if (linetxt[i] < 32) {
-            linetxt[i] = ' ';
-        }
-    }
-}
 
 //////////////////////////////////////////////
 ///// TestInfoArray class implementation /////
@@ -173,10 +195,22 @@ void TestInfoArray_init(TestInfoArray *obj)
     obj->ntests = 0;
 }
 
+void TestInfoArray_print(TestInfoArray *obj)
+{
+    printf("Number of tests: %d\n", (int) obj->ntests);
+    for (size_t i = 0; i < obj->ntests; i++) {
+        TestInfo_print(&obj->tests[i]);
+    }
+}
+
 /**
- * @brief test Test info (WILL TAKE OWNERSHIP!)
+ * @brief Adds test information (`key=value` pairs) to the array. It takes ownership
+ * of the given TestInfo structure.
+ * @param obj   Array of tests.
+ * @param test  Test info: all data pointers will be set to NULL, all data sizes
+ *              will be set to 0 to prevent double-free issue.
  */
-void TestInfoArray_addtest(TestInfoArray *obj, const TestInfo *test)
+void TestInfoArray_addtest(TestInfoArray *obj, TestInfo *test)
 {
     obj->ntests++;
     obj->tests = realloc(obj->tests, obj->ntests * sizeof(TestInfo));
@@ -185,19 +219,24 @@ void TestInfoArray_addtest(TestInfoArray *obj, const TestInfo *test)
         exit(EXIT_FAILURE);
     }
     obj->tests[obj->ntests - 1] = *test;
+    // Take ownership to prevent double-free
+    test->nargs = 0;
+    test->args = NULL;
 }
 
-void TestInfoArray_free(TestInfoArray *obj)
+
+void TestInfoArray_destruct(TestInfoArray *obj)
 {
     for (size_t i = 0; i < obj->ntests; i++) {
-        TestInfo_free(&obj->tests[i]);
+        TestInfo_destruct(&obj->tests[i]);
     }
     free(obj->tests);
 }
 
+
 void TestInfoArray_clear(TestInfoArray *obj)
 {
-    TestInfoArray_free(obj);
+    TestInfoArray_destruct(obj);
     TestInfoArray_init(obj);
 }
 
@@ -205,52 +244,107 @@ void TestInfoArray_clear(TestInfoArray *obj)
 ///// LOADER /////
 //////////////////
 
+
+
+typedef struct {
+    char linetxt[512];
+    int linenum;
+    int inside_entry;
+    TestInfo testinfo;
+    TestInfoArray tests;
+} ParserState;
+
+
+static void ParserState_init(ParserState *obj)
+{
+    obj->linenum = 0;   
+    obj->inside_entry = 0;
+    TestInfoArray_init(&obj->tests);
+    obj->testinfo.nargs = 0;
+    obj->testinfo.args = NULL;
+}
+
+
+static void ParserState_destruct(ParserState *obj)
+{
+    TestInfoArray_clear(&obj->tests);
+    TestInfo_destruct(&obj->testinfo);
+}
+
+
+static int ParserState_process_token(ParserState *state, const char *token)
+{
+    int is_end_token = strcmp(token, "end") == 0;
+    if (!state->inside_entry) {
+        // Begin addition of a new test
+        if (is_end_token) {
+            fprintf(stderr, "Error in line %d. 'end' without test name\n",
+                state->linenum);
+            return 0;
+        }
+        TestInfo_init(&state->testinfo, token);
+        state->testinfo.linenum = state->linenum;
+        state->inside_entry = 1;
+    } else if (is_end_token) {
+        // End of test description
+        TestInfoArray_addtest(&state->tests, &state->testinfo);
+        state->inside_entry = 0;
+    } else {
+        char name[64], value[64];
+        char *eqpos = strstr(token, "=");
+        int i;
+        if (eqpos == NULL) {
+            fprintf(stderr, "Error in line %d. Token '%s' doesn't contain '='\n",
+                state->linenum, token);
+            return 0;
+        }
+        for (i = 0; i < 64 && token[i] != '='; i++) {
+            name[i] = token[i];
+        }
+        name[i] = '\0';
+        xstrcpy_s(value, 64, eqpos + 1);
+        TestInfo_addarg(&state->testinfo, name, value);
+    }
+    return 1;
+}
+
+
 static TestInfoArray load_tests(const char *filename)
 {
-    FILE *fp = fopen(filename, "r");    
-    char linetxt[512], linenum = 0;
-    TestInfoArray tests;
-    TestInfoArray_init(&tests);
+    ParserState state;
+    ParserState_init(&state);
+    FILE *fp = fopen(filename, "r");
     if (fp == NULL) {
         fprintf(stderr, "File '%s' not found\n", filename);
-        return tests;
+        return state.tests;
     }
-    while (fgets(linetxt, 512, fp)) {
+    while (fgets(state.linetxt, 512, fp)) {
         // Erase comments, ignore empty strings
-        erase_comments(linetxt, 512);
-        linenum++;
-        char *token = strtok(linetxt, " \t\r\n");
+        erase_comments(state.linetxt, 512);
+        state.linenum++;
+        char *token = strtok(state.linetxt, " \t\r\n");
         if (token == NULL) {
             continue;
         }
         // Parse not empty string
-        // a) Test name
-        TestInfo testinfo;
-        TestInfo_init(&testinfo, token);
-        testinfo.linenum = linenum;
-        // b) Test arguments
-        while ((token = strtok(NULL, " ")) != NULL) {
-            char name[64], value[64];
-            char *eqpos = strstr(token, "=");
-            int i;
-            if (eqpos == NULL) {
-                fprintf(stderr, "Error in line %d. Token '%s' doesn't contain '='",
-                    linenum, token);
-                TestInfoArray_clear(&tests);
-                TestInfo_free(&testinfo);
-                return tests;
+        do {
+            int is_ok = ParserState_process_token(&state, token);
+            if (!is_ok) {
+                ParserState_destruct(&state);
+                fclose(fp);
+                return state.tests;
             }
-            for (i = 0; i < 64 && token[i] != '='; i++) {
-                name[i] = token[i];
-            }
-            name[i] = '\0';
-            xstrcpy_s(value, 64, eqpos + 1);
-            TestInfo_addarg(&testinfo, name, value);
-        }
-        TestInfoArray_addtest(&tests, &testinfo);
+        } while ((token = strtok(NULL, " \t\r\n")) != NULL);
     }
+    // Check if the last entry is closed
+    if (state.inside_entry) {
+        fprintf(stderr, "Error in line %d: entry '%s' is not closed with 'end'\n",
+            state.linenum, state.testinfo.testname);
+        ParserState_destruct(&state);
+    }
+    // Close file and return the battery info
     fclose(fp);
-    return tests;
+    return state.tests;
 }
 
 #define GET_LIMITED_INTVALUE(name, xmin, xmax) \
@@ -635,14 +729,14 @@ int battery_file(const char *filename, const GeneratorInfo *gen, CallerAPI *intf
     errmsg[0] = '\0';
     TestInfoArray tests_args = load_tests(filename);
     if (tests_args.ntests == 0) {
-        TestInfoArray_free(&tests_args);
+        TestInfoArray_destruct(&tests_args);
         return 0;
     }
     size_t ntests = tests_args.ntests;
     TestDescription *tests = calloc(ntests + 1, sizeof(TestDescription));
     if (tests == NULL) {
         fprintf(stderr, "***** battery_file: not enough memory *****");
-        TestInfoArray_free(&tests_args);
+        TestInfoArray_destruct(&tests_args);
         return 0;
     }
 
@@ -679,7 +773,7 @@ int battery_file(const char *filename, const GeneratorInfo *gen, CallerAPI *intf
     }
 
 battery_file_freemem:
-    TestInfoArray_free(&tests_args);
+    TestInfoArray_destruct(&tests_args);
     for (size_t i = 0; i < ntests; i++) {
         free((void *) tests[i].udata);
     }
