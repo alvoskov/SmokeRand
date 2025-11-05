@@ -35,7 +35,7 @@ static inline uint64_t get_bits_raw(void *state)
     (void) Lcg128State_a128_iter(state, 0x2360ED051FC65DA4, 0x4385DF649FCCF645, 1);    
     // Output XSL RR function
     uint64_t x_lo = obj->x_low, x_hi = obj->x_high;
-    unsigned int rot = x_hi >> 58; // 64 - 6
+    int rot = (int) (x_hi >> 58); // 64 - 6
     uint64_t xsl = x_hi ^ x_lo;
     return rotr64(xsl, rot);
 }

@@ -59,23 +59,27 @@ typedef struct {
 static inline uint8_t get_bits8(Xkiss8AwcState *obj)
 {
     // LFSR (xorshift-style) part
-    uint8_t tx = obj->s[0] ^ (obj->s[0] << 4);
+    uint8_t tx = (uint8_t) (obj->s[0] ^ (obj->s[0] << 4));
     obj->s[0] = obj->s[1];
     obj->s[1] = obj->s[2];
     obj->s[2] = obj->s[3];
-    obj->s[3] = obj->s[2] ^ tx ^ (obj->s[2] >> 1) ^ (tx << 1);
+    obj->s[3] = (uint8_t) (obj->s[2] ^ tx ^ (obj->s[2] >> 1) ^ (tx << 1));
     // AWC part
     // b**3 + b**2 + 1 => x_{n} = x_{n-3} + b_{n-2} + c
-    uint16_t t = (uint16_t) obj->x[0] + (uint16_t) obj->x[1] + (uint16_t) obj->x_c;
-    uint8_t u = t & 0xFF;
+    uint16_t t = (uint16_t) (
+        (uint16_t) obj->x[0] +
+        (uint16_t) obj->x[1] +
+        (uint16_t) obj->x_c
+    );
+    uint8_t u = (uint8_t) (t & 0xFF);
     obj->x[0] = obj->x[1];
     obj->x[1] = obj->x[2];
     obj->x[2] = u;
-    obj->x_c = t >> 8;
+    obj->x_c = (uint8_t) (t >> 8);
     // Weyl sequence part
     obj->weyl += 151u;
     // Generate output
-    return obj->s[0] + u + obj->weyl;
+    return (uint8_t) (obj->s[0] + u + obj->weyl);
 }
 
 

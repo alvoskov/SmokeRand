@@ -35,7 +35,7 @@ static inline void mulbox64(uint32_t *v, int i, int j, uint32_t a, int r1, int r
 {
     uint64_t mul = ((uint64_t) a) * (v[i] ^ v[j]);
     v[i] = (uint32_t) mul;
-    v[j] ^= mul >> 32;
+    v[j] ^= (uint32_t) (mul >> 32);
     v[j] = v[j] + rotl32(v[i], r1);
     v[i] = v[i] + rotl32(v[j], r2);
 }

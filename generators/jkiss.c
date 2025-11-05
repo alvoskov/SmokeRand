@@ -61,8 +61,8 @@ static void *create(const CallerAPI *intf)
     JKISSState *obj = intf->malloc(sizeof(JKISSState));
     uint64_t s0 = intf->get_seed64();
     obj->x = (uint32_t) (s0 >> 32);
-    obj->y = (uint32_t) (s0 & 0xFFFFFFFF) | 0x1;
-    obj->z = ~s0;
+    obj->y = (uint32_t) ((s0 & 0xFFFFFFFF) | 0x1);
+    obj->z = (uint32_t) (~s0);
     obj->c = 1;
     return (void *) obj;
 }

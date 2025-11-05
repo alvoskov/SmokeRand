@@ -40,7 +40,7 @@ static inline uint64_t get_bits_raw(void *state)
     uint64_t m;
     Sapparot2x64State *obj = state;
     obj->c += obj->a;
-    obj->c = rotl64(obj->c, obj->b >> C_SH);
+    obj->c = rotl64(obj->c, (int) (obj->b >> C_SH));
     obj->b = (obj->b + ((obj->a << 1) + 1)) ^ rotl64(obj->b, 5);
     obj->a += PHI;
     obj->a = rotl64(obj->a, C_RTR);

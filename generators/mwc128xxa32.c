@@ -39,12 +39,12 @@ static inline uint64_t get_bits_raw(void *state)
     static const uint32_t MWC_A1 = 3487286589;
     Mwc128xxa32State *obj = state;
     uint64_t t = MWC_A1 * (uint64_t) obj->x[2];
-    uint32_t ans = (obj->x[2] ^ obj->x[1]) + (obj->x[0] ^ (t >> 32));
+    uint32_t ans = (uint32_t) ((obj->x[2] ^ obj->x[1]) + (obj->x[0] ^ (t >> 32)));
     t += obj->c;
     obj->x[2] = obj->x[1];
     obj->x[1] = obj->x[0];
-    obj->x[0] = t;
-    obj->c = t >> 32;
+    obj->x[0] = (uint32_t) t;
+    obj->c = (uint32_t) (t >> 32);
     return ans;
 }
 
@@ -61,7 +61,7 @@ static void *create(const CallerAPI *intf)
 {
     Mwc128xxa32State *obj = intf->malloc(sizeof(Mwc128xxa32State));
     uint64_t s = intf->get_seed64();
-    Mwc128xxa32State_init(obj, (uint32_t) s, s >> 32);
+    Mwc128xxa32State_init(obj, (uint32_t) s, (uint32_t) (s >> 32));
     return (void *) obj;
 }
 

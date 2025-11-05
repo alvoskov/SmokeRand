@@ -27,7 +27,7 @@ static inline uint64_t get_bits_raw(void *state)
 {
     Pcg32State *obj = state;
     uint32_t xorshifted = (uint32_t) ( ((obj->x >> 18) ^ obj->x) >> 27 );
-    uint32_t rot = obj->x >> 59;
+    int rot = (int) (obj->x >> 59);
     obj->x = obj->x * 6364136223846793005ull + 12345ull;
     return rotr32(xorshifted, rot);
 }
@@ -45,7 +45,7 @@ static int run_self_test(const CallerAPI *intf)
     static const uint32_t x_ref = 0x62435AA4;
     uint32_t x;
     for (int i = 0; i < 10000; i++) {
-        x = get_bits_raw(&obj);
+        x = (uint32_t) get_bits_raw(&obj);
     }
     intf->printf("Output: 0x%lX; reference: 0x%lX\n",
         (unsigned long) x, (unsigned long) x_ref);

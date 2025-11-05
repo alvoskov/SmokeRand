@@ -130,7 +130,7 @@ static int run_self_test(const CallerAPI *intf)
     SuperKiss32State *obj = intf->malloc(sizeof(SuperKiss32State));
     SuperKiss32State_init(obj, 1236789, 521288629);
     for (unsigned long i = 0; i < 1000000000; i++) {
-        x = get_bits_raw(obj);
+        x = (uint32_t) get_bits_raw(obj);
     }
     intf->printf("Output: %lu; reference: x=%lu\n",
         (unsigned long) x, (unsigned long) kiss_ref);
@@ -143,7 +143,7 @@ static void *create(const CallerAPI *intf)
 {
     SuperKiss32State *obj = intf->malloc(sizeof(SuperKiss32State));
     uint64_t s = intf->get_seed64();
-    SuperKiss32State_init(obj, s >> 32, (uint32_t) s);
+    SuperKiss32State_init(obj, (uint32_t) (s >> 32), (uint32_t) s);
     return obj;
 }
 

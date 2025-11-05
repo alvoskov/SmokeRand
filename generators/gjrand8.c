@@ -16,7 +16,7 @@ typedef struct {
 
 static inline uint8_t rotl8(uint8_t x, int r)
 {
-    return (x << r) | (x >> (8 - r));
+    return (uint8_t) ( (x << r) | (x >> (8 - r)) );
 }
 
 
@@ -58,7 +58,7 @@ static void Gjrand8State_init(Gjrand8State *obj, uint8_t seed)
 static void *create(const CallerAPI *intf)
 {
     Gjrand8State *obj = intf->malloc(sizeof(Gjrand8State));
-    Gjrand8State_init(obj, intf->get_seed64());
+    Gjrand8State_init(obj, (uint8_t) intf->get_seed64());
     return obj;
 }
 

@@ -33,7 +33,7 @@ static inline uint64_t get_bits_raw(void *state)
     Cmwc4096State *obj = state;
     obj->i = (obj->i + 1) & 4095;
     uint64_t t = a * obj->Q[obj->i] + obj->c;
-    obj->c = t >> 32;
+    obj->c = (uint32_t) (t >> 32);
     uint32_t x = (uint32_t) (t + obj->c);
     if (x < obj->c) {
         x++;
@@ -46,10 +46,10 @@ static void *create(const CallerAPI *intf)
 {
     Cmwc4096State *obj = intf->malloc(sizeof(Cmwc4096State));
     uint64_t seed = intf->get_seed64();
-    uint32_t state = seed >> 32;
+    uint32_t state = (uint32_t) (seed >> 32);
     obj->Q[0] = (uint32_t) seed;
     for (size_t i = 1; i < 4096; i++) {
-        state = 69069 * state + 1;
+        state = 69069u * state + 1u;
         obj->Q[i] = state;
     }
     obj->c = 123;

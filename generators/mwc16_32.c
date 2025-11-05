@@ -18,10 +18,11 @@ PRNG_CMODULE_PROLOG
 static inline uint64_t get_bits_raw(void *state)
 {
     Lcg32State *obj = state;
-    uint16_t x_lo = obj->x & 0xFFFF, x_hi = obj->x >> 16;
+    uint16_t x_lo = (uint16_t) (obj->x & 0xFFFF);
+    uint16_t x_hi = (uint16_t) (obj->x >> 16);
 //    obj->x = (uint32_t)63885 * x_lo + x_hi;
 //  Causes a glitch in GCC 10 (some UB during optimization?)
-    obj->x = 63885 * x_lo + x_hi; 
+    obj->x = 63885u * x_lo + x_hi; 
     return obj->x;
 }
 

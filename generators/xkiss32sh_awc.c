@@ -77,7 +77,7 @@ static int run_self_test(const CallerAPI *intf)
         .xs  = 8765,
         .awc_x0 = 3, .awc_x1 = 2, .awc_c = 1};
     for (int i = 0; i < 10000; i++) {
-        u = get_bits_raw(&obj);
+        u = (uint32_t) get_bits_raw(&obj);
     }
     intf->printf("Output: 0x%X; reference: 0x%X\n",
         (unsigned int) u, (unsigned int) u_ref);

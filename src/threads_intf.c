@@ -200,12 +200,12 @@ void dlclose_wrap(void *handle)
 }
 
 
-int get_cpu_numcores(void)
+unsigned int get_cpu_numcores(void)
 {
 #ifdef USE_LOADLIBRARY
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
-    return (int) sysinfo.dwNumberOfProcessors;
+    return sysinfo.dwNumberOfProcessors;
 #elif defined(__DJGPP__)
     return 1;
 #elif !defined(NO_POSIX)

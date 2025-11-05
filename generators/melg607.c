@@ -63,9 +63,9 @@ void MelgState_init(MelgState *obj, uint64_t seed)
     uint64_t *x = obj->melg;
     obj->melg[0] = seed;
     for (obj->pos = 1; obj->pos < NN; obj->pos++) {
-        x[obj->pos] = (6364136223846793005ULL * (x[obj->pos-1] ^ (x[obj->pos-1] >> 62)) + obj->pos);
+        x[obj->pos] = (6364136223846793005ULL * (x[obj->pos-1] ^ (x[obj->pos-1] >> 62)) + (unsigned int) obj->pos);
     }
-    obj->lung = (6364136223846793005ULL * (x[obj->pos-1] ^ (x[obj->pos-1] >> 62)) + obj->pos);
+    obj->lung = (6364136223846793005ULL * (x[obj->pos-1] ^ (x[obj->pos-1] >> 62)) + (unsigned int) obj->pos);
     obj->pos = 0;
     obj->function_p = case_1;
 }

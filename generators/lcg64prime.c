@@ -36,12 +36,12 @@ static inline uint64_t get_bits_raw(void *state)
     __uint128_t r = lo + d * (__uint128_t) hi;
     int k = (int) (r >> 64) - 1;
     if (k > 0) {
-        r -= (((__uint128_t) k) << 64) - k * d;
+        r -= (((__uint128_t) k) << 64) - (unsigned int) k * d;
     }
     if (r > m) {
         r -= m;
     }
-    obj->x = r;
+    obj->x = (uint64_t) r;
 #else
     // r = lo + d*hi
     uint64_t r_lo, r_hi;

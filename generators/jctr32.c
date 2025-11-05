@@ -95,8 +95,8 @@ void Jctr32State_block(Jctr32State *obj)
 void Jctr32State_init(Jctr32State *obj, const uint32_t *key, uint64_t ctr)
 {
     obj->x[0] = JCTR32_PI0; obj->x[1] = key[0];
-    obj->x[2] = (uint32_t) ctr; // Counter: lower half
-    obj->x[3] = ctr >> 32;      // Counter: upper half
+    obj->x[2] = (uint32_t) ctr;         // Counter: lower half
+    obj->x[3] = (uint32_t) (ctr >> 32); // Counter: upper half
     obj->x[4] = key[1];     obj->x[5] = JCTR32_PI1;
     obj->x[6] = key[2];     obj->x[7] = key[3];
     obj->pos = 0;
@@ -133,9 +133,9 @@ static inline void *create_scalar(const GeneratorInfo *gi, const CallerAPI *intf
     uint64_t seed1 = intf->get_seed64();
     (void) gi;
     key[0] = (uint32_t) seed0;
-    key[1] = seed0 >> 32;
+    key[1] = (uint32_t) (seed0 >> 32);
     key[2] = (uint32_t) seed1;
-    key[3] = seed1 >> 32;
+    key[3] = (uint32_t) (seed1 >> 32);
     Jctr32State_init(obj, key, 0);
     return obj;
 }
@@ -232,7 +232,7 @@ void Jctr32VecState_init(Jctr32VecState *obj, const uint32_t *key, uint64_t ctr)
         uint64_t ctr_i = ctr + i;
         obj->x[0].u32[i] = JCTR32_PI0; obj->x[1].u32[i] = key[0];
         obj->x[2].u32[i] = (uint32_t) ctr_i; // Counter: lower half
-        obj->x[3].u32[i] = ctr_i >> 32;      // Counter: upper half
+        obj->x[3].u32[i] = (uint32_t) (ctr_i >> 32);      // Counter: upper half
         obj->x[4].u32[i] = key[1];     obj->x[5].u32[i] = JCTR32_PI1;
         obj->x[6].u32[i] = key[2];     obj->x[7].u32[i] = key[3];
     }
@@ -247,7 +247,7 @@ static inline void Jctr32VecState_inc_counter(Jctr32VecState *obj)
         uint64_t ctr = (obj->x[2].u32[i]) | ((uint64_t) obj->x[3].u32[i] << 32);
         ctr += JCTR32_NCOPIES;
         obj->x[2].u32[i] = (uint32_t) ctr;
-        obj->x[3].u32[i] = ctr >> 32;
+        obj->x[3].u32[i] = (uint32_t) (ctr >> 32);
     }
 }
 
@@ -279,9 +279,9 @@ static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
     uint64_t seed0 = intf->get_seed64();
     uint64_t seed1 = intf->get_seed64();
     key[0] = (uint32_t) seed0;
-    key[1] = seed0 >> 32;
+    key[1] = (uint32_t) (seed0 >> 32);
     key[2] = (uint32_t) seed1;
-    key[3] = seed1 >> 32;
+    key[3] = (uint32_t) (seed1 >> 32);
     Jctr32VecState_init(obj, key, 0);
     return obj;
 #else

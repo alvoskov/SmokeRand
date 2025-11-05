@@ -67,17 +67,19 @@ static inline uint16_t Xkiss16AwcState_get_bits(Xkiss16AwcState *obj)
     // xoroshiro32+ part
     uint16_t s0 = obj->s[0], s1 = obj->s[1];
     s1 ^= s0;
-    obj->s[0] = rotl16(s0, 13) ^ s1 ^ (s1 << 5); // a, b
+    obj->s[0] = (uint16_t) (rotl16(s0, 13) ^ s1 ^ (s1 << 5)); // a, b
     obj->s[1] = rotl16(s1, 10); // c
     // AWC (add with carry) part
-    uint32_t t = obj->awc_x0 + obj->awc_x1 + obj->awc_c;
+    uint32_t t = (uint32_t) obj->awc_x0 +
+        (uint32_t) obj->awc_x1 +
+        (uint32_t) obj->awc_c;
     obj->awc_x1 = obj->awc_x0;
-    obj->awc_c  = t >> K16_AWC_SH;
-    obj->awc_x0 = t & K16_AWC_MASK;
+    obj->awc_c  = (uint16_t) (t >> K16_AWC_SH);
+    obj->awc_x0 = (uint16_t) (t & K16_AWC_MASK);
     // Discrete Weyl sequence part
     obj->weyl += K16_WEYL_INC;
     // Combined output
-    return obj->weyl + obj->s[0] + obj->s[1] + obj->awc_x0;
+    return (uint16_t) (obj->weyl + obj->s[0] + obj->s[1] + obj->awc_x0);
 }
 
 static inline uint64_t get_bits_raw(void *state)
@@ -98,8 +100,8 @@ static void *create(const CallerAPI *intf)
         obj->s[0] = 0xDEAD;
         obj->s[1] = 0xBEEF;
     }
-    obj->awc_x0 = (seed >> 32) & 0xFFFF;
-    obj->awc_x1 = (seed >> 48) & 0xFFFF;
+    obj->awc_x0 = (uint16_t) ((seed >> 32) & 0xFFFF);
+    obj->awc_x1 = (uint16_t) ((seed >> 48) & 0xFFFF);
     obj->awc_c  = (obj->awc_x0 == 0 && obj->awc_x1 == 0) ? 1 : 0;
     obj->weyl = 0;
     return obj;
@@ -116,7 +118,7 @@ static int run_self_test(const CallerAPI *intf)
         .weyl = 1234, .s  = {8765, 4321},
         .awc_x0 = 3, .awc_x1 = 2, .awc_c = 1};
     for (int i = 0; i < 10000; i++) {
-        u = get_bits_raw(&obj);
+        u = (uint32_t) get_bits_raw(&obj);
     }
     intf->printf("Output: 0x%X; reference: 0x%X\n",
         (unsigned int) u, (unsigned int) u_ref);

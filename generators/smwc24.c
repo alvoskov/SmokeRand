@@ -45,11 +45,11 @@ static inline uint8_t get_bits8(Smwc24State *obj)
 {
     static const uint16_t MWC_A1 = 0x2d;
     static const uint8_t LCG_A1 = 137u;
-    uint8_t out = (LCG_A1 * obj->x) ^ ( (obj->x2 << 5) | (obj->x2 >> 3));
-    uint16_t mul = MWC_A1 * obj->x + obj->c;
-    obj->c = mul >> 8;
+    uint8_t out = (uint8_t) ((LCG_A1 * obj->x) ^ ( (obj->x2 << 5) | (obj->x2 >> 3)) );
+    uint16_t mul = (uint16_t) (MWC_A1 * obj->x + obj->c);
+    obj->c = (uint8_t) (mul >> 8);
     obj->x2 = obj->x;
-    obj->x = mul & 0xFF;
+    obj->x = (uint8_t) (mul & 0xFF);
     return out;
 }
 
@@ -70,8 +70,8 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Smwc24State *obj = intf->malloc(sizeof(Smwc24State));
-    obj->x = intf->get_seed32();
-    obj->x2 = intf->get_seed32();
+    obj->x = (uint8_t) intf->get_seed32();
+    obj->x2 = (uint8_t) intf->get_seed32();
     obj->c = 1;
     return (void *) obj;
 }

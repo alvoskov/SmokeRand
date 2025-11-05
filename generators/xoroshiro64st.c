@@ -47,8 +47,8 @@ static void *create(const CallerAPI *intf)
 {
     Xoroshiro64StState *obj = intf->malloc(sizeof(Xoroshiro64StState));
     uint64_t seed = intf->get_seed64();
-    obj->s[0] = seed >> 32;
-    obj->s[1] = seed & 0xFFFFFFFF;
+    obj->s[0] = (uint32_t) (seed >> 32);
+    obj->s[1] = (uint32_t) (seed & 0xFFFFFFFF);
     if (obj->s[0] == 0 && obj->s[1] == 0) {
         obj->s[0] = 0x12345678;
         obj->s[1] = 0xDEADBEEF;

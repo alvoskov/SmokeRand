@@ -104,9 +104,9 @@ static void *create_scalar(const GeneratorInfo *gi, const CallerAPI *intf)
     uint64_t s0 = intf->get_seed64();
     uint64_t s1 = intf->get_seed64();
     obj->key[0] = (uint32_t) s0;
-    obj->key[1] = s0 >> 32;
+    obj->key[1] = (uint32_t) (s0 >> 32);
     obj->key[2] = (uint32_t) s1;
-    obj->key[3] = s1 >> 32;
+    obj->key[3] = (uint32_t) (s1 >> 32);
     obj->ctr = 0;
     (void) gi;
     return obj;
@@ -132,8 +132,10 @@ static int run_self_test_scalar(const CallerAPI *intf)
 #ifdef XTEA_VEC_ENABLED
 static inline __m256i mix(__m256i x, __m256i key)
 {
-    return _mm256_xor_si256(key, _mm256_add_epi32(x,
-        _mm256_xor_si256(_mm256_slli_epi32(x, 4), _mm256_srli_epi32(x, 5))
+    return _mm256_xor_si256(key, _mm256_add_epi32(
+        x,
+        _mm256_xor_si256(_mm256_slli_epi32(x, 4),
+        _mm256_srli_epi32(x, 5))
     ));
 }
 #endif
@@ -163,11 +165,11 @@ void XteaVecState_block(XteaVecState *obj)
         z_b = _mm256_xor_si256(z_b, out1_b);
     }
     for (int i = 0; i < 32; i++) {
-        __m256i keyA = _mm256_set1_epi32(sum + obj->key[sum & 3]);
+        __m256i keyA = _mm256_set1_epi32((int) (sum + obj->key[sum & 3]));
         y_a = _mm256_add_epi32(y_a, mix(z_a, keyA));
         y_b = _mm256_add_epi32(y_b, mix(z_b, keyA));
         sum += DELTA;
-        __m256i keyB = _mm256_set1_epi32(sum + obj->key[(sum >> 11) & 3]);
+        __m256i keyB = _mm256_set1_epi32((int) (sum + obj->key[(sum >> 11) & 3]));
         z_a = _mm256_add_epi32(z_a, mix(y_a, keyB));
         z_b = _mm256_add_epi32(z_b, mix(y_b, keyB));
     }
@@ -188,16 +190,16 @@ void XteaVecState_block(XteaVecState *obj)
  */
 void XteaVecState_init(XteaVecState *obj, const uint32_t *key)
 {
-    for (int i = 0; i < 4; i++) {
+    for (size_t i = 0; i < 4; i++) {
         obj->key[i] = key[i];
     }
-    for (int i = 0; i < XTEA_NCOPIES; i++) {
+    for (unsigned int i = 0; i < XTEA_NCOPIES; i++) {
         obj->in[i] = i;
     }
-    for (int i = XTEA_NCOPIES; i < 2 * XTEA_NCOPIES; i++) {
+    for (size_t i = XTEA_NCOPIES; i < 2 * XTEA_NCOPIES; i++) {
         obj->in[i] = 0;
     }
-    for (int i = 0; i < 2 * XTEA_NCOPIES; i++) {
+    for (size_t i = 0; i < 2 * XTEA_NCOPIES; i++) {
         obj->out[i] = 0; // Needed for CBC mode
     }
     obj->pos = XTEA_NCOPIES;
@@ -246,8 +248,8 @@ static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
     uint64_t s0 = intf->get_seed64();
     uint64_t s1 = intf->get_seed64();
     uint32_t key[4];
-    key[0] = (uint32_t) s0; key[1] = s0 >> 32;
-    key[2] = (uint32_t) s1; key[3] = s1 >> 32;
+    key[0] = (uint32_t) s0; key[1] = (uint32_t) (s0 >> 32);
+    key[2] = (uint32_t) s1; key[3] = (uint32_t) (s1 >> 32);
     XteaVecState_init(obj, key);
     const char *mode_name = intf->get_param();
     if (!intf->strcmp(mode_name, "vector-ctr") || !intf->strcmp(mode_name, "")) {

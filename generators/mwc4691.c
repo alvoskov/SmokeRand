@@ -41,7 +41,7 @@ PRNG_CMODULE_PROLOG
  */
 typedef struct {
     uint32_t Q[4691];
-    int c;
+    unsigned int c;
     int j;
 } Mwc4691State;
 
@@ -60,7 +60,7 @@ static inline uint64_t get_bits_raw(void *state)
 static void Mwc4691State_init(Mwc4691State *obj, uint32_t xcng, uint32_t xs)
 {
     for (int i = 0; i < 4691; i++) {
-        xcng = 69069 * xcng + 123;
+        xcng = 69069u * xcng + 123u;
         xs ^= (xs << 13);
         xs ^= (xs >> 17);
         xs ^= (xs << 5);
@@ -75,7 +75,7 @@ static void *create(const CallerAPI *intf)
 {
     Mwc4691State *obj = intf->malloc(sizeof(Mwc4691State));
     uint64_t seed = intf->get_seed64();
-    Mwc4691State_init(obj, seed >> 32, (seed & 0xFFFFFFFF) | 1);
+    Mwc4691State_init(obj, (uint32_t) (seed >> 32), (uint32_t)(seed & 0xFFFFFFFF) | 1);
     return (void *) obj;
 }
 

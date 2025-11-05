@@ -31,12 +31,14 @@ static inline uint8_t get_bits8(Smwc8x16State *obj)
     static const uint16_t a = 108u;
     static const uint8_t a_lcg = 137u;
     obj->pos++;
-    uint16_t p = a * (uint16_t) (obj->x[(obj->pos - 15) & 0xF]) + (uint16_t) obj->c;
+    uint16_t p = (uint8_t) (a * (uint16_t) (obj->x[(obj->pos - 15) & 0xF]) + (uint16_t) obj->c);
     uint8_t x = (uint8_t) p;
     obj->x[obj->pos & 0xF] = x;
-    obj->c = p >> 8;
+    obj->c = (uint8_t) (p >> 8);
     uint8_t x_prev = obj->x[(obj->pos - 1) & 0xF];
-    return ((a_lcg * x) ^ ((x_prev << 3) | (x_prev >> 5))) + obj->x[(obj->pos - 2) & 0xF];
+    return (uint8_t) (
+        ((a_lcg * x) ^ ((x_prev << 3) | (x_prev >> 5))) + obj->x[(obj->pos - 2) & 0xF]
+    );
 //    x = (x << 5) | (x >> 3);
 //    return (x ^ obj->x[(obj->pos - 1) & 0xF]) + obj->x[(obj->pos - 2) & 0xF];
 }
@@ -57,8 +59,8 @@ static inline uint64_t get_bits_raw(void *state)
 static void Smwc8x16State_init(Smwc8x16State *obj, uint32_t seed)
 {
     obj->c = 1;
-    for (int i = 0; i < 16; i++) {
-        int sh = (i % 4) * 8;
+    for (unsigned int i = 0; i < 16; i++) {
+        const unsigned int sh = (i % 4) * 8;
         obj->x[i] = (uint8_t) ((seed >> sh) + i);
     }
     obj->pos = 0;

@@ -72,14 +72,14 @@ static int run_self_test(const CallerAPI *intf)
     RanvalState obj;
     RanvalState_init(&obj, 0x12345678);
     for (int i = 0; i < 10000; i++) {
-        u = get_bits_raw(&obj);
+        u = (uint32_t) get_bits_raw(&obj);
     }
     for (int i = 0; i < 2; i++) {
         intf->printf("Output: %.8X; reference: %.8X\n", u, u_ref[i]);
         if (u != u_ref[i]) {
             is_ok = 0;
         }
-        u = get_bits_raw(&obj);
+        u = (uint32_t) get_bits_raw(&obj);
     }        
     return is_ok;
 }

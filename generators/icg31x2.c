@@ -33,17 +33,14 @@
  */
 #include "smokerand/cinterface.h"
 
-enum {
-    ICG32_MOD1 = 0x7FFFFFFF, ///< \f$ 2^{31} - 1 \f$
-    ICG32_MOD2 = 0x7FFFFFED  ///< \f$ 2^{31} - 19 \f$
-};
-
+static const int32_t ICG32_MOD1 = 0x7FFFFFFF; ///< \f$ 2^{31} - 1 \f$
+static const int32_t ICG32_MOD2 = 0x7FFFFFED; ///< \f$ 2^{31} - 19 \f$
 
 PRNG_CMODULE_PROLOG
 
 typedef struct {
-    uint32_t x1;
-    uint32_t x2;
+    int32_t x1;
+    int32_t x2;
 } Icg31x2State;
 
 /**
@@ -70,14 +67,14 @@ static inline uint64_t get_bits_raw(void *state)
     Icg31x2State *obj = state;
     obj->x1 = (modinv32(ICG32_MOD1, obj->x1) + 1) % ICG32_MOD1;
     obj->x2 = (modinv32(ICG32_MOD2, obj->x2) + 1) % ICG32_MOD2;
-    return obj->x1 ^ (obj->x2 << 1);
+    return (uint32_t) obj->x1 ^ ( (uint32_t) obj->x2 << 1);
 }
 
 static void *create(const CallerAPI *intf)
 {
     Icg31x2State *obj = intf->malloc(sizeof(Icg31x2State));
-    obj->x1 = intf->get_seed32() % ICG32_MOD1;
-    obj->x2 = intf->get_seed32() % ICG32_MOD2;
+    obj->x1 = (int32_t) (intf->get_seed32() % (uint32_t) ICG32_MOD1);
+    obj->x2 = (int32_t) (intf->get_seed32() % (uint32_t) ICG32_MOD2);
     return obj;
 }
 

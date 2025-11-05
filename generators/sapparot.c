@@ -42,9 +42,9 @@ static void *create(const CallerAPI *intf)
 {
     SapparotState *obj = intf->malloc(sizeof(SapparotState));
     uint64_t seed = intf->get_seed64();    
-    obj->a = seed >> 32;
-    obj->b = seed & 0xFFFFFFFF;
-    return (void *) obj;
+    obj->a = (uint32_t) (seed >> 32);
+    obj->b = (uint32_t) (seed & 0xFFFFFFFF);
+    return obj;
 }
 
 static int run_self_test(const CallerAPI *intf)

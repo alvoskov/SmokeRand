@@ -48,7 +48,7 @@ static void Gjrand16State_init(Gjrand16State *obj, uint16_t seed)
 static void *create(const CallerAPI *intf)
 {
     Gjrand16State *obj = intf->malloc(sizeof(Gjrand16State));
-    Gjrand16State_init(obj, intf->get_seed64());
+    Gjrand16State_init(obj, (uint16_t) intf->get_seed64());
     return obj;
 }
 

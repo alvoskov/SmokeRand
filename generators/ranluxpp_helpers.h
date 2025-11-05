@@ -158,9 +158,11 @@ static inline int64_t compute_r(const uint64_t *upper, uint64_t *r)
    // value currently in r is greater or equal to m, if and only if one of
    // the last 240 bits is set and the upper bits are all set.
    unsigned char greater_m = ( r[0] | r[1] | r[2] | (r[3] & 0x0000ffffffffffff) ) > 0;
-   greater_m &= (r[3] >> 48) == 0xffff;
+   unsigned char fl = (unsigned char) ((r[3] >> 48) == 0xffff);
+   greater_m &= fl;
    for (int i = 4; i < 9; i++) {
-      greater_m &= (r[i] == UINT64_MAX);
+      fl = (unsigned char) (r[i] == UINT64_MAX);
+      greater_m &= fl;
    }
    //fprintf(stderr, "greater_m\t%u\n", greater_m);
    return c + (c == 0 && greater_m);

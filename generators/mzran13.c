@@ -56,7 +56,7 @@ static void *create(const CallerAPI *intf)
     obj->y = (seed0 >> 32) & 0x7FFFFFFF;
     obj->z = seed1 & 0x7FFFFFFF;
     obj->c = 1;
-    obj->n = seed1 >> 32;
+    obj->n = (uint32_t) (seed1 >> 32);
     return obj;
 }
 

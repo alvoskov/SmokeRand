@@ -19,7 +19,7 @@ typedef struct {
 static inline uint8_t Biski8State_get_bits(Biski8State *obj)
 {
     uint8_t output = GR * obj->mix;
-    uint8_t old_rot = (obj->last_mix << 3) | (obj->last_mix >> 5);
+    uint8_t old_rot = (uint8_t) ((obj->last_mix << 3) | (obj->last_mix >> 5));
     obj->last_mix = obj->ctr ^ obj->mix;
     obj->mix = old_rot + output;
     obj->ctr += GR;
@@ -42,9 +42,9 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Biski8State *obj = intf->malloc(sizeof(Biski8State));
-    obj->last_mix = intf->get_seed64();
-    obj->mix = intf->get_seed64();
-    obj->ctr = intf->get_seed64();
+    obj->last_mix = (uint8_t) intf->get_seed64();
+    obj->mix = (uint8_t) intf->get_seed64();
+    obj->ctr = (uint8_t) intf->get_seed64();
     for (int i = 0; i < 16; i++) {
         get_bits_raw(obj);
     }

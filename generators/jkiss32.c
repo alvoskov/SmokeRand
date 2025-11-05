@@ -47,7 +47,8 @@ static inline uint64_t get_bits_raw(void *state)
     obj->y ^= obj->y >> 7;
     obj->y ^= obj->y << 22;
     // AWC (add with carry) part
-    int32_t t = obj->z + obj->w + obj->c;
+    // Note: sign bit hack!
+    int32_t t = (int32_t) (obj->z + obj->w + obj->c);
     obj->z = obj->w;
     obj->c = t < 0;
     obj->w = t & 0x7fffffff;

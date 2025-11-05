@@ -90,13 +90,13 @@ static void *create(const CallerAPI *intf)
         return NULL;
     }
     intf->printf("RANROT32(%d,%d)\n", lag1, lag2);
-    RanRot32State *obj = intf->malloc(sizeof(RanRot32State) + lag1 * sizeof(uint32_t));   
+    RanRot32State *obj = intf->malloc(sizeof(RanRot32State) + (unsigned int) lag1 * sizeof(uint32_t));   
     obj->x = (uint32_t *) (void *) ( (char *) obj + sizeof(RanRot32State) );
     // pcg_rxs_m_xs64 for initialization
     uint64_t state = intf->get_seed64();
     obj->lag1 = lag1; obj->lag2 = lag2;
     for (int i = 0; i < obj->lag2; i++) {
-        obj->x[i] = pcg_bits64(&state) >> 32;
+        obj->x[i] = (uint32_t) (pcg_bits64(&state) >> 32);
     }
     obj->pos = 0; // Mark buffer uninitialized
     return (void *) obj;

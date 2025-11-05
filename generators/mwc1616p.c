@@ -42,10 +42,12 @@ typedef struct {
 static inline uint64_t get_bits_raw(void *state)
 {
     Mwc1616PlusShared *obj = state;
-    uint16_t z_lo = obj->z & 0xFFFF, z_hi = obj->z >> 16;
-    uint16_t w_lo = obj->w & 0xFFFF, w_hi = obj->w >> 16;
-    obj->z = (uint32_t)61578 * z_lo + z_hi;
-    obj->w = (uint32_t)63885 * w_lo + w_hi;
+    uint16_t z_lo = (uint16_t) (obj->z & 0xFFFF);
+    uint16_t z_hi = (uint16_t) (obj->z >> 16);
+    uint16_t w_lo = (uint16_t) (obj->w & 0xFFFF);
+    uint16_t w_hi = (uint16_t) (obj->w >> 16);
+    obj->z = (uint32_t)61578u * z_lo + z_hi;
+    obj->w = (uint32_t)63885u * w_lo + w_hi;
     uint32_t mwc = ((obj->z << 16) | (obj->z >> 16)) + obj->w;
     return mwc;
 }

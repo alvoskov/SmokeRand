@@ -112,7 +112,9 @@ void MagmaState_init(MagmaState *obj, const uint32_t *key)
         for (int j1 = 0; j1 < 16; j1++) {
             for (int j2 = 0; j2 < 16; j2++) {
                 int index = (j1 << 4) | j2;
-                uint32_t s = (sbox4[2*i + 1][j1] << 4) | sbox4[2*i][j2];
+                uint32_t s = (uint32_t) (
+                    (sbox4[2*i + 1][j1] << 4) | sbox4[2*i][j2]
+                );
                 s <<= (8 * i);
                 s = (s << 11) | (s >> 21);
                 obj->sbox8[i][index] = s;
@@ -140,7 +142,7 @@ static inline uint32_t gfunc(const MagmaState *obj, uint32_t k, uint32_t x)
 
 EXPORT uint64_t MagmaState_encrypt(const MagmaState *obj, uint64_t a)
 {
-    uint32_t a1 = a >> 32, a0 = (uint32_t) a;
+    uint32_t a1 = (uint32_t) (a >> 32), a0 = (uint32_t) a;
     uint32_t t;
     for (int i = 0; i < 3; i++) {
         MAGMA_ROUND(0);  MAGMA_ROUND(1);  MAGMA_ROUND(2);  MAGMA_ROUND(3);
@@ -165,7 +167,7 @@ static void *create_scalar(const GeneratorInfo *gi, const CallerAPI *intf)
     uint32_t key[8];
     for (int i = 0; i < 4; i++) {
         uint64_t seed = intf->get_seed64();
-        key[2*i] = seed >> 32;
+        key[2*i] = (uint32_t) (seed >> 32);
         key[2*i + 1] = (uint32_t) seed;
     }
     MagmaState_init(obj, key);
@@ -214,7 +216,7 @@ static int run_self_test_scalar(const CallerAPI *intf)
 
 void MagmaVecState_init(MagmaVecState *obj, const uint32_t *key)
 {
-    for (int i = 0; i < 8; i++) {
+    for (unsigned int i = 0; i < 8; i++) {
         obj->key.w32[i] = key[i];
         obj->ctr_a0.w32[i] = i;
         obj->ctr_a1.w32[i] = 0;
@@ -230,9 +232,9 @@ static void *create_vector(const CallerAPI *intf, MagmaMode mode)
 #ifdef MAGMA_VEC_ENABLED
     MagmaVecState *obj = intf->malloc(sizeof(MagmaVecState));
     uint32_t key[8];
-    for (int i = 0; i < 4; i++) {
+    for (unsigned int i = 0; i < 4; i++) {
         uint64_t seed = intf->get_seed64();
-        key[2*i] = seed >> 32;
+        key[2*i] = (uint32_t) (seed >> 32);
         key[2*i + 1] = (uint32_t) seed;
     }
     MagmaVecState_init(obj, key);
@@ -284,23 +286,23 @@ static inline void Vector256_from_m256i(Vector256 *obj, __m256i x)
 }
 
 #define APPLY_SBOX_LO_TOOUT(mask4, mask32, ind) \
-    out = _mm256_and_si256(x, _mm256_set1_epi32(mask4)); \
-    out = _mm256_or_si256(out, _mm256_set1_epi32(mask32)); \
+    out = _mm256_and_si256(x, _mm256_set1_epi32((int) mask4)); \
+    out = _mm256_or_si256(out, _mm256_set1_epi32((int) mask32)); \
     out = _mm256_shuffle_epi8(sbox[ind], out);
 
 
 #define APPLY_SBOX_LO(mask4, mask32, ind) { \
-    __m256i ni = _mm256_and_si256(x, _mm256_set1_epi32(mask4)); \
-    ni = _mm256_or_si256(ni, _mm256_set1_epi32(mask32)); \
+    __m256i ni = _mm256_and_si256(x, _mm256_set1_epi32((int) mask4)); \
+    ni = _mm256_or_si256(ni, _mm256_set1_epi32((int) mask32)); \
     ni = _mm256_shuffle_epi8(sbox[ind], ni); \
     out = _mm256_or_si256(out, ni); \
 }
 
 
 #define APPLY_SBOX_HI(mask4, mask32, ind) { \
-    __m256i ni = _mm256_and_si256(x, _mm256_set1_epi32(mask4)); \
+    __m256i ni = _mm256_and_si256(x, _mm256_set1_epi32((int) mask4)); \
     ni = _mm256_srli_epi32(ni, 4); \
-    ni = _mm256_or_si256(ni, _mm256_set1_epi32(mask32)); \
+    ni = _mm256_or_si256(ni, _mm256_set1_epi32((int) mask32)); \
     ni = _mm256_shuffle_epi8(sbox[ind], ni); \
     ni = _mm256_slli_epi32(ni, 4); \
     out = _mm256_or_si256(out, ni); \
@@ -391,7 +393,10 @@ static inline __m256i gfunc_m256i(__m256i key, __m256i a)
 
 static inline void magma_round_m256i(__m256i *a1, __m256i *a0, uint32_t key)
 {
-    __m256i t = _mm256_xor_si256(*a1, gfunc_m256i(_mm256_set1_epi32(key), *a0));
+    __m256i t = _mm256_xor_si256(
+        *a1,
+        gfunc_m256i(_mm256_set1_epi32((int) key), *a0)
+    );
     *a1 = *a0;
     *a0 = t;
 }
@@ -594,7 +599,7 @@ static int run_self_test_vector(const CallerAPI *intf)
     MagmaVecState_init(obj, key);
     for (int i = 0; i < 8; i++) {
         obj->ctr_a0.w32[i] = (uint32_t) ctr_in[i];
-        obj->ctr_a1.w32[i] = ctr_in[i] >> 32;
+        obj->ctr_a1.w32[i] = (uint32_t) (ctr_in[i] >> 32);
     }
     uint64_t u;
     int is_ok = 1;

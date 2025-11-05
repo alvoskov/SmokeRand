@@ -86,7 +86,7 @@ GeneratorFilter GeneratorFilter_from_name(const char *name)
 typedef struct {
     unsigned int nthreads;
     unsigned int testid;
-    int maxlen_log2; ///< log2(len) for stdout length in bytes
+    unsigned int maxlen_log2; ///< log2(len) for stdout length in bytes
     GeneratorFilter filter;
     ReportType report_type;
 } SmokeRandSettings;
@@ -100,9 +100,9 @@ typedef struct {
  * 2) For 32-bit systems - not more than 2 threads.
  * 3) If number of cores is more than 4 then leave one unloaded core.
  */
-static unsigned int get_default_nthreads(int *ncores)
+static unsigned int get_default_nthreads(unsigned int *ncores)
 {
-    int nthreads = get_cpu_numcores();
+    unsigned int nthreads = get_cpu_numcores();
     if (ncores != NULL) {
         *ncores = nthreads;
     }
@@ -111,7 +111,7 @@ static unsigned int get_default_nthreads(int *ncores)
     }
     if (nthreads > 4)
         nthreads--;
-    return (unsigned int) nthreads;
+    return nthreads;
 }
 
 /**
@@ -133,10 +133,10 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
         char *eqpos = strchr(argv[i], '=');
         size_t len = strlen(argv[i]);
         if (!strcmp(argv[i], "--threads")) {
-            int ncores;
+            unsigned int ncores;
             obj->nthreads = get_default_nthreads(&ncores);
-            fprintf(stderr, "%d CPU cores detected\n", ncores);
-            fprintf(stderr, "%d threads would be created\n", obj->nthreads);
+            fprintf(stderr, "%u CPU cores detected\n", ncores);
+            fprintf(stderr, "%u threads would be created\n", obj->nthreads);
             continue;
         }
         if (!strcmp(argv[i], "--report-brief")) {
@@ -170,14 +170,16 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
         // Numerical arguments processing
         argval = atoi(eqpos + 1);
         if (!strcmp(argname, "nthreads")) {
-            obj->nthreads = (unsigned int) argval;
-            if (argval <= 0) {
+            if (argval > 0) {
+                obj->nthreads = (unsigned int) argval;
+            } else {
                 fprintf(stderr, "Invalid value of argument '%s'\n", argname);
                 return 1;
             }
         } else if (!strcmp(argname, "testid")) {
-            obj->testid = (unsigned int) argval;
-            if (argval <= 0) {
+            if (argval > 0) {
+                obj->testid = (unsigned int) argval;
+            } else {                
                 fprintf(stderr, "Invalid value of argument '%s'\n", argname);
                 return 1;
             }
@@ -186,7 +188,7 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
                 fprintf(stderr, "Invalid value of argument '%s'\n", argname);
                 return 1;
             }
-            obj->maxlen_log2 = argval;
+            obj->maxlen_log2 = (unsigned int) argval;
         } else {
             fprintf(stderr, "Unknown argument '%s'\n", argname);
             return 1;

@@ -52,9 +52,9 @@ static inline uint16_t get_bits16(Smwc16x8State *obj)
     uint32_t p = a * (uint32_t) (obj->x[obj->pos]) + obj->c;
     uint16_t x = (uint16_t) p;
     obj->x[obj->pos] = x;
-    obj->c = p >> 16;
+    obj->c = (uint16_t) (p >> 16);
     // Scrambler: tested with the 1569 bad multiplier (1 TiB with "unusual" in BCFN)
-    return (a_lcg * x) ^ rotl16(x_prev, 7);
+    return (uint16_t) ( (a_lcg * x) ^ rotl16(x_prev, 7) );
 //  Possible alternative scrambler and bad multiplier: 123
 //    return (x ^ rotl16(x_prev, 3)) + rotl16(x_prev, 9);
 }
@@ -71,8 +71,8 @@ static inline uint64_t get_bits_raw(void *state)
 static void Smwc16x8State_init(Smwc16x8State *obj, uint64_t seed)
 {
     obj->c = 1;
-    for (int i = 0; i < 8; i++) {
-        int sh = (i % 4) * 16;
+    for (unsigned int i = 0; i < 8; i++) {
+        const unsigned int sh = (i % 4) * 16;
         obj->x[i] = (uint16_t) ((seed >> sh) + i);
     }
     obj->pos = 0;

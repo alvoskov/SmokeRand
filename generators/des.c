@@ -234,14 +234,18 @@ void fill_key_schedule(DESSubkey *sub_key, uint64_t key)
             sk <<= 1;
             sk |= (permuted_choice_2 >> (56-PC2[j])) & LB64_MASK;
         }
-        sub_key[i].k0246 = ((sk >> (42 - 24)) & 0x3F000000) |
+        sub_key[i].k0246 = (uint32_t) (
+            ((sk >> (42 - 24)) & 0x3F000000) |
             ((sk >> (30 - 16)) & 0x3F0000) |
             ((sk >> (18 - 8)) & 0x3F00) |
-            ((sk >> 6) & 0x3F);
-        sub_key[i].k1357 = ((sk >> (36 - 24)) & 0x3F000000) |
+            ((sk >> 6) & 0x3F)
+        );
+        sub_key[i].k1357 = (uint32_t) (
+            ((sk >> (36 - 24)) & 0x3F000000) |
             ((sk >> (24 - 16)) & 0x3F0000) |
             ((sk >> (12 - 8)) & 0x3F00) |
-            (sk & 0x3F);
+            (sk & 0x3F)
+        );
     }
 }
 

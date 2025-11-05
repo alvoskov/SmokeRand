@@ -51,9 +51,11 @@ static void *create(const CallerAPI *intf)
 {
     Mwc1616State *obj = intf->malloc(sizeof(Mwc1616State));
     uint64_t seed0 = intf->get_seed64(); // For MWC
-    obj->z = (seed0 & 0xFFFF) | 0x10000; // MWC generator 1: prevent bad seeds
-    obj->w = ((seed0 >> 16) & 0xFFFF) | 0x10000; // MWC generator 2: prevent bad seeds
-    return (void *) obj;
+    // MWC generator 1: prevent bad seeds
+    obj->z = (uint32_t) ((seed0 & 0xFFFF) | 0x10000);
+    // MWC generator 2: prevent bad seeds
+    obj->w = (uint32_t) (((seed0 >> 16) & 0xFFFF) | 0x10000);
+    return obj;
 }
 
 

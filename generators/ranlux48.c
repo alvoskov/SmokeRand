@@ -42,7 +42,7 @@ typedef struct {
 static inline uint32_t get_bits24_nolux(SwbLuxState *obj)
 {
     uint32_t x;
-    int32_t xj = obj->x[obj->j], xi = obj->x[obj->i];
+    int32_t xj = (int32_t) obj->x[obj->j], xi = (int32_t) obj->x[obj->i];
     int32_t t = xj - xi - (int32_t) obj->c;
     if (t >= 0) {
         x = (uint32_t) t;

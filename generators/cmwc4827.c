@@ -57,8 +57,10 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Cmwc4827State *obj = intf->malloc(sizeof(Cmwc4827State));
-    uint64_t s = intf->get_seed64();
-    Cmwc4827State_init(obj, s >> 32, (s & 0xFFFFFFFF) | 0x1);
+    uint64_t seed = intf->get_seed64();
+    uint32_t seed_hi = (uint32_t) (seed >> 32);
+    uint32_t seed_lo = (uint32_t) ((seed & 0xFFFFFFFF) | 0x1);
+    Cmwc4827State_init(obj, seed_hi, seed_lo);
     return obj;
 }
 

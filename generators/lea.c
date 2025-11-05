@@ -255,10 +255,10 @@ void LeaVecState_block(LeaVecState *obj)
     leavec_load_ctr(cb, obj->ctr + LEA_NCOPIES / 2);
     for (int i = 0; i < LEA_NROUNDS; i++) {
         __m256i rkv[4];
-        rkv[0] = _mm256_set1_epi32(rk[0]);
-        rkv[1] = _mm256_set1_epi32(rk[1]);
-        rkv[2] = _mm256_set1_epi32(rk[2]);
-        rkv[3] = _mm256_set1_epi32(rk[3]);
+        rkv[0] = _mm256_set1_epi32((int) rk[0]);
+        rkv[1] = _mm256_set1_epi32((int) rk[1]);
+        rkv[2] = _mm256_set1_epi32((int) rk[2]);
+        rkv[3] = _mm256_set1_epi32((int) rk[3]);
         leavec_round(ca, rkv, rkv[3]);
         leavec_round(cb, rkv, rkv[3]);
         rk += LEA_RK_ALIGN;
@@ -316,7 +316,7 @@ void LeaVecState_iter_func(void *data)
 void LeaVecState_init(LeaVecState *obj, const uint32_t *key)
 {
     lea128_fill_round_keys(obj->rk, key);
-    for (int i = 0; i < LEA_NCOPIES; i++) {
+    for (uint32_t i = 0; i < LEA_NCOPIES; i++) {
         obj->ctr[i] = i;
     }
     for (int i = LEA_NCOPIES; i < 4 * LEA_NCOPIES; i++) {
@@ -343,8 +343,8 @@ static void *create(const CallerAPI *intf)
     uint32_t seeds[4];
     for (int i = 0; i < 2; i++) {
         uint64_t s = intf->get_seed64();
-        seeds[2*i] = s & 0xFFFFFFF;
-        seeds[2*i + 1] = s >> 32;
+        seeds[2*i] = (uint32_t) (s & 0xFFFFFFF);
+        seeds[2*i + 1] = (uint32_t) (s >> 32);
     }
     const char *ver = intf->get_param();
     if (!intf->strcmp(ver, "scalar") || !intf->strcmp(ver, "")) {

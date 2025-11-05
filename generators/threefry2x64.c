@@ -196,11 +196,12 @@ static int self_test_compare(const CallerAPI *intf,
 static int run_self_test_scalar(const CallerAPI *intf)
 {
     Threefry2x64State obj;
-    static const uint64_t k0_m1[4] = {-1, -1}, ctr_m1[4] = {-1, -1};
+    static const uint64_t k0_m1[4]    = {0xffffffffffffffffull, 0xffffffffffffffffull};
+    static const uint64_t ctr_m1[4]   = {0xffffffffffffffffull, 0xffffffffffffffffull};
     static const uint64_t ref20_m1[4] = {0xe02cb7c4d95d277aull, 0xd06633d0893b8b68ull};
 
-    static const uint64_t ctr_pi[4] = {0x243f6a8885a308d3ull, 0x13198a2e03707344ull};
-    static const uint64_t k0_pi[4] = {0xa4093822299f31d0ull, 0x082efa98ec4e6c89ull};
+    static const uint64_t ctr_pi[4]   = {0x243f6a8885a308d3ull, 0x13198a2e03707344ull};
+    static const uint64_t k0_pi[4]    = {0xa4093822299f31d0ull, 0x082efa98ec4e6c89ull};
     static const uint64_t ref20_pi[4] = {0x263c7d30bb0f0af1ull, 0x56be8361d3311526ull};
 
     intf->printf("----- Self-test for the scalar version -----\n");
@@ -265,8 +266,8 @@ static inline void mix2v(__m256i *x0v, __m256i *x1v, int d)
 static inline void inject_key_vec(__m256i *x0v, __m256i *x1v, const uint64_t *ks,
     size_t n, size_t i0, size_t i1)
 {
-    __m256i ks0 = _mm256_set1_epi64x(ks[i0]);
-    __m256i ks1 = _mm256_set1_epi64x(ks[i1] + n);
+    __m256i ks0 = _mm256_set1_epi64x((long long) ks[i0]);
+    __m256i ks1 = _mm256_set1_epi64x((long long) (ks[i1] + n));
     for (int i = 0; i < NREGS; i++) {
         x0v[i] = _mm256_add_epi64(x0v[i], ks0);
         x1v[i] = _mm256_add_epi64(x1v[i], ks1);
@@ -398,7 +399,9 @@ static int run_self_test_vector(const CallerAPI *intf)
 {
 #ifdef TF128_VEC_ENABLED
     Threefry2x64AVXState obj;
-    static const uint64_t k0_m1[4] = {-1, -1}, ctr_m1[4] = {-1, -1},
+    static const uint64_t
+        k0_m1[4]    = {0xffffffffffffffffull, 0xffffffffffffffffull},
+        ctr_m1[4]   = {0xffffffffffffffffull, 0xffffffffffffffffull},
         ref20_m1[4] = {0xe02cb7c4d95d277aull, 0xd06633d0893b8b68ull},
         ctr_pi[4]   = {0x243f6a8885a308d3ull, 0x13198a2e03707344ull},
         k0_pi[4]    = {0xa4093822299f31d0ull, 0x082efa98ec4e6c89ull},

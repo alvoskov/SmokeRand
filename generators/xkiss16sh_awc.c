@@ -67,14 +67,14 @@ static inline uint16_t Xkiss16AwcState_get_bits(Xkiss16AwcState *obj)
     // xorshift16
     // https://gist.github.com/t-mat/8b2c183ae50480c7998f4d9ab2271b1d
     // http://www.retroprogramming.com/2017/07/xorshift-pseudorandom-numbers-in-z80.html
-    obj->xs ^= obj->xs << 7;
-    obj->xs ^= obj->xs >> 9;
-    obj->xs ^= obj->xs << 8;
+    obj->xs ^= (uint16_t) (obj->xs << 7);
+    obj->xs ^= (uint16_t) (obj->xs >> 9);
+    obj->xs ^= (uint16_t) (obj->xs << 8);
     // AWC (add with carry) part
-    uint32_t t = obj->awc_x0 + obj->awc_x1 + obj->awc_c;
+    uint32_t t = (uint32_t)obj->awc_x0 + (uint32_t)obj->awc_x1 + (uint32_t)obj->awc_c;
     obj->awc_x1 = obj->awc_x0;
-    obj->awc_c  = t >> K16_AWC_SH;
-    obj->awc_x0 = t & K16_AWC_MASK;
+    obj->awc_c  = (uint16_t) (t >> K16_AWC_SH);
+    obj->awc_x0 = (uint16_t) (t & K16_AWC_MASK);
     obj->weyl += K16_WEYL_INC;
     // Combined output
     uint16_t awc = rotl16(obj->awc_x0, 3) ^ (obj->awc_x1);
@@ -99,8 +99,8 @@ static void *create(const CallerAPI *intf)
         obj->xs = 0xDEAD;
     }
     obj->weyl = 0;
-    obj->awc_x0 = (seed >> 32) & 0xFFFF;
-    obj->awc_x1 = (seed >> 48) & 0xFFFF;
+    obj->awc_x0 = (uint16_t) ((seed >> 32) & 0xFFFF);
+    obj->awc_x1 = (uint16_t) ((seed >> 48) & 0xFFFF);
     obj->awc_c  = (obj->awc_x0 == 0 && obj->awc_x1 == 0) ? 1 : 0;
     return obj;
 }

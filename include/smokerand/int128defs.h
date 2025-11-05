@@ -41,14 +41,14 @@ static inline void uadd_128p64_ary_c99(uint32_t *x, uint64_t c)
 static inline uint64_t umuladd_64x64p64_c99(uint64_t a, uint64_t b, uint64_t c, uint64_t *hi)
 {
     static const uint64_t MASK32 = 0xFFFFFFFF;
-    uint32_t out[4], x_lo = (uint32_t) b, x_hi = b >> 32;
+    uint32_t out[4], x_lo = (uint32_t) b, x_hi = (uint32_t) (b >> 32);
     uint64_t mul, sum;
-    uint64_t a_lo = a & MASK32, a_hi = a >> 32;
+    uint64_t a_lo = a & MASK32, a_hi = (uint32_t) (a >> 32);
     // Row 0
     mul = a_lo * x_lo;
     out[0] = (uint32_t) mul;
     mul = a_lo * x_hi + (mul >> 32);
-    out[1] = (uint32_t) mul; out[2] = mul >> 32;
+    out[1] = (uint32_t) mul; out[2] = (uint32_t) (mul >> 32);
     // Row 1
     mul = a_hi * x_lo;
     sum = (mul & MASK32) + out[1];
@@ -72,8 +72,8 @@ static inline uint64_t umuladd_64x64p64_c99(uint64_t a, uint64_t b, uint64_t c, 
 static inline void uadd_128p64_c99(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
 {
     uint32_t out[4];
-    out[0] = (uint32_t) (*a_lo); out[1] = (*a_lo) >> 32;
-    out[2] = (uint32_t) (*a_hi); out[3] = (*a_hi) >> 32;
+    out[0] = (uint32_t) (*a_lo); out[1] = (uint32_t) ((*a_lo) >> 32);
+    out[2] = (uint32_t) (*a_hi); out[3] = (uint32_t) ((*a_hi) >> 32);
     uadd_128p64_ary_c99(out, b);
     (*a_hi) = ((uint64_t) out[2]) | (((uint64_t) out[3]) << 32);
     (*a_lo) = ((uint64_t) out[0]) | (((uint64_t) out[1]) << 32);
@@ -181,14 +181,14 @@ static inline void umuladd_128x128p64w(uint64_t a_hi, uint64_t a_lo,
 static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 {
     __uint128_t mul = ((__uint128_t) a) * b;
-    *high = mul >> 64;
+    *high = (uint64_t) (mul >> 64);
     return (uint64_t) mul;
 }
 
 static inline uint64_t unsigned_muladd128(uint64_t a, uint64_t b, uint64_t c, uint64_t *high)
 {
     const __uint128_t t = a * ((__uint128_t) b) + c;
-    *high = t >> 64;
+    *high = (uint64_t) (t >> 64);
     return (uint64_t) t;
 }
 
@@ -206,7 +206,7 @@ static inline void umuladd_128x128p64w(uint64_t a_hi, uint64_t a_lo,
     const __uint128_t x = ((__uint128_t) (*x_hi)) << 64 | (*x_lo);
     __uint128_t t = a * x + c;
     *x_lo = (uint64_t) t;
-    *x_hi = t >> 64;
+    *x_hi = (uint64_t) (t >> 64);
 }
 
 // End of GCC implementation of 128-bit arithmetics

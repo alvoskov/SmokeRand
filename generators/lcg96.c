@@ -95,8 +95,8 @@ typedef struct {
 } Lcg96x32State;
 
 
-#define HI64(x) ((x) >> 32)
-#define LO64(x) ((x) & 0xFFFFFFFF)
+#define HI64(x) ( (uint32_t) ((x) >> 32) )
+#define LO64(x) ( (uint32_t) ((x) & 0xFFFFFFFF) )
 #define MUL64(x,y) ((uint64_t)(x) * (uint64_t)(y))
 #define SUM64(x,y) ((uint64_t)(x) + (uint64_t)(y))
 

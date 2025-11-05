@@ -61,7 +61,8 @@ static inline void philox_bumpkey(uint32_t *key)
 static inline void philox_round(uint32_t *out, const uint32_t key)
 {
     uint64_t mul0 = out[0] * 0xD256D193ull;
-    uint32_t hi0 = mul0 >> 32, lo0 = (uint32_t) mul0;
+    uint32_t hi0 = (uint32_t) (mul0 >> 32);
+    uint32_t lo0 = (uint32_t) mul0;
 
     out[0] = hi0 ^ out[1] ^ key;
     out[1] = lo0;

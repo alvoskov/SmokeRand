@@ -70,8 +70,8 @@ static int run_self_test(const CallerAPI *intf)
     obj->p = 0;
     obj->s[0] = 0x123456789ABCDEF0;
     obj->s[1] = 0xDEADBEEFDEADBEEF;
-    for (int i = 2; i < 16; i++) {
-        obj->s[i] = 69069 * i;
+    for (unsigned int i = 2; i < 16; i++) {
+        obj->s[i] = 69069u * i;
     }
     static const uint64_t u_ref = 0xC77F3AEF0C1168B3;
     uint64_t u;

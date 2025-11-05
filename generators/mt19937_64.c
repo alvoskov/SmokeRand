@@ -106,7 +106,7 @@ void *create_full(const GeneratorInfo *gi, const CallerAPI *intf)
 
 void MT19937x64State_init_brief(MT19937x64State *obj, uint64_t seed)
 {
-    for (int i = 0; i < NN; i++) {
+    for (unsigned int i = 0; i < NN; i++) {
         obj->x[i] = seed;
         seed = 6364136223846793005ULL * (seed ^ (seed >> 62)) + (i + 1);
     }

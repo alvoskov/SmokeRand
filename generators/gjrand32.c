@@ -59,7 +59,7 @@ static void Gjrand32State_init(Gjrand32State *obj, uint32_t seed)
 static void *create(const CallerAPI *intf)
 {
     Gjrand32State *obj = intf->malloc(sizeof(Gjrand32State));
-    Gjrand32State_init(obj, intf->get_seed64());
+    Gjrand32State_init(obj, intf->get_seed32());
     return obj;
 }
 

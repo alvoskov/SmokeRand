@@ -39,14 +39,15 @@ typedef struct {
 
 static void Kiss96State_init(Kiss96State *obj, uint64_t seed)
 {
-    uint32_t seed_lo = (uint32_t) seed, seed_hi = seed >> 32;
+    const uint32_t seed_lo = (uint32_t) seed;
+    const uint32_t seed_hi = (uint32_t) (seed >> 32);
     obj->x = seed_lo;
     obj->y = seed_hi;
     if (obj->y == 0){
         obj->y = 0x12345678;
     }
-    obj->z = seed_hi & 0xFFFF;
-    obj->w = seed_hi >> 16;
+    obj->z = (uint32_t) (seed_hi & 0xFFFF);
+    obj->w = (uint32_t) (seed_hi >> 16);
     obj->c = 0;
 }
 

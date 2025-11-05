@@ -41,11 +41,11 @@ static inline uint64_t get_bits_raw(void *state)
     uint32_t ans = 0;
     for (int i = 0; i < 2; i++) {
         uint32_t t = MWC_A1 * (uint64_t) obj->x[1];
-        uint16_t ans16 = (obj->x[1] ^ obj->x[0]) + (obj->c ^ (t >> 16));
+        uint16_t ans16 = (uint16_t) ( (obj->x[1] ^ obj->x[0]) + (obj->c ^ (t >> 16)) );
         t += obj->c;
         obj->x[1] = obj->x[0];
-        obj->x[0] = t;
-        obj->c = t >> 16;
+        obj->x[0] = (uint16_t) t;
+        obj->c = (uint16_t) (t >> 16);
         ans = (ans << 16) | ans16;
     }
     return ans;
@@ -54,7 +54,7 @@ static inline uint64_t get_bits_raw(void *state)
 static void Mwc48xxa16State_init(Mwc48xxa16State *obj, uint32_t seed)
 {
     obj->x[0] = (uint16_t) seed;
-    obj->x[1] = (seed >> 16);
+    obj->x[1] = (uint16_t) (seed >> 16);
     obj->c = 1;
     for (int i = 0; i < 6; i++) {
         (void) get_bits_raw(obj);
@@ -65,7 +65,7 @@ static void *create(const CallerAPI *intf)
 {
     Mwc48xxa16State *obj = intf->malloc(sizeof(Mwc48xxa16State));
     Mwc48xxa16State_init(obj, intf->get_seed32());
-    return (void *) obj;
+    return obj;
 }
 
 

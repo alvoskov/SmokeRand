@@ -50,7 +50,7 @@ static inline uint64_t get_bits_raw(void *state)
     if (obj->x < 0LL) {
         obj->x += m;
     }
-    return obj->x >> 31;
+    return (uint64_t) obj->x >> 31;
 }
 
 static void *create(const CallerAPI *intf)
@@ -79,7 +79,7 @@ static int run_self_test(const CallerAPI *intf)
     static const uint32_t x_ref = 0x3523699d;
     uint32_t x;
     for (int i = 0; i < 1000; i++) {
-        x = get_bits_raw(&obj);
+        x = (uint32_t) get_bits_raw(&obj);
     }
     intf->printf("Output: %X; reference: %X\n",
         (unsigned int) x, (unsigned int) x_ref);

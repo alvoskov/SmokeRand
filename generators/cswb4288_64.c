@@ -52,7 +52,7 @@ PRNG_CMODULE_PROLOG
  */
 typedef struct {
     uint64_t q[CSWB64_LAGR];
-    int c;
+    unsigned int c;
     int ind;
 } Cswb4288x64State;
 

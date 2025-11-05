@@ -49,9 +49,9 @@ static inline uint64_t get_bits_raw(void *state)
     Smwc96State *obj = state;
     uint32_t out = (LCG_A1 * obj->x) ^ rotl32(obj->x2, 14); // >= 128 GiB
     uint64_t mul = MWC_A1 * obj->x + obj->c;
-    obj->c = mul >> 32;
+    obj->c = (uint32_t) (mul >> 32);
     obj->x2 = obj->x;
-    obj->x = mul & 0xFFFFFFFF;
+    obj->x = (uint32_t) (mul & 0xFFFFFFFF);
     return out;
 }
 
