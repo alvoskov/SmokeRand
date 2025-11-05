@@ -332,16 +332,16 @@ static inline void Tf256VecState_apply_round_key(Tf256VecState *obj, __m256i *ou
     mix4v(v, Rj0[6], Rj1[6]); mix4v(v, Rj0[7], Rj1[7]); }
 
 #define LOAD_COUNTER_VEC __m256i v[NWORDS]; \
-    v[0] = _mm256_loadu_si256((__m256i *) obj->ctr); \
-    v[1] = _mm256_loadu_si256((__m256i *) (obj->ctr + 4)); \
-    v[2] = _mm256_loadu_si256((__m256i *) (obj->ctr + 8)); \
-    v[3] = _mm256_loadu_si256((__m256i *) (obj->ctr + 12));
+    v[0] = _mm256_loadu_si256((__m256i *) (void *) obj->ctr); \
+    v[1] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 4)); \
+    v[2] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 8)); \
+    v[3] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 12));
 
 #define UNLOAD_OUTPUT_VEC \
-    _mm256_storeu_si256((__m256i *) obj->out,        v[0]); \
-    _mm256_storeu_si256((__m256i *) (obj->out + 4),  v[1]); \
-    _mm256_storeu_si256((__m256i *) (obj->out + 8),  v[2]); \
-    _mm256_storeu_si256((__m256i *) (obj->out + 12), v[3]);
+    _mm256_storeu_si256((__m256i *) (void *) obj->out,        v[0]); \
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 4),  v[1]); \
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 8),  v[2]); \
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 12), v[3]);
 
 /**
  * @brief ThreeFry4x64x72 (ThreeFish) block scrambling function.

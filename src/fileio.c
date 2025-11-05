@@ -1,7 +1,8 @@
 /**
  * @file fileio.c
  * @brief Implementation of PRNG based on reading binary data from stdin.
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -29,7 +30,7 @@ static void StdinCollector_fill_buffer(StdinCollector *obj)
     obj->pos = 0;
     if (nbytes != STDIN_COLLECTOR_BUFFER_SIZE) {
         fprintf(stderr, "Reading from stdin failed");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -140,7 +141,7 @@ GeneratorInfo StdinCollector_get_info(StdinCollectorType type)
         gen.nbits = 64;
     } else {
         fprintf(stderr, "get_stdin_collector_info: unknown type");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     return gen;
 }

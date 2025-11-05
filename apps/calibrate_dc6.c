@@ -53,7 +53,8 @@ static ThreadRetVal THREADFUNC_SPEC hamming_ot_run_test(void *udata)
 {
     HammingThreadState *obj = udata;
     GeneratorState gen = GeneratorState_create(obj->gi, obj->intf);
-    for (size_t i = obj->init_pos; i < obj->nsamples; i += obj->nthreads) {
+    size_t nthreads = (size_t) obj->nthreads;
+    for (size_t i = obj->init_pos; i < obj->nsamples; i += nthreads) {
         printf_mthr("%lu of %lu\n",
             (unsigned long) (i + 1), (unsigned long) obj->nsamples);
         TestResults res = obj->test_info.test_func(&gen, obj->test_info.opts);
@@ -64,7 +65,7 @@ static ThreadRetVal THREADFUNC_SPEC hamming_ot_run_test(void *udata)
 }
 
 
-double *generate_sample(GeneratorInfo *gi, int nsamples, const HwTestInfo *test_info)
+double *generate_sample(GeneratorInfo *gi, unsigned int nsamples, const HwTestInfo *test_info)
 {
     CallerAPI intf = CallerAPI_init_mthr();
     GeneratorState gen = GeneratorState_create(gi, &intf);
@@ -72,25 +73,25 @@ double *generate_sample(GeneratorInfo *gi, int nsamples, const HwTestInfo *test_
     GeneratorState_destruct(&gen, &intf);
     printf_mthr = intf.printf;
     intf.printf = printf_mute;
-    int nthreads = get_cpu_numcores();
+    unsigned int nthreads = (unsigned int) get_cpu_numcores();
     if (nthreads > 2) {
         nthreads--;
     }
-    printf("Number of threads: %d\n", nthreads);
-    double *z_ary = calloc(nsamples, sizeof(double));
+    printf("Number of threads: %u\n", nthreads);
+    double *z_ary = calloc((size_t) nsamples, sizeof(double));
     HammingThreadState *threads = calloc(nthreads, sizeof(HammingThreadState));
     if (z_ary == NULL || threads == NULL) {
         fprintf(stderr, "***** generate_sample: not enough memory *****\n");
         exit(EXIT_FAILURE);
     }
-    for (int i = 0; i < nthreads; i++) {
+    for (unsigned int i = 0; i < nthreads; i++) {
         threads[i].init_pos = i;
         threads[i].nsamples = nsamples;
         threads[i].z_ary = z_ary;
         threads[i].gi = gi;
         threads[i].intf = &intf;
         threads[i].test_info = *test_info;
-        threads[i].nthreads = nthreads;
+        threads[i].nthreads = (int) nthreads;
     }
     init_thread_dispatcher();
     ThreadObj *handles = calloc(sizeof(ThreadObj), nthreads);
@@ -98,11 +99,11 @@ double *generate_sample(GeneratorInfo *gi, int nsamples, const HwTestInfo *test_
         fprintf(stderr, "***** generate_sample: not enough memory *****\n");
         exit(EXIT_FAILURE);
     }
-    for (int i = 0; i < nthreads; i++) {
+    for (unsigned int i = 0; i < nthreads; i++) {
         handles[i] = ThreadObj_create(hamming_ot_run_test, &threads[i], i + 1);
     }
     // Get data from threads
-    for (int i = 0; i < nthreads; i++) {
+    for (unsigned int i = 0; i < nthreads; i++) {
         ThreadObj_wait(&handles[i]);
     }
     // Deallocate array
@@ -200,12 +201,12 @@ static void calc_statistics(double *x, size_t len)
     for (size_t i = 0; i < len; i++) {
         mean += x[i];
     }
-    mean /= len;
+    mean /= (double) len;
     for (size_t i = 0; i < len; i++) {
         double dx = x[i] - mean;
         std += dx * dx;
     }
-    std = sqrt(std / (len - 1));
+    std = sqrt(std / (double) (len - 1));
     printf("mean: %g; std: %g\n", mean, std);
     // Renorm sample for Lilliefors test
     for (size_t i = 0; i < len; i++) {
@@ -217,8 +218,8 @@ static void calc_statistics(double *x, size_t len)
     for (size_t i = 0; i < len; i++) {
         double f = sr_stdnorm_cdf(x[i]);
         double idbl = (double) i;
-        double Dplus = (idbl + 1.0) / len - f;
-        double Dminus = f - idbl / len;
+        double Dplus = (idbl + 1.0) / (double) len - f;
+        double Dminus = f - idbl / (double) len;
         if (Dplus > D) D = Dplus;
         if (Dminus > D) D = Dminus;
     }
@@ -233,21 +234,21 @@ int main(int argc, char *argv[])
 {
     const char *name, *mod_name;
     char filename[64];
-    int nbits = 32, nsamples = 10000;
+    unsigned int nbits = 32, nsamples = 10000;
     if (argc < 2) {
         print_help();
         return 0;
     }
     name = argv[1];
     if (argc >= 3) {
-        nbits = atoi(argv[2]);
+        nbits = (unsigned int) atoi(argv[2]);
         if (nbits != 32 && nbits != 64) {
             fprintf(stderr, "nbits: invalid value\n");
             return 1;
         }
     }
     if (argc >= 4) {
-        nsamples = atoi(argv[3]);
+        nsamples = (unsigned int) atoi(argv[3]);
         if (nsamples < 10 || nsamples > 10000000) {
             fprintf(stderr, "nsamples: invalid value\n");
             return 1;
@@ -270,7 +271,7 @@ int main(int argc, char *argv[])
     GeneratorInfo *gi = &mod.gen;
     printf("Generator name:    %s\n", gi->name);
     printf("Output size, bits: %d\n", gi->nbits);
-    snprintf(filename, 64, "hw_%s_%d.bin", name, nsamples);
+    snprintf(filename, 64, "hw_%s_%u.bin", name, nsamples);
     FILE *fp = fopen(filename, "wb");
     if (fp == NULL) {
         fprintf(stderr, "Cannot open output file '%s'\n", filename);

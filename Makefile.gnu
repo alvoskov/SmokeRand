@@ -60,9 +60,10 @@ else ifeq ($(PLATFORM_NAME), GENERIC)
     PLATFORM_FLAGS = -DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY
 endif
 #-----------------------------------------------------------------------------
-CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wstrict-aliasing
-CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 -O3 -Werror -Wall -Wextra -Wstrict-aliasing
-CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wstrict-aliasing
+# -Wconversion 
+CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wcast-align=strict -Wshadow
+CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wcast-align=strict -Wshadow
+CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wshadow
 LINKFLAGS = $(PLATFORM_FLAGS)
 INCLUDE = -Iinclude
 
@@ -95,18 +96,24 @@ endif
 
 # Core library
 CORE_LIB = $(LIBDIR)/libsmokerand_core.a
-LIB_SOURCES = $(addprefix $(SRCDIR)/, $(LIB_SOURCES_EXTRA) core.c coretests.c \
-    blake2s.c entropy.c extratests.c fileio.c lineardep.c hwtests.c specfuncs.c threads_intf.c)
-LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, $(LIB_HEADERS_EXTRA) apidefs.h cinterface.h core.h coretests.h \
-    blake2s.h entropy.h extratests.h fileio.h lineardep.h hwtests.h int128defs.h specfuncs.h threads_intf.h x86exts.h) \
-    include/smokerand_core.h
+LIB_SOURCES = $(addprefix $(SRCDIR)/, $(LIB_SOURCES_EXTRA) \
+    core.c coretests.c \
+    blake2s.c entropy.c extratests.c fileio.c lineardep.c hwtests.c specfuncs.c \
+    threads_intf.c)
+LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, $(LIB_HEADERS_EXTRA) \
+    apidefs.h cinterface.h coredefs.h int128defs.h x86exts.h ../smokerand_core.h \
+    core.h coretests.h \
+    blake2s.h entropy.h extratests.h fileio.h lineardep.h hwtests.h specfuncs.h \
+    threads_intf.h )
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
 INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/cinterface.h \
     $(INCLUDEDIR)/int128defs.h $(INCLUDEDIR)/x86exts.h
 # Battery
 BAT_LIB = $(LIBDIR)/libsmokerand_bat.a
-BATLIB_SOURCES = $(addprefix $(SRCDIR)/, bat_express.c bat_brief.c bat_default.c bat_file.c bat_full.c bat_special.c)
-BATLIB_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_express.h bat_brief.h bat_default.h bat_file.h bat_full.h bat_special.h) \
+BATLIB_SOURCES = $(addprefix $(SRCDIR)/, bat_express.c bat_brief.c bat_default.c \
+    bat_file.c bat_full.c bat_special.c)
+BATLIB_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_express.h bat_brief.h bat_default.h \
+    bat_file.h bat_full.h bat_special.h) \
     include/smokerand_bat.h
 BATLIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(BATLIB_SOURCES)))
 # Executables

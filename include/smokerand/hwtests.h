@@ -2,7 +2,8 @@
  * @file hwtests.h
  * @brief Hamming weights bases tests implementation, mainly based
  * on overlapping tuples and similar to DC6 from PractRand.
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -73,5 +74,4 @@ TestResults hamming_ot_test_wrap(GeneratorState *obj, const void *udata);
 TestResults hamming_ot_long_test_wrap(GeneratorState *obj, const void *udata);
 TestResults hamming_distr_test_wrap(GeneratorState *obj, const void *udata);
 
-#endif
-
+#endif // __SMOKERAND_HWTESTS_H

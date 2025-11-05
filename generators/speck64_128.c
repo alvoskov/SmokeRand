@@ -36,7 +36,7 @@ PRNG_CMODULE_PROLOG
  * @brief Speck64/128 state.
  */
 typedef struct {
-    uint32_t ctr[2]; ///< Counter
+    uint32_t ctr[2]; ///< Counter 
     uint32_t out[2]; ///< Output buffer
     uint32_t keys[NROUNDS]; ///< Round keys
 } Speck64x128State;
@@ -92,10 +92,9 @@ static inline uint64_t get_bits_raw(void *state)
 {
     Speck64x128State *obj = state;    
     Speck64x128State_block(obj);
-    uint64_t *ctr_ptr = (uint64_t *) obj->ctr;
-    uint64_t *out_ptr = (uint64_t *) obj->out;
-    (*ctr_ptr)++;
-    return *out_ptr;
+    if (++obj->ctr[0] == 0) ++obj->ctr[1];
+    const uint64_t u0 = obj->out[0], u1 = obj->out[1];
+    return u0 | (u1 << 32);
 }
 
 /**

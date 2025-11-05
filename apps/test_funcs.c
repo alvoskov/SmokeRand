@@ -46,7 +46,7 @@ int is_array64_sorted(const uint64_t *x, size_t len)
 
 static void fill_rand64(uint64_t *x, size_t len)
 {
-    uint64_t seed = time(NULL);
+    uint64_t seed = (uint64_t) time(NULL);
     for (size_t i = 0; i < len; i++) {
         x[i] = pcg_bits64(&seed);
     }
@@ -250,7 +250,7 @@ int test_binopdf()
     printf("----- test_binopdf -----\n");
     printf("Part 1. n = 8, p = 0.5\n");
     printf("%3s %3s %10s %10s %10s\n", "k", "n", "calc", "ref", "relerr%");
-    for (int i = 0; i < 8; i++) {
+    for (unsigned int i = 0; i < 8; i++) {
         double coeff_calc = sr_binomial_pdf(i, 8, 0.5) * 256.0;
         double coeff_ref = ref_256[i];
         double relerr = fabs((coeff_calc - coeff_ref) / coeff_ref);
@@ -262,7 +262,7 @@ int test_binopdf()
     printf("\n");
     printf("Part 2. n = 8, p = 0.5\n");
     printf("%3s %3s %10s %10s %10s\n", "k", "n", "calc", "ref", "relerr%");
-    for (int i = 0; i < 9; i++) {
+    for (unsigned int i = 0; i < 9; i++) {
         double coeff_calc = sr_binomial_pdf(i, 9, 0.25) * pow(4.0, 9.0);
         double coeff_ref = ref_4_pow_9[i];
         double relerr = fabs((coeff_calc - coeff_ref) / coeff_ref);
@@ -454,13 +454,14 @@ int test_binocdf()
     printf("%6s %6s %25s %25s %10s %10s\n",
         "k", "n", "fcalc", "fref", "relerr%", "f+fc-1");
     for (int i = 0; data[i][0] != 0; i++) {
-        double k = data[i][0], n = data[i][1];
+        unsigned long k = (unsigned long) data[i][0];
+        unsigned long n = (unsigned long) data[i][1];
         double p = data[i][2], f_ref = data[i][3];
         double f_calc = sr_binomial_cdf(k, n, p);
         double fc_calc = sr_binomial_pvalue(k, n, p);
         double relerr = fabs((f_calc - f_ref) / f_ref);
         double sum_m_1 = f_calc + fc_calc - 1.0;        
-        printf("%6.0f %6.0f %25.16g %25.16g %10.3g %10.3g\n",
+        printf("%6ld %6lu %25.16g %25.16g %10.3g %10.3g\n",
             k, n, f_calc, f_ref, 100*relerr, sum_m_1);
     }
     return 0;

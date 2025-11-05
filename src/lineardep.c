@@ -18,27 +18,29 @@
 
 
 #ifdef __AVX2__
-//#pragma message ("AVX2 version will be compiled")
+#pragma message ("AVX2 version will be compiled")
 #if defined(_MSC_VER) && !defined(__clang__)
 #include <intrin.h>
 #else
 #include <x86intrin.h>
 #endif
-#define VECINT_NBITS 256
-typedef __m256i VECINT;
-static inline void xorbits(VECINT *a_j, const VECINT *a_i, size_t i1, size_t i2)
+//#define VECINT_NBITS 256
+//typedef __m256i VECINT;
+//static inline void xorbits(VECINT *a_j, const VECINT *a_i, size_t i1, size_t i2)
+static inline void xorbits(uint32_t *a_j, const uint32_t *a_i, size_t i1, size_t i2)
 {
-    for (size_t k = i1; k < i2; k++) {
-        __m256i aj_k = _mm256_loadu_si256(a_j + k);
-        __m256i ai_k = _mm256_loadu_si256(a_i + k);
+    for (size_t k = i1; k < i2; k += 8) {
+        __m256i aj_k = _mm256_loadu_si256((__m256i *) (void *) (a_j + k));
+        __m256i ai_k = _mm256_loadu_si256((__m256i *) (void *) (a_i + k));
         aj_k = _mm256_xor_si256(aj_k, ai_k);
-        _mm256_storeu_si256(a_j + k, aj_k);
+        _mm256_storeu_si256((__m256i *) (void *) (a_j + k), aj_k);
     }
 }
 #else
-//#pragma message ("X64-64 version will be compiled")
-#define VECINT_NBITS 64
-typedef uint64_t VECINT;
+#pragma message ("Portable version will be compiled")
+// Don't change to other type: it will violate strict aliasing!
+#define VECINT_NBITS 32
+typedef uint32_t VECINT;
 static inline void xorbits(VECINT *a_j, const VECINT *a_i, size_t i1, size_t i2)
 {
     for (size_t k = i1; k < i2; k++)
@@ -47,9 +49,13 @@ static inline void xorbits(VECINT *a_j, const VECINT *a_i, size_t i1, size_t i2)
 #endif
 
 #define GET_AJI (row_ptr[j][i_offset] & i_mask)
-#define SWAP_ROWS(i, j) { uint32_t *ptr = row_ptr[i]; \
-    row_ptr[i] = row_ptr[j]; row_ptr[j] = ptr; }
 
+static inline void swap_rows(uint32_t **row_ptr, size_t i, size_t j)
+{
+    uint32_t *ptr = row_ptr[i];
+    row_ptr[i] = row_ptr[j];
+    row_ptr[j] = ptr;
+}
 
 /**
  * @brief Calculate rank of binary matrix.
@@ -65,20 +71,20 @@ static size_t calc_bin_matrix_rank(uint32_t *a, size_t n)
     size_t rank = 0;
     for (size_t i = 0; i < n; i++) {
         // Some useful offsets
-        size_t i_offset = i / 32;
-        size_t i_offset_64 = i / VECINT_NBITS;
-        uint32_t i_mask = 1ul << (i % 32);
+        const size_t i_offset = i / 32;
+        //const size_t i_offset_block = i / VECINT_NBITS;
+        const uint32_t i_mask = 1ul << (i % 32);
         // Find the j-th row where a(j,i) is not zero, swap it
         // with i-th row and make Gaussian elimination
         size_t j = rank;
         while (j < n && GET_AJI == 0) { j++; } // a_ji == 0
         if (j < n) {
-            SWAP_ROWS(i, j)
-            VECINT *a_i = (VECINT *) row_ptr[i];
-            for (size_t j = i + 1; j < n; j++) {
-                VECINT *a_j = (VECINT *) row_ptr[j];
+            swap_rows(row_ptr, i, j);
+            uint32_t *a_i = row_ptr[i];
+            for (j = i + 1; j < n; j++) {
+                uint32_t *a_j = row_ptr[j];
                 if (GET_AJI != 0) {
-                    xorbits(a_j, a_i, i_offset_64, n / VECINT_NBITS);
+                    xorbits(a_j, a_i, i_offset/*_block*/, n / 32 /* / VECINT_NBITS*/);
                 }
             }
             rank++;
@@ -107,32 +113,41 @@ TestResults matrixrank_test(GeneratorState *obj, const MatrixRankOptions *opts)
 {
     TestResults ans = TestResults_create("mrank");
     int nmat = 64, Oi[3] = {0, 0, 0};
-    double pi[3] = {0.1284, 0.5776, 0.2888};
+    const double pi[3] = {0.1284, 0.5776, 0.2888};
     size_t n = opts->n;
     //unsigned int max_nbits = opts->max_nbits;
-    size_t mat_len = n * n / 32;
+    const size_t mat_len = n * n / 32;
     size_t min_rank = n + 1;
     uint32_t *a = calloc(mat_len, sizeof(uint32_t));
     obj->intf->printf("Matrix rank test\n");
     obj->intf->printf("  n = %d. Number of matrices: %d; max_nbits: %u\n",
         (int) n, nmat, opts->max_nbits);
     for (int i = 0; i < nmat; i++) {
-        size_t mat_len = n * n / 32;
-        // Prepare nthreads matrices for threads
         if (opts->max_nbits == 8) {
-            uint8_t *a8 = (uint8_t *) a;
-            for (size_t j = 0; j < mat_len * 4; j++) {
-                a8[j] = obj->gi->get_bits(obj->state) & 0xFF;
+            for (size_t j = 0; j < mat_len; j++) {
+                const uint32_t u0 = (uint32_t) obj->gi->get_bits(obj->state) & 0xFF;
+                const uint32_t u1 = (uint32_t) obj->gi->get_bits(obj->state) & 0xFF;
+                const uint32_t u2 = (uint32_t) obj->gi->get_bits(obj->state) & 0xFF;
+                const uint32_t u3 = (uint32_t) obj->gi->get_bits(obj->state) & 0xFF;
+                a[j] = u0 | (u1 << 8) | (u2 << 16) | (u3 << 24);
             }
         } else if (obj->gi->nbits == 32) {
             for (size_t j = 0; j < mat_len; j++) {
                 a[j] = (uint32_t) obj->gi->get_bits(obj->state);
             }
-        } else {
-            uint64_t *a64 = (uint64_t *) a;
-            for (size_t j = 0; j < mat_len / 2; j++) {
-                a64[j] = obj->gi->get_bits(obj->state);
+        } else if (obj->gi->nbits == 64) {
+            for (size_t j = 0, pos = 0; j < mat_len / 2; j++) {
+                const uint64_t u = obj->gi->get_bits(obj->state);
+                a[pos++] = (uint32_t) (u & 0xFFFFFFFF);
+                a[pos++] = (uint32_t) (u >> 32);
             }
+        } else {
+            obj->intf->printf(
+                "Matrix rank is undefined for %d-bit PRNG and %d-bit chunks\n",
+                (int) obj->gi->nbits,
+                (int) opts->max_nbits
+            );
+            return ans;
         }
         // Calculate matrix rank
         size_t rank = calc_bin_matrix_rank(a, n);
@@ -176,22 +191,9 @@ TestResults matrixrank_test(GeneratorState *obj, const MatrixRankOptions *opts)
  */
 static inline void xorbytes(uint8_t *a, const uint8_t *b, size_t len)
 {
-/*
-    // Simpler but non optimized code
     for (size_t i = 0; i < len; i++) {
         a[i] ^= b[i];
     }
-*/    
-    uint64_t *av = (uint64_t *) a, *bv = (uint64_t *) b;
-    size_t nwords = len / 8;
-    for (size_t i = 0; i < nwords; i++) {
-        av[i] ^= bv[i];
-    }
-    a += nwords * 8;
-    b += nwords * 8;
-    for (size_t i = 0; i < len % 8; i++) {
-        a[i] ^= b[i];
-    }    
 }
 
 /**
@@ -212,17 +214,17 @@ size_t berlekamp_massey(const uint8_t *s, size_t n)
     if (C == NULL || B == NULL || T == NULL) {
         fprintf(stderr, "***** berlekamp_massey: not enough memory *****");
         free(C); free(B); free(T);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     C[0] = 1; B[0] = 1;
     while (N < n) {
-        char d = s[N];
+        uint8_t d = s[N];
         for (size_t i = 1; i <= L; i++) {
             d ^= C[i] & s[N - i];
         }
         if (d == 1) {
             memcpy(T, C, (L + 1) * sizeof(uint8_t));
-            xorbytes(&C[N - m], B, n - N + m);
+            xorbytes(&C[(long) N - m], B, (size_t) ((long) n - (long) N + m));
             if (2*L <= N) {
                 L = N + 1 - L;
                 m = (long) N;
@@ -250,7 +252,7 @@ static unsigned int linearcomp_get_bitpos(const GeneratorState *obj, const Linea
     } else if (opts->bitpos < 0) {
         return 0;
     } else {
-        return opts->bitpos;
+        return (unsigned int) opts->bitpos;
     }
 }
 
@@ -311,7 +313,7 @@ TestResults linearcomp_test(GeneratorState *obj, const LinearCompOptions *opts)
     uint8_t *s = calloc(opts->nbits, sizeof(uint8_t));
     if (s == NULL) {
         fprintf(stderr, "***** linearcomp_test: not enough memory *****\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     obj->intf->printf("Linear complexity test\n");
     obj->intf->printf("  nbits: %lld; bitpos: %d\n",

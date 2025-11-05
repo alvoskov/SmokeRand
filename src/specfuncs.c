@@ -32,7 +32,7 @@ double sr_expm1(double x)
             sum += t;
             t *= x / (++i);
         }
-        return sum;
+        return (double) sum;
     }
 }
 
@@ -72,7 +72,8 @@ double sr_lgamma(double x)
     for (k = 1; k < 11; k++) {
         az += b[k] / (x + k);
     }
-    return log(az) + 0.5 * log(2*M_PI) + (x + 0.5) * log(d) - d;
+    return log((double) az) + 0.5 * log(2*M_PI) +
+        (x + 0.5) * log((double) d) - (double) d;
 }
 
 
@@ -109,19 +110,19 @@ double sr_ks_pvalue(double x)
         int s = 1;
         while (sum != old_sum) {
             old_sum = sum;
-            sum += s * exp(-2.0 * i * i * xsq);
+            sum += s * exp((double) (-2.0 * i * i * xsq));
             s = -s; i++;
         }
-        return 2.0 * sum;
+        return (double) (2.0 * sum);
     } else {
         long double sum = 0.0, old_sum = 1.0, i = 1;
         long double t = -M_PI * M_PI / (8 * xsq);
         while (sum != old_sum) {
             old_sum = sum;
-            sum += exp((2*i - 1) * (2*i - 1) * t);
+            sum += exp((double) ((2*i - 1) * (2*i - 1) * t));
             i++;
         }
-        return 1.0 - sqrt(2 * M_PI) / x * sum;
+        return (double) (1.0 - sqrt(2 * M_PI) / x * sum);
     }
 }
 
@@ -259,10 +260,10 @@ double sr_betainc(double x, double a, double b, double *cIx_out)
     } else {
         double mul = exp(a*log(x) + b*log(1 - x) - sr_betaln(a, b));
         if (x >= a / (a + b)) {
-            cIx = mul * betainc_frac(1 - x, b, a);
+            cIx = (double) (mul * betainc_frac(1 - x, b, a));
             Ix = 1 - cIx;
         } else {
-            Ix = mul * betainc_frac(x, a, b);
+            Ix = (double) (mul * betainc_frac(x, a, b));
             cIx = 1 - Ix;
         }
     }
@@ -512,7 +513,7 @@ double sr_stdnorm_cdf(double x)
             f_old = f;
             f *= c * d;
         }
-        return -f * sr_stdnorm_pdf(x);
+        return (double) (-f * sr_stdnorm_pdf(x));
     } else if (x < 2.5) { /* Taylor series */
         long double q = x * x / 4, a0 = 1, a1 = q, b = a0;
         for (i = 2; 1 + a0 != 1 || 1 + a1 != 1; i += 2) {
@@ -520,7 +521,7 @@ double sr_stdnorm_cdf(double x)
             a1 = q * (a0 - a1) / (i + 1);
             b += a0 / (i + 1);
         }
-        return 0.5 + x * sr_stdnorm_pdf(x / 2) * b;
+        return (double) (0.5 + x * sr_stdnorm_pdf(x / 2) * b);
     } else if (x >= 2.5) {
         return 1.0 - sr_stdnorm_cdf(-x);
     } else {
@@ -593,7 +594,7 @@ double sr_stdnorm_inv(double p)
     }
     /* Taylor series expansion for p close to 0.5 */
     if (fabs(p - 0.5) < 1e-5) {
-        double pp = 2*p - 1;
+        pp = 2*p - 1;
         return sqrt(0.5*M_PI) * pp * (1 + M_PI / 12 * pp * pp);
     }
     /* Soranzo initial approximation */

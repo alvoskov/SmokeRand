@@ -7,7 +7,8 @@
  * @param Of course, this implementation of battery is not designed for 16-bit
  * platforms and ANSI C compilers and made just for testing the concept.
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.

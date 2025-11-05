@@ -2,56 +2,15 @@
  * @file apidefs.h
  * @brief Data types and definitions required for PRNG C interface.
  *
- * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
  */
 #ifndef __SMOKERAND_APIDEFS_H
 #define __SMOKERAND_APIDEFS_H
-#include <stdint.h>
-#include <stddef.h>
-#ifdef __WATCOMC__
-#include <stdlib.h>
-#endif
-
-///////////////////////////
-///// Circular shifts /////
-///////////////////////////
-
-static inline uint16_t rotl16(uint16_t x, int r)
-{
-    return (x << r) | (x >> ((-r) & 15));
-}
-
-static inline uint32_t rotl32(uint32_t x, int r)
-{
-#ifdef __WATCOMC__
-    return _lrotl(x, r);
-#else
-    return (x << r) | (x >> ((-r) & 31));
-#endif
-}
-
-static inline uint32_t rotr32(uint32_t x, int r)
-{
-#ifdef __WATCOMC__
-    return _lrotr(x, r);
-#else
-    return (x << ((-r) & 31)) | (x >> r);
-#endif
-}
-
-static inline uint64_t rotl64(uint64_t x, int r)
-{
-    return (x << r) | (x >> ((-r) & 63));
-}
-
-static inline uint64_t rotr64(uint64_t x, int r)
-{
-    return (x << ((-r) & 63)) | (x >> r);
-}
-
+#include "smokerand/coredefs.h"
 
 ////////////////////////////////////////////////////
 ///// Custom DLL entry point for GCC and clang /////
@@ -105,6 +64,7 @@ typedef struct {
     int (*printf)(const char *format, ... ); ///< Pointer to printf function
     int (*snprintf)(char *buf, size_t bufsz, const char *format, ...); ///< Pointer to snprintf function
     int (*strcmp)(const char *lhs, const char *rhs); ///< Pointer to strcmp function
+    int (*get_ram_info)(RamInfo *info); ////< Get RAM size, bytes (or -1 if unknown)
 } CallerAPI;
 
 
@@ -140,4 +100,4 @@ static inline uint64_t pcg_bits64(uint64_t *state)
     return (word >> 43) ^ word;
 }
 
-#endif
+#endif // __SMOKERAND_APIDEFS_H

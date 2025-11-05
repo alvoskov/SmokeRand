@@ -119,20 +119,20 @@ static int run_self_test_scalar(const CallerAPI *intf)
 static inline void xs128pp_block4(uint64_t *outary, uint64_t *s0ary, uint64_t *s1ary)
 {
 #ifdef XSH128PP_VEC_ENABLED
-    __m256i s0 = _mm256_loadu_si256((__m256i *) s1ary);
-    __m256i s1 = _mm256_loadu_si256((__m256i *) s0ary);
+    __m256i s0 = _mm256_loadu_si256((__m256i *) (void *) s1ary);
+    __m256i s1 = _mm256_loadu_si256((__m256i *) (void *) s0ary);
     // Apply output function to the state
     __m256i out = mm256_rotl_epi64_def(_mm256_add_epi64(s1, s0), 17);
     out = _mm256_add_epi64(out, s0);
-    _mm256_storeu_si256((__m256i *) outary, out);
+    _mm256_storeu_si256((__m256i *) (void *) outary, out);
     // Transition to the next state
     s1 = _mm256_xor_si256(s1, _mm256_slli_epi64(s1, 23)); // s1 ^= s1 << 23
     s1 = _mm256_xor_si256(s1, _mm256_srli_epi64(s1, 18)); // s1 ^= (s1 >> 18)
     s1 = _mm256_xor_si256(s1, s0); // s1 ^= s0
     s1 = _mm256_xor_si256(s1, _mm256_srli_epi64(s0, 5)); // s1 ^= (s0 >> 5)
     // Save the new state
-    _mm256_storeu_si256((__m256i *) s0ary, s0);
-    _mm256_storeu_si256((__m256i *) s1ary, s1);
+    _mm256_storeu_si256((__m256i *) (void *) s0ary, s0);
+    _mm256_storeu_si256((__m256i *) (void *) s1ary, s1);
 #else
     (void) outary; (void) s0ary; (void) s1ary;
 #endif

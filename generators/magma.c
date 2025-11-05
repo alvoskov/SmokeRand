@@ -275,12 +275,12 @@ static void *create_vector_cbc(const GeneratorInfo *gi, const CallerAPI *intf)
 #ifdef MAGMA_VEC_ENABLED
 static inline __m256i Vector256_to_m256i(const Vector256 *obj)
 {
-    return _mm256_loadu_si256((__m256i *) obj->w32);
+    return _mm256_loadu_si256((__m256i *) (void *) obj->w32);
 }
 
 static inline void Vector256_from_m256i(Vector256 *obj, __m256i x)
 {
-    _mm256_storeu_si256((__m256i *) obj->w32, x);
+    _mm256_storeu_si256((__m256i *) (void *) obj->w32, x);
 }
 
 #define APPLY_SBOX_LO_TOOUT(mask4, mask32, ind) \

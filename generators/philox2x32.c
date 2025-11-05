@@ -94,8 +94,7 @@ EXPORT void Philox2x32State_block10(Philox2x32State *obj)
 
 static inline void Philox2x32State_inc_counter(Philox2x32State *obj)
 {
-    uint64_t *ctr = (uint64_t *) obj->ctr;
-    (*ctr)++;
+    if (++obj->ctr[0] == 0) ++obj->ctr[1];
 }
 
 ///////////////////////////////

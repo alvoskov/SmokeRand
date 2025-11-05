@@ -302,44 +302,44 @@ EXPORT void Threefry2x64AVXState_block20(Threefry2x64AVXState *obj)
 #ifdef TF128_VEC_ENABLED
     __m256i x0v[NREGS], x1v[NREGS];
 #if NCOPIES == 4
-    x0v[0] = _mm256_loadu_si256((__m256i *) obj->ctr);
-    x1v[0] = _mm256_loadu_si256((__m256i *) (obj->ctr + 4));
+    x0v[0] = _mm256_loadu_si256((__m256i *) (void *) obj->ctr);
+    x1v[0] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 4));
 #elif NCOPIES == 8
-    x0v[0] = _mm256_loadu_si256((__m256i *) obj->ctr);
-    x0v[1] = _mm256_loadu_si256((__m256i *) (obj->ctr + 4));
-    x1v[0] = _mm256_loadu_si256((__m256i *) (obj->ctr + 8));
-    x1v[1] = _mm256_loadu_si256((__m256i *) (obj->ctr + 12));
+    x0v[0] = _mm256_loadu_si256((__m256i *) (void *) obj->ctr);
+    x0v[1] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 4));
+    x1v[0] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 8));
+    x1v[1] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 12));
 #elif NCOPIES == 16
-    x0v[0] = _mm256_loadu_si256((__m256i *) obj->ctr);
-    x0v[1] = _mm256_loadu_si256((__m256i *) (obj->ctr + 4));
-    x0v[2] = _mm256_loadu_si256((__m256i *) (obj->ctr + 8));
-    x0v[3] = _mm256_loadu_si256((__m256i *) (obj->ctr + 12));
-    x1v[0] = _mm256_loadu_si256((__m256i *) (obj->ctr + 16));
-    x1v[1] = _mm256_loadu_si256((__m256i *) (obj->ctr + 20));
-    x1v[2] = _mm256_loadu_si256((__m256i *) (obj->ctr + 24));
-    x1v[3] = _mm256_loadu_si256((__m256i *) (obj->ctr + 28));
+    x0v[0] = _mm256_loadu_si256((__m256i *) (void *) obj->ctr);
+    x0v[1] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 4));
+    x0v[2] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 8));
+    x0v[3] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 12));
+    x1v[0] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 16));
+    x1v[1] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 20));
+    x1v[2] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 24));
+    x1v[3] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 28));
 #else
 #error Unknown number of PRNG copies
 #endif
     make_block_vec(x0v, x1v, obj->k);
 
 #if NCOPIES == 4
-    _mm256_storeu_si256((__m256i *) obj->out, x0v[0]);
-    _mm256_storeu_si256((__m256i *) (obj->out + 4), x1v[0]);
+    _mm256_storeu_si256((__m256i *) (void *) obj->out, x0v[0]);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 4), x1v[0]);
 #elif NCOPIES == 8
-    _mm256_storeu_si256((__m256i *) obj->out, x0v[0]);
-    _mm256_storeu_si256((__m256i *) (obj->out + 4), x0v[1]);
-    _mm256_storeu_si256((__m256i *) (obj->out + 8), x1v[0]);
-    _mm256_storeu_si256((__m256i *) (obj->out + 12), x1v[1]);
+    _mm256_storeu_si256((__m256i *) (void *) obj->out, x0v[0]);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 4), x0v[1]);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 8), x1v[0]);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 12), x1v[1]);
 #elif NCOPIES == 16
-    _mm256_storeu_si256((__m256i *) obj->out, x0v[0]);
-    _mm256_storeu_si256((__m256i *) (obj->out + 4), x0v[1]);
-    _mm256_storeu_si256((__m256i *) (obj->out + 8), x0v[2]);
-    _mm256_storeu_si256((__m256i *) (obj->out + 12), x0v[3]);
-    _mm256_storeu_si256((__m256i *) (obj->out + 16), x1v[0]);
-    _mm256_storeu_si256((__m256i *) (obj->out + 20), x1v[1]);
-    _mm256_storeu_si256((__m256i *) (obj->out + 24), x1v[2]);
-    _mm256_storeu_si256((__m256i *) (obj->out + 28), x1v[3]);
+    _mm256_storeu_si256((__m256i *) (void *) obj->out, x0v[0]);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 4), x0v[1]);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 8), x0v[2]);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 12), x0v[3]);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 16), x1v[0]);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 20), x1v[1]);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 24), x1v[2]);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 28), x1v[3]);
 #else
 #error Unknown number of PRNG copies
 #endif

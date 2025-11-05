@@ -5,7 +5,8 @@
  * (not birthday spacings!) test, 2D 16x16 Ising model tests and adaptive
  * frequency test for 8-bit and 16-bit blocks.
  *
- * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -67,4 +68,4 @@ void battery_unit_sphere_volume(GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype);
 
 
-#endif
+#endif // __SMOKERAND_EXTRATESTS_H

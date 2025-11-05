@@ -47,23 +47,13 @@ void set_use_stderr_for_printf(int val)
     use_stderr_for_printf = val;
 }
 
-static void CallerAPI_set_ram_info(CallerAPI *intf)
-{
-    long long ramsize = get_ram_size();
-    if (ramsize > 0) {
-        intf->printf("RAM size: %lld MiB\n", ramsize / (1ull << 20));
-    } else {
-        intf->printf("RAM size: unknown\n", ramsize);
-    }
-}
-
 ///////////////////////////////
 ///// Single-threaded API /////
 ///////////////////////////////
 
 static uint32_t get_seed32(void)
 {
-    return Entropy_seed64(&entropy, 0) >> 32;
+    return (uint32_t) (Entropy_seed64(&entropy, 0) >> 32);
 }
 
 static uint64_t get_seed64(void)
@@ -97,7 +87,7 @@ CallerAPI CallerAPI_init(void)
     intf.printf = printf_ser;
     intf.snprintf = snprintf;
     intf.strcmp = strcmp;
-    CallerAPI_set_ram_info(&intf);
+    intf.get_ram_info = get_ram_info;
     return intf;
 }
 
@@ -131,7 +121,7 @@ static uint64_t get_seed64_mt(void)
 
 static uint32_t get_seed32_mt(void)
 {
-    return get_seed64_mt() >> 32;
+    return (uint32_t) (get_seed64_mt() >> 32);
 }
 
 static int printf_mt(const char *format, ...)
@@ -169,7 +159,7 @@ CallerAPI CallerAPI_init_mthr(void)
     intf.printf = printf_mt;
     intf.snprintf = snprintf;
     intf.strcmp = strcmp;
-    CallerAPI_set_ram_info(&intf);
+    intf.get_ram_info = get_ram_info;
     return intf;
 }
 
@@ -392,7 +382,7 @@ static void quicksort_range(uint64_t *v, ptrdiff_t begin, ptrdiff_t end)
 
 void quicksort64(uint64_t *x, size_t len)
 {
-    quicksort_range(x, 0, len - 1);
+    quicksort_range(x, 0, (ptrdiff_t) (len - 1));
 }
 
 
@@ -481,6 +471,23 @@ void radixsort32(uint32_t *x, size_t len)
     countsort32(out, x,   len, 0);
     countsort32(x,   out, len, 16);
     free(out);
+}
+
+
+/**
+ * @brief Fast sort for 64-bit integers that selects between radix sort
+ * and quick sort. Selection depends on the available RAM estimation
+ * and will use quicksort if we don't have enough memory for buffers.
+ */
+void fastsort64(const RamInfo *info, uint64_t *x, size_t len)
+{
+    const long long bufsize = (long long) (len * sizeof(uint64_t)) + (1ll << 20);
+    const long long ramsize = info->phys_avail_nbytes;
+    if (ramsize != RAM_SIZE_UNKNOWN && bufsize > ramsize) {
+        radixsort64(x, len);
+    } else {
+        quicksort64(x, len);
+    }
 }
 
 
@@ -741,7 +748,8 @@ static void TestResults_print_report(const TestResults *results,
     if (ntests >= 5) {
         printf("Quality (0-4): %.2f (%s)\n", grade, interpret_grade(grade));
     }
-    printf("Elapsed time:  "); print_elapsed_time(nseconds_total);
+    printf("Elapsed time:  ");
+    print_elapsed_time((unsigned long long) nseconds_total);
     printf("\n\n");
 }
 

@@ -5,11 +5,7 @@
  */
 
 #include "smokerand/blake2s.h"
-
-static inline uint32_t rotr32(uint32_t x, int r)
-{
-    return (x << ((-r) & 31)) | (x >> r);
-}
+#include "smokerand/coredefs.h"
 
 // Little-endian byte access.
 static uint32_t b2s_get32(const void *src)
@@ -111,7 +107,7 @@ int blake2s_init(blake2s_ctx *ctx, size_t outlen,
 
     for (size_t i = 0; i < 8; i++)      // state, "param block"
         ctx->h[i] = blake2s_iv[i];
-    ctx->h[0] ^= 0x01010000 ^ (keylen << 8) ^ outlen;
+    ctx->h[0] ^= 0x01010000 ^ ((uint32_t) keylen << 8) ^ (uint32_t) outlen;
 
     ctx->t[0] = 0;                      // input count low word
     ctx->t[1] = 0;                      // input count high word
@@ -136,8 +132,8 @@ void blake2s_update(blake2s_ctx *ctx,
     const void *in, size_t inlen)       // data bytes
 {
     for (size_t i = 0; i < inlen; i++) {
-        if (ctx->c == 64) {             // buffer full ?
-            ctx->t[0] += ctx->c;        // add counters
+        if (ctx->c == 64) {                  // buffer full ?
+            ctx->t[0] += (uint32_t) ctx->c;  // add counters
             if (ctx->t[0] < ctx->c)     // carry overflow ?
                 ctx->t[1]++;            // high word
             blake2s_compress(ctx, 0);   // compress (not last)
@@ -153,7 +149,7 @@ void blake2s_update(blake2s_ctx *ctx,
  */
 void blake2s_final(blake2s_ctx *ctx, void *out)
 {
-    ctx->t[0] += ctx->c;                // mark last block offset
+    ctx->t[0] += (uint32_t) ctx->c;     // mark last block offset
     if (ctx->t[0] < ctx->c)             // carry overflow
         ctx->t[1]++;                    // high word
 

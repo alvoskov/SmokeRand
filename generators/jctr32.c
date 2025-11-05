@@ -205,7 +205,7 @@ void Jctr32VecState_block(Jctr32VecState *obj)
 #ifdef __AVX2__
     __m256i out[8], x[8];
     for (size_t i = 0; i < 8; i++) {
-        out[i] = _mm256_loadu_si256((__m256i *) &obj->x[i].u32[0]);
+        out[i] = _mm256_loadu_si256((__m256i *) (void *) &obj->x[i].u32[0]);
         x[i] = out[i];
     }
     // 4 rounds - pass SmokeRand `full` battery
@@ -218,7 +218,7 @@ void Jctr32VecState_block(Jctr32VecState *obj)
     jctr32_vec_round(out);
     for (size_t i = 0; i < 8; i++) {
         out[i] = _mm256_add_epi32(out[i], x[i]);
-        _mm256_storeu_si256((__m256i *) &obj->out[i].u32[0], out[i]);
+        _mm256_storeu_si256((__m256i *) (void *) &obj->out[i].u32[0], out[i]);
     }
 #else
     (void) obj;

@@ -3,7 +3,8 @@
  * @brief Subroutines and special functions required for implementation
  * of statistical tests.
  *
- * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -105,7 +106,7 @@ static inline TestResults TestDescription_run(const TestDescription *obj, Genera
  * @brief Tests battery description.
  */
 typedef struct {
-    const char *name; 
+    const char *name;
     const TestDescription *tests;
 } TestsBattery;
 
@@ -127,6 +128,7 @@ PValueCategory get_pvalue_category(double pvalue);
 void quicksort64(uint64_t *x, size_t len);
 void radixsort32(uint32_t *x, size_t len);
 void radixsort64(uint64_t *x, size_t len);
+void fastsort64(const RamInfo *info, uint64_t *x, size_t len);
 
 
 typedef struct {
@@ -158,6 +160,17 @@ void GeneratorInfo_bits_to_file(GeneratorInfo *gen, const CallerAPI *intf, int m
 ////////////////////////////////////////
 ///// Some useful inline functions /////
 ////////////////////////////////////////
+
+/**
+ * @brief Calculates the \f$ (O_i - E_i)^2 / E_i \f term.
+ * @param Oi  Observed frequency.
+ * @param Ei  Expected (theoretical) frequency.
+ */
+static inline double calc_chi2emp_term(unsigned long long Oi, double Ei)
+{
+    double delta = (double) Oi - Ei;
+    return delta * delta / Ei;
+}
 
 /**
  * @brief Calculate Hamming weight (number of 1's for byte)
@@ -202,7 +215,7 @@ static inline uint8_t get_uint64_hamming_weight(uint64_t x)
 {
 #if defined(__GNUC__)
     // GCC specific extension (may use a single CPU instruction)
-    return __builtin_popcountll(x);
+    return (uint8_t) __builtin_popcountll(x);
 #else
     // Portable implementation of Hamming weights computation
     uint8_t hw = 0;
@@ -217,16 +230,16 @@ static inline uint8_t get_uint64_hamming_weight(uint64_t x)
 
 static inline uint8_t reverse_bits4(uint8_t x)
 {
-    x = (x >> 2) | (x << 2);
-    x = ((x & 0xA) >> 1) | ((x & 0x5) << 1);
+    x = (uint8_t) ( (x >> 2) | (x << 2) );
+    x = (uint8_t) ( ((x & 0xA) >> 1) | ((x & 0x5) << 1) );
     return x;
 }
 
 static inline uint8_t reverse_bits8(uint8_t x)
 {
-    x = (x >> 4) | (x << 4);
-    x = ((x & 0xCC) >> 2) | ((x & 0x33) << 2);
-    x = ((x & 0xAA) >> 1) | ((x & 0x55) << 1);
+    x = (uint8_t) ( (x >> 4) | (x << 4) );
+    x = (uint8_t) ( ((x & 0xCC) >> 2) | ((x & 0x33) << 2) );
+    x = (uint8_t) ( ((x & 0xAA) >> 1) | ((x & 0x55) << 1) );
     return x;
 }
 
@@ -253,4 +266,4 @@ static inline uint64_t reverse_bits64(uint64_t x)
     return x;
 }
 
-#endif
+#endif // __SMOKERAND_CORE_H

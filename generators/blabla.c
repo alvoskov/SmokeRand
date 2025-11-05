@@ -148,8 +148,8 @@ static inline void blabla_round_avx2(__m256i *a, __m256i *b, __m256i *c, __m256i
 void EXPORT BlaBlaState_block_vector(BlaBlaState *obj)
 {
 #ifdef __AVX2__
-    const __m256i *w256x = (__m256i *) (&obj->x[0]);
-    __m256i *w256o = (__m256i *) (&obj->out[0]);
+    const __m256i *w256x = (__m256i *) (void *) (&obj->x[0]);
+    __m256i *w256o = (__m256i *) (void *) (&obj->out[0]);
 
     __m256i in[8], x[8];
     for (size_t i = 0; i < 8; i++) {

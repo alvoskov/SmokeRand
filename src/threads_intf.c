@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #define NTHREADS_MAX 128
 
@@ -112,14 +113,21 @@ ThreadObj ThreadObj_current(void)
     #include <dlfcn.h>
 #endif
 
+
+#if defined(__WATCOMC__) && defined(USE_PE32_DOS)
+    #include <i86.h>
+    #include <dos.h>
+#endif
+
+
 void *dlopen_wrap(const char *libname)
 {
 #ifdef USE_LOADLIBRARY
     HMODULE lib = LoadLibraryA(libname);
     if (lib == NULL || lib == INVALID_HANDLE_VALUE) {
-        int errcode = (int) GetLastError();
+        DWORD errcode = GetLastError();
         fprintf(stderr, "Cannot load the '%s' module; error code: %d\n",
-            libname, errcode);
+            libname, (int) errcode);
         LPSTR msg_buf = NULL;
         (void) FormatMessageA(
             FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -197,7 +205,7 @@ int get_cpu_numcores(void)
 #ifdef USE_LOADLIBRARY
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
-    return sysinfo.dwNumberOfProcessors;
+    return (int) sysinfo.dwNumberOfProcessors;
 #elif defined(__DJGPP__)
     return 1;
 #elif !defined(NO_POSIX)
@@ -209,20 +217,103 @@ int get_cpu_numcores(void)
 
 //-------------------------------------------------------------
 
+#ifdef __DJGPP__
+#include <dpmi.h>
+#endif
 
-long long get_ram_size(void)
+/**
+ * @brief The output buffer for "Get Free Memory Information" DPMI 0.9
+ * function.
+ * @details Note about fields names:
+ *
+ * - 0x14 named as "total_number_of_unlocked_pages" in DPMI spec but described
+ * as "the number of physical pages that currently are not in use."
+ * - 0x18 name is consistent with description
+ */
+typedef struct {
+    uint32_t largest_block_avail;     // 0x00
+    uint32_t max_unlocked_page;       // 0x04
+    uint32_t largest_lockable_page;   // 0x08
+    uint32_t lin_addr_space;          // 0x0C
+    uint32_t num_free_pages_avail;    // 0x10
+    uint32_t num_physical_pages_free; // 0x14
+    uint32_t total_physical_pages;    // 0x18
+    uint32_t free_lin_addr_space;     // 0x1C
+    uint32_t size_of_page_file;       // 0x20
+    uint32_t reserved[3];
+} DpmiMemInfo;
+
+
+static inline void trunc_ram_info(RamInfo *info)
+{
+#if SIZE_MAX == UINT32_MAX
+    const long long max_ram = 1ll << 31; // 2 GiB
+    if (info->phys_total_nbytes > max_ram) {
+        info->phys_total_nbytes = max_ram;
+    }
+    if (info->phys_avail_nbytes > max_ram) {
+        info->phys_avail_nbytes = max_ram;
+    }
+#else
+    (void) info;
+#endif
+}
+
+/**
+ * @brief Returns total amount of physical RAM in bytes. For 32-bit builds
+ * it won't return more than 2 GiB due to limitations of 32-bit address space.
+ * @details Supports POSIX API, Windows API and DPMI 0.9 (for DJGPP and Open
+ * Watcom). References for DPMI implementation:
+ *
+ * - https://open-watcom.github.io/open-watcom-v2-wikidocs/cpguide.html
+ * - https://www.delorie.com/djgpp/doc/dpmi/api/310500.html
+ * - https://docs.pcjs.org/specs/dpmi/1990_04_23-DPMI_Spec_v09.pdf
+ */
+int get_ram_info(RamInfo *info)
 {
 #ifdef USE_LOADLIBRARY
     MEMORYSTATUSEX statex;
     statex.dwLength = sizeof(statex);
     GlobalMemoryStatusEx(&statex);
-    return (long long) statex.ullTotalPhys;
+    info->phys_total_nbytes = (long long) statex.ullTotalPhys;
+    info->phys_avail_nbytes = (long long) statex.ullAvailPhys;
+    trunc_ram_info(info);
+    return 1; // Success
+#elif defined(__DJGPP__)
+    const uint32_t page_size = 4096u;
+    __dpmi_free_mem_info meminfo;
+    __dpmi_get_free_memory_information(&meminfo);
+    info->phys_total_nbytes =
+        (long long) (meminfo.total_number_of_physical_pages * page_size);
+    info->phys_avail_nbytes =
+        (long long) (meminfo.total_number_of_free_pages * page_size);
+    trunc_ram_info(info);
+    return 1; // Success
+#elif defined(__WATCOMC__) && defined(USE_PE32_DOS)
+    const uint32_t page_size = 4096u;
+    union REGS regs;
+    struct SREGS sregs;
+    DpmiMemInfo meminfo;
+    regs.x.eax = 0x500;
+    memset(&sregs, 0, sizeof(sregs));
+    sregs.es = FP_SEG(&meminfo);
+    regs.x.edi = FP_OFF(&meminfo);
+    int386x(0x31, &regs, &regs, &sregs);
+    info->phys_total_nbytes =
+        (long long) (meminfo.total_physical_pages * page_size);
+    info->phys_avail_nbytes =
+        (long long) (meminfo.num_physical_pages_free * page_size);
+    trunc_ram_info(info);
+    return 1; // Success
 #elif !defined(NO_POSIX)
-    const long long pages = sysconf(_SC_PHYS_PAGES);
     const long long page_size = sysconf(_SC_PAGESIZE);
-    const long long total_ram_bytes = pages * page_size;
-    return total_ram_bytes;
+    info->phys_total_nbytes = sysconf(_SC_PHYS_PAGES) * page_size;
+    info->phys_avail_nbytes = sysconf(_SC_AVPHYS_PAGES) * page_size;
+    trunc_ram_info(info);
+    return 1; // Success
 #else
-    return -1;
+    info->phys_total_nbytes = RAM_SIZE_UNKNOWN;
+    info->phys_avail_nbytes = RAM_SIZE_UNKNOWN;
+    return 0; // Failure
 #endif
 }

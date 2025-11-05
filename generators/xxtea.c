@@ -199,8 +199,7 @@ void Xxtea128State_block(Xxtea128State *obj)
  */
 static inline void Xxtea128State_inc_counter(Xxtea128State *obj)
 {
-    uint64_t *ctr = (uint64_t *) obj->ctr;
-    (*ctr)++;
+    if (++obj->ctr[0] == 0) ++obj->ctr[1];
 }
 
 /**
@@ -250,10 +249,10 @@ void Xxtea128VecState_block(Xxtea128VecState *obj)
 #ifdef XXTEA_VEC_ENABLED
     uint32_t sum = 0;
     __m256i out[4], y, z, keyv[4];
-    out[0] = _mm256_loadu_si256((__m256i *) obj->ctr);
-    out[1] = _mm256_loadu_si256((__m256i *) (obj->ctr + XXTEA_NCOPIES));
-    out[2] = _mm256_loadu_si256((__m256i *) (obj->ctr + 2*XXTEA_NCOPIES));
-    out[3] = _mm256_loadu_si256((__m256i *) (obj->ctr + 3*XXTEA_NCOPIES));
+    out[0] = _mm256_loadu_si256((__m256i *) (void *) obj->ctr);
+    out[1] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + XXTEA_NCOPIES));
+    out[2] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 2*XXTEA_NCOPIES));
+    out[3] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 3*XXTEA_NCOPIES));
     keyv[0] = _mm256_set1_epi32(obj->key[0]);
     keyv[1] = _mm256_set1_epi32(obj->key[1]);
     keyv[2] = _mm256_set1_epi32(obj->key[2]);
@@ -272,10 +271,10 @@ void Xxtea128VecState_block(Xxtea128VecState *obj)
         y = out[0];
         z = _mm256_add_epi32(out[3], mixv(y, z, sumv, keyv[3 ^ e])); out[3] = z;
     }
-    _mm256_storeu_si256((__m256i *) obj->out,                     out[0]);
-    _mm256_storeu_si256((__m256i *) (obj->out + XXTEA_NCOPIES),   out[1]);
-    _mm256_storeu_si256((__m256i *) (obj->out + 2*XXTEA_NCOPIES), out[2]);
-    _mm256_storeu_si256((__m256i *) (obj->out + 3*XXTEA_NCOPIES), out[3]);
+    _mm256_storeu_si256((__m256i *) (void *) obj->out,                     out[0]);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + XXTEA_NCOPIES),   out[1]);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 2*XXTEA_NCOPIES), out[2]);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 3*XXTEA_NCOPIES), out[3]);
 #else
     (void) obj;
 #endif
@@ -367,8 +366,7 @@ void Xxtea256State_block(Xxtea256State *obj)
  */
 static inline void Xxtea256State_inc_counter(Xxtea256State *obj)
 {
-    uint64_t *ctr = (uint64_t *) obj->ctr;
-    (*ctr)++;
+    if (++obj->ctr[0] == 0) ++obj->ctr[1];
 }
 
 /**
@@ -418,24 +416,24 @@ void Xxtea256VecState_block(Xxtea256VecState *obj)
     uint32_t sum = 0;
     __m256i out[8], y, z;
     for (int i = 0; i < 8; i++) {
-        out[i] = _mm256_loadu_si256((__m256i *) (obj->ctr + i*XXTEA_NCOPIES));
+        out[i] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + i*XXTEA_NCOPIES));
     }
     y = out[0], z = out[7];
     for (int i = 0; i < XXTEA256_NROUNDS; i++) {
         sum += XXTEA_DELTA;
         unsigned int e = (sum >> 2) & 3;
-        __m256i sumv = _mm256_set1_epi32(sum), rk;
+        __m256i sumv = _mm256_set1_epi32(sum);
         for (int j = 0; j < 7; j++) {
             __m256i rk = _mm256_set1_epi32(obj->key[(j & 3) ^ e]);
             y = out[j + 1];
             z = _mm256_add_epi32(out[j], mixv(y, z, sumv, rk)); out[j] = z;
         }
-        rk = _mm256_set1_epi32(obj->key[(7 & 3) ^ e]);
+        __m256i rk = _mm256_set1_epi32(obj->key[(7 & 3) ^ e]);
         y = out[0];
         z = _mm256_add_epi32(out[7], mixv(y, z, sumv, rk)); out[7] = z;
     }
     for (int i = 0; i < 8; i++) {
-        _mm256_storeu_si256((__m256i *) (obj->out + i*XXTEA_NCOPIES), out[i]);
+        _mm256_storeu_si256((__m256i *) (void *) (obj->out + i*XXTEA_NCOPIES), out[i]);
     }
 #else
     (void) obj;

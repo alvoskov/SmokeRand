@@ -57,12 +57,12 @@ static SpeedResults measure_speed(const GeneratorInfo *gen, const CallerAPI *int
         uint64_t toc_proc = cpuclock();
         clock_t toc = clock();
         ns_total = 1.0e9 * (toc - tic) / CLOCKS_PER_SEC;
-        results.ns_per_call = ns_total / niter;
-        results.ticks_per_call = (double) (toc_proc - tic_proc) / niter;
+        results.ns_per_call = ns_total / (double) niter;
+        results.ticks_per_call = (double) (toc_proc - tic_proc) / (double) niter;
         // Convert to cpb
         size_t block_size = (mode == SPEED_UINT) ? 1 : SUM_BLOCK_SIZE;
         size_t nbytes = block_size * gen->nbits / 8;
-        results.cpb = results.ticks_per_call / nbytes;
+        results.cpb = results.ticks_per_call / (double) nbytes;
     }
     GeneratorState_destruct(&obj, intf);
     return results;

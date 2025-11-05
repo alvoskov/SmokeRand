@@ -209,7 +209,7 @@ TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
     TestResults ans = TestResults_create("hamming_ot");
     ans.x = 0;
     for (size_t i = 0; i < obj->len; i++) {
-        double Ei = count_total * obj->tuples[i].p;
+        double Ei = (double) count_total * obj->tuples[i].p;
         double Oi = (double) obj->tuples[i].count;
         if (Oi > DBL_EPSILON) {
             ans.x += 2.0 * Oi * log(Oi / Ei);
@@ -308,7 +308,7 @@ static const uint8_t *hamming_ot_fill_hw_tables(GeneratorState *obj,
     const HammingOtOptions *opts, double *code_to_prob)
 {
     // Select the right table for recoding Hamming weights to codes
-    int nweights = 0;
+    unsigned int nweights = 0;
     const uint8_t *hw = NULL;
     if (opts->mode != HAMMING_OT_VALUES) {
         // 2-bit codes for Hamming weights (taken from PractRand)
@@ -356,7 +356,7 @@ static const uint8_t *hamming_ot_fill_hw_tables(GeneratorState *obj,
     for (int i = 0; i < 4; i++) {
         code_to_prob[i] = 0.0;
     }
-    for (int i = 0; i < nweights; i++) {
+    for (unsigned int i = 0; i < nweights; i++) {
         code_to_prob[hw[i]] += sr_binomial_pdf(i, nweights - 1, 0.5);
     }
     return hw;
@@ -505,9 +505,9 @@ TestResults hamming_ot_test(GeneratorState *obj, const HammingOtOptions *opts)
  * codes - to probabilities.
  */
 static void hamming_ot_long_fill_hw_tables(unsigned short *hw_to_code,
-    double *code_to_prob, int bits_per_word)
+    double *code_to_prob, unsigned int bits_per_word)
 {
-    const int nweights = bits_per_word + 1;
+    const unsigned int nweights = bits_per_word + 1;
     if (bits_per_word == 128) {
         // 0:59 | 60:64 | 65:68 | 69:128 
         for (int i = 0;  i <= 59; i++)  hw_to_code[i] = 0;
@@ -534,7 +534,7 @@ static void hamming_ot_long_fill_hw_tables(unsigned short *hw_to_code,
         for (int i = 524; i <= 1024; i++) hw_to_code[i] = 3;
     } else {
         // Unknown word size: do something that will cause failure
-        for (int i = 0; i < nweights; i++) {
+        for (unsigned int i = 0; i < nweights; i++) {
             hw_to_code[0] = 0;
         }
     }
@@ -543,7 +543,7 @@ static void hamming_ot_long_fill_hw_tables(unsigned short *hw_to_code,
     for (int i = 0; i < 4; i++) {
         code_to_prob[i] = 0.0;
     }
-    for (int i = 0; i < nweights; i++) {
+    for (unsigned int i = 0; i < nweights; i++) {
         code_to_prob[hw_to_code[i]] += sr_binomial_pdf(i, nweights - 1, 0.5);
     }
 }
@@ -640,11 +640,11 @@ double hamming_distr_calc_zemp(unsigned long long *o, size_t nbits)
         npoints += o[i];
     }
     double *p = calloc(nbits + 1, sizeof(double));
-    sr_binomial_pdf_all(p, nbits, 0.5);
+    sr_binomial_pdf_all(p, (unsigned long) nbits, 0.5);
     for (size_t i = 0; i < nbits; i++) {
-        double e_i = npoints * p[i];
+        double e_i = (double) npoints * p[i];
         if (e_i > 25.0) {
-            chi2emp += pow(o[i] - e_i, 2.0) / e_i;
+            chi2emp += calc_chi2emp_term(o[i], e_i);
             df++;
         }
     }
@@ -760,8 +760,8 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
         obj->intf->printf("  Invalid nlevels value\n");
         return ans;
     }
-    int block_len = 1 << opts->nlevels;
-    HammingDistrHist *h = calloc(opts->nlevels, sizeof(HammingDistrHist));
+    unsigned int block_len = 1 << opts->nlevels;
+    HammingDistrHist *h = calloc((size_t) opts->nlevels, sizeof(HammingDistrHist));
     uint64_t *x = calloc(block_len, sizeof(uint64_t));
     int *hw = calloc(block_len, sizeof(int));
     for (int i = 0; i < opts->nlevels; i++) {
@@ -773,21 +773,21 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
     uint64_t not_mask = ~mask;
     uint64_t bad_or = 0;
     for (unsigned long long i = 0; i < opts->nvalues; i += block_len) {
-        for (int j = 0; j < block_len; j++) {
+        for (unsigned int j = 0; j < block_len; j++) {
             uint64_t u = obj->gi->get_bits(obj->state);
             x[j] = u & mask;
             bad_or |= u & not_mask;
             hw[j] = get_uint64_hamming_weight(x[j]);
         }
         // 1-value blocks
-        for (int j = 0; j < block_len; j += 2) {
+        for (unsigned int j = 0; j < block_len; j += 2) {
             h[0].o[hw[j]]++; h[0].o[hw[j + 1]]++;
             h[0].o_xor[get_uint64_hamming_weight(x[j] ^ x[j + 1])]++;
         }
         // 2, 4, 8, 16 - value blocks
         for (int j = 1; j < opts->nlevels; j++) {
-            calc_block_hw_sums(h[j].o,        hw, 1 << j, block_len);
-            calc_block_hw_xorsums(h[j].o_xor, x,  1 << j, block_len);
+            calc_block_hw_sums(h[j].o,        hw, 1 << j, (int) block_len);
+            calc_block_hw_xorsums(h[j].o_xor, x,  1 << j, (int) block_len);
         }
     }
     if (bad_or != 0) {
