@@ -141,7 +141,7 @@ void AES128State_init(AES128State *obj, const AES128Key *enc_key)
 void AES128State_encode(const AES128State *obj, uint8_t *output, const uint8_t *input)
 {
 #ifdef AESNI_ENABLED
-    __m128i m = _mm_loadu_si128((__m128i *) input);
+    __m128i m = _mm_loadu_si128((__m128i *) (void *) input);
     const AESBlock *ks = obj->key_schedule;
     m = _mm_xor_si128(m, ks[0].u128);
     m = _mm_aesenc_si128(m, ks[1].u128);
@@ -154,7 +154,7 @@ void AES128State_encode(const AES128State *obj, uint8_t *output, const uint8_t *
     m = _mm_aesenc_si128(m, ks[8].u128);
     m = _mm_aesenc_si128(m, ks[9].u128);
     m = _mm_aesenclast_si128(m, ks[10].u128);
-    _mm_storeu_si128((__m128i *) output, m);
+    _mm_storeu_si128((__m128i *) (void *) output, m);
 #else
     (void) obj; (void) output; (void) input;
 #endif

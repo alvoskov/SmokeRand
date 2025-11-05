@@ -1,7 +1,8 @@
 /**
  * @file fileio.h
  * @brief Implementation of PRNG based on reading binary data from stdin.
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -17,4 +18,4 @@ typedef enum {
 
 GeneratorInfo StdinCollector_get_info(StdinCollectorType type);
 void StdinCollector_print_report(void);
-#endif
+#endif // __SMOKERAND_FILEIO_H

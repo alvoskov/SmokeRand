@@ -231,19 +231,19 @@ void Speck128VecState_init(Speck128VecState *obj, const uint64_t *key, int nroun
 static inline void Speck128VecState_block(Speck128VecState *obj)
 {
 #ifdef SPECK_VEC_ENABLED
-    __m256i a = _mm256_loadu_si256((__m256i *) obj->ctr);
-    __m256i b = _mm256_loadu_si256((__m256i *) (obj->ctr + 4));
-    __m256i c = _mm256_loadu_si256((__m256i *) (obj->ctr + 8));
-    __m256i d = _mm256_loadu_si256((__m256i *) (obj->ctr + 12));
+    __m256i a = _mm256_loadu_si256((__m256i *) (void *) obj->ctr);
+    __m256i b = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 4));
+    __m256i c = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 8));
+    __m256i d = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 12));
     for (int i = 0; i < obj->nrounds; i++) {
         __m256i kv = _mm256_set1_epi64x(obj->keys[i]);
         round_avx(&b, &a, &kv);
         round_avx(&d, &c, &kv);
     }
-    _mm256_storeu_si256((__m256i *) obj->out, a);
-    _mm256_storeu_si256((__m256i *) (obj->out + 4), b);
-    _mm256_storeu_si256((__m256i *) (obj->out + 8), c);
-    _mm256_storeu_si256((__m256i *) (obj->out + 12), d);
+    _mm256_storeu_si256((__m256i *) (void *) obj->out, a);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 4), b);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 8), c);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 12), d);
 #else
     (void) obj;
 #endif
@@ -257,12 +257,12 @@ static inline void Speck128VecState_inc_counter(Speck128VecState *obj)
 {
 #ifdef SPECK_VEC_ENABLED
     const __m256i inc = _mm256_set1_epi64x(1);
-    __m256i ctr0 = _mm256_loadu_si256((__m256i *) &obj->ctr[0]); // 0-3
-    __m256i ctr8 = _mm256_loadu_si256((__m256i *) &obj->ctr[8]); // 8-11
+    __m256i ctr0 = _mm256_loadu_si256((__m256i *) (void *) &obj->ctr[0]); // 0-3
+    __m256i ctr8 = _mm256_loadu_si256((__m256i *) (void *) &obj->ctr[8]); // 8-11
     ctr0 = _mm256_add_epi64(ctr0, inc);
     ctr8 = _mm256_add_epi64(ctr8, inc);
-    _mm256_storeu_si256((__m256i *) &obj->ctr[0], ctr0);
-    _mm256_storeu_si256((__m256i *) &obj->ctr[8], ctr8);
+    _mm256_storeu_si256((__m256i *) (void *) &obj->ctr[0], ctr0);
+    _mm256_storeu_si256((__m256i *) (void *) &obj->ctr[8], ctr8);
 #else
     (void) obj;
 #endif

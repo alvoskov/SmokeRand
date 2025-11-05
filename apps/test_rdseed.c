@@ -4,7 +4,7 @@ int main()
 {
     uint64_t seed = 0;
     for (int i = 0; i < 5; i++) {
-        seed += mix_rdseed(0);
+        seed += call_rdseed();
     }
     if (!seed) {
         printf("rdseed is not implemented: sum is 0x%llX\n",

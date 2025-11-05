@@ -158,7 +158,7 @@ void Key256_fill(Key256 *key, uint64_t *data)
     key->lo.data.u64[0] = data[0];
     key->lo.data.u64[1] = data[1];
     key->hi.data.u64[0] = data[2];
-    key->lo.data.u64[1] = data[3];
+    key->hi.data.u64[1] = data[3];
 }
 
 

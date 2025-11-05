@@ -47,9 +47,11 @@ static inline BirthdayOptions BirthdayOptions_create(GeneratorInfo *gi,
     const unsigned int log2_len, const unsigned int log2_lambda)
 {
     BirthdayOptions opts;
-    unsigned int nbits_per_value = birthday_get_nbits_per_value(gi);
+    const unsigned int nbits_per_value = birthday_get_nbits_per_value(gi);
+    const unsigned int a = nbits_per_value + log2_lambda + 1;
+    const unsigned int b = 2*log2_len;
+    opts.e = (a >= b) ? (a - b) : 0;
     opts.n = 1ull << log2_len;
-    opts.e = nbits_per_value + log2_lambda + 1 - 2*log2_len;
     return opts;
 }
 
@@ -130,7 +132,7 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
     }
     obj->intf->printf("  Shift:            %d bits\n",   (int) opts->e);
     obj->intf->printf("  Raw sample size:  2^%.2f values (2^%.2f bytes)\n",
-        sr_log2(nvalues_raw), sr_log2(8.0 * (double) nvalues_raw));
+        sr_log2((double) nvalues_raw), sr_log2(8.0 * (double) nvalues_raw));
     obj->intf->printf("  lambda = %g\n", lambda);
     obj->intf->printf("  Filling the array with 'birthdays'\n");
     uint64_t mask = (1ull << opts->e) - 1;
@@ -139,7 +141,7 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
     uint64_t *x = calloc(opts->n, sizeof(uint64_t));
     if (x == NULL) {
         obj->intf->printf("  Not enough memory (2^%.0f bytes is required)\n",
-            sr_log2(opts->n * 8.0));
+            sr_log2((double) opts->n * 8.0));
         return ans;
     }
     unsigned long long bytes_per_trvalue = 1ull << (opts->e + 3);
@@ -165,7 +167,8 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
             nseconds_total = (unsigned long) (time(NULL) - tic);
             nseconds_left = (unsigned long) ( ((unsigned long long) nseconds_total * (opts->n - i)) / (i + 1) );
             mib_per_sec = (double) (i * bytes_per_trvalue) / (double) nseconds_total / (1ul << 20);
-            obj->intf->printf("\r    %.1f %% completed; ", 100.0 * i / (double) opts->n);
+            obj->intf->printf("\r    %.1f %% completed; ",
+                100.0 * (double) i / (double) opts->n);
             obj->intf->printf("time elapsed: "); print_elapsed_time(nseconds_total);
             obj->intf->printf(", left: ");
             print_elapsed_time(nseconds_left);
@@ -187,7 +190,7 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
     tic = time(NULL);
     quicksort64(x, opts->n); // Not radix: to prevent "out of memory"
     obj->intf->printf("  Time elapsed: ");
-    print_elapsed_time(time(NULL) - tic);
+    print_elapsed_time((unsigned long long) (time(NULL) - tic));
     obj->intf->printf("\n");    
     obj->intf->printf("  Searching duplicates\n");
     unsigned long ndups = 0;
@@ -203,6 +206,34 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
     return ans;
 }
 
+/**
+ * @brief Estimates an optimal sample size for the birthday paradox test.
+ * @details The optimal size is about half of available physical RAM,
+ * the higher RAM consumption means higher performance of the test. If
+ * an information about RAM volume is not available then the next default
+ * settings are used:
+ *
+ * - 64-bit platforms: 2^30 (requires 8 GiB of RAM and ~30min)
+ * - 32-bit platforms: 2^27 (requires 1 GiB of RAM, very slow)
+ *
+ */
+static unsigned int birthday_get_log2_n(const CallerAPI *intf)
+{
+    RamInfo raminfo;
+    int ans = intf->get_ram_info(&raminfo);
+    if (ans == 0 || raminfo.phys_total_nbytes == RAM_SIZE_UNKNOWN) {
+        return (SIZE_MAX == UINT64_MAX) ? 30 : 27;
+    } else {
+        const double log2_ramsize = sr_log2((double) raminfo.phys_total_nbytes);
+        int log2_n = (int) floor(log2_ramsize);
+        log2_n += (log2_ramsize - log2_n > 0.5) ? 1 : 0;
+        log2_n -= 4; // Half of all RAM, also divide by 2^3 (nbytes->n_u64)
+        if (log2_n < 19) {
+            log2_n = 19;
+        }
+        return (unsigned int) log2_n;
+    }
+}
 
 /**
  * @brief An implementation of birthday paradox test for 64-bit PRNGS
@@ -224,8 +255,8 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
  */
 void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
 {
-    static const int log2_n = (SIZE_MAX == UINT64_MAX) ? 30 : 27;
-    unsigned int nbits_per_value = birthday_get_nbits_per_value(gen);
+    const unsigned int log2_n = birthday_get_log2_n(intf);
+    const unsigned int nbits_per_value = birthday_get_nbits_per_value(gen);
     BirthdayOptions opts_small = BirthdayOptions_create(gen, log2_n, 2);
     BirthdayOptions opts_large = BirthdayOptions_create(gen, log2_n, 4);
     intf->printf("64-bit birthday paradox test\n");
@@ -277,18 +308,18 @@ void BlockFrequency_destruct(BlockFrequency *obj)
 }
 
 static inline void BlockFrequency_count(BlockFrequency *obj,
-    const uint64_t u, const int nbytes)
+    const uint64_t u, const unsigned int nbytes)
 {
     uint64_t tmp = u;
     // Bytes counter
-    for (int i = 0; i < nbytes; i++) {
+    for (unsigned int i = 0; i < nbytes; i++) {
         obj->bytefreq[tmp & 0xFF]++;
         tmp >>= 8;
     }
     obj->nbytes += nbytes;
     // 16-bit chunks counter
     tmp = u;
-    for (int i = 0; i < nbytes / 2; i++) {
+    for (unsigned int i = 0; i < nbytes / 2; i++) {
         obj->w16freq[tmp & 0xFFFF]++;
         tmp >>= 16;
     }    
@@ -308,7 +339,7 @@ int BlockFrequency_calc(BlockFrequency *obj)
         long long Ei = (long long) obj->nbytes / 256;
         long long dE = (long long) obj->bytefreq[i] - (long long) Ei;
         chi2_bytes += pow((double) dE, 2.0) / (double) Ei;
-        double z_bytes = fabs((double) dE) / sqrt( obj->nbytes * 255.0 / 65536.0);
+        double z_bytes = fabs((double) dE) / sqrt( (double) obj->nbytes * 255.0 / 65536.0);
         if (zmax_bytes < z_bytes) {
             zmax_bytes = z_bytes;
             zmax_bytes_ind = i;
@@ -318,7 +349,8 @@ int BlockFrequency_calc(BlockFrequency *obj)
         long long Ei = (long long) obj->nw16 / 65536;
         long long dE = (long long) obj->w16freq[i] - (long long) Ei;
         chi2_w16 += pow((double) dE, 2.0) / (double) Ei;
-        double z_w16 = fabs((double) dE) / sqrt( obj->nw16 * 65535.0 / 65536.0 / 65536.0);
+        double z_w16 = fabs((double) dE) /
+            sqrt( (double) obj->nw16 * 65535.0 / 65536.0 / 65536.0);
         if (zmax_w16 < z_w16) {
             zmax_w16 = z_w16;
             zmax_w16_ind = i;
@@ -367,7 +399,8 @@ void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf)
             }
         }
         int is_ok = BlockFrequency_calc(&freq);
-        printf("  Time elapsed: "); print_elapsed_time(time(NULL) - tic);
+        printf("  Time elapsed: ");
+        print_elapsed_time((unsigned long long) (time(NULL) - tic));
         printf("\n\n");
         if (!is_ok) {
             break;
@@ -399,15 +432,14 @@ typedef struct {
 } Ising2DLattice;
 
 
-static inline int inc_modL(int i, int L)
+static inline unsigned int inc_modL(unsigned int i, unsigned int L)
 {
     return (++i) % L;
 }
 
-static inline int dec_modL(int i, int L)
+static inline unsigned int dec_modL(unsigned int i, unsigned int L)
 {
-    i--;
-    return (i >= 0) ? i : (L - 1);
+    return (i > 0) ? (i - 1) : (L - 1);
 }
 
 void Ising2DLattice_init(Ising2DLattice *obj, unsigned int L)
@@ -419,11 +451,11 @@ void Ising2DLattice_init(Ising2DLattice *obj, unsigned int L)
     if (obj->s == NULL || obj->nn == NULL) {
         fprintf(stderr, "***** Ising2DLattice_init: not enough memory *****");
         free(obj->s); free(obj->nn);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     // Precalculate neighbours indexes
     for (unsigned int i = 0; i < obj->N; i++) {
-        int ix = i % L, iy = i / L;
+        const unsigned int ix = i % L, iy = i / L;
         //printf("%d %d | ", ix, iy);
         obj->s[i] = +1;
         obj->nn[i].inds[0] = iy * L + inc_modL(ix, L);
@@ -536,7 +568,7 @@ void Ising2DLattice_pass(Ising2DLattice *obj, GeneratorState *gs, IsingAlgorithm
         Ising2DLattice_pass_metropolis(obj, gs);
     } else {
         fprintf(stderr, "Ising2DLattice_pass internal error: unknown algorithm\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -593,7 +625,7 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
     if (e == NULL || cv == NULL) {
         fprintf(stderr, "***** ising2d_test: not enough memory *****\n");
         free(e); free(cv);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     for (unsigned long ii = 0; ii < opts->nsamples; ii++) {
         long long energy_sum = 0, energy_sum2 = 0;
@@ -673,7 +705,7 @@ static double calc_usphere_volplus(unsigned int ndims)
  */
 TestResults unit_sphere_volume_test(GeneratorState *gs, const UnitSphereOptions *opts)
 {
-    double tof_coeff = pow(2.0, -((int) gs->gi->nbits));
+    const double tof_coeff = pow(2.0, -((int) gs->gi->nbits));
     long long n_inside = 0;
     TestResults ans = TestResults_create("usphere");
     if (opts->ndims < 2 || opts->ndims > 20 || opts->npoints < 1000) {
@@ -687,17 +719,17 @@ TestResults unit_sphere_volume_test(GeneratorState *gs, const UnitSphereOptions 
     for (unsigned long long i = 0; i < opts->npoints; i++) {
         double d = 0.0;
         for (unsigned int j = 0; j < opts->ndims; j++) {
-            double x = gs->gi->get_bits(gs->state) * tof_coeff;
+            const double x = (double) gs->gi->get_bits(gs->state) * tof_coeff;
             d += x * x;
         }
         if (d <= 1.0) {
             n_inside++;
         }
     }
-    double v_theor = calc_usphere_volplus(opts->ndims);
-    double v_num = (double) n_inside / (double) opts->npoints;
-    double s_theor = sqrt(opts->npoints * v_theor * (1.0 - v_theor));
-    long long n_inside_theor = (long long) (v_theor * opts->npoints);
+    const double v_theor = calc_usphere_volplus(opts->ndims);
+    const double v_num = (double) n_inside / (double) opts->npoints;
+    const double s_theor = sqrt((double) opts->npoints * v_theor * (1.0 - v_theor));
+    const long long n_inside_theor = (long long) (v_theor * (double) opts->npoints);
     ans.x = (double) (n_inside - n_inside_theor) / s_theor;
     ans.p = sr_stdnorm_pvalue(ans.x);
     ans.alpha = sr_stdnorm_cdf(ans.x);

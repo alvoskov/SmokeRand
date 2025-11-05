@@ -84,8 +84,8 @@ GeneratorFilter GeneratorFilter_from_name(const char *name)
 }
 
 typedef struct {
-    int nthreads;
-    int testid;
+    unsigned int nthreads;
+    unsigned int testid;
     int maxlen_log2; ///< log2(len) for stdout length in bytes
     GeneratorFilter filter;
     ReportType report_type;
@@ -100,7 +100,7 @@ typedef struct {
  * 2) For 32-bit systems - not more than 2 threads.
  * 3) If number of cores is more than 4 then leave one unloaded core.
  */
-static int get_default_nthreads(int *ncores)
+static unsigned int get_default_nthreads(int *ncores)
 {
     int nthreads = get_cpu_numcores();
     if (ncores != NULL) {
@@ -111,7 +111,7 @@ static int get_default_nthreads(int *ncores)
     }
     if (nthreads > 4)
         nthreads--;
-    return nthreads;
+    return (unsigned int) nthreads;
 }
 
 /**
@@ -147,9 +147,14 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
             fprintf(stderr, "Argument '%s' should have --argname=argval layout\n", argv[i]);
             return 1;
         }
-        size_t name_len = (eqpos - argv[i]) - 2;
+        ptrdiff_t name_len = (eqpos - argv[i]) - 2;
         if (name_len >= 32) name_len = 31;
-        memcpy(argname, &argv[i][2], name_len); argname[name_len] = '\0';
+        if (name_len > 0) {
+            memcpy(argname, &argv[i][2], (size_t) name_len);
+            argname[name_len] = '\0';
+        } else {
+            argname[0] = '\0';
+        }
         // Text arguments processing
         if (!strcmp(argname, "param")) {
             set_cmd_param(eqpos + 1);
@@ -165,13 +170,13 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
         // Numerical arguments processing
         argval = atoi(eqpos + 1);
         if (!strcmp(argname, "nthreads")) {
-            obj->nthreads = argval;
+            obj->nthreads = (unsigned int) argval;
             if (argval <= 0) {
                 fprintf(stderr, "Invalid value of argument '%s'\n", argname);
                 return 1;
             }
         } else if (!strcmp(argname, "testid")) {
-            obj->testid = argval;
+            obj->testid = (unsigned int) argval;
             if (argval <= 0) {
                 fprintf(stderr, "Invalid value of argument '%s'\n", argname);
                 return 1;
@@ -303,6 +308,24 @@ static void apply_filter(GeneratorInfo **gi, GeneratorFilter filter, GeneratorIn
 }
 
 
+static void print_ram_size(const CallerAPI *intf)
+{
+    RamInfo info;
+    const long long mib_nbytes = 1ull << 20;
+    const int ans = intf->get_ram_info(&info);
+    const long long ramsize = info.phys_total_nbytes;
+    if (ans == 0 || ramsize == RAM_SIZE_UNKNOWN) {
+        intf->printf("Available/free RAM: unknown\n");
+    } else if (ramsize > 64 * mib_nbytes) {
+        intf->printf("Total physical RAM: %lld MiB\n", info.phys_total_nbytes / mib_nbytes);
+        intf->printf("Free physical RAM:  %lld MiB\n", info.phys_avail_nbytes / mib_nbytes);
+    } else {
+        intf->printf("Total physical RAM: %lld KiB\n", info.phys_total_nbytes / 1024);
+        intf->printf("Free  physical RAM: %lld KiB\n", info.phys_avail_nbytes / 1024);
+    }
+}
+
+
 int main(int argc, char *argv[])
 {
     if (argc < 3) {
@@ -364,6 +387,7 @@ int main(int argc, char *argv[])
         }
         apply_filter(&gi, opts.filter, &filter_gen);
         GeneratorInfo_print(gi, is_stdout);
+        print_ram_size(&intf);
         int ans = run_battery(battery_name, gi, &intf, &opts);
         GeneratorModule_unload(&mod);
         CallerAPI_free();

@@ -151,7 +151,7 @@ static void *create(const CallerAPI *intf)
     obj->r = par.r; obj->s = par.s;
     obj->is_additive = par.is_additive;
     obj->pos = obj->r;
-    obj->u = (uint64_t *) ( (char *) obj + sizeof(LFibDyn_State) );
+    obj->u = (uint64_t *) (void *) ( (char *) obj + sizeof(LFibDyn_State) );
     // pcg_rxs_m_xs64 for initialization
     uint64_t state = intf->get_seed64();
     for (int k = 0; k <= obj->r; k++) {

@@ -5,7 +5,8 @@
  * data types, intrinstics. Also has cross-platform C99 specific versions
  * of functions, mainly for 32-bit platforms.
  *
- * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -300,4 +301,4 @@ static inline uint64_t Lcg128State_a128_iter(Lcg128State *obj,
     return obj->x_high;
 }
 
-#endif
+#endif // __SMOKERAND_INT128DEFS_H

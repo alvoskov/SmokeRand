@@ -79,7 +79,7 @@ static inline void bspace_make_tuples32(const BSpaceNDOptions *opts,
             u[j] = 0;
             for (size_t k = 0; k < opts->ndims; k++) {
                 u[j] <<= opts->nbits_per_dim;
-                u[j] |= gi->get_bits(state) & mask;
+                u[j] |= (uint32_t) (gi->get_bits(state) & mask);
             }
         }
     } else {
@@ -89,21 +89,21 @@ static inline void bspace_make_tuples32(const BSpaceNDOptions *opts,
             u[j] = 0;
             for (size_t k = 0; k < opts->ndims; k++) {
                 u[j] <<= opts->nbits_per_dim;
-                u[j] |= gi->get_bits(state) >> shl;
+                u[j] |= (uint32_t) (gi->get_bits(state) >> shl);
             }
         }
     }
 }
 
 
-static unsigned int bspace_get_ndups64(uint64_t *x, size_t len)
+static unsigned int bspace_get_ndups64(RamInfo *ram, uint64_t *x, size_t len)
 {
     unsigned int ndups = 0;
-    radixsort64(x, len);
+    fastsort64(ram, x, len);
     for (size_t i = 0; i < len - 1; i++) {
         x[i] = x[i + 1] - x[i];
     }
-    radixsort64(x, len - 1);
+    fastsort64(ram, x, len - 1);
     for (size_t i = 0; i < len - 2; i++) {
         if (x[i] == x[i + 1])
             ndups++;
@@ -186,9 +186,11 @@ static unsigned long bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions
         fprintf(stderr, "***** bspace64_nd_test: not enough memory *****\n");
         exit(EXIT_FAILURE);
     }
+    RamInfo raminfo;
+    obj->intf->get_ram_info(&raminfo);
     for (size_t i = 0; i < opts->nsamples; i++) {
         bspace_make_tuples64(opts, obj->gi, obj->state, u, len);
-            ndups[i] = bspace_get_ndups64(u, len);
+            ndups[i] = bspace_get_ndups64(&raminfo, u, len);
     }
     unsigned long ndups_total = 0;
     for (size_t i = 0; i < opts->nsamples; i++) {
@@ -363,10 +365,10 @@ TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step)
             uint32_t x_hi4 = (uint32_t) (x >> (obj->gi->nbits - 4));
             // Take lower 4 bits
             u[i] <<= 4;
-            u[i] |=  x & 0xF;
+            u[i] |=  (uint32_t) (x & 0xF);
             // Take higher 4 bits with reversal
             u_high_rev[i] <<= 4;
-            u_high_rev[i] |= reverse_bits4(x_hi4);
+            u_high_rev[i] |= reverse_bits4((uint8_t) x_hi4);
             // Take higher 4 bits without reversal
             u_high_norev[i] <<= 4;
             u_high_norev[i] |= x_hi4;
@@ -404,7 +406,7 @@ static inline void collisionover_make_tuples(const CollOverNDOptions *opts,
     const GeneratorInfo *gi, void *state, uint64_t *u, size_t len)
 {
     uint64_t cur_tuple = 0;
-    const int rshift = (opts->ndims - 1) * opts->nbits_per_dim;
+    const unsigned int rshift = (opts->ndims - 1) * opts->nbits_per_dim;
     if (opts->get_lower) {
         // Take lower bits
         uint64_t mask;
@@ -476,7 +478,7 @@ TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opt
     uint64_t Oi[4] = {0, 0, 0, 0};
     Oi[0] = nstates_u64;
     double nstates = (double) nstates_u64;
-    double lambda = (n - opts->ndims + 1.0) / nstates;
+    double lambda = ((double) n - (double) opts->ndims + 1.0) / nstates;
     double mu = nstates * (lambda - 1 + exp(-lambda));
     TestResults ans;
     ans.name = "CollisionOver";
@@ -486,15 +488,17 @@ TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opt
     obj->intf->printf("  nsamples = %lu; len = %lu, mu = %g * %d\n",
         opts->nsamples, n, mu, (int) opts->nsamples);
 
+    RamInfo raminfo;
+    obj->intf->get_ram_info(&raminfo);
     ans.penalty = PENALTY_COLLOVER;
     ans.x = 0;
     for (unsigned long i = 0; i < opts->nsamples; i++) {
         collisionover_make_tuples(opts, obj->gi, obj->state, u, n);
         // Find collisions by sorting the array
-        radixsort64(u, n);
+        fastsort64(&raminfo, u, n);
         size_t ncopies = 0;
-        for (size_t i = 0; i < n - 1; i++) {
-            if (u[i] == u[i + 1]) {
+        for (size_t j = 0; j < n - 1; j++) {
+            if (u[j] == u[j + 1]) {
                 ncopies++;
             } else {
                 Oi[(ncopies < 3) ? (ncopies + 1) : 3]++;
@@ -503,7 +507,7 @@ TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opt
             }
         }
     }
-    ans.x += Oi[2];
+    ans.x += (double) Oi[2];
     ans.p = sr_poisson_pvalue(ans.x, mu * opts->nsamples);
     ans.alpha = sr_poisson_cdf(ans.x, mu * opts->nsamples);
     // Frequency table
@@ -556,7 +560,7 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     uint64_t beta = 1ull << (obj->gi->nbits - opts->shl);
     uint64_t u;
     size_t ngaps = opts->ngaps;
-    size_t nbins = (size_t) (log(Ei_min / (ngaps * p)) / log(1 - p));
+    size_t nbins = (size_t) (log(Ei_min / ((double) ngaps * p)) / log(1 - p));
     size_t *Oi = calloc(nbins + 1, sizeof(size_t));
     if (Oi == NULL) {
         fprintf(stderr, "***** gap_test: not enough memory *****\n");
@@ -591,9 +595,8 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     ans.penalty = PENALTY_GAP;
     ans.x = 0.0; // chi2emp
     for (size_t i = 0; i < nbins; i++) {
-        double Ei = p * pow(1.0 - p, (double) i) * ngaps;
-        double d = Ei - Oi[i];
-        ans.x += d * d / Ei;
+        double Ei = p * pow(1.0 - p, (double) i) * (double) ngaps;
+        ans.x += calc_chi2emp_term(Oi[i], Ei);
     }
     free(Oi);
     ans.p = sr_chi2_pvalue(ans.x, (unsigned long) (nbins - 1));
@@ -659,13 +662,17 @@ static GapFrequencyArray *GapFrequencyArray_create(size_t nbins, double p)
     return gapfreq;
 }
 
-static void GapFrequencyArray_inc_total(GapFrequencyArray *obj, size_t gap_len)
+
+static void
+GapFrequencyArray_inc_total(GapFrequencyArray *obj, unsigned long long gap_len)
 {
     if (gap_len < obj->nbins)
         obj->f[gap_len].ngaps_total++;
 }
 
-static void GapFrequencyArray_inc_with0(GapFrequencyArray *obj, size_t gap_len)
+
+static void
+GapFrequencyArray_inc_with0(GapFrequencyArray *obj, unsigned long long gap_len)
 {
     if (gap_len < obj->nbins)
         obj->f[gap_len].ngaps_with0++;
@@ -718,29 +725,30 @@ static double GapFrequencyArray_sumsq_as_norm(const GapFrequencyArray *obj,
 {
     double chi2emp = 0.0;
     for (size_t i = 0; i < obj->nbins; i++) {
-        double Oi = (double) obj->f[i].ngaps_total;
-        double Ei = ngaps * obj->f[i].p_total;
-        chi2emp += pow(Oi - Ei, 2.0) / Ei;
+        unsigned long long Oi = obj->f[i].ngaps_total;
+        double Ei = (double) ngaps * obj->f[i].p_total;
+        chi2emp += calc_chi2emp_term(Oi, Ei);
     }
     return sr_chi2_to_stdnorm_approx(chi2emp, (unsigned long) (obj->nbins - 1));
 }
 
 void gap16_count0_mainloop(GapFrequencyArray *gapfreq, GapFrequencyArray *gapfreq_rb,
-    GeneratorState *obj, long long ngaps)
+    GeneratorState *obj, unsigned long long ngaps)
 {
-    int w16_per_num = obj->gi->nbits / 16;
-    long long mod_mask = w16_per_num - 1, last0_pos = -1;
+    const unsigned int w16_per_num = obj->gi->nbits / 16;
+    const unsigned long long mod_mask = w16_per_num - 1;
+    const unsigned long long nbins = (unsigned long long) gapfreq->nbins;
+    unsigned long long last0_pos = ULLONG_MAX;
     uint64_t u = 0;
-    size_t nbins = gapfreq->nbins;
-    long long *lastw16_pos = calloc(65536, sizeof(long long));
+    unsigned long long *lastw16_pos = calloc(65536, sizeof(unsigned long long));
     if (lastw16_pos == NULL) {
         fprintf(stderr, "***** gap16_count0: not enough memory *****\n");
         exit(EXIT_FAILURE);
     }
     for (size_t i = 0; i < 65536; i++) {
-        lastw16_pos[i] = -1;
+        lastw16_pos[i] = ULLONG_MAX;
     }
-    for (long long pos = 0; pos < ngaps; pos++) {
+    for (unsigned long long pos = 0; pos < ngaps; pos++) {
         // Generate 16-bit word
         if ((pos & mod_mask) == 0) {
             u = obj->gi->get_bits(obj->state);
@@ -752,10 +760,10 @@ void gap16_count0_mainloop(GapFrequencyArray *gapfreq, GapFrequencyArray *gapfre
             last0_pos = pos;
         }
         // Update gaps information (symmetric boundaries)
-        if (lastw16_pos[w16] != -1) {
+        if (lastw16_pos[w16] != ULLONG_MAX) {
             // a) Get beginning and length
-            long long gap_len = pos - lastw16_pos[w16] - 1;
-            if (gap_len >= (long long) nbins) gap_len = nbins;
+            unsigned long long gap_len = pos - lastw16_pos[w16] - 1;
+            if (gap_len >= nbins) gap_len = nbins;
             // b) Update frequency table
             if (last0_pos > lastw16_pos[w16]) {
                 GapFrequencyArray_inc_with0(gapfreq, gap_len);
@@ -763,10 +771,10 @@ void gap16_count0_mainloop(GapFrequencyArray *gapfreq, GapFrequencyArray *gapfre
             GapFrequencyArray_inc_total(gapfreq, gap_len);
         }
         // Update gaps information (asymmetric boundaries)
-        if (last0_pos != -1) {
+        if (last0_pos != ULLONG_MAX) {
             // a) Get beginning and length
-            long long gap_len = pos - last0_pos - 1;
-            if (gap_len >= (long long) nbins) gap_len = nbins;
+            unsigned long long gap_len = pos - last0_pos - 1;
+            if (gap_len >= nbins) gap_len = nbins;
             // b0 Update frequency table
             if (lastw16_pos[w16] > last0_pos) {
                 GapFrequencyArray_inc_with0(gapfreq_rb, gap_len);
@@ -788,7 +796,8 @@ typedef struct {
 } GapFrequencyStats;
 
 
-static GapFrequencyStats GapFrequencyArray_calc_maxfreq(GapFrequencyArray *gapfreq, long long ngaps)
+static GapFrequencyStats
+GapFrequencyArray_calc_maxfreq(GapFrequencyArray *gapfreq, unsigned long long ngaps)
 {
     GapFrequencyStats ans = {.z_max_w0 = 0.0, .z_max_tot = 0.0,
         .ind_tot = 0, .ind_w0 = 0};
@@ -797,16 +806,16 @@ static GapFrequencyStats GapFrequencyArray_calc_maxfreq(GapFrequencyArray *gapfr
         const GapFrequency *gf = &gapfreq->f[i];
         // Frequency of gap "with zeros" inside
         // Convert binomial distribution to normal through p and cdf/inv.cdf
-        double z_w0 = GapFrequency_calc_z_with0(gf);
+        const double z_w0 = GapFrequency_calc_z_with0(gf);
         if (fabs(z_w0) > fabs(ans.z_max_w0)) {
             ans.z_max_w0 = z_w0;
             ans.ind_w0 = i;
         }
         // Frequency of gaps: convert binomial distribution to normal
         // through central limiting theorem
-        double mu = ngaps * gf->p_total;
-        double s = sqrt(ngaps * gf->p_total * (1.0 - gf->p_total));
-        double z_tot = (gf->ngaps_total - mu) / s;
+        const double mu = (double) ngaps * gf->p_total;
+        const double s = sqrt((double) ngaps * gf->p_total * (1.0 - gf->p_total));
+        const double z_tot = ((double) gf->ngaps_total - mu) / s;
         if (fabs(z_tot) > fabs(ans.z_max_tot)) {
             ans.z_max_tot = z_tot;
             ans.ind_tot = i;
@@ -867,7 +876,7 @@ static double gap16_z_bonferroni(double z, double p_gap)
  * Detects additive/subtractive lagged Fibonacci generators and SWB (subtract
  * with borrow) generators.
  */
-TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
+TestResults gap16_count0_test(GeneratorState *obj, unsigned long long ngaps)
 {
     const double p = 1.0 / 65536.0;
     TestResults ans = TestResults_create("gap16_count0");
@@ -879,15 +888,15 @@ TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
     } else {
         Ei_min = 1000.0;
     }
-    size_t nbins = (size_t) (log(Ei_min / (ngaps * p)) / log(1 - p));
+    size_t nbins = (size_t) (log(Ei_min / ((double) ngaps * p)) / log(1 - p));
     // Initialize frequency and position tables
     GapFrequencyArray *gapfreq = GapFrequencyArray_create(nbins, p);
     GapFrequencyArray *gapfreq_rb = GapFrequencyArray_create(nbins, p);
     // Print test info
     obj->intf->printf("gap16_count0 test\n");
     obj->intf->printf("  p = %g; ngaps = %llu (2^%.2f or 10^%.2f); nbins = %llu\n",
-        p, (unsigned long long) ngaps,
-        sr_log2((double) ngaps), log10(ngaps),
+        p, ngaps,
+        sr_log2((double) ngaps), log10( (double) ngaps),
         (unsigned long long) nbins);
     // Test main run
     gap16_count0_mainloop(gapfreq, gapfreq_rb, obj, ngaps);
@@ -953,7 +962,8 @@ TestResults gap16_count0_test(GeneratorState *obj, long long ngaps)
 
 static void sumcollector_calc_p(double *p, const int g, const int nmax)
 {
-    long double *g_mat = calloc((g + 1) * (nmax + 1), sizeof(long double));
+    size_t nlevels = (size_t) ( (g + 1) * (nmax + 1) );
+    long double *g_mat = calloc(nlevels, sizeof(long double));
     if (g_mat == NULL) {
         fprintf(stderr, "***** sumcollector_calc_p: not enough memory *****");
         exit(EXIT_FAILURE);
@@ -977,7 +987,7 @@ static void sumcollector_calc_p(double *p, const int g, const int nmax)
         }
     }
     for (int i = 0; i <= nmax; i++) {
-        p[i] = g_mat[(nmax + 1) * g + i];
+        p[i] = (double) g_mat[(nmax + 1) * g + i];
     }
     free(g_mat);
 }
@@ -1035,10 +1045,9 @@ TestResults sumcollector_test(GeneratorState *obj, const SumCollectorOptions *op
     ans.penalty = PENALTY_SUMCOLLECTOR;
     ans.x = 0.0;
     for (size_t i = 0; i < 50; i++) {
-        double Ei = p_vec[i] * Oi_sum;
+        double Ei = p_vec[i] * (double) Oi_sum;
         if (Ei >= 10.0) {
-            double d = (Ei - Oi_vec[i]) * (Ei - Oi_vec[i]) / Ei;
-            ans.x += d;
+            ans.x += calc_chi2emp_term(Oi_vec[i], Ei);
             df++;
         }
     }
@@ -1054,6 +1063,14 @@ TestResults sumcollector_test(GeneratorState *obj, const SumCollectorOptions *op
     free(Oi_vec);
     free(p_vec);
     return ans;
+}
+
+
+static inline uint32_t mod3_update_tuple(GeneratorState *obj,
+    uint32_t tuple, unsigned int ntuples)
+{
+    const uint32_t d = (uint32_t) (obj->gi->get_bits(obj->state) % 3u);
+    return (tuple * 3u + d) % ntuples;
 }
 
 /**
@@ -1081,18 +1098,16 @@ TestResults mod3_test(GeneratorState *obj, const Mod3Options *opts)
     obj->intf->printf("  Sample size: %llu (2^%.2f) values\n",
         opts->nvalues, sr_log2((double) opts->nvalues));
     for (int i = 0; i < 9; i++) {
-        int d = obj->gi->get_bits(obj->state) % 3;
-        tuple = (tuple * 3 + d) % ntuples;
+        tuple = mod3_update_tuple(obj, tuple, ntuples);
     }
     for (unsigned long long i = 0; i < opts->nvalues; i++) {
         Oi[tuple]++;
-        int d = obj->gi->get_bits(obj->state) % 3;
-        tuple = (tuple * 3 + d) % ntuples;
+        tuple = mod3_update_tuple(obj, tuple, ntuples);
     }
     double Ei = (double) opts->nvalues / (double) ntuples;
     ans.x = 0.0;
     for (unsigned int i = 0; i < ntuples; i++) {
-        ans.x += (Oi[i] - Ei) * (Oi[i] - Ei) / Ei;
+        ans.x += calc_chi2emp_term(Oi[i], Ei);
     }
     free(Oi);
     ans.penalty = PENALTY_MOD3;
@@ -1200,7 +1215,7 @@ TestResults nbit_words_freq_test(GeneratorState *obj,
         chi2[ii] = 0;
         double Ei = (double) nwords / (double) nbins;
         for (size_t i = 0; i < nbins; i++) {
-            chi2[ii] += pow(wfreq[i] - Ei, 2.0) / Ei;
+            chi2[ii] += calc_chi2emp_term(wfreq[i], Ei);
         }
     }
     // Kolmogorov-Smirnov test
@@ -1209,8 +1224,8 @@ TestResults nbit_words_freq_test(GeneratorState *obj,
     for (size_t i = 0; i < opts->nblocks; i++) {
         double f = sr_chi2_cdf(chi2[i], (unsigned long) (nbins - 1));
         double idbl = (double) i;
-        double Dplus = (idbl + 1.0) / opts->nblocks - f;
-        double Dminus = f - idbl / opts->nblocks;
+        double Dplus = (idbl + 1.0) / (double) opts->nblocks - f;
+        double Dminus = f - idbl / (double) opts->nblocks;
         if (Dplus > D) D = Dplus;
         if (Dminus > D) D = Dminus;
     }

@@ -147,16 +147,16 @@ void XteaVecState_block(XteaVecState *obj)
 #ifdef XTEA_VEC_ENABLED
     static const uint32_t DELTA = 0x9e3779b9;
     uint32_t sum = 0;
-    __m256i y_a = _mm256_loadu_si256((__m256i *) obj->in);
-    __m256i y_b = _mm256_loadu_si256((__m256i *) (obj->in + 8));
-    __m256i z_a = _mm256_loadu_si256((__m256i *) (obj->in + 16));
-    __m256i z_b = _mm256_loadu_si256((__m256i *) (obj->in + 24));
+    __m256i y_a = _mm256_loadu_si256((__m256i *) (void *) obj->in);
+    __m256i y_b = _mm256_loadu_si256((__m256i *) (void *) (obj->in + 8));
+    __m256i z_a = _mm256_loadu_si256((__m256i *) (void *) (obj->in + 16));
+    __m256i z_b = _mm256_loadu_si256((__m256i *) (void *) (obj->in + 24));
     // CBC mode: XOR input (counter) with the previous input
     if (obj->is_cbc) {
-        __m256i out0_a = _mm256_loadu_si256((__m256i *) obj->out);
-        __m256i out0_b = _mm256_loadu_si256((__m256i *) (obj->out + 8));
-        __m256i out1_a = _mm256_loadu_si256((__m256i *) (obj->out + 16));
-        __m256i out1_b = _mm256_loadu_si256((__m256i *) (obj->out + 24));
+        __m256i out0_a = _mm256_loadu_si256((__m256i *) (void *) obj->out);
+        __m256i out0_b = _mm256_loadu_si256((__m256i *) (void *) (obj->out + 8));
+        __m256i out1_a = _mm256_loadu_si256((__m256i *) (void *) (obj->out + 16));
+        __m256i out1_b = _mm256_loadu_si256((__m256i *) (void *) (obj->out + 24));
         y_a = _mm256_xor_si256(y_a, out0_a);
         y_b = _mm256_xor_si256(y_b, out0_b);
         z_a = _mm256_xor_si256(z_a, out1_a);
@@ -171,10 +171,10 @@ void XteaVecState_block(XteaVecState *obj)
         z_a = _mm256_add_epi32(z_a, mix(y_a, keyB));
         z_b = _mm256_add_epi32(z_b, mix(y_b, keyB));
     }
-    _mm256_storeu_si256((__m256i *) obj->out, y_a);
-    _mm256_storeu_si256((__m256i *) (obj->out + 8), y_b);
-    _mm256_storeu_si256((__m256i *) (obj->out + 16), z_a);
-    _mm256_storeu_si256((__m256i *) (obj->out + 24), z_b);
+    _mm256_storeu_si256((__m256i *) (void *) obj->out, y_a);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 8), y_b);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 16), z_a);
+    _mm256_storeu_si256((__m256i *) (void *) (obj->out + 24), z_b);
 #else
     (void) obj;
 #endif

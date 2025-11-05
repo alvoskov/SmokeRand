@@ -48,5 +48,5 @@ TestResults matrixrank_test(GeneratorState *obj, const MatrixRankOptions *opts);
 TestResults linearcomp_test_wrap(GeneratorState *obj, const void *udata);
 TestResults matrixrank_test_wrap(GeneratorState *obj, const void *udata);
 
-#endif
+#endif // __SMOKERAND_LINEARDEP_H
 

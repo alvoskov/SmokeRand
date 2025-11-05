@@ -10,13 +10,15 @@
  * Can be overriden by `-dNOTHREADS` (stubs instead of multithreading API)
  * or by `-dUSE_WINTHREADS` (use WinAPI threads).
  *
- * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
  */
 #ifndef __SMOKERAND_THREADS_INTF_H
 #define __SMOKERAND_THREADS_INTF_H
+#include "smokerand/coredefs.h"
 
 ////////////////////////////////////////////////////
 ///// Selection of default multi-threading API /////
@@ -128,6 +130,6 @@ void *dlopen_wrap(const char *libname);
 void *dlsym_wrap(void *handle, const char *symname);
 void dlclose_wrap(void *handle);
 int get_cpu_numcores(void);
-long long get_ram_size(void);
+int get_ram_info(RamInfo *info);
 
-#endif
+#endif // __SMOKERAND_THREADS_INTF_H

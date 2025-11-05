@@ -3,7 +3,8 @@
  * @brief C interface for modules (dynamic libraries) with pseudorandom
  * number generators implementations.
  *
- * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -195,4 +196,4 @@ static inline uint64_t get_bits_raw(void *state) { \
     return obj->out[obj->pos++]; \
 }
 
-#endif
+#endif // __SMOKERAND_CINTERFACE_H

@@ -159,8 +159,7 @@ void LeaState_block(LeaState *obj)
  */
 static inline void LeaState_inc_counter(LeaState *obj)
 {
-    uint64_t *ctr = (uint64_t *) obj->ctr;
-    (*ctr)++;
+    if (++obj->ctr[0] == 0) ++obj->ctr[1];
 }
 
 /**
@@ -218,18 +217,18 @@ static inline __m256i rotr32_vec(__m256i in, int r)
 
 static inline void leavec_load_ctr(__m256i *c, const uint32_t *ctr)
 {
-    c[0] = _mm256_loadu_si256((__m256i *) ctr);
-    c[1] = _mm256_loadu_si256((__m256i *) (ctr + LEA_NCOPIES));
-    c[2] = _mm256_loadu_si256((__m256i *) (ctr + 2*LEA_NCOPIES));
-    c[3] = _mm256_loadu_si256((__m256i *) (ctr + 3*LEA_NCOPIES));
+    c[0] = _mm256_loadu_si256((__m256i *) (void *) ctr);
+    c[1] = _mm256_loadu_si256((__m256i *) (void *) (ctr + LEA_NCOPIES));
+    c[2] = _mm256_loadu_si256((__m256i *) (void *) (ctr + 2*LEA_NCOPIES));
+    c[3] = _mm256_loadu_si256((__m256i *) (void *) (ctr + 3*LEA_NCOPIES));
 }
 
 static inline void leavec_store_out(uint32_t *out, const __m256i *c)
 {
-    _mm256_storeu_si256((__m256i *) out,                   c[0]);
-    _mm256_storeu_si256((__m256i *) (out + LEA_NCOPIES),   c[1]);
-    _mm256_storeu_si256((__m256i *) (out + 2*LEA_NCOPIES), c[2]);
-    _mm256_storeu_si256((__m256i *) (out + 3*LEA_NCOPIES), c[3]);
+    _mm256_storeu_si256((__m256i *) (void *) out,                   c[0]);
+    _mm256_storeu_si256((__m256i *) (void *) (out + LEA_NCOPIES),   c[1]);
+    _mm256_storeu_si256((__m256i *) (void *) (out + 2*LEA_NCOPIES), c[2]);
+    _mm256_storeu_si256((__m256i *) (void *) (out + 3*LEA_NCOPIES), c[3]);
 }
 
 static inline void leavec_round(__m256i *c, const __m256i *rka, __m256i rkb)

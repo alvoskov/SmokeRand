@@ -30,6 +30,7 @@
 
 #include "smokerand/entropy.h"
 #include "smokerand/blake2s.h"
+#include "smokerand/coredefs.h"
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
@@ -39,17 +40,6 @@
     #include <sys/farptr.h>
 #endif
 
-static inline uint32_t rotl32(uint32_t x, int r)
-{
-    return (x << r) | (x >> ((-r) & 31));
-}
-
-
-static inline uint64_t ror64(uint64_t x, uint64_t r)
-{
-    return (x << (64 - r)) | (x >> r);
-}
-
 
 /**
  * @brief rrmxmx hash from modified SplitMix PRNG.
@@ -57,7 +47,7 @@ static inline uint64_t ror64(uint64_t x, uint64_t r)
 static uint64_t mix_hash(uint64_t z)
 {
     static uint64_t const M = 0x9fb21c651e98df25ULL;    
-    z ^= ror64(z, 49) ^ ror64(z, 24);
+    z ^= rotr64(z, 49) ^ rotr64(z, 24);
     z *= M;
     z ^= z >> 28;
     z *= M;
@@ -72,8 +62,9 @@ static uint64_t mix_hash(uint64_t z)
 static uint64_t str_hash(const char *str)
 {
     uint64_t hash = 0xB7E151628AED2A6BULL;
-    for (unsigned char c = *str; c != 0; c = *str++) {
-        hash = (6906969069ULL * hash + 12345ULL) ^ c;
+    const unsigned char *bytes = (const unsigned char *) str;
+    for (unsigned char b = *bytes; b != 0; b = *bytes++) {
+        hash = (6906969069ULL * hash + 12345ULL) ^ b;
     }
     return mix_hash(hash);
 }
@@ -295,6 +286,7 @@ uint64_t get_machine_id()
     RegCloseKey(key);
 #elif defined(__DJGPP__)
     // DJGPP DOS: calculate ROM BIOS checksum
+    (void) str_hash;
     for (int i = 0; i < 8192; i++) {
         uint64_t lo = _farpeekl(_dos_ds, 0xF0000 + 8*i);
         uint64_t hi = _farpeekl(_dos_ds, 0xF0000 + 8*i + 4);
@@ -331,11 +323,11 @@ uint64_t get_machine_id()
 
 #ifdef NO_X86_EXTENSIONS
 /**
- * @brief XORs input with output of hardware RNG in CPU (rdseed).
+ * @brief rdseed is unavailable: just return 0.
  */
-uint64_t mix_rdseed(const uint64_t x)
+uint64_t call_rdseed()
 {
-    return x;
+    return 0;
 }
 
 /**
@@ -362,7 +354,7 @@ uint64_t __rdtsc(void);
 #include <x86intrin.h>
 #endif
 /**
- * @brief XORs input with output of hardware RNG in CPU (rdseed).
+ * @brief Calls x86-64 CPU rdseed instruction.
  * @details It is good but not very reliable source of entropy. Examples of
  * RDRAND failure on some CPUs:
  *
@@ -370,7 +362,7 @@ uint64_t __rdtsc(void);
  * - https://github.com/rust-random/getrandom/issues/228
  * - https://news.ycombinator.com/item?id=19848953
  */
-uint64_t mix_rdseed(const uint64_t x)
+uint64_t call_rdseed()
 {
     unsigned long long rd;
 #if !defined(__RDSEED__)
@@ -385,7 +377,7 @@ uint64_t mix_rdseed(const uint64_t x)
     // For 64-bit x86-64 executables
     while (!_rdseed64_step(&rd)) {}
 #endif
-    return x ^ rd;
+    return rd;
 }
 
 uint64_t cpuclock(void)
@@ -487,7 +479,7 @@ static int inject_rand(uint64_t *out, size_t len)
 {
 #ifdef WINDOWS_PLATFORM
     HCRYPTPROV hCryptProv;
-    DWORD nbytes = sizeof(uint64_t) * len;
+    DWORD nbytes = (DWORD) (sizeof(uint64_t) * len);
     // Acquire a cryptographic provider context
     // CRYPT_VERIFYCONTEXT for a temporary context
     if (!CryptAcquireContext(&hCryptProv, NULL, NULL,
@@ -548,7 +540,7 @@ void Entropy_init(Entropy *obj)
 {
     EntropyBuffer *ent_buf = calloc(1, sizeof(EntropyBuffer));
     uint32_t key[8] = {0, 0, 0, 0,  0, 0, 0, 0};
-    uint64_t timestamp = time(NULL);
+    uint64_t timestamp = (uint64_t) time(NULL);
     uint64_t cpu = cpuclock();
     int csprng_present = inject_rand(&ent_buf->u64[0], 4);
     // 256 bits of entropy from system CSPRNG
@@ -561,7 +553,7 @@ void Entropy_init(Entropy *obj)
     }
     // 256 bits of entropy from RDSEED
     for (size_t i = 4; i < 8; i++) {
-        ent_buf->u64[i] = mix_rdseed(0);
+        ent_buf->u64[i] = call_rdseed();
     }
     // Some fallback entropy sources
     ent_buf->u64[8] = timestamp;

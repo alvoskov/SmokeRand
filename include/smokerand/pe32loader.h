@@ -87,4 +87,4 @@ void PE32BasicInfo_print(const PE32BasicInfo *peinfo);
 uint32_t PE32BasicInfo_get_membuf_size(PE32BasicInfo *info);
 PE32MemoryImage *PE32BasicInfo_load(PE32BasicInfo *info, FILE *fp);
 
-#endif
+#endif // __SMOKERAND_PE32LOADER_H

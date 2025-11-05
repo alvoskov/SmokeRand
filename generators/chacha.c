@@ -346,8 +346,8 @@ static inline void qround_avx(__m128i *a, __m128i *b, __m128i *c, __m128i *d)
 void ChaCha_block_avx(ChaChaState *obj)
 {
 #ifdef CHACHA_VECTOR_INTR
-    const __m128i *w128x = (__m128i *) (&obj->x.w32[0]);
-    __m128i *w128o = (__m128i *) (&obj->out.w32[0]);
+    const __m128i *w128x = (__m128i *) (void *) (&obj->x.w32[0]);
+    __m128i *w128o = (__m128i *) (void *) (&obj->out.w32[0]);
     __m128i a = _mm_loadu_si128(&w128x[0]); // words 0..3
     __m128i b = _mm_loadu_si128(&w128x[1]); // words 4..7
     __m128i c = _mm_loadu_si128(&w128x[2]); // words 8..11
@@ -532,8 +532,8 @@ static inline void qround_avx2(__m256i *a, __m256i *b, __m256i *c, __m256i *d)
 void EXPORT ChaChaVec_block(ChaChaVecState *obj)
 {
 #ifdef CHACHA_VECTOR_AVX2
-    const __m256i *w256x = (__m256i *) (&obj->x.w32[0]);
-    __m256i *w256o = (__m256i *) (&obj->out.w32[0]);
+    const __m256i *w256x = (__m256i *) (void *) (&obj->x.w32[0]);
+    __m256i *w256o = (__m256i *) (void *) (&obj->out.w32[0]);
     __m256i a = _mm256_loadu_si256(&w256x[0]); // words 0..7
     __m256i b = _mm256_loadu_si256(&w256x[1]); // words 8..15
     __m256i c = _mm256_loadu_si256(&w256x[2]); // words 16..23

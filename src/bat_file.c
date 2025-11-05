@@ -33,6 +33,7 @@ typedef struct {
 } TestInfo;
 
 typedef struct {
+    char battery_name[64];
     TestInfo *tests;
     size_t ntests;
 } TestInfoArray;
@@ -84,7 +85,7 @@ void TestInfo_addarg(TestInfo *obj, const char *name, const char *value)
     obj->args = realloc(obj->args, obj->nargs * sizeof(TestArgument));
     if (obj->args == NULL) {
         fprintf(stderr, "***** TestInfo_addarg: not enough memory *****");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     xstrcpy_s(obj->args[obj->nargs - 1].name, 64, name);
     xstrcpy_s(obj->args[obj->nargs - 1].value, 64, value);
@@ -193,6 +194,7 @@ void TestInfoArray_init(TestInfoArray *obj)
 {
     obj->tests = malloc(sizeof(TestInfo));
     obj->ntests = 0;
+    xstrcpy_s(obj->battery_name, 64, "CUSTOM");
 }
 
 void TestInfoArray_print(TestInfoArray *obj)
@@ -287,7 +289,19 @@ static int ParserState_process_token(ParserState *state, const char *token)
         state->inside_entry = 1;
     } else if (is_end_token) {
         // End of test description
-        TestInfoArray_addtest(&state->tests, &state->testinfo);
+        if (!strcmp(state->testinfo.testname, "battery")) {
+            const char *battery_name = TestInfo_get_value(&state->testinfo, "name");
+            if (battery_name == NULL) {
+                fprintf(stderr,
+                    "Error in line %d. 'battery' entry must have 'name' field\n",
+                    state->linenum);
+                TestInfo_destruct(&state->testinfo);
+                return 0;
+            }
+            xstrcpy_s(state->tests.battery_name, 64, battery_name);
+        } else {
+            TestInfoArray_addtest(&state->tests, &state->testinfo);
+        }
         state->inside_entry = 0;
     } else {
         char name[64], value[64];
@@ -415,7 +429,7 @@ static int parse_monobit_freq(TestDescription *out, const TestInfo *obj, char *e
         fprintf(stderr, "***** parse_monobit_freq: not enough memory *****");
         exit(EXIT_FAILURE);
     }
-    opts->nvalues = nvalues;
+    opts->nvalues = (unsigned long long) nvalues;
     out->name = obj->testname;
     out->run = monobit_freq_test_wrap;
     out->udata = opts;
@@ -470,7 +484,7 @@ static int parse_gap(TestDescription *out, const TestInfo *obj, char *errmsg)
         exit(EXIT_FAILURE);
     }
     opts->shl = (unsigned int) shl;
-    opts->ngaps = ngaps;
+    opts->ngaps = (unsigned long long) ngaps;
     out->name = obj->testname;
     out->run = gap_test_wrap;
     out->udata = opts;
@@ -503,7 +517,7 @@ static int parse_hamming_distr(TestDescription *out, const TestInfo *obj, char *
         fprintf(stderr, "***** parse_hamming_distr: not enough memory *****");
         exit(EXIT_FAILURE);
     }
-    opts->nvalues = nvalues;
+    opts->nvalues = (unsigned long long) nvalues;
     opts->nlevels = (int) nlevels;
     out->name = obj->testname;
     out->run = hamming_distr_test_wrap;
@@ -531,7 +545,7 @@ static int parse_hamming_ot(TestDescription *out, const TestInfo *obj, char *err
         fprintf(stderr, "***** parse_hamming_ot: not enough memory *****");
         exit(EXIT_FAILURE);
     }
-    opts->nbytes = nbytes;
+    opts->nbytes = (unsigned long long) nbytes;
     opts->mode = mode;
     out->name = obj->testname;
     out->run = hamming_ot_test_wrap;
@@ -557,7 +571,7 @@ static int parse_hamming_ot_long(TestDescription *out, const TestInfo *obj, char
         fprintf(stderr, "***** parse_hamming_ot_long: not enough memory *****");
         exit(EXIT_FAILURE);
     }
-    opts->nvalues = nvalues;
+    opts->nvalues = (unsigned long long) nvalues;
     opts->wordsize = ws;
     out->name = obj->testname;
     out->run = hamming_ot_long_test_wrap;
@@ -640,7 +654,7 @@ static int parse_sumcollector(TestDescription *out, const TestInfo *obj, char *e
         fprintf(stderr, "***** parse_sumcollector: not enough memory *****");
         exit(EXIT_FAILURE);
     }
-    opts->nvalues = nvalues;
+    opts->nvalues = (unsigned long long) nvalues;
     out->name = obj->testname;
     out->run = sumcollector_test_wrap;
     out->udata = opts;
@@ -682,7 +696,7 @@ static int parse_usphere(TestDescription *out, const TestInfo *obj, char *errmsg
     GET_LIMITED_INTVALUE(npoints, 1000, 1ull << 40ull);
     UnitSphereOptions *opts = calloc(1, sizeof(UnitSphereOptions));
     opts->ndims = (unsigned int) ndims;
-    opts->npoints = npoints;
+    opts->npoints = (unsigned long long) npoints;
     out->name = obj->testname;
     out->run = unit_sphere_volume_test_wrap;
     out->udata = opts;
@@ -751,6 +765,20 @@ int battery_file(const char *filename, const GeneratorInfo *gen, CallerAPI *intf
                 parsed = 1;
             }
         }
+        // Try to find an entry with battery description and parse it
+/*
+        if (!parsed && !strcmp(name, "battery")) {
+            battery_name = TestInfo_get_value(curtest, "name");
+            if (battery_name == NULL) {
+                fprintf(stderr,
+                    "Error in line %d. 'battery' entry must have 'name' field\n",
+                    curtest->linenum);
+                goto battery_file_freemem;
+            }
+            parsed = 1;
+        }
+*/
+        // Error messages
         if (!parsed) {
             fprintf(stderr, "Error in line %d. Unknown test '%s'\n", curtest->linenum, name);
             is_ok = 0;
@@ -764,7 +792,7 @@ int battery_file(const char *filename, const GeneratorInfo *gen, CallerAPI *intf
     }
 
     TestsBattery bat;
-    bat.name = "CUSTOM";
+    bat.name = tests_args.battery_name;
     bat.tests = tests;
     if (gen != NULL) {
         TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);

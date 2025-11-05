@@ -3,7 +3,8 @@
  * @brief The key tests for testings PRNGs: frequency tests, Marsaglia's
  * birthday spacings and monkey tests, Knuth's gap test.
  *
- * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -108,7 +109,7 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts);
 TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step);
 TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opts);
 TestResults gap_test(GeneratorState *obj, const GapOptions *opts);
-TestResults gap16_count0_test(GeneratorState *obj, long long ngaps);
+TestResults gap16_count0_test(GeneratorState *obj, unsigned long long ngaps);
 TestResults sumcollector_test(GeneratorState *obj, const SumCollectorOptions *opts);
 TestResults mod3_test(GeneratorState *obj, const Mod3Options *opts);
 TestResults monobit_freq_test(GeneratorState *obj, const MonobitFreqOptions *opts);
@@ -130,4 +131,4 @@ TestResults gap_test_wrap(GeneratorState *obj, const void *udata);
 TestResults gap16_count0_test_wrap(GeneratorState *obj, const void *udata);
 TestResults mod3_test_wrap(GeneratorState *obj, const void *udata);
 TestResults sumcollector_test_wrap(GeneratorState *obj, const void *udata);
-#endif
+#endif // __SMOKERAND_CORETESTS_H
