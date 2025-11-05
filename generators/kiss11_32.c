@@ -122,7 +122,7 @@ static int run_self_test(const CallerAPI *intf)
     }
     // Test KISS part
     for (unsigned long i = 0; i < 1000000000;i++) {
-        x = get_bits_raw(obj);
+        x = (uint32_t) get_bits_raw(obj);
     }
     intf->printf("Output: %lu; reference: x=%lu\n",
         (unsigned long) x, (unsigned long) kiss_ref);
@@ -137,7 +137,7 @@ static void *create(const CallerAPI *intf)
 {
     Kiss2011u32State *obj = intf->malloc(sizeof(Kiss2011u32State));
     uint64_t s = intf->get_seed64();
-    Kiss2011u32State_init(obj, s >> 32, (uint32_t) s);
+    Kiss2011u32State_init(obj, (uint32_t) (s >> 32), (uint32_t) s);
     return obj;
 }
 

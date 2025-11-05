@@ -34,7 +34,7 @@ typedef struct {
 static inline uint64_t get_bits_raw(void *state)
 {
     SuperDuper73State *obj = state;
-    obj->lcg *= 69069;
+    obj->lcg *= 69069u;
     obj->xs = obj->xs ^ (obj->xs >> 15);
     obj->xs = obj->xs ^ (obj->xs << 17);
     return obj->lcg ^ obj->xs;
@@ -45,8 +45,8 @@ static void *create(const CallerAPI *intf)
 {
     SuperDuper73State *obj = intf->malloc(sizeof(SuperDuper73State));
     uint64_t seed = intf->get_seed64();
-    obj->lcg = (seed & 0xFFFFFFFF) | 0x1;
-    obj->xs = seed >> 32;
+    obj->lcg = (uint32_t) ( (seed & 0xFFFFFFFF) | 0x1);
+    obj->xs = (uint32_t) (seed >> 32); // TODO: FIX IT!
     if (obj->xs == 0) {
         obj->xs = 0xDEADBEEF;
     }

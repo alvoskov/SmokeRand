@@ -50,10 +50,10 @@ static inline uint64_t get_bits_raw(void *state)
 {
     KISS99State *obj = state;
     // LCG generator
-    obj->jcong = 69069 * obj->jcong + 1234567;
+    obj->jcong = 69069u * obj->jcong + 1234567u;
     // MWC generators
-    obj->z = 36969 * (obj->z & 0xFFFF) + (obj->z >> 16);
-    obj->w = 18000 * (obj->w & 0xFFFF) + (obj->w >> 16);
+    obj->z = 36969u * (obj->z & 0xFFFF) + (obj->z >> 16);
+    obj->w = 18000u * (obj->w & 0xFFFF) + (obj->w >> 16);
     uint32_t mwc = (obj->z << 16) + obj->w;
     // SHR3 generator
     uint32_t jsr = obj->jsr;
@@ -72,9 +72,9 @@ static void *create(const CallerAPI *intf)
     KISS99State *obj = intf->malloc(sizeof(KISS99State));
     uint64_t seed0 = intf->get_seed64(); // For MWC
     uint64_t seed1 = intf->get_seed64(); // For SHR3 and LCG
-    obj->z = (seed0 & 0xFFFF) | 0x10000; // MWC generator 1: prevent bad seeds
-    obj->w = ((seed0 >> 16) & 0xFFFF) | 0x10000; // MWC generator 2: prevent bad seeds
-    obj->jsr = (seed1 >> 32) | 0x1; // SHR3 mustn't be init with 0
+    obj->z = (uint32_t) (seed0 & 0xFFFF) | 0x10000; // MWC generator 1: prevent bad seeds
+    obj->w = (uint32_t) ((seed0 >> 16) & 0xFFFF) | 0x10000; // MWC generator 2: prevent bad seeds
+    obj->jsr = (uint32_t) (seed1 >> 32) | 0x1; // SHR3 mustn't be init with 0
     obj->jcong = (uint32_t) seed1; // LCG accepts any seed
     return (void *) obj;
 }

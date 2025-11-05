@@ -62,12 +62,12 @@ static void *create(const CallerAPI *intf)
 {
     SwbMwc32State *obj = intf->malloc(sizeof(SwbMwc32State));    
     for (size_t i = 0; i < SWB_A; i++) {
-        obj->x[i] = intf->get_seed64();
+        obj->x[i] = (uint32_t) intf->get_seed64();
     }
     obj->c = 1;
     obj->x[1] |= 1;
     obj->x[2] = (obj->x[2] >> 1) << 1;
-    obj->mwc = (intf->get_seed64() & 0xFFFFFFF) | 0x1;
+    obj->mwc = (uint32_t) (intf->get_seed64() & 0xFFFFFFF) | 0x1;
     obj->i = SWB_A - 1; obj->j = SWB_B - 1;
     return obj;
 }

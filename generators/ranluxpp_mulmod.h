@@ -74,7 +74,7 @@ static void multiply9x9(const uint64_t *in1, const uint64_t *in2, uint64_t *out)
 #pragma GCC diagnostic pop
          prod = prod * fac2;
 
-         uint64_t upper = prod >> 64;
+         uint64_t upper = (uint64_t) (prod >> 64);
          uint64_t lower = (uint64_t) prod;
 #else
          uint64_t upper1 = fac1 >> 32;
@@ -216,28 +216,28 @@ static void mod_m(const uint64_t *mul, uint64_t *out)
    {
       uint64_t r_0 = r[0];
 
-      uint64_t out_0 = sub_carry(r_0, c, &carry);
+      uint64_t out_0 = sub_carry(r_0, (uint64_t) c, &carry);
       out[0] = out_0;
    }
    for (int i = 1; i < 3; i++) {
       uint64_t r_i = r[i];
       r_i = sub_overflow(r_i, carry, &carry);
 
-      uint64_t out_i = sub_carry(r_i, t0, &carry);
+      uint64_t out_i = sub_carry(r_i, (uint64_t) t0, &carry);
       out[i] = out_i;
    }
    {
       uint64_t r_3 = r[3];
       r_3 = sub_overflow(r_3, carry, &carry);
 
-      uint64_t out_3 = sub_carry(r_3, t2, &carry);
+      uint64_t out_3 = sub_carry(r_3, (uint64_t) t2, &carry);
       out[3] = out_3;
    }
    for (int i = 4; i < 9; i++) {
       uint64_t r_i = r[i];
       r_i = sub_overflow(r_i, carry, &carry);
 
-      uint64_t out_i = sub_carry(r_i, t1, &carry);
+      uint64_t out_i = sub_carry(r_i, (uint64_t) t1, &carry);
       out[i] = out_i;
    }
 }

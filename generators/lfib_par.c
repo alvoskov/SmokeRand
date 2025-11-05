@@ -146,7 +146,7 @@ static void *create(const CallerAPI *intf)
         return NULL;
     }
     // Allocate buffers
-    size_t len = sizeof(LFibDyn_State) + (par.r + 2) * sizeof(uint64_t);
+    size_t len = sizeof(LFibDyn_State) + (size_t) (par.r + 2) * sizeof(uint64_t);
     LFibDyn_State *obj = intf->malloc(len);
     obj->r = par.r; obj->s = par.s;
     obj->is_additive = par.is_additive;
@@ -190,12 +190,12 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
 
 
     int pos = 0;
-    pos += intf->snprintf(description + pos, 4096 - pos, "%s", description_begin);
+    pos += intf->snprintf(description + pos, (size_t) (4096 - pos), "%s", description_begin);
     for (LFibDynDescr *gen = generators; gen->name != NULL; gen++) {
         intf->snprintf(gen->fullname_buf, 64, "LFib(%d,%d,%s,2^32)",
             gen->r, gen->s, (gen->is_additive) ? "+" : "-");
         gen->fullname = gen->fullname_buf;
-        pos += intf->snprintf(description + pos, 4096 - pos, " %-10s | %s\n",
+        pos += intf->snprintf(description + pos, (size_t) (4096 - pos), " %-10s | %s\n",
             gen->name, gen->fullname_buf);
     }
     LFibDynDescr descr = parse_parameters(intf);

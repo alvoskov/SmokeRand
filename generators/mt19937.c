@@ -33,7 +33,7 @@ typedef struct {
 void MT19937State_init(MT19937State *obj, uint32_t seed)
 {
     obj->pos = MTWIST_N;
-    for (int i = 0; i < MTWIST_N; i++) {
+    for (unsigned int i = 0; i < MTWIST_N; i++) {
         obj->state[i] = seed;
         seed = 1812433253U * (seed ^ (seed >> 30)) + (i + 1);
     }

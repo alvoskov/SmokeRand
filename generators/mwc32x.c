@@ -42,8 +42,8 @@ static inline uint32_t get_bits16(void *state)
 {
     const uint32_t A0 = 63885; // Selected from Knuth spectral test
     MWC32XState *obj = state;
-    uint16_t c = obj->data >> 16;
-    uint16_t x = obj->data & 0xFFFF;
+    uint16_t c = (uint16_t) (obj->data >> 16);
+    uint16_t x = (uint16_t) (obj->data & 0xFFFF);
     obj->data = A0 * x + c;
     return x ^ c;
 //    return x ^ (x >> 8);

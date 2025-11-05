@@ -47,10 +47,10 @@ typedef struct {
 
 static void NcomboState_init(NcomboState *obj, uint64_t seed)
 {
-    obj->x[0] = (seed & 0xFFFFFFFF) * 8u + 3u;
-    obj->x[1] = (seed & 0xFFFFFFFF) * 2u + 1u;
+    obj->x[0] = (uint32_t) ((seed & 0xFFFFFFFF) * 8u + 3u);
+    obj->x[1] = (uint32_t) ((seed & 0xFFFFFFFF) * 2u + 1u);
 
-    obj->y[0] = seed >> 32;
+    obj->y[0] = (uint32_t) (seed >> 32);
     obj->y[1] = 0xCAFEBABE;
     obj->y[2] = 0xDEADBEEF;
 }

@@ -87,8 +87,8 @@ static void *create(const CallerAPI *intf)
 {
     LFibFloat *obj = intf->malloc(sizeof(LFibFloat));
     uint64_t seed = intf->get_seed64();
-    uint32_t x = seed & 0xFFFFFFFF;
-    uint32_t y = seed >> 32;
+    uint32_t x = (uint32_t) (seed & 0xFFFFFFFF);
+    uint32_t y = (uint32_t) (seed >> 32);
     for (int i = 1; i <= LFIB_A; i++) {
         double s = 0.0, t = 0.5;
         for (int j = 1; j < 54; j++) {

@@ -116,21 +116,21 @@ void Hc256State_init(Hc256State *obj,
     uint32_t *P = obj->P, *X = obj->X;
     uint32_t *Q = obj->Q, *Y = obj->Y;
     //expand the key and iv into P and Q
-    for (int i = 0; i < 8; i++) P[i] = key[i];
-    for (int i = 8; i < 16; i++) P[i] = iv[i-8];
-    for (int i = 16; i < 528; i++)
-        P[i] = f(P[i-2], P[i-7], P[i-15], P[i-16])+i;
-    for (int i = 0; i < 16; i++)
+    for (size_t i = 0; i < 8; i++) P[i] = key[i];
+    for (size_t i = 8; i < 16; i++) P[i] = iv[i-8];
+    for (unsigned int i = 16; i < 528; i++)
+        P[i] = f(P[i-2], P[i-7], P[i-15], P[i-16]) + i;
+    for (size_t i = 0; i < 16; i++)
         P[i] = P[i+512];
-    for (int i = 16; i < 1024; i++)
+    for (unsigned int i = 16; i < 1024; i++)
         P[i] = f(P[i-2], P[i-7], P[i-15], P[i-16]) + 512 + i;
-    for (int i = 0; i < 16; i++)
+    for (size_t i = 0; i < 16; i++)
         Q[i] = P[1024-16+i];
-    for (int i = 16; i < 32; i++)
+    for (unsigned int i = 16; i < 32; i++)
         Q[i] = f(Q[i-2], Q[i-7], Q[i-15], Q[i-16]) + 1520 + i;
-    for (int i = 0; i < 16; i++)
+    for (size_t i = 0; i < 16; i++)
         Q[i] = Q[i+16];
-    for (int i = 16; i < 1024;i++)
+    for (unsigned int i = 16; i < 1024;i++)
         Q[i] = f(Q[i-2], Q[i-7], Q[i-15], Q[i-16]) + 1536 + i;
     //run the cipher 4096 steps without generating output
     for (int i = 0; i < 2; i++) {
@@ -196,8 +196,8 @@ static void *create(const CallerAPI *intf)
     uint32_t iv[8]  = {0, 0, 0, 0, 0, 0, 0, 0};
     for (int i = 0; i < 4; i++) {
         uint64_t seed = intf->get_seed64();
-        key[2*i] = seed & 0xFFFFFFFF;
-        key[2*i + 1] = seed >> 32;
+        key[2*i] = (uint32_t) (seed & 0xFFFFFFFF);
+        key[2*i + 1] = (uint32_t) (seed >> 32);
     }
     Hc256State *obj = intf->malloc(sizeof(Hc256State));
     Hc256State_init(obj, key, iv);

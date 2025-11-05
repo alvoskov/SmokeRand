@@ -37,10 +37,10 @@ static inline uint16_t get_bits16_raw(void *state)
 {
     Sfc16State *obj = state;
     enum {BARREL_SHIFT = 6, RSHIFT = 5, LSHIFT = 3};
-    uint16_t tmp = obj->a + obj->b + obj->counter++;
-    obj->a = obj->b ^ (obj->b >> RSHIFT);
-    obj->b = obj->c + (obj->c << LSHIFT);
-    obj->c = ((obj->c << BARREL_SHIFT) | (obj->c >> (16-BARREL_SHIFT))) + tmp;
+    uint16_t tmp = (uint16_t) (obj->a + obj->b + obj->counter++);
+    obj->a = (uint16_t) (obj->b ^ (obj->b >> RSHIFT));
+    obj->b = (uint16_t) (obj->c + (obj->c << LSHIFT));
+    obj->c = (uint16_t) (((obj->c << BARREL_SHIFT) | (obj->c >> (16-BARREL_SHIFT))) + tmp);
     return tmp;
 }
 

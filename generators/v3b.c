@@ -99,10 +99,10 @@ static inline uint64_t get_bits_raw(void *state)
 
 static void V3bState_init(V3bState *obj, uint64_t seed)
 {
-    for (int i = 0; i < 4; i++) {
-        obj->v[i] = obj->ctr[i] = i * 0x9e3779b9;
+    for (unsigned int i = 0; i < 4; i++) {
+        obj->v[i] = obj->ctr[i] = i * 0x9e3779b9U;
     }
-    obj->v[0] = seed;
+    obj->v[0] = (uint32_t) seed;
     obj->pos = 0;
     for (int i = 0; i < 16; i++) {
         (void) get_bits_raw(obj);
@@ -123,7 +123,7 @@ static int run_self_test(const CallerAPI *intf)
     V3bState obj;
     V3bState_init(&obj, 0);
     for (unsigned int i = 0; i < 1 << 20; i++) {
-        x ^= get_bits_raw(&obj);
+        x ^= (uint32_t) get_bits_raw(&obj);
     }
     intf->printf("Test value: %08X -- %s\n",
         x, x == x_ref ? "ok!" : "FAILED!");

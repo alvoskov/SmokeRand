@@ -60,10 +60,10 @@ static void *create(const CallerAPI *intf)
     Xkiss32AwcState *obj = intf->malloc(sizeof(Xkiss32AwcState));
     uint64_t seed_xs = intf->get_seed64();
     uint64_t seed = intf->get_seed64();
-    obj->s[0] = seed_xs & 0xFFFFFFFF;
-    obj->s[1] = (seed_xs >> 32) | 0x1;
-    obj->awc_x0 = (seed >> 32) & 0x3ffffff;
-    obj->awc_x1 = seed & 0x3ffffff;
+    obj->s[0] = (uint32_t) (seed_xs & 0xFFFFFFFF);
+    obj->s[1] = (uint32_t) ((seed_xs >> 32) | 0x1);
+    obj->awc_x0 = (uint32_t) ((seed >> 32) & 0x3ffffff);
+    obj->awc_x1 = (uint32_t) (seed & 0x3ffffff);
     obj->awc_c  = (obj->awc_x0 == 0 && obj->awc_x1 == 0) ? 1 : 0;
     return (void *) obj;
 }
@@ -79,7 +79,7 @@ static int run_self_test(const CallerAPI *intf)
         .s  = {8765, 4321},
         .awc_x0 = 3, .awc_x1 = 2, .awc_c = 1};
     for (int i = 0; i < 10000; i++) {
-        u = get_bits_raw(&obj);
+        u = (uint32_t) get_bits_raw(&obj);
     }
     intf->printf("Output: 0x%X; reference: 0x%X\n",
         (unsigned int) u, (unsigned int) u_ref);

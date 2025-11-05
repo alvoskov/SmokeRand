@@ -65,8 +65,8 @@ static inline void philox_round(uint32_t *out, const uint32_t *key)
 {
     uint64_t mul0 = out[0] * 0xD2511F53ull;
     uint64_t mul1 = out[2] * 0xCD9E8D57ull;
-    uint32_t hi0 = mul0 >> 32, lo0 = (uint32_t) mul0;
-    uint32_t hi1 = mul1 >> 32, lo1 = (uint32_t) mul1;
+    uint32_t hi0 = (uint32_t) (mul0 >> 32), lo0 = (uint32_t) mul0;
+    uint32_t hi1 = (uint32_t) (mul1 >> 32), lo1 = (uint32_t) mul1;
     out[0] = hi1 ^ out[1] ^ key[0]; out[1] = lo1;
     out[2] = hi0 ^ out[3] ^ key[1]; out[3] = lo0;
 }
@@ -134,14 +134,15 @@ static int self_test_compare(const CallerAPI *intf,
 static int run_self_test(const CallerAPI *intf)
 {
     Philox32State obj;
-    const uint32_t k0_m1[2] = {-1, -1};
+    const uint32_t minus1_u32 = 0xffffffff;
+    const uint32_t k0_m1[2]  = {minus1_u32, minus1_u32};
     const uint32_t ref_m1[4] = {0x408f276d, 0x41c83b0e, 0xa20bc7c6, 0x6d5451fd};
     const uint32_t k0_pi[2]  = {0xa4093822, 0x299f31d0};
     const uint32_t ref_pi[4] = {0xd16cfe09, 0x94fdcceb, 0x5001e420, 0x24126ea1};
 
     Philox32State_init(&obj, k0_m1);
-    obj.ctr[0] = -1; obj.ctr[1] = -1;
-    obj.ctr[2] = -1; obj.ctr[3] = -1;
+    obj.ctr[0] = minus1_u32; obj.ctr[1] = minus1_u32;
+    obj.ctr[2] = minus1_u32; obj.ctr[3] = minus1_u32;
 
     intf->printf("Philox4x64x10 ('-1' example)\n");
     Philox32State_block10(&obj);
@@ -183,7 +184,7 @@ static void *create(const CallerAPI *intf)
     for (size_t i = 0; i < Nw / 2; i += 2) {
         uint64_t seed = intf->get_seed64();
         k[i] = (uint32_t) (seed);
-        k[i + 1] = seed >> 32;
+        k[i + 1] = (uint32_t) (seed >> 32);
     }
     Philox32State_init(obj, k);
     return (void *) obj;

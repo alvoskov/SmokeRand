@@ -298,8 +298,8 @@ static void *create_scalar(const GeneratorInfo *gi, const CallerAPI *intf)
     uint32_t seeds[8];
     for (int i = 0; i < 4; i++) {
         uint64_t s = intf->get_seed64();
-        seeds[2*i] = s & 0xFFFFFFF;
-        seeds[2*i + 1] = s >> 32;
+        seeds[2*i] = (uint32_t) (s & 0xFFFFFFF);
+        seeds[2*i + 1] = (uint32_t) (s >> 32);
     }
     ChaCha_init(obj, GEN_NROUNDS, seeds);
     (void) gi;
@@ -617,8 +617,8 @@ static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
     uint32_t seeds[8];
     for (size_t i = 0; i < 4; i++) {
         uint64_t s = intf->get_seed64();
-        seeds[2*i] = s & 0xFFFFFFF;
-        seeds[2*i + 1] = s >> 32;
+        seeds[2*i] = (uint32_t) (s & 0xFFFFFFF);
+        seeds[2*i + 1] = (uint32_t) (s >> 32);
     }
     ChaChaVec_init(obj, GEN_NROUNDS, seeds);
     (void) gi;

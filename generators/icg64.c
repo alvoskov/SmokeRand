@@ -32,12 +32,10 @@
 
 PRNG_CMODULE_PROLOG
 
-enum {
-    ICG64_MOD = 0x7fffffffffffffe7 // 2^63 - 25
-};
+static const int64_t ICG64_MOD = 0x7fffffffffffffe7; // 2^63 - 25
 
 typedef struct {
-    uint64_t x;
+    int64_t x;
 } Icg64State;
 
 /**
@@ -64,13 +62,13 @@ static inline uint64_t get_bits_raw(void *state)
 {
     Icg64State *obj = state;
     obj->x = (modinv64(ICG64_MOD, obj->x) + 1) % ICG64_MOD;
-    return obj->x >> 31;
+    return (uint64_t) obj->x >> 31;
 }
 
 static void *create(const CallerAPI *intf)
 {
     Icg64State *obj = intf->malloc(sizeof(Icg64State));
-    obj->x = intf->get_seed64() % ICG64_MOD;
+    obj->x = (int64_t) (intf->get_seed64() % (uint64_t) ICG64_MOD);
     return obj;
 }
 

@@ -67,7 +67,7 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     ComboState *obj = intf->malloc(sizeof(ComboState));
-    ComboState_init(obj, intf->get_seed64());
+    ComboState_init(obj, intf->get_seed32());
     return obj;
 }
 

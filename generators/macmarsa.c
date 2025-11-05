@@ -22,14 +22,14 @@ typedef struct {
 
 static inline uint32_t lcg32(MMState *obj)
 {
-    return obj->x = 69069 * obj->x + 12345;
+    return obj->x = 69069u * obj->x + 12345u;
 }
 
 static inline uint64_t get_bits_raw(void *state)
 {
     MMState *obj = state;
-    obj->y = 63885 * (obj->y & 0xFFFF) + (obj->y >> 16);
-    int i = obj->y % 257;
+    obj->y = 63885u * (obj->y & 0xFFFF) + (obj->y >> 16);
+    unsigned int i = obj->y % 257;
     uint32_t out = obj->u[i];
     obj->u[i] = lcg32(obj);
     return out;

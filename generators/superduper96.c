@@ -46,12 +46,12 @@ static void *create(const CallerAPI *intf)
 {
     SuperDuper96State *obj = intf->malloc(sizeof(SuperDuper96State));
     uint64_t seed = intf->get_seed64();
-    obj->lcg = (seed & 0xFFFFFFFF) | 0x1;
-    obj->xs = seed >> 32;
+    obj->lcg = (uint32_t) (seed & 0xFFFFFFFF);
+    obj->xs  = (uint32_t) (seed >> 32);
     if (obj->xs == 0) {
         obj->xs = 0xDEADBEEF;
     }
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT32_PRNG("SuperDuper96", NULL)

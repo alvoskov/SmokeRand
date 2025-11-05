@@ -27,10 +27,11 @@ static inline uint64_t get_bits_raw(void *state)
 {
     static const int32_t m = 2147483647, a = 16807, q = 127773, r = 2836;
     Lcg32State *obj = state;
-    const uint32_t hi = obj->x / q;
-    const uint32_t lo = obj->x - q * hi; // It is x mod q
+    const int32_t x = (int32_t) obj->x;
+    const int32_t hi = x / q;
+    const int32_t lo = x - q * hi; // It is x mod q
     const int32_t t = a * lo - r * hi;
-    obj->x = (t < 0) ? (t + m) : t;
+    obj->x = (uint32_t) ((t < 0) ? (t + m) : t);
     return obj->x << 1; // 
 }
 
@@ -38,7 +39,7 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Lcg32State *obj = intf->malloc(sizeof(Lcg32State));
-    obj->x = intf->get_seed64() >> 33;
+    obj->x = (uint32_t) (intf->get_seed64() >> 33);
     return (void *) obj;
 }
 

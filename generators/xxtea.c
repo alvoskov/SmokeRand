@@ -253,15 +253,15 @@ void Xxtea128VecState_block(Xxtea128VecState *obj)
     out[1] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + XXTEA_NCOPIES));
     out[2] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 2*XXTEA_NCOPIES));
     out[3] = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 3*XXTEA_NCOPIES));
-    keyv[0] = _mm256_set1_epi32(obj->key[0]);
-    keyv[1] = _mm256_set1_epi32(obj->key[1]);
-    keyv[2] = _mm256_set1_epi32(obj->key[2]);
-    keyv[3] = _mm256_set1_epi32(obj->key[3]);
+    keyv[0] = _mm256_set1_epi32((int) obj->key[0]);
+    keyv[1] = _mm256_set1_epi32((int) obj->key[1]);
+    keyv[2] = _mm256_set1_epi32((int) obj->key[2]);
+    keyv[3] = _mm256_set1_epi32((int) obj->key[3]);
     y = out[0], z = out[3];
     for (int i = 0; i < XXTEA128_NROUNDS; i++) {
         sum += XXTEA_DELTA;
         unsigned int e = (sum >> 2) & 3;
-        __m256i sumv = _mm256_set1_epi32(sum);
+        __m256i sumv = _mm256_set1_epi32((int) sum);
         y = out[1];
         z = _mm256_add_epi32(out[0], mixv(y, z, sumv, keyv[0 ^ e])); out[0] = z;
         y = out[2];
@@ -319,13 +319,13 @@ void Xxtea128VecState_iter_func(void *data)
  */
 void Xxtea128VecState_init(Xxtea128VecState *obj, const uint32_t *key)
 {
-    for (int i = 0; i < 4; i++) {
+    for (size_t i = 0; i < 4; i++) {
         obj->key[i] = key[i];
     }
-    for (int i = 0; i < XXTEA_NCOPIES; i++) {
+    for (unsigned int i = 0; i < XXTEA_NCOPIES; i++) {
         obj->ctr[i] = i;
     }
-    for (int i = XXTEA_NCOPIES; i < 4 * XXTEA_NCOPIES; i++) {
+    for (size_t i = XXTEA_NCOPIES; i < 4 * XXTEA_NCOPIES; i++) {
         obj->ctr[i] = 0;
     }
     obj->intf.iter_func = Xxtea128VecState_iter_func;
@@ -422,13 +422,13 @@ void Xxtea256VecState_block(Xxtea256VecState *obj)
     for (int i = 0; i < XXTEA256_NROUNDS; i++) {
         sum += XXTEA_DELTA;
         unsigned int e = (sum >> 2) & 3;
-        __m256i sumv = _mm256_set1_epi32(sum);
+        __m256i sumv = _mm256_set1_epi32((int) sum);
         for (int j = 0; j < 7; j++) {
-            __m256i rk = _mm256_set1_epi32(obj->key[(j & 3) ^ e]);
+            __m256i rk = _mm256_set1_epi32((int) obj->key[(j & 3) ^ e]);
             y = out[j + 1];
             z = _mm256_add_epi32(out[j], mixv(y, z, sumv, rk)); out[j] = z;
         }
-        __m256i rk = _mm256_set1_epi32(obj->key[(7 & 3) ^ e]);
+        __m256i rk = _mm256_set1_epi32((int) obj->key[(7 & 3) ^ e]);
         y = out[0];
         z = _mm256_add_epi32(out[7], mixv(y, z, sumv, rk)); out[7] = z;
     }
@@ -479,13 +479,13 @@ void Xxtea256VecState_iter_func(void *data)
  */
 void Xxtea256VecState_init(Xxtea256VecState *obj, const uint32_t *key)
 {
-    for (int i = 0; i < 4; i++) {
+    for (size_t i = 0; i < 4; i++) {
         obj->key[i] = key[i];
     }
-    for (int i = 0; i < XXTEA_NCOPIES; i++) {
+    for (unsigned int i = 0; i < XXTEA_NCOPIES; i++) {
         obj->ctr[i] = i;
     }
-    for (int i = XXTEA_NCOPIES; i < 4 * XXTEA_NCOPIES; i++) {
+    for (size_t i = XXTEA_NCOPIES; i < 4 * XXTEA_NCOPIES; i++) {
         obj->ctr[i] = 0;
     }
     obj->intf.iter_func = Xxtea256VecState_iter_func;
@@ -506,8 +506,8 @@ static void *create(const CallerAPI *intf)
     uint32_t key[4];
     uint64_t s0 = intf->get_seed64();
     uint64_t s1 = intf->get_seed64();
-    key[0] = (uint32_t) s0; key[1] = s0 >> 32;
-    key[2] = (uint32_t) s1; key[3] = s1 >> 32;
+    key[0] = (uint32_t) s0; key[1] = (uint32_t) (s0 >> 32);
+    key[2] = (uint32_t) s1; key[3] = (uint32_t) (s1 >> 32);
     XxteaInfo info = XxteaInfo_get(intf);
     if (info.type == XXTEA128_SCALAR) {
         Xxtea128State *obj = intf->malloc(sizeof(Xxtea128State));

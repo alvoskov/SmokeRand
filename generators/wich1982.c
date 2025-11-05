@@ -70,7 +70,9 @@ static uint64_t get_bits_raw(void *state)
     s1 = (171 * s1) % 30269;
     s2 = (172 * s2) % 30307;
     s3 = (170 * s3) % 30323;
-    obj->s1 = s1; obj->s2 = s2; obj->s3 = s3;
+    obj->s1 = (uint16_t) s1;
+    obj->s2 = (uint16_t) s2;
+    obj->s3 = (uint16_t) s3;
     // Output function
     s1 = (s1 << 32) / 30269;
     s2 = (s2 << 32) / 30307;
@@ -82,9 +84,9 @@ static void *create(const CallerAPI *intf)
 {
     Wich1982State *obj = intf->malloc(sizeof(Wich1982State));
     uint64_t s = intf->get_seed64();
-    obj->s1 = 1 + (s % 30000);
-    obj->s2 = 1 + ((s >> 16) % 30000);
-    obj->s3 = 1 + ((s >> 32) % 30000);
+    obj->s1 = (uint16_t) (1 + (s % 30000));
+    obj->s2 = (uint16_t) (1 + ((s >> 16) % 30000));
+    obj->s3 = (uint16_t) (1 + ((s >> 32) % 30000));
     return obj;
 }
 

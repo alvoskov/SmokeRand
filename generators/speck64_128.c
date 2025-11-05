@@ -61,9 +61,9 @@ static void Speck64x128State_init(Speck64x128State *obj, const uint32_t *key, co
         a = key[0]; b = key[1]; c = key[2]; d = key[3];
     }
     for (size_t i = 0; i < NROUNDS; ) {
-        obj->keys[i] = a; speck_round(&b, &a, i++);
-        obj->keys[i] = a; speck_round(&c, &a, i++);
-        obj->keys[i] = a; speck_round(&d, &a, i++);
+        obj->keys[i] = a; speck_round(&b, &a, (uint32_t) (i++));
+        obj->keys[i] = a; speck_round(&c, &a, (uint32_t) (i++));
+        obj->keys[i] = a; speck_round(&d, &a, (uint32_t) (i++));
     }
 }
 

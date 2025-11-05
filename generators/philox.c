@@ -136,7 +136,8 @@ static int self_test_compare(const CallerAPI *intf,
 static int run_self_test(const CallerAPI *intf)
 {
     PhiloxState obj;
-    static const uint64_t k0_m1[2] = {-1, -1};
+    static const uint64_t minus1_u64 = 0xffffffffffffffffull;
+    static const uint64_t k0_m1[2] = {minus1_u64, minus1_u64};
     static const uint64_t ref_m1[4] = {0x87b092c3013fe90bull,
         0x438c3c67be8d0224ull, 0x9cc7d7c69cd777b6ull, 0xa09caebf594f0ba0ull};
 
@@ -146,8 +147,8 @@ static int run_self_test(const CallerAPI *intf)
         0x38c72dbd566e9788ull, 0xa5a1610e72fd18b5ull, 0x57bd43b5e52b7fe6ull};
 
     PhiloxState_init(&obj, k0_m1);
-    obj.ctr[0] = -1; obj.ctr[1] = -1;
-    obj.ctr[2] = -1; obj.ctr[3] = -1;
+    obj.ctr[0] = minus1_u64; obj.ctr[1] = minus1_u64;
+    obj.ctr[2] = minus1_u64; obj.ctr[3] = minus1_u64;
 
     intf->printf("Philox4x64x10 ('-1' example)\n");
     PhiloxState_block10(&obj);

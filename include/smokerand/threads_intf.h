@@ -129,7 +129,7 @@ ThreadObj ThreadObj_current(void);
 void *dlopen_wrap(const char *libname);
 void *dlsym_wrap(void *handle, const char *symname);
 void dlclose_wrap(void *handle);
-int get_cpu_numcores(void);
+unsigned int get_cpu_numcores(void);
 int get_ram_info(RamInfo *info);
 
 #endif // __SMOKERAND_THREADS_INTF_H

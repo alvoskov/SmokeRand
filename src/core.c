@@ -1042,18 +1042,28 @@ void set_bin_stdin(void)
 }
 
 
+static inline unsigned int
+maxlen_log2_to_nblocks32_log2(unsigned int maxlen_log2)
+{
+    if (maxlen_log2 == 0) {
+        return 62;
+    } else if (maxlen_log2 < 11) {
+        return 1;
+    } else {
+        return maxlen_log2 - 10;
+    }
+}
+
 /**
  * @brief Dump an output PRNG to the stdout in the format suitable
  * for PractRand.
  */
-void GeneratorInfo_bits_to_file(GeneratorInfo *gen, const CallerAPI *intf, int maxlen_log2)
+void GeneratorInfo_bits_to_file(GeneratorInfo *gen,
+    const CallerAPI *intf, unsigned int maxlen_log2)
 {
     set_bin_stdout();
     void *state = gen->create(gen, intf);
-    int shl = ((maxlen_log2 == 0) ? 62 : (maxlen_log2 - 10)); // For 32 bits
-    if (shl < 1) {
-        shl = 1;
-    }
+    unsigned int shl = maxlen_log2_to_nblocks32_log2(maxlen_log2);
     if (gen->nbits == 32) {
         uint32_t buf[256];        
         long long nblocks = 1ll << shl;

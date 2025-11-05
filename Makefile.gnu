@@ -61,8 +61,8 @@ else ifeq ($(PLATFORM_NAME), GENERIC)
 endif
 #-----------------------------------------------------------------------------
 # -Wconversion 
-CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wcast-align=strict -Wshadow
-CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wcast-align=strict -Wshadow
+CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wcast-align=strict -Wshadow -Wconversion
+CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wcast-align=strict -Wshadow -Wconversion
 CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wshadow
 LINKFLAGS = $(PLATFORM_FLAGS)
 INCLUDE = -Iinclude
@@ -106,8 +106,9 @@ LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, $(LIB_HEADERS_EXTRA) \
     blake2s.h entropy.h extratests.h fileio.h lineardep.h hwtests.h specfuncs.h \
     threads_intf.h )
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
-INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/cinterface.h \
-    $(INCLUDEDIR)/int128defs.h $(INCLUDEDIR)/x86exts.h
+INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/coredefs.h \
+    $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/int128defs.h \
+    $(INCLUDEDIR)/x86exts.h
 # Battery
 BAT_LIB = $(LIBDIR)/libsmokerand_bat.a
 BATLIB_SOURCES = $(addprefix $(SRCDIR)/, bat_express.c bat_brief.c bat_default.c \

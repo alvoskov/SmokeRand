@@ -236,7 +236,7 @@ static inline void Speck128VecState_block(Speck128VecState *obj)
     __m256i c = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 8));
     __m256i d = _mm256_loadu_si256((__m256i *) (void *) (obj->ctr + 12));
     for (int i = 0; i < obj->nrounds; i++) {
-        __m256i kv = _mm256_set1_epi64x(obj->keys[i]);
+        __m256i kv = _mm256_set1_epi64x((long long) obj->keys[i]);
         round_avx(&b, &a, &kv);
         round_avx(&d, &c, &kv);
     }
@@ -365,18 +365,18 @@ int run_self_test_vector_reduced(const CallerAPI *intf)
     int is_ok = 1;
     Speck128VecState *obj = intf->malloc(sizeof(Speck128VecState));
     Speck128VecState_init(obj, key, NROUNDS_R16);
-    for (int i = 0; i < 4; i++) {
+    for (unsigned int i = 0; i < 4; i++) {
         obj->ctr[i] = ctr[0]; obj->ctr[i + 8] = ctr[0];
         obj->ctr[i + 4] = ctr[1]; obj->ctr[i + 12] = ctr[1];
     }
     // Rounds 0..15
     Speck128VecState_block(obj);
     // Rounds 16..32
-    for (int i = 0; i < 16; i++) {
+    for (unsigned int i = 0; i < 16; i++) {
         obj->ctr[i] = obj->out[i];
     }
     uint64_t a = key[0], b = key[1];
-    for (int i = 0; i < 2*NROUNDS_R16 - 1; i++) {
+    for (unsigned int i = 0; i < 2*NROUNDS_R16 - 1; i++) {
         speck_round(&b, &a, i);
         if (i >= 15) {
             obj->keys[i - 15] = a;

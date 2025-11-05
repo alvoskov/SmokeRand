@@ -46,22 +46,22 @@ typedef struct {
     uint8_t pos;
 } Alfib8State;
 
-static inline uint64_t get_bits8(Alfib8State *obj)
+static inline uint8_t get_bits8(Alfib8State *obj)
 {
     uint8_t *x = obj->x;
     obj->pos++;
-    uint8_t u = x[(obj->pos - 61) & LF8X5_MASK]
+    uint8_t u = (uint8_t) ( x[(obj->pos - 61) & LF8X5_MASK]
         + x[(obj->pos - 60) & LF8X5_MASK]
         + x[(obj->pos - 46) & LF8X5_MASK]
-        + x[(obj->pos - 45) & LF8X5_MASK];
+        + x[(obj->pos - 45) & LF8X5_MASK] );
     x[obj->pos & LF8X5_MASK] = u;
     // Output scrambler
     // Round 1
-    u = u ^ (u >> 5); // Hide low linear complexity of lower bits
-    u = u + (u << 1); // To prevent failure of matrix rank tests
+    u = (uint8_t) (u ^ (u >> 5)); // Hide low linear complexity of lower bits
+    u = (uint8_t) (u + (u << 1)); // To prevent failure of matrix rank tests
     // Round 2
-    u = u ^ (u >> 6);
-    u = u + (u << 3);
+    u = (uint8_t) (u ^ (u >> 6));
+    u = (uint8_t) (u + (u << 3));
     return u;
 }
 
@@ -80,14 +80,14 @@ static inline uint64_t get_bits_raw(void *state)
 
 static void Alfib8State_init(Alfib8State *obj, uint32_t seed)
 {    
-    uint8_t x = seed & 0xFF;
-    uint8_t a = (seed >> 8) & 0xFF;
-    uint8_t b = (seed >> 16) & 0xFF;
-    uint8_t c = (seed >> 24) & 0xFF;
+    uint8_t x = (uint8_t) (seed & 0xFF);
+    uint8_t a = (uint8_t) ((seed >> 8) & 0xFF);
+    uint8_t b = (uint8_t) ((seed >> 16) & 0xFF);
+    uint8_t c = (uint8_t) ((seed >> 24) & 0xFF);
     for (int i = 0; i < LF8X5_WARMUP + LF8X5_BUFSIZE; i++) {
-        a ^= c ^ (x += 151);
+        a ^= (uint8_t) (c ^ (x += 151));
         b += a;
-        c = (c + ((b << 7) | (b >> 1))) ^ a;
+        c = (uint8_t) ((c + ((b << 7) | (b >> 1))) ^ a);
         if (i >= LF8X5_WARMUP) {
             obj->x[i - LF8X5_WARMUP] = c ^ b;
         }

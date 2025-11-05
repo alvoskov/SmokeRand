@@ -39,7 +39,7 @@ static void Mwc8222State_init(Mwc8222State *obj, uint64_t seed)
     obj->pos = 255;
     obj->c = 362436; // Must be less than 809430660
     for (int i = 0; i < 256; i++) {
-        obj->x[i] = pcg_bits64(&seed) >> 32;
+        obj->x[i] = (uint32_t) (pcg_bits64(&seed) >> 32);
     }
 }
 
@@ -48,7 +48,7 @@ static inline uint64_t get_bits_raw(void *state)
     static const uint64_t a = 809430660ULL;
     Mwc8222State *obj = state;
     uint64_t t = a * obj->x[++obj->pos] + obj->c;
-    obj->c = t >> 32;
+    obj->c = (uint32_t) (t >> 32);
     obj->x[obj->pos] = (uint32_t) t;
     return obj->x[obj->pos];
 }

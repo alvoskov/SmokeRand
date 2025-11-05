@@ -26,7 +26,7 @@ PRNG_CMODULE_PROLOG
 
 static inline uint8_t rotl8(uint8_t x, int r)
 {
-    return (x << r) | (x >> (8 - r));
+    return (uint8_t) ((x << r) | (x >> (8 - r)));
 }
 
 /**
@@ -42,7 +42,7 @@ typedef struct {
 static inline uint8_t Mtc8State_get_bits(Mtc8State *obj)
 {
     uint8_t old = obj->a + obj->b;
-    obj->a = (obj->b * 123u) ^ ++obj->ctr;
+    obj->a = (uint8_t) ((obj->b * 123u) ^ ++obj->ctr);
     obj->b = rotl8(old, 3);
     return obj->a;
 }

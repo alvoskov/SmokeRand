@@ -67,7 +67,7 @@ static void RC4OKState_init(RC4OKState *obj, const uint8_t *key, size_t key_len)
     }
     // Initialize the state with the given key
     int j = 0;
-    for (int i = 0; i < 256; i++) {
+    for (size_t i = 0; i < 256; i++) {
         j = (j + obj->s[i] + key[i % key_len]) & 0xFF;
         swap_bytes(&obj->s[i], &obj->s[j]);
     }

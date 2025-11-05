@@ -110,7 +110,7 @@ uint8_t gf256_mul(uint8_t a, uint8_t b)
     uint8_t result = 0;
     while (a && b) {
         if (b & 1) result ^= a;
-        a = (a << 1) ^ (a & 0x80 ? 0xC3 : 0x00);
+        a = (uint8_t) ( (a << 1) ^ (a & 0x80 ? 0xC3 : 0x00) );
         b >>= 1;
     }
     return result;
@@ -252,12 +252,12 @@ void KuznState_expand_key(KuznState *obj, const Key256 *key)
     int pos = 0;
     Vec16 c_in = {.data = {.u8 = {0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0}}};
     Vec16 c, tmp, f, k1 = key->hi, k2 = key->lo;
-    for (int i = 1; i <= 33; i++) {
+    for (unsigned int i = 1; i <= 33; i++) {
         if ((i - 1) % 8 == 0) {
             obj->rk[pos++] = k1;
             obj->rk[pos++] = k2;
         }
-        c_in.data.u8[0] = i;
+        c_in.data.u8[0] = (uint8_t) i;
         apply_L(&c, &c_in);
         tmp = k1;
         Vec16_xor(&tmp, &c);

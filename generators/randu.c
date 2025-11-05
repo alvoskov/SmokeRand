@@ -22,7 +22,7 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Lcg32State *obj = intf->malloc(sizeof(Lcg32State));
-    obj->x = intf->get_seed64() >> 32;
+    obj->x = intf->get_seed32();
     return (void *) obj;
 }
 

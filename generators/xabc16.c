@@ -41,9 +41,9 @@ typedef struct {
 
 static inline uint16_t get_bits16(Xabc16State *obj)
 {
-    obj->a ^= obj->c ^ (obj->x += 0x9E37);
+    obj->a ^= (uint16_t) (obj->c ^ (obj->x += 0x9E37));
     obj->b += obj->a;
-    obj->c = (obj->c + ((obj->b << 11) | (obj->b >> 5))) ^ obj->a;
+    obj->c = (uint16_t) ((obj->c + ((obj->b << 11) | (obj->b >> 5))) ^ obj->a);
     return obj->c ^ obj->b;
 }
 
@@ -64,7 +64,7 @@ static void *create(const CallerAPI *intf)
     obj->a = s & 0xFFFF;
     obj->b = (s >> 16) & 0xFFFF;
     obj->c = (s >> 32) & 0xFFFF;
-    obj->x = s >> 48;
+    obj->x = (uint16_t) (s >> 48);
     for (int i = 0; i < 32; i++) {
         (void) get_bits_raw(obj);
     }

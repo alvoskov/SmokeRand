@@ -55,15 +55,15 @@ static void *create(const CallerAPI *intf)
     obj->half_buff = 0;
     obj->red_spin = seed & 0xFFFFFFFF;
     obj->counter = 0;    
-    for (int i = 0; i < NUMBUFF; i++) {
-        seed = 6906969069 * seed + 12345;
-        obj->buffer[i] = seed >> 32;
+    for (size_t i = 0; i < NUMBUFF; i++) {
+        seed = 6906969069u * seed + 12345u;
+        obj->buffer[i] = (uint32_t) (seed >> 32);
     }
     // Generator warm-up
     for (unsigned long long i = 0; i < NUMBUFF * 128; i++) {
         (void) get_bits_raw(obj);
     }
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT64_PRNG("ranshi", NULL)

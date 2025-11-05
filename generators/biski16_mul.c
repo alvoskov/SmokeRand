@@ -19,7 +19,7 @@ typedef struct {
 static inline uint16_t Biski16State_get_bits(Biski16State *obj)
 {
     uint16_t output = GR * obj->mix;
-    uint16_t old_rot = (obj->last_mix << 11) | (obj->last_mix >> 5);
+    uint16_t old_rot = rotl16(obj->last_mix, 11);
     obj->last_mix = obj->ctr ^ obj->mix;
     obj->mix = old_rot + output;
     obj->ctr += GR;
@@ -37,9 +37,9 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Biski16State *obj = intf->malloc(sizeof(Biski16State));
-    obj->last_mix = intf->get_seed64();
-    obj->mix = intf->get_seed64();
-    obj->ctr = intf->get_seed64();
+    obj->last_mix = (uint16_t) intf->get_seed64();
+    obj->mix = (uint16_t) intf->get_seed64();
+    obj->ctr = (uint16_t) intf->get_seed64();
     return obj;
 }
 

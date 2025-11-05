@@ -34,7 +34,7 @@ static inline uint16_t Xoroshiro32PPState_get_bits(Xoroshiro32PPState *obj)
     uint16_t s1 = obj->s[1];
     const uint16_t result = rotl16(s0 + s1, 9) + s0;
     s1 ^= s0;
-    obj->s[0] = rotl16(s0, 13) ^ s1 ^ (s1 << 5); // a, b
+    obj->s[0] = (uint16_t) (rotl16(s0, 13) ^ s1 ^ (s1 << 5)); // a, b
     obj->s[1] = rotl16(s1, 10); // c
     return result;
 }
@@ -51,8 +51,8 @@ static void *create(const CallerAPI *intf)
 {
     Xoroshiro32PPState *obj = intf->malloc(sizeof(Xoroshiro32PPState));
     uint64_t seed = intf->get_seed64();
-    obj->s[0] = seed >> 16;
-    obj->s[1] = seed & 0xFFFF;
+    obj->s[0] = (uint16_t) (seed >> 16);
+    obj->s[1] = (uint16_t) (seed & 0xFFFF);
     if (obj->s[0] == 0 && obj->s[1] == 0) {
         obj->s[0] = 0xDEAD;
         obj->s[1] = 0xBEEF;

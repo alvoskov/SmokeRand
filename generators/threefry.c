@@ -311,10 +311,10 @@ static inline void mix4v(__m256i *xv, int d1, int d2)
 static inline void Tf256VecState_apply_round_key(Tf256VecState *obj, __m256i *out,
     size_t n, size_t i0, size_t i1, size_t i2, size_t i3)
 {
-    __m256i ks0 = _mm256_set1_epi64x(obj->k[i0]);
-    __m256i ks1 = _mm256_set1_epi64x(obj->k[i1]);
-    __m256i ks2 = _mm256_set1_epi64x(obj->k[i2]);
-    __m256i ks3 = _mm256_set1_epi64x(obj->k[i3] + n);
+    __m256i ks0 = _mm256_set1_epi64x((long long) obj->k[i0]);
+    __m256i ks1 = _mm256_set1_epi64x((long long) obj->k[i1]);
+    __m256i ks2 = _mm256_set1_epi64x((long long) obj->k[i2]);
+    __m256i ks3 = _mm256_set1_epi64x((long long) (obj->k[i3] + n));
     out[0] = _mm256_add_epi64(out[0], ks0);
     out[1] = _mm256_add_epi64(out[1], ks1);
     out[2] = _mm256_add_epi64(out[2], ks2);
@@ -432,14 +432,14 @@ void Tf256VecState_iter_func_20(void *data)
 static void Tf256VecState_init(Tf256VecState *obj, const uint64_t *k, int is_full)
 {
     obj->k[NWORDS] = C240;
-    for (int i = 0; i < NWORDS; i++) {
+    for (size_t i = 0; i < NWORDS; i++) {
         obj->k[i] = k[i];
         obj->k[NWORDS] ^= obj->k[i];
     }
-    for (int i = 0; i < NCOPIES; i++) {
+    for (unsigned int i = 0; i < NCOPIES; i++) {
         obj->ctr[i] = i;
     }
-    for (int i = NCOPIES; i < NCOPIES * NWORDS; i++) {
+    for (size_t i = NCOPIES; i < NCOPIES * NWORDS; i++) {
         obj->ctr[i] = 0;
     }
     if (is_full) {
@@ -490,7 +490,8 @@ static int self_test_compare(const CallerAPI *intf,
 static int run_self_test_scalar(const CallerAPI *intf)
 {
     Tf256State obj;
-    static const uint64_t k0_m1[4] = {-1, -1, -1, -1};
+    static const uint64_t minus1_u64 = 0xffffffffffffffffull;
+    static const uint64_t k0_m1[4] = {minus1_u64, minus1_u64, minus1_u64, minus1_u64};
     static const uint64_t ref72_m1[4] = {0x11518c034bc1ff4cull,
         0x193f10b8bcdcc9f7ull, 0xd024229cb58f20d8ull, 0x563ed6e48e05183full};
     static const uint64_t ref20_m1[4] = {0x29c24097942bba1bull,
@@ -504,8 +505,8 @@ static int run_self_test_scalar(const CallerAPI *intf)
         0xbaafd0c30138319bull, 0x84a5c1a729e685b9ull, 0x901d406ccebc1ba4ull};
 
     Tf256State_init(&obj, k0_m1, 1);
-    obj.p[0] = -1; obj.p[1] = -1;
-    obj.p[2] = -1; obj.p[3] = -1;
+    obj.p[0] = minus1_u64; obj.p[1] = minus1_u64;
+    obj.p[2] = minus1_u64; obj.p[3] = minus1_u64;
 
     intf->printf("Threefry4x64x72 ('-1' example)\n");
     Tf256State_block72(&obj);
@@ -565,8 +566,9 @@ int self_test_compare_vec(const CallerAPI *intf,
 static int run_self_test_vector(const CallerAPI *intf)
 {
 #ifdef THREEFRY_VEC_ENABLED
+    static const uint64_t minus1_u64 = 0xffffffffffffffffull;
     Tf256VecState obj;
-    static const uint64_t k0_m1[4] = {-1, -1, -1, -1};
+    static const uint64_t k0_m1[4] = {minus1_u64, minus1_u64, minus1_u64, minus1_u64};
     static const uint64_t ref72_m1[4] = {0x11518c034bc1ff4cull,
         0x193f10b8bcdcc9f7ull, 0xd024229cb58f20d8ull, 0x563ed6e48e05183full};
     static const uint64_t ref20_m1[4] = {0x29c24097942bba1bull,
@@ -581,7 +583,7 @@ static int run_self_test_vector(const CallerAPI *intf)
 
     Tf256VecState_init(&obj, k0_m1, 1);
     for (int i = 0; i < NWORDS * NCOPIES; i++) {
-        obj.ctr[i] = -1;
+        obj.ctr[i] = minus1_u64;
     }
     intf->printf("Threefry4x64x72 ('-1' example)\n");
     Tf256VecState_block72(&obj);

@@ -64,7 +64,7 @@ PRNG_CMODULE_PROLOG
  */
 typedef struct {
     uint32_t q[4288];
-    int c;
+    unsigned int c;
     int ind;
 } Cswb4288State;
 
@@ -109,8 +109,8 @@ static void *create(const CallerAPI *intf)
 {
     Cswb4288State *obj = intf->malloc(sizeof(Cswb4288State));
     uint64_t seed = intf->get_seed64();
-    Cswb4288State_init(obj, seed >> 32, (seed & 0xFFFFFFFF) | 1);
-    return (void *) obj;
+    Cswb4288State_init(obj, (uint32_t) (seed >> 32), (uint32_t) ((seed & 0xFFFFFFFF) | 1));
+    return obj;
 }
 
 /**

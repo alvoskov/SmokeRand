@@ -55,8 +55,8 @@ static inline uint64_t get_bits_raw(void *state)
 {
     const uint64_t A0 = 0xff676488; // 2^32 - 10001272
     MWC64State *obj = state;
-    uint32_t c = obj->data >> 32;
-    uint32_t x = obj->data & 0xFFFFFFFF;
+    uint32_t c = (uint32_t) (obj->data >> 32);
+    uint32_t x = (uint32_t) (obj->data & 0xFFFFFFFF);
     obj->data = A0 * x + c;
     return x;
 }

@@ -257,7 +257,7 @@ static void *create_generic(const CallerAPI *intf, int nrounds)
         key[i] = intf->get_seed64();
     }
     BlaBlaState_init(obj, key);
-    obj->nrounds = nrounds;
+    obj->nrounds = (size_t) nrounds;
     BlaBlaState_block_scalar(obj);
     return obj;
 }

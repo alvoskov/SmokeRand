@@ -45,12 +45,12 @@ static inline uint16_t get_bits16(Smwc48State *obj)
 {
     static const uint32_t MWC_A1 = 0xfefa;//0xe8c5;
     static const uint16_t LCG_A1 = 62317u;
-    uint16_t out = (LCG_A1 * obj->x) ^ ((obj->x2 << 5) | (obj->x2 >> 11));
+    uint16_t out = (uint16_t) ((LCG_A1 * obj->x) ^ ((obj->x2 << 5) | (obj->x2 >> 11)));
 //    uint16_t out = obj->x ^ obj->x2;
     uint32_t mul = MWC_A1 * obj->x + obj->c;
-    obj->c = mul >> 16;
+    obj->c = (uint16_t) (mul >> 16);
     obj->x2 = obj->x;
-    obj->x = mul & 0xFFFF;
+    obj->x = (uint16_t) (mul & 0xFFFF);
     return out;
 }
 
@@ -66,10 +66,10 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Smwc48State *obj = intf->malloc(sizeof(Smwc48State));
-    obj->x = intf->get_seed32();
-    obj->x2 = intf->get_seed32();
+    obj->x  = (uint16_t) intf->get_seed32();
+    obj->x2 = (uint16_t) intf->get_seed32();
     obj->c = 1;
-    return (void *) obj;
+    return obj;
 }
 
 

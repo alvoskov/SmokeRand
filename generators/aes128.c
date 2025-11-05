@@ -244,7 +244,7 @@ static const uint8_t sbox[256] = {
 // Multiplication by '0x02'
 static inline uint8_t xtime(uint8_t x)
 {
-    return ((x<<1) ^ (((x>>7) & 1) * 0x1b));
+    return (uint8_t) ( ((x<<1) ^ (((x>>7) & 1) * 0x1b)) );
 }
 
 
@@ -283,11 +283,11 @@ uint32_t a_to_t4(uint8_t a)
 void fill_lookup_tables(void)
 {
     for (unsigned int i = 0; i < 256; i++) {
-        uint32_t t0 = a_to_t0(i); te_tbl[0][i] = t0;
+        uint32_t t0 = a_to_t0((uint8_t) i); te_tbl[0][i] = t0;
         te_tbl[1][i] = (t0 << 24) | (t0 >> 8);
         te_tbl[2][i] = (t0 << 16) | (t0 >> 16);
         te_tbl[3][i] = (t0 << 8)  | (t0 >> 24);
-        te_tbl[4][i] = a_to_t4(i);
+        te_tbl[4][i] = a_to_t4((uint8_t) i);
     }
 }
 

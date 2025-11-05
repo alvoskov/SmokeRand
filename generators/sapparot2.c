@@ -36,7 +36,7 @@ static inline uint64_t get_bits_raw(void *state)
     uint32_t m;
     Sapparot2State *obj = state;
     obj->c += obj->a;
-    obj->c = rotl32(obj->c, obj->b >> C_SH);
+    obj->c = rotl32(obj->c, (int) (obj->b >> C_SH));
     obj->b = (obj->b + ((obj->a << 1) + 1)) ^ rotl32(obj->b, 5);
     obj->a += PHI;
     obj->a = rotl32(obj->a, C_RTR);
@@ -50,8 +50,8 @@ static void *create(const CallerAPI *intf)
 {
     Sapparot2State *obj = intf->malloc(sizeof(Sapparot2State));
     uint64_t seed = intf->get_seed64();    
-    obj->a = seed >> 32;
-    obj->b = seed & 0xFFFFFFFF;
+    obj->a = (uint32_t) (seed >> 32);
+    obj->b = (uint32_t) (seed & 0xFFFFFFFF);
     obj->c = intf->get_seed32();
     return (void *) obj;
 }
