@@ -12,6 +12,7 @@
  * 1. S. K. Park, K. W. Miller. Random number generators: good ones
  *    are hard to find // Communications of the ACM. 1988. V. 31. N 10.
  *    P.1192-1201. https://doi.org/10.1145/63039.63042
+ * 2. https://programmingpraxis.com/2014/01/14/minimum-standard-random-number-generator/
  *
  * @copyright
  * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
@@ -25,6 +26,7 @@ PRNG_CMODULE_PROLOG
 
 static inline uint64_t get_bits_raw(void *state)
 {
+/*
     static const int32_t m = 2147483647, a = 16807, q = 127773, r = 2836;
     Lcg32State *obj = state;
     const int32_t x = (int32_t) obj->x;
@@ -32,7 +34,23 @@ static inline uint64_t get_bits_raw(void *state)
     const int32_t lo = x - q * hi; // It is x mod q
     const int32_t t = a * lo - r * hi;
     obj->x = (uint32_t) ((t < 0) ? (t + m) : t);
-    return obj->x << 1; // 
+*/
+
+/*
+    Lcg32State *obj = state;
+    obj->x = (uint32_t) ( (16807ULL * obj->x) % 2147483647ULL );
+*/
+
+    Lcg32State *obj = state;
+    uint64_t prod = 16807ULL * obj->x;
+    uint32_t q = (uint32_t) (prod & 0x7FFFFFFFU);
+    uint32_t p = (uint32_t) (prod >> 31);
+    obj->x = p + q;
+    if (obj->x >= 0x7FFFFFFFU) {
+        obj->x -= 0x7FFFFFFFU;
+    }
+
+    return obj->x << 1;
 }
 
 
@@ -50,10 +68,10 @@ int run_self_test(const CallerAPI *intf)
     Lcg32State obj;
     obj.x = 1;
     for (size_t i = 0; i < 10000; i++) {
-        get_bits_raw(&obj);
+        get_bits_raw(&obj.x);
     }
     intf->printf("The current state is %d, reference value is %d\n",
-        obj.x, x_ref);
+        (int) obj.x, (int) x_ref);
     return obj.x == x_ref;
 }
 

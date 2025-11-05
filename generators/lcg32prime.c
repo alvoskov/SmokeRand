@@ -40,7 +40,7 @@ static inline uint64_t get_bits_raw(void *state)
     obj->x = r;
 #else
     // Implementation for 64-bit systems
-    obj->x = (uint32_t) ( (a * obj->x + 123) % m );
+    obj->x = (uint32_t) ( (a * obj->x + 123u) % m );
 #endif
     return obj->x;
 }
