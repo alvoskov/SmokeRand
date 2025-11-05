@@ -9,6 +9,9 @@
  */
 #include "smokerand/lineardep.h"
 #include "smokerand/specfuncs.h"
+#ifdef __AVX2__
+    #include "smokerand/x86exts.h"
+#endif
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -17,36 +20,26 @@
 #include <math.h>
 
 
-#ifdef __AVX2__
-#pragma message ("AVX2 version will be compiled")
-#if defined(_MSC_VER) && !defined(__clang__)
-#include <intrin.h>
-#else
-#include <x86intrin.h>
-#endif
-//#define VECINT_NBITS 256
-//typedef __m256i VECINT;
-//static inline void xorbits(VECINT *a_j, const VECINT *a_i, size_t i1, size_t i2)
 static inline void xorbits(uint32_t *a_j, const uint32_t *a_i, size_t i1, size_t i2)
 {
-    for (size_t k = i1; k < i2; k += 8) {
-        __m256i aj_k = _mm256_loadu_si256((__m256i *) (void *) (a_j + k));
-        __m256i ai_k = _mm256_loadu_si256((__m256i *) (void *) (a_i + k));
+#ifdef __AVX2__
+    #pragma message ("AVX2 version will be compiled")
+    i1 >>= 3; i2 >>= 3; // From 32-bit to 256-bit chunks
+    __m256i *a_j_vec = (__m256i *) (void *) a_j;
+    __m256i *a_i_vec = (__m256i *) (void *) a_i;
+    for (size_t k = i1; k < i2; k++) {
+        __m256i aj_k = _mm256_loadu_si256(a_j_vec + k);
+        __m256i ai_k = _mm256_loadu_si256(a_i_vec + k);
         aj_k = _mm256_xor_si256(aj_k, ai_k);
-        _mm256_storeu_si256((__m256i *) (void *) (a_j + k), aj_k);
+        _mm256_storeu_si256(a_j_vec + k, aj_k);
     }
-}
 #else
-#pragma message ("Portable version will be compiled")
-// Don't change to other type: it will violate strict aliasing!
-#define VECINT_NBITS 32
-typedef uint32_t VECINT;
-static inline void xorbits(VECINT *a_j, const VECINT *a_i, size_t i1, size_t i2)
-{
+    #pragma message ("Portable version will be compiled")
     for (size_t k = i1; k < i2; k++)
         a_j[k] ^= a_i[k];
-}
 #endif
+}
+
 
 #define GET_AJI (row_ptr[j][i_offset] & i_mask)
 
