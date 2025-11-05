@@ -61,9 +61,9 @@ else ifeq ($(PLATFORM_NAME), GENERIC)
 endif
 #-----------------------------------------------------------------------------
 # -Wconversion 
-CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wcast-align=strict -Wshadow -Wconversion
-CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wcast-align=strict -Wshadow -Wconversion
-CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wshadow
+CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wcast-align=strict -Wshadow -Wconversion -Wvla
+CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wcast-align=strict -Wshadow -Wconversion -Wvla
+CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wshadow -Wvla
 LINKFLAGS = $(PLATFORM_FLAGS)
 INCLUDE = -Iinclude
 
