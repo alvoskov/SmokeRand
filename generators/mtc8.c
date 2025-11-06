@@ -24,11 +24,6 @@
 
 PRNG_CMODULE_PROLOG
 
-static inline uint8_t rotl8(uint8_t x, int r)
-{
-    return (uint8_t) ((x << r) | (x >> (8 - r)));
-}
-
 /**
  * @brief MTC8 generator state.
  */

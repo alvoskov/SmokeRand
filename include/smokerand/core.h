@@ -87,6 +87,13 @@ typedef enum {
 } ReportType;
 
 
+typedef enum {
+    BATTERY_PASSED = 0,
+    BATTERY_FAILED = 1,
+    BATTERY_ERROR  = 2
+} BatteryExitCode;
+
+
 /**
  * @brief Test generalized description.
  */
@@ -112,7 +119,7 @@ typedef struct {
 
 size_t TestsBattery_ntests(const TestsBattery *obj);
 void TestsBattery_print_info(const TestsBattery *obj);
-void TestsBattery_run(const TestsBattery *bat,
+BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     const GeneratorInfo *gen, const CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype);
 
