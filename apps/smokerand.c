@@ -206,17 +206,18 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
  * @param intf Pointers to API functions.
  * @param opts Pre-parsed command line options.
  */
-int run_battery(const char *battery_name, GeneratorInfo *gi,
+BatteryExitCode run_battery(const char *battery_name, GeneratorInfo *gi,
     CallerAPI *intf, SmokeRandSettings *opts)
 {
+    BatteryExitCode ans = BATTERY_SUCCESS;
     if (!strcmp(battery_name, "default")) {
-        battery_default(gi, intf, opts->testid, opts->nthreads, opts->report_type);
+        ans = battery_default(gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else if (!strcmp(battery_name, "brief")) {
-        battery_brief(gi, intf, opts->testid, opts->nthreads, opts->report_type);
+        ans = battery_brief(gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else if (!strcmp(battery_name, "full")) {
-        battery_full(gi, intf, opts->testid, opts->nthreads, opts->report_type);
+        ans = battery_full(gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else if (!strcmp(battery_name, "express")) {
-        battery_express(gi, intf, opts->testid, opts->nthreads, opts->report_type);
+        ans = battery_express(gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else if (!strcmp(battery_name, "help")) {
         if (gi->description != NULL) {
             printf("%s\n", gi->description);
@@ -224,19 +225,19 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
             printf("Built-in help not found\n");
         }
     } else if (!strcmp(battery_name, "selftest")) {
-        battery_self_test(gi, intf);
+        ans = battery_self_test(gi, intf);
     } else if (!strcmp(battery_name, "speed")) {
-        battery_speed(gi, intf);
+        ans = battery_speed(gi, intf);
     } else if (!strcmp(battery_name, "stdout")) {
-        GeneratorInfo_bits_to_file(gi, intf, opts->maxlen_log2);
+        GeneratorInfo_bits_to_file(gi, intf, opts->maxlen_log2);        
     } else if (!strcmp(battery_name, "freq")) {
-        battery_blockfreq(gi, intf);
+        ans = battery_blockfreq(gi, intf);
     } else if (!strcmp(battery_name, "birthday")) {
-        battery_birthday(gi, intf);
+        ans = battery_birthday(gi, intf);
     } else if (!strcmp(battery_name, "ising")) {
-        battery_ising(gi, intf, opts->testid, opts->nthreads, opts->report_type);
+        ans = battery_ising(gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else if (!strcmp(battery_name, "unitsphere")) {
-        battery_unit_sphere_volume(gi, intf, opts->testid, opts->nthreads, opts->report_type);
+        ans = battery_unit_sphere_volume(gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else if (!strcmp(battery_name, "dummy")) {
         fprintf(stderr, "Battery 'dummy': do nothing\n");
     } else if (strlen(battery_name) > 1 &&
@@ -246,12 +247,12 @@ int run_battery(const char *battery_name, GeneratorInfo *gi,
             return 1;
         }
         const char *filename = battery_name + 2;
-        return battery_file(filename, gi, intf, opts->testid, opts->nthreads, opts->report_type);
+        ans = battery_file(filename, gi, intf, opts->testid, opts->nthreads, opts->report_type);
     } else {
         fprintf(stderr, "Unknown battery %s\n", battery_name);
-        return 1;
+        ans = BATTERY_ERROR;
     }
-    return 0;
+    return ans;
 }
 
 int print_battery_info(const char *battery_name)
@@ -369,7 +370,7 @@ int main(int argc, char *argv[])
             stdin_gi = StdinCollector_get_info(stdin_collector_64bit);
         }
         GeneratorInfo_print(&stdin_gi, is_stdout);
-        int ans = run_battery(battery_name, &stdin_gi, &intf, &opts);
+        BatteryExitCode ans = run_battery(battery_name, &stdin_gi, &intf, &opts);
         StdinCollector_print_report();
         CallerAPI_free();
         return ans;
@@ -390,7 +391,7 @@ int main(int argc, char *argv[])
         apply_filter(&gi, opts.filter, &filter_gen);
         GeneratorInfo_print(gi, is_stdout);
         print_ram_size(&intf);
-        int ans = run_battery(battery_name, gi, &intf, &opts);
+        BatteryExitCode ans = run_battery(battery_name, gi, &intf, &opts);
         GeneratorModule_unload(&mod);
         CallerAPI_free();
         return ans;
