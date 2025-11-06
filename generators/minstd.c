@@ -24,9 +24,8 @@
 
 PRNG_CMODULE_PROLOG
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_mul32_raw(void *state)
 {
-/*
     static const int32_t m = 2147483647, a = 16807, q = 127773, r = 2836;
     Lcg32State *obj = state;
     const int32_t x = (int32_t) obj->x;
@@ -34,13 +33,13 @@ static inline uint64_t get_bits_raw(void *state)
     const int32_t lo = x - q * hi; // It is x mod q
     const int32_t t = a * lo - r * hi;
     obj->x = (uint32_t) ((t < 0) ? (t + m) : t);
-*/
+    return (obj->x << 1) | (obj->x >> 30);
+}
 
-/*
-    Lcg32State *obj = state;
-    obj->x = (uint32_t) ( (16807ULL * obj->x) % 2147483647ULL );
-*/
+MAKE_GET_BITS_WRAPPERS(mul32);
 
+static inline uint64_t get_bits_mul64_raw(void *state)
+{
     Lcg32State *obj = state;
     uint64_t prod = 16807ULL * obj->x;
     uint32_t q = (uint32_t) (prod & 0x7FFFFFFFU);
@@ -49,9 +48,11 @@ static inline uint64_t get_bits_raw(void *state)
     if (obj->x >= 0x7FFFFFFFU) {
         obj->x -= 0x7FFFFFFFU;
     }
-
     return (obj->x << 1) | (obj->x >> 30);
 }
+
+
+MAKE_GET_BITS_WRAPPERS(mul64);
 
 
 static void *create(const CallerAPI *intf)
@@ -68,12 +69,56 @@ int run_self_test(const CallerAPI *intf)
     Lcg32State obj;
     obj.x = 1;
     for (size_t i = 0; i < 10000; i++) {
-        get_bits_raw(&obj.x);
+        get_bits_mul32_raw(&obj.x);
     }
+    int is_ok = 1;
+    intf->printf("Mul32 version testing results\n");
     intf->printf("The current state is %d, reference value is %d\n",
         (int) obj.x, (int) x_ref);
-    return obj.x == x_ref;
+    if (obj.x != x_ref) is_ok = 0;
+
+    obj.x = 1;
+    for (size_t i = 0; i < 10000; i++) {
+        get_bits_mul32_raw(&obj.x);
+    }
+
+    intf->printf("Mul64 version testing results\n");
+    intf->printf("The current state is %d, reference value is %d\n",
+        (int) obj.x, (int) x_ref);
+    if (obj.x != x_ref) is_ok = 0;
+
+    return is_ok;
 }
 
 
-MAKE_UINT32_PRNG("Minstd", run_self_test)
+static const char description[] =
+"minstd: a classic but obsolete 'minimal standard' LCG.\n"
+"  mul32 - version with 32-bit multiplication.\n"
+"  mul64 - version with 64-bit multiplication (default).\n";
+
+
+int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
+{
+    const char *param = intf->get_param();
+    gi->description = description;
+    gi->nbits = 32;
+    gi->create = default_create;
+    gi->free = default_free;
+    gi->self_test = run_self_test;
+    gi->parent = NULL;
+    if (!intf->strcmp(param, "mul64") || !intf->strcmp(param, "")) {
+        gi->name = "minstd:mul64";
+        gi->get_bits = get_bits_mul64;
+        gi->get_sum = get_sum_mul64;
+    } else if (!intf->strcmp(param, "mul32")) {
+        gi->name = "minstd:mul32";
+        gi->get_bits = get_bits_mul32;
+        gi->get_sum = get_sum_mul32;
+    } else {
+        gi->name = "minstd:unknown";
+        gi->get_bits = NULL;
+        gi->get_sum = NULL;
+        return 0;
+    }
+    return 1;
+}
