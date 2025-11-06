@@ -134,7 +134,7 @@ static double gammainc_lower_series(double a, double x)
     long i;
     for (i = 1; i < 1000000 && t > DBL_EPSILON; i++) {
         sum += t;
-        t *= x / (a + i);
+        t *= x / (a + (double) i);
     }
     return mul * sum;
 }
@@ -149,8 +149,9 @@ static double gammainc_upper_contfrac(double a, double x)
     double c = p1/p0, d = q0 / q1;
     long i;
     for (i = 2; i < 2000000 && fabs(f - f_old) > DBL_EPSILON; i++) {
-        double bk = x + 2*i + 1 - a;
-        double ak = i * (a - i);
+        const double i_dbl = (double) i;
+        double bk = x + 2*i_dbl + 1 - a;
+        double ak = i_dbl * (a - i_dbl);
         f_old = f;
         if (c < 1e-30) c = 1e-30;
         c = bk + ak / c;
@@ -352,7 +353,8 @@ static double ln_binomial_coeff(unsigned long n, unsigned long k)
     double lnc = 0.0;
     unsigned long i;
     for (i = 1; i <= k; i++) {
-        lnc += log(n + 1.0 - i) - log((double) i);
+        const double i_dbl = (double) i;
+        lnc += log((double) n + 1.0 - i_dbl) - log(i_dbl);
     }
     return lnc;
 }
@@ -367,7 +369,7 @@ static double ln_binomial_coeff(unsigned long n, unsigned long k)
 double sr_binomial_pdf(unsigned long k, unsigned long n, double p)
 {
     double ln_pdf = ln_binomial_coeff(n, k) +
-        k * log(p) + (n - k) * log(1.0 - p);
+        (double) k * log(p) + (double) (n - k) * log(1.0 - p);
     return exp(ln_pdf);
 }
 
@@ -381,10 +383,11 @@ void sr_binomial_pdf_all(double *pdf, unsigned long n, double p)
     double lnc = 0.0, ln_pdf, ln_p = log(p), ln_1mp = log(1.0 - p);
     unsigned long i;
     for (i = 0; i <= n; i++) {
+        const double i_dbl = (double) i;
         if (i > 0) {
-            lnc += log(n + 1.0 - i) - log((double) i);
+            lnc += log((double) n + 1.0 - i_dbl) - log(i_dbl);
         }
-        ln_pdf = lnc + i * ln_p + (n - i) * ln_1mp;
+        ln_pdf = lnc + i_dbl * ln_p + (double) (n - i) * ln_1mp;
         pdf[i] = exp(ln_pdf);
     }
 }
@@ -397,7 +400,7 @@ void sr_binomial_pdf_all(double *pdf, unsigned long n, double p)
  */
 double sr_binomial_cdf(unsigned long k, unsigned long n, double p)
 {
-    return sr_betainc(1 - p, n - k, 1 + k, NULL);
+    return sr_betainc(1 - p, (double) (n - k), (double) (1 + k), NULL);
 }
 
 /**
@@ -425,9 +428,10 @@ double sr_binomial_pvalue(double k, double n, double p)
  */
 double sr_chi2_to_stdnorm_approx(double x, unsigned long f)
 {
-    double s2 = 2.0 / (9.0 * f);
-    double mu = 1 - s2;
-    double z = (pow(x/f, 1.0/3.0) - mu) / sqrt(s2);
+    const double f_dbl = (double) f;
+    const double s2 = 2.0 / (9.0 * f_dbl);
+    const double mu = 1.0 - s2;
+    const double z = (pow(x / f_dbl, 1.0 / 3.0) - mu) / sqrt(s2);
     return z;
 }
 

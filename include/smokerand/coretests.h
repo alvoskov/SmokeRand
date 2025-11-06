@@ -106,7 +106,7 @@ typedef struct {
 
 
 TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts);
-TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step);
+TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned long step);
 TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opts);
 TestResults gap_test(GeneratorState *obj, const GapOptions *opts);
 TestResults gap16_count0_test(GeneratorState *obj, unsigned long long ngaps);

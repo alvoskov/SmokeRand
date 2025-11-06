@@ -209,7 +209,9 @@ unsigned int get_cpu_numcores(void)
 #elif defined(__DJGPP__)
     return 1;
 #elif !defined(NO_POSIX)
-    return sysconf(_SC_NPROCESSORS_ONLN);
+    const long ncores = sysconf(_SC_NPROCESSORS_ONLN);
+    return (ncores <= 0) ? 1U : (unsigned int) ncores;
+    
 #else
     return 1;
 #endif

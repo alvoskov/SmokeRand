@@ -14,8 +14,8 @@ FOR %%i IN (generators\*.dll) DO (
     IF !ERRORLEVEL! == 2 SET /a nerror=nerror+1
 )
 
-echo Passed:          %npassed%
-echo Failed:          %nfailed%
-echo Not implemented: %nerror%
+echo Passed: %npassed%
+echo Failed: %nfailed%
+echo Error:  %nerror%
 
 endlocal

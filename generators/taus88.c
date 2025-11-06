@@ -26,11 +26,11 @@ typedef struct {
 void Taus88State_init(Taus88State *obj, uint32_t s)
 {
     for (int i = 0; i < 3; ) {
-        if (s & 0xFFFFFFF0UL) {
+        if (s & 0xFFFFFFF0U) {
             obj->s[i] = s;
             i++;
         }
-        s = 1664525UL * s + 1UL;
+        s = 1664525U * s + 1U;
     }
 }
 
@@ -46,11 +46,11 @@ uint64_t get_bits_raw(void *state)
     Taus88State *obj = state;
     uint32_t s1 = obj->s[0], s2 = obj->s[1], s3 = obj->s[2], b;
     b = (((s1 << 13) ^ s1) >> 19);
-    s1 = (((s1 & 0xFFFFFFFEUL) << 12) ^ b);
+    s1 = (((s1 & 0xFFFFFFFEU) << 12) ^ b);
     b = (((s2 << 2) ^ s2) >> 25);
-    s2 = (((s2 & 0xFFFFFFF8UL) << 4) ^ b);
+    s2 = (((s2 & 0xFFFFFFF8U) << 4) ^ b);
     b = (((s3 << 3 ) ^ s3) >> 11);
-    s3 = (((s3 & 0xFFFFFFF0UL) << 17 ) ^ b);
+    s3 = (((s3 & 0xFFFFFFF0U) << 17 ) ^ b);
     obj->s[0] = s1; obj->s[1] = s2; obj->s[2] = s3;
     return (s1 ^ s2 ^ s3);
 }

@@ -50,7 +50,7 @@ static inline uint64_t get_bits_raw(void *state)
         obj->x -= 0x7FFFFFFFU;
     }
 
-    return obj->x << 1;
+    return (obj->x << 1) | (obj->x >> 30);
 }
 
 

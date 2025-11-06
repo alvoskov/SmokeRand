@@ -30,9 +30,9 @@ typedef struct {
 static inline uint64_t get_bits_raw(void *state)
 {
     Mulberry32State *obj = state;
-    uint32_t z = (obj->w += 0x6D2B79F5UL);
-    z = (z ^ (z >> 15)) * (z | 1UL);
-    z ^= z + (z ^ (z >> 7)) * (z | 61UL);
+    uint32_t z = (obj->w += 0x6D2B79F5U);
+    z = (z ^ (z >> 15)) * (z | 1U);
+    z ^= z + (z ^ (z >> 7)) * (z | 61U);
     return z ^ (z >> 14);
 }
 

@@ -56,7 +56,7 @@ static SpeedResults measure_speed(const GeneratorInfo *gen, const CallerAPI *int
         }
         uint64_t toc_proc = cpuclock();
         clock_t toc = clock();
-        ns_total = 1.0e9 * (toc - tic) / CLOCKS_PER_SEC;
+        ns_total = 1.0e9 * (double) ((toc - tic) / CLOCKS_PER_SEC);
         results.ns_per_call = ns_total / (double) niter;
         results.ticks_per_call = (double) (toc_proc - tic_proc) / (double) niter;
         // Convert to cpb

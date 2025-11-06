@@ -638,8 +638,8 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
             energy_sum += energy;
             energy_sum2 += energy * energy;
         }
-        double Emean = (double) energy_sum / opts->sample_len;
-        double E2mean = (double) energy_sum2 / opts->sample_len;
+        double Emean = (double) energy_sum / (double) opts->sample_len;
+        double E2mean = (double) energy_sum2 / (double) opts->sample_len;
         e[ii] = Emean / obj.N;
         cv[ii] = (E2mean - Emean * Emean) / obj.N * jc * jc;
         gs->intf->printf("%2lu of %2lu: e = %12.8f, cv = %12.8f\n",

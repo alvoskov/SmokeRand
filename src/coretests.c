@@ -14,6 +14,7 @@
 #include "smokerand/specfuncs.h"
 #include <math.h>
 #include <float.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -271,8 +272,8 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     }
     ans.penalty = PENALTY_BSPACE;
     ans.x = (double) ndups_total;
-    ans.p = sr_poisson_pvalue(ans.x, lambda * opts->nsamples);
-    ans.alpha = sr_poisson_cdf(ans.x, lambda * opts->nsamples);
+    ans.p = sr_poisson_pvalue(ans.x, lambda * (double) opts->nsamples);
+    ans.alpha = sr_poisson_cdf(ans.x, lambda * (double) opts->nsamples);
     obj->intf->printf("  x = %.0f; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
     return ans;
@@ -338,7 +339,7 @@ static void bspace4_8d_decimated_pvalue(TestResults *ans, const char *name,
  *              lower 64 bits, 262144 is enough to detect the same PRNG with
  *              truncation of lower 96 bits.
  */
-TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step)
+TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned long step)
 {
     TestResults ans = TestResults_create("bspace4_8d_dec");
     const unsigned int nbits_total = 32;
@@ -346,7 +347,7 @@ TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step)
     double lambda = bspace_calc_lambda(len, nbits_total);
     // Show information about the test
     obj->intf->printf("Birthday spacings test with decimation\n");
-    obj->intf->printf("  ndims = 8; nbits_per_dim = 4; step = %u\n", step);
+    obj->intf->printf("  ndims = 8; nbits_per_dim = 4; step = %lu\n", step);
     obj->intf->printf("  nsamples = 1; len = %lld, lambda = %g\n",
         (unsigned long long) len, lambda);
     // Run the test
@@ -373,7 +374,7 @@ TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned int step)
             u_high_norev[i] <<= 4;
             u_high_norev[i] |= x_hi4;
             // Decimation
-            for (unsigned int k = 0; k < step - 1; k++) {
+            for (unsigned long k = 0; k < step - 1; k++) {
                 (void) obj->gi->get_bits(obj->state);
             }
         }
@@ -508,8 +509,8 @@ TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opt
         }
     }
     ans.x += (double) Oi[2];
-    ans.p = sr_poisson_pvalue(ans.x, mu * opts->nsamples);
-    ans.alpha = sr_poisson_cdf(ans.x, mu * opts->nsamples);
+    ans.p = sr_poisson_pvalue(ans.x, mu * (double) opts->nsamples);
+    ans.alpha = sr_poisson_cdf(ans.x, mu * (double) opts->nsamples);
     // Frequency table
     double Ei = exp(-lambda) * nstates;
     obj->intf->printf("  Frequencies table (average per sample)\n");
@@ -692,7 +693,7 @@ static double GapFrequency_calc_z_with0(const GapFrequency *gf)
     unsigned long ngaps_total = (unsigned long) gf->ngaps_total;
     unsigned long ngaps_with0 = (unsigned long) gf->ngaps_with0;
     double alpha = sr_binomial_cdf(ngaps_with0, ngaps_total, gf->p_with0);
-    double pvalue = sr_binomial_pvalue(ngaps_with0, ngaps_total, gf->p_with0);
+    double pvalue = sr_binomial_pvalue((double) ngaps_with0, (double) ngaps_total, gf->p_with0);
     // Check if discretization error is big enough to take it into account
     // It can be e.g. rather sensitive in the case of binopdf(1085, 1085, 0.992085)
     // when mathematical expectance is 1076.4 and standard deviation is 2.91.

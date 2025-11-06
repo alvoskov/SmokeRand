@@ -458,7 +458,7 @@ int test_binocdf()
         unsigned long n = (unsigned long) data[i][1];
         double p = data[i][2], f_ref = data[i][3];
         double f_calc = sr_binomial_cdf(k, n, p);
-        double fc_calc = sr_binomial_pvalue(k, n, p);
+        double fc_calc = sr_binomial_pvalue((double) k, (double) n, p);
         double relerr = fabs((f_calc - f_ref) / f_ref);
         double sum_m_1 = f_calc + fc_calc - 1.0;        
         printf("%6ld %6lu %25.16g %25.16g %10.3g %10.3g\n",
