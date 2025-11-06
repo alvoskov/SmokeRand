@@ -716,10 +716,13 @@ typedef struct {
 /**
  * @brief Loads a custom battery from a user-defined text file.
  * @details File format:
- * test_name param1=value1 param2=value2
+ *
+ *     battery name=battery_name end
+ *     test_name param1=value1 param2=value2 end
  */
-int battery_file(const char *filename, const GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads, ReportType rtype)
+BatteryExitCode battery_file(const char *filename, const GeneratorInfo *gen,
+    CallerAPI *intf, unsigned int testid, unsigned int nthreads,
+    ReportType rtype)
 {
     static const TestFunc parsers[] = {
         {"bspace_nd", parse_bspace_nd},
@@ -744,16 +747,17 @@ int battery_file(const char *filename, const GeneratorInfo *gen, CallerAPI *intf
     TestInfoArray tests_args = load_tests(filename);
     if (tests_args.ntests == 0) {
         TestInfoArray_destruct(&tests_args);
-        return 0;
+        return BATTERY_ERROR;
     }
     size_t ntests = tests_args.ntests;
     TestDescription *tests = calloc(ntests + 1, sizeof(TestDescription));
     if (tests == NULL) {
         fprintf(stderr, "***** battery_file: not enough memory *****");
         TestInfoArray_destruct(&tests_args);
-        return 0;
+        return BATTERY_ERROR;
     }
 
+    BatteryExitCode ans = BATTERY_PASSED;
     int is_ok = 1;
     for (size_t i = 0; i < tests_args.ntests; i++) {        
         const char *name = TestInfo_get_value(&tests_args.tests[i], "test");
@@ -765,28 +769,17 @@ int battery_file(const char *filename, const GeneratorInfo *gen, CallerAPI *intf
                 parsed = 1;
             }
         }
-        // Try to find an entry with battery description and parse it
-/*
-        if (!parsed && !strcmp(name, "battery")) {
-            battery_name = TestInfo_get_value(curtest, "name");
-            if (battery_name == NULL) {
-                fprintf(stderr,
-                    "Error in line %d. 'battery' entry must have 'name' field\n",
-                    curtest->linenum);
-                goto battery_file_freemem;
-            }
-            parsed = 1;
-        }
-*/
         // Error messages
         if (!parsed) {
             fprintf(stderr, "Error in line %d. Unknown test '%s'\n", curtest->linenum, name);
             is_ok = 0;
+            ans = BATTERY_ERROR;
             goto battery_file_freemem;
         }
 
         if (!is_ok) {
             fprintf(stderr, "Error in line %d. %s\n", curtest->linenum, errmsg);
+            ans = BATTERY_ERROR;
             goto battery_file_freemem;
         }
     }
@@ -795,9 +788,10 @@ int battery_file(const char *filename, const GeneratorInfo *gen, CallerAPI *intf
     bat.name = tests_args.battery_name;
     bat.tests = tests;
     if (gen != NULL) {
-        TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
+        ans = TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
     } else {
         TestsBattery_print_info(&bat);
+        ans = BATTERY_PASSED;
     }
 
 battery_file_freemem:
@@ -806,6 +800,6 @@ battery_file_freemem:
         free((void *) tests[i].udata);
     }
     free(tests);
-    return is_ok;
+    return ans;
 }
 

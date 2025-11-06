@@ -43,7 +43,7 @@ static unsigned int birthday_get_nbits_per_value(const GeneratorInfo *gi)
  * in the PRNG output (usually 64), \f$ e \f$ is number of truncated (lower)
  * bits.
  */
-static inline BirthdayOptions BirthdayOptions_create(GeneratorInfo *gi,
+static inline BirthdayOptions BirthdayOptions_create(const GeneratorInfo *gi,
     const unsigned int log2_len, const unsigned int log2_lambda)
 {
     BirthdayOptions opts;
@@ -253,7 +253,7 @@ static unsigned int birthday_get_log2_n(const CallerAPI *intf)
  *   Then p-value for sum of duplicates from "small" and "large" subtests
  *   is calculated.
  */
-void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
+BatteryExitCode battery_birthday(const GeneratorInfo *gen, const CallerAPI *intf)
 {
     const unsigned int log2_n = birthday_get_log2_n(intf);
     const unsigned int nbits_per_value = birthday_get_nbits_per_value(gen);
@@ -279,7 +279,11 @@ void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf)
         intf->printf("  x = %g (ndups); p = %g; 1-p=%g\n", ans.x, ans.p, ans.alpha);
     }
     GeneratorState_destruct(&obj, intf);
-    (void) ans;
+    if (ans.p < 1e-6 || ans.p > 1.0 - 1e-6) {
+        return BATTERY_FAILED;
+    } else {
+        return BATTERY_PASSED;
+    }
 }
 
 /////////////////////////////////
@@ -379,14 +383,15 @@ int BlockFrequency_calc(BlockFrequency *obj)
     }
 }
 
-void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf)
+BatteryExitCode battery_blockfreq(const GeneratorInfo *gen, const CallerAPI *intf)
 {
     BlockFrequency freq;
     BlockFrequency_init(&freq);
     GeneratorState obj = GeneratorState_create(gen, intf);
-    size_t block_size = 1 << 30;
+    size_t block_size = 1U << 30;
     time_t tic = time(NULL);
-    while (1) {
+    int is_ok = 1;
+    while (is_ok) {
         if (gen->nbits == 64) {
             for (size_t i = 0; i < block_size; i++) {
                 uint64_t u = obj.gi->get_bits(obj.state);
@@ -398,16 +403,14 @@ void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf)
                 BlockFrequency_count(&freq, u, 4);
             }
         }
-        int is_ok = BlockFrequency_calc(&freq);
+        is_ok = BlockFrequency_calc(&freq);
         printf("  Time elapsed: ");
         print_elapsed_time((unsigned long long) (time(NULL) - tic));
         printf("\n\n");
-        if (!is_ok) {
-            break;
-        }
     }
     BlockFrequency_destruct(&freq);
     GeneratorState_destruct(&obj, intf);
+    return (is_ok) ? BATTERY_PASSED : BATTERY_FAILED;
 }
 
 /////////////////////////////////////
@@ -757,7 +760,7 @@ TestResults unit_sphere_volume_test_wrap(GeneratorState *gs, const void *udata)
 ///// Batteries /////
 /////////////////////
 
-void battery_ising(GeneratorInfo *gen, CallerAPI *intf,
+BatteryExitCode battery_ising(const GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
     static const Ising2DOptions
@@ -773,14 +776,15 @@ void battery_ising(GeneratorInfo *gen, CallerAPI *intf,
         "ising", tests
     };
     if (gen != NULL) {
-        TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
+        return TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
     } else {
         TestsBattery_print_info(&bat);
+        return BATTERY_PASSED;
     }
 }
 
 
-void battery_unit_sphere_volume(GeneratorInfo *gen, CallerAPI *intf,
+BatteryExitCode battery_unit_sphere_volume(const GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
     static const UnitSphereOptions 
@@ -809,8 +813,9 @@ void battery_unit_sphere_volume(GeneratorInfo *gen, CallerAPI *intf,
         "unitsphere", tests
     };
     if (gen != NULL) {
-        TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
+        return TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
     } else {
         TestsBattery_print_info(&bat);
+        return BATTERY_PASSED;
     }
 }

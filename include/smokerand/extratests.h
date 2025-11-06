@@ -60,11 +60,11 @@ TestResults ising2d_test_wrap(GeneratorState *obj, const void *udata);
 TestResults unit_sphere_volume_test_wrap(GeneratorState *gs, const void *udata);
 
 
-void battery_birthday(GeneratorInfo *gen, const CallerAPI *intf);
-void battery_ising(GeneratorInfo *gen, CallerAPI *intf,
+BatteryExitCode battery_birthday(const GeneratorInfo *gen, const CallerAPI *intf);
+BatteryExitCode battery_ising(const GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype);
-void battery_blockfreq(GeneratorInfo *gen, const CallerAPI *intf);
-void battery_unit_sphere_volume(GeneratorInfo *gen, CallerAPI *intf,
+BatteryExitCode battery_blockfreq(const GeneratorInfo *gen, const CallerAPI *intf);
+BatteryExitCode battery_unit_sphere_volume(const GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype);
 
 

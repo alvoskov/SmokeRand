@@ -12,6 +12,7 @@
 #define __SMOKERAND_BAT_FILE_H
 #include "smokerand/core.h"
 
-int battery_file(const char *filename, const GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads, ReportType rtype);
+BatteryExitCode battery_file(const char *filename, const GeneratorInfo *gen,
+    CallerAPI *intf, unsigned int testid, unsigned int nthreads,
+    ReportType rtype);
 #endif

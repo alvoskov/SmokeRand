@@ -734,7 +734,7 @@ TestResultsSummary_fill(TestResultsSummary *obj, const TestResults *results, siz
 }
 
 
-static void TestResults_print_report(const TestResults *results,
+static TestResultsSummary TestResults_print_report(const TestResults *results,
     size_t ntests, time_t nseconds_total, ReportType rtype)
 {
     TestResultsSummary summary;
@@ -770,6 +770,7 @@ static void TestResults_print_report(const TestResults *results,
     printf("Elapsed time:  ");
     print_elapsed_time((unsigned long long) nseconds_total);
     printf("\n\n");
+    return summary;
 }
 
 /**
@@ -823,7 +824,7 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     }
     if (results == NULL) {
         fprintf(stderr, "***** TestsBattery_run: not enough memory *****\n");
-        exit(EXIT_FAILURE);
+        return BATTERY_ERROR;
     }
     // Create a PRNG example: either for one-threaded version or for basic
     // sanity check for multithreaded version.
@@ -872,9 +873,10 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     }
     printf("Generator name:    %s\n", gen->name);
     printf("Output size, bits: %d\n\n", (int) gen->nbits);
-    TestResults_print_report(results, nresults, toc - tic, rtype);
+    TestResultsSummary summary =
+        TestResults_print_report(results, nresults, toc - tic, rtype);
     free(results);
-    return BATTERY_PASSED;
+    return (summary.nfailed == 0) ? BATTERY_PASSED : BATTERY_FAILED;
 }
 
 //////////////////////////////////////////////////////////////////

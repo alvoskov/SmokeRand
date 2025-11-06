@@ -86,11 +86,14 @@ typedef enum {
     REPORT_FULL = 1
 } ReportType;
 
-
+/**
+ * @brief Exit codes for battries
+ */
 typedef enum {
-    BATTERY_PASSED = 0,
-    BATTERY_FAILED = 1,
-    BATTERY_ERROR  = 2
+    BATTERY_PASSED  = 0, ///< All battery tests have been passed
+    BATTERY_FAILED  = 1, ///< Some battery tests failed
+    BATTERY_ERROR   = 2, ///< Error during battery run
+    BATTERY_UNKNOWN = 3  ///< Unknown battery name
 } BatteryExitCode;
 
 

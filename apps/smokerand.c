@@ -198,6 +198,53 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
 }
 
 
+typedef BatteryExitCode (*BatteryCallback)(const GeneratorInfo *gen,
+    CallerAPI *intf,
+    unsigned int testid,
+    unsigned int nthreads,
+    ReportType rtype);
+
+
+typedef struct {
+    const char *name;
+    BatteryCallback battery;    
+} BatteryEntry;
+
+
+static BatteryExitCode battery_dummy(const GeneratorInfo *gen, CallerAPI *intf,
+    unsigned int testid, unsigned int nthreads, ReportType rtype)
+{
+    fprintf(stderr, "Battery 'dummy': do nothing\n");
+    (void) gen; (void) intf; (void) testid; (void) nthreads; (void) rtype;
+    return BATTERY_PASSED;
+}
+
+static BatteryExitCode battery_help(const GeneratorInfo *gen, CallerAPI *intf,
+    unsigned int testid, unsigned int nthreads, ReportType rtype)
+{
+    (void) intf; (void) testid; (void) nthreads; (void) rtype;
+    if (gen->description != NULL) {
+        printf("%s\n", gen->description);
+        return BATTERY_PASSED;
+    } else {
+        printf("Built-in help not found\n");
+        return BATTERY_FAILED;
+    }
+}
+
+#define DEFINE_SHORT_BATTERY_ENV(battery_name) \
+static BatteryExitCode battery_##battery_name##_env(const GeneratorInfo *gen, \
+    CallerAPI *intf, unsigned int testid, unsigned int nthreads, \
+    ReportType rtype) { \
+    (void) testid; (void) nthreads; (void) rtype; \
+    return battery_##battery_name(gen, intf); \
+}
+
+DEFINE_SHORT_BATTERY_ENV(birthday)
+DEFINE_SHORT_BATTERY_ENV(blockfreq)
+DEFINE_SHORT_BATTERY_ENV(self_test)
+DEFINE_SHORT_BATTERY_ENV(speed)
+
 /**
  * @brief Run a battery of statistical test for a given generator.
  * @param battery_name  Name of tests battery: `default`, `express`, `brief`,
@@ -209,38 +256,26 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
 BatteryExitCode run_battery(const char *battery_name, GeneratorInfo *gi,
     CallerAPI *intf, SmokeRandSettings *opts)
 {
-    BatteryExitCode ans = BATTERY_SUCCESS;
-    if (!strcmp(battery_name, "default")) {
-        ans = battery_default(gi, intf, opts->testid, opts->nthreads, opts->report_type);
-    } else if (!strcmp(battery_name, "brief")) {
-        ans = battery_brief(gi, intf, opts->testid, opts->nthreads, opts->report_type);
-    } else if (!strcmp(battery_name, "full")) {
-        ans = battery_full(gi, intf, opts->testid, opts->nthreads, opts->report_type);
-    } else if (!strcmp(battery_name, "express")) {
-        ans = battery_express(gi, intf, opts->testid, opts->nthreads, opts->report_type);
-    } else if (!strcmp(battery_name, "help")) {
-        if (gi->description != NULL) {
-            printf("%s\n", gi->description);
-        } else {
-            printf("Built-in help not found\n");
-        }
-    } else if (!strcmp(battery_name, "selftest")) {
-        ans = battery_self_test(gi, intf);
-    } else if (!strcmp(battery_name, "speed")) {
-        ans = battery_speed(gi, intf);
-    } else if (!strcmp(battery_name, "stdout")) {
-        GeneratorInfo_bits_to_file(gi, intf, opts->maxlen_log2);        
-    } else if (!strcmp(battery_name, "freq")) {
-        ans = battery_blockfreq(gi, intf);
-    } else if (!strcmp(battery_name, "birthday")) {
-        ans = battery_birthday(gi, intf);
-    } else if (!strcmp(battery_name, "ising")) {
-        ans = battery_ising(gi, intf, opts->testid, opts->nthreads, opts->report_type);
-    } else if (!strcmp(battery_name, "unitsphere")) {
-        ans = battery_unit_sphere_volume(gi, intf, opts->testid, opts->nthreads, opts->report_type);
-    } else if (!strcmp(battery_name, "dummy")) {
-        fprintf(stderr, "Battery 'dummy': do nothing\n");
-    } else if (strlen(battery_name) > 1 &&
+    static const BatteryEntry batteries[] = {
+        {"default", battery_default},
+        {"brief", battery_brief},
+        {"full", battery_full},
+        {"express", battery_express},
+        {"help", battery_help},
+        {"selftest", battery_self_test_env},
+        {"speed", battery_speed_env},
+        {"freq", battery_blockfreq_env},
+        {"birthday", battery_birthday_env},
+        {"ising", battery_ising},
+        {"unitsphere", battery_unit_sphere_volume},
+        {"dummy", battery_dummy},
+        {NULL, NULL}
+    };
+    (void) batteries;
+
+    BatteryExitCode ans = BATTERY_UNKNOWN;
+
+    if (strlen(battery_name) > 1 &&
         battery_name[0] == 'f' && battery_name[1] == '=') {
         if (battery_name[2] == '\0') {
             fprintf(stderr, "File name cannot be empty");
@@ -248,9 +283,18 @@ BatteryExitCode run_battery(const char *battery_name, GeneratorInfo *gi,
         }
         const char *filename = battery_name + 2;
         ans = battery_file(filename, gi, intf, opts->testid, opts->nthreads, opts->report_type);
+    } else if (!strcmp(battery_name, "stdout")) {
+        GeneratorInfo_bits_to_file(gi, intf, opts->maxlen_log2);
     } else {
-        fprintf(stderr, "Unknown battery %s\n", battery_name);
-        ans = BATTERY_ERROR;
+        for (const BatteryEntry *entry = batteries; entry->name != NULL; entry++) {
+            if (!strcmp(battery_name, entry->name)) {
+                ans = entry->battery(gi, intf, opts->testid, opts->nthreads, opts->report_type);
+                break;
+            }
+        }
+        if (ans == BATTERY_UNKNOWN) {
+            fprintf(stderr, "Unknown battery %s\n", battery_name);
+        }
     }
     return ans;
 }
@@ -338,7 +382,7 @@ int main(int argc, char *argv[])
     GeneratorInfo filter_gen;
     SmokeRandSettings opts;
     if (SmokeRandSettings_load(&opts, argc, argv)) {
-        return 1;
+        return BATTERY_ERROR;
     }
     char *battery_name = argv[1];
     char *generator_lib = argv[2];
@@ -349,12 +393,12 @@ int main(int argc, char *argv[])
 
     if (opts.nthreads > 1 && (is_stdin32 || is_stdin64)) {
         fprintf(stderr, "Multithreading is not supported for stdin32/stdin64\n");
-        return 1;
+        return BATTERY_ERROR;
     }
 
     if (!entfuncs_test()) {
         fprintf(stderr, "Seed generator self-test failed\n");
-        return 1;
+        return BATTERY_ERROR;
     }
 
     if (!strcmp(generator_lib, "list")) {
@@ -379,14 +423,14 @@ int main(int argc, char *argv[])
         GeneratorModule mod = GeneratorModule_load(generator_lib, &intf);
         if (!mod.valid) {
             CallerAPI_free();
-            return 1;
+            return BATTERY_ERROR;
         }
         GeneratorInfo *gi = &mod.gen;
         if (gi->nbits != 64 && (opts.filter == FILTER_INTERLEAVED32 ||
             opts.filter == FILTER_HIGH32 || opts.filter == FILTER_LOW32)) {
             fprintf(stderr, "This filter is supported only for 64-bit generators\n");
             CallerAPI_free();
-            return 1;
+            return BATTERY_ERROR;
         }
         apply_filter(&gi, opts.filter, &filter_gen);
         GeneratorInfo_print(gi, is_stdout);
