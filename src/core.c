@@ -698,29 +698,48 @@ static void print_bar(void)
 }
 
 
-static void TestResults_print_report(const TestResults *results,
-    size_t ntests, time_t nseconds_total, ReportType rtype)
+typedef struct {
+    unsigned int npassed;
+    unsigned int nwarnings;
+    unsigned int nfailed;
+    double grade;
+    const char *grade_text;
+} TestResultsSummary;
+
+
+static void
+TestResultsSummary_fill(TestResultsSummary *obj, const TestResults *results, size_t ntests)
 {
-    unsigned int npassed = 0, nwarnings = 0, nfailed = 0;
-    double grade = 4.0;
+    obj->npassed = 0;
+    obj->nwarnings = 0;
+    obj->nfailed = 0;
+    obj->grade = 4.0;
     for (size_t i = 0; i < ntests; i++) {
         PValueCategory pvalue_cat = get_pvalue_category(results[i].p);
         switch (pvalue_cat) {
         case PVALUE_PASSED:
-            npassed++; break;
+            obj->npassed++; break;
         case PVALUE_WARNING:
-            nwarnings++; break;
+            obj->nwarnings++; break;
         case PVALUE_FAILED:
-            nfailed++;
-            grade -= results[i].penalty;
+            obj->nfailed++;
+            obj->grade -= results[i].penalty;
             break;
         }
     }
-    if (grade < 0.0) {
-        grade = 0.0;
+    if (obj->grade < 0.0) {
+        obj->grade = 0.0;
     }
+    obj->grade_text = interpret_grade(obj->grade);
+}
 
-    if (rtype != REPORT_FULL && npassed == ntests) {
+
+static void TestResults_print_report(const TestResults *results,
+    size_t ntests, time_t nseconds_total, ReportType rtype)
+{
+    TestResultsSummary summary;
+    TestResultsSummary_fill(&summary, results, ntests);
+    if (rtype != REPORT_FULL && summary.npassed == ntests) {
         printf("\n\n"
             "---------------------------------------------------\n"
             "----- All tests have been passed successfully -----\n"
@@ -742,11 +761,11 @@ static void TestResults_print_report(const TestResults *results,
         }
         print_bar();
     }
-    printf("Passed:        %u\n", npassed);
-    printf("Suspicious:    %u\n", nwarnings);
-    printf("Failed:        %u\n", nfailed);
+    printf("Passed:        %u\n", summary.npassed);
+    printf("Suspicious:    %u\n", summary.nwarnings);
+    printf("Failed:        %u\n", summary.nfailed);
     if (ntests >= 5) {
-        printf("Quality (0-4): %.2f (%s)\n", grade, interpret_grade(grade));
+        printf("Quality (0-4): %.2f (%s)\n", summary.grade, summary.grade_text);
     }
     printf("Elapsed time:  ");
     print_elapsed_time((unsigned long long) nseconds_total);
@@ -773,7 +792,7 @@ void TestsBattery_print_info(const TestsBattery *obj)
  * @brief Runs the given battery of the statistical test for the given
  * pseudorandom number generator.
  */
-void TestsBattery_run(const TestsBattery *bat,
+BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     const GeneratorInfo *gen, const CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
@@ -792,7 +811,7 @@ void TestsBattery_run(const TestsBattery *bat,
     printf("===== Starting '%s' battery =====\n", bat->name);
     if (testid > ntests) { // testid is 1-based index
         fprintf(stderr, "Invalid test id %u", testid);
-        return;
+        return BATTERY_ERROR;
     }
     // Allocate memory for tests
     if (testid == TESTS_ALL) {
@@ -813,7 +832,7 @@ void TestsBattery_run(const TestsBattery *bat,
         GeneratorState_destruct(&obj, intf);
         free(results);
         fprintf(stderr, "***** TestsBattery_run: invalid generator output size *****\n");
-        return;            
+        return BATTERY_ERROR;            
     }
     // Run the tests
     tic = time(NULL);
@@ -855,6 +874,7 @@ void TestsBattery_run(const TestsBattery *bat,
     printf("Output size, bits: %d\n\n", (int) gen->nbits);
     TestResults_print_report(results, nresults, toc - tic, rtype);
     free(results);
+    return BATTERY_PASSED;
 }
 
 //////////////////////////////////////////////////////////////////

@@ -37,7 +37,7 @@ static inline uint8_t get_bits8_raw(void *state)
     uint8_t tmp = (uint8_t) (obj->a + obj->b + obj->counter++);
     obj->a = (uint8_t) (obj->b ^ (obj->b >> RSHIFT));
     obj->b = (uint8_t) (obj->c + (obj->c << LSHIFT));
-    obj->c = (uint8_t) (((obj->c << BARREL_SHIFT) | (obj->c >> (8-BARREL_SHIFT))) + tmp);
+    obj->c = (uint8_t) (rotl8(obj->c, BARREL_SHIFT) + tmp);
     return tmp;
 }
 

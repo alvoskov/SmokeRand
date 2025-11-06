@@ -12,13 +12,6 @@ typedef struct {
 } Biski8State;
 
 
-static inline uint8_t rotl8(uint8_t x, int r)
-{
-    return (uint8_t) ( (x << r) | (x >> (8 - r)) );
-}
-
-
-
 static inline uint8_t Biski8State_get_bits(Biski8State *obj)
 {
     uint8_t output = obj->mix + obj->loop_mix;

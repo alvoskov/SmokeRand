@@ -11,6 +11,6 @@
 #ifndef __SMOKERAND_BAT_FULL_H
 #define __SMOKERAND_BAT_FULL_H
 #include "smokerand/core.h"
-void battery_full(const GeneratorInfo *gen, CallerAPI *intf,
+BatteryExitCode battery_full(const GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype);
 #endif
