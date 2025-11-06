@@ -27,7 +27,7 @@
  * subtractive lagged Fibonacci PRNGs with big lags. Also detects ChaCha12 with
  * 32-bit counter: the test consumes more than 2^36 values.
  */
-void battery_full(const GeneratorInfo *gen, CallerAPI *intf,
+BatteryExitCode battery_full(const GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
     // Monobit frequency test options
@@ -159,8 +159,9 @@ void battery_full(const GeneratorInfo *gen, CallerAPI *intf,
         "full", tests
     };
     if (gen != NULL) {
-        TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
+        return TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
     } else {
         TestsBattery_print_info(&bat);
+        return BATTERY_PASSED;
     }
 }

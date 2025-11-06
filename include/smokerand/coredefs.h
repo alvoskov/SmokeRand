@@ -38,6 +38,17 @@ typedef struct {
 ///// Circular shifts /////
 ///////////////////////////
 
+static inline uint8_t rotl8(uint8_t x, int r)
+{
+    return (uint8_t) ( (x << r) | (x >> ((-r) & 7)) );
+}
+
+
+static inline uint8_t rotr8(uint8_t x, int r)
+{
+    return (uint8_t) ( (x << ((-r) & 7)) | (x >> r) );
+}
+
 static inline uint16_t rotl16(uint16_t x, int r)
 {
     return (uint16_t) ( (x << r) | (x >> ((-r) & 15)) );

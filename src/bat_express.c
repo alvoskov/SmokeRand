@@ -26,7 +26,7 @@
 /**
  * @brief SmokeRand `express` battery.
  */
-void battery_express(const GeneratorInfo *gen, CallerAPI *intf,
+BatteryExitCode battery_express(const GeneratorInfo *gen, CallerAPI *intf,
     unsigned int testid, unsigned int nthreads, ReportType rtype)
 {
     static const BSpaceNDOptions
@@ -57,8 +57,9 @@ void battery_express(const GeneratorInfo *gen, CallerAPI *intf,
         "express", tests
     };
     if (gen != NULL) {
-        TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
+        return TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
     } else {
         TestsBattery_print_info(&bat);
+        return BATTERY_PASSED;
     }
 }
