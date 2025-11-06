@@ -14,11 +14,6 @@ typedef struct {
     uint8_t d;
 } Gjrand8State;
 
-static inline uint8_t rotl8(uint8_t x, int r)
-{
-    return (uint8_t) ( (x << r) | (x >> (8 - r)) );
-}
-
 
 static uint8_t Gjrand8State_get_bits(Gjrand8State *obj)
 {

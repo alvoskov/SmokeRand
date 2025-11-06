@@ -149,7 +149,7 @@ SpeedResults battery_speed_test(const GeneratorInfo *gen, const CallerAPI *intf,
     return speed_corr;
 }
 
-void battery_speed(const GeneratorInfo *gen, const CallerAPI *intf)
+BatteryExitCode battery_speed(const GeneratorInfo *gen, const CallerAPI *intf)
 {
     printf("===== Generator speed measurements =====\n");
     printf("----- Speed test for uint generation -----\n");
@@ -169,18 +169,21 @@ void battery_speed(const GeneratorInfo *gen, const CallerAPI *intf)
         printf("Average results:\n");
         printf("  Corrected result (cpB):     %g\n\n", cpb_mean);
     }
+    return BATTERY_PASSED;
 }
 
-void battery_self_test(const GeneratorInfo *gen, const CallerAPI *intf)
+BatteryExitCode battery_self_test(const GeneratorInfo *gen, const CallerAPI *intf)
 {
     if (gen->self_test == 0) {
         intf->printf("Internal self-test not implemented\n");
-        return;
+        return BATTERY_ERROR;
     }
     intf->printf("Running internal self-test...\n");
     if (gen->self_test(intf)) {
         intf->printf("Internal self-test passed\n");
+        return BATTERY_PASSED;
     } else {
         intf->printf("Internal self-test failed\n");
+        return BATTERY_FAILED;
     }
 }
