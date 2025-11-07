@@ -21,7 +21,7 @@ latex/
 *.map
 
 # DJGPP
-.dxe
+*.dxe
 
 # Prerequisites
 *.d
