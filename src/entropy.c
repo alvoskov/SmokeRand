@@ -554,13 +554,14 @@ void Entropy_init_from_key(Entropy *obj, const uint32_t *key, uint64_t nonce)
     for (size_t i = 0; i < 4; i++) {
         for (size_t j = 0; j < 4; j++) {
             size_t ind = 4 * i + j;
-            fprintf(stderr, "%.8lX ", (unsigned long) obj->gen.x[ind]);
+            fprintf(stderr, "%.8" PRIX32 " ", obj->gen.x[ind]);
         }
         fprintf(stderr, "\n");
     }
-    for (size_t i = 0; i < 4; i++) {
-        fprintf(stderr, "Output %d: 0x%16.16llX\n",
-            (int) i, (unsigned long long) ChaCha20State_next64(&obj->gen));
+
+    for (int i = 0; i < 4; i++) {
+        fprintf(stderr, "Output %d: 0x%16.16" PRIX64 "\n",
+            i, ChaCha20State_next64(&obj->gen));
     }
 }
 
@@ -578,13 +579,15 @@ void Entropy_init_from_textseed(Entropy *obj, const char *seed, size_t len)
     fprintf(stderr, "  Seed value: %s\n", seed);
     fprintf(stderr, "  Seed size:  %u byte(s)\n", (unsigned int) len);
     blake2s(key_bytes, 32, NULL, 0, seed, len);
-    // A portable (LE/BE-invariant) converation of bytes to words.
+    // Big-endian portable converation of bytes to 32-bit words.
+    // BE was selected to show Blake2s hash by sequential printing of
+    // 32-bit words in hexadecimal format.
     for (size_t i = 0; i < 8; i++) {
         key_words[i] =
-            ( (uint32_t) key_bytes[4*i]           ) |
-            ( (uint32_t) key_bytes[4*i + 1] << 8  ) |
-            ( (uint32_t) key_bytes[4*i + 2] << 16 ) |
-            ( (uint32_t) key_bytes[4*i + 3] << 24 );
+            ( (uint32_t) key_bytes[4*i]     << 24 ) |
+            ( (uint32_t) key_bytes[4*i + 1] << 16 ) |
+            ( (uint32_t) key_bytes[4*i + 2] << 8  ) |
+            ( (uint32_t) key_bytes[4*i + 3] << 0  );
     }    
     Entropy_init_from_key(obj, key_words, nonce);
 }
@@ -668,9 +671,7 @@ void Entropy_print_seeds_log(const Entropy *obj, FILE *fp)
     fprintf(fp, "Number of seeds: %llu\n", (unsigned long long) obj->slog_pos);
     fprintf(fp, "%10s %18s %20s\n", "Thread", "Seed(HEX)", "Seed(DEC)");
     for (size_t i = 0; i < obj->slog_pos; i++) {
-        fprintf(fp, "%10llu 0x%.16llX %.20llu\n",
-            (unsigned long long) obj->slog[i].thread_id,
-            (unsigned long long) obj->slog[i].seed,
-            (unsigned long long) obj->slog[i].seed);
+        fprintf(fp, "%10" PRIX64 " 0x%.16" PRIX64 " %.20" PRIu64 "\n",
+            obj->slog[i].thread_id, obj->slog[i].seed, obj->slog[i].seed);
     }
 }

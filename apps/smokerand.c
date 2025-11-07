@@ -50,6 +50,7 @@ void print_help(void)
     "    interleaved32  Process 64-bit generator output as interleaving 32-bit words\n"
     "    high32, low32  Analyse higher/lower 32 bits of 64-bit generator\n"
     "  --report-brief Show only failures in the report\n"
+    "  --seed=data Use the user supplied string (data) as a seed\n"
     "  --nthreads  Run battery in multithreaded mode (default number of threads)\n"
     "  --threads=n Run battery in multithreaded mode using n threads\n"
     "\n";
