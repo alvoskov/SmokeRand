@@ -138,7 +138,7 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
     uint64_t mask = (1ull << opts->e) - 1;
     time_t tic = time(NULL);
     uint64_t cpu_tic = cpuclock();
-    uint64_t *x = calloc(opts->n, sizeof(uint64_t));
+    uint64_t *x = calloc((size_t) opts->n, sizeof(uint64_t));
     if (x == NULL) {
         obj->intf->printf("  Not enough memory (2^%.0f bytes is required)\n",
             sr_log2((double) opts->n * 8.0));
@@ -188,7 +188,7 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
     // qsort is used instead of radix sort to prevent "out of memory" error:
     // 2^30 of u64 is 8GiB of data
     tic = time(NULL);
-    quicksort64(x, opts->n); // Not radix: to prevent "out of memory"
+    quicksort64(x, (size_t) opts->n); // Not radix: to prevent "out of memory"
     obj->intf->printf("  Time elapsed: ");
     print_elapsed_time((unsigned long long) (time(NULL) - tic));
     obj->intf->printf("\n");    
@@ -531,6 +531,12 @@ void Ising2DLattice_flip_wolff(Ising2DLattice *obj, size_t ind, GeneratorState *
     Ising2DLattice_flip_wolff_internal(obj, ind, obj->s[ind], gs, p_int);
 }
 
+static inline size_t
+Ising2DLattice_rand_index(Ising2DLattice *obj, GeneratorState *gs)
+{
+    return (size_t) (gs->gi->get_bits(gs->state) % obj->N);
+}
+
 /**
  * @brief Metropolis algorithm: one pass consisting of L^2 flips. Catches
  * 32-bit linear congruental generators like '69069'. Rather slow.
@@ -541,18 +547,19 @@ void Ising2DLattice_pass_metropolis(Ising2DLattice *obj, GeneratorState *gs)
     const double p_mul = pow(2.0, gs->gi->nbits);
     uint64_t n_same_to_p_int[5];
     for (int i = 2; i <= 4; i++) {
-        double dE = (i - 2) * 4;
+        const double dE = (i - 2) * 4;
         n_same_to_p_int[i] = (uint64_t) (exp(-dE * jc) * p_mul);
     }
 
     for (size_t ii = 0; ii < obj->N; ii++) {
-        size_t i = gs->gi->get_bits(gs->state) % obj->N; // Essential for test sensitivity
+        // i index computation procedure is essential for test sensitivity
+        const size_t i = Ising2DLattice_rand_index(obj, gs);
         int n_same = 0;
         for (size_t j = 0; j < 4; j++) {
             if (obj->s[obj->nn[i].inds[j]] == obj->s[i])
                 n_same++;
         }
-        double dE = (n_same - 2) * 4;
+        const double dE = (n_same - 2) * 4;
         if (dE < 0) {
             obj->s[i] = -obj->s[i];
         } else {
@@ -566,7 +573,8 @@ void Ising2DLattice_pass_metropolis(Ising2DLattice *obj, GeneratorState *gs)
 void Ising2DLattice_pass(Ising2DLattice *obj, GeneratorState *gs, IsingAlgorithm alg)
 {
     if (alg == ISING_WOLFF) {
-        Ising2DLattice_flip_wolff(obj, gs->gi->get_bits(gs->state) % obj->N, gs);
+        const size_t i = Ising2DLattice_rand_index(obj, gs);        
+        Ising2DLattice_flip_wolff(obj, i, gs);
     } else if (alg == ISING_METROPOLIS) {
         Ising2DLattice_pass_metropolis(obj, gs);
     } else {

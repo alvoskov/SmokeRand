@@ -490,23 +490,22 @@ static int self_test_compare(const CallerAPI *intf,
 static int run_self_test_scalar(const CallerAPI *intf)
 {
     Tf256State obj;
-    static const uint64_t minus1_u64 = 0xffffffffffffffffull;
-    static const uint64_t k0_m1[4] = {minus1_u64, minus1_u64, minus1_u64, minus1_u64};
-    static const uint64_t ref72_m1[4] = {0x11518c034bc1ff4cull,
-        0x193f10b8bcdcc9f7ull, 0xd024229cb58f20d8ull, 0x563ed6e48e05183full};
-    static const uint64_t ref20_m1[4] = {0x29c24097942bba1bull,
-        0x0371bbfb0f6f4e11ull, 0x3c231ffa33f83a1cull, 0xcd29113fde32d168ull};
-
-    static const uint64_t k0_pi[4] = {0x452821e638d01377ull,
-        0xbe5466cf34e90c6cull, 0xbe5466cf34e90c6c, 0xc0ac29b7c97c50ddull};
-    static const uint64_t ref72_pi[4] = {0xacf412ccaa3b2270ull,
-        0xc9e99bd53f2e9173ull, 0x43dad469dc825948ull, 0xfbb19d06c8a2b4dcull};
-    static const uint64_t ref20_pi[4] = {0xa7e8fde591651bd9ull,
-        0xbaafd0c30138319bull, 0x84a5c1a729e685b9ull, 0x901d406ccebc1ba4ull};
+    static const uint64_t
+        k0_m1[4] = {UINT64_MAX, UINT64_MAX, UINT64_MAX, UINT64_MAX},
+        ref72_m1[4] = {0x11518c034bc1ff4cull, 0x193f10b8bcdcc9f7ull,
+            0xd024229cb58f20d8ull, 0x563ed6e48e05183full},
+        ref20_m1[4] = {0x29c24097942bba1bull, 0x0371bbfb0f6f4e11ull,
+            0x3c231ffa33f83a1cull, 0xcd29113fde32d168ull},
+        k0_pi[4] = {0x452821e638d01377ull, 0xbe5466cf34e90c6cull,
+            0xbe5466cf34e90c6c, 0xc0ac29b7c97c50ddull},
+        ref72_pi[4] = {0xacf412ccaa3b2270ull, 0xc9e99bd53f2e9173ull,
+            0x43dad469dc825948ull, 0xfbb19d06c8a2b4dcull},
+        ref20_pi[4] = {0xa7e8fde591651bd9ull, 0xbaafd0c30138319bull,
+            0x84a5c1a729e685b9ull, 0x901d406ccebc1ba4ull};
 
     Tf256State_init(&obj, k0_m1, 1);
-    obj.p[0] = minus1_u64; obj.p[1] = minus1_u64;
-    obj.p[2] = minus1_u64; obj.p[3] = minus1_u64;
+    obj.p[0] = UINT64_MAX; obj.p[1] = UINT64_MAX;
+    obj.p[2] = UINT64_MAX; obj.p[3] = UINT64_MAX;
 
     intf->printf("Threefry4x64x72 ('-1' example)\n");
     Tf256State_block72(&obj);
@@ -566,9 +565,8 @@ int self_test_compare_vec(const CallerAPI *intf,
 static int run_self_test_vector(const CallerAPI *intf)
 {
 #ifdef THREEFRY_VEC_ENABLED
-    static const uint64_t minus1_u64 = 0xffffffffffffffffull;
     Tf256VecState obj;
-    static const uint64_t k0_m1[4] = {minus1_u64, minus1_u64, minus1_u64, minus1_u64};
+    static const uint64_t k0_m1[4] = {UINT64_MAX, UINT64_MAX, UINT64_MAX, UINT64_MAX};
     static const uint64_t ref72_m1[4] = {0x11518c034bc1ff4cull,
         0x193f10b8bcdcc9f7ull, 0xd024229cb58f20d8ull, 0x563ed6e48e05183full};
     static const uint64_t ref20_m1[4] = {0x29c24097942bba1bull,

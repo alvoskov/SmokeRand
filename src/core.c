@@ -562,7 +562,7 @@ void TestsDispatcher_init(TestsDispatcher *obj, const TestsBattery *bat,
         uint64_t state = intf->get_seed64();
         for (size_t i = 0; i < ntests; i++) {
             state = pcg_bits64(&state);
-            size_t j = state % ntests;
+            size_t j = (size_t) (state % ntests);
             size_t tmp = obj->inds[i];
             obj->inds[i] = obj->inds[j];
             obj->inds[j] = tmp;

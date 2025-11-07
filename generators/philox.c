@@ -136,19 +136,17 @@ static int self_test_compare(const CallerAPI *intf,
 static int run_self_test(const CallerAPI *intf)
 {
     PhiloxState obj;
-    static const uint64_t minus1_u64 = 0xffffffffffffffffull;
-    static const uint64_t k0_m1[2] = {minus1_u64, minus1_u64};
-    static const uint64_t ref_m1[4] = {0x87b092c3013fe90bull,
-        0x438c3c67be8d0224ull, 0x9cc7d7c69cd777b6ull, 0xa09caebf594f0ba0ull};
-
-    static const uint64_t k0_pi[2] = {
-        0x452821e638d01377ull, 0xbe5466cf34e90c6cull};
-    static const uint64_t ref_pi[4] = {0xa528f45403e61d95ull,
-        0x38c72dbd566e9788ull, 0xa5a1610e72fd18b5ull, 0x57bd43b5e52b7fe6ull};
+    static const uint64_t
+        k0_m1[2] = {UINT64_MAX, UINT64_MAX},
+        ref_m1[4] = {0x87b092c3013fe90bull, 0x438c3c67be8d0224ull,
+            0x9cc7d7c69cd777b6ull, 0xa09caebf594f0ba0ull},
+        k0_pi[2] = {0x452821e638d01377ull, 0xbe5466cf34e90c6cull},
+        ref_pi[4] = {0xa528f45403e61d95ull, 0x38c72dbd566e9788ull,
+            0xa5a1610e72fd18b5ull, 0x57bd43b5e52b7fe6ull};
 
     PhiloxState_init(&obj, k0_m1);
-    obj.ctr[0] = minus1_u64; obj.ctr[1] = minus1_u64;
-    obj.ctr[2] = minus1_u64; obj.ctr[3] = minus1_u64;
+    obj.ctr[0] = UINT64_MAX; obj.ctr[1] = UINT64_MAX;
+    obj.ctr[2] = UINT64_MAX; obj.ctr[3] = UINT64_MAX;
 
     intf->printf("Philox4x64x10 ('-1' example)\n");
     PhiloxState_block10(&obj);
