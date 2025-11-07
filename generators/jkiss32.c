@@ -1,10 +1,21 @@
 /**
  * @file jkiss32.c
- * @brief JKISS is a version of KISS algorithm (2007 version) by J. Marsaglia
- * with paramteres tuned by David Jones.
+ * @brief JKISS32 is a version of KISS algorithm (2007 version) by J. Marsaglia
+ * with parameteres tuned by David Jones.
  * @details It doesn't use multiplication: it is a combination or xorshift32,
  * discrete Weyl sequence and AWC (add with carry) generator. Doesn't require
  * 64-bit integers.
+ *
+ * The next comment by G. Marsaglia should be taken into account during its
+ * initialization:
+ *
+ * When b=2^31, b^2+b-1 is not prime, but factors into 610092078393289 * 7559
+ * so the full period from KISS() requires that for the seeds x, y, z, w, c:
+ *
+ * - x can be any 32-bit integer,
+ * - y can be any 32-bit integer not 0,
+ * - z and w any 31-bit integers not multiples of 7559
+ * - c can be 0 or 1.
  *
  * References:
  *
@@ -23,6 +34,7 @@
  * was suggested by David Jones.
  */
 #include "smokerand/cinterface.h"
+#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
@@ -30,17 +42,16 @@ PRNG_CMODULE_PROLOG
  * @brief JKISS32 PRNG state.
  */
 typedef struct {
-    uint32_t x;
-    uint32_t y;
-    uint32_t z;
-    uint32_t w;
-    uint32_t c;
+    uint32_t x; ///< Discrete Weyl sequence part.
+    uint32_t y; ///< xorshift part.
+    uint32_t z; ///< AWC part 1
+    uint32_t w; ///< AWC part 2
+    uint32_t c; ///< AWC carry bit
 } JKISS32State;
 
 
 static inline uint64_t get_bits_raw(void *state)
 {
-
     JKISS32State *obj = state;
     // xorshift part
     obj->y ^= obj->y << 5;
@@ -48,7 +59,7 @@ static inline uint64_t get_bits_raw(void *state)
     obj->y ^= obj->y << 22;
     // AWC (add with carry) part
     // Note: sign bit hack!
-    int32_t t = (int32_t) (obj->z + obj->w + obj->c);
+    const int32_t t = (int32_t) (obj->z + obj->w + obj->c);
     obj->z = obj->w;
     obj->c = t < 0;
     obj->w = t & 0x7fffffff;
@@ -61,13 +72,38 @@ static inline uint64_t get_bits_raw(void *state)
 
 static void *create(const CallerAPI *intf)
 {
+    static const uint32_t AWC_MAX = 0x7fffffff; // 2^31 - 1
+    JKISS32State *obj = intf->malloc(sizeof(JKISS32State));
+    seed64_to_2x32(intf, &obj->x, &obj->y);
+    if (obj->y == 0) {
+        obj->y = 0x12345678;
+    }
+    seed64_to_2x32(intf, &obj->z, &obj->w);
+    obj->z = obj->z & AWC_MAX;
+    obj->w = obj->w & AWC_MAX;
+    while (obj->z % 7559 == 0) { obj->z--; obj->z = (obj->z & AWC_MAX); }
+    while (obj->w % 7559 == 0) { obj->w--; obj->w = (obj->w & AWC_MAX); }
+    obj->c = 0;
+    return obj;
+}
+
+
+static int run_self_test(const CallerAPI *intf)
+{
+    static const uint32_t x_ref = 2362004368;
+    uint32_t x;
     JKISS32State *obj = intf->malloc(sizeof(JKISS32State));
     obj->x = 123456789;
     obj->y = 234567891;
     obj->z = 345678912;
     obj->w = 456789123;
     obj->c = 0;
-    return (void *) obj;
+    for (long i = 0; i < 10000000; i++) {
+        x = (uint32_t) get_bits_raw(obj);
+    }
+    intf->printf("Output: %" PRIu32 "; reference: %" PRIu32 "\n", x, x_ref);
+    intf->free(obj);
+    return (x == x_ref) ? 1 : 0;
 }
 
-MAKE_UINT32_PRNG("JKISS32", NULL)
+MAKE_UINT32_PRNG("JKISS32", run_self_test)
