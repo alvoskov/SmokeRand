@@ -1,11 +1,24 @@
 /**
  * @file minstd.c
  * @brief Obsolete "minimal standard" 31-bit LCG with prime modulus.
- * It is \f$ LCG(2^{31} - 1, 16807, 0) \f$. Fails SmallCrush, Crush,
- * BigCrush and PractRand and fairly slow on modern 64-bit processors. 
- * @details This implementation of minstd is based on "Integer version 2"
- * from [1]. It uses Schrage's method to be able to use only 32-bit
- * arithmetics.
+ * It is \f$ LCG(2^{31} - 1, 16807, 0) \f$.
+ *
+ * @detials It is an obsolete generator that fails SmallCrush, Crush, BigCrush
+ * and PractRand and its speed is comparable to SIMD version of ChaCha12 on
+ * modern 64-bit x86-64 processors. This implementation of minstd includes
+ * two versions:
+ *
+ * - `mul32` that is based on "Integer version 2" from [1]. It uses Schrage's
+ *   method to be able to use only 32-bit arithmetics.
+ * - `mul64` that relies on 32-bit x 32-bit multiplication that returns the
+ *   upper 32 bits of 64-bit product.
+ *
+ * The `mul64` version is usually faster on 32-bit and 64-bit processors:
+ * the required multiplication instruction is available on x86 architecture
+ * since 80386.
+ *
+ * This version of minstd uses the output scrambler that extends its 31-bit
+ * output to 32 bits by the `(x << 1) | (x >> 30)` transformation.
  *
  * Reference:
  *
@@ -24,9 +37,13 @@
 
 PRNG_CMODULE_PROLOG
 
+/**
+ * @brief minstd "Integer version 2" based on Schrage's method.
+ */
 static inline uint64_t get_bits_mul32_raw(void *state)
 {
-    static const int32_t m = 2147483647, a = 16807, q = 127773, r = 2836;
+    static const int32_t m = 2147483647, a = 16807;
+    static const int32_t q = 127773, r = 2836; // (m div a) and (m mod a)
     Lcg32State *obj = state;
     const int32_t x = (int32_t) obj->x;
     const int32_t hi = x / q;
@@ -38,6 +55,10 @@ static inline uint64_t get_bits_mul32_raw(void *state)
 
 MAKE_GET_BITS_WRAPPERS(mul32);
 
+/**
+ * @brief minstd "Real version 1" based on 64-bit multiplication with
+ * two 32-bit input arguments.
+ */
 static inline uint64_t get_bits_mul64_raw(void *state)
 {
     Lcg32State *obj = state;
@@ -93,7 +114,7 @@ int run_self_test(const CallerAPI *intf)
 
 static const char description[] =
 "minstd: a classic but obsolete 'minimal standard' LCG.\n"
-"  mul32 - version with 32-bit multiplication.\n"
+"  mul32 - version with 32-bit multiplication (Schrage's method).\n"
 "  mul64 - version with 64-bit multiplication (default).\n";
 
 

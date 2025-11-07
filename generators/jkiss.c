@@ -14,8 +14,6 @@
  *    http://www0.cs.ucl.ac.uk/staff/D.Jones/GoodPracticeRNG.pdf
  * 2. https://groups.google.com/group/sci.stat.math/msg/b555f463a2959bb7/
  *
- * http://www0.cs.ucl.ac.uk/staff/D.Jones/GoodPracticeRNG.pdf
- *
  * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
@@ -25,6 +23,7 @@
  * was suggested by David Jones.
  */
 #include "smokerand/cinterface.h"
+#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
@@ -56,15 +55,35 @@ static inline uint64_t get_bits_raw(void *state)
     return obj->x + obj->y + obj->z;
 }
 
+
 static void *create(const CallerAPI *intf)
 {
     JKISSState *obj = intf->malloc(sizeof(JKISSState));
-    uint64_t s0 = intf->get_seed64();
-    obj->x = (uint32_t) (s0 >> 32);
-    obj->y = (uint32_t) ((s0 & 0xFFFFFFFF) | 0x1);
-    obj->z = (uint32_t) (~s0);
-    obj->c = 1;
-    return (void *) obj;
+    seed64_to_2x32(intf, &obj->x, &obj->y);
+    seed64_to_2x32(intf, &obj->z, &obj->c);
+    if (obj->y == 0) {
+        obj->y = 0x12345678;
+    }
+    obj->c = (obj->c & 0x7FFFFFFF) + 1;
+    return obj;
 }
 
-MAKE_UINT32_PRNG("JKISS", NULL)
+
+static int run_self_test(const CallerAPI *intf)
+{
+    static const uint32_t x_ref = 3388360461;
+    uint32_t x;
+    JKISSState *obj = intf->malloc(sizeof(JKISSState));
+    obj->x = 123456789; obj->y = 987654321;
+    obj->z = 43219876;  obj->c = 6543217;
+    for (long i = 0; i < 10000000; i++) {
+        x = (uint32_t) get_bits_raw(obj);
+    }
+    intf->printf("Observed: 0x%.8" PRIX32 "; expected: 0x%.8" PRIX32 "\n",
+        x, x_ref);
+    intf->free(obj);
+    return (x == x_ref) ? 1 : 0;
+}
+
+
+MAKE_UINT32_PRNG("JKISS", run_self_test)

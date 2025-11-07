@@ -51,11 +51,9 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Flea32x1State *obj = intf->malloc(sizeof(Flea32x1State));
-    obj->a = intf->get_seed32();
-    obj->b = intf->get_seed32();
-    obj->c = intf->get_seed32();
-    obj->d = intf->get_seed32();
-    return (void *) obj;
+    seed64_to_2x32(intf, &obj->a, &obj->b);
+    seed64_to_2x32(intf, &obj->c, &obj->d);
+    return obj;
 }
 
 MAKE_UINT32_PRNG("flea32x1", NULL)

@@ -74,13 +74,13 @@ static inline uint64_t get_bits_raw(void *state)
     if (obj->ind < 4288) {
         return obj->q[obj->ind++];
     } else {
-        for (int i = 0; i < 4160; i++) {
+        for (size_t i = 0; i < 4160; i++) {
             uint32_t t = obj->q[i];
             uint32_t h = obj->q[i + 128] + obj->c;
             obj->c = t < h;
             obj->q[i] = h - t - 1;
         }
-        for (int i = 4160; i < 4288; i++) {
+        for (size_t i = 4160; i < 4288; i++) {
             uint32_t t = obj->q[i];
             uint32_t h = obj->q[i - 4160] + obj->c;
             obj->c = t < h;
@@ -93,7 +93,10 @@ static inline uint64_t get_bits_raw(void *state)
 
 static void Cswb4288State_init(Cswb4288State *obj, uint32_t xcng, uint32_t xs)
 {
-    for (int i = 0; i < 4288; i++) {
+    if (xs == 0) {
+        xs = 0x12345678u;
+    }
+    for (size_t i = 0; i < 4288; i++) {
         xcng = 69069u * xcng + 123u;
         xs ^= (xs << 13);
         xs ^= (xs >> 17);
@@ -108,8 +111,9 @@ static void Cswb4288State_init(Cswb4288State *obj, uint32_t xcng, uint32_t xs)
 static void *create(const CallerAPI *intf)
 {
     Cswb4288State *obj = intf->malloc(sizeof(Cswb4288State));
-    uint64_t seed = intf->get_seed64();
-    Cswb4288State_init(obj, (uint32_t) (seed >> 32), (uint32_t) ((seed & 0xFFFFFFFF) | 1));
+    uint32_t s0, s1;
+    seed64_to_2x32(intf, &s0, &s1);
+    Cswb4288State_init(obj, s0, s1);
     return obj;
 }
 

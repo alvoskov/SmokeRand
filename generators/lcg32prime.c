@@ -8,7 +8,8 @@
  *  V. 68. N. 225. P. 249-260
  *  http://dx.doi.org/10.1090/S0025-5718-99-00996-5
  *
- * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -32,12 +33,12 @@ static inline uint64_t get_bits_raw(void *state)
     uint64_t r = lo + d * hi;
     int k = (int) (r >> 32) - 1;
     if (k > 0) {
-        r -= (((uint64_t) k) << 32) - k * d;
+        r -= (((uint64_t) k) << 32) - (uint64_t) k * d;
     }
     if (r > m) {
         r -= m;
     }
-    obj->x = r;
+    obj->x = (uint32_t) r;
 #else
     // Implementation for 64-bit systems
     obj->x = (uint32_t) ( (a * obj->x + 123u) % m );

@@ -32,7 +32,7 @@ typedef struct {
 
 static void Cmwc4827State_init(Cmwc4827State *obj, uint32_t xcng, uint32_t xs)
 {
-    for (int i = 0; i < 4827; i++) {
+    for (size_t i = 0; i < 4827; i++) {
         xcng = 69069u * xcng + 13579u;
         xs ^= (xs << 13);
         xs ^= (xs >> 17);
@@ -77,20 +77,6 @@ static int run_self_test(const CallerAPI *intf)
     intf->free(obj);
     return x == x_ref;
 }
-
-
-#if 0
-int main(void)
-{unsigned long int i,x,cng=123456789,xs=362436069;
-/* First seed Q[] with CNG+XS: */
-for(i=0;i<4827;i++) Q=CNG+XS;
-/* Then generate 10^9 CMWC4827()s */
-for(i=0;i<1000000000;i++) x=CMWC4827();
-printf("Does x=1346668762?\n x=%lu\n",x);
-return 0;
-}
-
-#endif
 
 
 MAKE_UINT32_PRNG("Cmwc4827", run_self_test)
