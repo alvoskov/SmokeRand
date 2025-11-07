@@ -560,7 +560,7 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     double p = 1.0 / (1ull << opts->shl); // beta in the floating point format
     uint64_t beta = 1ull << (obj->gi->nbits - opts->shl);
     uint64_t u;
-    size_t ngaps = opts->ngaps;
+    unsigned long long ngaps = opts->ngaps;
     size_t nbins = (size_t) (log(Ei_min / ((double) ngaps * p)) / log(1 - p));
     size_t *Oi = calloc(nbins + 1, sizeof(size_t));
     if (Oi == NULL) {
@@ -572,8 +572,7 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     obj->intf->printf("Gap test\n");
     obj->intf->printf("  alpha = 0.0; beta = %g; shl = %u;\n", p, opts->shl);
     obj->intf->printf("  ngaps = %llu (2^%.2f or 10^%.2f); nbins = %llu\n",
-        (unsigned long long) ngaps,
-        sr_log2((double) ngaps), log10((double) ngaps),
+        ngaps, sr_log2((double) ngaps), log10((double) ngaps),
         (unsigned long long) nbins);
     if (!gap_test_guard(obj, opts)) {
         obj->intf->printf("  Generator output doesn't hit the gap! p <= 1e-15\n");
@@ -582,7 +581,7 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
         ans.x = NAN;
         return ans;
     }
-    for (size_t i = 0; i < ngaps; i++) {
+    for (unsigned long long i = 0; i < ngaps; i++) {
         size_t gap_len = 0;
         u = obj->gi->get_bits(obj->state);
         nvalues++;
@@ -1183,11 +1182,11 @@ static int cmp_doubles(const void *aptr, const void *bptr)
 TestResults nbit_words_freq_test(GeneratorState *obj,
     const NBitWordsFreqOptions *opts)
 {
-    size_t nbins = 1ull << opts->bits_per_word;
-    unsigned int nwords_per_num = obj->gi->nbits / opts->bits_per_word;
-    unsigned long long block_len = (1ull << (opts->bits_per_word)) * opts->average_freq / nwords_per_num;
-    size_t nwords = nwords_per_num * block_len;
-    uint64_t mask = nbins - 1;
+    const size_t nbins = 1ul << opts->bits_per_word;
+    const unsigned int nwords_per_num = obj->gi->nbits / opts->bits_per_word;
+    const unsigned long long block_len = nbins * opts->average_freq / nwords_per_num;
+    const unsigned long long nwords = nwords_per_num * block_len;
+    const uint64_t mask = nbins - 1;
     double *chi2 = calloc(opts->nblocks, sizeof(double));
     size_t *wfreq = calloc(nbins, sizeof(size_t));
 

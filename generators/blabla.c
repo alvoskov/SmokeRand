@@ -343,9 +343,13 @@ static int run_self_test(const CallerAPI *intf)
     BlaBlaState_block_scalar(obj);
     int is_ok = compare_data(intf, obj, get_bits_scalar, data, 64);
     intf->printf("----- Checking the vectorized (AVX2) version -----\n");
+#ifdef __AVX2__
     BlaBlaState_init(obj, key);
     BlaBlaState_block_vector(obj);
     is_ok = is_ok & compare_data(intf, obj, get_bits_vector, data, 64);
+#else
+    intf->printf("AVX2 version is not supported on this platform\n");
+#endif
     intf->free(obj);
     return is_ok;
 }

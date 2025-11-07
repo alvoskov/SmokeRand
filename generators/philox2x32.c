@@ -129,18 +129,12 @@ static int self_test_compare(const CallerAPI *intf,
 static int run_self_test(const CallerAPI *intf)
 {
     Philox2x32State obj;
-    const uint32_t k0_m1 = 0xFFFFFFFF;
-    const uint32_t ref_m1[2] = {0x2c3f628b, 0xab4fd7ad};
-    const uint32_t k0_pi = 0x13198a2e;
-    const uint32_t ref_pi[2] = {0xdd7ce038, 0xf62a4c12};
+    static const uint32_t ref_m1[2] = {0x2c3f628b, 0xab4fd7ad};
+    static const uint32_t k0_pi = 0x13198a2e;
+    static const uint32_t ref_pi[2] = {0xdd7ce038, 0xf62a4c12};
 
-/*
-philox2x32 10 00000000 00000000 00000000   ff1dae59 6cd10df2
-philox2x32 10 ffffffff ffffffff ffffffff   
-philox2x32 10 243f6a88 85a308d3 13198a2e   dd7ce038 f62a4c12
-*/
-    Philox2x32State_init(&obj, k0_m1);
-    obj.ctr[0] = 0xFFFFFFFF; obj.ctr[1] = 0xFFFFFFFF;
+    Philox2x32State_init(&obj, UINT32_MAX);
+    obj.ctr[0] = UINT32_MAX; obj.ctr[1] = UINT32_MAX;
 
     intf->printf("Philox2x32x10 ('-1' example)\n");
     Philox2x32State_block10(&obj);
