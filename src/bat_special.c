@@ -38,25 +38,25 @@ static SpeedResults measure_speed(const GeneratorInfo *gen, const CallerAPI *int
     GeneratorState obj = GeneratorState_create(gen, intf);
     SpeedResults results;
     double ns_total = 0.0;
-    for (size_t niter = 2; ns_total < 0.5e9; niter <<= 1) {
+    for (unsigned long long niter = 2; ns_total < 0.5e9; niter <<= 1) {
         clock_t tic = clock();
         uint64_t tic_proc = cpuclock();
         if (mode == SPEED_UINT) {
             uint64_t sum = 0;
-            for (size_t i = 0; i < niter; i++) {
+            for (unsigned long long i = 0; i < niter; i++) {
                 sum += obj.gi->get_bits(obj.state);
             }
             (void) sum;
         } else {
             uint64_t sum = 0;
-            for (size_t i = 0; i < niter; i++) {
+            for (unsigned long long i = 0; i < niter; i++) {
                 sum += obj.gi->get_sum(obj.state, SUM_BLOCK_SIZE);
             }
             (void) sum;
         }
         uint64_t toc_proc = cpuclock();
         clock_t toc = clock();
-        ns_total = 1.0e9 * (double) ((toc - tic) / CLOCKS_PER_SEC);
+        ns_total = 1.0e9 * ((double) (toc - tic) / (double) CLOCKS_PER_SEC);
         results.ns_per_call = ns_total / (double) niter;
         results.ticks_per_call = (double) (toc_proc - tic_proc) / (double) niter;
         // Convert to cpb

@@ -51,10 +51,8 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Xabc32State *obj = intf->malloc(sizeof(Xabc32State));
-    obj->a = intf->get_seed32();
-    obj->b = intf->get_seed32();
-    obj->c = intf->get_seed32();
-    obj->x = intf->get_seed32();
+    seed64_to_2x32(intf, &obj->a, &obj->b);
+    seed64_to_2x32(intf, &obj->c, &obj->x);
     for (int i = 0; i < 32; i++) {
         (void) get_bits_raw(obj);
     }

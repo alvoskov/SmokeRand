@@ -129,13 +129,9 @@ static inline void *create_scalar(const GeneratorInfo *gi, const CallerAPI *intf
 {
     uint32_t key[4];
     Jctr32State *obj = intf->malloc(sizeof(Jctr32State));
-    uint64_t seed0 = intf->get_seed64();
-    uint64_t seed1 = intf->get_seed64();
+    seed64_to_2x32(intf, &key[0], &key[1]);
+    seed64_to_2x32(intf, &key[2], &key[3]);
     (void) gi;
-    key[0] = (uint32_t) seed0;
-    key[1] = (uint32_t) (seed0 >> 32);
-    key[2] = (uint32_t) seed1;
-    key[3] = (uint32_t) (seed1 >> 32);
     Jctr32State_init(obj, key, 0);
     return obj;
 }
@@ -274,14 +270,10 @@ static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
 {
 #ifdef __AVX2__
     uint32_t key[4];
-    Jctr32VecState *obj = intf->malloc(sizeof(Jctr32VecState));    
+    Jctr32VecState *obj = intf->malloc(sizeof(Jctr32VecState));
+    seed64_to_2x32(intf, &key[0], &key[1]);
+    seed64_to_2x32(intf, &key[2], &key[3]);
     (void) gi;
-    uint64_t seed0 = intf->get_seed64();
-    uint64_t seed1 = intf->get_seed64();
-    key[0] = (uint32_t) seed0;
-    key[1] = (uint32_t) (seed0 >> 32);
-    key[2] = (uint32_t) seed1;
-    key[3] = (uint32_t) (seed1 >> 32);
     Jctr32VecState_init(obj, key, 0);
     return obj;
 #else

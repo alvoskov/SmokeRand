@@ -38,7 +38,8 @@ static inline void uadd_128p64_ary_c99(uint32_t *x, uint64_t c)
  * @param[out] hi Pointer to the buffer for upper 64 bits.
  * @return Lower 64 bits.
  */
-static inline uint64_t umuladd_64x64p64_c99(uint64_t a, uint64_t b, uint64_t c, uint64_t *hi)
+static inline uint64_t
+umuladd_64x64p64_c99(uint64_t a, uint64_t b, uint64_t c, uint64_t *hi)
 {
     static const uint64_t MASK32 = 0xFFFFFFFF;
     uint32_t out[4], x_lo = (uint32_t) b, x_hi = (uint32_t) (b >> 32);
@@ -69,7 +70,8 @@ static inline uint64_t umuladd_64x64p64_c99(uint64_t a, uint64_t b, uint64_t c, 
  * @brief A portable implementation of the `a += b` operation with 128-bit
  * `a` and 64-bit `b`. Useful for LCG and MWC generators.
  */
-static inline void uadd_128p64_c99(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
+static inline void
+uadd_128p64_c99(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
 {
     uint32_t out[4];
     out[0] = (uint32_t) (*a_lo); out[1] = (uint32_t) ((*a_lo) >> 32);
@@ -96,7 +98,8 @@ static inline void uadd_128p64_c99(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
  * @param[in] c Input value.
  * @return Lower 64 bits.
  */
-static inline void umuladd_128x128p64_c99(const uint32_t *a, uint32_t *x, uint64_t c)
+static inline void
+umuladd_128x128p64_c99(const uint32_t *a, uint32_t *x, uint64_t c)
 {
     static const uint64_t MASK32 = 0xFFFFFFFF;
     uint32_t out[4];
@@ -212,17 +215,20 @@ static inline void umuladd_128x128p64w(uint64_t a_hi, uint64_t a_lo,
 // End of GCC implementation of 128-bit arithmetics
 #else
 // Begin of portable (C99) implementation of 128-bit arithmetics
-static inline uint64_t unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
+static inline uint64_t
+unsigned_mul128(uint64_t a, uint64_t b, uint64_t *high)
 {
     return umuladd_64x64p64_c99(a, b, 0, high);
 }
 
-static inline uint64_t unsigned_muladd128(uint64_t a, uint64_t b, uint64_t c, uint64_t *high)
+static inline uint64_t
+unsigned_muladd128(uint64_t a, uint64_t b, uint64_t c, uint64_t *high)
 {
     return umuladd_64x64p64_c99(a, b, c, high);
 }
 
-static inline void unsigned_add128(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
+static inline void
+unsigned_add128(uint64_t *a_hi, uint64_t *a_lo, uint64_t b)
 {
     uadd_128p64_c99(a_hi, a_lo, b);
 }
@@ -231,10 +237,10 @@ static inline void umuladd_128x128p64w(uint64_t a_hi, uint64_t a_lo,
     uint64_t *x_hi, uint64_t *x_lo, uint64_t c)
 {
     uint32_t x[4], a[4];
-    x[0] = (uint32_t) (*x_lo); x[1] = (*x_lo) >> 32;
-    x[2] = (uint32_t) (*x_hi); x[3] = (*x_hi) >> 32;
-    a[0] = (uint32_t) a_lo; a[1] = a_lo >> 32;
-    a[2] = (uint32_t) a_hi; a[3] = a_hi >> 32;
+    x[0] = (uint32_t) (*x_lo); x[1] = (uint32_t) ((*x_lo) >> 32);
+    x[2] = (uint32_t) (*x_hi); x[3] = (uint32_t) ((*x_hi) >> 32);
+    a[0] = (uint32_t) a_lo;    a[1] = (uint32_t) (a_lo >> 32);
+    a[2] = (uint32_t) a_hi;    a[3] = (uint32_t) (a_hi >> 32);
     umuladd_128x128p64_c99(a, x, c);
     *x_hi = ((uint64_t) x[2]) | (((uint64_t) x[3]) << 32);
     *x_lo  = ((uint64_t) x[0]) | (((uint64_t) x[1]) << 32);

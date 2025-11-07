@@ -89,6 +89,17 @@ typedef int (*GetGenInfoFunc)(GeneratorInfo *gi, const CallerAPI *intf);
 
 
 /**
+ * @brief Generates 64-bit seed and loads it to the pair of 32-bit outputs.
+ */
+static inline void
+seed64_to_2x32(const CallerAPI *intf, uint32_t *s0, uint32_t *s1)
+{
+    const uint64_t s = intf->get_seed64();
+    *s0 = (uint32_t) s;
+    *s1 = (uint32_t) (s >> 32);
+}
+
+/**
  * @brief pcg_rxs_m_xs64 PRNG that has a good quality and can be used
  * for initialization for other PRNGs such as lagged Fibonacci.
  */

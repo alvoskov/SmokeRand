@@ -581,7 +581,7 @@ static int run_self_test_vector(const CallerAPI *intf)
 
     Tf256VecState_init(&obj, k0_m1, 1);
     for (int i = 0; i < NWORDS * NCOPIES; i++) {
-        obj.ctr[i] = minus1_u64;
+        obj.ctr[i] = UINT64_MAX;
     }
     intf->printf("Threefry4x64x72 ('-1' example)\n");
     Tf256VecState_block72(&obj);

@@ -30,7 +30,6 @@ static char cmd_param[128] = {0};
 static int use_stderr_for_printf = 0;
 static int use_mutexes = 0;
 
-
 static const char *get_cmd_param(void)
 {
     return cmd_param;
@@ -45,6 +44,11 @@ void set_cmd_param(const char *param)
 void set_use_stderr_for_printf(int val)
 {
     use_stderr_for_printf = val;
+}
+
+void set_entropy_textseed(const char *seed, size_t len)
+{
+    Entropy_init_from_textseed(&entropy, seed, len);
 }
 
 ///////////////////////////////
@@ -515,82 +519,144 @@ void print_elapsed_time(unsigned long long nseconds_total)
 }
 
 
-/////////////////////////////////////////////
-///// TestsBattery class implementation /////
-/////////////////////////////////////////////
+typedef struct {
+    size_t ind; ///< Test index (ID) inside battery and in the output buffer
+    size_t ord; ///< Test ordinal (for output information)
+} TestIndex;
 
+////////////////////////////////////////////
+///// ThreadQueue class implementation /////
+////////////////////////////////////////////
 
-size_t TestsBattery_ntests(const TestsBattery *obj)
-{
+typedef struct {
+    GeneratorState gen; ///< Per-thread PRNG
+    TestIndex *tests_inds; ///< Test indexes and ordinals
     size_t ntests;
-    for (ntests = 0; obj->tests[ntests].run != NULL; ntests++) { }
-    return ntests;
+    size_t front;
+} ThreadQueue;
+
+
+void ThreadQueue_init(ThreadQueue *obj, const GeneratorInfo *gi,
+    const CallerAPI *intf)
+{
+    obj->ntests = 0;
+    obj->front = 0;
+    obj->tests_inds = calloc(1, sizeof(TestIndex));
+    obj->gen = GeneratorState_create(gi, intf);
 }
 
 
-DECLARE_MUTEX(tests_dispatcher_mutex)
+void ThreadQueue_push_back(ThreadQueue *obj, TestIndex index)
+{
+    obj->ntests++;
+    obj->tests_inds = realloc(obj->tests_inds, obj->ntests * sizeof(TestIndex));
+    obj->tests_inds[obj->ntests - 1] = index;
+}
 
+
+TestIndex ThreadQueue_pop_front(ThreadQueue *obj)
+{
+    static const TestIndex none = {.ind = SIZE_MAX, .ord = SIZE_MAX};
+    return (obj->front == obj->ntests) ? none : obj->tests_inds[obj->front++];
+}
+
+
+void ThreadQueue_destruct(ThreadQueue *obj)
+{
+    GeneratorState_destruct(&obj->gen, obj->gen.intf);
+    free(obj->tests_inds);
+}
+
+////////////////////////////////////////////////
+///// TestsDispatcher class implementation /////
+////////////////////////////////////////////////
+
+/**
+ * @brief State of multi-threaded tests dispatcher. It uses PRNG from entropy
+ * module but its result is fully determined by the PRNG input. This determinism
+ * allows to obtain completely reproducible results (e.g. p-values in the test
+ * reports) from the same seed.
+ */
 typedef struct {
-    size_t ord;
-    size_t *inds;
     size_t *res_thrd_ord;
     const TestsBattery *bat;
     size_t ntests;
     TestResults *results;
     const GeneratorInfo *gi;
     const CallerAPI *intf;
+    ThreadQueue *queues;
+    unsigned int nthreads;
 } TestsDispatcher;
 
 
 void TestsDispatcher_init(TestsDispatcher *obj, const TestsBattery *bat,
-    const GeneratorInfo *gen, const CallerAPI *intf, TestResults *results,
+    const GeneratorInfo *gen, const CallerAPI *intf,
+    unsigned int nthreads, TestResults *results,
     int shuffle)
 {
     size_t ntests = TestsBattery_ntests(bat);
-    obj->ord = 0;
-    obj->inds = calloc(ntests, sizeof(size_t));
     obj->res_thrd_ord = calloc(ntests, sizeof(size_t));
     obj->bat = bat;
     obj->ntests = ntests;
     obj->results = results;
     obj->gi = gen;
     obj->intf = intf;
-    for (size_t i = 0; i < ntests; i++) {
-        obj->inds[i] = i;
+    obj->nthreads = nthreads;
+    obj->queues = calloc(nthreads, sizeof(ThreadQueue));
+
+    // They should be initialized BEFORE shuffling: shuffling
+    // uses get_seed64 from entropy generator.
+    for (unsigned int i = 0; i < nthreads; i++) {
+        ThreadQueue_init(&obj->queues[i], gen, intf);
     }
+    // Prepare an unshuffled array of indexes
+    TestIndex *inds = calloc(ntests, sizeof(TestIndex));
+    for (size_t i = 0; i < ntests; i++) {
+        inds[i].ind = i;
+        inds[i].ord = i;
+    }
+    // An optional shuffling (shuffling indexes but not ordinals)
     if (shuffle) {
         uint64_t state = intf->get_seed64();
         for (size_t i = 0; i < ntests; i++) {
             state = pcg_bits64(&state);
             size_t j = (size_t) (state % ntests);
-            size_t tmp = obj->inds[i];
-            obj->inds[i] = obj->inds[j];
-            obj->inds[j] = tmp;
+            size_t tmp = inds[i].ind;
+            inds[i].ind = inds[j].ind;
+            inds[j].ind = tmp;
         }
     }
-
-    INIT_MUTEX(tests_dispatcher_mutex);
+    // Assign tests to threads
+    unsigned int thr_id = 0;
+    for (size_t i = 0; i < ntests; i++) {
+        thr_id = (thr_id + 1) % nthreads;
+        ThreadQueue_push_back(&obj->queues[thr_id], inds[i]);
+    }
+    // Free internal buffers
+    free(inds);
 }
+
 
 void TestsDispatcher_destruct(TestsDispatcher *obj)
 {
-    free(obj->inds);
+    //free(obj->inds);
     free(obj->res_thrd_ord);
+    for (unsigned int i = 0; i < obj->nthreads; i++) {
+        ThreadQueue_destruct(&obj->queues[i]);
+    }
+    free(obj->queues);
 }
 
 
-size_t TestsDispatcher_get_ordinal(TestsDispatcher *obj)
+/////////////////////////////////////////////
+///// TestsBattery class implementation /////
+/////////////////////////////////////////////
+
+size_t TestsBattery_ntests(const TestsBattery *obj)
 {
-    size_t ord;
-    MUTEX_LOCK(tests_dispatcher_mutex)
-    ord = obj->ord;
-    if (obj->ord < obj->ntests) {
-        obj->ord++;        
-    } else {
-        ord = SIZE_MAX;
-    }
-    MUTEX_UNLOCK(tests_dispatcher_mutex)
-    return ord;
+    size_t ntests;
+    for (ntests = 0; obj->tests[ntests].run != NULL; ntests++) { }
+    return ntests;
 }
 
 
@@ -601,30 +667,29 @@ static ThreadRetVal THREADFUNC_SPEC battery_thread(void *data)
     ThreadObj thrd = ThreadObj_current();
     th_data->intf->printf("vvvvvvvvvv Thread %u (ID %llu) started vvvvvvvvvv\n",
         thrd.ord, (unsigned long long) thrd.id);
-    GeneratorState obj = GeneratorState_create(th_data->gi, th_data->intf);
-    for (size_t ord = TestsDispatcher_get_ordinal(th_data);
-        ord < th_data->ntests;
-        ord = TestsDispatcher_get_ordinal(th_data)) {
-        size_t ind = th_data->inds[ord];
+    ThreadQueue *queue = &th_data->queues[thrd.ord];
+    for (TestIndex ti = ThreadQueue_pop_front(queue);
+        ti.ind < th_data->ntests;
+        ti = ThreadQueue_pop_front(queue))
+    {
         th_data->intf->printf(
             "vvvvv Thread %u: test #%lld: %s (%lld of %lld) started vvvvv\n",
             thrd.ord,
-            (long long) ind + 1, bat->tests[ind].name,
-            (long long) ord + 1, (long long) th_data->ntests);
-        th_data->results[ind] = TestDescription_run(&bat->tests[ind], &obj);
-        th_data->res_thrd_ord[ind] = thrd.ord;
+            (long long) ti.ind + 1, bat->tests[ti.ind].name,
+            (long long) ti.ord + 1, (long long) th_data->ntests);
+        th_data->results[ti.ind] = TestDescription_run(&bat->tests[ti.ind], &queue->gen);
+        th_data->res_thrd_ord[ti.ind] = thrd.ord;
         th_data->intf->printf(
             "^^^^^ Thread %u: test #%lld: %s (%lld of %lld) finished ^^^^^\n",
             thrd.ord,
-            (long long) ind + 1, bat->tests[ind].name,
-            (long long) ord + 1, (long long) th_data->ntests);
-        th_data->results[ind].name = bat->tests[ind].name;
-        th_data->results[ind].id = (unsigned int) (ind + 1);
-        th_data->results[ind].thread_id = thrd.ord;
+            (long long) ti.ind + 1, bat->tests[ti.ind].name,
+            (long long) ti.ord + 1, (long long) th_data->ntests);
+        th_data->results[ti.ind].name = bat->tests[ti.ind].name;
+        th_data->results[ti.ind].id = (unsigned int) (ti.ind + 1);
+        th_data->results[ti.ind].thread_id = thrd.ord;
     }
     th_data->intf->printf("^^^^^^^^^^ Thread %u (ID %llu) finished ^^^^^^^^^^\n",
         thrd.ord, (unsigned long long) thrd.id);
-    GeneratorState_destruct(&obj, th_data->intf);
     return 0;
 }
 
@@ -637,12 +702,12 @@ static void TestsBattery_run_threads(const TestsBattery *bat,
     unsigned int nthreads, TestResults *results, ReportType rtype)
 {
     TestsDispatcher tdisp;
-    TestsDispatcher_init(&tdisp, bat, gen, intf, results, 1);
+    TestsDispatcher_init(&tdisp, bat, gen, intf, nthreads, results, 1);
     // Run threads
     init_thread_dispatcher();
     ThreadObj *thrd = calloc(sizeof(ThreadObj), nthreads);
     for (unsigned int i = 0; i < nthreads; i++) {
-        thrd[i] = ThreadObj_create(battery_thread, &tdisp, i + 1);
+        thrd[i] = ThreadObj_create(battery_thread, &tdisp, i);
     }
     // Get data from threads
     for (size_t i = 0; i < nthreads; i++) {

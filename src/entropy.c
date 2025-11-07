@@ -380,6 +380,7 @@ uint64_t call_rdseed()
     return rd;
 }
 
+
 uint64_t cpuclock(void)
 {
     return __rdtsc();
@@ -536,6 +537,59 @@ typedef union {
 } EntropyBuffer;
 
 
+/**
+ * @brief Initialize the seed generator using existing 256-bit key
+ * and 64-bit nonce.
+ */
+void Entropy_init_from_key(Entropy *obj, const uint32_t *key, uint64_t nonce)
+{
+    ChaCha20State_init(&obj->gen, key);
+    ChaCha20State_set_nonce(&obj->gen, nonce);
+    obj->slog_len = 1 << 8;
+    obj->slog_maxlen = 1 << 20;
+    obj->slog = calloc(obj->slog_len, sizeof(SeedLogEntry));
+    obj->slog_pos = 0;
+    fprintf(stderr, "Entropy pool (seed generator) initialized\n");
+    fprintf(stderr, "ChaCha20 initial state\n");
+    for (size_t i = 0; i < 4; i++) {
+        for (size_t j = 0; j < 4; j++) {
+            size_t ind = 4 * i + j;
+            fprintf(stderr, "%.8lX ", (unsigned long) obj->gen.x[ind]);
+        }
+        fprintf(stderr, "\n");
+    }
+    for (size_t i = 0; i < 4; i++) {
+        fprintf(stderr, "Output %d: 0x%16.16llX\n",
+            (int) i, (unsigned long long) ChaCha20State_next64(&obj->gen));
+    }
+}
+
+/**
+ * @brief Initialize the seed generator using some text seed string.
+ * @details The input text seed will be sent to the Blake2s hash function
+ * and the obtained 256-bit hash will be used as a key for ChaCha20.
+ */
+void Entropy_init_from_textseed(Entropy *obj, const char *seed, size_t len)
+{
+    static const uint64_t nonce = 0x90ABCDEF12345678;
+    uint8_t key_bytes[32];
+    uint32_t key_words[8];
+    fprintf(stderr, "Initializing from a user-defined text seed\n");
+    fprintf(stderr, "  Seed value: %s\n", seed);
+    fprintf(stderr, "  Seed size:  %u byte(s)\n", (unsigned int) len);
+    blake2s(key_bytes, 32, NULL, 0, seed, len);
+    // A portable (LE/BE-invariant) converation of bytes to words.
+    for (size_t i = 0; i < 8; i++) {
+        key_words[i] =
+            ( (uint32_t) key_bytes[4*i]           ) |
+            ( (uint32_t) key_bytes[4*i + 1] << 8  ) |
+            ( (uint32_t) key_bytes[4*i + 2] << 16 ) |
+            ( (uint32_t) key_bytes[4*i + 3] << 24 );
+    }    
+    Entropy_init_from_key(obj, key_words, nonce);
+}
+
+
 void Entropy_init(Entropy *obj)
 {
     EntropyBuffer *ent_buf = calloc(1, sizeof(EntropyBuffer));
@@ -572,26 +626,8 @@ void Entropy_init(Entropy *obj)
     blake2s(key, 32, NULL, 0, &ent_buf->u8[0], 128);
     free(ent_buf);
     // Initialize the seed generator
-    ChaCha20State_init(&obj->gen, key);
     uint64_t nonce = timestamp ^ (cpu << 40);
-    ChaCha20State_set_nonce(&obj->gen, nonce);
-    obj->slog_len = 1 << 8;
-    obj->slog_maxlen = 1 << 20;
-    obj->slog = calloc(obj->slog_len, sizeof(SeedLogEntry));
-    obj->slog_pos = 0;
-    fprintf(stderr, "Entropy pool (seed generator) initialized\n");
-    fprintf(stderr, "ChaCha20 initial state\n");
-    for (size_t i = 0; i < 4; i++) {
-        for (size_t j = 0; j < 4; j++) {
-            size_t ind = 4 * i + j;
-            fprintf(stderr, "%.8lX ", (unsigned long) obj->gen.x[ind]);
-        }
-        fprintf(stderr, "\n");
-    }
-    for (size_t i = 0; i < 4; i++) {
-        fprintf(stderr, "Output %d: 0x%16.16llX\n",
-            (int) i, (unsigned long long) ChaCha20State_next64(&obj->gen));
-    }
+    Entropy_init_from_key(obj, key, nonce);
 }
 
 void Entropy_free(Entropy *obj)

@@ -98,6 +98,8 @@ static inline int Entropy_is_init(const Entropy *obj)
 
 
 void Entropy_init(Entropy *obj);
+void Entropy_init_from_key(Entropy *obj, const uint32_t *key, uint64_t nonce);
+void Entropy_init_from_textseed(Entropy *obj, const char *seed, size_t len);
 void Entropy_free(Entropy *obj);
 uint64_t Entropy_seed64(Entropy *obj, uint64_t thread_id);
 void Entropy_print_seeds_log(const Entropy *obj, FILE *fp);

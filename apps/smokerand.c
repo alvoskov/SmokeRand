@@ -114,13 +114,105 @@ static unsigned int get_default_nthreads(unsigned int *ncores)
     return nthreads;
 }
 
+
+typedef BatteryExitCode (*ArgValueCallback) (SmokeRandSettings *obj, const char *argvalue);
+
+
+#define DEFINE_NUMARG_CALLBACK(field, argname, condition) \
+static BatteryExitCode field##_callback(SmokeRandSettings *obj, const char *argvalue) \
+{ \
+    int argval = atoi(argvalue); \
+    if (condition) { \
+        obj->field = (unsigned int) argval; \
+        return BATTERY_PASSED; \
+    } else { \
+        fprintf(stderr, "Invalid value of argument '%s'\n", argname); \
+        return BATTERY_ERROR; \
+    } \
+}
+
+typedef struct {
+    const char *name;
+    ArgValueCallback callback;
+} ArgumentEntry;
+
+
+static BatteryExitCode process_argument(SmokeRandSettings *obj,
+    const ArgumentEntry *args,
+    const char *argname, const char *argvalue)
+{
+    for (const ArgumentEntry *e = args; e->name != NULL; e++) {
+        if (!strcmp(e->name, argname)) {
+            if (e->callback(obj, argvalue) == BATTERY_PASSED) {
+                return BATTERY_PASSED;
+            } else {
+                return BATTERY_ERROR;
+            }
+        }
+    }
+    return BATTERY_FAILED;
+}
+
+
+
+DEFINE_NUMARG_CALLBACK(nthreads, "nthreads", argval > 0)
+DEFINE_NUMARG_CALLBACK(testid, "testid", argval > 0)
+DEFINE_NUMARG_CALLBACK(maxlen_log2, "maxlen_log2", argval < 12 || argval > 63)
+
+
+static BatteryExitCode SmokeRandSettings_numarg_load(SmokeRandSettings *obj,
+    const char *argname, const char *argvalue)
+{
+    static const ArgumentEntry args[] = {
+        {"nthreads", nthreads_callback},
+        {"testid",   testid_callback},
+        {"maxlen_log2", maxlen_log2_callback},
+        {NULL, NULL}
+    };
+    return process_argument(obj, args, argname, argvalue);
+}
+
+
+static BatteryExitCode SmokeRandSettings_txtarg_load(SmokeRandSettings *obj,
+    const char *argname, const char *argvalue)
+{
+    if (!strcmp(argname, "param")) {
+        set_cmd_param(argvalue);
+        return BATTERY_PASSED;
+    } else if (!strcmp(argname, "filter")) {
+        obj->filter = GeneratorFilter_from_name(argvalue);
+        if (obj->filter == FILTER_UNKNOWN) {
+            fprintf(stderr, "Unknown filter %s\n", argvalue);
+            return BATTERY_ERROR;
+        } else {
+            return BATTERY_PASSED;
+        }
+    } else if (!strcmp(argname, "seed")) {
+        set_entropy_textseed(argvalue, strlen(argvalue));
+        return BATTERY_PASSED;
+    } else {
+        return BATTERY_FAILED;
+    }
+}
+
+
+#define PROCESS_ARGUMENTS_BLOCK(loader_func) \
+{ \
+    BatteryExitCode code = loader_func(obj, argname, eqpos + 1); \
+    if (code == BATTERY_ERROR) { \
+        return BATTERY_ERROR; \
+    } else if (code == BATTERY_PASSED) { \
+        continue; \
+    } \
+}
+
 /**
  * @brief Process command line arguments to extract settings.
  * @param[out] obj  Output buffer for parsed settings.
  * @param[in]  argc Number of command line arguments (from `main` function).
  * @param[in]  argv Values of command line arguments (from `main` function).
  */
-int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
+BatteryExitCode SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
 {
     obj->nthreads = 1;
     obj->testid = TESTS_ALL;
@@ -129,7 +221,6 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
     obj->maxlen_log2 = 0;
     for (int i = 3; i < argc; i++) {
         char argname[32];
-        int argval;
         char *eqpos = strchr(argv[i], '=');
         size_t len = strlen(argv[i]);
         if (!strcmp(argv[i], "--threads")) {
@@ -145,7 +236,7 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
         }
         if (len < 3 || (argv[i][0] != '-' || argv[i][1] != '-') || eqpos == NULL) {
             fprintf(stderr, "Argument '%s' should have --argname=argval layout\n", argv[i]);
-            return 1;
+            return BATTERY_ERROR;
         }
         ptrdiff_t name_len = (eqpos - argv[i]) - 2;
         if (name_len >= 32) name_len = 31;
@@ -155,46 +246,16 @@ int SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
         } else {
             argname[0] = '\0';
         }
-        // Text arguments processing
-        if (!strcmp(argname, "param")) {
-            set_cmd_param(eqpos + 1);
-            continue;
-        } else if (!strcmp(argname, "filter")) {
-            obj->filter = GeneratorFilter_from_name(eqpos + 1);
-            if (obj->filter == FILTER_UNKNOWN) {
-                fprintf(stderr, "Unknown filter %s\n", eqpos + 1);
-                return 1;
-            }
-            continue;
-        }
-        // Numerical arguments processing
-        argval = atoi(eqpos + 1);
-        if (!strcmp(argname, "nthreads")) {
-            if (argval > 0) {
-                obj->nthreads = (unsigned int) argval;
-            } else {
-                fprintf(stderr, "Invalid value of argument '%s'\n", argname);
-                return 1;
-            }
-        } else if (!strcmp(argname, "testid")) {
-            if (argval > 0) {
-                obj->testid = (unsigned int) argval;
-            } else {                
-                fprintf(stderr, "Invalid value of argument '%s'\n", argname);
-                return 1;
-            }
-        } else if (!strcmp(argname, "maxlen_log2")) {
-            if (argval < 12 || argval > 63) {
-                fprintf(stderr, "Invalid value of argument '%s'\n", argname);
-                return 1;
-            }
-            obj->maxlen_log2 = (unsigned int) argval;
-        } else {
-            fprintf(stderr, "Unknown argument '%s'\n", argname);
-            return 1;
-        }
+        // Text arguments
+        PROCESS_ARGUMENTS_BLOCK(SmokeRandSettings_txtarg_load);
+        // Numerical arguments
+        PROCESS_ARGUMENTS_BLOCK(SmokeRandSettings_numarg_load);
+        // Unknown argument
+        fprintf(stderr, "Unknown argument '%s'\n", argname);
+        return BATTERY_ERROR;
+
     }
-    return 0;
+    return BATTERY_PASSED;
 }
 
 

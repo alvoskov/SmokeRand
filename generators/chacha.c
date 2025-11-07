@@ -248,7 +248,7 @@ MAKE_GET_BITS_WRAPPERS(c99ctr32);
  */
 static void print_mat16(const CallerAPI *intf, uint32_t *x)
 {
-    for (int i = 0; i < 16; i++) {
+    for (size_t i = 0; i < 16; i++) {
         intf->printf("%10.8X ", x[i]);
         if ((i + 1) % 4 == 0)
             intf->printf("\n");
@@ -274,14 +274,14 @@ static int run_self_test_scalar(const CallerAPI *intf, void (*blockfunc)(ChaChaS
     };
     ChaChaState obj;
     ChaCha_init(&obj, GEN_NROUNDS_FULL, x_init); // 20 rounds
-    for (int i = 0; i < 12; i++) {
+    for (size_t i = 0; i < 12; i++) {
         obj.x.w32[i + 4] = x_init[i];
     }
     intf->printf("Input:\n"); print_mat16(intf, obj.x.w32);
     blockfunc(&obj);
     intf->printf("Output (real):\n"); print_mat16(intf, obj.out.w32);
     intf->printf("Output (reference):\n"); print_mat16(intf, out_final);
-    for (int i = 0; i < 16; i++) {
+    for (size_t i = 0; i < 16; i++) {
         if (out_final[i] != obj.out.w32[i]) {
             intf->printf("TEST FAILED!\n");
             return 0;
@@ -296,10 +296,8 @@ static void *create_scalar(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     ChaChaState *obj = intf->malloc(sizeof(ChaChaState));
     uint32_t seeds[8];
-    for (int i = 0; i < 4; i++) {
-        uint64_t s = intf->get_seed64();
-        seeds[2*i] = (uint32_t) (s & 0xFFFFFFF);
-        seeds[2*i + 1] = (uint32_t) (s >> 32);
+    for (size_t i = 0; i < 4; i++) {
+        seed64_to_2x32(intf, &seeds[2*i], &seeds[2*i + 1]);
     }
     ChaCha_init(obj, GEN_NROUNDS, seeds);
     (void) gi;
@@ -616,9 +614,7 @@ static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
     ChaChaVecState *obj = intf->malloc(sizeof(ChaChaVecState));
     uint32_t seeds[8];
     for (size_t i = 0; i < 4; i++) {
-        uint64_t s = intf->get_seed64();
-        seeds[2*i] = (uint32_t) (s & 0xFFFFFFF);
-        seeds[2*i + 1] = (uint32_t) (s >> 32);
+        seed64_to_2x32(intf, &seeds[2*i], &seeds[2*i + 1]);
     }
     ChaChaVec_init(obj, GEN_NROUNDS, seeds);
     (void) gi;
@@ -686,7 +682,7 @@ int run_self_test_vector(const CallerAPI *intf)
     ChaChaVec_block(&obj);
     intf->printf("Output (real):\n"); print_matx(intf, obj.out.w32, 8, 64);
     intf->printf("Output (reference):\n"); print_matx(intf, out_final, 4, 16);
-    for (int i = 0; i < 64; i++) {
+    for (size_t i = 0; i < 64; i++) {
         if (out_final[mat32_map[i]] != obj.out.w32[i]) {
             intf->printf("TEST FAILED!\n");
             return 0;
