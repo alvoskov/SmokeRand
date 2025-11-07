@@ -20,6 +20,9 @@ latex/
 *.tgt
 *.map
 
+# DJGPP
+.dxe
+
 # Prerequisites
 *.d
 
