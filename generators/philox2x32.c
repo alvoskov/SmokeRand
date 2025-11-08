@@ -174,7 +174,7 @@ static void *create(const CallerAPI *intf)
     Philox2x32State *obj = intf->malloc(sizeof(Philox2x32State));
     k = intf->get_seed32();
     Philox2x32State_init(obj, k);
-    return (void *) obj;
+    return obj;
 }
 
 

@@ -182,12 +182,10 @@ static void *create(const CallerAPI *intf)
     uint32_t k[Nw / 2];
     Philox32State *obj = intf->malloc(sizeof(Philox32State));
     for (size_t i = 0; i < Nw / 2; i += 2) {
-        uint64_t seed = intf->get_seed64();
-        k[i] = (uint32_t) (seed);
-        k[i + 1] = (uint32_t) (seed >> 32);
+        seed64_to_2x32(intf, &k[i], &k[i + 1]);
     }
     Philox32State_init(obj, k);
-    return (void *) obj;
+    return obj;
 }
 
 

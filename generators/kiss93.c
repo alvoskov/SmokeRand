@@ -18,31 +18,33 @@ PRNG_CMODULE_PROLOG
  * @brief KISS93 PRNG state.
  */
 typedef struct {
-    uint32_t S1;
-    uint32_t S2;
-    uint32_t S3;
+    uint32_t lcg;
+    uint32_t xs1;
+    uint32_t xs2;
 } KISS93State;
 
 static inline uint64_t get_bits_raw(void *state)
 {
     KISS93State *obj = state;
-    obj->S1 = 69069 * obj->S1 + 23606797;
-    uint32_t b = obj->S2 ^ (obj->S2 << 17);
-    obj->S2 = (b >> 15) ^ b;
-    b = ((obj->S3 << 18) ^ obj->S3) & 0x7fffffffU;
-    obj->S3 = (b >> 13) ^ b;
-    uint32_t u = obj->S1 + obj->S2 + obj->S3;
+    // LCG
+    obj->lcg = 69069U * obj->lcg + 23606797U;
+    // Some LFSR
+    uint32_t b = obj->xs1 ^ (obj->xs1 << 17);
+    obj->xs1 = (b >> 15) ^ b;
+    b = ((obj->xs2 << 18) ^ obj->xs2) & 0x7fffffffU;
+    obj->xs2 = (b >> 13) ^ b;
+    const uint32_t u = obj->lcg + obj->xs1 + obj->xs2;
     return u;
 }
 
 
 static void *create(const CallerAPI *intf)
 {
+    // Default seeds: 12345, 6789, 111213
     KISS93State *obj = intf->malloc(sizeof(KISS93State));
-    obj->S1 = 12345;
-    obj->S2 = 6789;
-    obj->S3 = (uint32_t) intf->get_seed64();// Default is 111213;
-    return (void *) obj;
+    seed64_to_2x32(intf, &obj->lcg, &obj->xs1);
+    obj->xs2 = 111213;
+    return obj;
 }
 
 MAKE_UINT32_PRNG("KISS93", NULL)
