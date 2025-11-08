@@ -42,7 +42,7 @@ static inline uint8_t get_bits8(Xabc8State *obj)
 {
     obj->a ^= (uint8_t) (obj->c ^ (obj->x += 151));
     obj->b += obj->a;
-    obj->c = (uint8_t) ((obj->c + ((obj->b << 7) | (obj->b >> 1))) ^ obj->a);
+    obj->c = (uint8_t) ( (obj->c + rotl8(obj->b, 7)) ^ obj->a );
     return obj->c ^ obj->b;
 }
 

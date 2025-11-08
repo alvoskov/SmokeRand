@@ -362,6 +362,13 @@ to the PRNG output, management of the final report layout etc.
 .B \-\-report\-brief
 The final report will include only failed test.
 .TP
+.B \-\-seed=\fIvalue\fR
+Seeds the interal seed generator using the \fIvalue\fR string supplied by the
+user. It is transformed by Blake2s hash function and is used as a 256-bit key
+for the ChaCha20 stream cipher based PRNG used as a seed generator. Test battery
+run results are completely determined by the seed \fIvalue\fR, the tested PRNG
+and the number of threads (see the \fBthreads\fR key).
+.TP
 .B \-\-threads=\fIn\fR
 Run battery in multithreaded mode using \fIn\fR threads.
 .TP
