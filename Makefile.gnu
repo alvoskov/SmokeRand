@@ -97,12 +97,12 @@ endif
 # Core library
 CORE_LIB = $(LIBDIR)/libsmokerand_core.a
 LIB_SOURCES = $(addprefix $(SRCDIR)/, $(LIB_SOURCES_EXTRA) \
-    core.c coretests.c \
+    base64.c core.c coretests.c \
     blake2s.c entropy.c extratests.c fileio.c lineardep.c hwtests.c specfuncs.c \
     threads_intf.c)
 LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, $(LIB_HEADERS_EXTRA) \
     apidefs.h cinterface.h coredefs.h int128defs.h x86exts.h ../smokerand_core.h \
-    core.h coretests.h \
+    base64.h core.h coretests.h \
     blake2s.h entropy.h extratests.h fileio.h lineardep.h hwtests.h specfuncs.h \
     threads_intf.h )
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
@@ -119,7 +119,7 @@ BATLIB_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_express.h bat_brief.h bat_defau
 BATLIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(BATLIB_SOURCES)))
 # Executables
 EXEC_NAMES = smokerand sr_tiny calibrate_linearcomp calibrate_dc6 \
-    test_crand test_funcs test_rdseed
+    test_base64 test_crand test_funcs test_rdseed
 EXEC_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXEC_NAMES)))
 EXECXX_NAMES = test_cpp11
 EXECXX_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXECXX_NAMES)))
@@ -153,6 +153,9 @@ $(BINDIR)/calibrate_dc6$(EXE): $(OBJDIR)/calibrate_dc6.o $(CORE_LIB) $(BAT_LIB)
 	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
 $(BINDIR)/calibrate_linearcomp$(EXE): $(OBJDIR)/calibrate_linearcomp.o $(CORE_LIB)
+	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
+
+$(BINDIR)/test_base64$(EXE): $(OBJDIR)/test_base64.o $(CORE_LIB) $(BAT_LIB)
 	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
 $(BINDIR)/test_cpp11$(EXE): $(OBJDIR)/test_cpp11.o $(CORE_LIB) $(BAT_LIB)

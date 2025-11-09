@@ -29,6 +29,7 @@
 #endif
 
 #include "smokerand/entropy.h"
+#include "smokerand/base64.h"
 #include "smokerand/blake2s.h"
 #include "smokerand/coredefs.h"
 #include <time.h>
@@ -40,6 +41,8 @@
     #include <sys/farptr.h>
 #endif
 
+
+#define CHACHA_DEFAULT_NONCE 0x90ABCDEF12345678
 
 /**
  * @brief rrmxmx hash from modified SplitMix PRNG.
@@ -572,7 +575,6 @@ void Entropy_init_from_key(Entropy *obj, const uint32_t *key, uint64_t nonce)
  */
 void Entropy_init_from_textseed(Entropy *obj, const char *seed, size_t len)
 {
-    static const uint64_t nonce = 0x90ABCDEF12345678;
     uint8_t key_bytes[32];
     uint32_t key_words[8];
     fprintf(stderr, "Initializing from a user-defined text seed\n");
@@ -589,8 +591,30 @@ void Entropy_init_from_textseed(Entropy *obj, const char *seed, size_t len)
             ( (uint32_t) key_bytes[4*i + 2] << 8  ) |
             ( (uint32_t) key_bytes[4*i + 3] << 0  );
     }    
-    Entropy_init_from_key(obj, key_words, nonce);
+    Entropy_init_from_key(obj, key_words, CHACHA_DEFAULT_NONCE);
 }
+
+
+
+int Entropy_init_from_base64_seed(Entropy *obj, const char *seed)
+{
+    fprintf(stderr, "Initializing from a user-defined base64 seed\n");
+    fprintf(stderr, "  Seed value: %s\n", seed);
+    size_t nwords;
+    uint32_t *key_words = sr_base64_to_u32_bigendian(seed, &nwords);
+    if (key_words == NULL) {
+        fprintf(stderr, "  Error: base64 input is corrupted\n");
+        return 0;
+    } else if (nwords != 8) {
+        fprintf(stderr, "  Error: base64 input is shorter/longer than 256 bits\n");
+        free(key_words);
+        return 0;
+    }
+    Entropy_init_from_key(obj, key_words, CHACHA_DEFAULT_NONCE);
+    free(key_words);
+    return 1;
+}
+
 
 
 void Entropy_init(Entropy *obj)
@@ -629,8 +653,7 @@ void Entropy_init(Entropy *obj)
     blake2s(key, 32, NULL, 0, &ent_buf->u8[0], 128);
     free(ent_buf);
     // Initialize the seed generator
-    uint64_t nonce = timestamp ^ (cpu << 40);
-    Entropy_init_from_key(obj, key, nonce);
+    Entropy_init_from_key(obj, key, CHACHA_DEFAULT_NONCE);
 }
 
 void Entropy_free(Entropy *obj)
@@ -638,6 +661,16 @@ void Entropy_free(Entropy *obj)
     free(obj->slog);
     obj->slog = NULL;
 }
+
+/**
+ * @brief Returns the pointer to the 256-bit ChaCha20 key used for generator
+ * of seeds.
+ */
+const uint32_t *Entropy_get_key(const Entropy *obj)
+{
+    return &(obj->gen.x[4]);
+}
+
 
 /**
  * @brief Returns 64-bit random seed. Hardware RNG is used
