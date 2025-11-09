@@ -38,6 +38,7 @@ CallerAPI CallerAPI_init_mthr(void);
 void CallerAPI_free(void);
 void set_cmd_param(const char *param);
 void set_entropy_textseed(const char *seed, size_t len);
+int set_entropy_base64_seed(const char *seed);
 void set_use_stderr_for_printf(int val);
 
 /**

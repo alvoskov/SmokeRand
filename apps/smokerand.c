@@ -85,7 +85,8 @@ GeneratorFilter GeneratorFilter_from_name(const char *name)
 }
 
 typedef struct {
-    unsigned int nthreads;
+    unsigned int nthreads; ///< From `--threads` or `--nthreads` keys.
+    unsigned int nthreads_from_seed; ///< From base64 seed (`seed=_` key)
     unsigned int testid;
     unsigned int maxlen_log2; ///< log2(len) for stdout length in bytes
     GeneratorFilter filter;
@@ -173,6 +174,18 @@ static BatteryExitCode SmokeRandSettings_numarg_load(SmokeRandSettings *obj,
     return process_argument(obj, args, argname, argvalue);
 }
 
+static inline int char_to_hex_digit(char c)
+{
+    if ('0' <= c && c <= '9') {
+        return (int) (c - '0');
+    } else if ('A' <= c && c <= 'F') {
+        return (int) (c - 'A') + 10;
+    } else if ('a' <= c && c <= 'f') {
+        return (int) (c - 'a') + 10;
+    } else {
+        return -1;
+    }
+}
 
 static BatteryExitCode SmokeRandSettings_txtarg_load(SmokeRandSettings *obj,
     const char *argname, const char *argvalue)
@@ -189,7 +202,24 @@ static BatteryExitCode SmokeRandSettings_txtarg_load(SmokeRandSettings *obj,
             return BATTERY_PASSED;
         }
     } else if (!strcmp(argname, "seed")) {
-        set_entropy_textseed(argvalue, strlen(argvalue));
+        if (strlen(argvalue) > 5 && argvalue[0] == '_') {            
+            if (argvalue[3] != '_') {
+                fprintf(stderr, "Invalid format of _ seed\n");
+                return BATTERY_ERROR;
+            }
+            int d1 = char_to_hex_digit(argvalue[1]);
+            int d0 = char_to_hex_digit(argvalue[2]);
+            if (d0 < 0 || d1 < 0) {
+                fprintf(stderr, "Invalid format of number of threads in the _ seed\n");
+                return BATTERY_ERROR;
+            }
+            obj->nthreads_from_seed = (unsigned int) (d1 * 16 + d0);
+            if (!set_entropy_base64_seed(argvalue + 4)) {
+                return BATTERY_ERROR;
+            }
+        } else {            
+            set_entropy_textseed(argvalue, strlen(argvalue));
+        }
         return BATTERY_PASSED;
     } else {
         return BATTERY_FAILED;
@@ -207,6 +237,17 @@ static BatteryExitCode SmokeRandSettings_txtarg_load(SmokeRandSettings *obj,
     } \
 }
 
+
+void SmokeRandSettings_init(SmokeRandSettings *obj)
+{
+    obj->nthreads = 1;
+    obj->nthreads_from_seed = 0;
+    obj->testid = TESTS_ALL;
+    obj->filter = FILTER_NONE;
+    obj->report_type = REPORT_FULL;
+    obj->maxlen_log2 = 0;
+}
+
 /**
  * @brief Process command line arguments to extract settings.
  * @param[out] obj  Output buffer for parsed settings.
@@ -215,11 +256,7 @@ static BatteryExitCode SmokeRandSettings_txtarg_load(SmokeRandSettings *obj,
  */
 BatteryExitCode SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *argv[])
 {
-    obj->nthreads = 1;
-    obj->testid = TESTS_ALL;
-    obj->filter = FILTER_NONE;
-    obj->report_type = REPORT_FULL;
-    obj->maxlen_log2 = 0;
+    SmokeRandSettings_init(obj);
     for (int i = 3; i < argc; i++) {
         char argname[32];
         char *eqpos = strchr(argv[i], '=');
@@ -255,6 +292,9 @@ BatteryExitCode SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *a
         fprintf(stderr, "Unknown argument '%s'\n", argname);
         return BATTERY_ERROR;
 
+    }
+    if (obj->nthreads_from_seed != 0) {
+        obj->nthreads = obj->nthreads_from_seed;
     }
     return BATTERY_PASSED;
 }

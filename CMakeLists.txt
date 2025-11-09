@@ -35,6 +35,7 @@ if (M_LIB)
 endif()
 
 add_library(smokerand_core
+    src/base64.c        include/smokerand/base64.h
     src/core.c          include/smokerand/core.h
     src/coretests.c     include/smokerand/coretests.h
     src/blake2s.c       include/smokerand/blake2s.h
@@ -80,7 +81,7 @@ target_include_directories(peparse PRIVATE include)
 target_link_libraries(peparse smokerand_core ${COMMON_LIBS})
 
 # d) Some tests
-set(TESTS calibrate_dc6 calibrate_linearcomp test_funcs test_rdseed)
+set(TESTS calibrate_dc6 calibrate_linearcomp test_base64 test_funcs test_rdseed)
 foreach(testname ${TESTS})
     add_executable(${testname} apps/${testname}.c)
     target_include_directories(${testname} PRIVATE include)

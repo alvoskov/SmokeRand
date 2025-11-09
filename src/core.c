@@ -9,6 +9,7 @@
  *
  * This software is licensed under the MIT license.
  */
+#include "smokerand/base64.h"
 #include "smokerand/core.h"
 #include "smokerand/entropy.h"
 #include "smokerand/specfuncs.h"
@@ -50,6 +51,12 @@ void set_entropy_textseed(const char *seed, size_t len)
 {
     Entropy_init_from_textseed(&entropy, seed, len);
 }
+
+int set_entropy_base64_seed(const char *seed)
+{
+    return Entropy_init_from_base64_seed(&entropy, seed);
+}
+
 
 ///////////////////////////////
 ///// Single-threaded API /////
@@ -937,7 +944,15 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
             bat->name, testid);
     }
     printf("Generator name:    %s\n", gen->name);
-    printf("Output size, bits: %d\n\n", (int) gen->nbits);
+    printf("Output size, bits: %d\n", (int) gen->nbits);
+    const uint32_t *seed_key = Entropy_get_key(&entropy);
+    char *seed_key_txt = sr_u32_bigendian_to_base64(seed_key, 8);
+    if (seed_key_txt != NULL) {
+        printf("Used seed:         _%.2X_%s\n\n", nthreads, seed_key_txt);
+        free(seed_key_txt);
+    } else {
+        printf("Used seed:         _%.2X_???\n\n", nthreads);
+    }
     TestResultsSummary summary =
         TestResults_print_report(results, nresults, toc - tic, rtype);
     free(results);
