@@ -6,6 +6,7 @@
 
 #include "smokerand/blake2s.h"
 #include "smokerand/coredefs.h"
+#include <stdio.h>
 
 // Little-endian byte access.
 static uint32_t b2s_get32(const void *src)
@@ -22,30 +23,26 @@ static inline void b2s_g(uint32_t *v,
     int a, int b, int c, int d,
     uint32_t x, uint32_t y)
 {
-    v[a] = v[a] + v[b] + x;
-    v[d] = rotr32(v[d] ^ v[a], 16);
-    v[c] = v[c] + v[d];
-    v[b] = rotr32(v[b] ^ v[c], 12);
-    v[a] = v[a] + v[b] + y;
-    v[d] = rotr32(v[d] ^ v[a], 8);
-    v[c] = v[c] + v[d];
-    v[b] = rotr32(v[b] ^ v[c], 7);
+    v[a] = v[a] + v[b] + x; v[d] = rotr32(v[d] ^ v[a], 16);
+    v[c] = v[c] + v[d];     v[b] = rotr32(v[b] ^ v[c], 12);
+    v[a] = v[a] + v[b] + y; v[d] = rotr32(v[d] ^ v[a], 8);
+    v[c] = v[c] + v[d];     v[b] = rotr32(v[b] ^ v[c], 7);
 }
 
 
-static inline void b2s_round(uint32_t *v, const uint32_t *m, int i)
+static inline void b2s_round(uint32_t *v, const uint32_t *m, size_t i)
 {
     static const uint8_t sigma[10][16] = {
-        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
-        { 14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3 },
-        { 11, 8, 12, 0, 5, 2, 15, 13, 10, 14, 3, 6, 7, 1, 9, 4 },
-        { 7, 9, 3, 1, 13, 12, 11, 14, 2, 6, 5, 10, 4, 0, 15, 8 },
-        { 9, 0, 5, 7, 2, 4, 10, 15, 14, 1, 11, 12, 6, 8, 3, 13 },
-        { 2, 12, 6, 10, 0, 11, 8, 3, 4, 13, 7, 5, 15, 14, 1, 9 },
-        { 12, 5, 1, 15, 14, 13, 4, 10, 0, 7, 6, 3, 9, 2, 8, 11 },
-        { 13, 11, 7, 14, 12, 1, 3, 9, 5, 0, 15, 4, 8, 6, 2, 10 },
-        { 6, 15, 14, 9, 11, 3, 0, 8, 12, 2, 13, 7, 1, 4, 10, 5 },
-        { 10, 2, 8, 4, 7, 6, 1, 5, 15, 11, 9, 14, 3, 12, 13, 0 }
+        { 0,   1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15 },
+        { 14, 10,  4,  8,  9, 15, 13,  6,  1, 12,  0,  2, 11,  7,  5,  3 },
+        { 11,  8, 12,  0,  5,  2, 15, 13, 10, 14,  3,  6,  7,  1,  9,  4 },
+        { 7,   9,  3,  1, 13, 12, 11, 14,  2,  6,  5, 10,  4,  0, 15,  8 },
+        { 9,   0,  5,  7,  2,  4, 10, 15, 14,  1, 11, 12,  6,  8,  3, 13 },
+        { 2,  12,  6, 10,  0, 11,  8,  3,  4, 13,  7,  5, 15, 14,  1,  9 },
+        { 12,  5,  1, 15, 14, 13,  4, 10,  0,  7,  6,  3,  9,  2,  8, 11 },
+        { 13, 11,  7, 14, 12,  1,  3,  9,  5,  0, 15,  4,  8,  6,  2, 10 },
+        { 6,  15, 14,  9, 11,  3,  0,  8, 12,  2, 13,  7,  1,  4, 10,  5 },
+        { 10,  2,  8,  4,  7,  6,  1,  5, 15, 11,  9, 14,  3, 12, 13,  0 }
     };
     b2s_g(v,  0, 4,  8, 12, m[sigma[i][ 0]], m[sigma[i][ 1]]);
     b2s_g(v,  1, 5,  9, 13, m[sigma[i][ 2]], m[sigma[i][ 3]]);
@@ -67,60 +64,78 @@ static const uint32_t blake2s_iv[8] =
 };
 
 /**
- * @brief Compression function. "last" flag indicates last block.
+ * @brief Reset 64-bit counter
  */
-static void blake2s_compress(blake2s_ctx *ctx, int last)
+static inline void blake2s_reset_counter(blake2s_state *obj)
 {
-    uint32_t v[16], m[16];
-
-    for (int i = 0; i < 8; i++) {       // init work variables
-        v[i] = ctx->h[i];
-        v[i + 8] = blake2s_iv[i];
-    }
-
-    v[12] ^= ctx->t[0];                 // low 32 bits of offset
-    v[13] ^= ctx->t[1];                 // high 32 bits
-    if (last)                           // last block flag set ?
-        v[14] = ~v[14];
-
-
-    for (int i = 0; i < 16; i++)        // get little-endian words
-        m[i] = b2s_get32(&ctx->b[4 * i]);
-
-    for (int i = 0; i < 10; i++)        // ten rounds
-        b2s_round(v, m, i);
-        
-    for (int i = 0; i < 8; i++)
-        ctx->h[i] ^= v[i] ^ v[i + 8];
+    obj->t[0] = 0; // Lower 32 bits
+    obj->t[1] = 0; // Higher 32 bits
 }
 
 /**
- * @brief Initialize the hashing context "ctx" with optional key "key".
+ * @brief Increment 64-bit counter
+ */
+static inline void blake2s_inc_counter(blake2s_state *obj, uint32_t inc)
+{
+    obj->t[0] += inc;
+    if (obj->t[0] < inc)
+        obj->t[1]++;
+}
+
+
+/**
+ * @brief Compression function. "last" flag indicates last block.
+ */
+static void blake2s_compress(blake2s_state *obj, int last)
+{
+    uint32_t m[16], v[16];
+
+    for (size_t i = 0; i < 8; i++) {    // init work variables
+        v[i] = obj->h[i];
+        v[i + 8] = blake2s_iv[i];
+    }
+
+    v[12] ^= obj->t[0]; // low 32 bits of offset
+    v[13] ^= obj->t[1]; // high 32 bits
+    if (last)           // last block flag set ?
+        v[14] = ~v[14];
+
+
+    for (size_t i = 0; i < 16; i++)     // get little-endian words
+        m[i] = b2s_get32(&obj->buf[4 * i]);
+
+    for (size_t i = 0; i < 10; i++)        // ten rounds
+        b2s_round(v, m, i);
+        
+    for (size_t i = 0; i < 8; i++)
+        obj->h[i] ^= v[i] ^ v[i + 8];
+}
+
+/**
+ * @brief Initialize the Blake2s state.
+ * @param outlen  The digest size in bytes
  * 1 <= outlen <= 32 gives the digest size in bytes.
  * Secret key (also <= 32 bytes) is optional (keylen = 0).
  */
-int blake2s_init(blake2s_ctx *ctx, size_t outlen,
-    const void *key, size_t keylen)     // (keylen=0: no key)
+int blake2s_init(blake2s_state *obj, size_t outlen,
+    const void *key, size_t keylen)
 {
-    if (outlen == 0 || outlen > 32 || keylen > 32)
-        return -1;                      // illegal parameters
-
-    for (size_t i = 0; i < 8; i++)      // state, "param block"
-        ctx->h[i] = blake2s_iv[i];
-    ctx->h[0] ^= 0x01010000 ^ ((uint32_t) keylen << 8) ^ (uint32_t) outlen;
-
-    ctx->t[0] = 0;                      // input count low word
-    ctx->t[1] = 0;                      // input count high word
-    ctx->c = 0;                         // pointer within buffer
-    ctx->outlen = outlen;
-
-    for (size_t i = keylen; i < 64; i++) // zero input block
-        ctx->b[i] = 0;
-    if (keylen > 0) {
-        blake2s_update(ctx, key, keylen);
-        ctx->c = 64;                    // at the end
+    // Check input parameters
+    if (outlen == 0 || outlen > BLAKE2S_OUTBYTES || keylen > BLAKE2S_KEYBYTES) {
+        return -1;
     }
-
+    for (size_t i = 0; i < 8; i++)      // state, "param block"
+        obj->h[i] = blake2s_iv[i];
+    obj->h[0] ^= 0x01010000 ^ ((uint32_t) keylen << 8) ^ (uint32_t) outlen;
+    blake2s_reset_counter(obj);
+    obj->c = 0;                         // pointer within buffer
+    obj->outlen = outlen;
+    for (size_t i = keylen; i < BLAKE2S_BLOCKBYTES; i++) // zero input block
+        obj->buf[i] = 0;
+    if (keylen > 0) {
+        blake2s_update(obj, key, keylen);
+        obj->c = BLAKE2S_BLOCKBYTES;    // at the end
+    }
     return 0;
 }
 
@@ -128,18 +143,15 @@ int blake2s_init(blake2s_ctx *ctx, size_t outlen,
 /**
  * @brief Add "inlen" bytes from "in" into the hash.
  */
-void blake2s_update(blake2s_ctx *ctx,
-    const void *in, size_t inlen)       // data bytes
+void blake2s_update(blake2s_state *obj, const void *in, size_t inlen)
 {
     for (size_t i = 0; i < inlen; i++) {
-        if (ctx->c == 64) {                  // buffer full ?
-            ctx->t[0] += (uint32_t) ctx->c;  // add counters
-            if (ctx->t[0] < ctx->c)     // carry overflow ?
-                ctx->t[1]++;            // high word
-            blake2s_compress(ctx, 0);   // compress (not last)
-            ctx->c = 0;                 // counter to zero
+        if (obj->c == BLAKE2S_BLOCKBYTES) { // buffer full ?
+            blake2s_inc_counter(obj, (uint32_t) obj->c);
+            blake2s_compress(obj, 0); // compress (not last)
+            obj->c = 0;               // counter to zero
         }
-        ctx->b[ctx->c++] = ((const uint8_t *) in)[i];
+        obj->buf[obj->c++] = ((const uint8_t *) in)[i];
     }
 }
 
@@ -147,20 +159,16 @@ void blake2s_update(blake2s_ctx *ctx,
  * @brief Generate the message digest (size given in init).
  * Result placed in "out".
  */
-void blake2s_final(blake2s_ctx *ctx, void *out)
+void blake2s_final(blake2s_state *obj, void *out)
 {
-    ctx->t[0] += (uint32_t) ctx->c;     // mark last block offset
-    if (ctx->t[0] < ctx->c)             // carry overflow
-        ctx->t[1]++;                    // high word
-
-    while (ctx->c < 64)                 // fill up with zeros
-        ctx->b[ctx->c++] = 0;
-    blake2s_compress(ctx, 1);           // final block flag = 1
-
-    // little endian convert and store
-    for (size_t i = 0; i < ctx->outlen; i++) {
+    blake2s_inc_counter(obj, (uint32_t) obj->c);
+    while (obj->c < BLAKE2S_BLOCKBYTES)
+        obj->buf[obj->c++] = 0;
+    blake2s_compress(obj, 1); // Final block flag = 1
+    // Digest output (little endian)
+    for (size_t i = 0; i < obj->outlen; i++) {
         ((uint8_t *) out)[i] =
-            (ctx->h[i >> 2] >> (8 * (i & 3))) & 0xFF;
+            (obj->h[i >> 2] >> (8 * (i & 3))) & 0xFF;
     }
 }
 
@@ -171,11 +179,107 @@ int blake2s(void *out, size_t outlen,
     const void *key, size_t keylen,
     const void *in, size_t inlen)
 {
-    blake2s_ctx ctx;
-    if (blake2s_init(&ctx, outlen, key, keylen))
+    blake2s_state obj;
+    if (blake2s_init(&obj, outlen, key, keylen)) {
         return -1;
-    blake2s_update(&ctx, in, inlen);
-    blake2s_final(&ctx, out);
+    }
+    blake2s_update(&obj, in, inlen);
+    blake2s_final(&obj, out);
     return 0;
 }
 
+
+static inline size_t blake2s_strlen(const char *str)
+{
+    size_t len = 0;
+    while (str[len] != '\0') { len++; }
+    return len;
+}
+
+
+
+// Deterministic sequences (Fibonacci generator).
+static void selftest_seq(uint8_t *out, size_t len, uint32_t seed)
+{
+    uint32_t a = 0xDEAD4BAD * seed; // prime
+    uint32_t b = 1;
+    for (size_t i = 0; i < len; i++) { // fill the buf
+        uint32_t t = a + b;
+        a = b;
+        b = t;
+        out[i] = (uint8_t) ((t >> 24) & 0xFF);
+    }
+}
+
+
+static int blake2s_selftest_prng()
+{
+    // Grand hash of hash results.
+    static const uint8_t blake2s_res[32] = {
+        0x6A, 0x41, 0x1F, 0x08, 0xCE, 0x25, 0xAD, 0xCD,
+        0xFB, 0x02, 0xAB, 0xA6, 0x41, 0x45, 0x1C, 0xEC,
+        0x53, 0xC5, 0x98, 0xB2, 0x4F, 0x4F, 0xC7, 0x87,
+        0xFB, 0xDC, 0x88, 0x79, 0x7F, 0x4C, 0x1D, 0xFE
+    };
+    // Parameter sets.
+    static const size_t b2s_md_len[4] = { 16, 20, 28, 32 };
+    static const size_t b2s_in_len[6] = { 0,  3,  64, 65, 255, 1024 };
+    uint8_t in[1024], md[32], key[32];
+    blake2s_state obj;
+
+    // 256-bit hash for testing.
+    if (blake2s_init(&obj, 32, NULL, 0)) {
+        return -1;
+    }
+
+    for (size_t i = 0; i < 4; i++) {
+        size_t outlen = b2s_md_len[i];
+        for (size_t j = 0; j < 6; j++) {
+            size_t inlen = b2s_in_len[j];
+
+            selftest_seq(in, inlen, (uint32_t) inlen);     // unkeyed hash
+            blake2s(md, outlen, NULL, 0, in, (uint32_t) inlen);
+            blake2s_update(&obj, md, outlen);   // hash the hash
+
+            selftest_seq(key, outlen, (uint32_t) outlen);  // keyed hash
+            blake2s(md, outlen, key, outlen, in, (uint32_t) inlen);
+            blake2s_update(&obj, md, outlen);   // hash the hash
+        }
+    }
+
+    // Compute and compare the hash of hashes.
+    blake2s_final(&obj, md);
+    for (size_t i = 0; i < 32; i++) {
+        if (md[i] != blake2s_res[i])
+            return -1;
+    }
+    return 0;
+}
+
+
+/**
+ * @brief An internal self-test for Blake2s-256.
+ */
+int blake2s_self_test(void)
+{
+    static const char in[] = "The quick brown fox jumps over the lazy dog|"
+        "The quick brown fox jumps over the lazy dog";
+    static const uint8_t ref[32] = {
+        0xad, 0xd6, 0x41, 0x6a,  0x0c, 0x13, 0xa8, 0x35,
+        0xf0, 0xba, 0xe3, 0x53,  0x69, 0x8b, 0x1c, 0x02,
+        0x52, 0x70, 0x34, 0xaa,  0xd4, 0x60, 0x08, 0x5d,
+        0x02, 0x74, 0x5b, 0x78,  0xc9, 0x65, 0x92, 0x84
+    };
+    uint8_t out[32];
+    blake2s_256(out, in, blake2s_strlen(in));
+    for (size_t i = 0; i < 32; i++) {
+        if (out[i] != ref[i])
+            return -1;
+    }
+
+    if (blake2s_selftest_prng() == -1) {
+        return -1;
+    }
+
+    return 0;
+}

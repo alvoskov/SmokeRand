@@ -13,6 +13,9 @@
  *    Preprint EPI-865-16-86, Yerevan, Jan. 1986
  * 4. K.Savvidy The MIXMAX random number generator. Comp. Phys. Commun.
  *    196 (2015), pp 161–165 http://dx.doi.org/10.1016/j.cpc.2015.06.003
+ * 5. K.Savvidy and G.Savvidy Spectrum and Entropy of C-systems. MIXMAX
+ *    random number generator Chaos, Solitons & Fractals, Volume 91,
+ *    (2016) pp. 33–38 http://dx.doi.org/10.1016/j.chaos.2016.05.003
  *
  * This modification returns lower 32 bits of its 61-bit output. It also
  * contains an internal self-test that is based on the values obtained
@@ -163,9 +166,11 @@ int iterate(rng_state_t* X)
 }
 
 #if (SPECIALMUL!=0)
-inline uint64_t MULWU (uint64_t k){ return (( (k)<<(SPECIALMUL) & M61) | ( (k) >> (BITS-SPECIALMUL))  )  ;}
+static inline uint64_t MULWU (uint64_t k) {
+    return (( (k)<<(SPECIALMUL) & M61) | ( (k) >> (BITS-SPECIALMUL))  );
+}
 #elif (SPECIALMUL==0)
-inline uint64_t MULWU (uint64_t k){ return 0;}
+static inline uint64_t MULWU (uint64_t k) { return 0; }
 #else
 #error SPECIALMUL not defined
 #endif
@@ -190,7 +195,6 @@ static uint64_t modadd(uint64_t foo, uint64_t bar)
 uint64_t iterate_raw_vec(uint64_t* Y, uint64_t sumtotOld)
 {
 	// operates with a raw vector, uses known sum of elements of Y
-	int i;
 #if (SPECIAL!=0)
     uint64_t temp2 = Y[1];
 #endif
@@ -198,21 +202,21 @@ uint64_t iterate_raw_vec(uint64_t* Y, uint64_t sumtotOld)
     Y[0] = ( tempV = sumtotOld);
     uint64_t sumtot = Y[0], ovflow = 0; // will keep a running sum of all new elements
 	tempP = 0;              // will keep a partial sum of all old elements
-	for (i=1; i<N; i++){
+	for (int i = 1; i < N; i++){
 #if (SPECIALMUL!=0)
         uint64_t tempPO = MULWU(tempP);
-        tempP = modadd(tempP,Y[i]);
+        tempP = modadd(tempP, Y[i]);
         tempV = MOD_MERSENNE(tempV + tempP + tempPO); // edge cases ?
 #else
-        tempP = modadd(tempP , Y[i]);
-        tempV = modadd(tempV , tempP);
+        tempP = modadd(tempP, Y[i]);
+        tempV = modadd(tempV, tempP);
 #endif
         Y[i] = tempV;
 		sumtot += tempV; if (sumtot < tempV) {ovflow++;}
 	}
 #if (SPECIAL!=0)
     temp2 = MOD_MULSPEC(temp2);
-    Y[2] = modadd( Y[2] , temp2 );
+    Y[2] = modadd(Y[2], temp2);
     sumtot += temp2; if (sumtot < temp2) {ovflow++;}
 #endif
 	return MOD_MERSENNE(MOD_MERSENNE(sumtot) + (ovflow <<3 ));
@@ -226,19 +230,17 @@ uint64_t iterate_raw_vec(uint64_t* Y, uint64_t sumtotOld)
  * with a bit swap is used to seed
  */
 void seed_spbox(rng_state_t* X, uint64_t seed)
-{ 
-    const uint64_t MULT64=6364136223846793005ULL; 
-    int i;
-    uint64_t sumtot=0,ovflow=0;
+{
+    const uint64_t MULT64 = 6364136223846793005ULL; 
+    uint64_t sumtot = 0, ovflow = 0;
     
-    if (seed == 0){
+    if (seed == 0) {
         seed = 0xDEADBEEF;
     }
 	
     uint64_t l = seed;
-
-    for (i=0; i < N; i++){
-        l*=MULT64; l = (l << 32) ^ (l>>32);
+    for (int i = 0; i < N; i++) {
+        l *= MULT64; l = (l << 32) ^ (l >> 32);
         X->V[i] = l & MERSBASE;
         sumtot += X->V[(i)]; if (sumtot < X->V[(i)]) {ovflow++;}
     }
@@ -260,8 +262,8 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     rng_state_t *obj = intf->malloc(sizeof(rng_state_t));
-	seed_spbox(obj, 123);
-    return (void *) obj;
+	seed_spbox(obj, intf->get_seed64());
+    return obj;
 }
 
 static int run_self_test(const CallerAPI *intf)
@@ -274,7 +276,8 @@ static int run_self_test(const CallerAPI *intf)
     };
 
     int is_ok = 1;
-    rng_state_t *obj = create(intf);
+    rng_state_t *obj = intf->malloc(sizeof(rng_state_t));
+	seed_spbox(obj, 123);
     for (int i = 0; i < 16; i++) {
         uint32_t x = (uint32_t) get_bits_raw(obj);
         intf->printf("%.8llX|%.8llX\n", x, x_ref[i]);

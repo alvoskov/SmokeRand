@@ -44,34 +44,6 @@
 
 #define CHACHA_DEFAULT_NONCE 0x90ABCDEF12345678
 
-/**
- * @brief rrmxmx hash from modified SplitMix PRNG.
- */
-static uint64_t mix_hash(uint64_t z)
-{
-    static uint64_t const M = 0x9fb21c651e98df25ULL;    
-    z ^= rotr64(z, 49) ^ rotr64(z, 24);
-    z *= M;
-    z ^= z >> 28;
-    z *= M;
-    return z ^ z >> 28;
-}
-
-
-/**
- * @brief A simple non-cryptographic hash for ASCIIZ strings.
- * @details It is a modification of DJB2 algorithm.
- */
-static uint64_t str_hash(const char *str)
-{
-    uint64_t hash = 0xB7E151628AED2A6BULL;
-    const unsigned char *bytes = (const unsigned char *) str;
-    for (unsigned char b = *bytes; b != 0; b = *bytes++) {
-        hash = (6906969069ULL * hash + 12345ULL) ^ b;
-    }
-    return mix_hash(hash);
-}
-
 //////////////////////////////////////////////
 ///// ChaCha20State class implementation /////
 //////////////////////////////////////////////
@@ -154,28 +126,7 @@ uint64_t ChaCha20State_next64(ChaCha20State *obj)
 }
 
 
-int blake2s_test(void)
-{
-    static const char in[] = "The quick brown fox jumps over the lazy dog|"
-        "The quick brown fox jumps over the lazy dog";
-    static const uint8_t ref[32] = {
-        0xad, 0xd6, 0x41, 0x6a,  0x0c, 0x13, 0xa8, 0x35,
-        0xf0, 0xba, 0xe3, 0x53,  0x69, 0x8b, 0x1c, 0x02,
-        0x52, 0x70, 0x34, 0xaa,  0xd4, 0x60, 0x08, 0x5d,
-        0x02, 0x74, 0x5b, 0x78,  0xc9, 0x65, 0x92, 0x84
-    };
-    uint8_t out[32];    
-    blake2s(out, 32, NULL, 0, in, strlen(in));
-    int is_ok = 1;
-    for (size_t i = 0; i < 32; i++) {
-        if (out[i] != ref[i])
-            is_ok = 0;
-    }
-    return is_ok;
-}
-
-
-int chacha20_test(void)
+int chacha20_self_test(void)
 {
     static const uint32_t x_init[] = { // Input values
         0x03020100,  0x07060504,  0x0b0a0908,  0x0f0e0d0c,
@@ -205,7 +156,7 @@ int chacha20_test(void)
 
 int entfuncs_test(void)
 {
-    return chacha20_test() && blake2s_test();
+    return chacha20_self_test() && (blake2s_self_test() != -1);
 }
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
@@ -265,12 +216,23 @@ uint32_t get_tick_count()
 }
 
 /**
+ * @brief 128-bit bit machine ID obtained from Blake2s-128 hash function.
+ * @details We don't care about little/big-endianness because this is
+ * also a characteristic of the computer.
+ */
+typedef union {
+    uint8_t u8[16];
+    uint64_t u64[2];
+} MachineID;
+
+/**
  * @brief Returns a hash made from an unique machine ID.
  */
-uint64_t get_machine_id()
+static MachineID get_machine_id()
 {
-    uint64_t machine_id = 0;
+    MachineID machine_id = {.u64 = {0, 0}};
     char value[64];
+    memset(value, 0, 64);
 #ifdef WINDOWS_PLATFORM
     // Windows: get machine GUID from registry
     DWORD size = 64, type = REG_SZ;
@@ -281,7 +243,7 @@ uint64_t get_machine_id()
     }
     if (RegQueryValueExA(key, "MachineGuid",
         NULL, &type, (LPBYTE)value, &size) == ERROR_SUCCESS) {
-        machine_id = str_hash(value);
+        blake2s_128(machine_id.u8, value, strlen(value));
     }
     //for (int i = 0; value[i] != 0; i++) {
     //    printf("%c", (unsigned char) value[i]);
@@ -289,20 +251,19 @@ uint64_t get_machine_id()
     RegCloseKey(key);
 #elif defined(__DJGPP__)
     // DJGPP DOS: calculate ROM BIOS checksum
-    (void) str_hash;
+    uint64_t bios_buf = malloc(8192, sizeof(uint64_t));
     for (int i = 0; i < 8192; i++) {
         uint64_t lo = _farpeekl(_dos_ds, 0xF0000 + 8*i);
         uint64_t hi = _farpeekl(_dos_ds, 0xF0000 + 8*i + 4);
-        uint64_t bios_data = (hi << 32) | lo;
-        machine_id = (6906969069ull * machine_id + 12345ull) ^ bios_data;
+        uint64_t bios_buf[i] = (hi << 32) | lo;
     }
+    blake2s_128(machine_id.u8, bios_buf, 65536u);
+    free(bios_buf);
     (void) value;
 #elif defined(DOS386_PLATFORM)
     // DOS: calculate ROM BIOS checksum
     uint64_t *bios_data = (uint64_t *) 0xF0000;
-    for (int i = 0; i < 8192; i++) {
-        machine_id = (6906969069ull * machine_id + 12345ull) ^ bios_data[i];
-    }
+    blake2s_128(machine.id, bios_data, 65536u);
     (void) value;
 #else
     // UNIX: try to find a file with machine ID
@@ -314,7 +275,9 @@ uint64_t get_machine_id()
         }
     }
     // Read the line with machine ID
-    machine_id = fgets(value, 64, fp) ? str_hash(value) : 0;
+    if (fgets(value, 64, fp)) {
+        blake2s_128(machine_id.u8, value, strlen(value));
+    }
     fclose(fp);
 #endif    
     return machine_id;
@@ -473,17 +436,17 @@ static int dos386_random_rdtsc(FILE *fp, uint64_t *out, size_t len)
 #endif
 
 /**
- * @brief Gains access to the system CSPRNG and XORs content of the output
- * buffer with output of this generator.
+ * @brief Gains access to the system CSPRNG and writes its output
+ * to the output buffer.
  * @param[out] out  Output buffer.
- * @param[in]  len  Size of output buffer in 64-bit words.
+ * @param[in]  len  Size of output buffer in bytes.
  * @return 0/1 - failure/success.
  */
-static int inject_rand(uint64_t *out, size_t len)
+static int fill_from_random_device(unsigned char *out, size_t len)
 {
 #ifdef WINDOWS_PLATFORM
     HCRYPTPROV hCryptProv;
-    DWORD nbytes = (DWORD) (sizeof(uint64_t) * len);
+    DWORD nbytes = (DWORD) (sizeof(unsigned char) * len);
     // Acquire a cryptographic provider context
     // CRYPT_VERIFYCONTEXT for a temporary context
     if (!CryptAcquireContext(&hCryptProv, NULL, NULL,
@@ -491,18 +454,10 @@ static int inject_rand(uint64_t *out, size_t len)
         return 0;
     }
     // Generate random bytes
-    uint64_t *buf = malloc(nbytes);
-    if (buf == NULL || !CryptGenRandom(hCryptProv, nbytes, (BYTE *) buf)) {
+    if (!CryptGenRandom(hCryptProv, nbytes, (BYTE *) out)) {
         CryptReleaseContext(hCryptProv, 0);
-        free(buf);
         return 0;
     }
-    // Inject the bytes into the output buffer with XOR
-    for (size_t i = 0; i < len; i++) {
-        //printf("%llX\n", (unsigned long long) buf[i]);
-        out[i] ^= buf[i];
-    }
-    free(buf);
     // Release the cryptographic provider context
     CryptReleaseContext(hCryptProv, 0);
     return 1;
@@ -511,20 +466,11 @@ static int inject_rand(uint64_t *out, size_t len)
     if (fd == -1) {
         return 0;
     }
-
-    size_t nbytes = sizeof(uint64_t) * len;
-    uint64_t *buf = malloc(nbytes);
-
-    if (buf == NULL || read(fd, buf, nbytes) != (ssize_t) nbytes) {
+    size_t nbytes = sizeof(unsigned char) * len;
+    if (read(fd, out, nbytes) != (ssize_t) nbytes) {
         close(fd);
-        free(buf);
         return 0;
     }
-    for (size_t i = 0; i < len; i++) {
-        //printf("-->%llX\n", (unsigned long long) buf[i]);
-        out[i] ^= buf[i];
-    }
-    free(buf);
     close(fd);
     return 1;
 #else
@@ -533,10 +479,12 @@ static int inject_rand(uint64_t *out, size_t len)
 #endif
 }
 
+#define ENTROPY_BUFFER_SIZE_U64 16
+#define ENTROPY_BUFFER_SIZE (16 * 8)
 
 typedef union {
-    uint64_t u64[16];
-    uint8_t u8[128];
+    uint64_t u64[ENTROPY_BUFFER_SIZE_U64];
+    uint8_t u8[ENTROPY_BUFFER_SIZE];
 } EntropyBuffer;
 
 
@@ -572,15 +520,18 @@ void Entropy_init_from_key(Entropy *obj, const uint32_t *key, uint64_t nonce)
  * @brief Initialize the seed generator using some text seed string.
  * @details The input text seed will be sent to the Blake2s hash function
  * and the obtained 256-bit hash will be used as a key for ChaCha20.
+ * @param obj   Entropy class example to be initialized.
+ * @param seed  ASCIIZ string with the text seed.
  */
-void Entropy_init_from_textseed(Entropy *obj, const char *seed, size_t len)
+void Entropy_init_from_textseed(Entropy *obj, const char *seed)
 {
     uint8_t key_bytes[32];
     uint32_t key_words[8];
+    size_t len = strlen(seed);
     fprintf(stderr, "Initializing from a user-defined text seed\n");
     fprintf(stderr, "  Seed value: %s\n", seed);
     fprintf(stderr, "  Seed size:  %u byte(s)\n", (unsigned int) len);
-    blake2s(key_bytes, 32, NULL, 0, seed, len);
+    blake2s_256(key_bytes, seed, len);
     // Big-endian portable converation of bytes to 32-bit words.
     // BE was selected to show Blake2s hash by sequential printing of
     // 32-bit words in hexadecimal format.
@@ -616,14 +567,21 @@ int Entropy_init_from_base64_seed(Entropy *obj, const char *seed)
 }
 
 
-
+/**
+ * @brief Initialize the seed generator using available sources of entropy
+ * that include system-level CSPRNG such as `dev/urandom`, `time(NULL)`, RDTSC,
+ * machine and process id.
+ */
 void Entropy_init(Entropy *obj)
 {
     EntropyBuffer *ent_buf = calloc(1, sizeof(EntropyBuffer));
     uint32_t key[8] = {0, 0, 0, 0,  0, 0, 0, 0};
     uint64_t timestamp = (uint64_t) time(NULL);
     uint64_t cpu = cpuclock();
-    int csprng_present = inject_rand(&ent_buf->u64[0], 4);
+    int csprng_present = fill_from_random_device(&ent_buf->u8[0], 8 * sizeof(uint32_t));
+    //for (size_t i = 0; i < 4; i++) {
+    //    printf("%8.8" PRIX64 " ", ent_buf->u64[i]);
+    //}
     // 256 bits of entropy from system CSPRNG
     if (!csprng_present) {
         fprintf(stderr,
@@ -637,20 +595,23 @@ void Entropy_init(Entropy *obj)
         ent_buf->u64[i] = call_rdseed();
     }
     // Some fallback entropy sources
+    MachineID machine_id = get_machine_id();
     ent_buf->u64[8] = timestamp;
     ent_buf->u64[9] = cpu;
-    ent_buf->u64[10] = get_machine_id();
-    ent_buf->u64[11] = get_tick_count();
-    ent_buf->u64[12] = get_current_process_id();
-    if (!csprng_present) {
-        fprintf(stderr, "Time stamp:   0x%.16" PRIx64 "; ", timestamp);
-        fprintf(stderr, "CPU ticks:    0x%.16" PRIx64 "\n", cpu);
-        fprintf(stderr, "Machine ID:   0x%.16" PRIx64 "; ", ent_buf->u64[10]);
-        fprintf(stderr, "System timer: 0x%.16" PRIx64 "\n", ent_buf->u64[11]);
-        fprintf(stderr, "Process ID:   0x%.16" PRIx64 "\n", ent_buf->u64[12]);
+    ent_buf->u64[10] = machine_id.u64[0];
+    ent_buf->u64[11] = machine_id.u64[1];
+    ent_buf->u64[12] = get_tick_count();
+    ent_buf->u64[13] = get_current_process_id();
+    if (!csprng_present || 1) {
+        fprintf(stderr, "Time stamp:   0x%16.16" PRIx64 "; ", timestamp);
+        fprintf(stderr, "CPU ticks:    0x%16.16" PRIx64 "\n", cpu);
+        fprintf(stderr, "Machine ID:   0x%16.16" PRIx64 "-0x%16.16" PRIx64 "\n",
+            ent_buf->u64[10], ent_buf->u64[11]);
+        fprintf(stderr, "System timer: 0x%16.16" PRIx64 "\n", ent_buf->u64[12]);
+        fprintf(stderr, "Process ID:   0x%16.16" PRIx64 "\n", ent_buf->u64[13]);
     }
     // Make a key using the cryptographic hash function
-    blake2s(key, 32, NULL, 0, &ent_buf->u8[0], 128);
+    blake2s_256(key, &ent_buf->u8[0], ENTROPY_BUFFER_SIZE);
     free(ent_buf);
     // Initialize the seed generator
     Entropy_init_from_key(obj, key, CHACHA_DEFAULT_NONCE);
@@ -701,10 +662,17 @@ uint64_t Entropy_seed64(Entropy *obj, uint64_t thread_id)
 
 void Entropy_print_seeds_log(const Entropy *obj, FILE *fp)
 {
+    const size_t max_log_length = 1024;
+    int filler_printed = 0;
     fprintf(fp, "Number of seeds: %llu\n", (unsigned long long) obj->slog_pos);
     fprintf(fp, "%10s %18s %20s\n", "Thread", "Seed(HEX)", "Seed(DEC)");
     for (size_t i = 0; i < obj->slog_pos; i++) {
-        fprintf(fp, "%10" PRIX64 " 0x%.16" PRIX64 " %.20" PRIu64 "\n",
-            obj->slog[i].thread_id, obj->slog[i].seed, obj->slog[i].seed);
+        if (i < max_log_length || i > obj->slog_pos - 5) {
+            fprintf(fp, "%10" PRIX64 " 0x%.16" PRIX64 " %.20" PRIu64 "\n",
+                obj->slog[i].thread_id, obj->slog[i].seed, obj->slog[i].seed);
+        } else if (!filler_printed) {
+            fprintf(fp, "    ...................................................\n");
+            filler_printed = 1;
+        }
     }
 }

@@ -278,7 +278,7 @@ BatteryExitCode battery_birthday(const GeneratorInfo *gen, const CallerAPI *intf
         ans.alpha = sr_poisson_pvalue(ans.x, lambda);
         intf->printf("  x = %g (ndups); p = %g; 1-p=%g\n", ans.x, ans.p, ans.alpha);
     }
-    GeneratorState_destruct(&obj, intf);
+    GeneratorState_destruct(&obj);
     if (ans.p < 1e-6 || ans.p > 1.0 - 1e-6) {
         return BATTERY_FAILED;
     } else {
@@ -409,7 +409,7 @@ BatteryExitCode battery_blockfreq(const GeneratorInfo *gen, const CallerAPI *int
         printf("\n\n");
     }
     BlockFrequency_destruct(&freq);
-    GeneratorState_destruct(&obj, intf);
+    GeneratorState_destruct(&obj);
     return (is_ok) ? BATTERY_PASSED : BATTERY_FAILED;
 }
 

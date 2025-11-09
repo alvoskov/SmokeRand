@@ -218,7 +218,7 @@ static BatteryExitCode SmokeRandSettings_txtarg_load(SmokeRandSettings *obj,
                 return BATTERY_ERROR;
             }
         } else {            
-            set_entropy_textseed(argvalue, strlen(argvalue));
+            set_entropy_textseed(argvalue);
         }
         return BATTERY_PASSED;
     } else {

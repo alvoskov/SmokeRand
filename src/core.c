@@ -26,10 +26,13 @@
 #include <io.h>
 #endif
 
+#define THREAD_ORD_OFFSET 1
+
 static Entropy entropy = ENTROPY_INITIALIZER;
 static char cmd_param[128] = {0};
 static int use_stderr_for_printf = 0;
 static int use_mutexes = 0;
+static unsigned int seed64_mt_current_thread_ord = 0;
 
 static const char *get_cmd_param(void)
 {
@@ -47,9 +50,9 @@ void set_use_stderr_for_printf(int val)
     use_stderr_for_printf = val;
 }
 
-void set_entropy_textseed(const char *seed, size_t len)
+void set_entropy_textseed(const char *seed)
 {
-    Entropy_init_from_textseed(&entropy, seed, len);
+    Entropy_init_from_textseed(&entropy, seed);
 }
 
 int set_entropy_base64_seed(const char *seed)
@@ -124,8 +127,12 @@ static void destroy_mutexes()
 static uint64_t get_seed64_mt(void)
 {
     MUTEX_LOCK(get_seed64_mt_mutex);
-    ThreadObj thr = ThreadObj_current();
-    uint64_t seed = Entropy_seed64(&entropy, thr.ord);
+    unsigned int ord = seed64_mt_current_thread_ord;
+    if (ord < THREAD_ORD_OFFSET) {
+        ThreadObj thr = ThreadObj_current();
+        ord = thr.ord;
+    }
+    const uint64_t seed = Entropy_seed64(&entropy, ord);
     MUTEX_UNLOCK(get_seed64_mt_mutex);
     return seed;
 }
@@ -272,9 +279,13 @@ void GeneratorInfo_print(const GeneratorInfo *gi, int to_stderr)
     }
 }
 
-void GeneratorState_destruct(GeneratorState *obj, const CallerAPI *intf)
+/**
+ * @brief Destructor for the generator state: deallocates all internal
+ * buffers but not the GeneratorState itself.
+ */
+void GeneratorState_destruct(GeneratorState *obj)
 {
-    obj->gi->free(obj->state, obj->gi, intf);
+    obj->gi->free(obj->state, obj->gi, obj->intf);
 }
 
 /**
@@ -540,14 +551,16 @@ typedef struct {
     TestIndex *tests_inds; ///< Test indexes and ordinals
     size_t ntests;
     size_t front;
+    unsigned int thread_ord; ///< Thread ordinal
 } ThreadQueue;
 
 
 void ThreadQueue_init(ThreadQueue *obj, const GeneratorInfo *gi,
-    const CallerAPI *intf)
+    const CallerAPI *intf, unsigned int thread_ord)
 {
     obj->ntests = 0;
     obj->front = 0;
+    obj->thread_ord = thread_ord;
     obj->tests_inds = calloc(1, sizeof(TestIndex));
     obj->gen = GeneratorState_create(gi, intf);
 }
@@ -570,7 +583,7 @@ TestIndex ThreadQueue_pop_front(ThreadQueue *obj)
 
 void ThreadQueue_destruct(ThreadQueue *obj)
 {
-    GeneratorState_destruct(&obj->gen, obj->gen.intf);
+    GeneratorState_destruct(&obj->gen);
     free(obj->tests_inds);
 }
 
@@ -614,13 +627,16 @@ void TestsDispatcher_init(TestsDispatcher *obj, const TestsBattery *bat,
     // They should be initialized BEFORE shuffling: shuffling
     // uses get_seed64 from entropy generator.
     for (unsigned int i = 0; i < nthreads; i++) {
-        ThreadQueue_init(&obj->queues[i], gen, intf);
+        const unsigned int thread_ord = i + THREAD_ORD_OFFSET;
+        seed64_mt_current_thread_ord = thread_ord;
+        ThreadQueue_init(&obj->queues[i], gen, intf, thread_ord);
     }
+    seed64_mt_current_thread_ord = 0;
     // Prepare an unshuffled array of indexes
     TestIndex *inds = calloc(ntests, sizeof(TestIndex));
     for (size_t i = 0; i < ntests; i++) {
         inds[i].ind = i;
-        inds[i].ord = i;
+        inds[i].ord = i + THREAD_ORD_OFFSET;
     }
     // An optional shuffling (shuffling indexes but not ordinals)
     if (shuffle) {
@@ -642,6 +658,19 @@ void TestsDispatcher_init(TestsDispatcher *obj, const TestsBattery *bat,
     // Free internal buffers
     free(inds);
 }
+
+
+ThreadQueue *
+TestsDispatcher_get_queue_by_ord(const TestsDispatcher *obj, unsigned int ord)
+{
+    for (unsigned int i = 0; i < obj->nthreads; i++) {
+        if (obj->queues[i].thread_ord == ord) {
+            return &obj->queues[i];
+        }
+    }
+    return NULL;
+}
+
 
 
 void TestsDispatcher_destruct(TestsDispatcher *obj)
@@ -674,7 +703,12 @@ static ThreadRetVal THREADFUNC_SPEC battery_thread(void *data)
     ThreadObj thrd = ThreadObj_current();
     th_data->intf->printf("vvvvvvvvvv Thread %u (ID %llu) started vvvvvvvvvv\n",
         thrd.ord, (unsigned long long) thrd.id);
-    ThreadQueue *queue = &th_data->queues[thrd.ord];
+
+    ThreadQueue *queue = TestsDispatcher_get_queue_by_ord(th_data, thrd.ord);
+    if (queue == NULL) {
+        fprintf(stderr, "***** Thread %u: cannot find queue *****\n", thrd.ord);
+        exit(EXIT_FAILURE);
+    }
     for (TestIndex ti = ThreadQueue_pop_front(queue);
         ti.ind < th_data->ntests;
         ti = ThreadQueue_pop_front(queue))
@@ -714,7 +748,8 @@ static void TestsBattery_run_threads(const TestsBattery *bat,
     init_thread_dispatcher();
     ThreadObj *thrd = calloc(sizeof(ThreadObj), nthreads);
     for (unsigned int i = 0; i < nthreads; i++) {
-        thrd[i] = ThreadObj_create(battery_thread, &tdisp, i);
+        const unsigned int ord = tdisp.queues[i].thread_ord;
+        thrd[i] = ThreadObj_create(battery_thread, &tdisp, ord);
     }
     // Get data from threads
     for (size_t i = 0; i < nthreads; i++) {
@@ -902,7 +937,7 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     // sanity check for multithreaded version.
     GeneratorState obj = GeneratorState_create(gen, intf);
     if (GeneratorState_check_size(&obj) == 0) {
-        GeneratorState_destruct(&obj, intf);
+        GeneratorState_destruct(&obj);
         free(results);
         fprintf(stderr, "***** TestsBattery_run: invalid generator output size *****\n");
         return BATTERY_ERROR;            
@@ -925,10 +960,10 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
             results->name = bat->tests[testid - 1].name;
             results->id = testid;
         }
-        GeneratorState_destruct(&obj, intf);
+        GeneratorState_destruct(&obj);
     } else {
         // Multithreaded version
-        GeneratorState_destruct(&obj, intf);
+        GeneratorState_destruct(&obj);
         TestsBattery_run_threads(bat, gen, intf, nthreads, results, rtype);
     }
     toc = time(NULL);

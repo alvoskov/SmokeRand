@@ -58,7 +58,7 @@ int main()
     size_t nvalues = 10000000;
     GeneratorState obj = GeneratorState_create(gi, &intf);
     unsigned int *lc_vec = calc_linearcomp_vector(&obj, nvalues);
-    GeneratorState_destruct(&obj, &intf);
+    GeneratorState_destruct(&obj);
     GeneratorModule_unload(&mod);
     CallerAPI_free();
     // Write results to the file

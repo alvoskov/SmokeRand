@@ -64,7 +64,7 @@ static SpeedResults measure_speed(const GeneratorInfo *gen, const CallerAPI *int
         size_t nbytes = block_size * gen->nbits / 8;
         results.cpb = results.ticks_per_call / (double) nbytes;
     }
-    GeneratorState_destruct(&obj, intf);
+    GeneratorState_destruct(&obj);
     return results;
 }
 

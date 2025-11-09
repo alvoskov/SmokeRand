@@ -60,7 +60,7 @@ static ThreadRetVal THREADFUNC_SPEC hamming_ot_run_test(void *udata)
         TestResults res = obj->test_info.test_func(&gen, obj->test_info.opts);
         obj->z_ary[i] = res.x;
     }
-    GeneratorState_destruct(&gen, obj->intf);
+    GeneratorState_destruct(&gen);
     return 0;
 }
 
@@ -70,15 +70,15 @@ double *generate_sample(GeneratorInfo *gi, unsigned int nsamples, const HwTestIn
     CallerAPI intf = CallerAPI_init_mthr();
     GeneratorState gen = GeneratorState_create(gi, &intf);
     (void) test_info->test_func(&gen, test_info->opts);    
-    GeneratorState_destruct(&gen, &intf);
+    GeneratorState_destruct(&gen);
     printf_mthr = intf.printf;
     intf.printf = printf_mute;
-    unsigned int nthreads = (unsigned int) get_cpu_numcores();
+    unsigned int nthreads = get_cpu_numcores();
     if (nthreads > 2) {
         nthreads--;
     }
     printf("Number of threads: %u\n", nthreads);
-    double *z_ary = calloc((size_t) nsamples, sizeof(double));
+    double *z_ary = calloc(nsamples, sizeof(double));
     HammingThreadState *threads = calloc(nthreads, sizeof(HammingThreadState));
     if (z_ary == NULL || threads == NULL) {
         fprintf(stderr, "***** generate_sample: not enough memory *****\n");

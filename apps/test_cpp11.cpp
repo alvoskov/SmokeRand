@@ -71,7 +71,7 @@ int main()
     battery_brief(&tw, &intf, TESTS_ALL, 4, REPORT_FULL);
 
 
-    GeneratorState_destruct(&state, &intf);
+    GeneratorState_destruct(&state);
 
 
 

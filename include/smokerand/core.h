@@ -37,7 +37,7 @@ CallerAPI CallerAPI_init(void);
 CallerAPI CallerAPI_init_mthr(void);
 void CallerAPI_free(void);
 void set_cmd_param(const char *param);
-void set_entropy_textseed(const char *seed, size_t len);
+void set_entropy_textseed(const char *seed);
 int set_entropy_base64_seed(const char *seed);
 void set_use_stderr_for_printf(int val);
 
@@ -53,7 +53,7 @@ typedef struct {
 GeneratorState GeneratorState_create(const GeneratorInfo *gi,
     const CallerAPI *intf);
 void GeneratorInfo_print(const GeneratorInfo *gi, int to_stderr);
-void GeneratorState_destruct(GeneratorState *obj, const CallerAPI *intf);
+void GeneratorState_destruct(GeneratorState *obj);
 int GeneratorState_check_size(const GeneratorState *obj);
 
 typedef struct

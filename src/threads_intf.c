@@ -14,7 +14,10 @@
 #include <string.h>
 #include <stdint.h>
 
-#define NTHREADS_MAX 128
+#define NTHREADS_MAX 256
+
+#define THREAD_ID_UNKNOWN 0
+#define THREAD_ORD_UNKNOWN 0
 
 static ThreadObj threads[NTHREADS_MAX];
 static int nthreads = 0;
@@ -86,14 +89,14 @@ ThreadObj ThreadObj_current(void)
 #elif defined(USE_WINTHREADS)
     obj.id = GetCurrentThreadId();
 #else
-    obj.id = 1;
+    obj.id = THREAD_ID_UNKNOWN;
 #endif
     for (int i = 0; i < nthreads; i++) {
         if (threads[i].id == obj.id && threads[i].exists) {
             return threads[i];
         }
     }
-    obj.ord = 1;
+    obj.ord = THREAD_ORD_UNKNOWN;
     return obj;
 }
 
