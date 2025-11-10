@@ -66,12 +66,9 @@ typedef struct {
     uint64_t c;
 } GMWC128State;
 
-
-enum {
-    GMWC_MINUSA0 = 0x7d084a4d80885f,
-    GMWC_A0INV   = 0x9b1eea3792a42c61,
-    GMWC_A1      = 0xff002aae7d81a646
-};
+#define GMWC_MINUSA0 0x7d084a4d80885fU
+#define GMWC_A0INV   0x9b1eea3792a42c61U
+#define GMWC_A1      0xff002aae7d81a646U
 
 
 static inline uint64_t get_bits_raw(void *state)

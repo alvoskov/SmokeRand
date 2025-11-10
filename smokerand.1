@@ -363,11 +363,18 @@ to the PRNG output, management of the final report layout etc.
 The final report will include only failed test.
 .TP
 .B \-\-seed=\fIvalue\fR
-Seeds the interal seed generator using the \fIvalue\fR string supplied by the
+Seeds the internal seed generator using the \fIvalue\fR string supplied by the
 user. It is transformed by Blake2s hash function and is used as a 256-bit key
 for the ChaCha20 stream cipher based PRNG used as a seed generator. Test battery
 run results are completely determined by the seed \fIvalue\fR, the tested PRNG
 and the number of threads (see the \fBthreads\fR key).
+.sp
+Seed values beginning with the underlining symbol (\fI_\fR) have a special
+format \fI_XX_base64key\fR where \fIXX\fR is the number of threads in the
+hexadecimal format (always 2 digits) and \fIbase64key\fR is the 256-bit key
+for ChaCha20 stream cipher encoded in the base64 format. Such seeds are 
+printed in all PRNG testing reports and allow to fully reproduce obtained
+results.
 .TP
 .B \-\-threads=\fIn\fR
 Run battery in multithreaded mode using \fIn\fR threads.
@@ -450,6 +457,7 @@ Passed:       6
 Suspicious:   0
 Failed:       1
 Elapsed time: 00:00:01
+Used seed:    _01_BLz8gLS86F8xv87cDFt/1SQgKGkyw2YYRdWqpL4MEyE==
 .EE
 .SS Custom batteries
 .PP

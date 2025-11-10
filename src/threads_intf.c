@@ -167,7 +167,10 @@ void *dlopen_wrap(const char *libname)
 void *dlsym_wrap(void *handle, const char *symname)
 {
 #ifdef USE_LOADLIBRARY
-    return (void *) GetProcAddress(handle, symname);
+    const FARPROC proc = GetProcAddress(handle, symname);
+    void *ptr; // To bypass -Wpedantic GCC warning
+    memcpy(&ptr, &proc, sizeof(void *));
+    return ptr;
 #elif defined(USE_PE32_DOS)
     return dlsym_pe32dos(handle, symname);
 #elif defined(__DJGPP__)

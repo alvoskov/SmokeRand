@@ -120,7 +120,7 @@ void HammingTuplesTable_init(HammingTuplesTable *obj,
     const double *code_to_prob)
 {
     const uint64_t code_mask = (1ull << code_nbits) - 1;
-    obj->len = 1ull << code_nbits * tuple_size;
+    obj->len = 1UL << code_nbits * tuple_size;
     obj->tuples = calloc(obj->len, sizeof(HammingWeightsTuple));
     if (obj->tuples == NULL) {
         fprintf(stderr, "***** HammingTuplesTable_init: not enough memory *****\n");
@@ -549,10 +549,10 @@ static void hamming_ot_long_fill_hw_tables(unsigned short *hw_to_code,
 }
 
 
-static inline unsigned short get_wlong_hamming_weight(GeneratorState *obj,
+static inline unsigned int get_wlong_hamming_weight(GeneratorState *obj,
     unsigned int values_per_word)
 {
-    unsigned short hw = 0;
+    unsigned int hw = 0;
     for (unsigned int i = 0; i < values_per_word; i++) {
         hw += get_uint64_hamming_weight(obj->gi->get_bits(obj->state));
     }
@@ -590,7 +590,7 @@ TestResults hamming_ot_long_test(GeneratorState *obj, const HammingOtLongOptions
     HammingTuplesTable_init(&table, code_nbits, tuple_size, code_to_prob);
 
     uint64_t tuple = 0; // 9 4-bit Hamming weights + 1 extra Hamming weight
-    unsigned short cur_weight; // Current Hamming weight
+    unsigned int cur_weight; // Current Hamming weight
     unsigned int values_per_word = bits_per_word / obj->gi->nbits;
     unsigned long long ntuples = opts->nvalues / values_per_word;
     obj->intf->printf("Hamming weights based test (overlapping tuples), long version\n");
@@ -760,7 +760,7 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
         obj->intf->printf("  Invalid nlevels value\n");
         return ans;
     }
-    unsigned int block_len = 1 << opts->nlevels;
+    unsigned long block_len = 1UL << opts->nlevels;
     HammingDistrHist *h = calloc((size_t) opts->nlevels, sizeof(HammingDistrHist));
     uint64_t *x = calloc(block_len, sizeof(uint64_t));
     int *hw = calloc(block_len, sizeof(int));
@@ -780,7 +780,7 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
             hw[j] = get_uint64_hamming_weight(x[j]);
         }
         // 1-value blocks
-        for (unsigned int j = 0; j < block_len; j += 2) {
+        for (unsigned long j = 0; j < block_len; j += 2) {
             h[0].o[hw[j]]++; h[0].o[hw[j + 1]]++;
             h[0].o_xor[get_uint64_hamming_weight(x[j] ^ x[j + 1])]++;
         }
@@ -800,7 +800,7 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
     for (int i = 0; i < opts->nlevels; i++) {
         HammingDistrHist_calc_stats(&h[i]);
         obj->intf->printf("    %8d | %8.3f %10.3g | %8.3f %10.3g\n",
-            (int) ((1 << i) * nbits), h[i].z, h[i].p, h[i].z_xor, h[i].p_xor);
+            (int) ((1U << i) * nbits), h[i].z, h[i].p, h[i].z_xor, h[i].p_xor);
         if (fabs(h[i].z) > zabs_max) {
             zabs_max = fabs(h[i].z); ans.p = h[i].p; ans.x = h[i].z;
         }

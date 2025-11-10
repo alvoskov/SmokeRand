@@ -802,7 +802,8 @@ void print_help()
         "(C) 2024-2025 Alexey L. Voskov\n\n"
         "Usage: sr_tiny gen_name [speed]\n"
         "  gen_name = alfib, lcg32, lcg64, mwc1616x, xorshift32\n"
-        "    alfib = LFib(55,24,+,2^32): additive lagged Fibonacci\n"
+        "    alfib = LFib(55,24,+,2^32): additive lagged Fibonacci\n");
+    printf(
         "    lcg32 - 32-bit LCG; x_n = 69069x_{n-1} + 12345 mod 2^32\n"
         "    lcg64 - 64-bit LCG, returns upper 32 bits\n"
         "    mwc1616 - a combination of 2 MWC generators from KISS99,\n"
@@ -894,7 +895,7 @@ void measure_speed(Generator32State *gen)
         toc = clock();
     } while (toc - tic < 2*CLOCKS_PER_SEC);
     nsec = ((double) (toc - tic) / CLOCKS_PER_SEC);
-    kib_sec = (double) ((unsigned long long) nblocks_total << 6) / nsec;
+    kib_sec = (double) nblocks_total * 64.0 / nsec;
     if (kib_sec < 1000.0) {
         printf("  Generator speed: %g KiB/sec", kib_sec);
     } else {

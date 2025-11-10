@@ -49,11 +49,9 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Sapparot2State *obj = intf->malloc(sizeof(Sapparot2State));
-    uint64_t seed = intf->get_seed64();    
-    obj->a = (uint32_t) (seed >> 32);
-    obj->b = (uint32_t) (seed & 0xFFFFFFFF);
+    seed64_to_2x32(intf, &obj->a, &obj->b);
     obj->c = intf->get_seed32();
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT32_PRNG("sapparot2", NULL)

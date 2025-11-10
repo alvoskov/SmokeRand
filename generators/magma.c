@@ -206,7 +206,7 @@ static int run_self_test_scalar(const CallerAPI *intf)
     }
     intf->free(obj);
     return is_ok;
-};
+}
 
 /////////////////////////////////////////////
 ///// Vectorized version implementation /////
@@ -617,7 +617,7 @@ static int run_self_test_vector(const CallerAPI *intf)
     intf->printf("----- Not implemented\n");
     return 1;
 #endif
-};
+}
 
 
 //////////////////////

@@ -49,7 +49,7 @@ typedef struct {
     uint8_t *img; ///< Loaded image raw data.
     size_t imgsize; ///< Loaded image size, bytes.
     void *entry_point; ///< Program entry point.
-    int nexports; ///< Number of exports.
+    unsigned int nexports; ///< Number of exports.
     void **exports_addrs; ///< Exports addresses (not RVAs)
     char **exports_names; ///< Exports names (ASCIIZ strings)
     uint16_t *exports_ords; ///< Exports ordinals.
@@ -71,7 +71,7 @@ typedef struct {
     uint32_t import_dir; ///< Import directory RVA.
     uint32_t reloc_dir; ///< Relocations (fixups) directory RVA.
 
-    int nsections; ///< Number of sections.
+    unsigned int nsections; ///< Number of sections.
     PE32SectionInfo *sections; ///< Sections table.
 } PE32BasicInfo;
 
@@ -80,7 +80,7 @@ void *PE32MemoryImage_get_func_addr(const PE32MemoryImage *img, const char *func
 void PE32MemoryImage_free(PE32MemoryImage *obj);
 
 
-int get_pe386_offset(FILE *fp);
+uint32_t get_pe386_offset(FILE *fp);
 int PE32BasicInfo_init(PE32BasicInfo *peinfo, FILE *fp, uint32_t pe_offset);
 void PE32BasicInfo_free(PE32BasicInfo *peinfo);
 void PE32BasicInfo_print(const PE32BasicInfo *peinfo);
