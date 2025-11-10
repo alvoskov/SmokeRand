@@ -67,10 +67,10 @@ static inline uint32_t get_u32_le_from_u8(const uint8_t *buf)
 
 static inline void set_u32_le_to_u8(uint8_t *buf, uint32_t value)
 {
-    buf[0] = value & 0xFF;
-    buf[1] = (value >> 8) & 0xFF;
-    buf[2] = (value >> 16) & 0xFF;
-    buf[3] = (value >> 24) & 0xFF;
+    buf[0] = (uint8_t) (value & 0xFF);
+    buf[1] = (uint8_t) ((value >> 8) & 0xFF);
+    buf[2] = (uint8_t) ((value >> 16) & 0xFF);
+    buf[3] = (uint8_t) ((value >> 24) & 0xFF);
 }
 
 

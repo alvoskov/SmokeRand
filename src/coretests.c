@@ -539,7 +539,7 @@ static int gap_test_guard(GeneratorState *obj, const GapOptions *opts)
 {
     int is_ok = 0;
     uint64_t beta = 1ull << (obj->gi->nbits - opts->shl);
-    double p = 1.0 / (1ull << opts->shl); // beta in the floating point format
+    double p = 1.0 / (double) (1ull << opts->shl); // beta in the floating point format
     unsigned long long nsamples = (unsigned long long) (-20.0 / log10(1.0 - p));
     for (unsigned long i = 0; i < nsamples; i++) {
         if (obj->gi->get_bits(obj->state) <= beta) {
@@ -557,7 +557,7 @@ static int gap_test_guard(GeneratorState *obj, const GapOptions *opts)
 TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
 {
     const double Ei_min = 10.0;
-    double p = 1.0 / (1ull << opts->shl); // beta in the floating point format
+    double p = 1.0 / (double) (1ull << opts->shl); // beta in the floating point format
     uint64_t beta = 1ull << (obj->gi->nbits - opts->shl);
     uint64_t u;
     unsigned long long ngaps = opts->ngaps;
@@ -960,7 +960,7 @@ TestResults gap16_count0_test(GeneratorState *obj, unsigned long long ngaps)
 ///////////////////////
 
 
-static void sumcollector_calc_p(double *p, const int g, const int nmax)
+static void sumcollector_calc_p(double *p, unsigned int g, unsigned int nmax)
 {
     size_t nlevels = (size_t) ( (g + 1) * (nmax + 1) );
     long double *g_mat = calloc(nlevels, sizeof(long double));
@@ -970,23 +970,23 @@ static void sumcollector_calc_p(double *p, const int g, const int nmax)
     }
     // g0(n) = d_{0n}
     g_mat[0] = 1.0;
-    for (int i = 1; i <= nmax; i++) {
+    for (unsigned int i = 1; i <= nmax; i++) {
         g_mat[i] = 0.0;
     }
     // g_g(n) = 1 / factorial(g + 1)
-    for (int i = 1; i <= g; i++) {
+    for (unsigned int i = 1; i <= g; i++) {
         g_mat[(nmax + 1) * i + i] = 1.0 / exp(sr_lgamma(i + 2));
     }
     // Recurrent formula
-    for (int gi = 1; gi <= g; gi++) {
-        for (int ni = gi + 1; ni <= nmax; ni++) {
+    for (unsigned int gi = 1; gi <= g; gi++) {
+        for (unsigned int ni = gi + 1; ni <= nmax; ni++) {
             g_mat[(nmax + 1) * gi + ni] = (long double) (ni - gi + 1) / (ni + 1) * (
                 g_mat[(nmax + 1) * (gi - 1) + (ni - 1)] +
                 (long double) gi / (ni - gi) * g_mat[(nmax + 1) * gi + (ni - 1)]
             );
         }
     }
-    for (int i = 0; i <= nmax; i++) {
+    for (unsigned int i = 0; i <= nmax; i++) {
         p[i] = (double) g_mat[(nmax + 1) * g + i];
     }
     free(g_mat);
