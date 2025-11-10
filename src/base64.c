@@ -12,16 +12,14 @@
  */
 #include "smokerand/base64.h"
 #include <stdlib.h>
-
+#include <stdio.h>
 /**
  * @brief Calculate length of base64 string for binary data.
  * @param nbytes  Binary data size, bytes.
  */
 static size_t calc_base64_len(size_t nbytes)
 {
-    size_t nsyms_raw = (nbytes * 4) / 3;
-    nsyms_raw += ((nbytes * 4) % 3 > 0) ? 3 : 0;
-    return nsyms_raw;
+    return (nbytes == 0) ? 0 : (1 + (nbytes - 1) / 3) * 4;
 }
 
 /**

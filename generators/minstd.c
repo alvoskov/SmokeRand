@@ -53,7 +53,7 @@ static inline uint64_t get_bits_mul32_raw(void *state)
     return (obj->x << 1) | (obj->x >> 30);
 }
 
-MAKE_GET_BITS_WRAPPERS(mul32);
+MAKE_GET_BITS_WRAPPERS(mul32)
 
 /**
  * @brief minstd "Real version 1" based on 64-bit multiplication with
@@ -73,7 +73,7 @@ static inline uint64_t get_bits_mul64_raw(void *state)
 }
 
 
-MAKE_GET_BITS_WRAPPERS(mul64);
+MAKE_GET_BITS_WRAPPERS(mul64)
 
 
 static void *create(const CallerAPI *intf)

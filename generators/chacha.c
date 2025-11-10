@@ -226,7 +226,7 @@ static inline uint64_t get_bits_c99_raw(void *state)
     return obj->out.w32[obj->pos++];
 }
 
-MAKE_GET_BITS_WRAPPERS(c99);
+MAKE_GET_BITS_WRAPPERS(c99)
 
 static inline uint64_t get_bits_c99ctr32_raw(void *state)
 {
@@ -239,7 +239,7 @@ static inline uint64_t get_bits_c99ctr32_raw(void *state)
     return obj->out.w32[obj->pos++];
 }
 
-MAKE_GET_BITS_WRAPPERS(c99ctr32);
+MAKE_GET_BITS_WRAPPERS(c99ctr32)
 
 
 /**
@@ -390,7 +390,7 @@ static inline uint64_t get_bits_avx_raw(void *state)
     return obj->out.w32[obj->pos++];
 }
 
-MAKE_GET_BITS_WRAPPERS(avx);
+MAKE_GET_BITS_WRAPPERS(avx)
 
 
 static inline uint64_t get_bits_avxctr32_raw(void *state)
@@ -404,7 +404,7 @@ static inline uint64_t get_bits_avxctr32_raw(void *state)
     return obj->out.w32[obj->pos++];
 }
 
-MAKE_GET_BITS_WRAPPERS(avxctr32);
+MAKE_GET_BITS_WRAPPERS(avxctr32)
 
 
 /////////////////////////////////////////////////////
@@ -593,6 +593,17 @@ void EXPORT ChaChaVec_block(ChaChaVecState *obj)
 #endif
 }
 
+/*
+static inline size_t pos_to_vec_ind(size_t pos)
+{
+    size_t in_offset = ( ((pos << 1) & 0xF8) + (pos & 0x3) ) & 0x3F;
+    size_t out_offset = (pos >> 3) & 0xFC;
+    return in_offset + out_offset;
+//    size_t in_offset = ( ((pos >> 2) << 3) + (pos & 0x3) ) & 0x3F;
+//    size_t out_offset = (pos >> 5) << 2;
+    return in_offset + out_offset;
+}
+*/
 
 
 static uint64_t get_bits_vector_raw(void *state)
@@ -603,10 +614,13 @@ static uint64_t get_bits_vector_raw(void *state)
         ChaChaVec_block(obj);
         obj->pos = 0;
     }
+    
+//    size_t ind = pos_to_vec_ind(obj->pos++);
+//    return obj->out.w32[ind];
     return obj->out.w32[obj->pos++];
 }
 
-MAKE_GET_BITS_WRAPPERS(vector);
+MAKE_GET_BITS_WRAPPERS(vector)
 
 static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
 {

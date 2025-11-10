@@ -12,6 +12,7 @@
  */
 #ifndef __SMOKERAND_BASE64_H
 #define __SMOKERAND_BASE64_H
+#include <stddef.h>
 #include <stdint.h>
 
 char *sr_u32_bigendian_to_base64(const uint32_t *in, size_t len);

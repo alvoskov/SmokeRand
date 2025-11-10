@@ -54,10 +54,7 @@ enum {
     NCOPIES = 4, ///< Number of generator copies (DON'T CHANGE!)
 };
 
-enum {
-    C240 = 0x1BD11BDAA9FC1A22ULL
-};
-
+#define C240 0x1BD11BDAA9FC1A22U
 
 
 typedef enum {

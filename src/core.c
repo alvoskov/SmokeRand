@@ -325,7 +325,9 @@ GeneratorModule GeneratorModule_load(const char *libname, const CallerAPI *intf)
         mod.valid = 0;
         return mod;
     }
-    GetGenInfoFunc gen_getinfo = (GetGenInfoFunc)( dlsym_wrap(mod.lib, "gen_getinfo") );
+    void *fptr = dlsym_wrap(mod.lib, "gen_getinfo");
+    GetGenInfoFunc gen_getinfo;
+    memcpy(&gen_getinfo, &fptr, sizeof(gen_getinfo));
     if (gen_getinfo == NULL) {
         fprintf(stderr, "Cannot find the 'gen_getinfo' function\n");
         mod.valid = 0;
@@ -876,7 +878,7 @@ static TestResultsSummary TestResults_print_report(const TestResults *results,
     }
     printf("Elapsed time:  ");
     print_elapsed_time((unsigned long long) nseconds_total);
-    printf("\n\n");
+    printf("\n");
     return summary;
 }
 
@@ -895,6 +897,7 @@ void TestsBattery_print_info(const TestsBattery *obj)
     print_bar();
     printf("\n\n");
 }
+
 
 /**
  * @brief Runs the given battery of the statistical test for the given
@@ -980,16 +983,20 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     }
     printf("Generator name:    %s\n", gen->name);
     printf("Output size, bits: %d\n", (int) gen->nbits);
-    const uint32_t *seed_key = Entropy_get_key(&entropy);
-    char *seed_key_txt = sr_u32_bigendian_to_base64(seed_key, 8);
+    char *seed_key_txt = Entropy_get_base64_key(&entropy);
     if (seed_key_txt != NULL) {
         printf("Used seed:         _%.2X_%s\n\n", nthreads, seed_key_txt);
-        free(seed_key_txt);
     } else {
-        printf("Used seed:         _%.2X_???\n\n", nthreads);
+        printf("Used seed:         none\n\n");
     }
     TestResultsSummary summary =
         TestResults_print_report(results, nresults, toc - tic, rtype);
+    if (seed_key_txt != NULL) {
+        printf("Used seed:     _%.2X_%s\n", nthreads, seed_key_txt);
+    } else {
+        printf("Used seed:     none\n");
+    }
+    free(seed_key_txt);
     free(results);
     return (summary.nfailed == 0) ? BATTERY_PASSED : BATTERY_FAILED;
 }

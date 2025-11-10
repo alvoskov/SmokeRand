@@ -60,10 +60,10 @@ else ifeq ($(PLATFORM_NAME), GENERIC)
     PLATFORM_FLAGS = -DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY
 endif
 #-----------------------------------------------------------------------------
-# -Wconversion 
-CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wcast-align=strict -Wshadow -Wconversion -Wvla
-CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wcast-align=strict -Wshadow -Wconversion -Wvla
-CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wshadow -Wvla
+# -Wcast-align=strict
+CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wpedantic -Wshadow -Wconversion -Wvla
+CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wpedantic -Wshadow -Wconversion -Wvla
+CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wpedantic -Wshadow -Wvla
 LINKFLAGS = $(PLATFORM_FLAGS)
 INCLUDE = -Iinclude
 
