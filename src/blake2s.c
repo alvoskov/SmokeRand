@@ -1,14 +1,61 @@
 /**
- * @file blake2s.c
- * @brief A simple blake2s Reference Implementation.
- * @details https://datatracker.ietf.org/doc/html/rfc7693.html
+ * @file blake2s.h
+ * @brief A simple Blake2s implementation based on the reference implementation
+ * from RFC 7693. It also includes internal self-tests.
+ *
+ * @details The original reference implementation and licensing information
+ * can be found here:
+ *
+ * 1. https://datatracker.ietf.org/doc/html/rfc7693.html
+ * 2. https://trustee.ietf.org/documents/trust-legal-provisions/tlp-5/
+ *
+ * @copyright
+ * The original code of Blake2s reference implementation was taken from
+ * RFC 7693, the authors are Markku-Juhani O. Saarinen and Jean-Philippe
+ * Aumasson. Some code refactoring and integration of self-tests were
+ * made by A.L. Voskov. According to TLP 5.0 it is licensed under the
+ * 3-Clause BSD License (or "Revised BSD License" according to IETF
+ * TLP 5.0).
+ *
+ *
+ * Copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * All rights reserved.
+ *
+ * Copyright (c) 2015 IETF Trust and the persons identified as authors of
+ * the code. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice,
+ *   this list of conditions and the following disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in the
+ *   documentation and/or other materials provided with the distribution.
+ * - Neither the name of Internet Society, IETF or IETF Trust, nor the
+ *   names of specific contributors, may be used to endorse or promote
+ *   products  derived from this software without specific prior written
+ *   permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "smokerand/blake2s.h"
 #include "smokerand/coredefs.h"
 #include <stdio.h>
 
-// Little-endian byte access.
+/**
+ * @brief Little-endian byte access.
+ */
 static uint32_t b2s_get32(const void *src)
 {
     const uint8_t *p = (const uint8_t *) src;
@@ -142,6 +189,9 @@ int blake2s_init(blake2s_state *obj, size_t outlen,
 
 /**
  * @brief Add "inlen" bytes from "in" into the hash.
+ * @param ctx    Context
+ * @param in     Pointer to data to be hashed
+ * @param inlen  Data size to be hashed, bytes
  */
 void blake2s_update(blake2s_state *obj, const void *in, size_t inlen)
 {
@@ -155,9 +205,11 @@ void blake2s_update(blake2s_state *obj, const void *in, size_t inlen)
     }
 }
 
+
 /**
  * @brief Generate the message digest (size given in init).
- * Result placed in "out".
+ * @param obj  State context
+ * @param out  Output buffer (result will be placed in it)
  */
 void blake2s_final(blake2s_state *obj, void *out)
 {
@@ -174,6 +226,9 @@ void blake2s_final(blake2s_state *obj, void *out)
 
 /**
  * @brief Convenience function for all-in-one computation.
+ * @param out  Output buffer for the digest
+ * @param key  Secret key
+ * @param in   Data to be hashed
  */
 int blake2s(void *out, size_t outlen,
     const void *key, size_t keylen,
@@ -189,16 +244,9 @@ int blake2s(void *out, size_t outlen,
 }
 
 
-static inline size_t blake2s_strlen(const char *str)
-{
-    size_t len = 0;
-    while (str[len] != '\0') { len++; }
-    return len;
-}
-
-
-
-// Deterministic sequences (Fibonacci generator).
+/**
+ * @brief Deterministic sequences (Fibonacci generator).
+ */
 static void selftest_seq(uint8_t *out, size_t len, uint32_t seed)
 {
     uint32_t a = 0xDEAD4BAD * seed; // prime
@@ -212,6 +260,11 @@ static void selftest_seq(uint8_t *out, size_t len, uint32_t seed)
 }
 
 
+/**
+ * @brief Blake2s test taken from RFC 7693. It is described by the authors
+ * as: "This is a fairly exhaustive, yet compact and fast method for verifying
+ * that the hashing module is functioning correctly".
+ */
 static int blake2s_selftest_prng()
 {
     // Grand hash of hash results.
@@ -256,30 +309,55 @@ static int blake2s_selftest_prng()
     return 0;
 }
 
+static int blake2s_selftest_string(const uint8_t *ref, const char *str)
+{
+    uint8_t out[32];
+    size_t len = 0;
+    while (str[len] != '\0') { len++; }
+    blake2s_256(out, str, len);
+    for (size_t i = 0; i < 32; i++) {
+        if (out[i] != ref[i])
+            return -1;
+    }
+    return 0;
+}
+
 
 /**
  * @brief An internal self-test for Blake2s-256.
  */
 int blake2s_self_test(void)
 {
-    static const char in[] = "The quick brown fox jumps over the lazy dog|"
+    static const char in_1[] = "The quick brown fox jumps over the lazy dog|"
         "The quick brown fox jumps over the lazy dog";
-    static const uint8_t ref[32] = {
+    static const uint8_t ref_1[32] = {
         0xad, 0xd6, 0x41, 0x6a,  0x0c, 0x13, 0xa8, 0x35,
         0xf0, 0xba, 0xe3, 0x53,  0x69, 0x8b, 0x1c, 0x02,
         0x52, 0x70, 0x34, 0xaa,  0xd4, 0x60, 0x08, 0x5d,
         0x02, 0x74, 0x5b, 0x78,  0xc9, 0x65, 0x92, 0x84
     };
-    uint8_t out[32];
-    blake2s_256(out, in, blake2s_strlen(in));
-    for (size_t i = 0; i < 32; i++) {
-        if (out[i] != ref[i])
-            return -1;
-    }
 
-    if (blake2s_selftest_prng() == -1) {
+    static const char in_2[] = "";
+    static const uint8_t ref_2[32] = {
+        0x69, 0x21, 0x7A, 0x30,  0x79, 0x90, 0x80, 0x94, 
+        0xE1, 0x11, 0x21, 0xD0,  0x42, 0x35, 0x4A, 0x7C,
+        0x1F, 0x55, 0xB6, 0x48,  0x2C, 0xA1, 0xA5, 0x1E,
+        0x1B, 0x25, 0x0D, 0xFD,  0x1E, 0xD0, 0xEE, 0xF9
+    };
+    static const char in_3[] = "abc"; // From RFC 7693
+    static const uint8_t ref_3[32] = {
+        0x50, 0x8C, 0x5E, 0x8C,  0x32, 0x7C, 0x14, 0xE2,
+        0xE1, 0xA7, 0x2B, 0xA3,  0x4E, 0xEB, 0x45, 0x2F,
+        0x37, 0x45, 0x8B, 0x20,  0x9E, 0xD6, 0x3A, 0x29,
+        0x4D, 0x99, 0x9B, 0x4C,  0x86, 0x67, 0x59, 0x82
+    };
+
+    if (blake2s_selftest_string(ref_1, in_1) == -1 ||
+        blake2s_selftest_string(ref_2, in_2) == -1 ||
+        blake2s_selftest_string(ref_3, in_3) == -1 ||
+        blake2s_selftest_prng()) {
         return -1;
+    } else {
+        return 0;
     }
-
-    return 0;
 }

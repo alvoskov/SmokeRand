@@ -226,7 +226,7 @@ static inline uint64_t get_bits_c99_raw(void *state)
     return obj->out.w32[obj->pos++];
 }
 
-MAKE_GET_BITS_WRAPPERS(c99);
+MAKE_GET_BITS_WRAPPERS(c99)
 
 static inline uint64_t get_bits_c99ctr32_raw(void *state)
 {
@@ -239,7 +239,7 @@ static inline uint64_t get_bits_c99ctr32_raw(void *state)
     return obj->out.w32[obj->pos++];
 }
 
-MAKE_GET_BITS_WRAPPERS(c99ctr32);
+MAKE_GET_BITS_WRAPPERS(c99ctr32)
 
 
 /**
@@ -390,7 +390,7 @@ static inline uint64_t get_bits_avx_raw(void *state)
     return obj->out.w32[obj->pos++];
 }
 
-MAKE_GET_BITS_WRAPPERS(avx);
+MAKE_GET_BITS_WRAPPERS(avx)
 
 
 static inline uint64_t get_bits_avxctr32_raw(void *state)
@@ -404,7 +404,7 @@ static inline uint64_t get_bits_avxctr32_raw(void *state)
     return obj->out.w32[obj->pos++];
 }
 
-MAKE_GET_BITS_WRAPPERS(avxctr32);
+MAKE_GET_BITS_WRAPPERS(avxctr32)
 
 
 /////////////////////////////////////////////////////
@@ -606,7 +606,7 @@ static uint64_t get_bits_vector_raw(void *state)
     return obj->out.w32[obj->pos++];
 }
 
-MAKE_GET_BITS_WRAPPERS(vector);
+MAKE_GET_BITS_WRAPPERS(vector)
 
 static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
 {

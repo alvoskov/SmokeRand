@@ -86,7 +86,7 @@ static inline uint64_t get_bits_full_raw(void *state)
     return MT19937x64State_next(state);
 }
 
-MAKE_GET_BITS_WRAPPERS(full);
+MAKE_GET_BITS_WRAPPERS(full)
 
 
 
@@ -148,7 +148,7 @@ static inline uint64_t get_bits_brief_raw(void *state)
     return MT19937x64State_next_brief(state);
 }
 
-MAKE_GET_BITS_WRAPPERS(brief);
+MAKE_GET_BITS_WRAPPERS(brief)
 
 
 void *create_brief(const GeneratorInfo *gi, const CallerAPI *intf)

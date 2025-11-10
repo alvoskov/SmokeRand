@@ -28,12 +28,10 @@ typedef struct {
     uint64_t c;
 } Sapparot2x64State;
 
+#define PHI 0x9E3779B97F4A7C55U
+#define C_RTR 13
+#define C_SH  58
 
-enum {
-    PHI = 0x9E3779B97F4A7C55ULL,
-    C_RTR = 13,
-    C_SH = 58
-};
 
 static inline uint64_t get_bits_raw(void *state)
 {

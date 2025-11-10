@@ -78,4 +78,4 @@ int run_self_test(const CallerAPI *intf)
     return u == u_ref;
 }
 
-MAKE_UINT32_PRNG("xoshiro128++", run_self_test);
+MAKE_UINT32_PRNG("xoshiro128++", run_self_test)

@@ -32,10 +32,7 @@ typedef struct {
     uint64_t x;
 } RrmxmxState;
 
-
-enum {
-    GAMMA_GOLDEN = 0x9E3779B97F4A7C15
-};
+#define GAMMA_GOLDEN 0x9E3779B97F4A7C15U
 
 /**
  * @brief The RRMXMX implementation that uses the default gamma (fractional

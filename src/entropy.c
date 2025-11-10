@@ -245,9 +245,6 @@ static MachineID get_machine_id()
         NULL, &type, (LPBYTE)value, &size) == ERROR_SUCCESS) {
         blake2s_128(machine_id.u8, value, strlen(value));
     }
-    //for (int i = 0; value[i] != 0; i++) {
-    //    printf("%c", (unsigned char) value[i]);
-    //}
     RegCloseKey(key);
 #elif defined(__DJGPP__)
     // DJGPP DOS: calculate ROM BIOS checksum
@@ -263,7 +260,7 @@ static MachineID get_machine_id()
 #elif defined(DOS386_PLATFORM)
     // DOS: calculate ROM BIOS checksum
     uint64_t *bios_data = (uint64_t *) 0xF0000;
-    blake2s_128(machine.id, bios_data, 65536u);
+    blake2s_128(machine_id.u8, bios_data, 65536u);
     (void) value;
 #else
     // UNIX: try to find a file with machine ID
@@ -576,16 +573,16 @@ void Entropy_init(Entropy *obj)
 {
     EntropyBuffer *ent_buf = calloc(1, sizeof(EntropyBuffer));
     uint32_t key[8] = {0, 0, 0, 0,  0, 0, 0, 0};
-    uint64_t timestamp = (uint64_t) time(NULL);
-    uint64_t cpu = cpuclock();
+    // 256 bits of entropy from system CSPRNG
     int csprng_present = fill_from_random_device(&ent_buf->u8[0], 8 * sizeof(uint32_t));
     //for (size_t i = 0; i < 4; i++) {
     //    printf("%8.8" PRIX64 " ", ent_buf->u64[i]);
     //}
-    // 256 bits of entropy from system CSPRNG
-    if (!csprng_present) {
+    if (csprng_present) {
+        fprintf(stderr, "System CSPRNG is available and was used\n");
+    } else {
         fprintf(stderr,
-            "Warning: system CSPRNG is unaccessible. An internal seeder will be used.\n");
+            "Warning: system CSPRNG is unaccessible. Fallback entropy sources will be used.\n");
 #ifdef DOS386_PLATFORM
         dos386_random_rdtsc(stderr, &ent_buf->u64[0], 2);
 #endif
@@ -595,6 +592,8 @@ void Entropy_init(Entropy *obj)
         ent_buf->u64[i] = call_rdseed();
     }
     // Some fallback entropy sources
+    uint64_t timestamp = (uint64_t) time(NULL);
+    uint64_t cpu = cpuclock();
     MachineID machine_id = get_machine_id();
     ent_buf->u64[8] = timestamp;
     ent_buf->u64[9] = cpu;
@@ -603,7 +602,7 @@ void Entropy_init(Entropy *obj)
     ent_buf->u64[12] = get_tick_count();
     ent_buf->u64[13] = get_current_process_id();
     if (!csprng_present || 1) {
-        fprintf(stderr, "Time stamp:   0x%16.16" PRIx64 "; ", timestamp);
+        fprintf(stderr, "Time stamp:   0x%16.16" PRIx64 "\n", timestamp);
         fprintf(stderr, "CPU ticks:    0x%16.16" PRIx64 "\n", cpu);
         fprintf(stderr, "Machine ID:   0x%16.16" PRIx64 "-0x%16.16" PRIx64 "\n",
             ent_buf->u64[10], ent_buf->u64[11]);
