@@ -24,8 +24,8 @@
  */
 #ifndef __SMOKERAND_ENTROPY_H
 #define __SMOKERAND_ENTROPY_H
-#include <stdint.h>
 #include <stdio.h>
+#include <stdint.h>
 
 /**
  * @brief Entry for seeds logger.
@@ -56,7 +56,7 @@ typedef struct {
     {0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0}, 0 \
 }
 
-void ChaCha20State_init(ChaCha20State *obj, const uint32_t *key);
+void ChaCha20State_init(ChaCha20State *obj, const uint32_t *key, uint64_t nonce);
 void ChaCha20State_generate(ChaCha20State *obj);
 uint32_t ChaCha20State_next32(ChaCha20State *obj);
 uint64_t ChaCha20State_next64(ChaCha20State *obj);
@@ -90,22 +90,22 @@ typedef struct {
 
 #define ENTROPY_INITIALIZER { CHACHA20STATE_INITIALIZER, NULL, 0, 0, 0 }
 
-static inline int Entropy_is_init(const Entropy *obj)
-{
-    return obj->gen.x[0] == 0x61707865 && obj->gen.x[1] == 0x3320646e &&
-           obj->gen.x[2] == 0x79622d32 && obj->gen.x[3] == 0x6b206574;
-}
-
-
 void Entropy_init(Entropy *obj);
 void Entropy_init_from_key(Entropy *obj, const uint32_t *key, uint64_t nonce);
 void Entropy_init_from_textseed(Entropy *obj, const char *seed);
 int Entropy_init_from_base64_seed(Entropy *obj, const char *seed);
 void Entropy_free(Entropy *obj);
 const uint32_t *Entropy_get_key(const Entropy *obj);
+char *Entropy_get_base64_key(const Entropy *obj);
 uint64_t Entropy_seed64(Entropy *obj, uint64_t thread_id);
 void Entropy_print_seeds_log(const Entropy *obj, FILE *fp);
 uint64_t call_rdseed();
 uint64_t cpuclock(void);
+
+static inline int Entropy_is_init(const Entropy *obj)
+{
+    return obj->gen.x[0] == 0x61707865 && obj->gen.x[1] == 0x3320646e &&
+           obj->gen.x[2] == 0x79622d32 && obj->gen.x[3] == 0x6b206574;
+}
 
 #endif // __SMOKERAND_ENTROPY_H

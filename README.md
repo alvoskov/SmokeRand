@@ -840,7 +840,7 @@ There are only two problematic situations:
  rc4ok             | u32    | +       | +     | +       | +    | 6.2  | N/A    | 4.5   | +       | >= 32 TiB
  romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      | 4(0)  |         | >= 32 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
- sapparot          | u32    | +       | 1     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
+ sapparot          | u32    | +       | 2     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
  sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4(0)  |         | >= 16 TiB
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB

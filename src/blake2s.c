@@ -169,7 +169,7 @@ int blake2s_init(blake2s_state *obj, size_t outlen,
 {
     // Check input parameters
     if (outlen == 0 || outlen > BLAKE2S_OUTBYTES || keylen > BLAKE2S_KEYBYTES) {
-        return -1;
+        return BLAKE2S_FAILURE;
     }
     for (size_t i = 0; i < 8; i++)      // state, "param block"
         obj->h[i] = blake2s_iv[i];
@@ -183,7 +183,7 @@ int blake2s_init(blake2s_state *obj, size_t outlen,
         blake2s_update(obj, key, keylen);
         obj->c = BLAKE2S_BLOCKBYTES;    // at the end
     }
-    return 0;
+    return BLAKE2S_SUCCESS;
 }
 
 
@@ -236,11 +236,11 @@ int blake2s(void *out, size_t outlen,
 {
     blake2s_state obj;
     if (blake2s_init(&obj, outlen, key, keylen)) {
-        return -1;
+        return BLAKE2S_FAILURE;
     }
     blake2s_update(&obj, in, inlen);
     blake2s_final(&obj, out);
-    return 0;
+    return BLAKE2S_SUCCESS;
 }
 
 
@@ -282,7 +282,7 @@ static int blake2s_selftest_prng()
 
     // 256-bit hash for testing.
     if (blake2s_init(&obj, 32, NULL, 0)) {
-        return -1;
+        return BLAKE2S_FAILURE;
     }
 
     for (size_t i = 0; i < 4; i++) {
@@ -304,9 +304,9 @@ static int blake2s_selftest_prng()
     blake2s_final(&obj, md);
     for (size_t i = 0; i < 32; i++) {
         if (md[i] != blake2s_res[i])
-            return -1;
+            return BLAKE2S_FAILURE;
     }
-    return 0;
+    return BLAKE2S_SUCCESS;
 }
 
 static int blake2s_selftest_string(const uint8_t *ref, const char *str)
@@ -317,16 +317,16 @@ static int blake2s_selftest_string(const uint8_t *ref, const char *str)
     blake2s_256(out, str, len);
     for (size_t i = 0; i < 32; i++) {
         if (out[i] != ref[i])
-            return -1;
+            return BLAKE2S_FAILURE;
     }
-    return 0;
+    return BLAKE2S_SUCCESS;
 }
 
 
 /**
  * @brief An internal self-test for Blake2s-256.
  */
-int blake2s_self_test(void)
+int blake2s_selftest(void)
 {
     static const char in_1[] = "The quick brown fox jumps over the lazy dog|"
         "The quick brown fox jumps over the lazy dog";
@@ -352,12 +352,12 @@ int blake2s_self_test(void)
         0x4D, 0x99, 0x9B, 0x4C,  0x86, 0x67, 0x59, 0x82
     };
 
-    if (blake2s_selftest_string(ref_1, in_1) == -1 ||
-        blake2s_selftest_string(ref_2, in_2) == -1 ||
-        blake2s_selftest_string(ref_3, in_3) == -1 ||
+    if (blake2s_selftest_string(ref_1, in_1) == BLAKE2S_FAILURE ||
+        blake2s_selftest_string(ref_2, in_2) == BLAKE2S_FAILURE ||
+        blake2s_selftest_string(ref_3, in_3) == BLAKE2S_FAILURE ||
         blake2s_selftest_prng()) {
-        return -1;
+        return BLAKE2S_FAILURE;
     } else {
-        return 0;
+        return BLAKE2S_SUCCESS;
     }
 }

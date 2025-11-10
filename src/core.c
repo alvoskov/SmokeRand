@@ -898,6 +898,7 @@ void TestsBattery_print_info(const TestsBattery *obj)
     printf("\n\n");
 }
 
+
 /**
  * @brief Runs the given battery of the statistical test for the given
  * pseudorandom number generator.
@@ -982,19 +983,18 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     }
     printf("Generator name:    %s\n", gen->name);
     printf("Output size, bits: %d\n", (int) gen->nbits);
-    const uint32_t *seed_key = Entropy_get_key(&entropy);
-    char *seed_key_txt = sr_u32_bigendian_to_base64(seed_key, 8);
+    char *seed_key_txt = Entropy_get_base64_key(&entropy);
     if (seed_key_txt != NULL) {
         printf("Used seed:         _%.2X_%s\n\n", nthreads, seed_key_txt);
     } else {
-        printf("Used seed:         _%.2X_???\n\n", nthreads);
+        printf("Used seed:         none\n\n");
     }
     TestResultsSummary summary =
         TestResults_print_report(results, nresults, toc - tic, rtype);
     if (seed_key_txt != NULL) {
         printf("Used seed:     _%.2X_%s\n", nthreads, seed_key_txt);
     } else {
-        printf("Used seed:     _%.2X_???\n", nthreads);
+        printf("Used seed:     none\n");
     }
     free(seed_key_txt);
     free(results);

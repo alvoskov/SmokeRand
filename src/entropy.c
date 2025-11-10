@@ -56,7 +56,8 @@ static inline void chacha_qround(uint32_t *x, size_t ai, size_t bi, size_t ci, s
     x[ci] += x[di]; x[bi] ^= x[ci]; x[bi] = rotl32(x[bi], 7);
 }
 
-void ChaCha20State_init(ChaCha20State *obj, const uint32_t *key)
+
+void ChaCha20State_init(ChaCha20State *obj, const uint32_t *key, uint64_t nonce)
 {
     // Constants: the upper row of the matrix
     obj->x[0] = 0x61707865; obj->x[1] = 0x3320646e;
@@ -66,9 +67,10 @@ void ChaCha20State_init(ChaCha20State *obj, const uint32_t *key)
         obj->x[i + 4] = key[i];
     }
     // Row 3: counter and nonce
-    for (size_t i = 12; i <= 15; i++) {
-        obj->x[i] = 0;
-    }
+    obj->x[12] = 0;
+    obj->x[13] = 0;
+    obj->x[14] = (uint32_t) nonce;
+    obj->x[15] = (uint32_t) (nonce >> 32);
     // Output counter
     obj->pos = 16;
 }
@@ -95,6 +97,7 @@ void ChaCha20State_generate(ChaCha20State *obj)
     }
 }
 
+
 static void ChaCha20State_inc_counter(ChaCha20State *obj)
 {
     if (++obj->x[12] == 0) {
@@ -102,11 +105,6 @@ static void ChaCha20State_inc_counter(ChaCha20State *obj)
     }
 }
 
-static void ChaCha20State_set_nonce(ChaCha20State *obj, uint64_t nonce)
-{
-    obj->x[14] = (uint32_t) nonce;
-    obj->x[15] = (uint32_t) (nonce >> 32);
-}
 
 uint32_t ChaCha20State_next32(ChaCha20State *obj)
 {
@@ -118,6 +116,7 @@ uint32_t ChaCha20State_next32(ChaCha20State *obj)
     return obj->out[obj->pos++];
 }
 
+
 uint64_t ChaCha20State_next64(ChaCha20State *obj)
 {
     uint64_t lo = ChaCha20State_next32(obj);
@@ -126,7 +125,7 @@ uint64_t ChaCha20State_next64(ChaCha20State *obj)
 }
 
 
-int chacha20_self_test(void)
+static int chacha20_selftest(void)
 {
     static const uint32_t x_init[] = { // Input values
         0x03020100,  0x07060504,  0x0b0a0908,  0x0f0e0d0c,
@@ -134,13 +133,13 @@ int chacha20_self_test(void)
         0x00000001,  0x09000000,  0x4a000000,  0x00000000
     };
     static const uint32_t out_final[] = { // Refernce values from RFC 7359
-       0xe4e7f110,  0x15593bd1,  0x1fdd0f50,  0xc47120a3,
-       0xc7f4d1c7,  0x0368c033,  0x9aaa2204,  0x4e6cd4c3,
-       0x466482d2,  0x09aa9f07,  0x05d7c214,  0xa2028bd9,
-       0xd19c12b5,  0xb94e16de,  0xe883d0cb,  0x4e3c50a2
+        0xe4e7f110,  0x15593bd1,  0x1fdd0f50,  0xc47120a3,
+        0xc7f4d1c7,  0x0368c033,  0x9aaa2204,  0x4e6cd4c3,
+        0x466482d2,  0x09aa9f07,  0x05d7c214,  0xa2028bd9,
+        0xd19c12b5,  0xb94e16de,  0xe883d0cb,  0x4e3c50a2
     };
     ChaCha20State obj;
-    ChaCha20State_init(&obj, x_init);
+    ChaCha20State_init(&obj, x_init, 0);
     for (size_t i = 0; i < 4; i++) {
         obj.x[i + 12] = x_init[i + 8];
     }
@@ -153,10 +152,9 @@ int chacha20_self_test(void)
     return 1;
 }
 
-
 int entfuncs_test(void)
 {
-    return chacha20_self_test() && (blake2s_self_test() != -1);
+    return chacha20_selftest() && (blake2s_selftest() == BLAKE2S_SUCCESS);
 }
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
@@ -491,8 +489,7 @@ typedef union {
  */
 void Entropy_init_from_key(Entropy *obj, const uint32_t *key, uint64_t nonce)
 {
-    ChaCha20State_init(&obj->gen, key);
-    ChaCha20State_set_nonce(&obj->gen, nonce);
+    ChaCha20State_init(&obj->gen, key, nonce);
     obj->slog_len = 1 << 8;
     obj->slog_maxlen = 1 << 20;
     obj->slog = calloc(obj->slog_len, sizeof(SeedLogEntry));
@@ -631,6 +628,21 @@ const uint32_t *Entropy_get_key(const Entropy *obj)
     return &(obj->gen.x[4]);
 }
 
+/**
+ * @brief Returns dynamically allocated buffer with base64 representation
+ * of the key returned by the Entropy_get_key function. If Entropy class
+ * is not initialized then NULL will be returned.
+ * @return Buffer with ASCIIZ string with base64 key representation, must
+ * be deallocated by `free` function by the caller.
+ */
+char *Entropy_get_base64_key(const Entropy *obj)
+{
+    if (Entropy_is_init(obj)) {
+        return sr_u32_bigendian_to_base64(Entropy_get_key(obj), 8);
+    } else {
+        return NULL;
+    }
+}
 
 /**
  * @brief Returns 64-bit random seed. Hardware RNG is used

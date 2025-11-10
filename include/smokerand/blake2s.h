@@ -57,9 +57,11 @@
 
 enum blake2s_constant
 {
+    BLAKE2S_FAILURE    = -1,
+    BLAKE2S_SUCCESS    = 0,
     BLAKE2S_BLOCKBYTES = 64,
     BLAKE2S_KEYBYTES   = 32,
-    BLAKE2S_OUTBYTES   = 32,
+    BLAKE2S_OUTBYTES   = 32
 };
 
 /**
@@ -91,6 +93,6 @@ static inline int blake2s_128(void *out, const void *in, size_t inlen)
     return blake2s(out, 16, NULL, 0, in, inlen);
 }
 
-int blake2s_self_test(void);
+int blake2s_selftest(void);
 
 #endif // __SMOKERAND_BLAKE2S_H

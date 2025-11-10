@@ -593,6 +593,17 @@ void EXPORT ChaChaVec_block(ChaChaVecState *obj)
 #endif
 }
 
+/*
+static inline size_t pos_to_vec_ind(size_t pos)
+{
+    size_t in_offset = ( ((pos << 1) & 0xF8) + (pos & 0x3) ) & 0x3F;
+    size_t out_offset = (pos >> 3) & 0xFC;
+    return in_offset + out_offset;
+//    size_t in_offset = ( ((pos >> 2) << 3) + (pos & 0x3) ) & 0x3F;
+//    size_t out_offset = (pos >> 5) << 2;
+    return in_offset + out_offset;
+}
+*/
 
 
 static uint64_t get_bits_vector_raw(void *state)
@@ -603,6 +614,9 @@ static uint64_t get_bits_vector_raw(void *state)
         ChaChaVec_block(obj);
         obj->pos = 0;
     }
+    
+//    size_t ind = pos_to_vec_ind(obj->pos++);
+//    return obj->out.w32[ind];
     return obj->out.w32[obj->pos++];
 }
 
