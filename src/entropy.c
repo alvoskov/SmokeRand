@@ -248,13 +248,13 @@ static MachineID get_machine_id()
     RegCloseKey(key);
 #elif defined(__DJGPP__)
     // DJGPP DOS: calculate ROM BIOS checksum
-    uint64_t bios_buf = malloc(8192, sizeof(uint64_t));
-    for (int i = 0; i < 8192; i++) {
-        uint64_t lo = _farpeekl(_dos_ds, 0xF0000 + 8*i);
-        uint64_t hi = _farpeekl(_dos_ds, 0xF0000 + 8*i + 4);
-        uint64_t bios_buf[i] = (hi << 32) | lo;
+    uint64_t *bios_buf = malloc(8192 * sizeof(uint64_t));
+    for (unsigned int i = 0; i < 8192; i++) {
+        uint64_t lo = _farpeekl(_dos_ds, 0xF0000U + 8*i);
+        uint64_t hi = _farpeekl(_dos_ds, 0xF0000U + 8*i + 4);
+        bios_buf[i] = (hi << 32) | lo;
     }
-    blake2s_128(machine_id.u8, bios_buf, 65536u);
+    blake2s_128(machine_id.u8, bios_buf, 65536U);
     free(bios_buf);
     (void) value;
 #elif defined(DOS386_PLATFORM)
@@ -357,9 +357,9 @@ uint64_t cpuclock(void)
  * @brief Calculate number of bits required to represent the input value
  * without leading zeros.
  */
-static int dos386_get_nbits(uint64_t value)
+static unsigned int dos386_get_nbits(uint64_t value)
 {
-    int nbits = 0;
+    unsigned int nbits = 0;
     while (value != 0) {
         value >>= 1;
         nbits++;
@@ -394,7 +394,7 @@ static int dos386_random_rdtsc(FILE *fp, uint64_t *out, size_t len)
     uint64_t rdtsc_prev = __rdtsc(), delta_prev = 0;
     uint64_t accum = dos386_get_bios_pit();
     for (size_t i = 0; i < len; i++) {
-        int nbits_total = 0;
+        size_t nbits_total = 0;
         for (int j = 0; j < 64 && nbits_total < 128; j++) {
             // Wait for the next tick of the PIT
             for (uint32_t t = dos386_get_bios_pit(); t == dos386_get_bios_pit(); ) {
@@ -413,7 +413,7 @@ static int dos386_random_rdtsc(FILE *fp, uint64_t *out, size_t len)
             rdtsc_prev = rdtsc_cur;
             delta_prev = delta_cur;
             // Add extracted bits to the accumulator
-            int nbits = dos386_get_nbits(rndbits);
+            size_t nbits = dos386_get_nbits(rndbits);
             nbits_total += nbits;
             if (nbits != 0) {
                 accum = (accum << nbits) | (accum >> (64 - nbits));

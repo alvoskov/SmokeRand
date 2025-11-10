@@ -502,7 +502,7 @@ static void Ising2DLattice_flip_wolff_internal(Ising2DLattice *obj, size_t ind, 
     GeneratorState *gs, const uint64_t p_int)
 {
     // Flip spin
-    obj->s[ind] = -s0;
+    obj->s[ind] = (int8_t) (-s0);
     // Go to neighbours
     for (size_t i = 0; i < 4; i++) {
         size_t nn_ind = obj->nn[ind].inds[i];
@@ -561,10 +561,10 @@ void Ising2DLattice_pass_metropolis(Ising2DLattice *obj, GeneratorState *gs)
         }
         const double dE = (n_same - 2) * 4;
         if (dE < 0) {
-            obj->s[i] = -obj->s[i];
+            obj->s[i] = (int8_t) (-obj->s[i]);
         } else {
             if (n_same_to_p_int[n_same] > gs->gi->get_bits(gs->state)) {
-                obj->s[i] = -obj->s[i];
+                obj->s[i] = (int8_t) (-obj->s[i]);
             }
         }
     }
