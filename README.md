@@ -1182,6 +1182,18 @@ are less sensitive, e.g. entropy test catches only randu.
 
 # Versions history
 
+10.11.2025: SmokeRand 0.41
+
+- The `--seed` command line key was added, it allows to use two kinds of seeds
+  for the internal seeder based on Blake2s and ChaCha20. Their usage allows to
+  fully reproduce any test battery run for deterministic PRNG.
+- Tests dispatcher for multithreaded mode made fully deterministic that made
+  fully reproducible runs possible.
+- Improvements and bugfixes in initialization procedures of several PRNGs.
+- Code cleanup and some bugfixes after `-Wconversion` and `-Wpedantic` flags.
+- License texts for Blake2s and MIXMAX were added.
+- Some scripts for PRNG self-tests and `express` battery runs were added.
+
 25.10.2025: SmokeRand 0.40
 
 - DJGPP preliminary support; plugins with pseudorandom number generators are
