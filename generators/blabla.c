@@ -183,7 +183,7 @@ static inline uint64_t get_bits_vector_raw(void *state)
     return x;
 }
 
-MAKE_GET_BITS_WRAPPERS(vector);
+MAKE_GET_BITS_WRAPPERS(vector)
 
 
 //////////////////////////////////////////
@@ -242,7 +242,7 @@ static inline uint64_t get_bits_scalar_raw(void *state)
 }
 
 
-MAKE_GET_BITS_WRAPPERS(scalar);
+MAKE_GET_BITS_WRAPPERS(scalar)
 
 //////////////////////
 ///// Interfaces /////

@@ -47,9 +47,8 @@ PRNG_CMODULE_PROLOG
 #include "smokerand/x86exts.h"
 #endif
 
-enum {
-    XXTEA_DELTA = 0x9e3779b9, ///< Increment for round keys.
-};
+// Increment for round keys.
+#define XXTEA_DELTA 0x9e3779b9U
 
 enum {
     XXTEA_NCOPIES = 8, ///< Number of generator copies inside the state.

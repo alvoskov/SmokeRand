@@ -1,6 +1,7 @@
 #include "smokerand/pe32loader.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include <string.h>
 
 #define ERRMSG_MAXLEN 256
@@ -35,32 +36,56 @@ void execbuffer_free(void *buf)
 }
 #endif
 
-static inline uint32_t read_u32(FILE *fp, unsigned int offset)
+static inline uint32_t read_u32(FILE *fp, uint32_t offset)
 {
     uint32_t tmp;
-    fseek(fp, offset, SEEK_SET);
+    fseek(fp, (long) offset, SEEK_SET);
     if (fread(&tmp, sizeof(tmp), 1, fp) != 1) {
         return 0;
     }
     return tmp;
 }
 
-static inline uint16_t read_u16(FILE *fp, unsigned int offset)
+static inline uint16_t read_u16(FILE *fp, uint32_t offset)
 {
     uint16_t tmp;
-    fseek(fp, offset, SEEK_SET);
+    fseek(fp, (long) offset, SEEK_SET);
     if (fread(&tmp, sizeof(tmp), 1, fp) != 1) {
         return 0;
     }
     return tmp;
 }
+
+static inline uint32_t get_u32_le_from_u8(const uint8_t *buf)
+{
+    return (((uint32_t) buf[0]) << 0)  |
+           (((uint32_t) buf[1]) << 8)  |
+           (((uint32_t) buf[2]) << 16) |
+           (((uint32_t) buf[3]) << 24);
+}
+
+
+static inline void set_u32_le_to_u8(uint8_t *buf, uint32_t value)
+{
+    buf[0] = value & 0xFF;
+    buf[1] = (value >> 8) & 0xFF;
+    buf[2] = (value >> 16) & 0xFF;
+    buf[3] = (value >> 24) & 0xFF;
+}
+
+
+static inline uint16_t get_u16_le_from_u8(const uint8_t *buf)
+{
+    return (uint16_t) ( ((uint16_t) buf[0]) | (((uint16_t) buf[1]) << 8) );
+}
+
 
 /**
  * @brief Checks some "magic" signatures of PE32 format and returns
  * an offset of PE header.
  * @return PE header offset or 0 in the case of failure.
  */
-int get_pe386_offset(FILE *fp)
+uint32_t get_pe386_offset(FILE *fp)
 {
     uint32_t pe_offset;
     if (read_u16(fp, 0) != 0x5A4D) { // MZ
@@ -101,10 +126,10 @@ int PE32BasicInfo_init(PE32BasicInfo *peinfo, FILE *fp, uint32_t pe_offset)
         peinfo->nsections = 0;
         return 0;
     }
-    unsigned int offset = pe_offset + 0xF8;
-    for (int i = 0; i < peinfo->nsections; i++) {
+    uint32_t offset = pe_offset + 0xF8;
+    for (unsigned int i = 0; i < peinfo->nsections; i++) {
         PE32SectionInfo *sect = &peinfo->sections[i];
-        fseek(fp, offset, SEEK_SET);
+        fseek(fp, (long) offset, SEEK_SET);
         if (fread(sect->name, 8, 1, fp) != 1) {
             return 0;
         }
@@ -120,20 +145,20 @@ int PE32BasicInfo_init(PE32BasicInfo *peinfo, FILE *fp, uint32_t pe_offset)
 
 void PE32BasicInfo_print(const PE32BasicInfo *peinfo)
 {
-    printf("nsections:  %d\n", (int) peinfo->nsections);
-    printf("ep rva:     %lX\n", (unsigned long) peinfo->entrypoint_rva);
-    printf("imagebase:  %lX\n", (unsigned long) peinfo->imagebase);
-    printf("export_dir: %lX\n", (unsigned long) peinfo->export_dir);
-    printf("import_dir: %lX\n", (unsigned long) peinfo->import_dir);
-    printf("reloc_dir:  %lX\n", (unsigned long) peinfo->reloc_dir);
-
-    for (int i = 0; i < peinfo->nsections; i++) {
+    printf("nsections:  %u\n", peinfo->nsections);
+    printf("ep rva:     %" PRIX32 "\n", peinfo->entrypoint_rva);
+    printf("imagebase:  %" PRIX32 "\n", peinfo->imagebase);
+    printf("export_dir: %" PRIX32 "\n", peinfo->export_dir);
+    printf("import_dir: %" PRIX32 "\n", peinfo->import_dir);
+    printf("reloc_dir:  %" PRIX32 "\n", peinfo->reloc_dir);
+    printf("%12s  %8s %8s %8s %8s\n",
+        "Name", "virtsize", "virtaddr", "physsize", "physaddr");
+    for (unsigned int i = 0; i < peinfo->nsections; i++) {
         PE32SectionInfo *sect = &peinfo->sections[i];
-        printf("%s: %lX %lX %lX %lX\n", sect->name,
-            (unsigned long) sect->virtual_size,
-            (unsigned long) sect->virtual_addr,
-            (unsigned long) sect->physical_size,
-            (unsigned long) sect->physical_addr);
+        printf("%12s: %8.8" PRIX32" %8.8" PRIX32 " %8.8" PRIX32 " %8.8" PRIX32 "\n",
+            sect->name,
+            sect->virtual_size, sect->virtual_addr,
+            sect->physical_size, sect->physical_addr);
     }
 }
 
@@ -170,8 +195,21 @@ uint32_t PE32BasicInfo_get_membuf_size(PE32BasicInfo *info)
  */
 static inline uint32_t PE32MemoryImage_get_u32(const PE32MemoryImage *obj, uint32_t rva)
 {
-    return *( (uint32_t *) (obj->img + rva) );
+    return get_u32_le_from_u8(obj->img + rva);
 }
+
+
+static inline uint16_t PE32MemoryImage_get_u16(const PE32MemoryImage *obj, uint32_t rva)
+{
+    return get_u16_le_from_u8(obj->img + rva);
+}
+
+
+static inline void PE32MemoryImage_put_u32(PE32MemoryImage *obj, uint32_t rva, uint32_t value)
+{
+    set_u32_le_to_u8(obj->img + rva, value);
+}
+
 
 /**
  * @brief Return the function address from the PE32 executable file export table.
@@ -182,7 +220,7 @@ static inline uint32_t PE32MemoryImage_get_u32(const PE32MemoryImage *obj, uint3
  */
 void *PE32MemoryImage_get_func_addr(const PE32MemoryImage *obj, const char *func_name)
 {
-    for (int i = 0; i < obj->nexports; i++) {
+    for (unsigned int i = 0; i < obj->nexports; i++) {
         int ord = obj->exports_ords[i];
         if (!strcmp(func_name, obj->exports_names[i])) {
             return obj->exports_addrs[ord];
@@ -210,29 +248,29 @@ void PE32MemoryImage_destruct(PE32MemoryImage *obj)
 int PE32MemoryImage_apply_relocs(PE32MemoryImage *img, PE32BasicInfo *info)
 {
     uint8_t *buf = img->img;
-    uint32_t imagebase_real = (uint32_t) ((size_t) buf);
-    uint32_t *relocs = (uint32_t *) (buf + info->reloc_dir);
-    uint32_t offset = imagebase_real - info->imagebase;
-    for (uint32_t *r = relocs; r[0] != 0; ) {
-        uint32_t rva = r[0];
-        uint32_t nbytes = r[1];
-        uint32_t nrelocs = (r[1] - 8) / 2;
-        printf("Reloc. chunk: rva=%lX, nbytes=%lX, nrelocs=%lX\n",
-            (unsigned long) rva,
-            (unsigned long) nbytes,
-            (unsigned long) nrelocs);
-        uint16_t *re = (uint16_t *) (r + 2);
+    const uint32_t imagebase_real = (uint32_t) ((size_t) buf);
+    const uint32_t offset = imagebase_real - info->imagebase;
+    uint32_t rva;
+    for (uint32_t r = info->reloc_dir;
+        (rva = PE32MemoryImage_get_u32(img, r)) != 0; ) {
+        const uint32_t nbytes = PE32MemoryImage_get_u32(img, r + 4);
+        const uint32_t nrelocs = (nbytes - 8) / 2;
+        printf("Reloc. chunk: rva=%" PRIX32 ", nbytes=%" PRIX32 ", nrelocs=%" PRIX32 "\n",
+            rva, nbytes, nrelocs);
+        const uint32_t re = r + 8;
         for (uint32_t i = 0; i < nrelocs; i++) {
-            if (re[i] >> 12 == 3) {
-                uint32_t reloc_rva = rva + (re[i] & 0x0FFF);
-                uint32_t *reloc_place = (uint32_t *) (buf + reloc_rva);
-                printf("  Reloc: rva=%lX, before=%lX, ",
-                    (unsigned long) reloc_rva, (unsigned long) *reloc_place);
-                *reloc_place += offset;
-                printf("after: %lX\n", (unsigned long) *reloc_place);
+            const uint16_t re_val = PE32MemoryImage_get_u16(img, re + 2*i);
+            if (re_val >> 12 == 3) {
+                uint32_t reloc_rva = rva + (re_val & 0x0FFF);
+                uint32_t reloc_val = PE32MemoryImage_get_u32(img, reloc_rva);
+                printf("  Reloc: rva=%" PRIX32 ", before=%" PRIX32 ", ",
+                    reloc_rva, reloc_val);
+                reloc_val += offset;
+                PE32MemoryImage_put_u32(img, reloc_rva, reloc_val);
+                printf("after: %" PRIX32 "\n", reloc_val);
             }
         }
-        r += (nbytes) / sizeof(uint32_t);
+        r += nbytes;
     }
     return 1;
 }
@@ -251,27 +289,25 @@ int PE32MemoryImage_apply_exports(PE32MemoryImage *img, PE32BasicInfo *info)
     uint32_t *func_names_rva = (uint32_t *) &img->img[func_names_array_rva];
     uint32_t *func_addrs_rva = (uint32_t *) &img->img[func_addrs_array_rva];
     img->exports_ords = (uint16_t *) &img->img[ord_array_rva];
-    printf("nexports: %d\n", img->nexports);
-    printf("addrs rva: %lX\n", (unsigned long) func_addrs_array_rva);
-    printf("names rva: %lX\n", (unsigned long) func_names_array_rva);
-    printf("ord rva: %lX\n", (unsigned long) ord_array_rva);
+    printf("nexports:  %u\n", img->nexports);
+    printf("addrs rva: %" PRIX32 "\n", func_addrs_array_rva);
+    printf("names rva: %" PRIX32 "\n", func_names_array_rva);
+    printf("ord rva:   %" PRIX32 "\n", ord_array_rva);
     // Patch RVAs
     uint32_t imagebase_real = (uint32_t) ((size_t) img->img);
-    for (int i = 0; i < img->nexports; i++) {
+    for (unsigned int i = 0; i < img->nexports; i++) {
         func_names_rva[i] += imagebase_real;
         func_addrs_rva[i] += imagebase_real;
     }
     img->exports_names = (void *) func_names_rva;
     img->exports_addrs = (void *) func_addrs_rva;
 
-    for (int i = 0; i < img->nexports; i++) {
-        int ord = img->exports_ords[i];
+    for (unsigned int i = 0; i < img->nexports; i++) {
+        const int ord = img->exports_ords[i];
+        const unsigned long long addr = (size_t) img->exports_addrs[ord];
+        const unsigned long long base = (size_t) img->img;
         printf("  func=%s, addr=%llX, rva=%llX, ord=%d\n",
-            img->exports_names[i],
-            (unsigned long long) ( (size_t) img->exports_addrs[ord] ),
-            (unsigned long long) ( (size_t) img->exports_addrs[ord] ) -
-                (unsigned long long) ( (size_t) img->img ),
-            ord);
+            img->exports_names[i], addr, addr - base, ord);
     }
     return 1;
 }
@@ -288,7 +324,7 @@ int PE32MemoryImage_apply_imports(PE32MemoryImage *img, PE32BasicInfo *info)
     if (info->import_dir == 0) {
         return 1;
     }
-    uint32_t lookup_rva = PE32MemoryImage_get_u32(img, info->import_dir);
+    const uint32_t lookup_rva = PE32MemoryImage_get_u32(img, info->import_dir);
     if (lookup_rva != 0) {
         snprintf(errmsg, ERRMSG_MAXLEN, "DLL imports are not supported");
         return 0;
@@ -321,9 +357,9 @@ PE32MemoryImage *PE32BasicInfo_load(PE32BasicInfo *info, FILE *fp)
         return NULL;
     }
     uint8_t *buf = img->img;
-    for (int i = 0; i < info->nsections; i++) {
+    for (unsigned int i = 0; i < info->nsections; i++) {
         PE32SectionInfo *sect = &info->sections[i];
-        if (fseek(fp, sect->physical_addr, SEEK_SET) ||
+        if (fseek(fp, (long) sect->physical_addr, SEEK_SET) ||
             fread(buf + sect->virtual_addr, sect->physical_size, 1, fp) != 1) {
             snprintf(errmsg, ERRMSG_MAXLEN, "Cannot read section %d\n", i + 1);
             free(img->img); free(img);
@@ -393,6 +429,7 @@ void *dlopen_pe32dos(const char *libname, int flag)
     }
     PE32BasicInfo peinfo;
     PE32BasicInfo_init(&peinfo, fp, pe_offset);
+    PE32BasicInfo_print(&peinfo);
     PE32MemoryImage *img = PE32BasicInfo_load(&peinfo, fp);
     fclose(fp);
     PE32BasicInfo_destruct(&peinfo);

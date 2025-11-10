@@ -4,9 +4,7 @@
 
 PRNG_CMODULE_PROLOG
 
-enum {
-    GR = 0x9e3779b97f4a7c15
-};
+#define GR 0x9e3779b97f4a7c15U
 
 typedef struct {
     uint64_t old_mix;
