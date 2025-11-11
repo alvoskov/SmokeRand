@@ -121,7 +121,7 @@ BATLIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(BATLIB_SOURCE
 EXEC_NAMES = smokerand sr_tiny calibrate_linearcomp calibrate_dc6 \
     test_base64 test_crand test_funcs test_rdseed
 EXEC_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXEC_NAMES)))
-EXECXX_NAMES = test_cpp11
+EXECXX_NAMES = test_cpp11 test_chacha
 EXECXX_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXECXX_NAMES)))
 
 # Generators
@@ -157,6 +157,9 @@ $(BINDIR)/calibrate_linearcomp$(EXE): $(OBJDIR)/calibrate_linearcomp.o $(CORE_LI
 
 $(BINDIR)/test_base64$(EXE): $(OBJDIR)/test_base64.o $(CORE_LIB) $(BAT_LIB)
 	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
+
+$(BINDIR)/test_chacha$(EXE): $(OBJDIR)/test_chacha.o $(CORE_LIB) $(BAT_LIB)
+	$(CXX) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
 $(BINDIR)/test_cpp11$(EXE): $(OBJDIR)/test_cpp11.o $(CORE_LIB) $(BAT_LIB)
 	$(CXX) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
