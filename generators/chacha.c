@@ -55,6 +55,12 @@ PRNG_CMODULE_PROLOG
 #define CHACHA_VECTOR_AVX2
 #endif
 
+#define CHACHA_CONST0 0x61707865
+#define CHACHA_CONST1 0x3320646e
+#define CHACHA_CONST2 0x79622d32
+#define CHACHA_CONST3 0x6b206574
+
+
 enum {
     GEN_NROUNDS = 12, ///< Number of rounds for ChaCha12
     GEN_NROUNDS_FULL = 20 ///< Number of rounds for ChaCha20
@@ -204,8 +210,8 @@ static inline void ChaCha_inc_counter32(ChaChaState *obj)
 void ChaCha_init(ChaChaState *obj, size_t nrounds, const uint32_t *seed)
 {
     // Constants: the upper row of the matrix
-    obj->x[0] = 0x61707865; obj->x[1] = 0x3320646e;
-    obj->x[2] = 0x79622d32; obj->x[3] = 0x6b206574;
+    obj->x[0] = CHACHA_CONST0; obj->x[1] = CHACHA_CONST1;
+    obj->x[2] = CHACHA_CONST2; obj->x[3] = CHACHA_CONST3;
     // Rows 1-2: seed (key)
     for (size_t i = 0; i < 8; i++) {
         obj->x[i + 4] = seed[i];
@@ -586,8 +592,8 @@ void EXPORT ChaChaVec_init(ChaChaVecState *obj, size_t nrounds, const uint32_t *
         obj->out[i] = 0;
     }
     // Constants: the upper row of the matrix
-    obj->x[0] = 0x61707865; obj->x[1] = 0x3320646e;
-    obj->x[2] = 0x79622d32; obj->x[3] = 0x6b206574;
+    obj->x[0] = CHACHA_CONST0; obj->x[1] = CHACHA_CONST1;
+    obj->x[2] = CHACHA_CONST2; obj->x[3] = CHACHA_CONST3;
     for (size_t i = 0; i < 4; i++) { // From gen.1 to gen.0
         obj->x[i + 4] = obj->x[i];
     }
