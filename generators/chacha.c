@@ -11,7 +11,7 @@
  * This file contains three versions of ChaCha12:
  *
  * - `c99`:  portable version (default, around 3 cpb)
- * - `avx`:  AVX version (faster, aroudn 2-2.5 cpb)
+ * - `avx`:  AVX version (faster, around 2-2.5 cpb)
  * - `avx2`: AVX2 version (fastest, around 1 cpb)
  *
  * Usage of AVX2 (SIMD) instructions gives about 3x speedup.
@@ -850,72 +850,52 @@ static const char description[] =
 "  c99 / c99-12   - portable ChaCha12 version (default, slower)\n"
 "  c99-8          - portable ChaCha8 version\n"
 "  c99-20         - portable ChaCha20 version\n"
+#ifdef CHACHA_VECTOR_INTR
 "  avx / avx-12   - AVX ChaCha12 version (faster)\n"
 "  avx-8          - AVX ChaCha8 version\n"
 "  avx-20         - AVX ChaCha20 version\n"
+#endif
+#ifdef CHACHA_VECTOR_AVX2
 "  avx2 / avx2-12 - AVX2 ChaCha12 version (fastest)\n"
 "  avx2-8         - AVX2 ChaCha8 version\n"
 "  avx2-20        - AVX2 ChaCha20 version\n"
 "  c99-ctr32      - c99 variant with 32-bit counter (WILL FAIL SOME TESTS!)\n"
-"  avx-ctr32      - avx variant with 32-bit counter (WILL FAIL SOME TESTS!)\n";
+"  avx-ctr32      - avx variant with 32-bit counter (WILL FAIL SOME TESTS!)\n"
+#endif
+"";
 
 
 /**
- * @brief ChaCha version description
+ * @brief ChaCha versions description
  */
-typedef struct {
-    const char *key; ///< Key for the `--param=key` command line option.
-    const char *name;
-    void *(*create)(const GeneratorInfo *gi, const CallerAPI *intf);
-    uint64_t (*get_bits)(void *state);
-    uint64_t (*get_sum)(void *state, size_t len);
-} GeneratorEntry;
-
-
-static const GeneratorEntry gen_list[] = {
-    {"c99",       "ChaCha12:c99", create_scalar,       get_bits_c99, get_sum_c99},
-    {"",          "ChaCha12:c99", create_scalar,       get_bits_c99, get_sum_c99},
-    {"c99-8",     "ChaCha8:c99",  create_scalar_brief, get_bits_c99, get_sum_c99},
-    {"c99-12",    "ChaCha12:c99", create_scalar,       get_bits_c99, get_sum_c99},
-    {"c99-20",    "ChaCha20:c99", create_scalar_full,  get_bits_c99, get_sum_c99},
-    {"c99-ctr32", "ChaCha12:c99-ctr32", create_scalar, get_bits_c99ctr32, get_sum_c99ctr32},
+static const GeneratorParamVariant gen_list[] = {
+    {"c99",       "ChaCha12:c99", 32, create_scalar,       get_bits_c99, get_sum_c99},
+    {"",          "ChaCha12:c99", 32, create_scalar,       get_bits_c99, get_sum_c99},
+    {"c99-8",     "ChaCha8:c99",  32, create_scalar_brief, get_bits_c99, get_sum_c99},
+    {"c99-12",    "ChaCha12:c99", 32, create_scalar,       get_bits_c99, get_sum_c99},
+    {"c99-20",    "ChaCha20:c99", 32, create_scalar_full,  get_bits_c99, get_sum_c99},
+    {"c99-ctr32", "ChaCha12:c99-ctr32", 32, create_scalar, get_bits_c99ctr32, get_sum_c99ctr32},
 #ifdef CHACHA_VECTOR_INTR
-    {"avx",       "ChaCha12:avx", create_scalar,       get_bits_avx, get_sum_avx},
-    {"avx-8",     "ChaCha8:avx",  create_scalar_brief, get_bits_avx, get_sum_avx},
-    {"avx-12",    "ChaCha12:avx", create_scalar,       get_bits_avx, get_sum_avx},
-    {"avx-20",    "ChaCha20:avx", create_scalar_full,  get_bits_avx, get_sum_avx},
-    {"avx-ctr32", "ChaCha12:avx-ctr32", create_scalar, get_bits_avxctr32, get_sum_avxctr32},
+    {"avx",       "ChaCha12:avx", 32, create_scalar,       get_bits_avx, get_sum_avx},
+    {"avx-8",     "ChaCha8:avx",  32, create_scalar_brief, get_bits_avx, get_sum_avx},
+    {"avx-12",    "ChaCha12:avx", 32, create_scalar,       get_bits_avx, get_sum_avx},
+    {"avx-20",    "ChaCha20:avx", 32, create_scalar_full,  get_bits_avx, get_sum_avx},
+    {"avx-ctr32", "ChaCha12:avx-ctr32", 32, create_scalar, get_bits_avxctr32, get_sum_avxctr32},
 #endif
 #ifdef CHACHA_VECTOR_AVX2
-    {"avx2",      "ChaCha12:avx2", create_vector,       get_bits_vector, get_sum_vector},
-    {"avx2-8",    "ChaCha8:avx2",  create_vector_brief, get_bits_vector, get_sum_vector},
-    {"avx2-12",   "ChaCha12:avx2", create_vector,       get_bits_vector, get_sum_vector},
-    {"avx2-20",   "ChaCha20:avx2", create_vector_full,  get_bits_vector, get_sum_vector},
+    {"avx2",      "ChaCha12:avx2", 32, create_vector,       get_bits_vector, get_sum_vector},
+    {"avx2-8",    "ChaCha8:avx2",  32, create_vector_brief, get_bits_vector, get_sum_vector},
+    {"avx2-12",   "ChaCha12:avx2", 32, create_vector,       get_bits_vector, get_sum_vector},
+    {"avx2-20",   "ChaCha20:avx2", 32, create_vector_full,  get_bits_vector, get_sum_vector},
 #endif
-    {NULL, NULL, NULL, NULL, NULL}
+    {NULL, NULL, 0, NULL, NULL, NULL}
 };
 
 
 int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
 {
     const char *param = intf->get_param();
-    gi->name = "ChaCha12:unknown";
     gi->description = description;
-    gi->nbits = 32;
-    gi->create = default_create;
-    gi->free = default_free;
-    gi->get_bits = NULL;
     gi->self_test = run_self_test;
-    gi->get_sum = NULL;
-    gi->parent = NULL;
-    for (const GeneratorEntry *ge = gen_list; ge->key != NULL; ge++) {
-        if (!intf->strcmp(param, ge->key)) {
-            gi->name = ge->name;
-            gi->create = ge->create;
-            gi->get_bits = ge->get_bits;
-            gi->get_sum = ge->get_sum;            
-            break;
-        }
-    }
-    return (gi->get_bits != NULL) ? 1 : 0;
+    return GeneratorParamVariant_find(gen_list, intf, param, gi);
 }

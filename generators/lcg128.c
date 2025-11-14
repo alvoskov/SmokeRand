@@ -160,7 +160,6 @@ typedef struct {
     uint32_t x[4];
 } Lcg128x32State;
 
-
 #define HI64(x) ( (uint32_t) ((x) >> 32) )
 #define LO64(x) ( (uint32_t) ((x) & 0xFFFFFFFF) )
 #define MUL64(x,y) ((uint64_t)(x) * (uint64_t)(y))
@@ -254,6 +253,15 @@ static int run_self_test(const CallerAPI *intf)
     return is_ok;
 }
 
+static const GeneratorParamVariant gen_list[] = {
+    {"x64",       "Lcg128:x64",     64, default_create, get_bits_x64u64,  get_sum_x64u64},
+    {"",          "Lcg128:x64",     64, default_create, get_bits_x64u64,  get_sum_x64u64},
+    {"x128u64",   "Lcg128:x128u64", 64, default_create, get_bits_x128u64, get_sum_x128u64},
+    {"x128u32",   "Lcg128:x128u32", 32, default_create, get_bits_x128u32, get_sum_x128u32},
+    {"c99",       "ChaCha12:c99",   32, create_c99,     get_bits_c99,     get_sum_c99},
+};
+
+
 
 static const char description[] =
 "128-bit LCG with m = 2^128 that returns the upper 32 or 64 bits. The next\n"
@@ -270,36 +278,6 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
 {
     const char *param = intf->get_param();
     gi->description = description;
-    gi->create = default_create;
-    gi->free = default_free;
     gi->self_test = run_self_test;
-    gi->parent = NULL;
-    if (!intf->strcmp(param, "x64") || !intf->strcmp(param, "")) {
-        gi->name = "Lcg128:x64";
-        gi->nbits = 64;
-        gi->get_bits = get_bits_x64u64;
-        gi->get_sum = get_sum_x64u64;
-    } else if (!intf->strcmp(param, "x128u64")) {
-        gi->name = "Lcg128:x128u64";
-        gi->nbits = 64;
-        gi->get_bits = get_bits_x128u64;
-        gi->get_sum = get_sum_x128u64;
-    } else if (!intf->strcmp(param, "x128u32")) {
-        gi->name = "Lcg128:x128u32";
-        gi->nbits = 32;
-        gi->get_bits = get_bits_x128u32;
-        gi->get_sum = get_sum_x128u32;
-    } else if (!intf->strcmp(param, "c99")) {
-        gi->name = "Lcg128:c99";
-        gi->nbits = 32;
-        gi->create = create_c99;
-        gi->get_bits = get_bits_c99;
-        gi->get_sum = get_sum_c99;
-    } else {
-        gi->name = "Lcg128:unknown";
-        gi->nbits = 64;
-        gi->get_bits = NULL;
-        gi->get_sum = NULL;
-    }
-    return 1;
+    return GeneratorParamVariant_find(gen_list, intf, param, gi);
 }
