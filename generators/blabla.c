@@ -360,67 +360,41 @@ static const char description[] =
 "by J.P. Aumasson. Essentially a modification of ChaCha for 64-bit words.\n"
 "The next param values are supported:\n"
 "  c99             - portable BlaBla version (default, slower): 10 rounds\n"
-"  avx2            - AVX2 BlaBla version (fastest): 10 rounds\n"
 "  c99-montecarlo  - c99 with reduced number of rounds: 4 rounds\n"
-"  avx2-montecarlo - avx2 with reduced number of rounds: 4 rounds\n"
 "  c99-reduced     - c99 with reduced number of rounds: 2 rounds\n"
-"  avx2-reduced    - avx2 with reduced number of rounds: 2 rounds\n";
+#ifdef __AVX2__
+"  avx2            - AVX2 BlaBla version (fastest): 10 rounds\n"
+"  avx2-reduced    - avx2 with reduced number of rounds: 2 rounds\n"
+"  avx2-montecarlo - avx2 with reduced number of rounds: 4 rounds\n"
+#endif
+"";
+
+
+static const GeneratorParamVariant gen_list[] = {
+    {"",                "BlaBla:c99", 64,
+        default_create,     get_bits_scalar, get_sum_scalar},
+    {"c99",             "BlaBla:c99", 64,
+        default_create,     get_bits_scalar, get_sum_scalar},
+    {"c99-montecarlo",  "BlaBla:c99:montecarlo", 64,
+        create_montecarlo,  get_bits_scalar, get_sum_scalar},
+    {"c99-reduced",     "BlaBla:c99:reduced", 64,
+        create_reduced,     get_bits_scalar, get_sum_scalar},
+#ifdef __AVX2__
+    {"avx2",            "BlaBla:avx2", 64,
+        default_create,     get_bits_vector, get_sum_vector},
+    {"avx2-montecarlo", "BlaBla:avx2:montecarlo", 64,
+        create_montecarlo,  get_bits_vector, get_sum_vector},
+    {"avx2-reduced",    "BlaBla:avx2:reduced",  64,
+        create_reduced,     get_bits_vector, get_sum_vector},
+#endif
+    {NULL, NULL, 0, NULL, NULL, NULL}
+};
 
 
 int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
 {
     const char *param = intf->get_param();
     gi->description = description;
-    gi->nbits = 64;
-    gi->create = default_create;
-    gi->free = default_free;
     gi->self_test = run_self_test;
-    gi->parent = NULL;
-    if (!intf->strcmp(param, "c99") || !intf->strcmp(param, "")) {
-        gi->name = "BlaBla:c99";
-        gi->get_bits = get_bits_scalar;
-        gi->get_sum = get_sum_scalar;
-    } else if (!intf->strcmp(param, "avx2")) {
-        gi->name = "BlaBla:avx2";
-        gi->get_bits = get_bits_vector;
-        gi->get_sum = get_sum_vector;
-#ifndef __AVX2__
-        intf->printf("Not implemented\n");
-        return 0;
-#endif
-    } else if (!intf->strcmp(param, "c99-montecarlo")) {
-        gi->name = "BlaBla:c99:montecarlo";
-        gi->create = create_montecarlo;
-        gi->get_bits = get_bits_scalar;
-        gi->get_sum = get_sum_scalar;
-    } else if (!intf->strcmp(param, "avx2-montecarlo")) {
-        gi->name = "BlaBla:avx2:montecarlo";
-        gi->create = create_montecarlo;
-        gi->get_bits = get_bits_vector;
-        gi->get_sum = get_sum_vector;
-#ifndef __AVX2__
-        intf->printf("Not implemented\n");
-        return 0;
-#endif
-    } else if (!intf->strcmp(param, "c99-reduced")) {
-        gi->name = "BlaBla:c99:reduced";
-        gi->create = create_reduced;
-        gi->get_bits = get_bits_scalar;
-        gi->get_sum = get_sum_scalar;
-    } else if (!intf->strcmp(param, "avx2-reduced")) {
-        gi->name = "BlaBla:avx2:reduced";
-        gi->create = create_reduced;
-        gi->get_bits = get_bits_vector;
-        gi->get_sum = get_sum_vector;
-#ifndef __AVX2__
-        intf->printf("Not implemented\n");
-        return 0;
-#endif
-    } else {
-        gi->name = "BlaBla:unknown";
-        gi->get_bits = NULL;
-        gi->get_sum = NULL;
-        return 0;
-    }
-    return 1;
+    return GeneratorParamVariant_find(gen_list, intf, param, gi);
 }

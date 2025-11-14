@@ -138,6 +138,55 @@ typedef struct {
     uint64_t x;
 } Lcg64State;
 
+///////////////////////////////////////////////////////////////////////////
+///// Some data structures and subroutines for command line interface /////
+///////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief Pseudorandom number generator variant description for the given
+ * `--param=value` variant.
+ */
+typedef struct {
+    const char *param; ///< Value for the `--param=value` command line option.
+    const char *name;  ///< Generator name
+    unsigned int nbits; ///< Number of bits in the output (32 or 64)
+    void *(*create)(const GeneratorInfo *gi, const CallerAPI *intf);
+    uint64_t (*get_bits)(void *state);
+    uint64_t (*get_sum)(void *state, size_t len);
+} GeneratorParamVariant;
+
+/**
+ * @brief Find the PRNG variant by the `--param=value` command line argument.
+ * @param[in]  gen_list  Generators variants list terminated with `{NULL, ...}`.
+ * @param[in]  intf      Pointer to the interface.
+ * @param[in]  param     ASCIIZ string with `value` from the `--param=value` argument.
+ * @param[out] gi        Output buffer for writing pointers to the generator name,
+ *                       default create/free and get_bits/get_sum callbacks.
+ * @return 0 - failure, 1 - success.
+ */
+static inline int
+GeneratorParamVariant_find(const GeneratorParamVariant *gen_list,
+    const CallerAPI *intf, const char *param, GeneratorInfo *gi)
+{
+    gi->name     = "Unknown";
+    gi->nbits    = 32;
+    gi->create   = default_create;
+    gi->free     = default_free;
+    gi->get_bits = NULL;
+    gi->get_sum  = NULL;
+    for (const GeneratorParamVariant *e = gen_list; e->param != NULL; e++) {
+        if (!intf->strcmp(param, e->param)) {
+            gi->name     = e->name;
+            gi->nbits    = e->nbits;
+            gi->create   = e->create;
+            gi->get_bits = e->get_bits;
+            gi->get_sum  = e->get_sum;
+            return 1; // Success
+        }
+    }
+    intf->printf("Unknown param value '%s'\n", param);
+    return 0; // Failure
+}
 
 ///////////////////////////////////////////////////////
 ///// Structures for PRNGs based on block ciphers /////
