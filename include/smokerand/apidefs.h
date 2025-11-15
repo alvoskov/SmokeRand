@@ -100,6 +100,23 @@ seed64_to_2x32(const CallerAPI *intf, uint32_t *s0, uint32_t *s1)
 }
 
 /**
+ * @brief Fill the array of 32-bit unsigned integer with seed.
+ */
+static inline void
+seeds_to_array_u32(const CallerAPI *intf, uint32_t *out, size_t len)
+{
+    for (size_t i = 0; i < len / 2; i++) {
+        uint64_t seed = intf->get_seed64();
+        out[2*i]      = (uint32_t) seed;
+        out[2*i + 1]  = (uint32_t) (seed >> 32);
+    }
+    if ((len & 0x1) == 1) {
+        out[len - 1] = (uint32_t) intf->get_seed64();
+    }
+}
+
+
+/**
  * @brief pcg_rxs_m_xs64 PRNG that has a good quality and can be used
  * for initialization for other PRNGs such as lagged Fibonacci.
  */

@@ -56,6 +56,7 @@
  * alvoskov@gmail.com
  */
 #include "smokerand/cinterface.h"
+#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
@@ -129,7 +130,7 @@ static int run_self_test(const CallerAPI *intf)
     for (unsigned long i = 0; i < 1000000000; i++) {
         x = (uint32_t) get_bits_raw(obj);
     }
-    intf->printf("x = %22u; x_ref = %22u\n", x, x_ref);
+    intf->printf("x = %22" PRIu32 "; x_ref = %" PRIu32 "\n", x, x_ref);
     intf->free(obj);
     return x == x_ref;
 }

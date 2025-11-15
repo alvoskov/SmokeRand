@@ -507,30 +507,19 @@ static const char description[] =
 "  c99   - software cross-platform implementation (slow)\n";
 
 
+static const GeneratorParamVariant gen_list[] = {
+    {"",      "AES128:aesni", 64, create_aesni,  get_bits_aesni, get_sum_aesni},
+    {"aesni", "AES128:aesni", 64, create_aesni,  get_bits_aesni, get_sum_aesni},
+    {"c99",   "AES128:c99",   64, create_c99,    get_bits_c99,   get_sum_c99},
+    {NULL,    NULL,           0,  NULL,          NULL,           NULL}
+};
+
+
 int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
 {
     const char *param = intf->get_param();
     gi->description = description;
-    gi->create = default_create;
-    gi->free = default_free;
-    gi->nbits = 64;
     gi->self_test = run_self_test;
-    gi->parent = NULL;
-    fill_lookup_tables();
-    if (!intf->strcmp(param, "aesni") || !intf->strcmp(param, "")) {
-        gi->name = "AES128:aesni";
-        gi->create = create_aesni;
-        gi->get_bits = get_bits_aesni;
-        gi->get_sum = get_sum_aesni;
-    } else if (!intf->strcmp(param, "c99")) {
-        gi->name = "AES128:c99";
-        gi->create = create_c99;
-        gi->get_bits = get_bits_c99;
-        gi->get_sum = get_sum_c99;
-    } else {
-        gi->name = "AES128:unknown";
-        gi->get_bits = NULL;
-        gi->get_sum = NULL;
-    }
-    return 1;
+    fill_lookup_tables(); // Essential for software version!
+    return GeneratorParamVariant_find(gen_list, intf, param, gi);
 }

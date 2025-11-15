@@ -1,4 +1,5 @@
 /**
+ * @file jctr64.c
  * @brief jctr64 is a counter-based PRNG based on an experimental block
  * cipher by Bob Jenkins.
  * @details The original cipher is a 512-bit block ARX cipher based on 64-bit

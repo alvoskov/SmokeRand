@@ -387,7 +387,7 @@ static const GeneratorParamVariant gen_list[] = {
     {"avx2-reduced",    "BlaBla:avx2:reduced",  64,
         create_reduced,     get_bits_vector, get_sum_vector},
 #endif
-    {NULL, NULL, 0, NULL, NULL, NULL}
+    GENERATOR_PARAM_VARIANT_EMPTY
 };
 
 

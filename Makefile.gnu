@@ -60,9 +60,17 @@ else ifeq ($(PLATFORM_NAME), GENERIC)
     PLATFORM_FLAGS = -DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY
 endif
 #-----------------------------------------------------------------------------
-# -Wcast-align=strict
-CFLAGS = $(PLATFORM_FLAGS) -std=c99 -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wpedantic -Wshadow -Wconversion -Wvla
-CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wpedantic -Wshadow -Wconversion -Wvla
+ifeq ($(PLATFORM_NAME), DJGPP)
+COMPILER_FLAGS = -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wpedantic \
+    -Wshadow -Wconversion -Wvla
+else
+
+COMPILER_FLAGS = -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wpedantic \
+    -Wshadow -Wconversion -Wvla -Wcast-align=strict
+endif
+
+CFLAGS = $(PLATFORM_FLAGS) -std=c99 $(COMPILER_FLAGS)
+CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 $(COMPILER_FLAGS)
 CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wpedantic -Wshadow -Wvla
 LINKFLAGS = $(PLATFORM_FLAGS)
 INCLUDE = -Iinclude

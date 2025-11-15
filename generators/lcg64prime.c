@@ -18,6 +18,7 @@
  */
 #include "smokerand/cinterface.h"
 #include "smokerand/int128defs.h"
+#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
@@ -69,7 +70,7 @@ static void *create(const CallerAPI *intf)
 {
     Lcg64State *obj = intf->malloc(sizeof(Lcg64State));
     obj->x = intf->get_seed64() | 0x1;
-    return (void *) obj;
+    return obj;
 }
 
 
@@ -84,7 +85,7 @@ static int run_self_test(const CallerAPI *intf)
     for (size_t i = 0; i < 100000; i++) {
         u = get_bits_raw(&obj);
     }
-    intf->printf("Result: %llu; reference value: %llu\n", u, u_ref);
+    intf->printf("Result: %" PRIu64 "; reference value: %" PRIu64 "\n", u, u_ref);
     return u == u_ref;
 }
 

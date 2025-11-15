@@ -73,7 +73,7 @@ static inline uint64_t get_bits_raw(void *state)
 static void Kiss4691State_init(Kiss4691State *obj, uint32_t xcng, uint32_t xs)
 {
     obj->xcng = xcng;
-    obj->xs = xs;
+    obj->xs = (xs != 0) ? xs : 0x12345678;
     for (int i = 0; i < 4691; i++) {
         obj->q[i] = Kiss4691State_supdup_iter(obj);
     }
@@ -85,9 +85,10 @@ static void Kiss4691State_init(Kiss4691State *obj, uint32_t xcng, uint32_t xs)
 static void *create(const CallerAPI *intf)
 {
     Kiss4691State *obj = intf->malloc(sizeof(Kiss4691State));
-    uint64_t seed = intf->get_seed64();
-    Kiss4691State_init(obj, (uint32_t) (seed >> 32), (uint32_t) (seed & 0xFFFFFFFF) | 1);
-    return (void *) obj;
+    uint32_t xcng, xs;
+    seed64_to_2x32(intf, &xcng, &xs);
+    Kiss4691State_init(obj, xcng, xs);
+    return obj;
 }
 
 

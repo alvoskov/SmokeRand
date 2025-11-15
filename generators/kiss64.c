@@ -1,15 +1,15 @@
 /**
  * @file kiss64.c
  * @brief 64-bit version of KISS pseudorandom number generator
- * by George Marsaglia. It passes SmallCrush, Crush and BigCrush batteries,
- * has period about 2^123
+ * by George Marsaglia. It has period about 2^123.
  * @details It is developed by George Marsaglia. References:
  *
  * - https://groups.google.com/g/comp.lang.fortran/c/qFv18ql_WlU
  * - https://www.thecodingforums.com/threads/64-bit-kiss-rngs.673657/
  * - https://ssau.ru/pagefiles/sbornik_pit_2021.pdf
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.

@@ -1,7 +1,22 @@
 /**
- * @details
+ * @file gjrand16.c
+ * @brief Implementation of gjrand16 nonlinear chaotic generator.
+ * @details It is a modification of gjrand algorithm suggested by M. O'Neill
+ * for testing purposes. The gjrand algorithm is designed by D. Blackman
+ * (aka G. Jones).
+ *
+ * References:
+ *
  * 1. https://sourceforge.net/p/gjrand/discussion/446985/thread/3f92306c58/
  * 2. https://gist.github.com/imneme/7a783e20f71259cc13e219829bcea4ac
+ *
+ * @copyright The gjrand16 algorithm is designed by M. O'Neill and D. Blackman
+ * (aka G. Jones). Reentrant implementation for SmokeRand:
+ *
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 

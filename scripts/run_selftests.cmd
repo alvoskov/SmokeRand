@@ -5,10 +5,10 @@ setlocal EnableDelayedExpansion
 SET npassed=0
 SET nfailed=0
 SET nunknown=0
-SET failed_list
+SET failed_list=
 
-FOR %%i IN (generators\b*.dll) DO (
-    smokerand selftest %%i
+FOR %%i IN (%~dp0..\bin\generators\*.dll) DO (
+    %~dp0..\bin\smokerand selftest %%i
     echo !ERRORLEVEL!
     IF !ERRORLEVEL! == 0 SET /a npassed=npassed+1
     IF !ERRORLEVEL! == 1 (

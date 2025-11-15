@@ -1,4 +1,21 @@
-// https://burtleburtle.net/bob/rand/isaac.html#IAcode
+/** 
+ * @file ia64.c
+ * @brief IA nonlinear generator by Bob Jenkins.
+ * @details It is a nonlinear generator based on ideas from RC4, the 64-bit
+ * modification is made by A.L. Voskov.
+ *
+ * References:
+ *
+ * 1. https://burtleburtle.net/bob/rand/isaac.html#IAcode
+ *
+ * @copyright
+ * Based on public domain code by Bob Jenkins.
+ *
+ * Adaptation for SmokeRand:
+ *
+ * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG

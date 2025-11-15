@@ -1,19 +1,24 @@
 /**
  * @file hc256.c
- * @brief HC256 cipher based 32-bit CSPRNG.
- * @details References:
+ * @brief Cryptographical PRNG based on the HC256 stream cipher.
+ * @details The HC256 algorithm is developed by Wu H. References:
  *
  * 1. Wu, H. (2004). A New Stream Cipher HC-256. In: Roy, B., Meier, W. (eds)
  *    Fast Software Encryption. FSE 2004. Lecture Notes in Computer Science,
  *    vol 3017. Springer, Berlin, Heidelberg.
  *    https://doi.org/10.1007/978-3-540-25937-4_15
+ * 2. https://personal.ntu.edu.sg/wuhj/research/hc/index.html
+ * 3. https://www.ecrypt.eu.org/stream/hcpf.html
  *
- * @copyright The HC256 algorithm is developed by Wu H.
+ * @copyright The HC256 algorithm is developed by Wu H. This code is a
+ * modification of the reference implementation that is described as "free
+ * for any use" and "HC-256 and HC-128 are not covered by any patent and they
+ * are freely-available".
  *
- * Adaptation for SmokeRand:
- *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
- * alvoskov@gmail.com
+ * A.L. Voskov modified that code to make it compliant to C99 standard and
+ * suitable for multithreaded usage. All these modifications are dedicated
+ * to the public domain. The resulting SmokeRand plugin is not designed for
+ * cryptographical usage, its a high-quality PRNG.
  */
 #include "smokerand/cinterface.h"
 

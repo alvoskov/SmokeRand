@@ -1,5 +1,5 @@
 /**
- * @file gjrand64.c
+ * @file gjrand32.c
  * @brief Implementation of gjrand64 nonlinear chaotic generator.
  * @details The gjrand32 algorithm is designed by D. Blackman (aka G. Jones),
  * its period is at least \f$ 2^{32} \f$.

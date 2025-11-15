@@ -9,12 +9,16 @@
  * the two multiply-with-carry generators in MWC with the 3-shift register
  * SHR3 and the congruential generator CONG, using addition and exclusive-or.
  * Period about 2^123. It is one of my favorite generators.
- * 
+ *
+ * NOTE: it intentionally reproduces an error from the original code
+ * of G. Marsaglia, SHR constants are (17, 13, 5), should be (13, 17, 5).
+ * This error has been detected by Greg Rose.
+ *
  * References:
  *
  * - https://groups.google.com/group/sci.stat.math/msg/b555f463a2959bb7/
  * - http://www0.cs.ucl.ac.uk/staff/d.jones/GoodPracticeRNG.pdf
- * - https://eprint.iacr.org/2011/007.pdf
+ * - Greg Rose. KISS: A Bit Too Simple. 2011. https://eprint.iacr.org/2011/007.pdf
  * - Marsaglia G. Xorshift RNGs // Journal of Statistical Software. 2003.
  *   V. 8. N. 14. P.1-6. https://doi.org/10.18637/jss.v008.i14
  *
@@ -22,7 +26,7 @@
  *
  * Implementation for SmokeRand:
  *
- * (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
