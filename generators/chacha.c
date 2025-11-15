@@ -310,9 +310,6 @@ static void *create_scalar_nrounds(const CallerAPI *intf, size_t nrounds)
     ChaChaState *obj = intf->malloc(sizeof(ChaChaState));
     uint32_t seeds[8];
     seeds_to_array_u32(intf, seeds, 8);
-    for (int i = 0; i < 8; i++) {
-        intf->printf("->%X\n", seeds[i]);
-    }
     ChaCha_init(obj, nrounds, seeds);
     return obj;
 }
