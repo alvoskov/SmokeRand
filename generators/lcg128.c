@@ -259,6 +259,7 @@ static const GeneratorParamVariant gen_list[] = {
     {"x128u64",   "Lcg128:x128u64", 64, default_create, get_bits_x128u64, get_sum_x128u64},
     {"x128u32",   "Lcg128:x128u32", 32, default_create, get_bits_x128u32, get_sum_x128u32},
     {"c99",       "ChaCha12:c99",   32, create_c99,     get_bits_c99,     get_sum_c99},
+    GENERATOR_PARAM_VARIANT_EMPTY
 };
 
 

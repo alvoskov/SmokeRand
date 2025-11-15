@@ -188,6 +188,9 @@ GeneratorParamVariant_find(const GeneratorParamVariant *gen_list,
     return 0; // Failure
 }
 
+#define GENERATOR_PARAM_VARIANT_EMPTY {NULL, NULL, 0, NULL, NULL, NULL}
+
+
 ///////////////////////////////////////////////////////
 ///// Structures for PRNGs based on block ciphers /////
 ///////////////////////////////////////////////////////

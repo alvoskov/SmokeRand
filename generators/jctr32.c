@@ -1,4 +1,5 @@
 /**
+ * @file jctr32.c
  * @brief jctr32 is a counter-based PRNG based on an experimental block
  * cipher by Bob Jenkins.
  * @details The original cipher is a 256-bit block ARX cipher based on 32-bit

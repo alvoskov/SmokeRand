@@ -309,8 +309,9 @@ static void *create_scalar_nrounds(const CallerAPI *intf, size_t nrounds)
 {
     ChaChaState *obj = intf->malloc(sizeof(ChaChaState));
     uint32_t seeds[8];
-    for (size_t i = 0; i < 4; i++) {
-        seed64_to_2x32(intf, &seeds[2*i], &seeds[2*i + 1]);
+    seeds_to_array_u32(intf, seeds, 8);
+    for (int i = 0; i < 8; i++) {
+        intf->printf("->%X\n", seeds[i]);
     }
     ChaCha_init(obj, nrounds, seeds);
     return obj;
@@ -888,7 +889,7 @@ static const GeneratorParamVariant gen_list[] = {
     {"avx2-12",   "ChaCha12:avx2", 32, create_vector,       get_bits_vector, get_sum_vector},
     {"avx2-20",   "ChaCha20:avx2", 32, create_vector_full,  get_bits_vector, get_sum_vector},
 #endif
-    {NULL, NULL, 0, NULL, NULL, NULL}
+    GENERATOR_PARAM_VARIANT_EMPTY
 };
 
 

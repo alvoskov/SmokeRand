@@ -20,7 +20,7 @@ PRNG_CMODULE_PROLOG
 static inline uint64_t get_bits_raw(void *state)
 {
     Lcg64State *obj = state;
-    obj->x = (obj->x * 762939453125ull ) & P42_MASK;
+    obj->x = (obj->x * 762939453125ULL ) & P42_MASK;
     return obj->x >> 10;
 }
 
@@ -28,7 +28,7 @@ static void *create(const CallerAPI *intf)
 {
     Lcg64State *obj = intf->malloc(sizeof(Lcg64State));
     obj->x = (intf->get_seed64() & P42_MASK) | 0x1;
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT32_PRNG("LCG42", NULL)

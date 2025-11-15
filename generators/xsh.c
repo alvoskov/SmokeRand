@@ -43,8 +43,11 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     XSHState *obj = intf->malloc(sizeof(XSHState));
-    obj->x = intf->get_seed64() | 0x1; // Seed mustn't be 0
-    return (void *) obj;
+    obj->x = intf->get_seed64();
+    if (obj->x == 0) {
+        obj->x = 0x12345678;
+    }
+    return obj;
 }
 
 

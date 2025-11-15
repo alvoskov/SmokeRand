@@ -6,8 +6,8 @@ SET npassed=0
 SET nfailed=0
 SET nerror=0
 
-FOR %%i IN (generators\*.dll) DO (
-    smokerand express %%i --report-brief --threads
+FOR %%i IN (%~dp0..\bin\generators\*.dll) DO (
+    %~dp0..\bin\smokerand express %%i --report-brief --threads
     echo !ERRORLEVEL!
     IF !ERRORLEVEL! == 0 SET /a npassed=npassed+1
     IF !ERRORLEVEL! == 1 SET /a nfailed=nfailed+1

@@ -20,20 +20,21 @@ PRNG_CMODULE_PROLOG
 
 static inline uint64_t get_bits_raw(void *state)
 {
+    const uint64_t a = 1588635695UL;
+    const uint64_t m = 4294967291UL; // 2^32 - 5
+    const uint64_t c = 123U;
     Lcg32State *obj = state;
-    const uint64_t a = 1588635695ul;
-    const uint64_t m = 4294967291ul; // 2^32 - 5
 #if SIZE_MAX == UINT32_MAX
     // Implementation for 32-bit systems;
     // 64-bit mod may require runtime library funcions on such platforms
     // (e.g. 32-bit MinGW). So we use custom implementation.
     const uint64_t d = 5;
-    uint64_t ax = a * obj->x + 123;
-    uint64_t lo = ax & 0xFFFFFFFF, hi = ax >> 32;
+    const uint64_t ax = a * obj->x + c;
+    const uint64_t lo = ax & 0xFFFFFFFF, hi = ax >> 32;
     uint64_t r = lo + d * hi;
-    int k = (int) (r >> 32) - 1;
+    const int k = (int) (r >> 32) - 1;
     if (k > 0) {
-        r -= (((uint64_t) k) << 32) - (uint64_t) k * d;
+        r -= ((uint64_t) k << 32) - (uint64_t) k * d;
     }
     if (r > m) {
         r -= m;
@@ -41,7 +42,7 @@ static inline uint64_t get_bits_raw(void *state)
     obj->x = (uint32_t) r;
 #else
     // Implementation for 64-bit systems
-    obj->x = (uint32_t) ( (a * obj->x + 123u) % m );
+    obj->x = (uint32_t) ( (a * obj->x + c) % m );
 #endif
     return obj->x;
 }
@@ -50,8 +51,8 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Lcg32State *obj = intf->malloc(sizeof(Lcg32State));
-    obj->x = (uint32_t) (intf->get_seed64() >> 32) | 0x1;
-    return (void *) obj;
+    obj->x = intf->get_seed32();
+    return obj;
 }
 
 /**
@@ -60,8 +61,8 @@ static void *create(const CallerAPI *intf)
 static int run_self_test(const CallerAPI *intf)
 {
     Lcg32State obj = {.x = 1};
-    uint64_t u, u_ref = 4055904884ul;
-    for (size_t i = 0; i < 100000; i++) {
+    uint64_t u, u_ref = 4055904884UL;
+    for (long i = 0; i < 100000; i++) {
         u = get_bits_raw(&obj);
     }
     intf->printf("Result: %llu; reference value: %llu\n", u, u_ref);

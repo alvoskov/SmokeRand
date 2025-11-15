@@ -3,6 +3,10 @@
  * @brief xorwow pseudorandom number generator.
  * @details Fails `bspace8_8d`, `linearcomp_low` and `matrixrank` tests.
  *
+ * Failures in the `express` battery: `bspace4_8d`, `bspace4_8d_dec`
+ *
+ * 
+ *
  * BigCrush failures:
  *
  *           Test                          p-value
@@ -62,16 +66,13 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     XorWowState *obj = intf->malloc(sizeof(XorWowState));
-    uint64_t s1 = intf->get_seed64();
-    uint64_t s2 = intf->get_seed64();
-    uint64_t s3 = intf->get_seed64();
-    obj->x = (uint32_t) s1;
-    obj->y = (uint32_t) (s1 >> 32);
-    obj->z = (uint32_t) s2;
-    obj->w = (uint32_t) (s2 >> 32);
-    obj->v = (uint32_t) s3;
-    obj->d = (uint32_t) (s3 >> 32);
-    return (void *) obj;
+    seed64_to_2x32(intf, &obj->x, &obj->y);
+    seed64_to_2x32(intf, &obj->z, &obj->w);
+    seed64_to_2x32(intf, &obj->v, &obj->d);
+    if (obj->v == 0) {
+        obj->v = 0x12345678;
+    }
+    return obj;
 }
 
 MAKE_UINT32_PRNG("xorwow", NULL)

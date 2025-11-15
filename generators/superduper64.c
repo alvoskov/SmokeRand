@@ -91,8 +91,27 @@ static void *create(const CallerAPI *intf)
     return (void *) obj;
 }
 
+static const char description[] =
+"SuperDuper64: a 64-bit version of the combined generator by G.Marsaglia\n"
+"The next param values are supported:\n"
+"    u64 - full 64-bit output (default)\n"
+"    u32 - return only upper 32 bits\n";
+
+static const GeneratorParamVariant gen_list[] = {
+    {"",      "SuperDuper64:u64", 64, default_create, get_bits_u64, get_sum_u64},
+    {"u64",   "SuperDuper64:u64", 64, default_create, get_bits_u64, get_sum_u64},
+    {"u32",   "SuperDuper64:u32", 32, default_create, get_bits_u32, get_sum_u32},
+};
+
+
 int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
 {
+    const char *param = intf->get_param();
+    gi->description = description;
+    gi->self_test = NULL;
+    return GeneratorParamVariant_find(gen_list, intf, param, gi);
+
+/*
     const char *param = intf->get_param();
     gi->description = NULL;
     gi->create = default_create;
@@ -116,4 +135,5 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
         gi->get_sum = NULL;
     }
     return 1;
+*/
 }

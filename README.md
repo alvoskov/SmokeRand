@@ -826,6 +826,10 @@ There are only two problematic situations:
  ranrot32[7/3]     | u32    | +       | 3     | 5/6     | 6    | 0.58 | +      | 0     | Small   | 128 MiB
  ranrot32[17/9]    | u32    | +       | 1     | 2       | 4    | 0.68 | +      | 0     | +       | 1 GiB
  ranrot32[57/13]   | u32    | +       | +     | +       | 1    | 0.74 | +      | 2     | +       | 8 GiB
+ ranrot8tiny       | u32    | +       | 8     |         |      | 2.0  |        | 0     |         | 4 MiB
+ ranrot16tiny      | u32    | +       | +     | +       | 1    | 1.0  |        | 2     |         | 8 GiB
+ ranrot32tiny      | u32    | +       | +     | +       | +    | 0.41 | +      | 3     |         | 2 TiB
+ ranrot64tiny      | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 1 TiB
  ranshi            | u64    | +       | 2     | 7       | 8    | 0.43 | +      | 0     |         | 32 KiB
  ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | +      | 3.5   |         | 8 TiB
  ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 32 TiB
@@ -1181,6 +1185,15 @@ are less sensitive, e.g. entropy test catches only randu.
 - Passes ENT: lcg32prime, lcg64, lfib31, swb
 
 # Versions history
+
+16.11.2025: SmokeRand 0.42
+
+- The first public release.
+- ChaCha8 added to the `chacha` PRNG. Also AVX2 version of ChaCha now returns
+  the same sequence as the portable version.
+- `ranrot8tiny`, `ranrot16tiny`, `ranrot32tiny`, `ranrot64tiny` custom PRNGs
+  were added.
+- Some code cleanup.
 
 10.11.2025: SmokeRand 0.41
 
