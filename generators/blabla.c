@@ -379,14 +379,15 @@ static const GeneratorParamVariant gen_list[] = {
         create_montecarlo,  get_bits_scalar, get_sum_scalar},
     {"c99-reduced",     "BlaBla:c99:reduced", 64,
         create_reduced,     get_bits_scalar, get_sum_scalar},
-#ifdef __AVX2__
+#ifndef __AVX2__
+    GENERATOR_PARAM_VARIANT_EMPTY,
+#endif
     {"avx2",            "BlaBla:avx2", 64,
         default_create,     get_bits_vector, get_sum_vector},
     {"avx2-montecarlo", "BlaBla:avx2:montecarlo", 64,
         create_montecarlo,  get_bits_vector, get_sum_vector},
     {"avx2-reduced",    "BlaBla:avx2:reduced",  64,
         create_reduced,     get_bits_vector, get_sum_vector},
-#endif
     GENERATOR_PARAM_VARIANT_EMPTY
 };
 

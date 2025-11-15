@@ -669,7 +669,7 @@ static void *create_vector_nrounds(const CallerAPI *intf, size_t nrounds)
     ChaChaVec_init(obj, nrounds, seeds);
     return obj;
 #else
-    (void) intf;
+    (void) intf; (void) nrounds;
     return NULL;
 #endif
 }
@@ -742,7 +742,7 @@ int run_self_test_vector(const CallerAPI *intf)
         if (out_final[i % 16] != obj.out[i]) {
             intf->printf("TEST FAILED!\n");
             return 0;
-        }        
+        }
     }
     intf->printf("Success.\n");
     return 1;
@@ -764,10 +764,6 @@ int run_self_test(const CallerAPI *intf)
 {
     static const unsigned long nskipped = 1UL << 10;
     static const size_t nsamples = 8192;
-    static const uint32_t key[] = { // Input values
-        0x03020100,  0x07060504,  0x0b0a0908,  0x0f0e0d0c,
-        0x13121110,  0x17161514,  0x1b1a1918,  0x1f1e1d1c
-    };
 
     int is_ok = 1;
     intf->printf("----- ChaCha: c99 version -----\n");
@@ -783,6 +779,10 @@ int run_self_test(const CallerAPI *intf)
 
 
 #if defined(CHACHA_VECTOR_INTR) || defined(CHACHA_VECTOR_AVX2)
+    static const uint32_t key[] = { // Input values
+        0x03020100,  0x07060504,  0x0b0a0908,  0x0f0e0d0c,
+        0x13121110,  0x17161514,  0x1b1a1918,  0x1f1e1d1c
+    };
     intf->printf("Comparing with portable version...\n");
     uint32_t *c99_out = intf->malloc(nsamples * sizeof(uint32_t));
     ChaChaState *obj_c99 = intf->malloc(sizeof(ChaChaState));
@@ -876,19 +876,21 @@ static const GeneratorParamVariant gen_list[] = {
     {"c99-12",    "ChaCha12:c99", 32, create_scalar,       get_bits_c99, get_sum_c99},
     {"c99-20",    "ChaCha20:c99", 32, create_scalar_full,  get_bits_c99, get_sum_c99},
     {"c99-ctr32", "ChaCha12:c99-ctr32", 32, create_scalar, get_bits_c99ctr32, get_sum_c99ctr32},
-#ifdef CHACHA_VECTOR_INTR
+#ifndef CHACHA_VECTOR_INTR
+    GENERATOR_PARAM_VARIANT_EMPTY,
+#endif
     {"avx",       "ChaCha12:avx", 32, create_scalar,       get_bits_avx, get_sum_avx},
     {"avx-8",     "ChaCha8:avx",  32, create_scalar_brief, get_bits_avx, get_sum_avx},
     {"avx-12",    "ChaCha12:avx", 32, create_scalar,       get_bits_avx, get_sum_avx},
     {"avx-20",    "ChaCha20:avx", 32, create_scalar_full,  get_bits_avx, get_sum_avx},
     {"avx-ctr32", "ChaCha12:avx-ctr32", 32, create_scalar, get_bits_avxctr32, get_sum_avxctr32},
+#ifndef CHACHA_VECTOR_AVX2
+    GENERATOR_PARAM_VARIANT_EMPTY,
 #endif
-#ifdef CHACHA_VECTOR_AVX2
     {"avx2",      "ChaCha12:avx2", 32, create_vector,       get_bits_vector, get_sum_vector},
     {"avx2-8",    "ChaCha8:avx2",  32, create_vector_brief, get_bits_vector, get_sum_vector},
     {"avx2-12",   "ChaCha12:avx2", 32, create_vector,       get_bits_vector, get_sum_vector},
     {"avx2-20",   "ChaCha20:avx2", 32, create_vector_full,  get_bits_vector, get_sum_vector},
-#endif
     GENERATOR_PARAM_VARIANT_EMPTY
 };
 

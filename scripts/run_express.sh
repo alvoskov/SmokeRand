@@ -3,10 +3,12 @@ npassed=0
 nfailed=0
 nerror=0
 
-for file in generators/*.so; do
+script_dir=$(dirname $0)
+
+for file in $script_dir/../bin/generators/*.so; do
     if [ -f "$file" ]; then
         echo "Processing file: $file"
-        ./smokerand express $file --report-brief --threads
+        $script_dir/../bin/smokerand express $file --report-brief --threads
         if [ $? -eq 0 ]; then
             npassed=$((npassed + 1))
         elif [ $? -eq 1 ]; then

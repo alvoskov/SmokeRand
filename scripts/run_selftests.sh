@@ -3,10 +3,12 @@ npassed=0
 nfailed=0
 nunknown=0
 
-for file in generators/*.so; do
+script_dir=$(dirname $0)
+
+for file in $script_dir/../bin/generators/*.so; do
     if [ -f "$file" ]; then
         echo "Processing file: $file"
-        ./smokerand selftest $file
+        $script_dir/../bin/smokerand selftest $file
         if [ $? -eq 0 ]; then
             npassed=$((npassed + 1))
         elif [ $? -eq 1 ]; then
