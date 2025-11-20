@@ -742,25 +742,24 @@ static ThreadRetVal THREADFUNC_SPEC battery_thread(void *data)
  */
 static void TestsBattery_run_threads(const TestsBattery *bat,
     const GeneratorInfo *gen, const CallerAPI *intf,
-    unsigned int nthreads, TestResults *results, ReportType rtype)
+    const BatteryOptions *opts, TestResults *results)
 {
     TestsDispatcher tdisp;
-    TestsDispatcher_init(&tdisp, bat, gen, intf, nthreads, results, 1);
+    TestsDispatcher_init(&tdisp, bat, gen, intf, opts->nthreads, results, 1);
     // Run threads
     init_thread_dispatcher();
-    ThreadObj *thrd = calloc(sizeof(ThreadObj), nthreads);
-    for (unsigned int i = 0; i < nthreads; i++) {
+    ThreadObj *thrd = calloc(sizeof(ThreadObj), opts->nthreads);
+    for (unsigned int i = 0; i < opts->nthreads; i++) {
         const unsigned int ord = tdisp.queues[i].thread_ord;
         thrd[i] = ThreadObj_create(battery_thread, &tdisp, ord);
     }
     // Get data from threads
-    for (size_t i = 0; i < nthreads; i++) {
+    for (size_t i = 0; i < opts->nthreads; i++) {
         ThreadObj_wait(&thrd[i]);
     }
     // Deallocate array
     TestsDispatcher_destruct(&tdisp);
     free(thrd);
-    (void) rtype;
 }
 
 
@@ -905,27 +904,25 @@ void TestsBattery_print_info(const TestsBattery *obj)
  */
 BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     const GeneratorInfo *gen, const CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads, ReportType rtype)
+    const BatteryOptions *opts)
 {
     time_t tic, toc;
     size_t ntests = TestsBattery_ntests(bat);
     size_t nresults = ntests;
     TestResults *results = NULL;
-    if (nthreads == 0) {
-        nthreads = 1;
-    }
+    const unsigned int nthreads = (opts->nthreads == 0) ? 1 : opts->nthreads;
 #ifdef NOTHREADS
     nthreads = 1;
     printf("WARNING: multithreading is not supported on this platform\n");
     printf("They will be run sequentally\n");
 #endif
     printf("===== Starting '%s' battery =====\n", bat->name);
-    if (testid > ntests) { // testid is 1-based index
-        fprintf(stderr, "Invalid test id %u", testid);
+    if (opts->testid > ntests) { // testid is 1-based index
+        fprintf(stderr, "Invalid test id %u", opts->testid);
         return BATTERY_ERROR;
     }
     // Allocate memory for tests
-    if (testid == TESTS_ALL) {
+    if (opts->testid == TESTS_ALL) {
         results = calloc(ntests, sizeof(TestResults));
         nresults = ntests;
     } else {
@@ -947,9 +944,9 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     }
     // Run the tests
     tic = time(NULL);
-    if (nthreads == 1 || testid != TESTS_ALL) {
+    if (nthreads == 1 || opts->testid != TESTS_ALL) {
         // One-threaded version
-        if (testid == TESTS_ALL) {
+        if (opts->testid == TESTS_ALL) {
             for (size_t i = 0; i < ntests; i++) {
                 intf->printf("----- Test %u of %u (%s)\n",
                     (unsigned int) (i + 1), (unsigned int) ntests, bat->tests[i].name);
@@ -959,40 +956,40 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
                 results[i].thread_id = 0;
             }
         } else {
-            *results = TestDescription_run(&bat->tests[testid - 1], &obj);
-            results->name = bat->tests[testid - 1].name;
-            results->id = testid;
+            *results = TestDescription_run(&bat->tests[opts->testid - 1], &obj);
+            results->name = bat->tests[opts->testid - 1].name;
+            results->id = opts->testid;
         }
         GeneratorState_destruct(&obj);
     } else {
         // Multithreaded version
         GeneratorState_destruct(&obj);
-        TestsBattery_run_threads(bat, gen, intf, nthreads, results, rtype);
+        TestsBattery_run_threads(bat, gen, intf, opts, results);
     }
     toc = time(NULL);
     printf("\n");
-    if (rtype == REPORT_FULL) {
+    if (opts->report_type == REPORT_FULL) {
         printf("==================== Seeds logger report ====================\n");
         Entropy_print_seeds_log(&entropy, stdout);
     }
-    if (testid == TESTS_ALL) {
+    if (opts->testid == TESTS_ALL) {
         printf("==================== '%s' battery report ====================\n", bat->name);
     } else {
         printf("==================== '%s' battery test #%d report ====================\n",
-            bat->name, testid);
+            bat->name, opts->testid);
     }
     printf("Generator name:    %s\n", gen->name);
     printf("Output size, bits: %d\n", (int) gen->nbits);
     char *seed_key_txt = Entropy_get_base64_key(&entropy);
     if (seed_key_txt != NULL) {
-        printf("Used seed:         _%.2X_%s\n\n", nthreads, seed_key_txt);
+        printf("Used seed:         _%.2X_%s\n\n", opts->nthreads, seed_key_txt);
     } else {
         printf("Used seed:         none\n\n");
     }
     TestResultsSummary summary =
-        TestResults_print_report(results, nresults, toc - tic, rtype);
+        TestResults_print_report(results, nresults, toc - tic, opts->report_type);
     if (seed_key_txt != NULL) {
-        printf("Used seed:     _%.2X_%s\n", nthreads, seed_key_txt);
+        printf("Used seed:     _%.2X_%s\n", opts->nthreads, seed_key_txt);
     } else {
         printf("Used seed:     none\n");
     }

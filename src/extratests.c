@@ -768,8 +768,8 @@ TestResults unit_sphere_volume_test_wrap(GeneratorState *gs, const void *udata)
 ///// Batteries /////
 /////////////////////
 
-BatteryExitCode battery_ising(const GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads, ReportType rtype)
+BatteryExitCode battery_ising(const GeneratorInfo *gen, const CallerAPI *intf,
+    const BatteryOptions *opts)
 {
     static const Ising2DOptions
         metr  = {.sample_len = 5000000, .nsamples = 20, .algorithm = ISING_METROPOLIS},
@@ -784,7 +784,7 @@ BatteryExitCode battery_ising(const GeneratorInfo *gen, CallerAPI *intf,
         "ising", tests
     };
     if (gen != NULL) {
-        return TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
+        return TestsBattery_run(&bat, gen, intf, opts);
     } else {
         TestsBattery_print_info(&bat);
         return BATTERY_PASSED;
@@ -792,8 +792,8 @@ BatteryExitCode battery_ising(const GeneratorInfo *gen, CallerAPI *intf,
 }
 
 
-BatteryExitCode battery_unit_sphere_volume(const GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads, ReportType rtype)
+BatteryExitCode battery_unit_sphere_volume(const GeneratorInfo *gen, const CallerAPI *intf,
+    const BatteryOptions *opts)
 {
     static const UnitSphereOptions 
         usphere_2d  = {.ndims = 2,  .npoints = 2000000000},
@@ -821,7 +821,7 @@ BatteryExitCode battery_unit_sphere_volume(const GeneratorInfo *gen, CallerAPI *
         "unitsphere", tests
     };
     if (gen != NULL) {
-        return TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
+        return TestsBattery_run(&bat, gen, intf, opts);
     } else {
         TestsBattery_print_info(&bat);
         return BATTERY_PASSED;

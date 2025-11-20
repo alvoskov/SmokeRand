@@ -55,6 +55,11 @@ template <class G> GeneratorWrapper<G>::GeneratorWrapper()
 
 int main()
 {                                     
+    BatteryOptions bat_opts;
+    bat_opts.testid = TESTS_ALL;
+    bat_opts.nthreads = 4;
+    bat_opts.report_type = REPORT_FULL;
+    bat_opts.param = NULL;
     CallerAPI intf = CallerAPI_init_mthr();
     GeneratorWrapper<std::mt19937> tw;
     //GeneratorWrapper<std::knuth_b> tw;
@@ -68,7 +73,7 @@ int main()
     TestResults res = linearcomp_test(&state, &opts);
     printf("p = %g x = %g\n", res.p, res.x);
 
-    battery_brief(&tw, &intf, TESTS_ALL, 4, REPORT_FULL);
+    battery_brief(&tw, &intf, &bat_opts);
 
 
     GeneratorState_destruct(&state);

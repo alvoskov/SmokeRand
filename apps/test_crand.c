@@ -56,6 +56,12 @@ static void gen_free(void *state, const GeneratorInfo *info, const CallerAPI *in
 
 int main()
 {
+    BatteryOptions opts = {
+        .testid = TESTS_ALL,
+        .nthreads = 4,
+        .report_type = REPORT_FULL,
+        .param = NULL
+    };
     static const GeneratorInfo gen = {
         .name = "crand",
         .description = "rand() function test",
@@ -70,7 +76,7 @@ int main()
 
     CallerAPI intf = CallerAPI_init_mthr();
     battery_speed(&gen, &intf);
-    battery_default(&gen, &intf, TESTS_ALL, 4, REPORT_FULL);
+    battery_default(&gen, &intf, &opts);
     CallerAPI_free();
     return 0;
 }

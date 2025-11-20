@@ -19,8 +19,8 @@
 /**
  * @brief SmokeRand `default` battery.
  */
-BatteryExitCode battery_default(const GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads, ReportType rtype)
+BatteryExitCode battery_default(const GeneratorInfo *gen, const CallerAPI *intf,
+    const BatteryOptions *opts)
 {
     // Monobit frequency test options
     static const MonobitFreqOptions monobit = {.nvalues = 1ull << 28};
@@ -141,7 +141,7 @@ BatteryExitCode battery_default(const GeneratorInfo *gen, CallerAPI *intf,
         "default", tests
     };
     if (gen != NULL) {
-        return TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
+        return TestsBattery_run(&bat, gen, intf, opts);
     } else {
         TestsBattery_print_info(&bat);
         return BATTERY_PASSED;

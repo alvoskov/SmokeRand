@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 
 
 state, npoints = 12345, 500
-#a, b, m, sh, decstep = 69069, 12345, 2**32, 0, 2**9
-a, b, m, sh, decstep = 6906969069, 12345, 2**64, 32, 2**20
+a, b, m, sh, decstep = 69069, 12345, 2**32, 0, 2**0#9
+#a, b, m, sh, decstep = 6906969069, 12345, 2**64, 32, 2**20
 x = np.zeros(npoints)
 y = np.zeros(npoints)
 z = np.zeros(npoints)

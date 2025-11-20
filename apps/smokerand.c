@@ -88,6 +88,7 @@ typedef struct {
     unsigned int nthreads; ///< From `--threads` or `--nthreads` keys.
     unsigned int nthreads_from_seed; ///< From base64 seed (`seed=_` key)
     unsigned int testid;
+    const char *bat_param;
     unsigned int maxlen_log2; ///< log2(len) for stdout length in bytes
     GeneratorFilter filter;
     ReportType report_type;
@@ -193,6 +194,9 @@ static BatteryExitCode SmokeRandSettings_txtarg_load(SmokeRandSettings *obj,
     if (!strcmp(argname, "param")) {
         set_cmd_param(argvalue);
         return BATTERY_PASSED;
+    } else if (!strcmp(argname, "batparam")) {
+        obj->bat_param = argvalue;
+        return BATTERY_PASSED;
     } else if (!strcmp(argname, "filter")) {
         obj->filter = GeneratorFilter_from_name(argvalue);
         if (obj->filter == FILTER_UNKNOWN) {
@@ -241,10 +245,11 @@ static BatteryExitCode SmokeRandSettings_txtarg_load(SmokeRandSettings *obj,
 void SmokeRandSettings_init(SmokeRandSettings *obj)
 {
     obj->nthreads = 1;
-    obj->nthreads_from_seed = 0;
     obj->testid = TESTS_ALL;
-    obj->filter = FILTER_NONE;
     obj->report_type = REPORT_FULL;
+    obj->bat_param = NULL;
+    obj->nthreads_from_seed = 0;
+    obj->filter = FILTER_NONE;
     obj->maxlen_log2 = 0;
 }
 
@@ -301,10 +306,7 @@ BatteryExitCode SmokeRandSettings_load(SmokeRandSettings *obj, int argc, char *a
 
 
 typedef BatteryExitCode (*BatteryCallback)(const GeneratorInfo *gen,
-    CallerAPI *intf,
-    unsigned int testid,
-    unsigned int nthreads,
-    ReportType rtype);
+    const CallerAPI *intf, const BatteryOptions *opts);
 
 
 typedef struct {
@@ -313,18 +315,18 @@ typedef struct {
 } BatteryEntry;
 
 
-static BatteryExitCode battery_dummy(const GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads, ReportType rtype)
+static BatteryExitCode battery_dummy(const GeneratorInfo *gen, const CallerAPI *intf,
+    const BatteryOptions *opts)
 {
     fprintf(stderr, "Battery 'dummy': do nothing\n");
-    (void) gen; (void) intf; (void) testid; (void) nthreads; (void) rtype;
+    (void) gen; (void) intf; (void) opts;
     return BATTERY_PASSED;
 }
 
-static BatteryExitCode battery_help(const GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads, ReportType rtype)
+static BatteryExitCode battery_help(const GeneratorInfo *gen, const CallerAPI *intf,
+    const BatteryOptions *opts)
 {
-    (void) intf; (void) testid; (void) nthreads; (void) rtype;
+    (void) intf; (void) opts;
     if (gen->description != NULL) {
         printf("%s\n", gen->description);
         return BATTERY_PASSED;
@@ -336,9 +338,8 @@ static BatteryExitCode battery_help(const GeneratorInfo *gen, CallerAPI *intf,
 
 #define DEFINE_SHORT_BATTERY_ENV(battery_name) \
 static BatteryExitCode battery_##battery_name##_env(const GeneratorInfo *gen, \
-    CallerAPI *intf, unsigned int testid, unsigned int nthreads, \
-    ReportType rtype) { \
-    (void) testid; (void) nthreads; (void) rtype; \
+    const CallerAPI *intf, const BatteryOptions *opts) { \
+    (void) opts; \
     return battery_##battery_name(gen, intf); \
 }
 
@@ -346,6 +347,32 @@ DEFINE_SHORT_BATTERY_ENV(birthday)
 DEFINE_SHORT_BATTERY_ENV(blockfreq)
 DEFINE_SHORT_BATTERY_ENV(self_test)
 DEFINE_SHORT_BATTERY_ENV(speed)
+
+
+/**
+ * @brief Will load battery from dynamic library
+ */
+BatteryExitCode battery_shared_lib(const char *filename, const GeneratorInfo *gen,
+    const CallerAPI *intf, const BatteryOptions *opts)
+{
+    void *lib = dlopen_wrap(filename);
+    if (lib == NULL) {
+        fprintf(stderr, "Cannot open the `%s` battery\n", filename);
+        return BATTERY_ERROR;
+    }
+    BatteryCallback battery_func;
+    BatteryExitCode result;
+    void *fptr = dlsym_wrap(lib, "battery_func");
+    memcpy(&battery_func, &fptr, sizeof(battery_func));
+    if (battery_func == NULL) {
+        fprintf(stderr, "Cannot find the 'battery_func' function\n");
+        result = BATTERY_ERROR;
+    } else {
+        result = battery_func(gen, intf, opts);
+    }
+    dlclose_wrap(lib);
+    return result;
+}
 
 /**
  * @brief Run a battery of statistical test for a given generator.
@@ -376,6 +403,12 @@ BatteryExitCode run_battery(const char *battery_name, GeneratorInfo *gi,
     (void) batteries;
 
     BatteryExitCode ans = BATTERY_UNKNOWN;
+    BatteryOptions bat_opts;
+    bat_opts.testid      = opts->testid;
+    bat_opts.nthreads    = opts->nthreads;
+    bat_opts.report_type = opts->report_type;
+    bat_opts.param       = (opts->bat_param != NULL) ? opts->bat_param : "";
+
 
     if (strlen(battery_name) > 1 &&
         battery_name[0] == 'f' && battery_name[1] == '=') {
@@ -384,13 +417,21 @@ BatteryExitCode run_battery(const char *battery_name, GeneratorInfo *gi,
             return 1;
         }
         const char *filename = battery_name + 2;
-        ans = battery_file(filename, gi, intf, opts->testid, opts->nthreads, opts->report_type);
+        ans = battery_file(filename, gi, intf, &bat_opts);
+    } else if (strlen(battery_name) > 1 && 
+        battery_name[0] == 's' && battery_name[1] == '=') {
+        if (battery_name[2] == '\0') {
+            fprintf(stderr, "File name cannot be empty");
+            return 1;
+        }
+        const char *filename = battery_name + 2;
+        ans = battery_shared_lib(filename, gi, intf, &bat_opts);
     } else if (!strcmp(battery_name, "stdout")) {
         GeneratorInfo_bits_to_file(gi, intf, opts->maxlen_log2);
     } else {
         for (const BatteryEntry *entry = batteries; entry->name != NULL; entry++) {
             if (!strcmp(battery_name, entry->name)) {
-                ans = entry->battery(gi, intf, opts->testid, opts->nthreads, opts->report_type);
+                ans = entry->battery(gi, intf, &bat_opts);
                 break;
             }
         }
@@ -403,17 +444,20 @@ BatteryExitCode run_battery(const char *battery_name, GeneratorInfo *gi,
 
 int print_battery_info(const char *battery_name)
 {
+    const BatteryOptions opts = {
+        .testid = 0, .nthreads = 0, .report_type = REPORT_FULL, .param = NULL
+    };
     if (!strcmp(battery_name, "express")) {
-        battery_express(NULL, NULL, 0, 0, REPORT_FULL);
+        battery_express(NULL, NULL, &opts);
     } else if (!strcmp(battery_name, "default")) {
-        battery_default(NULL, NULL, 0, 0, REPORT_FULL);
+        battery_default(NULL, NULL, &opts);
     } else if (!strcmp(battery_name, "brief")) {
-        battery_brief(NULL, NULL, 0, 0, REPORT_FULL);
+        battery_brief(NULL, NULL, &opts);
     } else if (!strcmp(battery_name, "full")) {
-        battery_full(NULL, NULL, 0, 0, REPORT_FULL);
+        battery_full(NULL, NULL, &opts);
     } else if (strlen(battery_name) > 2 &&
         battery_name[0] == 'f' && battery_name[1] == '=') {
-        battery_file(battery_name + 2, NULL, NULL, 0, 0, REPORT_FULL);
+        battery_file(battery_name + 2, NULL, NULL, &opts);
     } else {
         fprintf(stderr, "Information about battery %s is absent\n",
             battery_name);

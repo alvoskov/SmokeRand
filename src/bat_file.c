@@ -721,8 +721,7 @@ typedef struct {
  *     test_name param1=value1 param2=value2 end
  */
 BatteryExitCode battery_file(const char *filename, const GeneratorInfo *gen,
-    CallerAPI *intf, unsigned int testid, unsigned int nthreads,
-    ReportType rtype)
+    const CallerAPI *intf, const BatteryOptions *opts)
 {
     static const TestFunc parsers[] = {
         {"bspace_nd", parse_bspace_nd},
@@ -788,7 +787,7 @@ BatteryExitCode battery_file(const char *filename, const GeneratorInfo *gen,
     bat.name = tests_args.battery_name;
     bat.tests = tests;
     if (gen != NULL) {
-        ans = TestsBattery_run(&bat, gen, intf, testid, nthreads, rtype);
+        ans = TestsBattery_run(&bat, gen, intf, opts);
     } else {
         TestsBattery_print_info(&bat);
         ans = BATTERY_PASSED;

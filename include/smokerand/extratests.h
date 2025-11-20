@@ -61,11 +61,11 @@ TestResults unit_sphere_volume_test_wrap(GeneratorState *gs, const void *udata);
 
 
 BatteryExitCode battery_birthday(const GeneratorInfo *gen, const CallerAPI *intf);
-BatteryExitCode battery_ising(const GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads, ReportType rtype);
+BatteryExitCode battery_ising(const GeneratorInfo *gen, const CallerAPI *intf,
+    const BatteryOptions *opts);
 BatteryExitCode battery_blockfreq(const GeneratorInfo *gen, const CallerAPI *intf);
-BatteryExitCode battery_unit_sphere_volume(const GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads, ReportType rtype);
+BatteryExitCode battery_unit_sphere_volume(const GeneratorInfo *gen, const CallerAPI *intf,
+    const BatteryOptions *opts);
 
 
 #endif // __SMOKERAND_EXTRATESTS_H

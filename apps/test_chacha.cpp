@@ -38,6 +38,12 @@ static uint64_t get_bits(void *state)
 
 int main()
 {
+    BatteryOptions opts;
+    opts.testid = TESTS_ALL;
+    opts.nthreads = 8;
+    opts.report_type = REPORT_FULL;
+    opts.param = NULL;
+
     static GeneratorInfo gen;
     gen.name = "chacha_cpp11";
     gen.description = "chacha in a fancy c++ class";
@@ -51,7 +57,7 @@ int main()
 
     CallerAPI intf = CallerAPI_init_mthr();
     battery_speed(&gen, &intf);
-    battery_default(&gen, &intf, TESTS_ALL, 8, REPORT_FULL);
+    battery_default(&gen, &intf, &opts);
     CallerAPI_free();
     return 0;
 }
