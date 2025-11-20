@@ -13,6 +13,5 @@
 #include "smokerand/core.h"
 
 BatteryExitCode battery_file(const char *filename, const GeneratorInfo *gen,
-    CallerAPI *intf, unsigned int testid, unsigned int nthreads,
-    ReportType rtype);
+    const CallerAPI *intf, const BatteryOptions *opts);
 #endif

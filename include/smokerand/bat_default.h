@@ -11,6 +11,6 @@
 #ifndef __SMOKERAND_BAT_DEFAULT_H
 #define __SMOKERAND_BAT_DEFAULT_H
 #include "smokerand/core.h"
-BatteryExitCode battery_default(const GeneratorInfo *gen, CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads, ReportType rtype);
+BatteryExitCode battery_default(const GeneratorInfo *gen, const CallerAPI *intf,
+    const BatteryOptions *opts);
 #endif

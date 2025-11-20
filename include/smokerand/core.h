@@ -122,11 +122,20 @@ typedef struct {
     const TestDescription *tests;
 } TestsBattery;
 
+
+typedef struct {
+    unsigned int testid;
+    unsigned int nthreads;
+    ReportType report_type;
+    const char *param;
+} BatteryOptions;
+
+
 size_t TestsBattery_ntests(const TestsBattery *obj);
 void TestsBattery_print_info(const TestsBattery *obj);
 BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     const GeneratorInfo *gen, const CallerAPI *intf,
-    unsigned int testid, unsigned int nthreads, ReportType rtype);
+    const BatteryOptions *opts); 
 
 
 typedef enum {

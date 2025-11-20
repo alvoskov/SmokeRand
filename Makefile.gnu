@@ -143,7 +143,8 @@ GEN_BINDIR = $(BINDIR)/generators
 
 #-----------------------------------------------------------------------------
 all: $(CORE_LIB) $(BAT_LIB) $(addprefix $(BINDIR)/, $(addsuffix $(EXE),$(EXEC_NAMES))) \
-    $(addprefix $(BINDIR)/, $(addsuffix $(EXE),$(EXECXX_NAMES))) generators
+    $(addprefix $(BINDIR)/, $(addsuffix $(EXE),$(EXECXX_NAMES))) generators \
+    $(BINDIR)/bat_example$(SO)
 
 $(CORE_LIB): $(LIB_OBJFILES)
 	$(AR) rcu $@ $^
@@ -180,6 +181,12 @@ $(BINDIR)/test_funcs$(EXE): $(OBJDIR)/test_funcs.o $(CORE_LIB) $(BAT_LIB)
 
 $(BINDIR)/test_rdseed$(EXE): $(OBJDIR)/test_rdseed.o $(CORE_LIB) $(BAT_LIB)
 	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
+
+$(BINDIR)/bat_example$(SO): $(OBJDIR)/bat_example.o
+	$(CC) -shared -fPIC $(LINKFLAGS) $< -o $@ $(INCLUDE)
+
+$(OBJDIR)/bat_example.o: $(APPSRCDIR)/bat_example.c $(INTERFACE_HEADERS)
+	$(CC) -fPIC $(LINKFLAGS) -c $< -o $@ $(INCLUDE)
 
 $(LIB_OBJFILES) $(BATLIB_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.c $(LIB_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
