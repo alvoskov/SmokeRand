@@ -42,13 +42,13 @@ typedef struct {
 static inline uint64_t get_bits_raw(void *state)
 {
     Mwc1616PlusShared *obj = state;
-    uint16_t z_lo = (uint16_t) (obj->z & 0xFFFF);
-    uint16_t z_hi = (uint16_t) (obj->z >> 16);
-    uint16_t w_lo = (uint16_t) (obj->w & 0xFFFF);
-    uint16_t w_hi = (uint16_t) (obj->w >> 16);
+    const uint16_t z_lo = (uint16_t) (obj->z & 0xFFFF);
+    const uint16_t z_hi = (uint16_t) (obj->z >> 16);
+    const uint16_t w_lo = (uint16_t) (obj->w & 0xFFFF);
+    const uint16_t w_hi = (uint16_t) (obj->w >> 16);
     obj->z = (uint32_t)61578u * z_lo + z_hi;
     obj->w = (uint32_t)63885u * w_lo + w_hi;
-    uint32_t mwc = ((obj->z << 16) | (obj->z >> 16)) + obj->w;
+    const uint32_t mwc = rotl32(obj->z, 16) + obj->w;
     return mwc;
 }
 
@@ -56,10 +56,10 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Mwc1616PlusShared *obj = intf->malloc(sizeof(Mwc1616PlusShared));
-    uint32_t seed0 = intf->get_seed32();
+    const uint32_t seed0 = intf->get_seed32();
     obj->z = (seed0 & 0xFFFF) | (1ul << 16ul);
     obj->w = (seed0 >> 16) | (1ul << 16ul);
-    return (void *) obj;
+    return obj;
 }
 
 
