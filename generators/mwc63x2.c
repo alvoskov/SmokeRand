@@ -1,22 +1,30 @@
-/*
-    a = [1073100393]
-    m = [1073100393 * 2**32 - 1]
-
-    a = [4005]
-    m = [4005 * 2**32 - 1]
-With degraded multipliers:
-- Passes `express`, `brief`, `default`, `full`
-- Passes SmallCrush, Crush, BigCrush
-- PractRand: >= 2 TiB
-
-With good multipliers:
-- Passes `express`, `brief`, `default`, `full`
-- Passes SmallCrush, Crush, BigCrush
-- PractRand: 
-*/
-
-
-
+/**
+ * @file mwc63x2.c
+ * @brief Mwc63x2 combined PRNG: consists of two MWC (multiply-with-carry)
+ * generators.
+ * @details It is a combination of two MWC (Multiply-With-Carry) generators
+ * designed to the signed 64-bit integers typical for Java or Oberon dialects.
+ * This generator doesn't use integer overflows. The algorithm is fairly
+ * robust and passes the next tests:
+ *
+ * With intentionally bad multipliers (4005 and 3939):
+ *
+ * - Passes `express`, `brief`, `default`, `full`.
+ * - Passes SmallCrush, Crush, BigCrush.
+ * - PractRand: >= 2 TiB.
+ *
+ * With good multipliers:
+ *
+ * - Passes `express`, `brief`, `default`, `full`.
+ * - Passes SmallCrush, Crush, BigCrush.
+ * - PractRand: >= 8 TiB.
+ *
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
@@ -30,6 +38,7 @@ typedef struct {
     int64_t mwc1;
     int64_t mwc2;
 } MWC63x2State;
+
 
 static inline uint64_t get_bits_raw(void *state)
 {
@@ -47,6 +56,7 @@ static inline uint64_t get_bits_raw(void *state)
     return (uint32_t) out;
 }
 
+
 static void *create(const CallerAPI *intf)
 {
     MWC63x2State *obj = intf->malloc(sizeof(MWC63x2State));
@@ -59,6 +69,7 @@ static void *create(const CallerAPI *intf)
     } while (obj->mwc2 == 0);
     return obj;
 }
+
 
 static int run_self_test(const CallerAPI *intf)
 {
