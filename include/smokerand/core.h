@@ -13,6 +13,7 @@
 #define __SMOKERAND_CORE_H
 #include "apidefs.h"
 #include <stdint.h>
+#include <limits.h>
 
 #define PENALTY_FREQ           4.0
 #define PENALTY_GAP            4.0
@@ -30,7 +31,8 @@
 #define PENALTY_LINEARCOMP     0.25
 
 enum {
-    TESTS_ALL = 0
+    TESTS_ALL = 0,
+    TEST_UNKNOWN = INT_MAX
 };
 
 CallerAPI CallerAPI_init(void);
@@ -124,7 +126,13 @@ typedef struct {
 
 
 typedef struct {
-    unsigned int testid;
+    unsigned int id;
+    const char *name;
+} TestIdentifier;
+
+
+typedef struct {
+    TestIdentifier test;
     unsigned int nthreads;
     ReportType report_type;
     const char *param;
@@ -132,6 +140,7 @@ typedef struct {
 
 
 size_t TestsBattery_ntests(const TestsBattery *obj);
+unsigned int TestsBattery_get_testid(const TestsBattery *obj, const TestIdentifier *test);
 void TestsBattery_print_info(const TestsBattery *obj);
 BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     const GeneratorInfo *gen, const CallerAPI *intf,

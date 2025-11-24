@@ -153,7 +153,7 @@ int Vec16_compare(const Vec16 *v1, const Vec16 *v2)
 }
 
 
-void Key256_fill(Key256 *key, uint64_t *data)
+void Key256_fill(Key256 *key, const uint64_t *data)
 {
     key->lo.data.u64[0] = data[0];
     key->lo.data.u64[1] = data[1];
@@ -234,12 +234,13 @@ void KuznState_make_table_LS()
  */
 static inline void apply_fast_LS(Vec16 *out, Vec16 in)
 {
-    out->data.u64[0] = 0; out->data.u64[1] = 0;
+    uint64_t out0 = 0, out1 = 0;
     for (int i = 0; i < 16; i++) {
-        uint8_t b = in.data.u8[i];
-        out->data.u64[0] ^= lookup_table_LS[256*i + b].data.u64[0];
-        out->data.u64[1] ^= lookup_table_LS[256*i + b].data.u64[1];
+        const uint8_t b = in.data.u8[i];
+        out0 ^= lookup_table_LS[256*i + b].data.u64[0];
+        out1 ^= lookup_table_LS[256*i + b].data.u64[1];
     }
+    out->data.u64[0] = out0; out->data.u64[1] = out1;
 }
 
 
@@ -526,6 +527,12 @@ EXPORT uint64_t get_sum(void *state, size_t len)
     return sum;
 }
 
+static const char description[] =
+"RFC7801/GOST R 34.12-2015 'Kuznyechik' based PRNG. This block cipher runs\n"
+"in the counter mode and returns 64-bit unsigned integers.\n"
+"Note: its output (but not correctness of the cipher implementation itself)\n"
+"may be dependent on endianness of the computer\n";
+
 
 int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
 {
@@ -533,14 +540,14 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
     KuznState_make_table_LS();
     // Fill the output structure
     gi->name = "Kuznyechik";
-    gi->description = NULL;
-    gi->nbits = 64;
-    gi->get_bits = get_bits;
-    gi->create = default_create;
-    gi->free = default_free;
-    gi->get_sum = get_sum;
-    gi->self_test = run_self_test;
-    gi->parent = NULL;
+    gi->description = description;
+    gi->nbits       = 64;
+    gi->get_bits    = get_bits;
+    gi->create      = default_create;
+    gi->free        = default_free;
+    gi->get_sum     = get_sum;
+    gi->self_test   = run_self_test;
+    gi->parent      = NULL;
     (void) intf;
     return 1;
 }

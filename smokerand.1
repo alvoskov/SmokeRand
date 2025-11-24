@@ -1,4 +1,4 @@
-.TH smokerand 1  "November 16, 2025" "version 0.42" "USER COMMANDS"
+.TH smokerand 1  "November 23, 2025" "version 0.43" "USER COMMANDS"
 .SH NAME
 smokerand \- a test suite for pseudorandom numbers generators
 .SH SYNOPSIS
@@ -375,6 +375,12 @@ hexadecimal format (always 2 digits) and \fIbase64key\fR is the 256-bit key
 for ChaCha20 stream cipher encoded in the base64 format. Such seeds are 
 printed in all PRNG testing reports and allow to fully reproduce obtained
 results.
+.TP
+.B \-\-testid=\fIid\fR
+Run only the test with the given numeric \fIid\fR.
+.TP
+.B \-\-testname=\fIname\fR
+Run only a test with the given \fIname\fR.
 .TP
 .B \-\-threads=\fIn\fR
 Run battery in multithreaded mode using \fIn\fR threads.

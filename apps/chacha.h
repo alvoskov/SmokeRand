@@ -1,3 +1,29 @@
+/**
+ * @file chacha.h
+ * @brief ChaCha20 based PRNG implementation for C++11.
+ * @details This PRNG is based on the ChaCha20 stream cipher. Even ChaCha12 and
+ * ChaCha8 are still considered cryptographically strong. ChaCha20 passes
+ * TestU01, PractRand and SmokeRand test batteries and can be recommened as
+ * a robust general purpose parallel generator.
+ *
+ * WARNING! This program is designed as a general purpose high quality PRNG
+ * for simulations and statistical testing. IT IS NOT DESIGNED FOR ENCRYPTION,
+ * KEYS/NONCES GENERATION AND OTHER CRYPTOGRAPHICAL APPLICATION!
+ *
+ * References:
+ * 1. RFC 7539. ChaCha20 and Poly1305 for IETF Protocols
+ *    https://datatracker.ietf.org/doc/html/rfc7539
+ * 2. D.J. Bernstein. ChaCha, a variant of Salsa20. 2008.
+ *    https://cr.yp.to/chacha.html
+ * 3. Jean-Philippe Aumasson. Too Much Crypto // Cryptology ePrint Archive.
+ *    2019. Paper 2019/1492. year = {2019}, https://eprint.iacr.org/2019/1492
+ *
+ * @copyright
+ * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include <cstdint>
 #include <cstring>
 #include <cassert>

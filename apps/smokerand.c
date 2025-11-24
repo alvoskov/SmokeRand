@@ -52,6 +52,8 @@ void print_help(void)
     "    high32, low32  Analyse higher/lower 32 bits of 64-bit generator\n"
     "  --report-brief Show only failures in the report\n"
     "  --seed=data Use the user supplied string (data) as a seed\n"
+    "  --testid=id     Run only the test with the given numeric id\n"
+    "  --testname=name Run only the test with the given name\n"
     "  --nthreads  Run battery in multithreaded mode (default number of threads)\n"
     "  --threads=n Run battery in multithreaded mode using n threads\n"
     "\n";
@@ -88,7 +90,8 @@ GeneratorFilter GeneratorFilter_from_name(const char *name)
 typedef struct {
     unsigned int nthreads; ///< From `--threads` or `--nthreads` keys.
     unsigned int nthreads_from_seed; ///< From base64 seed (`seed=_` key)
-    unsigned int testid;
+    unsigned int testid; ///< Test identifier obtained from the `--testid` key
+    const char *testname; ///< Test name obtained from the `--testname` key
     const char *bat_param;
     unsigned int maxlen_log2; ///< log2(len) for stdout length in bytes
     GeneratorFilter filter;
@@ -226,6 +229,9 @@ static BatteryExitCode SmokeRandSettings_txtarg_load(SmokeRandSettings *obj,
             set_entropy_textseed(argvalue);
         }
         return BATTERY_PASSED;
+    } else if (!strcmp(argname, "testname")) {
+        obj->testname = argvalue;
+        return BATTERY_PASSED;
     } else {
         return BATTERY_FAILED;
     }
@@ -245,13 +251,14 @@ static BatteryExitCode SmokeRandSettings_txtarg_load(SmokeRandSettings *obj,
 
 void SmokeRandSettings_init(SmokeRandSettings *obj)
 {
-    obj->nthreads = 1;
-    obj->testid = TESTS_ALL;
-    obj->report_type = REPORT_FULL;
-    obj->bat_param = NULL;
+    obj->nthreads           = 1;
+    obj->testid             = TESTS_ALL;
+    obj->testname           = NULL;
+    obj->report_type        = REPORT_FULL;
+    obj->bat_param          = NULL;
     obj->nthreads_from_seed = 0;
-    obj->filter = FILTER_NONE;
-    obj->maxlen_log2 = 0;
+    obj->filter             = FILTER_NONE;
+    obj->maxlen_log2        = 0;
 }
 
 /**
@@ -387,25 +394,30 @@ BatteryExitCode run_battery(const char *battery_name, GeneratorInfo *gi,
     CallerAPI *intf, SmokeRandSettings *opts)
 {
     static const BatteryEntry batteries[] = {
-        {"default", battery_default},
-        {"brief", battery_brief},
-        {"full", battery_full},
-        {"express", battery_express},
-        {"help", battery_help},
-        {"selftest", battery_self_test_env},
-        {"speed", battery_speed_env},
-        {"freq", battery_blockfreq_env},
-        {"birthday", battery_birthday_env},
-        {"ising", battery_ising},
+        {"default",    battery_default},
+        {"brief",      battery_brief},
+        {"full",       battery_full},
+        {"express",    battery_express},
+        {"help",       battery_help},
+        {"selftest",   battery_self_test_env},
+        {"speed",      battery_speed_env},
+        {"freq",       battery_blockfreq_env},
+        {"birthday",   battery_birthday_env},
+        {"ising",      battery_ising},
         {"unitsphere", battery_unit_sphere_volume},
-        {"dummy", battery_dummy},
-        {NULL, NULL}
+        {"dummy",      battery_dummy},
+        {NULL,         NULL}
     };
-    (void) batteries;
 
+    if (opts->testid != TESTS_ALL && opts->testname != NULL) {
+        fprintf(stderr, "testid and testname keys cannot coexist\n");
+        return BATTERY_ERROR;
+    }
+    
     BatteryExitCode ans = BATTERY_UNKNOWN;
     BatteryOptions bat_opts;
-    bat_opts.testid      = opts->testid;
+    bat_opts.test.id     = opts->testid;
+    bat_opts.test.name   = opts->testname;
     bat_opts.nthreads    = opts->nthreads;
     bat_opts.report_type = opts->report_type;
     bat_opts.param       = (opts->bat_param != NULL) ? opts->bat_param : "";
@@ -415,7 +427,7 @@ BatteryExitCode run_battery(const char *battery_name, GeneratorInfo *gi,
         battery_name[0] == 'f' && battery_name[1] == '=') {
         if (battery_name[2] == '\0') {
             fprintf(stderr, "File name cannot be empty");
-            return 1;
+            return BATTERY_ERROR;
         }
         const char *filename = battery_name + 2;
         ans = battery_file(filename, gi, intf, &bat_opts);
@@ -423,7 +435,7 @@ BatteryExitCode run_battery(const char *battery_name, GeneratorInfo *gi,
         battery_name[0] == 's' && battery_name[1] == '=') {
         if (battery_name[2] == '\0') {
             fprintf(stderr, "File name cannot be empty");
-            return 1;
+            return BATTERY_ERROR;
         }
         const char *filename = battery_name + 2;
         ans = battery_shared_lib(filename, gi, intf, &bat_opts);
@@ -446,7 +458,8 @@ BatteryExitCode run_battery(const char *battery_name, GeneratorInfo *gi,
 int print_battery_info(const char *battery_name)
 {
     const BatteryOptions opts = {
-        .testid = 0, .nthreads = 0, .report_type = REPORT_FULL, .param = NULL
+        .test = {.id = 0, .name = NULL},
+        .nthreads = 0, .report_type = REPORT_FULL, .param = NULL
     };
     if (!strcmp(battery_name, "express")) {
         battery_express(NULL, NULL, &opts);
@@ -526,7 +539,6 @@ int main(int argc, char *argv[])
         print_help();
         return 0;
     }
-    GeneratorInfo filter_gen;
     SmokeRandSettings opts;
     if (SmokeRandSettings_load(&opts, argc, argv)) {
         return BATTERY_ERROR;
@@ -566,6 +578,7 @@ int main(int argc, char *argv[])
         CallerAPI_free();
         return ans;
     } else {
+        GeneratorInfo filter_gen;
         CallerAPI intf = (opts.nthreads == 1) ? CallerAPI_init() : CallerAPI_init_mthr();
         GeneratorModule mod = GeneratorModule_load(generator_lib, &intf);
         if (!mod.valid) {

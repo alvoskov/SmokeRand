@@ -56,10 +56,11 @@ template <class G> GeneratorWrapper<G>::GeneratorWrapper()
 int main()
 {                                     
     BatteryOptions bat_opts;
-    bat_opts.testid = TESTS_ALL;
-    bat_opts.nthreads = 4;
+    bat_opts.test.id     = TESTS_ALL;
+    bat_opts.test.name   = nullptr;
+    bat_opts.nthreads    = 4;
     bat_opts.report_type = REPORT_FULL;
-    bat_opts.param = NULL;
+    bat_opts.param       = NULL;
     CallerAPI intf = CallerAPI_init_mthr();
     GeneratorWrapper<std::mt19937> tw;
     //GeneratorWrapper<std::knuth_b> tw;

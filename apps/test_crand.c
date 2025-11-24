@@ -57,7 +57,7 @@ static void gen_free(void *state, const GeneratorInfo *info, const CallerAPI *in
 int main()
 {
     BatteryOptions opts = {
-        .testid = TESTS_ALL,
+        .test = {.id = TESTS_ALL, .name = NULL},
         .nthreads = 4,
         .report_type = REPORT_FULL,
         .param = NULL

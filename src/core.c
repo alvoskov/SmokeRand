@@ -312,14 +312,25 @@ int GeneratorState_check_size(const GeneratorState *obj)
 ///// Subroutines for working with C modules /////
 //////////////////////////////////////////////////
 
-
 /**
  * @brief Loads shared library (`.so` or `.dll`) with module that
  * implements pseudorandom number generator.
  */
 GeneratorModule GeneratorModule_load(const char *libname, const CallerAPI *intf)
 {
-    GeneratorModule mod = {.valid = 1};
+    GeneratorModule mod = {.valid = 1,
+        {
+            .name = NULL,
+            .description = NULL,
+            .nbits = 0,
+            .create = NULL,
+            .free = NULL,
+            .get_bits = NULL,
+            .self_test = NULL,
+            .get_sum = NULL,
+            .parent = NULL
+        }
+    };
     mod.lib = dlopen_wrap(libname);
     if (mod.lib == NULL) {
         mod.valid = 0;
@@ -698,6 +709,24 @@ size_t TestsBattery_ntests(const TestsBattery *obj)
 }
 
 
+unsigned int TestsBattery_get_testid(const TestsBattery *obj, const TestIdentifier *test)
+{
+    if (test->id != TESTS_ALL && test->name != NULL) { // They are mutually exclusive
+        return TEST_UNKNOWN;
+    } else if (test->id != TESTS_ALL) { // Note test->id is 1-based index
+        return (test->id > TestsBattery_ntests(obj)) ? TEST_UNKNOWN : test->id;
+    } else if (test->name != NULL) { // Convert name to id
+        for (unsigned int id = 0; obj->tests[id].run != NULL; id++) {
+            if (!strcmp(obj->tests[id].name, test->name))
+                return id + 1;
+        }
+        return TEST_UNKNOWN;
+    } else { // Default id (means "all tests should be launched")
+        return TESTS_ALL;
+    }
+}
+
+
 static ThreadRetVal THREADFUNC_SPEC battery_thread(void *data)
 {
     TestsDispatcher *th_data = data;
@@ -907,22 +936,27 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     const BatteryOptions *opts)
 {
     time_t tic, toc;
-    size_t ntests = TestsBattery_ntests(bat);
+    const size_t ntests = TestsBattery_ntests(bat);
     size_t nresults = ntests;
     TestResults *results = NULL;
     const unsigned int nthreads = (opts->nthreads == 0) ? 1 : opts->nthreads;
+    const unsigned int testid = TestsBattery_get_testid(bat, &opts->test);
 #ifdef NOTHREADS
     nthreads = 1;
     printf("WARNING: multithreading is not supported on this platform\n");
     printf("They will be run sequentally\n");
 #endif
     printf("===== Starting '%s' battery =====\n", bat->name);
-    if (opts->testid > ntests) { // testid is 1-based index
-        fprintf(stderr, "Invalid test id %u", opts->testid);
+    if (testid == TEST_UNKNOWN) {
+        if (opts->test.id != TESTS_ALL) {
+            fprintf(stderr, "Invalid test id %u\n", opts->test.id);
+        } else if (opts->test.name != NULL) {
+            fprintf(stderr, "Invalid test name %s\n", opts->test.name);
+        }
         return BATTERY_ERROR;
     }
     // Allocate memory for tests
-    if (opts->testid == TESTS_ALL) {
+    if (testid == TESTS_ALL) {
         results = calloc(ntests, sizeof(TestResults));
         nresults = ntests;
     } else {
@@ -944,9 +978,9 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     }
     // Run the tests
     tic = time(NULL);
-    if (nthreads == 1 || opts->testid != TESTS_ALL) {
+    if (nthreads == 1 || testid != TESTS_ALL) {
         // One-threaded version
-        if (opts->testid == TESTS_ALL) {
+        if (testid == TESTS_ALL) {
             for (size_t i = 0; i < ntests; i++) {
                 intf->printf("----- Test %u of %u (%s)\n",
                     (unsigned int) (i + 1), (unsigned int) ntests, bat->tests[i].name);
@@ -956,9 +990,9 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
                 results[i].thread_id = 0;
             }
         } else {
-            *results = TestDescription_run(&bat->tests[opts->testid - 1], &obj);
-            results->name = bat->tests[opts->testid - 1].name;
-            results->id = opts->testid;
+            *results = TestDescription_run(&bat->tests[testid - 1], &obj);
+            results->name = bat->tests[testid - 1].name;
+            results->id = testid;
         }
         GeneratorState_destruct(&obj);
     } else {
@@ -972,11 +1006,11 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
         printf("==================== Seeds logger report ====================\n");
         Entropy_print_seeds_log(&entropy, stdout);
     }
-    if (opts->testid == TESTS_ALL) {
+    if (testid == TESTS_ALL) {
         printf("==================== '%s' battery report ====================\n", bat->name);
     } else {
         printf("==================== '%s' battery test #%d report ====================\n",
-            bat->name, opts->testid);
+            bat->name, testid);
     }
     printf("Generator name:    %s\n", gen->name);
     printf("Output size, bits: %d\n", (int) gen->nbits);
