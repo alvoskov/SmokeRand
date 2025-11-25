@@ -748,14 +748,14 @@ static ThreadRetVal THREADFUNC_SPEC battery_thread(void *data)
             "vvvvv Thread %u: test #%lld: %s (%lld of %lld) started vvvvv\n",
             thrd.ord,
             (long long) ti.ind + 1, bat->tests[ti.ind].name,
-            (long long) ti.ord + 1, (long long) th_data->ntests);
+            (long long) ti.ord, (long long) th_data->ntests);
         th_data->results[ti.ind] = TestDescription_run(&bat->tests[ti.ind], &queue->gen);
         th_data->res_thrd_ord[ti.ind] = thrd.ord;
         th_data->intf->printf(
             "^^^^^ Thread %u: test #%lld: %s (%lld of %lld) finished ^^^^^\n",
             thrd.ord,
             (long long) ti.ind + 1, bat->tests[ti.ind].name,
-            (long long) ti.ord + 1, (long long) th_data->ntests);
+            (long long) ti.ord, (long long) th_data->ntests);
         th_data->results[ti.ind].name = bat->tests[ti.ind].name;
         th_data->results[ti.ind].id = (unsigned int) (ti.ind + 1);
         th_data->results[ti.ind].thread_id = thrd.ord;

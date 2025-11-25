@@ -10,14 +10,44 @@
  * With intentionally bad multipliers (4005 and 3939):
  *
  * - Passes `express`, `brief`, `default`, `full`.
- * - Passes SmallCrush, Crush, BigCrush.
+ * - Passes SmallCrush, Crush, BigCrush from TestU01.
  * - PractRand: >= 2 TiB.
  *
  * With good multipliers:
  *
  * - Passes `express`, `brief`, `default`, `full`.
- * - Passes SmallCrush, Crush, BigCrush.
- * - PractRand: >= 8 TiB.
+ * - Passes SmallCrush, Crush, BigCrush from TestU01.
+ * - PractRand: >= 16 TiB.
+ *
+ * It also passes SmokeRand and TestU01 with reverse order of bits.
+ *
+ * MWC is rather famous algorithm developed by G. Marsaglia, it is an
+ * essentially LCG with prime modulo in a specific form that allows very
+ * fast high precision arithmetics.
+ *
+ * \f$ m = ab - 1 \f$ (where \f$b = 2^{31}\f$ for this implementation,
+ * also \f$ a < b \f$)
+ *
+ * The interal state of the corresponding LCG is \f$ u = bc + x \f$ where c is
+ * the carry, the x is the lower part of the multiplication result.
+ * We can use the \f$ a \pm m \mod m = a \mod m \f$ formula to prove
+ * the connection:
+ *
+ * \f[
+ * a(bc + x) \mod m = (abc + ax) \mod m = \left(ab(c - 1) + ax + 1\right) \mod m =
+ * ... = \left( ax + c \right) \mod m = ax + c.
+ * \f]
+ * 
+ * mod m was excluded due to restrictions on initialization.
+ *
+ * References:
+ *
+ * 1. George Marsaglia. Random Number Generators // Journal of Modern Applied
+ *    Statistical Methods. 2003. V. 2. N 1. P. 2-13.
+ *    https://doi.org/10.22237/jmasm/1051747320
+ * 2. G. Marsaglia "Multiply-With-Carry (MWC) generators" (from DIEHARD
+ *    CD-ROM) https://www.grc.com/otg/Marsaglia_MWC_Generators.pdf
+ * 3. https://github.com/lpareja99/spectral-test-knuth
  *
  * @copyright
  * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
