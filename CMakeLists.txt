@@ -126,15 +126,15 @@ set (GENERATORS
     smwc192 smwc192lux smwc24 smwc48 smwc48lux smwc8x16 smwc96 speck128 
     speck128sc speck64_128 splitmix splitmix32 splitmix32cbc splitmix_g1 
     sqxor sqxor32 stormdrop superduper64 superduper73 superduper96 
-    swb swblarge swblux swbmwc32 swbmwc64 swbw taus88 threefry threefry2x64 
-    tinymt32 tinymt64 tylo64 ultra ultra64 v3b well1024a weyl wich1982 
-    wich2006 wob2m wyrand xabc16 xabc32 xabc64 xabc8 xkiss8_awc xkiss16_awc 
-    xkiss16sh_awc xkiss32_awc xkiss32sh_awc xkiss64_awc xorgens xoroshiro1024st 
-    xoroshiro1024stst xoroshiro128 xoroshiro128aox xoroshiro128p 
-    xoroshiro128pp xoroshiro128pp_vec xoroshiro32 xoroshiro32pp xoroshiro64pp 
-    xoroshiro64st xoroshiro64stst xorshift128 xorshift128p xorshift128pp 
-    xorshift128rp xorshift64 xorshift64st xorwow xoshiro128p xoshiro128pp 
-    xsh xtea xxtea ziff98 
+    swb swblarge swblux swbmwc32 swbmwc64 swbw taus88 threefish1024 
+    threefry threefry2x64 tinymt32 tinymt64 tylo64 ultra ultra64 
+    v3b well1024a weyl wich1982 wich2006 wob2m wyrand xabc16 xabc32 
+    xabc64 xabc8 xkiss8_awc xkiss16_awc xkiss16sh_awc xkiss32_awc 
+    xkiss32sh_awc xkiss64_awc xorgens xoroshiro1024st xoroshiro1024stst 
+    xoroshiro128 xoroshiro128aox xoroshiro128p xoroshiro128pp xoroshiro128pp_vec 
+    xoroshiro32 xoroshiro32pp xoroshiro64pp xoroshiro64st xoroshiro64stst 
+    xorshift128 xorshift128p xorshift128pp xorshift128rp xorshift64 
+    xorshift64st xorwow xoshiro128p xoshiro128pp xsh xtea xxtea ziff98 
 )
 
 # Examples of plugins, i.e. modules with PRNGs
