@@ -292,15 +292,59 @@ uint64_t call_rdseed()
 }
 
 /**
+ * @brief A crude estimation of CPU frequency based on `clock` function
+ * and execution of arithmetic loops that cannot be optimized by compilers.
+ * It also uses a default CPU frequency as 3 GHz as fallback (it is rather
+ * close to it since ~2005).
+ */
+static uint64_t estimate_cpu_freq()
+{
+    const clock_t tic_init = clock();
+    const double ticks_per_iter = 2.5;
+    const uint64_t default_freq = 3000000000; // 3 GHz
+    clock_t tic;
+    do {
+        tic = clock();
+    } while (tic == tic_init);
+    volatile uint32_t sum = 0;
+    uint32_t x = (uint32_t) tic;
+    double time_elapsed = 0.0;
+    long long niters = 0;
+    do {
+        const long niters_per_step = 200000;
+        // Note about cycle: don't split arithmetic expression into "nicer"
+        // and "more human readable" chunks: it may influence speed at -O0
+        // and -O1.
+        for (long i = 0; i < niters_per_step; i++) {
+            sum += (x = 69069U * x + 12345U);
+        }
+        niters += niters_per_step;
+        const clock_t toc = clock();
+        time_elapsed = (double) (toc - tic) / (double) CLOCKS_PER_SEC;
+    } while (time_elapsed < 0.5 && time_elapsed >= 0);
+    if (time_elapsed <= 0.001) {
+        return default_freq;
+    }
+    const uint64_t freq = (uint64_t) (ticks_per_iter * (double) niters / time_elapsed);
+    return (freq < 1000U * default_freq) ? freq : default_freq;
+}
+
+
+/**
  * @brief Emulation of RDTSC instruction: estimates number of CPU tics
  * from the program start using `clock` function and crude estimation
  * of CPU frequency as 3 GHz (it is rather close to it since ~2005).
+ * @details NOTE: THIS FUNCTION MAY BE NOT SUITABLE FOR MULTITHREADING!
+ * Its initialization at the first run is not thread-safe!
  */
 uint64_t cpuclock(void)
 {
-    const uint64_t default_freq = 3000000000; // 3 GHz
-    const uint64_t clocks_to_tics = default_freq / CLOCKS_PER_SEC;
-    uint64_t clk = (uint64_t) clock();
+    static uint64_t cpu_freq = 0;
+    if (cpu_freq == 0) {
+        cpu_freq = estimate_cpu_freq();
+    }
+    const uint64_t clocks_to_tics = cpu_freq / CLOCKS_PER_SEC;
+    const uint64_t clk = (uint64_t) clock();
     return clk * clocks_to_tics;
 }
 #else
