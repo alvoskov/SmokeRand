@@ -1,6 +1,7 @@
 #include "smokerand/apidefs.h"
 #include "smokerand/core.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 static GeneratorState GeneratorState_create_x(const GeneratorInfo *gi,
     const CallerAPI *intf)

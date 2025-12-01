@@ -367,6 +367,7 @@ static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
     Tf1024VecState_init(obj, key, tweak);
     return obj;
 #else
+    (void) Tf1024VecState_init;
     (void) gi;
     intf->printf("Not implemented\n");
     return NULL;
