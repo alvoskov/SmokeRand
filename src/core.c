@@ -939,12 +939,13 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     const size_t ntests = TestsBattery_ntests(bat);
     size_t nresults = ntests;
     TestResults *results = NULL;
-    const unsigned int nthreads = (opts->nthreads == 0) ? 1 : opts->nthreads;
     const unsigned int testid = TestsBattery_get_testid(bat, &opts->test);
 #ifdef NOTHREADS
-    nthreads = 1;
+    const unsigned int nthreads = 1;
     printf("WARNING: multithreading is not supported on this platform\n");
     printf("They will be run sequentally\n");
+#else
+    const unsigned int nthreads = (opts->nthreads == 0) ? 1 : opts->nthreads;
 #endif
     printf("===== Starting '%s' battery =====\n", bat->name);
     if (testid == TEST_UNKNOWN) {
