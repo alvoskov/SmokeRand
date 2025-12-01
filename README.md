@@ -705,8 +705,8 @@ There are only two problematic situations:
  gmwc128           | u64    | +       | +     | +       | +    | 0.72 | +      | 4     |         | >= 32 TiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 5     | +       | >= 32 TiB
  hicg64_u32        | u32    | 1       | 2     | 3       | 3    | 5.4  | +      | 0     | Small   | 32 MiB
- icg31x2           | u32    | +       | +     | +       | 1    | 87   |        | 2     | >=Small | 8 GiB
- icg64             | u32    | +       | +     | +       | +    | 113  |        |       | >=Small | >= 1 TiB
+ icg31x2           | u32    | +       | +     | +       | 1    | 87   |        | 2     | >=Crush | 8 GiB
+ icg64             | u32    | +       | +     | +       | +    | 113  |        |       | >=Crush | >= 1 TiB
  icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  | +      | 0     | Small   | 32 MiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss96            | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 32 TiB(?)
@@ -824,7 +824,7 @@ There are only two problematic situations:
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      | 3.5   |+_lo/+_hi| 2 MiB
  randu             | u32    | 6       | 23    | 41      | 45   | 0.41 | -(>>10)| 0     | -       | 1 KiB
  ranlux++          | u64    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 32 TiB
- ranrot_bi         | u64    | +       | +     | 1       | 2/4  | 0.33 | +      | 0     |         | 8 GiB
+ ranrot_bi         | u64    | +       | +     | 1       | 2/4  | 0.33 | +      | 0     |>=C(IL)  | 8 GiB
  ranrot32[7/3]     | u32    | +       | 3     | 5/6     | 6    | 0.58 | +      | 0     | Small   | 128 MiB
  ranrot32[17/9]    | u32    | +       | 1     | 2       | 4    | 0.68 | +      | 0     | +       | 1 GiB
  ranrot32[57/13]   | u32    | +       | +     | +       | 1    | 0.74 | +      | 2     | +       | 8 GiB
@@ -889,7 +889,7 @@ There are only two problematic situations:
  threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 8 TiB
  threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | >= 32 TiB
  threefish_avx     | u64    | +       | +     | +       | +    | 1.3  | +      | 5     |         | >= 8 TiB
- threefish1024     | u64    | +       | +     | +       | +    | 4.4  | +      | 5     | +(il)   | >= 8 TiB
+ threefish1024     | u64    | +       | +     | +       | +    | 4.4  | +      | 5     | +(il)   | >= 16 TiB
  threefish1024_avx | u64    | +       | +     | +       | +    | 1.3  | +      | 5     | +(il)   | >= 2 TiB
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
