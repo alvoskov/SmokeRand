@@ -889,7 +889,7 @@ There are only two problematic situations:
  threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 8 TiB
  threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | >= 32 TiB
  threefish_avx     | u64    | +       | +     | +       | +    | 1.3  | +      | 5     |         | >= 8 TiB
- threefish1024     | u64    | +       | +     | +       | +    | 4.4  | +      | 5     | +       | >= 4 TiB
+ threefish1024     | u64    | +       | +     | +       | +    | 4.4  | +      | 5     | +       | >= 8 TiB
  threefish1024_avx | u64    | +       | +     | +       | +    | 1.3  | +      | 5     | +       | >= 2 TiB
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
