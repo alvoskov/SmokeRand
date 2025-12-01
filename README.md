@@ -652,7 +652,7 @@ There are only two problematic situations:
 
  Algorithm         | Output | express | brief | default | full | cpb  | bday64 | Grade | TestU01 | PractRand 
 -------------------|--------|---------|-------|---------|------|------|--------|-------|---------|-----------
- aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      | 5     | +       | >= 32 TiB
+ aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      | 5     | +il     | >= 32 TiB
  aes128(c99)       | u64    | +       | +     | +       | +    | 6.8  | +      | 5     |         | >= 32 TiB
  alfib             | u64    | 2       | 5     | 6       | 8    | 0.23 | +      | 0     | Small   | 128 MiB
  alfib8x5          | u32    | +       | +     | +       | +    | 3.2  | +      | 4     |         | >= 4 TiB
@@ -661,7 +661,7 @@ There are only two problematic situations:
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 1 TiB
  ara32             | u32    | +       | 1     | 1       | 1    | 0.96 | +      | 2(0)  | +       | 512 MiB
  biski8_mul        | u32    | 1       | 19    | 33      | 41   | 2.2  | -(>>10)| 0     | -       | 512 KiB
- biski16_mul       | u32    | +       | 2     | 3       | 6    | 1.6  | -      | 0     |         | 16 GiB
+ biski16_mul       | u32    | +       | 2     | 3       | 6    | 1.6  | -      | 0     | -       | 16 GiB
  biski64_mul       | u64    | +       | +     | +       | +    | 0.18 | +      | 4     |         | >= 2 TiB
  biski8            | u32    | +       | 17    | 35      | 35   | 1.4  | -(>>10)| 0     | -       | 2 MiB
  biski8_alt        | u32    | +       | 17    | 31      | 31   | 1.4  | -(>>10)| 0     | -       | 2 MiB
@@ -671,7 +671,7 @@ There are only two problematic situations:
  biski32_alt       | u32    | +       | +     | +       | +    | 0.43 | +      | 4(0)  | +       | >= 16 TiB
  biski64           | u64    | +       | +     | +       | +    | <0.1 | +      | 3     |         | >= 32 TiB
  biski64_alt       | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 32 TiB(?)
- blabla2           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     | >=Crush | >= 16 TiB
+ blabla2           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     | +il     | >= 16 TiB
  blabla4           | u64    | +       | +     | +       | +    | 0.58 | +      | 4     |         | >= 8 TiB
  blabla10          | u64    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 16 TiB
  chacha            | u32    | +       | +     | +       | +    | 3.3  | +      | 5     | +       | >= 32 TiB
@@ -726,7 +726,7 @@ There are only two problematic situations:
  lcg128_u32_full   | u32    | +       | +     | 1       | 1    | 0.75 | +      | 3     | +       | >= 32 TiB
  lcg69069          | u32    | 6       | 20    | 38/39   | 43/44| 0.38 | -(>>10)| 0     | -       | 2 KiB
  lea128            | u32    | +       | +     | +       | +    | 5.7  | +      | 5     | +       | >= 32 TiB
- lea128_avx        | u32    | +       | +     | +       | +    | 1.2  | +      | 5     |         | >= 32 TiB
+ lea128_avx        | u32    | +       | +     | +       | +    | 1.2  | +      | 5     | >= Crush| >= 32 TiB
  lfib_par[31+]     | u32    | 1       | 6/7   | 8/0     | 11/12| 0.70 | +      | 0     | -       | 32 MiB
  lfib_par[55+]     | u32    | 1       | 5     | 6       | 8    | 0.51 | +      | 0     | -       | 2 GiB
  lfib_par[55-]     | u32    | 1       | 5     | 6       | 8    | 0.51 | +      | 0     | -       | 2 GiB
@@ -863,7 +863,7 @@ There are only two problematic situations:
  speck128_avx(full)| u64    | +       | +     | +       | +    | 0.75 | +      | 5     |         | >= 16 TiB
  speck128_avx(r16) | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 32 TiB
  splitmix          | u64    | +       | +     | +       | +    | 0.12 | -      | 3     | +       | >= 32 TiB
- splitmix_g1       | u64    | +       | 1     | 1       | 2    | 0.12 | -      | 0.75  |         | 8 GiB
+ splitmix_g1       | u64    | +       | 1     | 1       | 2    | 0.12 | -      | 0.75  |sIL/>=CLH| 8 GiB
  splitmix32        | u32    | +       | 3     | 4       | 5/7  | 0.25 | -(>>10)| 0     | Small   | 1 GiB
  splitmix32cbc     | u32    | +       | +     | +       | +    | 2.1  | -      | 3     | +       | 8 TiB
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | 4     | +       | >= 16 TiB
@@ -889,8 +889,8 @@ There are only two problematic situations:
  threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 8 TiB
  threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | >= 32 TiB
  threefish_avx     | u64    | +       | +     | +       | +    | 1.3  | +      | 5     |         | >= 8 TiB
- threefish1024     | u64    | +       | +     | +       | +    | 4.4  | +      | 5     | +       | >= 8 TiB
- threefish1024_avx | u64    | +       | +     | +       | +    | 1.3  | +      | 5     | +       | >= 2 TiB
+ threefish1024     | u64    | +       | +     | +       | +    | 4.4  | +      | 5     | +(il)   | >= 8 TiB
+ threefish1024_avx | u64    | +       | +     | +       | +    | 1.3  | +      | 5     | +(il)   | >= 2 TiB
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 32 TiB
@@ -936,13 +936,13 @@ There are only two problematic situations:
  xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      | 3     | +       | 8 MiB
  xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      | 4     | +       | >= 16 TiB
  xsh               | u64    | 2       | 9     | 14      | 18   | 0.43 | -      | 0     | -       | 32 KiB
- xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     |         | ?
- xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     |         | >= 32 TiB
- xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     |         | >= 8 TiB
- xxtea128          | u32    | +       | +     | +       | +    | 18   | +      | 4.5   |         | >= 1 TiB
- xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   |         | >= 32 TiB
- xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   |         | >= 1 TiB
- xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   |         | >= 32 TiB
+ xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     | >= Crush| ?
+ xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     | >= Crush| >= 32 TiB
+ xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     | >= Crush| >= 8 TiB
+ xxtea128          | u32    | +       | +     | +       | +    | 18   | +      | 4.5   | >= Crush| >= 1 TiB
+ xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   | >= Crush| >= 32 TiB
+ xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   | >= Crush| >= 1 TiB
+ xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   | >= Crush| >= 32 TiB
  ziff98            | u32    | +       | 3     | 3       | 3    | 0.47 | +      | 3.25  | Small   | 32 GiB
 
 Performance estimation for some 64-bit generators
