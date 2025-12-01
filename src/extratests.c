@@ -93,6 +93,34 @@ static inline uint64_t birthday_gen_trvalue(GeneratorState *obj, uint64_t mask, 
 
 
 /**
+ * @brief Estimate the generator speed in the 64-bit birthday paradox test.
+ * It is needed for correct interactive progress information output.
+ */
+static double
+birthday_get_bytes_per_sec(GeneratorState *obj, const BirthdayOptions *opts, uint64_t mask)
+{
+    const clock_t cl_tic_init = clock();
+    clock_t cl_tic, cl_toc;
+    long ncalls = 0;
+    do {
+        cl_tic = clock();
+    } while (cl_tic == cl_tic_init);
+    clock_t cl_toc_init = cl_tic;
+    do {
+        int is_ok;
+        (void) birthday_gen_trvalue(obj, mask, &is_ok);
+        (void) birthday_gen_trvalue(obj, mask, &is_ok);
+        if (!is_ok) {
+            return 1.0;
+        }
+        ncalls += 2;
+        cl_toc = clock();
+    } while (cl_toc == cl_toc_init);
+    const double nbytes = (double) ncalls * pow(2.0, opts->e) * 8.0;
+    return nbytes * (double) CLOCKS_PER_SEC / (double) (cl_toc - cl_tic);
+}
+
+/**
  * @brief Birthday paradox (not birthday spacings!) test for 64-bit pseudorandom
  * number generators. Detects 64-bit uniformly distributed PRNGS with 64-bit state.
  * @details This test for 64-bit PRNGs is suggested by M.E.O'Neill. It detects
@@ -121,9 +149,9 @@ static inline uint64_t birthday_gen_trvalue(GeneratorState *obj, uint64_t mask, 
 TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
 {
     TestResults ans = TestResults_create("birthday");
-    unsigned long long nvalues_raw = (opts->n << opts->e);
-    unsigned int nbits_per_value = birthday_get_nbits_per_value(obj->gi);
-    double lambda = BirthdayOptions_calc_lambda(opts, nbits_per_value);
+    const unsigned long long nvalues_raw = (opts->n << opts->e);
+    const unsigned int nbits_per_value = birthday_get_nbits_per_value(obj->gi);
+    const double lambda = BirthdayOptions_calc_lambda(opts, nbits_per_value);
     obj->intf->printf("  Sample size:      2^%.2f values (2^%.2f bytes)\n",
         sr_log2((double) opts->n), sr_log2(8.0 * (double) opts->n));
     if (opts->n < 8) {
@@ -135,7 +163,7 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
         sr_log2((double) nvalues_raw), sr_log2(8.0 * (double) nvalues_raw));
     obj->intf->printf("  lambda = %g\n", lambda);
     obj->intf->printf("  Filling the array with 'birthdays'\n");
-    uint64_t mask = (1ull << opts->e) - 1;
+    const uint64_t mask = (1ull << opts->e) - 1;
     time_t tic = time(NULL);
     uint64_t cpu_tic = cpuclock();
     uint64_t *x = calloc((size_t) opts->n, sizeof(uint64_t));
@@ -144,7 +172,15 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
             sr_log2((double) opts->n * 8.0));
         return ans;
     }
-    unsigned long long bytes_per_trvalue = 1ull << (opts->e + 3);
+
+    const double bytes_per_sec = birthday_get_bytes_per_sec(obj, opts, mask);
+    const double time_elapsed = 8.0 * (double) nvalues_raw / bytes_per_sec;
+    unsigned long long chunk_size = opts->n / (unsigned long long) (time_elapsed * 5.0);
+    if (chunk_size < 1) {
+        chunk_size = 1;
+    }
+
+    const unsigned long long bytes_per_trvalue = 1ull << (opts->e + 3);
     for (unsigned long long i = 0; i < opts->n; i++) {
         int is_ok;
         x[i] = birthday_gen_trvalue(obj, mask, &is_ok);
@@ -156,7 +192,7 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
             free(x);
             return ans;
         }
-        if (i % (opts->n / 1000) == 0) {
+        if (i % chunk_size == 0) {
             unsigned long nseconds_total, nseconds_left;
             double mib_per_sec, cpb;
             uint64_t cpu_toc = cpuclock();
