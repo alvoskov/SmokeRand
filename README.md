@@ -828,13 +828,13 @@ There are only two problematic situations:
  ranrot32[7/3]     | u32    | +       | 3     | 5/6     | 6    | 0.58 | +      | 0     | Small   | 128 MiB
  ranrot32[17/9]    | u32    | +       | 1     | 2       | 4    | 0.68 | +      | 0     | +       | 1 GiB
  ranrot32[57/13]   | u32    | +       | +     | +       | 1    | 0.74 | +      | 2     | +       | 8 GiB
- ranrot8tiny       | u32    | +       | 8     |         |      | 2.0  |        | 0     | -       | 4 MiB
- ranrot16tiny      | u32    | +       | +     | +       | 1    | 1.0  |        | 2     | >= Crush| 8 GiB
- ranrot32tiny      | u32    | +       | +     | +       | +    | 0.41 | +      | 3     |         | 2 TiB
+ ranrot8tiny       | u32    | +       | 8     | 24      |      | 2.0  | -(>>10)| 0     | -       | 4 MiB
+ ranrot16tiny      | u32    | +       | +     | +       | 1    | 1.0  | -      | 2     | Crush   | 8 GiB
+ ranrot32tiny      | u32    | +       | +     | +       | +    | 0.41 | +      | 3     | +       | 2 TiB
  ranrot64tiny      | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 1 TiB
- ranshi            | u64    | +       | 2     | 7       | 8    | 0.43 | +      | 0     |         | 32 KiB
- ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | +      | 3.5   |         | 8 TiB
- ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 32 TiB
+ ranshi            | u64    | +       | 2     | 7       | 8    | 0.43 | +      | 0     | -(IL)   | 32 KiB
+ ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | +      | 3.5   | +       | 8 TiB
+ ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     | +       | >= 32 TiB
  ranval            | u32    | +       | +     | +       | +    | 0.31 | +      | 4(0)  | +       | >= 32 TiB
  ranval64          | u64    | +       | +     | +       | +    | 0.23 | +      | 4(0)  |         | >= 16 TiB
  r250              | u32    | 3       | 7     | 10      | 13   | 0.50 | +      | 0     | -       | 1 MiB
@@ -889,13 +889,13 @@ There are only two problematic situations:
  threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 8 TiB
  threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | >= 32 TiB
  threefish_avx     | u64    | +       | +     | +       | +    | 1.3  | +      | 5     |         | >= 8 TiB
- threefish1024     | u64    | +       | +     | +       |      | 4.4  |        | 5     |         | ?
- threefish1024_avx | u64    | +       | +     | +       | +    | 1.3  | +      | 5     |         | ?
+ threefish1024     | u64    | +       | +     | +       | +    | 4.4  | +      | 5     | +       | >= 4 TiB
+ threefish1024_avx | u64    | +       | +     | +       | +    | 1.3  | +      | 5     | +       | >= 2 TiB
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 32 TiB
  ultra             | u32    | +       | +     | +       | 1    | 0.81 | +      | 2     | +       | 4 GiB
- ultra64           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 16 TiB
+ ultra64           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |+_lo/+_hi| >= 16 TiB
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     | +       | >= 32 TiB
  wich1982          | u32    | +       | 5     | 11      | 13   | 2.3  | -      | 0     | -       | 256 GiB
  wich2006          | u32    | +       | +     | +       | +    | 4.6  | +      | 4     | +       | >= 16 TiB
