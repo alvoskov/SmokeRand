@@ -685,7 +685,7 @@ There are only two problematic situations:
  cswb4288          | u32    | +       | 1     | 1       | 4/5  | 0.90 | +      | 0     | Crush   | >= 32 TiB
  cswb4288_64       | u64    | +       | 1     | 2       | 4/5  | 0.52 | +      | 0     | +lo/+hi | >= 32 TiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +lo/+hi | >= 16 TiB
- des-ctr           | u64    | +       | +     | +       | +    | 24   | -      | 3     | >=Crush | >= 4 TiB
+ des-ctr           | u64    | +       | +     | +       | +    | 24   | -      | 3     | +IL     | >= 4 TiB
  drand48           | u32    | 3       | 13    | 21      | 23/24| 0.72 | -      | 0     | -       | 1 MiB
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 16 TiB
  isaac             | u32    | +       | +     | +       | +    | 1.6  | +      | 5     | >=Crush | >= 16 TiB
