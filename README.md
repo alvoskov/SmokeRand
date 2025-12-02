@@ -936,7 +936,7 @@ There are only two problematic situations:
  xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      | 3     | +       | 8 MiB
  xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      | 4     | +       | >= 16 TiB
  xsh               | u64    | 2       | 9     | 14      | 18   | 0.43 | -      | 0     | -       | 32 KiB
- xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     | >= Crush| ?
+ xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     | >= Crush| >= 4 TiB
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     | >= Crush| >= 32 TiB
  xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     | >= Crush| >= 8 TiB
  xxtea128          | u32    | +       | +     | +       | +    | 18   | +      | 4.5   | >= Crush| >= 1 TiB
