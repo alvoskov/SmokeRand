@@ -657,7 +657,7 @@ There are only two problematic situations:
  alfib             | u64    | 2       | 5     | 6       | 8    | 0.23 | +      | 0     | Small   | 128 MiB
  alfib8x5          | u32    | +       | +     | +       | +    | 3.2  | +      | 4     |         | >= 4 TiB
  alfib64x5         | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 8 TiB
- alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | N/A    | 3.75  | +       | 4 GiB
+ alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | +      | 3.75  | +       | 4 GiB
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 1 TiB
  ara32             | u32    | +       | 1     | 1       | 1    | 0.96 | +      | 2(0)  | +       | 512 MiB
  biski8_mul        | u32    | 1       | 19    | 33      | 41   | 2.2  | -(>>10)| 0     | -       | 512 KiB
@@ -688,7 +688,7 @@ There are only two problematic situations:
  des-ctr           | u64    | +       | +     | +       | +    | 24   | -      | 3     | +IL     | >= 4 TiB
  drand48           | u32    | 3       | 13    | 21      | 23/24| 0.72 | -      | 0     | -       | 1 MiB
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 16 TiB
- isaac             | u32    | +       | +     | +       | +    | 1.6  | +      | 5     | >=Crush | >= 16 TiB
+ isaac             | u32    | +       | +     | +       | +    | 1.6  | +      | 5     | +       | >= 16 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 5     | +       | >= 32 TiB
  jctr32            | u32    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 16 TiB
  jctr32_avx2       | u32    | +       | +     | +       | +    | 0.51 | +      | 4     |         | >= 32 TiB
@@ -705,7 +705,7 @@ There are only two problematic situations:
  gmwc128           | u64    | +       | +     | +       | +    | 0.72 | +      | 4     |         | >= 32 TiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 5     | +       | >= 32 TiB
  hicg64_u32        | u32    | 1       | 2     | 3       | 3    | 5.4  | +      | 0     | Small   | 32 MiB
- icg31x2           | u32    | +       | +     | +       | 1    | 87   |        | 2     | >=Crush | 8 GiB
+ icg31x2           | u32    | +       | +     | +       | 1    | 87   |        | 2     | Crush   | 8 GiB
  icg64             | u32    | +       | +     | +       | +    | 113  |        |       | >=Crush | >= 1 TiB
  icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  | +      | 0     | Small   | 32 MiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
@@ -762,7 +762,7 @@ There are only two problematic situations:
  lrnd64_1023       | u64    | 2       | 3     | 5       | 7    | 0.44 | +      | 2.25  | Small   | 4 MiB
  lxm_64x128        | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 32 TiB
  macmarsa          | u32    | 2       | 12    | 18      | 19   | 0.67 | -(>>10)| 0     | -       | 128 KiB
- magma             | u64    | +       | +     | +       | +    | 25   |        |       | >=Crush | >= 1 TiB
+ magma             | u64    | +       | +     | +       | +    | 25   |        |       | +       | >= 1 TiB
  magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      | 3     |         | >= 16 TiB
  magma_avx-cbc     | u64    | +       | +     | +       | +    | 7.1  | +      | 4     |         | >= 2 TiB
  melg607           | u64    | 2       | 3     | 5       | 7    | 0.73 | +      | 2.25  | Small   | 8 MiB
@@ -905,7 +905,7 @@ There are only two problematic situations:
  xabc8             | u32    | +       | 8     | 15      | 22   | 3.7  | -(>>10)| 0     | -       | 8 MiB
  xabc16            | u32    | +       | +     | 1       | 1    | 1.6  | +      | 2     | Small   | 64 GiB
  xabc32            | u32    | +       | +     | +       | +    | 0.82 | +      | 4(0)  | +       | 16 TiB
- xabc64            | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | 4 TiB
+ xabc64            | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |+IL/+H   | 4 TiB
  xkiss8_awc        | u32    | +       | +     | +       | +    | 3.2  | +      | 4     | +       | >= 16 TiB
  xkiss16_awc       | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
  xkiss16sh_awc     | u32    | +       | +     | +       | +    | 2.1  | +      | 3     | +       | 16 GiB
