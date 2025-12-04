@@ -74,8 +74,8 @@ local gen_sources = {
     'xoroshiro32pp',      'xoroshiro64pp',      'xoroshiro64st',      'xoroshiro64stst', 
     'xorshift128',        'xorshift128p',       'xorshift128pp',      'xorshift128rp', 
     'xorshift64',         'xorshift64st',       'xorwow',             'xoshiro128p', 
-    'xoshiro128pp',       'xsh',                'xtea',               'xxtea', 
-    'ziff98'
+    'xoshiro128pp',       'xsh',                'xtea',               'xtea2',
+    'xtea2_64',           'xxtea',              'ziff98'
 }
 
 return {

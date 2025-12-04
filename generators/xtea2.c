@@ -1,5 +1,22 @@
-// https://tomstdenis.tripod.com/xtea.pdf
-// ??? _0B_WHi5GiyND7BqO8PGKyh75r4nHVA/CTDldAmsns4hNQ0=
+/**
+ * @file xtea2.c
+ * @details An experimental modification of XTEA block cipher with 128-bit
+ * block size and 128-bit key developed by Tom St Denis. Uses 32-bit words.
+ * @details
+ *
+ * Note:
+ *
+ * - 7 rounds - pass `express` and `brief` battery.
+ * - 8 rounds - pass `default` battery.
+ *
+ * WARNING! No cryptoanalysis of this cipher was found in literature!
+ * IT MUST NOT BE USED FOR ENCRYPTION!
+ *
+ * References:
+ * 
+ * 1. Tom St Denis. Extended TEA Algorithms. April 20th 1999.
+ *    https://tomstdenis.tripod.com/xtea.pdf
+ */
 #include "smokerand/cinterface.h"
 #include <inttypes.h>
 
@@ -14,6 +31,11 @@ typedef struct {
 } Xtea2State;
 
 
+static inline uint32_t xtea2_mix(uint32_t v, uint32_t sum, uint32_t rkey)
+{
+    return ((v << 4) ^ (v >> 5)) + sum + rotl32(rkey, v & 0x1F);
+}
+
 void Xtea2State_block(Xtea2State *obj)
 {
     // Load and pre-white the registers
@@ -22,9 +44,9 @@ void Xtea2State_block(Xtea2State *obj)
     uint32_t sum = 0;
     // Round functions
     for (int i = 0; i < 32; i++) {
-        a += ((b << 4) ^ (b >> 5)) + (d ^ sum) + rotl32(obj->key[sum & 3], b & 0x1F);
+        a += xtea2_mix(b, d ^ sum, obj->key[sum & 3]);
         sum += 0x9E3779B9;
-        c += ((d << 4) ^ (d >> 5)) + (b ^ sum) + rotl32(obj->key[(sum >> 11) & 3], d & 0x1F);
+        c += xtea2_mix(d, b ^ sum, obj->key[(sum >> 11) & 3]);
         // Rotate plaintext registers
         const uint32_t t = a;
         a = b; b = c; c = d; d = t;

@@ -877,7 +877,7 @@ There are only two problematic situations:
  shr3              | u32    | 2       | 17    | 33      | 37(?)| 0.76 | -(>>10)| 0     | -       | 32 KiB
  swb               | u32    | 1       | 6     | 7       | 9    | 3.2  | +      | 0     | Small   | 128 MiB
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | 2     | Crush   | 4 TiB
- swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 2 TiB
+ swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 8 TiB
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | +      | 0     | Crush   | 512 GiB
  swbmwc32          | u32    | +       | 1     | 1       | 1    | 0.87 | +      | 0     | Small   | 128 GiB
  swbmwc64          | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |+_lo/+_hi| >= 32 TiB
@@ -939,6 +939,8 @@ There are only two problematic situations:
  xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     | >= Crush| >= 4 TiB
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     | >= Crush| >= 32 TiB
  xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     | >= Crush| >= 8 TiB
+ xtea2             | u32    | +       | +     | +       |      |      |        |       |         | ?
+ xtea2_64          | u64    | +       | +     | +       |      |      |        |       |         | ?
  xxtea128          | u32    | +       | +     | +       | +    | 18   | +      | 4.5   | >= Crush| >= 1 TiB
  xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   | >= Crush| >= 32 TiB
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   | >= Crush| >= 1 TiB
@@ -1192,7 +1194,10 @@ are less sensitive, e.g. entropy test catches only randu.
 
 ??.12.2025: SmokeRand 0.43
 
-- Bug was fixed in the `gap16_count0`: occasional false failures for 
+- Bug was fixed in the `gap16_count0` test: occasional false failures for
+  cryptographic algorithms (wrong computation of `[value .. 0 .. value]`
+  gaps percentage was fixed)
+- New algorithms added: `threefish1024`, `mwc63x2`, `xtea2`, `xtea2_64`.
 
 16.11.2025: SmokeRand 0.42
 
