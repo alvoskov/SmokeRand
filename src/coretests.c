@@ -765,7 +765,7 @@ void gap16_count0_mainloop(GapFrequencyArray *gapfreq, GapFrequencyArray *gapfre
             unsigned long long gap_len = pos - lastw16_pos[w16] - 1;
             if (gap_len >= nbins) gap_len = nbins;
             // b) Update frequency table
-            if (last0_pos > lastw16_pos[w16]) {
+            if (last0_pos != ULLONG_MAX && last0_pos > lastw16_pos[w16]) {
                 GapFrequencyArray_inc_with0(gapfreq, gap_len);
             }
             GapFrequencyArray_inc_total(gapfreq, gap_len);
@@ -776,7 +776,7 @@ void gap16_count0_mainloop(GapFrequencyArray *gapfreq, GapFrequencyArray *gapfre
             unsigned long long gap_len = pos - last0_pos - 1;
             if (gap_len >= nbins) gap_len = nbins;
             // b0 Update frequency table
-            if (lastw16_pos[w16] > last0_pos) {
+            if (lastw16_pos[w16] != ULLONG_MAX && lastw16_pos[w16] > last0_pos) {
                 GapFrequencyArray_inc_with0(gapfreq_rb, gap_len);
             }
             GapFrequencyArray_inc_total(gapfreq_rb, gap_len);
