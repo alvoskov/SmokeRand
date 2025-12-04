@@ -1190,6 +1190,10 @@ are less sensitive, e.g. entropy test catches only randu.
 
 # Versions history
 
+??.12.2025: SmokeRand 0.43
+
+- Bug was fixed in the `gap16_count0`: occasional false failures for 
+
 16.11.2025: SmokeRand 0.42
 
 - The first public release.
@@ -1547,3 +1551,10 @@ retuns upper 64 bits. Of course, 1 PiB is only a minimalistic lower boundary
 for a general purpose PRNG that is used to draw a border between seriously
 flawed and barely usable LCGs with \f$ m = 2 ^ k \f$ modulo.
 
+# Notes and TO-DO lists
+
+Examples of false failures in SmokeRand 0.42 in gap16_count0 test:
+
+smokerand.exe brief generators/chacha.dll --seed=_01_UU3t9pAb3d5FYNSe6nbg3ew3LMZtRMkA4p84wYkBr60= --testname=gap16_count0
+smokerand.exe brief generators/aes128.dll --seed=_01_9FvOZLUeS9/Pl7c9rZBvJlLmKK85Oo8qGfpwgl4GGvA= --testname=gap16_count0
+smokerand.exe brief generators/speck128.dll --testname=gap16_count0 --seed=_01_iQNhejvPDb2ImAIwDMyWe+ZnqFFX3riJn0aorb3XvWc=
