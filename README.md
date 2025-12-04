@@ -688,8 +688,8 @@ There are only two problematic situations:
  des-ctr           | u64    | +       | +     | +       | +    | 24   | -      | 3     | +IL     | >= 4 TiB
  drand48           | u32    | 3       | 13    | 21      | 23/24| 0.72 | -      | 0     | -       | 1 MiB
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 16 TiB
- isaac             | u32    | +       | +     | +       | +    | 1.6  | +      | 5     | +       | >= 16 TiB
- isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 5     | +       | >= 32 TiB
+ isaac             | u32    | +       | +     | +       | +    | 1.6  | +      | 4.5   | +       | >= 16 TiB
+ isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 4.5   | +       | >= 32 TiB
  jctr32            | u32    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 16 TiB
  jctr32_avx2       | u32    | +       | +     | +       | +    | 0.51 | +      | 4     |         | >= 32 TiB
  jctr64            | u64    | +       | +     | +       | +    | 1.1  | +      | 4     |         | >= 16 TiB
@@ -715,7 +715,7 @@ There are only two problematic situations:
  kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     | +       | >= 16 TiB
  kiss11_64         | u64    | +       | +     | +       | +    | 0.60 | +      | 4     |         | >= 32 TiB
  kiss4691          | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 32 TiB
- kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 4.5   | +       | >= 4 TiB
+ kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 5     | +       | >= 4 TiB
  lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>10)| 0     | -       | 512 MiB
  lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     | -       | 16 KiB
  lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | +      | 0     | Small   | 16 MiB
@@ -939,8 +939,8 @@ There are only two problematic situations:
  xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     | >= Crush| >= 4 TiB
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     | >= Crush| >= 32 TiB
  xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     | >= Crush| >= 8 TiB
- xtea2             | u32    | +       | +     | +       |      |      |        |       |         | ?
- xtea2_64          | u64    | +       | +     | +       |      |      |        |       |         | ?
+ xtea2             | u32    | +       | +     | +       |      | 12   |        |       | >= Crush| ?
+ xtea2_64          | u64    | +       | +     | +       |      | 28   |        |       |         | ?
  xxtea128          | u32    | +       | +     | +       | +    | 18   | +      | 4.5   | >= Crush| >= 1 TiB
  xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   | >= Crush| >= 32 TiB
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   | >= Crush| >= 1 TiB
