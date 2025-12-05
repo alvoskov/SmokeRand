@@ -831,7 +831,7 @@ There are only two problematic situations:
  ranrot8tiny       | u32    | +       | 8     | 24      |      | 2.0  | -(>>10)| 0     | -       | 4 MiB
  ranrot16tiny      | u32    | +       | +     | +       | 1    | 1.0  | -      | 2     | Crush   | 8 GiB
  ranrot32tiny      | u32    | +       | +     | +       | +    | 0.41 | +      | 3     | +       | 2 TiB
- ranrot64tiny      | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 1 TiB
+ ranrot64tiny      | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 16 TiB
  ranshi            | u64    | +       | 2     | 7       | 8    | 0.43 | +      | 0     | -(IL)   | 32 KiB
  ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | +      | 3.5   | +       | 8 TiB
  ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     | +       | >= 32 TiB
