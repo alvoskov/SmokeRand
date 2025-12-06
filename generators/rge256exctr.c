@@ -30,6 +30,9 @@ static inline void RGE256ExCtrState_block(RGE256ExCtrState *obj)
         s[7] ^= s[2]; s[2] += rotl32(s[7], 13);
         s[4] ^= s[3]; s[3] += rotl32(s[4], 17);
     }
+    for (int i = 0; i < 8; i++) {
+        obj->out[i] += obj->ctr[i];
+    }
 }
 
 
