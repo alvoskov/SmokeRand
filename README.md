@@ -844,11 +844,12 @@ There are only two problematic situations:
  ranlux[2]         | u32    | +       | +     | +       | +    | 27   | N/A    |       |         | >= 2 TiB
  rc4               | u32    | +       | +     | +       | +    | 6.0  | +      | 3     | +       | 512 GiB
  rc4ok             | u32    | +       | +     | +       | +    | 6.2  | N/A    | 4.5   | +       | >= 32 TiB
+ rge256lite        | u32    | +       | +     | +       | +    | 5.2  | +      | 4     | +       | >= 1 TiB
  rge256ex          | u32    | +       | +     | +       | +    | 0.62 | +      |       | >=Crush | >= 1 TiB
  rge256ex-ctr      | u32    |         |       |         |      | 1.8  |        |       |         | ?
  rge512ex          | u64    |         |       |         |      | 0.34 |        |       |         | ?
  rge512ex-ctr      | u64    | +       | +     | +       | +    | 0.85 | +      | 4     |         | >= 1 TiB
- rge512ex-ctr-avx2 | u64    | +       | +     | +       |      | 0.39 | +      |       |>=CH     | ?
+ rge512ex-ctr-avx2 | u64    | +       | +     | +       |      | 0.39 | +      |       |>=CH     | >= 16 TiB
  romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      | 4(0)  |         | >= 32 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
  sapparot          | u32    | +       | 2     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
