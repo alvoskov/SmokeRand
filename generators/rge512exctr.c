@@ -1,6 +1,6 @@
 // Original: https://doi.org/10.5281/zenodo.17713219
 // express, brief, default, full, birthday
-// PractRand >= 1 TiB
+// PractRand >= 16 TiB
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
