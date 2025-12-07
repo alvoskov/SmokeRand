@@ -176,7 +176,8 @@ Systematic failures in P.1-4 mean that PRNG is seriously flawed and mustn't
 be used for computations. P.5 requires a special consideration for each task
 and each generator. Of course, statistical tests are not sufficient for
 PRNG quality control: state-of-art quality PRNG should satisfy theoretical
-"next bit test" and be cryptographically secure.
+"next bit test", i.e. based on cryptographical primitives such as block or
+stream ciphers.
 
 Extra tests:
 
@@ -189,6 +190,33 @@ Extra tests:
    Monte-Carlo computations.
 3. Long runs of frequency test for 1-bit, 8-bit and 16-bit chunks. This is an
    adaptive test that will show intermediate results.
+
+
+# Usage
+
+To test the generator the next command can be used:
+
+    $ ./smokerand default generators/lcg64.so --threads
+
+Integration with PractRand:
+
+    $ ./smokerand stdout generators/lcg64.so | RNG_test stdin32 -multithreaded
+
+Getting PRNG input from stdin (multithreading is not supported in this case):
+
+    $ ./smokerand stdout generators/lcg64.so | ./smokerand express stdin32
+
+Integeration with TestU01 using the TestU01-threads plugin:
+
+    $ ./smokerand s=libtestu01th_sr_ext.so generators/lcg64.so --batparam=SmallCrush --threads
+
+For 64-bit generators you can test them in different modes:
+
+- Interleaved 32-bit parts: `--filter=interleaved32`
+- Higher 32 bits (default): `--filter=high32`
+- Lower 32 bits: `--filter=low32`
+
+The plugin can be downloaded from https://github.com/alvoskov/TestU01-threads
 
 # Implemented algorithms
 
@@ -828,7 +856,7 @@ There are only two problematic situations:
  ranrot32[7/3]     | u32    | +       | 3     | 5/6     | 6    | 0.58 | +      | 0     | Small   | 128 MiB
  ranrot32[17/9]    | u32    | +       | 1     | 2       | 4    | 0.68 | +      | 0     | +       | 1 GiB
  ranrot32[57/13]   | u32    | +       | +     | +       | 1    | 0.74 | +      | 2     | +       | 8 GiB
- ranrot8tiny       | u32    | +       | 8     | 24      |      | 2.0  | -(>>10)| 0     | -       | 4 MiB
+ ranrot8tiny       | u32    | +       | 8     | 24      | 27   | 2.0  | -(>>10)| 0     | -       | 4 MiB
  ranrot16tiny      | u32    | +       | +     | +       | 1    | 1.0  | -      | 2     | Crush   | 8 GiB
  ranrot32tiny      | u32    | +       | +     | +       | +    | 0.41 | +      | 3     | +       | 2 TiB
  ranrot64tiny      | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 16 TiB
@@ -847,9 +875,9 @@ There are only two problematic situations:
  rge256lite        | u32    | +       | +     | +       | +    | 5.2  | +      | 4(0)  | +       | >= 1 TiB
  rge256ex          | u32    | +       | +     | +       | +    | 0.62 | +      | 4     | +       | >= 1 TiB
  rge256ex-ctr      | u32    | +       | +     | +       | +    | 1.8  |        | 4     | +       | >= 2 TiB
- rge512ex          | u64    | +       | +     | +       | +    | 0.34 | +      | 4     | >=C(IL) | ?
+ rge512ex          | u64    | +       | +     | +       | +    | 0.34 | +      | 4     | +(IL)   | >= 8 TiB
  rge512ex-ctr      | u64    | +       | +     | +       | +    | 0.85 | +      | 4     |         | >= 1 TiB
- rge512ex-ctr-avx2 | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |>=CH     | >= 16 TiB
+ rge512ex-ctr-avx2 | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |+IL,+H   | >= 16 TiB
  romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      | 4(0)  |         | >= 32 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
  sapparot          | u32    | +       | 2     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
@@ -1198,14 +1226,23 @@ are less sensitive, e.g. entropy test catches only randu.
 
 # Versions history
 
-??.12.2025: SmokeRand 0.43
+07.12.2025: SmokeRand 0.43
 
-- Bug was fixed in the `gap16_count0` test: occasional false failures for
-  cryptographic algorithms (wrong computation of `[value .. 0 .. value]`
-  gaps percentage was fixed)
 - New algorithms added: `threefish1024`, `mwc63x2`, `xtea2`, `xtea2_64`.
 - New experimental nonlinear generators added: `rge256lite`, `rge256ex`,
   `rge256exctr`, `rge512ex`, `rge512exctr`.
+- Custom batteries implemented as shared libraries are supported now, see
+  the `apps/bat_example.c` and `include/smokerand/plugindefs.h` files.
+  It allows to use TestU01 as a plugin (see the
+  https://github.com/alvoskov/TestU01-threads repository with such plugin
+  containing a multi-threaded version of TestU01)
+- New command line key `--testname=name` was added. Now it is possible to
+  write e.g. `--testname=gap16_count0` instead of manual search of numeric
+  testid for the `--testid=id` key.
+- Bug was fixed in the `gap16_count0` test: occasional false failures for
+  cryptographic algorithms (wrong computation of `[value .. 0 .. value]`
+  gaps percentage was fixed). The bug was likely introduced in v0.41 after
+  refactoring after enabling of `-Wconversion` flag.
 
 16.11.2025: SmokeRand 0.42
 
@@ -1566,7 +1603,7 @@ flawed and barely usable LCGs with \f$ m = 2 ^ k \f$ modulo.
 
 # Notes and TO-DO lists
 
-Examples of false failures in SmokeRand 0.42 in gap16_count0 test:
+Examples of false failures in SmokeRand 0.42 in gap16_count0 test (fixed in 0.43):
 
 smokerand.exe brief generators/chacha.dll --seed=_01_UU3t9pAb3d5FYNSe6nbg3ew3LMZtRMkA4p84wYkBr60= --testname=gap16_count0
 smokerand.exe brief generators/aes128.dll --seed=_01_9FvOZLUeS9/Pl7c9rZBvJlLmKK85Oo8qGfpwgl4GGvA= --testname=gap16_count0

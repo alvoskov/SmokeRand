@@ -1,5 +1,14 @@
-#include "smokerand/apidefs.h"
-#include "smokerand/core.h"
+/**
+ * @file bat_example.c
+ * @brief A simple example of custom battery implemented as a plugin, i.e.
+ * shared object / dynamic library.
+ * @copyright
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
+#include "smokerand/plugindefs.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -30,13 +39,14 @@ static void GeneratorState_destruct_x(GeneratorState *obj)
 }
 
 
+/**
+ * @brief Battery entry point.
+ */
 BatteryExitCode EXPORT battery_func(const GeneratorInfo *gen,
-    CallerAPI *intf, unsigned int testid, unsigned int nthreads,
-    ReportType rtype)
+    const CallerAPI *intf, const BatteryOptions *opts)
 {
-    (void) testid; (void) nthreads; (void) rtype;
     GeneratorState obj = GeneratorState_create_x(gen, intf);
-    unsigned long long npoints = 100000;
+    const unsigned long long npoints = 100000;
 
     double sum = 0.0;
     if (gen->nbits == 32) {
@@ -50,6 +60,11 @@ BatteryExitCode EXPORT battery_func(const GeneratorInfo *gen,
     }
     sum /= npoints;
     intf->printf("Mean = %.10f\n", sum);
+    intf->printf("Test id:           %u\n", opts->test.id);
+    intf->printf("Test name:         %s\n",
+        (opts->test.name != NULL) ? opts->test.name : "(none)");
+    intf->printf("Battery parameter: %s\n", opts->param);
+    intf->printf("Number of threads: %u\n", opts->nthreads);
     GeneratorState_destruct_x(&obj);
     return BATTERY_PASSED;
 }

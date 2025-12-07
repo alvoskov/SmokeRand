@@ -1,4 +1,4 @@
-.TH smokerand 1  "November 23, 2025" "version 0.43" "USER COMMANDS"
+.TH smokerand 1  "December 07, 2025" "version 0.43" "USER COMMANDS"
 .SH NAME
 smokerand \- a test suite for pseudorandom numbers generators
 .SH SYNOPSIS
@@ -252,7 +252,8 @@ number generator. Batteries are either predefined sets of statistical tests or
 special operation modes. There are general purpose batteries (\fBexpress\fR,
 \fBbrief\fR, \fBdefault\fR, \fBfull\fR), specialized batteries (\fBbirthday\fR,
 \fBising\fR, \fBfreq\fR), special operation modes (\fBselftest\fR, \fBspeed\fR,
-\fBstdout\fR), custom batteries from user-defined scripts (\fBf=\fIfilename\fR).
+\fBstdout\fR), custom batteries from user-defined scripts (\fBf=\fIfilename\fR),
+custom batteries from user-defined shared libraries (\fBs=\fIfilename\fR).
 .TP
 \fIgenerator_lib\fR is the name of dynamic library (.so or .dll) with an
 implementation of pseudorandom number generator or a special mode name.
@@ -351,10 +352,15 @@ and assumtion about fixed 3 GHz CPU frequency.
 Send the PRNG output to the stdout in the binary format. Endianness is
 platform-dependent.
 .SS Custom batteries
-Custom batteries are defined by users in a human-readable text format.
-In this case the name of battery is the name of file with the \fBf=\fR prefix.
+Custom batteries are defined by users either in a human-readable text format
+or as shared libraries. In this case the name of battery is the name of file
+with the \fBf=\fR or \fBs=\fR prefixes respectively.
 .TP
-.B f=\fIfilename\fR Load a custom battery from a file with \fIfilename\fR name.
+.B f=\fIfilename\fR Load a custom battery from a human-readable text file
+with \fIfilename\fR name.
+.TP
+.B s=\fIfilename\fR Load a custom battery from a shared library file with
+\fIfilename\fR name.
 .SS Optional keys
 Optional command line \fIkeys\fR are used for multithreading, applying filters
 to the PRNG output, management of the final report layout etc. 
