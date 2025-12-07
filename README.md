@@ -844,12 +844,12 @@ There are only two problematic situations:
  ranlux[2]         | u32    | +       | +     | +       | +    | 27   | N/A    |       |         | >= 2 TiB
  rc4               | u32    | +       | +     | +       | +    | 6.0  | +      | 3     | +       | 512 GiB
  rc4ok             | u32    | +       | +     | +       | +    | 6.2  | N/A    | 4.5   | +       | >= 32 TiB
- rge256lite        | u32    | +       | +     | +       | +    | 5.2  | +      | 4     | +       | >= 1 TiB
- rge256ex          | u32    | +       | +     | +       | +    | 0.62 | +      |       | >=Crush | >= 1 TiB
- rge256ex-ctr      | u32    |         |       |         |      | 1.8  |        |       |         | ?
- rge512ex          | u64    |         |       |         |      | 0.34 |        |       |         | ?
+ rge256lite        | u32    | +       | +     | +       | +    | 5.2  | +      | 4(0)  | +       | >= 1 TiB
+ rge256ex          | u32    | +       | +     | +       | +    | 0.62 | +      | 4     | +       | >= 1 TiB
+ rge256ex-ctr      | u32    | +       | +     | +       | +    | 1.8  |        | 4     | +       | >= 2 TiB
+ rge512ex          | u64    | +       | +     | +       | +    | 0.34 | +      | 4     | >=C(IL) | ?
  rge512ex-ctr      | u64    | +       | +     | +       | +    | 0.85 | +      | 4     |         | >= 1 TiB
- rge512ex-ctr-avx2 | u64    | +       | +     | +       |      | 0.39 | +      |       |>=CH     | >= 16 TiB
+ rge512ex-ctr-avx2 | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |>=CH     | >= 16 TiB
  romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      | 4(0)  |         | >= 32 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
  sapparot          | u32    | +       | 2     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
@@ -1204,6 +1204,8 @@ are less sensitive, e.g. entropy test catches only randu.
   cryptographic algorithms (wrong computation of `[value .. 0 .. value]`
   gaps percentage was fixed)
 - New algorithms added: `threefish1024`, `mwc63x2`, `xtea2`, `xtea2_64`.
+- New experimental nonlinear generators added: `rge256lite`, `rge256ex`,
+  `rge256exctr`, `rge512ex`, `rge512exctr`.
 
 16.11.2025: SmokeRand 0.42
 

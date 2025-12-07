@@ -1,7 +1,36 @@
-// Original: https://doi.org/10.5281/zenodo.17713219
-// express, brief, default, full - passed
-// PractRand: >= 1 TiB
-// TestU01 >= Crush
+/**
+ * @file rge256ex.c
+ * @brief RGE256ex is an improved modification of RGE256 nonlinear generator.
+ * @details It is a modification of RGE256 generator suggested by Steven Reid.
+ * The author of the modification is Alexey L. Voskov:
+ *
+ * - A linear part with 64-bit counter was added (so the minimal period
+ *   is at least 2^64).
+ * - Extra rotations were added to the ARX nonlinear transformation that allowed
+ *   to reduce the number of rounds and get rid of the output function.
+ *
+ * S. Reid suggested several different version of RGE256 algorithm, this variant
+ * is based on its simplified version.
+ *
+ * Passes SmokeRand `express`, `brief`, `default`, `full` batteries, TestU01
+ * SmallCrush, Crush and BigCrush batteries, PractRand 0.94 >= 1 TiB.
+ *
+ * References:
+ *
+ * 1. Reid, S. (2025). RGE-256: A New ARX-Based Pseudorandom Number Generator
+ *    With Structured Entropy and Empirical Validation. Zenodo.
+ *    https://doi.org/10.5281/zenodo.17713219
+ * 2. https://rrg314.github.io/RGE-256-Lite/
+ *
+ * @copyright The original RGE256 algorithm was suggested by Steven Reid.
+ *
+ * Reengineering to RGE256ex and reentrant C version for SmokeRand:
+ *
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
@@ -10,11 +39,11 @@ typedef struct {
     uint32_t s[8];
     uint64_t ctr;
     int pos;
-} RGE256State;
+} RGE256ExState;
 
 
 
-static void RGE256State_next(RGE256State *obj)
+static void RGE256ExState_next(RGE256ExState *obj)
 {
     uint32_t *s = obj->s;    
     const uint64_t ctr = obj->ctr;
@@ -38,9 +67,9 @@ static void RGE256State_next(RGE256State *obj)
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    RGE256State *obj = state;
+    RGE256ExState *obj = state;
     if (obj->pos >= 8) {
-        RGE256State_next(obj);
+        RGE256ExState_next(obj);
         obj->pos = 0;
     }
     uint32_t out = obj->s[obj->pos++];
@@ -49,10 +78,14 @@ static inline uint64_t get_bits_raw(void *state)
 
 static void *create(const CallerAPI *intf)
 {
-    RGE256State *obj = intf->malloc(sizeof(RGE256State));
+    RGE256ExState *obj = intf->malloc(sizeof(RGE256ExState));
     seeds_to_array_u32(intf, obj->s, 8);
     obj->pos = 8;
-    obj->ctr = 0;
+    obj->ctr = intf->get_seed32();
+    // Warmup
+    for (int i = 0; i < 10; i++) {
+        (void) RGE256ExState_next(obj);
+    }
     return obj;
 }
 

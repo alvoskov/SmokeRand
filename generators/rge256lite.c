@@ -1,6 +1,33 @@
-// express, default, brief, full
-// SmallCrush, Crush, BigCrush
-// PractRand: >= 1 TiB
+/**
+ * @file rge256lite.c
+ * @brief RGE256 is a nonlinear generator based on ARX nonlinear transformation.
+ * @details The RGE256-lite generator was suggested by by Steven Reid; there are
+ * several versions of RGE256 algorithm (with the same name!), this
+ * implementation is based on the JavaScript code of the "lite" version with
+ * 3 rounds.
+ *
+ * Passes SmokeRand `express`, `brief`, `default`, `full` batteries, TestU01
+ * SmallCrush, Crush and BigCrush batteries, PractRand 0.94 >= 1 TiB.
+ *
+ * WARNING! IT HAS NO GUARANTEED MINIMAL PERIOD! BAD SEEDS ARE POSSIBLE!
+ * DON'T USE THIS PRNG FOR ANY SERIOUS WORK!
+ *
+ * References:
+ *
+ * 1. Reid, S. (2025). RGE-256: A New ARX-Based Pseudorandom Number Generator
+ *    With Structured Entropy and Empirical Validation. Zenodo.
+ *    https://doi.org/10.5281/zenodo.17713219
+ * 2. https://rrg314.github.io/RGE-256-Lite/
+ *
+ * @copyright The original RGE256 algorithm was suggested by Steven Reid.
+ *
+ * Reentrant C version for SmokeRand:
+ *
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG

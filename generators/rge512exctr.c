@@ -1,7 +1,35 @@
-// Original: https://doi.org/10.5281/zenodo.17713219
-// express, brief, default, full, birthday
-// PractRand >= 16 TiB
+/**
+ * @file rge512exctr.c
+ * @brief RGE512ex-ctr is an counter based generator inspired by the RGE256
+ * nonlinear generator.
+ * @details This counter based generator was developed by Alexey L. Voskov.
+ * It is based on reengineered ARX nonlinear transformations from RGE256
+ * generator suggested by Steven Reid. The rounds are identical to rounds
+ * in the RGE512ex generator. Even 5 rounds are enough to pass `express`,
+ * `brief`, `default` and `full` SmokeRand batteries, so 6 rounds are used
+ * for robustness.
+ *
+ * Passes SmokeRand `express`, `brief`, `default`, `full` batteries,
+ * PractRand 0.94 >= 16 TiB.
+ *
+ * References:
+ *
+ * 1. Reid, S. (2025). RGE-256: A New ARX-Based Pseudorandom Number Generator
+ *    With Structured Entropy and Empirical Validation. Zenodo.
+ *    https://doi.org/10.5281/zenodo.17713219
+ * 2. https://rrg314.github.io/RGE-256-Lite/
+ *
+ * @copyright The original RGE256 algorithm was suggested by Steven Reid.
+ *
+ * Reengineering to RGE512ex and reentrant C version for SmokeRand:
+ *
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
+#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
@@ -19,9 +47,9 @@ PRNG_CMODULE_PROLOG
 
 
 typedef struct {
-    uint64_t ctr[8];
-    uint64_t out[8];
-    int pos;
+    uint64_t ctr[8]; ///< Countains seed, counter and PI digits.
+    uint64_t out[8]; ///< Output buffer.
+    int pos;         ///< Current position in the output buffer.
 } RGE512ExCtrState;
 
 
@@ -49,7 +77,7 @@ static inline void RGE512ExCtrState_block(RGE512ExCtrState *obj)
 }
 
 
-static void RGE512ExCtrState_init(RGE512ExCtrState *obj, const uint32_t *seed)
+static void RGE512ExCtrState_init(RGE512ExCtrState *obj, const uint64_t *seed)
 {
     obj->ctr[0] = 0;          obj->ctr[1] = 0;
     obj->ctr[2] = RGE512EXCTR_PI0;
@@ -80,9 +108,9 @@ MAKE_GET_BITS_WRAPPERS(scalar)
 static void *create_scalar(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     RGE512ExCtrState *obj = intf->malloc(sizeof(RGE512ExCtrState));
-    uint32_t seed[4];
+    uint64_t seed[4];
     (void) gi;
-    seeds_to_array_u32(intf, seed, 4);
+    seeds_to_array_u64(intf, seed, 4);
     RGE512ExCtrState_init(obj, seed);
     return obj;
 }
@@ -160,7 +188,7 @@ void RGE512ExCtrVecState_block(RGE512ExCtrVecState *obj)
 }
 
 
-static void RGE512ExCtrVecState_init(RGE512ExCtrVecState *obj, const uint32_t *seed)
+static void RGE512ExCtrVecState_init(RGE512ExCtrVecState *obj, const uint64_t *seed)
 {
     for (size_t i = 0; i < RGE512_NCOPIES; i++) {
         obj->ctr[0].u64[i] = i;          obj->ctr[1].u64[i] = 0;
@@ -204,9 +232,9 @@ MAKE_GET_BITS_WRAPPERS(vector)
 static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     RGE512ExCtrVecState *obj = intf->malloc(sizeof(RGE512ExCtrVecState));
-    uint32_t seed[4];
+    uint64_t seed[4];
     (void) gi;
-    seeds_to_array_u32(intf, seed, 4);
+    seeds_to_array_u64(intf, seed, 4);
     RGE512ExCtrVecState_init(obj, seed);
     return obj;
 }
@@ -224,11 +252,37 @@ static inline void *create(const CallerAPI *intf)
 
 static int run_self_test(const CallerAPI *intf)
 {
+    static const uint64_t seed[4] = {
+        0x243F6A8885A308D3, 0x13198A2E03707344,
+        0xA4093822299F31D0, 0x082EFA98EC4E6C89,
+    };
+    static const uint64_t ref[16] = {
+        0xD98E61B2CC93161E, 0x0041DD213CF03BFC, 0xD6EAC978C601BED3, 0x381D55429C4FE741,
+        0x3CD1A29DBF80837B, 0x394F63EAA2FEF0FF, 0x1F95B6654AAB3D86, 0x1E44A6809FE5488A,
+        0xB486DD04269FD97E, 0x17359706F6750537, 0x0953C3C850E8DA3B, 0x55D4ACC29DE8E1D2,
+        0x68D97208DC3C364F, 0xF6E1DCA7725649E0, 0x457ABA201816DB67, 0x676103C544864EE5,
+    };
     int is_ok = 1;
+    intf->printf("Testing the scalar version\n");
+    RGE512ExCtrState *obj_sc = intf->malloc(sizeof(RGE512ExCtrState));
+    RGE512ExCtrState_init(obj_sc, seed);
+    for (int i = 0; i < 134; i++) {
+        (void) get_bits_scalar_raw(obj_sc);
+    }
+    intf->printf("%16s %16s\n", "Out", "Ref");
+    for (int i = 0; i < 16; i++) {
+        const uint64_t u = get_bits_scalar_raw(obj_sc), u_ref = ref[i];
+        intf->printf("%16.16" PRIX64 " %16.16" PRIX64 "\n", u, u_ref);
+        if (u != u_ref) {
+            is_ok = 0;
+        }
+    }
+    if (!is_ok) {
+        return is_ok;
+    }
+
 #ifdef __AVX2__
-    uint32_t seed[4];
-    seeds_to_array_u32(intf, seed, 4);
-    RGE512ExCtrState    *obj_sc  = intf->malloc(sizeof(RGE512ExCtrState));
+    intf->printf("Testing the AVX2 implementation\n");
     RGE512ExCtrVecState *obj_vec = intf->malloc(sizeof(RGE512ExCtrVecState));
     RGE512ExCtrState_init(obj_sc, seed);
     RGE512ExCtrVecState_init(obj_vec, seed);
@@ -239,10 +293,9 @@ static int run_self_test(const CallerAPI *intf)
             is_ok = 0;
         }
     }
-    intf->free(obj_sc);
     intf->free(obj_vec);
 #endif
-    (void) intf;
+    intf->free(obj_sc);
     return is_ok;
 }
 

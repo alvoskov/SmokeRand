@@ -1,5 +1,33 @@
-// Original: https://doi.org/10.5281/zenodo.17713219
-// express, brief, default, full - passed even with 5 rounds instead of 6
+/**
+ * @file rge256exctr.c
+ * @brief RGE256ex-ctr is an counter based generator inspired by the RGE256
+ * nonlinear generator.
+ * @details This counter based generator was developed by Alexey L. Voskov.
+ * It is based on reengineered ARX nonlinear transformations from RGE256
+ * generator suggested by Steven Reid. The rounds are identical to rounds
+ * in the RGE256ex generator. Even 5 rounds are enough to pass `express`,
+ * `brief`, `default` and `full` SmokeRand batteries, so 6 rounds are used
+ * for robustness.
+ *
+ * Passes SmokeRand `express`, `brief`, `default`, `full` batteries, TestU01
+ * SmallCrush, Crush and BigCrush batteries, PractRand 0.94 >= 1 TiB.
+ *
+ * References:
+ *
+ * 1. Reid, S. (2025). RGE-256: A New ARX-Based Pseudorandom Number Generator
+ *    With Structured Entropy and Empirical Validation. Zenodo.
+ *    https://doi.org/10.5281/zenodo.17713219
+ * 2. https://rrg314.github.io/RGE-256-Lite/
+ *
+ * @copyright The original RGE256 algorithm was suggested by Steven Reid.
+ *
+ * Reengineering to RGE256ex and reentrant C version for SmokeRand:
+ *
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG

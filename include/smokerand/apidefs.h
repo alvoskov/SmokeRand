@@ -115,6 +115,16 @@ seeds_to_array_u32(const CallerAPI *intf, uint32_t *out, size_t len)
     }
 }
 
+/**
+ * @brief Fill the array of 64-bit unsigned integer with seed.
+ */
+static inline void
+seeds_to_array_u64(const CallerAPI *intf, uint64_t *out, size_t len)
+{
+    for (size_t i = 0; i < len; i++) {
+        out[i] = intf->get_seed64();
+    }
+}
 
 /**
  * @brief pcg_rxs_m_xs64 PRNG that has a good quality and can be used
