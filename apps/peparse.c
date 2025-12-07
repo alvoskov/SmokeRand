@@ -38,18 +38,22 @@ int main(int argc, char *argv[])
         return 1;
     }
     //----------------------------------------------------
+    const BatteryOptions opts = {
+        .test = {.id = TESTS_ALL, .name = NULL}, .nthreads = 1,
+        .report_type = REPORT_FULL, .param = NULL
+    };
     CallerAPI intf = CallerAPI_init();
     GeneratorInfo gi;
     gen_getinfo(&gi, &intf);
     GeneratorInfo_print(&gi, 1);
     if (!strcmp("express", argv[1])) {
-        battery_express(&gi, &intf, TESTS_ALL, 1, REPORT_FULL);
+        battery_express(&gi, &intf, &opts);
     } else if (!strcmp("brief", argv[1])) {
-        battery_brief(&gi, &intf, TESTS_ALL, 1, REPORT_FULL);
+        battery_brief(&gi, &intf, &opts);
     } else if (!strcmp("default", argv[1])) {
-        battery_default(&gi, &intf, TESTS_ALL, 1, REPORT_FULL);
+        battery_default(&gi, &intf, &opts);
     } else if (!strcmp("full", argv[1])) {
-        battery_full(&gi, &intf, TESTS_ALL, 1, REPORT_FULL);
+        battery_full(&gi, &intf, &opts);
     } else if (!strcmp("selftest", argv[1])) {
         battery_self_test(&gi, &intf);
     } else if (!strcmp("speed", argv[1])) {
@@ -59,7 +63,7 @@ int main(int argc, char *argv[])
             fprintf(stderr, "@filename argument must begin with '@'\n");
             return 1;
         }
-        battery_file(argv[1] + 1, &gi, &intf, TESTS_ALL, 1, REPORT_FULL);
+        battery_file(argv[1] + 1, &gi, &intf, &opts);
     }
     CallerAPI_free();
     //----------------------------------------------------
