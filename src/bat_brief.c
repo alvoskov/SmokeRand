@@ -115,3 +115,6 @@ BatteryExitCode battery_brief(const GeneratorInfo *gen, const CallerAPI *intf,
         return BATTERY_PASSED;
     }
 }
+
+// For unity builds
+#undef COLLOVER_PROPS

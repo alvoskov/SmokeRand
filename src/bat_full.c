@@ -165,3 +165,7 @@ BatteryExitCode battery_full(const GeneratorInfo *gen, const CallerAPI *intf,
         return BATTERY_PASSED;
     }
 }
+
+// For unity builds
+#undef COLLOVER_LO_PROPS
+#undef COLLOVER_HI_PROPS

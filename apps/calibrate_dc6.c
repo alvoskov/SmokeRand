@@ -94,7 +94,7 @@ double *generate_sample(GeneratorInfo *gi, unsigned int nsamples, const HwTestIn
         threads[i].nthreads = (int) nthreads;
     }
     init_thread_dispatcher();
-    ThreadObj *handles = calloc(sizeof(ThreadObj), nthreads);
+    ThreadObj *handles = calloc(nthreads, sizeof(ThreadObj));
     if (handles == NULL) {
         fprintf(stderr, "***** generate_sample: not enough memory *****\n");
         exit(EXIT_FAILURE);

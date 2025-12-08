@@ -777,7 +777,7 @@ static void TestsBattery_run_threads(const TestsBattery *bat,
     TestsDispatcher_init(&tdisp, bat, gen, intf, opts->nthreads, results, 1);
     // Run threads
     init_thread_dispatcher();
-    ThreadObj *thrd = calloc(sizeof(ThreadObj), opts->nthreads);
+    ThreadObj *thrd = calloc(opts->nthreads, sizeof(ThreadObj));
     for (unsigned int i = 0; i < opts->nthreads; i++) {
         const unsigned int ord = tdisp.queues[i].thread_ord;
         thrd[i] = ThreadObj_create(battery_thread, &tdisp, ord);
