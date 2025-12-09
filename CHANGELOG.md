@@ -8,7 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ### Unreleased
 
+## Changed
+
 - CHANGELOG.md is in the separate file now.
+- results.md (pseudorandom number generators tests results) is in the separate
+  file now.
 - Bugfix with GCC 14-15 warnings about mismatched `calloc` arguments.
 - `undef` were added to battery files to simplify unity builds of `smokerand`
   executable.
@@ -34,7 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   gaps percentage was fixed). The bug was likely introduced in v0.41 after
   refactoring after enabling of `-Wconversion` flag.
 
-## [0.42] - 16.11.2025
+## [0.42] - 2025-11-16
 
 ### Added
 
@@ -47,7 +51,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 - Some code cleanup.
 
-## [0.41] - 10.11.2025
+## [0.41] - 2025-11-10
 
 ### Added
 
@@ -65,7 +69,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - Code cleanup and some bugfixes after `-Wconversion` and `-Wpedantic` flags.
 
 
-## [0.40] - 25.10.2025
+## [0.40] - 2025-10-25
 
 ### Added
 
@@ -79,7 +83,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - Some bugfixes and code cleanup.
 
 
-## 15.10.2025: SmokeRand 0.39
+## [0.39] - 2025-10-15
 
 ### Added
 
@@ -93,7 +97,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `mt19937`: code cleanup and additon of a test vector.
 
 
-## 28.09.2025: SmokeRand 0.38
+## [0.38] - 2025-09-28
 
 ### Added
 
@@ -107,7 +111,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - Some bugfixes.
 
 
-## 28.06.2025: SmokeRand 0.37
+## [0.37] - 2025-06-28
 
 ### Added
 
@@ -120,7 +124,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   versions of `gjrand` etc.
 
 
-## 15.06.2025: SmokeRand 0.36
+## [0.36] - 2025-06-15
 
 ### Added
 
@@ -139,7 +143,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `ranval64` chaotic generator by Bob Jenkins also known as RKISS.
 
 
-## 02.05.2025: SmokeRand 0.35
+## [0.35] - 2025-05-02
 
 ### Added
 
@@ -147,7 +151,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   Wichmann-Hill (1982,2006), several inverse congruential generators.
 
 
-## 01.05.2025: SmokeRand 0.34
+## [0.34] - 2025-05-01
 
 ### Added
 
@@ -158,7 +162,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   batteries.
 
 
-## 10.04.2025: SmokeRand 0.33
+## [0.33] - 2025-04-10
 
 ### Added
 
@@ -173,7 +177,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - All generators are either portable or at least have portable versions.
 
 
-## 28.03.2025: SmokeRand 0.32
+## [0.32] - 2025-03-28
 
 ### Added
 
@@ -182,7 +186,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   Options: `scalar-128`, `avx2-128`, `scalar-256`, `avx2-256`.
 
 
-## 26.03.2025: SmokeRand 0.31
+## [0.31] - 2025-03-26
 
 ### Added
 
@@ -196,7 +200,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - Improved debug output in the `gap` and `gap16_count0` tests.
 
 
-## 18.03.2025: SmokeRand 0.30
+## [0.30] - 2025-03-18
 
 ### Added
 
@@ -220,7 +224,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   `apps/test_crand.c` and `apps/test_cpp11.cpp` are much more useful.
 
 
-## 16.03.2025: SmokeRand 0.29
+## [0.29] - 2025-03-16
 
 ### Added
 
@@ -243,7 +247,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   libraries linking is also supported for zig cc / clang.
 
 
-## 10.03.2025: SmokeRand 0.28
+## [0.28] - 2025-03-10
 
 ### Added
 
@@ -256,7 +260,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - Internal self-tests for some LFSR generators were added.
 
 
-## 07.03.2025: SmokeRand 0.27
+## [0.27] - 2025-03-07
 
 ### Changed
 
@@ -266,7 +270,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - Generators source files are renames (`_shared` suffix excluded).
 
 
-## 05.03.2025: SmokeRand 0.26
+## [0.26] - 2025-03-05
 
 - Multithreading support was transferred to a separate file.
 - Improved threads IDs printing.
@@ -274,7 +278,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   for UNIX-like systems was added.
 
 
-## 04.03.2025: SmokeRand 0.25
+## [0.25] - 2025-03-04
 
 ### Added
 
@@ -289,7 +293,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `freq` battery now shows bytes/words that caused failure.
 
 
-## 25.02.2025: SmokeRand 0.24.
+## [0.24] - 2025-02-25
 
 ### Added
 
@@ -303,7 +307,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - PractRand results updated for some generators.
 
 
-## 12.02.2025: SmokeRand 0.23.
+## [0.23] - 2025-02-12
 
 ### Added
 
@@ -316,7 +320,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   other scrambled LFSRs.
 
 
-## 09.02.2025: SmokeRand 0.22.
+## [0.22] - 2025-02-09
 
 ### Added
 
@@ -328,13 +332,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - Refactoring.
 
 
-## 08.02.2025: SmokeRand 0.21.
+## [0.21] - 2025-02-08
 
 - Scripted versions of all four general purpose batteries: `express`, `brief`,
   `default`, `full`.
 - Refactoring of C versions of batteries.
 
-## 07.02.2025: SmokeRand 0.20.
+## [0.20] - 2025-02-07
 
 ### Added
 
@@ -347,14 +351,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   battery description (support of user-defined data for tests was added).
 
 
-## 02.01.2025: SmokeRand 0.19.
+## [0.19] - 2025-01-02
 
 ### Added
 
 - CSPRNG based on Magma GOST R 34.12-2015 block cipher (CTR and CBC modes).
 
 
-## 31.01.2025: SmokeRand 0.18.
+## [0.18] - 2025-01-31
 
 - segfault was fixed in the `gap16_count0` test and memory leaks --- in
   the `nbit_words_freq_test` test.
@@ -363,13 +367,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - Improved seed generator, uses more entropy sources and machine ID.
 
 
-## 29.01.2025: SmokeRand 0.17.
+## [0.17] - 2025-01-29
 
 - Birthday test now works with 32-bit generators.
 - New PRNGs including Threefry2x64x20 (scalar and AVX2 versions).
 
 
-## 23.12.2024: SmokeRand 0.16.
+## [0.16] - 2024-12-23
 
 - Speck128/128 with reduced number of rounds.
 - `dos16` renamed to `express`.
@@ -377,7 +381,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   It may occur in the case of incorrect optional parameter.
 
 
-## 16.12.2024: SmokeRand 0.15.
+## [0.15] - 2024-12-16
 
 - RC4OK generator was added.
 - Fine tuning of some `hamming_ot_low` tests in `full` battery: samples sizes
@@ -386,7 +390,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `-O3` key in `Makefile.gnu`.
 
 
-## 12.12.2024: SmokeRand 0.14.
+## [0.14] - 2024-12-12
 
 - AES-128 based PRNG added (only for x86-64 processors with AESNI support).
 - Bugfix in linearcomp test (memory leak).
@@ -394,7 +398,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   16-bit computers.
 
 
-## 09.12.2024: SmokeRand 0.13.
+## [0.13] - 2024-12-09
 
 ### Changed
 
@@ -405,7 +409,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   to finishing its compact 16-bit version.
 
 
-## 09.12.2024: SmokeRand 0.12.
+## [0.12] - 2024-12-09
 
 ### Added
 
@@ -418,7 +422,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 were overlapping (shift was fixed).
 
 
-## [0.11] - 02.12.2024
+## [0.11] - 2024-12-02
 
 ### Added
 
@@ -428,7 +432,7 @@ were overlapping (shift was fixed).
   correlations and detect lagged Fibonacci generators and RANROT).
 
 
-## [0.1] - 01.12.2024
+## [0.1] - 2024-12-01
 
 An initial version.
 
