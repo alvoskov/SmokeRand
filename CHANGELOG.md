@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
-## [0.43] - 2025-12-07
-
 ### Unreleased
+
+## Added
+
+- `komirand` and `komirandw` algorithms.
 
 ## Changed
 
@@ -16,6 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - Bugfix with GCC 14-15 warnings about mismatched `calloc` arguments.
 - `undef` were added to battery files to simplify unity builds of `smokerand`
   executable.
+
+## [0.43] - 2025-12-07
 
 ### Added
 
