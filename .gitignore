@@ -66,3 +66,11 @@ latex/
 *.su
 *.idb
 *.pdb
+
+# Anything in bin/
+bin/
+
+# Built packages
+smokerand*.gz
+smokerand_*.deb
+smokerand_*/usr/
