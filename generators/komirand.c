@@ -1,13 +1,27 @@
 /**
  * @file komirand.c
- * @brief Komirand generator which is a wrapper around the komihash.h
- * library
+ * @brief Komirand generator is a nonlinear chaotic pseudorandom number
+ * generator suggested by Aleksey Vaneev. The algorithm description and
+ * official test vectors can be found at https://github.com/avaneev/komihash
+ *
+ * WARNING! It has no guaranteed minimal period, bad seeds are theoretically
+ * possible. Don't use this generator for any serious work!
+ *
+ * @copyright The komirand algorithm was developed by Aleksey Vannev.
+ *
+ * An initial wrapper for SmokeRand: (C) 2025 Scott Baker
+ *
+ * Refactoring for eliminating dependence from `komihash.h`, adding
+ * internal self-tests and warmup addition:
+ * 
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
  */
-
 #include "smokerand/cinterface.h"
-#include "komihash.h"
+#include "smokerand/int128defs.h"
+#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
@@ -15,29 +29,56 @@ PRNG_CMODULE_PROLOG
  * @brief Komirand PRNG state.
  */
 typedef struct {
-    uint64_t seed1;
-    uint64_t seed2;
-} komirand_state;
+    uint64_t st1;
+    uint64_t st2;
+} KomirandState;
 
-static inline uint64_t get_bits_raw(komirand_state *state)
+static inline uint64_t get_bits_raw(KomirandState *state)
 {
-	uint64_t seed1 = state->seed1;
-	uint64_t seed2 = state->seed2;
-
-	uint64_t ret = komirand(&seed1, &seed2);
-
-	state->seed1 = seed1;
-	state->seed2 = seed2;
-
-	return ret;
+    static const uint64_t inc = 0xaaaaaaaaaaaaaaaa;
+    uint64_t s1 = state->st1, s2 = state->st2, mul_hi;
+    const uint64_t mul_lo = unsigned_mul128(s1, s2, &mul_hi);
+    s2 += mul_hi + inc;
+    s1 = mul_lo ^ s2;
+    state->st1 = s1;
+    state->st2 = s2;
+    return s1;
 }
 
 static void *create(const CallerAPI *intf)
 {
-    komirand_state *obj = intf->malloc(sizeof(komirand_state));
-    obj->seed1 = intf->get_seed64();
-    obj->seed2 = intf->get_seed64();
-    return (void *) obj;
+    KomirandState *obj = intf->malloc(sizeof(KomirandState));
+    obj->st1 = intf->get_seed64();
+    obj->st2 = intf->get_seed64();
+    // Warmup
+    for (int i = 0; i < 8; i++) {
+        (void) get_bits_raw(obj);
+    }
+    return obj;
 }
 
-MAKE_UINT64_PRNG("Komirand", NULL)
+/**
+ * @brief An internal self-test based on 
+ */
+static int run_self_test(const CallerAPI *intf)
+{
+    static const uint64_t u_ref[] = { // Official test vectors
+        0xaaaaaaaaaaaaaaaa, 0xfffffffffffffffe,
+        0x4924924924924910, 0xbaebaebaebaeba00,
+        0x400c62cc4727496b, 0x35a969173e8f925b,
+        0xdb47f6bae9a247ad, 0x98e0f6cece6711fe
+    };
+    KomirandState obj = {0, 0};
+    int is_ok = 1;
+    for (int i = 0; i < 8; i++) {
+        const uint64_t u = get_bits_raw(&obj);
+        intf->printf("Out: %16.16" PRIX64 "; ref: %16.16" PRIX64 "\n",
+            u, u_ref[i]);
+        if (u != u_ref[i]) {
+            is_ok = 0;
+        }
+    }
+    return is_ok;
+}
+
+MAKE_UINT64_PRNG("Komirand", run_self_test)
