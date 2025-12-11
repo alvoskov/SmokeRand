@@ -5,7 +5,8 @@
  * official test vectors can be found at https://github.com/avaneev/komihash
  *
  * WARNING! It has no guaranteed minimal period, bad seeds are theoretically
- * possible. Don't use this generator for any serious work!
+ * possible. Don't use this generator for statistical, scientific and
+ * engineering computations!
  *
  * @copyright The komirand algorithm was developed by Aleksey Vannev.
  *
@@ -49,7 +50,7 @@ static void *create(const CallerAPI *intf)
 {
     KomirandState *obj = intf->malloc(sizeof(KomirandState));
     obj->st1 = intf->get_seed64();
-    obj->st2 = intf->get_seed64();
+    obj->st2 = obj->st1;
     // Warmup
     for (int i = 0; i < 8; i++) {
         (void) get_bits_raw(obj);
