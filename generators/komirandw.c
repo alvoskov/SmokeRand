@@ -2,7 +2,7 @@
  * @file komirandw.c
  * @brief Komirand-Weyl is a modification of Komirand generator that has an
  * additional linear component - discrete Weyl sequence, this modification
- * provides a period at least 2^64 and make the PRNG suitable for practical
+ * provides a period at least 2^64 and makes the PRNG suitable for practical
  * applications. This modification was made by A.L. Voskov.
  * 
  * The original Komirand generator was suggested by Aleksey Vaneev. The

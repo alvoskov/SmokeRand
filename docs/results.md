@@ -2,6 +2,8 @@
 
  Algorithm         | Output | express | brief | default | full | cpb  | bday64 | Grade | TestU01 | PractRand 
 -------------------|--------|---------|-------|---------|------|------|--------|-------|---------|-----------
+ a5rand            | u64    | +       | +     | +       |      | 0.37 |        |       |         | ?
+ a5randw           | u64    | +       | +     | +       |      | 0.41 |        |       |         | ?
  aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      | 5     | +il     | >= 32 TiB
  aes128(c99)       | u64    | +       | +     | +       | +    | 6.8  | +      | 5     |         | >= 32 TiB
  alfib             | u64    | 2       | 5     | 6       | 8    | 0.23 | +      | 0     | Small   | 128 MiB
@@ -65,8 +67,8 @@
  kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     | +       | >= 16 TiB
  kiss11_64         | u64    | +       | +     | +       | +    | 0.60 | +      | 4     |         | >= 32 TiB
  kiss4691          | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 32 TiB
- komirand          | u64    | +       | +     | +       | +    | 0.49 | +      | 4     |         | ?
- komirandw         | u64    | +       | +     | +       | +    | 0.52 | +      | 4     |         | ?
+ komirand          | u64    | +       | +     | +       | +    | 0.49 | +      | 4(0)  |         | ?
+ komirandw         | u64    | +       | +     | +       | +    | 0.52 | +      | 4     |         | >= 8 TiB
  kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 5     | +       | >= 4 TiB
  lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>10)| 0     | -       | 512 MiB
  lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     | -       | 16 KiB
@@ -636,3 +638,12 @@ So for 1 PiB t = 176, for 8 PiB t = 192 that correspond to the 256-bit LCG that
 retuns upper 64 bits. Of course, 1 PiB is only a minimalistic lower boundary
 for a general purpose PRNG that is used to draw a border between seriously
 flawed and barely usable LCGs with \f$ m = 2 ^ k \f$ modulo.
+
+
+# Other notes and TO-DO lists
+
+Examples of false failures in SmokeRand 0.42 in gap16_count0 test (fixed in 0.43):
+
+smokerand.exe brief generators/chacha.dll --seed=_01_UU3t9pAb3d5FYNSe6nbg3ew3LMZtRMkA4p84wYkBr60= --testname=gap16_count0
+smokerand.exe brief generators/aes128.dll --seed=_01_9FvOZLUeS9/Pl7c9rZBvJlLmKK85Oo8qGfpwgl4GGvA= --testname=gap16_count0
+smokerand.exe brief generators/speck128.dll --testname=gap16_count0 --seed=_01_iQNhejvPDb2ImAIwDMyWe+ZnqFFX3riJn0aorb3XvWc=

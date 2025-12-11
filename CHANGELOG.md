@@ -8,7 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ## Added
 
+- `a5rand` and `a5randw` algorithms.
 - `komirand` and `komirandw` algorithms.
+- `xoroshiro256p`, `xoroshiro256pp`, `xoroshiro256stst` algorithms.
 
 ## Changed
 
