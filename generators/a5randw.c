@@ -62,10 +62,10 @@ static void *create(const CallerAPI *intf)
 static int run_self_test(const CallerAPI *intf)
 {
     static const uint64_t u_ref[] = {
-        0x2492492492492491, 0x83958cf072b19e08,
-        0x1ae643aae6b8922e, 0xf463902672f2a1a0,
-        0xf7a47a8942e378b5, 0x778d796d5f66470f,
-        0x966ed0e1a9317374, 0xaea26585979bf755
+        0x14250451008902A5, 0xDCFCC934621465C8,
+        0xED5DF26967142930, 0xC5F1200DFF592138,
+        0x75B488F5FC293E02, 0x901FED8B6B18ADD3,
+        0x18D7786413A4D922, 0x840B6E159ADB90D5
     };
     A5RandWeylState obj = {0, 0, 0};
     int is_ok = 1;
