@@ -35,12 +35,12 @@ typedef struct {
 
 static inline uint64_t get_bits_raw(A5Rand32WeylState *obj)
 {
-    static const uint32_t inc1 = 0x55555555, inc2 = 0x9E3779B9;
-    const uint64_t mul = (uint64_t)(obj->st1 + inc1) * (uint64_t) obj->st2;
-    obj->st1           = (uint32_t) (mul & 0xFFFFFFFF); // lower
-    const uint32_t st2 = (uint32_t) (mul >> 32); // higher
-    obj->st2 = st2 + (obj->w += inc2);
-    return obj->st1 ^ st2;
+    static const uint32_t inc1 = 0x55555555;
+    obj->w += 0x9E3779B9;
+    const uint64_t mul = (uint64_t)(obj->st1 + inc1) * (uint64_t) (obj->st2 + obj->w);
+    obj->st1 = (uint32_t) (mul & 0xFFFFFFFF); // lower
+    obj->st2 = (uint32_t) (mul >> 32); // higher
+    return obj->st1 ^ obj->st2;
 }
 
 
