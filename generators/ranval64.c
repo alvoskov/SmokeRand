@@ -6,8 +6,9 @@
  * from SmokeRand, TestU01 and PractRand batteries. There were several
  * modifications of ranval, the implemented variant is from Bob Jenkins homepage.
  *
- * WARNING! THE MINIMAL PERIOD OF RANVAL IS UNKNOWN! Don't use it as a general
- * purpose pseudorandom number generator! Bad seeds are possible!
+ * WARNING! It has no guaranteed minimal period, bad seeds are theoretically
+ * possible. Usage of this generator for statistical, scientific and
+ * engineering computations is strongly discouraged!
  *
  * References:
  *

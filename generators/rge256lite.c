@@ -9,8 +9,9 @@
  * Passes SmokeRand `express`, `brief`, `default`, `full` batteries, TestU01
  * SmallCrush, Crush and BigCrush batteries, PractRand 0.94 >= 1 TiB.
  *
- * WARNING! IT HAS NO GUARANTEED MINIMAL PERIOD! BAD SEEDS ARE POSSIBLE!
- * DON'T USE THIS PRNG FOR ANY SERIOUS WORK!
+ * WARNING! It has no guaranteed minimal period, bad seeds are theoretically
+ * possible. Usage of this generator for statistical, scientific and
+ * engineering computations is strongly discouraged!
  *
  * References:
  *
