@@ -1,5 +1,11 @@
 // https://github.com/avaneev/prvhash
 // 
+/*
+ * WARNING! It has no guaranteed minimal period, bad seeds are theoretically
+ * possible. Usage of this generator for statistical, scientific and
+ * engineering computations is strongly discouraged!
+ */
+
 #include "smokerand/cinterface.h"
 #include <inttypes.h>
 

@@ -5,8 +5,8 @@
  * official test vectors can be found at https://github.com/avaneev/komihash
  *
  * WARNING! It has no guaranteed minimal period, bad seeds are theoretically
- * possible. Don't use this generator for statistical, scientific and
- * engineering computations!
+ * possible. Usage of this generator for statistical, scientific and
+ * engineering computations is strongly discouraged!
  *
  * @copyright The a5rand algorithm was developed by Aleksey Vannev.
  *

@@ -10,9 +10,12 @@
  * This PRNG also fails PractRand 0.94 at 16 GiB sample (BCFN test based on
  * Hamming weights).
  *
- * WARNING! The minimal period of RANROT_BI is unknown! This PRNG shouldn't
- * be used in practice! However, it is interesting for checking tests that
- * are aimed to find biases in Hamming weights.
+ * WARNING! It has no guaranteed minimal period, bad seeds are theoretically
+ * possible. Usage of this generator for statistical, scientific and
+ * engineering computations is strongly discouraged!
+ *
+ * However this generator is interesting for checking tests that are aimed to
+ * find biases in Hamming weights.
  *
  * The generator is taken from:
  *

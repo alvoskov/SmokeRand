@@ -5,8 +5,12 @@
  * except `mod3`. There were several modifications of flea, the implemented
  * variant is from PractRand 0.94 by Chris Doty-Humphrey.
  *
- * WARNING! THE MINIMAL PERIOD OF FLEA32x1 IS UNKNOWN! It was added mainly for
- * testing the `mod3` test and shouldn't be used in practice!
+ * WARNING! It has no guaranteed minimal period, bad seeds are theoretically
+ * possible. Usage of this generator for statistical, scientific and
+ * engineering computations is strongly discouraged!
+ *
+ * The generator was added mainly for testing the `mod3` test: it is the
+ * only test that it fails.
  *
  * References:
  *

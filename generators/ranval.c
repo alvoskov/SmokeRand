@@ -6,8 +6,9 @@
  * modifications of ranval, the implemented variant is from PractRand 0.94
  * by Chris Doty-Humphrey.
  *
- * WARNING! THE MINIMAL PERIOD OF RANVAL IS UNKNOWN! Don't use it as a general
- * purpose pseudorandom number generator! Bad seeds are possible!
+ * WARNING! It has no guaranteed minimal period, bad seeds are theoretically
+ * possible. Usage of this generator for statistical, scientific and
+ * engineering computations is strongly discouraged!
  *
  * References:
  *

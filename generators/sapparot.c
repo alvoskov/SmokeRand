@@ -3,10 +3,11 @@
  * @brief Sapparot is a chaotic generator.
  * @details References:
  *
- * 1.Ilya O. Levin. Sapparot. http://www.literatecode.com/sapparot
+ * 1. Ilya O. Levin. Sapparot. http://www.literatecode.com/sapparot
  *
- * WARNING! IT HAS NO GUARANTEED MINIMAL PERIOD! BAD SEEDS ARE POSSIBLE!
- * DON'T USE THIS PRNG FOR ANY SERIOUS WORK! The author uses rotations
+ * WARNING! It has no guaranteed minimal period, bad seeds are theoretically
+ * possible. Usage of this generator for statistical, scientific and
+ * engineering computations is strongly discouraged! The author uses rotations
  * in the "discrete Weyl sequence" part without proof of a minimal cycle
  * of an updated counter part.
  *

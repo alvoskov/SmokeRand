@@ -305,9 +305,9 @@
  xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | +      | 0     | Small   | 128 KiB
  xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      | 3     | +       | 8 MiB
  xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      | 4     | +       | >= 16 TiB
- xoshiro256p       | u64    | 1       | 1     | 2       |      |      |        |       |         | 64 MiB
- xoshiro256pp      | u64    | +       | +     | +       |      |      |        |       |         | ?
- xoshiro256stst    | u64    | +       | +     | +       |      |      |        |       |         | ?
+ xoshiro256p       | u64    | 1       | 1     | 2       | 3    | 0.20 |        | 3.25  |         | 64 MiB
+ xoshiro256pp      | u64    | +       | +     | +       | +    | 0.22 | +      | 4     |         | ?
+ xoshiro256stst    | u64    | +       | +     | +       |      | 0.22 |        |       |         | ?
  xsh               | u64    | 2       | 9     | 14      | 18   | 0.43 | -      | 0     | -       | 32 KiB
  xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     | >= Crush| >= 4 TiB
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     | >= Crush| >= 32 TiB
