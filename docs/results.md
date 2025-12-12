@@ -73,7 +73,7 @@
  komirand16w       | u32    | 1-4     | 20-21 |         |      |      |        | 0     |         | ?
  komirand32        | u32    | +       | 1     | 2       |      |      |        | 0     |         | 2-8 GiB
  komirand32w       | u32    | +       | +     | +       | +    |      |        | ?(0)  |         | >= 2 TiB
- komirand          | u64    | +       | +     | +       | +    | 0.49 | +      | 4(0)  |         | ?
+ komirand          | u64    | +       | +     | +       | +    | 0.49 | +      | 4(0)  |         | >= 16 TiB
  komirandw         | u64    | +       | +     | +       | +    | 0.52 | +      | 4     |         | >= 8 TiB
  kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 5     | +       | >= 4 TiB
  lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>10)| 0     | -       | 512 MiB
@@ -305,6 +305,9 @@
  xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | +      | 0     | Small   | 128 KiB
  xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      | 3     | +       | 8 MiB
  xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      | 4     | +       | >= 16 TiB
+ xoshiro256p       | u64    | 1       | 1     | 2       |      |      |        |       |         | 64 MiB
+ xoshiro256pp      | u64    | +       | +     | +       |      |      |        |       |         | ?
+ xoshiro256stst    | u64    | +       | +     | +       |      |      |        |       |         | ?
  xsh               | u64    | 2       | 9     | 14      | 18   | 0.43 | -      | 0     | -       | 32 KiB
  xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     | >= Crush| >= 4 TiB
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     | >= Crush| >= 32 TiB

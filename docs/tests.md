@@ -1,3 +1,60 @@
+# About implemented tests
+
+The next tests are implemented in the SmokeRand core:
+
+1. Monobit frequency test.
+2. Frequency test for bytes and 16-bit chunks.
+3. Birthday spacings test.
+4. Birthday spacings test with decimation.
+5. CollisionOver test.
+6. Gap test.
+7. Gap test on 16-bit words with zero counting (modified `rda16` from gjrand).
+8. Matrix rank test.
+9. Linear complexity test.
+10. Hamming weights frequency tests for non-overlapping blocks and their
+    pairwise XORs.
+11. Hamming weights tests based on overlapping tuples (similar to DC6 test
+    from PractRand 0.94).
+12. Simplified `mod3` test from gjrand.
+13. SumCollector test.
+
+Systematic failure of even one test means that PRNG is not suitable as a general
+purpose PRNG. However different tests have different impact on the PRNG quality:
+
+1. Frequency tests failure: the PRNG is either broken or seriously flawed.
+2. Hamming weights based tests: short-term correlations in bits distribution.
+   Local deviations from the uniform distribution are possible.
+3. Gap test failure: the PRNG output has regularities that may disrupt
+   Monte-Carlo simulations (similar to Ising 2D model case).
+4. Birthday spacings, CollisionOver and SumCollector test failure: the PRNG
+   output shows a regular structure (often similar to lattice) that can break
+   generation of identifiers and Monte-Carlo simulations.
+5. Matrix rank and linear complexity tests failure: there is a linear dependence
+   between bits of the PRNG output sequence. Don't work with separate bits of 
+   such PRNG, even `a % n` usage may be risky. However, these flaws are usually
+   irrelevant for Monte-Carlo simulations and MT19937 and WELL1024a are often
+   used as general purpose PRNGs.
+
+Systematic failures in P.1-4 mean that PRNG is seriously flawed and mustn't
+be used for computations. P.5 requires a special consideration for each task
+and each generator. Of course, statistical tests are not sufficient for
+PRNG quality control: state-of-art quality PRNG should satisfy theoretical
+"next bit test", i.e. based on cryptographical primitives such as block or
+stream ciphers.
+
+Extra tests:
+
+1. 64-bit birthday paradox test. Requires 8 GiB of RAM and about 30 minutes.
+   Allows to detect perfectly uniform 64-bit generators with 64-bit state
+   such as SplitMix, 64-bit LCGs with full 64-bit outputs, some modifications
+   of PCG.
+2. 2-dimensional Ising model test: modifications with Wolff and Metropolis
+   algorithms. Rather slow and not very sensitive, but resemble real
+   Monte-Carlo computations.
+3. Long runs of frequency test for 1-bit, 8-bit and 16-bit chunks. This is an
+   adaptive test that will show intermediate results.
+
+
 # Tests description
 
 The tests supplied with SmokeRand are mostly well-known, described in scientific
@@ -6,6 +63,23 @@ modifications are specific to SmokeRand and allow to detect such PRNGs as
 64-bit LCG with prime modulus, 96-bit and 128-bit LCGs with \f$ m = 2^k \f$
 and truncation of lower 64 or even 96 bits, "Subtract-with-Borrow + Weyl
 Sequence" (SWBW) and incorrectly configured CSPRNGs with 32-bit counters.
+
+Despite relatively small amount of tests SmokeRand can detect flaws in some
+PRNG that pass BigCrush or PractRand:
+
+- 64-bit LCG with prime modulus: passes PractRand, detection by BigCrush
+  requires special settings (interleaved mode).
+- 96-bit and 128-bit LCGs by modulo 2^{k} and truncation of lower 64 bits.
+  They pass BigCrush but detected by PractRand. SmokeRand also can detect
+  128-bit LCG with truncated lower 96 bits (they pass BigCrush and PractRand).
+- SWBW: detected by PractRand but not by BigCrush.
+- Uniformly distributed 64-bit generators with 64-bit state such as
+  SplitMix, PCG64/64, rrmxmx, DES-CTR, MAGMA-CTR: detected by an extra
+  "birthday paradox" battery.
+- Additive and subtractive lagged Fibonacci generators with large lags, e.g.
+  LFib(19937,9842+): the `gap16` (`rda16`) test is taken from gjrand.
+- RC4 obsolete CSPRNG: detected by PractRand but not by BigCrush. In SmokeRand
+  extra "freq" battery is required to detect it.
 
 ## Monobit frequency test
 
