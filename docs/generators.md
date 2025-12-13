@@ -3,14 +3,15 @@
 A lot of pseudorandom number generators are supplied with SmokeRand. They can
 be divided into several groups:
 
-- Cryptographically secure: aes128, chacha, chacha_avx (ChaCha12), hc256,
-  isaac64, kuzn, lea, speck128, speck128_avx (Speck128/128).
-- Obsolete CSPRNG: DES, GOST R 34.12-2015 "Magma", RC4.
-- Counter-based scramblers based on cryptographical primitives: philox,
-  philox32, speck128_r16, threefry.
-- Other counter-based PRNGs: blabla, jctr32, jctr64
+- Cryptographical, i.e. based on block and stream ciphers: aes128, chacha,
+  hc256, isaac, isaac64, kuzn, lea, rc4ok, speck128 (different modifications),
+  threefish/threefish1024, xtea, xxtea etc.
+- Obsolete cryptographical: DES, GOST R 34.12-2015 "Magma", RC4.
+- Counter-based scramblers based on cryptographical primitives: blabla (closer
+  to experimental stream cipher), philox, philox32, speck128_r16, threefry.
+- Other counter-based PRNGs: jctr32, jctr64
 - Lagged Fibonacci: alfib, alfib_lux, alfib_mod, mlfib17_5, lfib_par,
-  lfib_ranmar, r1279.
+  lfib_ranmar, r250, r1279.
 - Linear congruental: cmwc4096, drand48, lcg32prime, lcg42, lcg64, lcg64prime,
   lcg96, lcg128, lcg69069, minstd, mwc1616, mwc64, mwc128, randu, ranluxpp,
   seizgin63.
@@ -28,7 +29,11 @@ be divided into several groups:
   xoroshiro128pp, xoroshiro1024st, xoroshiro1024stst, xorwow.
 - GSFR: mt19937, tinymt32, tinymt64.
 - Combined generators: kiss93, kiss99, kiss64, lxm_64x128, superduper73,
-  superduper64, superduper96, swbmwc32, swbmwc64 etc.
+  superduper64, superduper96, swbmwc32, swbmwc64, xkiss etc.
+- Chaotic nonlinear generators based on reversible mappings: gjrand, prvhash,
+  ranval, ranval64, sfc, wob2m.
+- Chaotic generators based on irreversible mappings: a5rand, msws, romutrio,
+  komirand.
 - Other: coveyou64, mrg32k3a, romutrio.
 
 

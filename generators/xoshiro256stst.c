@@ -1,17 +1,25 @@
 /**
  * @file xoshiro256stst.c
- * @brief xoshiro256** PRNG: https://prng.di.unimi.it/xoshiro256starstar.c
+ * @brief xoshiro256** pseudorandom number generator.
+ * @details The implementation is based on public domain code by D.Blackman
+ * and S.Vigna (vigna@acm.org). This generator doesn't fail matrix rank and
+ * linear complexity tests.
+ * 
+ * References:
+ *
+ * 1. https://prng.di.unimi.it/xoshiro256starstar.c
+ *
+ * @copyright
  *
  * This software is licensed under the MIT license.
  */
-
 #include "smokerand/cinterface.h"
 #include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief PRNG state.
+ * @brief xoshiro256** PRNG state.
  */
 typedef struct {
     uint64_t s[4];

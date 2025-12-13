@@ -46,7 +46,7 @@ static void *create(const CallerAPI *intf)
 {
     A5Rand32State *obj = intf->malloc(sizeof(A5Rand32State));
     obj->st1 = intf->get_seed32();
-    obj->st2 = intf->get_seed32();
+    obj->st2 = obj->st1; // Recommended by the PRNG author
     // Warmup
     for (int i = 0; i < 8; i++) {
         (void) get_bits_raw(obj);

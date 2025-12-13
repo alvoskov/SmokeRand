@@ -45,7 +45,7 @@ static void *create(const CallerAPI *intf)
 {
     A5RandState *obj = intf->malloc(sizeof(A5RandState));
     obj->st1 = intf->get_seed64();
-    obj->st2 = intf->get_seed64();
+    obj->st2 = obj->st1; // Recommended by the author
     // Warmup
     for (int i = 0; i < 8; i++) {
         (void) get_bits_raw(obj);

@@ -1,4 +1,31 @@
+# About design
+
+SmokeRand design philosophy resembles such TestU01 batteries as SmallCrush,
+Crush and BigCrush: implemented statistical tests are grouped into predefined
+batteries that consume fixed samples from a tested generator. It differs from
+PractRand and gjrand where tests are adaptive, i.e. gradually accumulate
+statistics from input samples. An important goal during SmokeRand development
+was to overcome TestU01 limitations such as support of only 32-bit PRNGs,
+some problems with lower bits analysis, absence of multithreading support.
+
+Analysis of the lowest bits of generators output that improves sensitivity
+of tests, e.g. linear complexity, matrix rank or birthday spacings test.
+
+A set of tests implemented in SmokeRand is probably not exhaustive but is
+intended to catch different types of statistical flaws. The main sources
+of inspiration:
+
+- NIST STS: frequency tests (in SmokeRand - for 1, 8 and 16-bit blocks).
+- TestU01: birthday spacings, collision over, matrix rank, classicaal gap test,
+  linear complexity, sumcollector test.
+- PractRand: Hamming weights based tests, `mod3` test.
+- gjrand: `rda16` gap test modification.
+
 # Compilation
+
+Some basic compilation tips are given in `README.md`, here we consider only
+targeting less-common platforms, usage of compiler-dependent C features (such
+as 128-bit arithmetics), working in memory-constrained environment etc.
 
 ## Usage of Ninja and WMake
 
@@ -86,14 +113,21 @@ with limited amount of RAM, e.g. under 32-bit DOS extenders on old hardware:
 
 ## DJGPP
 
-Notes about DJGPP:
+DJGPP supports its own system of dynamically loaded modules in DXE3 format.
+They are essentially simplified versions of dynamic libraries / shared objects
+common in Windows NT and GNU/Linux. To build with DJGPP use the next command:
 
-- All plugins with PRNGs are compiled as DXE3 modules using the `dxe3gen`
-  linker that is specific to DJGPP. It is possible to make SmokeRand DJGPP
-  build to use DLLs but it will require a cross-compilation of plugins with
-  MinGW or Open Watcom that is not too practical.
-- SmokeRand man page can be converted to the overstrike based format using
-  the next commands:
+    $ make -f Makefile.gnu PLATFORM_NAME=DJGPP
+
+Long file names support must be enabled!
+
+All plugins with PRNGs will be compiled as DXE3 modules using the `dxe3gen`
+linker that is specific to DJGPP. It is possible to make SmokeRand DJGPP build
+to use DLLs but it will require a cross-compilation of plugins with MinGW or
+Open Watcom that is not too practical.
+
+SmokeRand man page can be converted to the overstrike based format using
+the next commands:
 
     $ groff -mandoc -Tascii -P-cBoU smokerand.1 > smokerand.dos
     $ less smokerand.dos
@@ -105,6 +139,9 @@ Notes about DJGPP:
 compiled plugins with PRNGs even without DOS extender with PE files support.
 16-bit DOS version (see `apps/sr_tiny.c`) doesn't support dynamic libraries
 at all, tested generators should be embedded into its source code.
+
+As it was mentioned above it is possible to use the same approach for DJGPP
+but it is disabled by default. See the `src/threads_intf.c` file for details.
 
 
 # Batteries

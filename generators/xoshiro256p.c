@@ -1,21 +1,37 @@
 /**
  * @file xoshiro256p.c
- * @brief xoshiro256+ PRNG: https://prng.di.unimi.it/xoshiro256plus.c
+ * @brief xoshiro256+ pseudorandom number generator.
+ * @details The implementation is based on public domain code by D.Blackman
+ * and S.Vigna (vigna@acm.org). Its lowest bit has low linear complexity.
+ * It fails `linearcomp_low`, `matrixrank_4096_low`, `matrixrank_8192_low` and
+ * `matrixrank_8192` tests.
+ *
+ * Reference:
+ * 
+ * 1. https://prng.di.unimi.it/xoshiro256plus.c
+ *
+ * @copyright
+ * An initial wrapper for SmokeRand: (C) 2025 Scott Baker
+ *
+ * Refactoring with addition of internal self-tests:
+ * 
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
  */
-
 #include "smokerand/cinterface.h"
 #include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief PRNG state.
+ * @brief xoshiro256+ PRNG state.
  */
 typedef struct {
     uint64_t s[4];
 } Xoshiro256PState;
+
 
 static inline uint64_t get_bits_raw(Xoshiro256PState *state)
 {
@@ -29,6 +45,7 @@ static inline uint64_t get_bits_raw(Xoshiro256PState *state)
 	state->s[3] = rotl64(state->s[3], 45);
 	return result;
 }
+
 
 static void *create(const CallerAPI *intf)
 {

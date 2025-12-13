@@ -8,15 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ## Added
 
-- `a5rand` and `a5randw` algorithms.
-- `komirand` and `komirandw` algorithms.
-- `xoroshiro256p`, `xoroshiro256pp`, `xoroshiro256stst` algorithms.
+- `a5rand`, `a5rand32`, `a5rand32w`, `a5randw` algorithms.
+- `komirand`, `komirand16`, `komirand16w`, `komirand32`, `komirand32w`,
+  `komirandw` algorithms.
+- `prvhash12c`, `prvhash12cw`, `prvhash16c`, `prvhash64c`, `prchash64cw` algorithms.
+- `xoshiro256p`, `xoshiro256pp`, `xoshiro256stst` algorithms.
 
 ## Changed
 
-- CHANGELOG.md is in the separate file now.
-- results.md (pseudorandom number generators tests results) is in the separate
-  file now.
+- [Changelog](CHANGELOG.md) is in the separate file now.
+- [Pseudorandom number generators tests results](docs/results.md) is in the
+  separate file now.
+- [Readme](README.md) is separated into several files, they are in the `docs/`
+  directory now.
 - Bugfix with GCC 14-15 warnings about mismatched `calloc` arguments.
 - `undef` were added to battery files to simplify unity builds of `smokerand`
   executable.

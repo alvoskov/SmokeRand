@@ -1,10 +1,23 @@
 /**
  * @file xoshiro256pp.c
- * @brief xoshiro256++ PRNG: https://prng.di.unimi.it/xoshiro256plusplus.c
+ * @brief xoshiro256++ pseudorandom number generator.
+ * @details The implementation is based on public domain code by D.Blackman
+ * and S.Vigna (vigna@acm.org). This generator doesn't fail matrix rank and
+ * linear complexity tests.
+ *
+ * References:
+ * 1. PRNG: https://prng.di.unimi.it/xoshiro256plusplus.c
+ *
+ * @copyright
+ * An initial wrapper for SmokeRand: (C) 2025 Scott Baker
+ *
+ * Refactoring with addition of internal self-tests:
+ * 
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
  */
-
 #include "smokerand/cinterface.h"
 #include <inttypes.h>
 

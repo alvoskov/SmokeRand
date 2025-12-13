@@ -102,14 +102,15 @@ target_link_libraries(test_crand smokerand_bat smokerand_core ${COMMON_LIBS})
 
 # Generators list
 set (GENERATORS
-    aes128 alfib alfib64x5 alfib8x5 alfib_lux alfib_mod ara32 biski16 
-    biski16_alt biski16_mul biski32 biski32_alt biski64 biski64sh 
-    biski64_alt biski64_mul biski8 biski8_alt biski8_mul blabla chacha 
-    cmwc4096 cmwc4827 combo coveyou64 cswb4288 cswb4288_64 cwg64 
-    des drand48 efiix64x48 flea32x1 gjrand8 gjrand16 gjrand32 gjrand64 
-    gmwc128 hc256 hicg64 icg31x2 ia ia64 ibaa icg64 icg64_p2 isaac 
-    isaac64 jkiss jkiss32 jlkiss64 kiss11_32 kiss11_64 kiss64 kiss93 
-    kiss96 kiss99 kiss4691 komirand komirandw kuzn lcg128 lcg32prime 
+    a5rand a5rand32 a5rand32w a5randw aes128 alfib alfib64x5 alfib8x5 
+    alfib_lux alfib_mod ara32 biski16 biski16_alt biski16_mul biski32 
+    biski32_alt biski64 biski64sh biski64_alt biski64_mul biski8 
+    biski8_alt biski8_mul blabla chacha cmwc4096 cmwc4827 combo coveyou64 
+    cswb4288 cswb4288_64 cwg64 des drand48 efiix64x48 flea32x1 gjrand8 
+    gjrand16 gjrand32 gjrand64 gmwc128 hc256 hicg64 icg31x2 ia ia64 
+    ibaa icg64 icg64_p2 isaac isaac64 jkiss jkiss32 jlkiss64 kiss11_32 
+    kiss11_64 kiss64 kiss93 kiss96 kiss99 kiss4691 komirand komirand16 
+    komirand16w komirand32 komirand32w komirandw kuzn lcg128 lcg32prime 
     lcg42 lcg64 lcg64prime lcg69069 lcg96 lea lfib4 lfib4_u64 lfib_par 
     lfib_ranmar lfsr113 lfsr258 loop_7fff_w64 lrnd64_1023 lrnd64_255 
     lxm_64x128 macmarsa magma melg19937 melg44497 melg607 minstd 
@@ -120,7 +121,8 @@ set (GENERATORS
     mwc3232x mwc32x mwc32xxa8 mwc40xxa8 mwc4691 mwc48xxa16 mwc63x2 
     mwc64 mwc64x mwc64_2p58 mwc8222 mzran13 pcg32 pcg32_dxsm pcg32_xsl_rr 
     ncombo pcg64_64 pcg64_dxsm pcg64_xsl_rr philox philox2x32 philox32 
-    r1279 r250 ran randu ranlux48 ranluxpp ranq1 ranq2 ranrot32 ranrot8tiny 
+    prvhash12c prvhash12cw prvhash16c prvhash64c prchash64cw r1279 
+    r250 ran randu ranlux48 ranluxpp ranq1 ranq2 ranrot32 ranrot8tiny 
     ranrot16tiny ranrot32tiny ranrot64tiny ranrot_bi ranshi ranval 
     ranval64 rc4 rc4ok rge256ex rge256exctr rge256lite rge512ex rge512exctr 
     romutrio rrmxmx sapparot sapparot2 sapparot2_64 seed sezgin63 
@@ -136,8 +138,8 @@ set (GENERATORS
     xoroshiro128aox xoroshiro128p xoroshiro128pp xoroshiro128pp_vec 
     xoroshiro32 xoroshiro32pp xoroshiro64pp xoroshiro64st xoroshiro64stst 
     xorshift128 xorshift128p xorshift128pp xorshift128rp xorshift64 
-    xorshift64st xorwow xoshiro128p xoshiro128pp xsh xtea xtea2 xtea2_64 
-    xxtea ziff98 
+    xorshift64st xorwow xoshiro128p xoshiro128pp xoshiro256p xoshiro256pp 
+    xoshiro256stst xsh xtea xtea2 xtea2_64 xxtea ziff98 
 )
 
 # Examples of plugins, i.e. modules with PRNGs
