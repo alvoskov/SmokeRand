@@ -50,7 +50,7 @@ local gen_sources = {
     'mzran13',            'pcg32',              'pcg32_dxsm',         'pcg32_xsl_rr', 
     'ncombo',             'pcg64_64',           'pcg64_dxsm',         'pcg64_xsl_rr', 
     'philox',             'philox2x32',         'philox32',           'prvhash12c', 
-    'prvhash12cw',        'prvhash16c',         'prvhash64c',         'prchash64cw', 
+    'prvhash12cw',        'prvhash16c',         'prvhash64c',         'prvhash64cw', 
     'r1279',              'r250',               'ran',                'randu', 
     'ranlux48',           'ranluxpp',           'ranq1',              'ranq2', 
     'ranrot32',           'ranrot8tiny',        'ranrot16tiny',       'ranrot32tiny', 

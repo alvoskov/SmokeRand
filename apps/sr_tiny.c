@@ -259,10 +259,10 @@ typedef Mwc1616State Mwc1616xState;
 u32 mwc1616x_func(void *state)
 {
     Mwc1616xState *obj = state;
-    u16 z_lo = obj->z & 0xFFFF, z_hi = obj->z >> 16;
-    u16 w_lo = obj->w & 0xFFFF, w_hi = obj->w >> 16;
-    obj->z = 61578ul * z_lo + z_hi;
-    obj->w = 63885ul * w_lo + w_hi;
+    u16 z_lo = (u16) (obj->z & 0xFFFF), z_hi = (u16) (obj->z >> 16);
+    u16 w_lo = (u16) (obj->w & 0xFFFF), w_hi = (u16) (obj->w >> 16);
+    obj->z = 61578U * (u32)z_lo + (u32)z_hi;
+    obj->w = 63885U * (u32)w_lo + (u32)w_hi;
     return ((obj->z << 16) | (obj->z >> 16)) ^ obj->w;
 }
 
@@ -359,8 +359,8 @@ typedef struct {
 
 void Lcg64x16State_init(Lcg64x16State *obj, u32 seed)
 {
-    obj->x[0] = seed & 0xFFFF;
-    obj->x[1] = seed >> 16;
+    obj->x[0] = (u16) (seed & 0xFFFF);
+    obj->x[1] = (u16) (seed >> 16);
     obj->x[2] = 0;
     obj->x[3] = 0;
 }
@@ -404,8 +404,8 @@ u32 lcg64x16_func(void *state)
 u32 xorshift32_func(void *state)
 {
     u32 *x = state;
-    *x ^= (*x << 17);
-    *x ^= (*x >> 13);
+    *x ^= (*x << 13);
+    *x ^= (*x >> 17);
     *x ^= (*x << 5);
     return *x;
 }
@@ -462,13 +462,11 @@ u32 xorwow_func(void *state)
  */
 static void xorbytes(u8 *a, const u8 *b, size_t len)
 {
-/*
     size_t i;
     for (i = 0; i < len; i++) {
         a[i] ^= b[i];
     }
-*/
-
+/*
     u32 *av = (u32 *) a, *bv = (u32 *) b;
     size_t nwords = len / 4, i;
     for (i = 0; i < nwords; i++) {
@@ -479,6 +477,7 @@ static void xorbytes(u8 *a, const u8 *b, size_t len)
     for (i = 0; i < len % 4; i++) {
         a[i] ^= b[i];
     }    
+*/
 }
 
 /**
@@ -504,13 +503,13 @@ size_t berlekamp_massey(const u8 *s, size_t n)
     }
     C[0] = 1; B[0] = 1;
     while (N < n) {
-        char d = s[N];
+        u8 d = s[N];
         for (i = 1; i <= L; i++) {
-            d ^= C[i] & s[N - i];
+            d ^= (u8) (C[i] & s[N - i]);
         }
         if (d == 1) {
             memcpy(T, C, (L + 1) * sizeof(u8));
-            xorbytes(&C[N - m], B, n - N + m);
+            xorbytes(&C[(long) N - m], B, (size_t) ((long) n - (long) N + m));
             if (2*L <= N) {
                 L = N + 1 - L;
                 m = (long) N;
@@ -625,9 +624,10 @@ void quicksort(u32 *v, int begin, int end)
  * @brief Calculates number of duplicates (essentially xemp) for
  * birthday spacings test.
  */
-int get_ndups(u32 *x, int n)
+unsigned int get_ndups(u32 *x, int n)
 {
-    int i, ndups = 0;
+    unsigned int ndups = 0;
+    int i;
     quicksort(x, 0, n - 1);
     for (i = 0; i < n - 1; i++) {
         x[i] = x[i + 1] - x[i];
@@ -674,7 +674,7 @@ typedef struct {
 
 void BSpaceBuffer_init(BSpaceBuffer *obj, int len, int ndim)
 {
-    obj->x = calloc(len, sizeof(u32));
+    obj->x = calloc((size_t) len, sizeof(u32));
     if (obj->x == NULL) {
         fprintf(stderr, "***** Not enough memory *****\n");
         exit(1);
@@ -684,7 +684,7 @@ void BSpaceBuffer_init(BSpaceBuffer *obj, int len, int ndim)
     obj->ndups = 0;
     obj->ndim = ndim;
     obj->nbits_per_dim = 32 / ndim;
-    obj->mask = (1ul << obj->nbits_per_dim) - 1;
+    obj->mask = ((u32)1U << obj->nbits_per_dim) - 1U;
 }
 
 
@@ -692,7 +692,8 @@ void BSpaceBuffer_add_values(BSpaceBuffer *obj, const u32 *x_in)
 {
     int i, j;
     int n = obj->len, ndim = obj->ndim, pos = obj->pos;
-    int mask = obj->mask, nbits_per_dim = obj->nbits_per_dim;
+    int nbits_per_dim = obj->nbits_per_dim;
+    u32 mask = obj->mask;
     for (i = 0; i < n; i += ndim) {
         u32 tmp = 0;
         for (j = 0; j < ndim; j++) {
@@ -722,12 +723,14 @@ void BSpaceBuffer_free(BSpaceBuffer *obj)
 void gen_tests(ResultsList *out, Generator32State *obj)
 {
     const double lambda = 4.0;
-    int n = 4096, i, ii, ndups = 0, nsamples = 1024;
+    unsigned int ndups = 0;
+    int n = 4096, nsamples = 1024;
+    int i, ii;
     BSpaceBuffer bs_dec, bs_4x8d, bs_8x4d;
     double chi2emp = 0.0, mu = 0.0;
     TestResultEntry tres;
     u32 u_dec = 0;
-    u32 *x = calloc(n, sizeof(u32));
+    u32 *x = calloc((size_t) n, sizeof(u32));
     u32 *bytefreq = calloc(256, sizeof(u32));
     if (x == NULL || bytefreq == NULL) {
         fprintf(stderr, "***** Not enough memory *****\n");
@@ -911,9 +914,9 @@ void print_elapsed_time(double sec_total)
 {
     unsigned long sec_total_int = (unsigned long) sec_total;
     int ms = (int) ((sec_total - sec_total_int) * 1000.0);
-    int seconds = sec_total_int % 60;
-    int minutes = (sec_total_int / 60) % 60;
-    int hours = (sec_total_int / 3600);
+    int seconds = (int) (sec_total_int % 60);
+    int minutes = (int) ((sec_total_int / 60) % 60);
+    int hours = (int) (sec_total_int / 3600);
     printf("%.2d:%.2d:%.2d.%.3d\n", hours, minutes, seconds, ms);
 }
 

@@ -6,34 +6,6 @@ unsigned integers.
 
 The current version of SmokeRand can be found [here](https://github.com/alvoskov/SmokeRand).
 
-## Quick start
-
-SmokeRand is written in C99. Compile SmokeRand using GNU Make (`Makefile.gnu` or
-`make_pkg.sh` if DEB package is desired) or CMake (`CMakeLists.txt`), see
-[Compilation](#compilation) section for details. Then write a program that sends
-your PRNG output as a binary stream to `stdout` and attach it to SmokeRand
-through a pipe:
-
-```sh
-$ make -f Makefile.gnu
-$ cd bin
-$ py ../misc/pyrand.py | ./smokerand default stdin32
-```
-
-An example of Python script that will send an infinite stream of bytes to stdout:
-
-```python
-import sys, random
-while True:
-    random_bytes = random.randbytes(1024)
-    sys.stdout.buffer.write(random_bytes)
-```
-
-An alternative method is writing a plugin using C API, see
-[How to test a PRNG](#how-to-test-a-prng) section and `generators` directory
-for details. This is a more advanced method that enables multithreading.
-
-
 ## Key features
 
 - Direct support of both 32-bit and 64-bit generators without taking
@@ -47,6 +19,65 @@ for details. This is a more advanced method that enables multithreading.
 - Cross-platform multithreading support (only for PRNGs implemented as
   shared libraries).
 - Easy integration with TestU01 and PractRand.
+
+## Quick start
+
+SmokeRand is written in C99. Compile SmokeRand using GNU Make (`Makefile.gnu`
+or `make_pkg.sh` if DEB package is desired) or CMake (`CMakeLists.txt`), see
+[Compilation](#compilation) section for details. Then test one of the supplied
+generators implemented as plugins:
+
+```sh
+$ make -f Makefile.gnu
+$ cd bin
+$ ./smokerand default generators/lcg64.so [--threads]
+```
+
+You can also write a program that sends your PRNG output as binary stream to
+`stdout` and connect it to SmokeRand through a pipe:
+
+```sh
+$ py ../misc/pyrand.py | ./smokerand default stdin32
+```
+
+An example of Python script that will send an infinite stream of bytes to stdout:
+
+```python
+import sys, random
+while True:
+    random_bytes = random.randbytes(1024)
+    sys.stdout.buffer.write(random_bytes)
+```
+
+A similar example in C99 for a 64-bit linear congruential generator:
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+#include <time.h>
+#include <fcntl.h>
+#if defined(_MSC_VER) || defined(__WATCOMC__)
+#include <io.h>
+#endif
+#define BUFSIZE 256
+int main() {
+    uint64_t x = (uint64_t) time(NULL);
+    uint32_t buf[BUFSIZE];
+#if defined(_WIN32)
+    (void) _setmode( _fileno(stdout), _O_BINARY);
+#endif
+    while (1) {
+        for (size_t i = 0; i < BUFSIZE; i++) {
+            x = 6906969069U * x + 12345U;
+            buf[i] = x >> 32;
+        }
+        fwrite(buf, sizeof(uint32_t), BUFSIZE, stdout);
+    }
+    return 0;
+}
+```
+
+See details in the [How to test a PRNG](#how-to-test-a-prng) section.
 
 ## Compilation
 

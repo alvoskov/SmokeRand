@@ -22,8 +22,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - [Readme](README.md) is separated into several files, they are in the `docs/`
   directory now.
 - Bugfix with GCC 14-15 warnings about mismatched `calloc` arguments.
+- Bugfix in `src/sr_tiny.c`: xorshift32 parameters: now they are (13,17,5)
+  instead of (17,13,5).
 - `undef` were added to battery files to simplify unity builds of `smokerand`
   executable.
+- CMakeLists.txt cleanup.
 
 ## [0.43] - 2025-12-07
 
