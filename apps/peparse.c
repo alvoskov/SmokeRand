@@ -31,12 +31,14 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Error: %s\n", dlerror_pe32dos());
         return 1;
     }
-   
-    GetGenInfoFunc gen_getinfo = dlsym_pe32dos(handle, "gen_getinfo");
-    if (gen_getinfo == NULL) {
+
+    void *fptr = dlsym_pe32dos(handle, "gen_getinfo");
+    if (fptr == NULL) {
         fprintf(stderr, "Cannot find the 'gen_getinfo' function\n");
         return 1;
     }
+    GetGenInfoFunc gen_getinfo;
+    memcpy(&gen_getinfo, &fptr, sizeof(gen_getinfo));
     //----------------------------------------------------
     const BatteryOptions opts = {
         .test = {.id = TESTS_ALL, .name = NULL}, .nthreads = 1,

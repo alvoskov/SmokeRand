@@ -286,9 +286,9 @@ int PE32MemoryImage_apply_exports(PE32MemoryImage *img, PE32BasicInfo *info)
     uint32_t func_addrs_array_rva = PE32MemoryImage_get_u32(img, info->export_dir + 28);
     uint32_t func_names_array_rva = PE32MemoryImage_get_u32(img, info->export_dir + 32);
     uint32_t ord_array_rva = PE32MemoryImage_get_u32(img, info->export_dir + 36);
-    uint32_t *func_names_rva = (uint32_t *) &img->img[func_names_array_rva];
-    uint32_t *func_addrs_rva = (uint32_t *) &img->img[func_addrs_array_rva];
-    img->exports_ords = (uint16_t *) &img->img[ord_array_rva];
+    uint32_t *func_names_rva = (uint32_t *) (void *) &img->img[func_names_array_rva];
+    uint32_t *func_addrs_rva = (uint32_t *) (void *) &img->img[func_addrs_array_rva];
+    img->exports_ords = (uint16_t *) (void *) &img->img[ord_array_rva];
     printf("nexports:  %u\n", img->nexports);
     printf("addrs rva: %" PRIX32 "\n", func_addrs_array_rva);
     printf("names rva: %" PRIX32 "\n", func_names_array_rva);

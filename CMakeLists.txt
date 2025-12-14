@@ -3,12 +3,17 @@ project (SmokeRand)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Compiler settings
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(PROF_FLAGS "")
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set(CMODULE_LINK_FLAGS "-nostdlib")
     set(FREESTANDING "-ffreestanding")
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROF_FLAGS} -std=c99 -O2 -Wall -Werror -Wextra -Wno-attributes -march=native")
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "OpenWatcom")
+    add_compile_options(-march=native -O3 -Werror -Wall -Wextra)
+    add_compile_options(-Wstrict-aliasing=1 -Wpedantic -Wshadow -Wconversion)
+    add_compile_options(-Wvla -Wcast-align=strict)
+elseif(CMAKE_C_COMPILER_ID STREQUAL "OpenWatcom")
     set(CMODULE_LINK_FLAGS " ")
     set(FREESTANDING " ")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -za99 -DNO_X86_EXTENSIONS -DNOTHREADS")
@@ -18,7 +23,7 @@ else()
 endif()
 
 # Some CMake settings
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
+set(CMAKE_VERBOSE_MAKEFILE FALSE)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -121,7 +126,7 @@ set (GENERATORS
     mwc3232x mwc32x mwc32xxa8 mwc40xxa8 mwc4691 mwc48xxa16 mwc63x2 
     mwc64 mwc64x mwc64_2p58 mwc8222 mzran13 pcg32 pcg32_dxsm pcg32_xsl_rr 
     ncombo pcg64_64 pcg64_dxsm pcg64_xsl_rr philox philox2x32 philox32 
-    prvhash12c prvhash12cw prvhash16c prvhash64c prchash64cw r1279 
+    prvhash12c prvhash12cw prvhash16c prvhash64c prvhash64cw r1279 
     r250 ran randu ranlux48 ranluxpp ranq1 ranq2 ranrot32 ranrot8tiny 
     ranrot16tiny ranrot32tiny ranrot64tiny ranrot_bi ranshi ranval 
     ranval64 rc4 rc4ok rge256ex rge256exctr rge256lite rge512ex rge512exctr 
