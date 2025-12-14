@@ -1,5 +1,20 @@
 # Tests results
 
+A table in this document contains pseudorandom number generators results obtained
+from SmokeRand, TestU01 and PractRand test suites. The next grading algorithm
+was used:
+
+1. An initial grade was obtained from SmokeRand `full` battery.
+2. If PRNG failed `birthday` or `freq` battery - then 1 is subtracted for each
+   failure.
+3. If the grade is 4.0 and PRNG failed some tests in TestU01 or PractRand
+   then 0.5 is subtracted.
+4. If PRNG is widely known cryptographic and has no known weakness then
+   the grade is 5.
+5. If PRNG is an experimental cryptographic - then the grade is 4.
+6. If it is not proved that PRNG period in the worst case is greater than 60
+   then the grade is 0 (written as `(0)` after empirically obtained grade).
+
  Algorithm         | Output | express | brief | default | full | cpb  | bday64 | Grade | TestU01 | PractRand 
 -------------------|--------|---------|-------|---------|------|------|--------|-------|---------|-----------
  a5rand            | u64    | +       | +     | +       | +    | 0.37 |        |       |         | ?
@@ -69,8 +84,8 @@
  kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     | +       | >= 16 TiB
  kiss11_64         | u64    | +       | +     | +       | +    | 0.60 | +      | 4     |         | >= 32 TiB
  kiss4691          | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 32 TiB
- komirand16        | u32    | 1-7     | 19-20 | 40      |      |      |        | 0     |         | 64 KiB
- komirand16w       | u32    | 1-4     | 20-21 | 39      |      |      |        | 0     |         | 16 MiB
+ komirand16        | u32    | 1-7     | 19-20 | 40      |      |      |        | 0     | -       | 64 KiB
+ komirand16w       | u32    | 1-4     | 20-21 | 39      |      |      |        | 0     | -       | 16 MiB
  komirand32        | u32    | +       | 1     | 2       | 10   | 0.63 | -(>>10)| 0     | Small   | 2-8 GiB
  komirand32w       | u32    | +       | +     | +       | +    | 1.0  | +      | 4(0)  | +       | >= 2 TiB
  komirand          | u64    | +       | +     | +       | +    | 0.49 | +      | 4(0)  |         | >= 16 TiB
@@ -135,7 +150,7 @@
  mt19937_64        | u64    | +       | 3     | 3       | 3    | 0.45 | +      | 3.25  | Small   | 256 GiB
  mt19937_64_full   | u64    | +       | 3     | 3       | 3    | 0.46 | +      | 3.25  | Small   | 256 GiB
  mtc8              | u32    | 1       | 20/21 | 35      | 39   | 1.9  |        | 0     | -       | 2 MiB
- mtc16             | u32    | +       | +     | +       | +    | 1.3  | +      | 3.5(0)| >= Crush| 512 GiB(stdin32)*
+ mtc16             | u32    | +       | +     | +       | +    | 1.3  | +      | 3.5(0)| +       | 512 GiB(stdin32)*
  mtc32             | u32    | +       | +     | +       | +    | 0.39 | +      | 4(0)  | >= Crush| >= 4 TiB
  mtc64             | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 16 TiB
  mtc64hi           | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 2 TiB
@@ -179,10 +194,11 @@
  philox            | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  philox2x32        | u32    | +       | +     | +       | +    | 1.6  | -      | 3     | +       | >= 32 TiB
  philox32          | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
- prvhash12cw       | u32    | +       | +     | +       |      |      |        |       |         | ?
- prvhash12c        | u32    | +       | 1/2   | 2/3     |      | 4.3  |        | 0     |         | 8 GiB
+ prvhash12cw       | u32    | +       | +     | +       | +    |      |        |       | +       | ?
+ prvhash12c        | u32    | +       | 1/2   | 2/3     |      | 4.3  |        | 0     | Small   | 8 GiB
  prvhash16c        | u32    | +       | +     | +       |      | 2.4  |        |       |         | ?
- prvhash64c        | u64    | +       | +     | +       |      | 0.51 | +      | (0)   |         | ?
+ prvhash64c        | u64    | +       | +     | +       | +    | 0.51 | +      | (0)   |         | ?
+ prvhash64cw       | u64    | +       | +     | +       |      | 0.41 |        |       |         | ?
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      | 0     |S_lo/+_hi| 512 KiB
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      | 3.5   |+_lo/+_hi| 2 MiB
@@ -306,7 +322,7 @@
  xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      | 3     | +       | 8 MiB
  xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      | 4     | +       | >= 16 TiB
  xoshiro256p       | u64    | 1       | 1     | 2       | 3    | 0.20 | +      | 3.25  |         | 64 MiB
- xoshiro256pp      | u64    | +       | +     | +       | +    | 0.22 | +      | 4     |         | ?
+ xoshiro256pp      | u64    | +       | +     | +       | +    | 0.22 | +      | 4     |         | >= 4 TiB
  xoshiro256stst    | u64    | +       | +     | +       | +    | 0.22 | +      |       |         | ?
  xsh               | u64    | 2       | 9     | 14      | 18   | 0.43 | -      | 0     | -       | 32 KiB
  xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     | >= Crush| >= 4 TiB

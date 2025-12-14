@@ -30,14 +30,14 @@ generators implemented as plugins:
 ```sh
 $ make -f Makefile.gnu
 $ cd bin
-$ ./smokerand default generators/lcg64.so [--threads]
+$ ./smokerand express generators/lcg64.so [--threads]
 ```
 
 You can also write a program that sends your PRNG output as binary stream to
 `stdout` and connect it to SmokeRand through a pipe:
 
 ```sh
-$ py ../misc/pyrand.py | ./smokerand default stdin32
+$ py ../misc/pyrand.py | ./smokerand express stdin32
 ```
 
 An example of Python script that will send an infinite stream of bytes to stdout:

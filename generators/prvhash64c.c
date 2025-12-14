@@ -1,11 +1,25 @@
-// https://github.com/avaneev/prvhash
-// 
-/*
+/**
+ * @file prvhash64c.c
+ * @brief prvhash64-core chaotic PRNG developed by Aleksey Vaneev.
+ * @details It is a chaotic generator based on reversible mapping.
+ *
  * WARNING! It has no guaranteed minimal period, bad seeds are theoretically
  * possible. Usage of this generator for statistical, scientific and
  * engineering computations is strongly discouraged!
+ *
+ * References:
+ *
+ * 1. https://github.com/avaneev/prvhash
+ *
+ * @copyright The prvhash-core algorithm was developed by Aleksey Vaneev.
+ *
+ * "Weyl sequence" modification and implementation for SmokeRand:
+ *
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
-
 #include "smokerand/cinterface.h"
 #include <inttypes.h>
 

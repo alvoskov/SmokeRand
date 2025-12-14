@@ -157,3 +157,90 @@ due to optimized implementations that don't use floating point values and
 multiplications whenever possible. Birthday spacings tests use radix sort
 instead of QuickSort.
 
+
+# Test results interpretation
+
+
+All statistical tests included in SmokeRand batteries return p-value. Their
+interpretation is rather simple and based on the next intervals:
+
+- **Ok**: in the (0.001 and 0.999) interval;
+- **SUSPICIOUS**: in the [1e-10; 0.001] and [0.999; 1-1e-10] intervals;
+- **FAIL**: in the [0; 1e-10) and (1 - 1e-10; 1] intervals.
+
+Only systematic *SUSPICIOUS* or *FAIL* results must be interpreted
+as detected statistical flaw of the tested pseudorandom number generator.
+Such threshold values may seem unusually strict but allow to significantly
+reduce false positives. Tests sensitivity can be easily increased by using
+larger samples without altering critical p-values. Such approach is used in
+dieharder, TestU01, and PractRand test suites.
+
+**WARNING!** The SmokeRand test batteries can detect flaws in many popular
+pseudorandom number generators but they **cannot guarantee a high quality**
+of generator that passed them, **especially for cryptography**. Consider
+them just as a "smoke test" for searching obvious defects in pseudorandom number
+generators.
+
+A state-of-art general purpose PRNG must be cryptographically secure, i.e. its
+quality should be analysed not only by empirical test but by cryptoanalytic
+techniques. Of course, it should be used correctly, i.e. having period at least
+2^64, not be prone to the birthday paradox, not be reseeded during the sample
+generation if reproducible simulation is desired etc.
+
+## Automatic quality assessment
+
+SmokeRand makes an automatic quality assessment in the form of numerical grade
+from 0 (the lowest quality) to 4 (the highest quality). The grades are
+interpreted the next way:
+
+- **4.0** - **good** generator, probably may be used as a general purpose PRNG.
+- **3.0-3.99** - **some issues** have been detected, usage for any computational
+  task requires an extra analysis.
+- **2.0-2.99** - **flawed** generator. Cannot be recommended as a general purpose
+  generator but detected flaws will probably cause problems only in some specific
+  conditions.
+- **1.0-1.99** - **bad** generator. Detected biases are serious and can easily
+  distort results of Monte-Carlo simulations. But it may be suitable for e.g.
+  programming games like TETRIS or generating some non-repeating values.
+- **<1.0** - **very bad** generator. Can be used only if its replacement
+  to a simple counter (0,1,2,3,....) would be totally acceptable.
+
+The **excellent** grade is intentionally avoided because such grading is
+impossible without thorough cryptoanalysis that cannot be fully automated and
+represented as a battery of statistical tests.
+
+The grading algorithm is rather simple and based on a penalty system. An initial
+grade is 4.0 and some penalty is subtracted from it for an every failed test.
+The used penalties for failures:
+
+- 4.0 for frequency test and gap test.
+- 3.0 for birthday spacings and collision over tests.
+- 2.0 for Hamming weights based test, gap16_count0, mod3 and sumcollector tests.
+- 1.0 for birthday spacings test with decimation.
+- 0.25 for a matrix rank and linear complexity tests. If e.g. three test of this
+  kind are failed - 0.75 is subtracted from the grade.
+
+If the resulting grade is less than zero then it is converted to zero.
+Of course, this scale is very crude, partially subjective and probably rather
+strict. It is aimed on distinction between e.g. low linear complexity of some
+bits (important only in some specific cases) and failure of gap test (can
+easily distort a Monte-Carlo simulation results).
+
+If failures for the **birthday** or **freq** extra batteries were observed
+then the 1.0 penalty value should be subtracted from the final grade for each
+failure. E.g. SplitMix and RC4 will be graded as 3.0 instead of 4.0.
+
+Examples of grading for some generators:
+
+- **good**: AES128, ChaCha12, xoroshiro128++, KISS99, MWC64X.
+- **some issues**: Mersenne Twister, 128-bit LCG, xoroshiro128+,
+  SplitMix, RC4, DES-CTR.
+- **flawed**: flea32x1, taus88, WELL1024a.
+- **bad**, **very bad**: RANDU, 32-bit and 64-bit LCGs with power of 2 modulo,
+  xorwow, SWB, ChaCha12 with 32-bit counter, LFIB(607,273,+)
+
+Grouping RANDU together with xorwow and additive lagged Fibonacci PRNGs
+may be seen as too pessimistic quality estimation of some generators. But
+it is partially based on the idea that usage of non-cryptographic generators
+that even pass all tests (have 4.0 final grade) is an intentional downgrade
+in quality, bithack that requires a special justification.

@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
-### Unreleased
+## Unreleased
 
-## Added
+## [0.44] - 2025-12-15
+
+### Added
 
 - `a5rand`, `a5rand32`, `a5rand32w`, `a5randw` algorithms.
 - `komirand`, `komirand16`, `komirand16w`, `komirand32`, `komirand32w`,
@@ -14,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `prvhash12c`, `prvhash12cw`, `prvhash16c`, `prvhash64c`, `prchash64cw` algorithms.
 - `xoshiro256p`, `xoshiro256pp`, `xoshiro256stst` algorithms.
 
-## Changed
+### Changed
 
 - [Changelog](CHANGELOG.md) is in the separate file now.
 - [Pseudorandom number generators tests results](docs/results.md) is in the
@@ -449,6 +451,6 @@ were overlapping (shift was fixed).
 
 An initial version.
 
-Requires some testing, extension
-of documentation, completion of `dos16` battery implementation for 16-bit
-computers. Tests lists for batteries are frozen before 1.0 release.
+Requires some testing, extension of documentation, completion of `dos16`
+battery implementation for 16-bit computers. Tests lists for batteries are
+frozen before 1.0 release.

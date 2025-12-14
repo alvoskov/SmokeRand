@@ -349,3 +349,9 @@ with small state size. Of course, they are slower and less sensitive tha
 specialized statistical tests from `express`, `brief`, `default` and `full`
 batteries and have mainly historical and educational interest.
 
+
+# TODO list
+
+- Consider adding SHELL = cmd inside a Windows_NT condition since those commands
+  rely on that particular shell, which isn't necessarily what GNU Make will pick
+  automatically.

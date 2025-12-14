@@ -76,9 +76,11 @@
 #include <time.h>
 #include <float.h>
 
+#ifndef CLOCKS_PER_SEC
+#define CLOCKS_PER_SEC CLK_TCK
+#endif
 
 /*----------------------------------------------------------*/
-
 
 typedef unsigned char u8;
 
