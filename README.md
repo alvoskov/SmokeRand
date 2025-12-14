@@ -202,5 +202,5 @@ batteries and other technical details can be found at:
 - [Technical notes](docs/technotes.md): details about compilation, heuristic
   scaling, built-in and custom batteries etc.
 - [Tests](docs/tests.md): a detailed description of statistical tests.
-- [Existing solutions](docs/review): a review of other existing PRNG test
+- [Existing solutions](docs/review.md): a review of other existing PRNG test
   suites (TestU01, PractRand etc.).
