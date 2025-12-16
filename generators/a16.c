@@ -1,3 +1,4 @@
+// >= 0.5 TiB
 #include "smokerand/cinterface.h"
 #include "smokerand/int128defs.h"
 #include <inttypes.h>
