@@ -1,4 +1,26 @@
-// >= 0.5 TiB
+//
+/*
+
+TestU01: BigCrush
+SmokeRand: full
+64-bit birthday paradox test: passes
+
+rng=RNG_stdin32, seed=unknown
+length= 2 terabytes (2^41 bytes), time= 7651 seconds
+  no anomalies in 313 test result(s)
+
+rng=RNG_stdin32, seed=unknown
+length= 4 terabytes (2^42 bytes), time= 14449 seconds
+  Test Name                         Raw       Processed     Evaluation
+  Gap-16:A                          R=  -4.8  p =1-5.9e-4   unusual
+  ...and 322 test result(s) without anomalies
+
+rng=RNG_stdin32, seed=unknown
+length= 8 terabytes (2^43 bytes), time= 27521 seconds
+  Test Name                         Raw       Processed     Evaluation
+  FPF-14+6/16:all                   R=  -7.5  p =1-7.3e-7   suspicious
+  ...and 330 test result(s) without anomalies
+*/
 #include "smokerand/cinterface.h"
 #include "smokerand/int128defs.h"
 #include <inttypes.h>
