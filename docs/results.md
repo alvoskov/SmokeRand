@@ -194,8 +194,8 @@ was used:
  philox            | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  philox2x32        | u32    | +       | +     | +       | +    | 1.6  | -      | 3     | +       | >= 32 TiB
  philox32          | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
- prvhash12c        | u32    | +       | 1/2   | 2/3     |      | 4.3  |        | 0     | Small   | 8 GiB
- prvhash12cw       | u32    | +       | +     | +       | +    | 6.1  |        |       | +       | >= 8 TiB
+ prvhash12c        | u32    | +       | 0/1   | 0/1     |      |      |        | 0     |         | 8 GiB
+ prvhash12cw       | u32    | +       | +     | +       |      |      |        |       |         | ?
  prvhash16c        | u32    | +       | +     | +       | +    | 2.4  |        |       |         | 256 GiB
  prvhash16cw       | u32    | +       | +     | +       | +    | 2.4  |        |       |         | ?
  prvhash64c        | u64    | +       | +     | +       | +    | 0.51 | +      | 4(0)  |         | ?

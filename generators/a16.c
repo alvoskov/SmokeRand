@@ -1,6 +1,7 @@
 //
 /*
 
+Version with ++:
 TestU01: BigCrush
 SmokeRand: full
 64-bit birthday paradox test: passes
@@ -38,16 +39,15 @@ typedef struct {
 
 static inline uint16_t get_bits16(Komirand16WeylState *state)
 {
-    //static const uint16_t inc = 0x9E37;
+    static const uint16_t inc = 0x9E37;
     uint16_t s1 = state->st1, s2 = state->st2;
     s2 += (uint16_t) state->w;
     s1 += (uint16_t) ( rotl16(s2, 3) ^ rotl16(s2, 8) ^ s2);
     s2 ^= (uint16_t) ( rotl16(s1, 15) + rotl16(s1, 8) + s1 );
-    //s1 ^= (s1 >> 8);
-    //s2 ^= (s2 >> 8);
     state->st1 = s2;
     state->st2 = s1;
-    state->w++;//= inc;
+    state->w += inc;
+    //state->w++;
     return (state->st1 ^ state->st2);
 }
 
