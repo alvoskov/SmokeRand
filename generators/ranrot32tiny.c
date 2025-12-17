@@ -3,7 +3,11 @@
  * @brief A modified RANROT generator with guaranteed minimal period 2^32
  * due to injection of the discrete Weyl sequence in its state. It is
  * a modification of RANROT PRNG made by A.L. Voskov.
- * pseudorandom number generator.
+ *
+ * WARNING! The minimal guaranteed period is only 2^32, bad seeds are
+ * theoretically possible. Usage of this generator for statistical, scientific
+ * and engineering computations is strongly discouraged!
+ *
  * @details The RANROT generators were suggested by Agner Fog.
  *
  *  1. Agner Fog. Chaotic Random Number Generators with Random Cycle Lengths.

@@ -70,6 +70,10 @@ static void *create(const CallerAPI *intf)
     obj->lcg  = trunc12u(intf->get_seed32());
     obj->hash = trunc12u(intf->get_seed32());
     obj->w    = trunc12u(intf->get_seed32());
+    // Warmup
+    for (int i = 0; i < 8; i++) {
+        (void) get_bits_raw(obj);
+    }
     return obj;
 }
 

@@ -47,8 +47,12 @@ static void *create(const CallerAPI *intf)
 {
     PrvHashCore64State *obj = intf->malloc(sizeof(PrvHashCore64State));
     obj->seed = intf->get_seed64();
-    obj->lcg  = intf->get_seed64();
-    obj->hash = intf->get_seed64();
+    obj->lcg  = 0;
+    obj->hash = 0;
+    // Warmup
+    for (int i = 0; i < 8; i++) {
+        (void) get_bits_raw(obj);
+    }
     return obj;
 }
 
