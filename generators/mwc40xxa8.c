@@ -42,7 +42,7 @@ static inline uint64_t get_bits_raw(void *state)
     for (int i = 0; i < 4; i++) {
         uint16_t t = (uint16_t) (MWC_A1 * (uint16_t) obj->x[3]);
         uint8_t ans8 = (uint8_t) ((obj->x[2] ^ obj->x[1]) + (obj->x[0] ^ (t >> 8)));
-        t = (uint8_t) (t + obj->c);
+        t = (uint16_t) (t + obj->c);
         obj->x[3] = obj->x[2];
         obj->x[2] = obj->x[1];
         obj->x[1] = obj->x[0];
