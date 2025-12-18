@@ -14,15 +14,13 @@ typedef struct {
 } Biski8State;
 
 
-
-// biski64 generator function
 static inline uint8_t Biski8State_get_bits(Biski8State *obj)
 {
-    uint8_t output = GR * obj->mix;
-    uint8_t old_rot = (uint8_t) ((obj->last_mix << 3) | (obj->last_mix >> 5));
-    obj->last_mix = obj->ctr ^ obj->mix;
-    obj->mix = old_rot + output;
-    obj->ctr += GR;
+    const uint8_t output = (uint8_t) (GR * obj->mix);
+    const uint8_t old_rot = rotl8(obj->last_mix, 3);
+    obj->last_mix = (uint8_t) (obj->ctr ^ obj->mix);
+    obj->mix = (uint8_t) (old_rot + output);
+    obj->ctr = (uint8_t) (obj->ctr + GR);
     return output;
 }
 

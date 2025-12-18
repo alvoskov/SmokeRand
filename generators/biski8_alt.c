@@ -14,11 +14,11 @@ typedef struct {
 
 static inline uint8_t Biski8State_get_bits(Biski8State *obj)
 {
-    uint8_t output = obj->mix + obj->loop_mix;
-    uint8_t old_loop_mix = obj->loop_mix;
+    const uint8_t output = (uint8_t) (obj->mix + obj->loop_mix);
+    const uint8_t old_loop_mix = obj->loop_mix;
     obj->loop_mix = (uint8_t) (obj->ctr ^ obj->mix);
     obj->mix = (uint8_t) ( (obj->mix ^ rotl8(obj->mix, 2)) + rotl8(old_loop_mix, 5) );
-    obj->ctr += 0x99;
+    obj->ctr = (uint8_t) (obj->ctr + 0x99U);
     return output;
 }
 
