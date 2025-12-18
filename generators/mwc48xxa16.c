@@ -36,11 +36,11 @@ typedef struct {
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    static const uint16_t MWC_A1 = 52563;
+    static const uint32_t MWC_A1 = 52563U;
     Mwc48xxa16State *obj = state;
     uint32_t ans = 0;
     for (int i = 0; i < 2; i++) {
-        uint32_t t = MWC_A1 * (uint64_t) obj->x[1];
+        uint32_t t = MWC_A1 * (uint32_t) obj->x[1];
         uint16_t ans16 = (uint16_t) ( (obj->x[1] ^ obj->x[0]) + (obj->c ^ (t >> 16)) );
         t += obj->c;
         obj->x[1] = obj->x[0];
