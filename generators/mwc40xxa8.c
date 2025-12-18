@@ -26,7 +26,7 @@ PRNG_CMODULE_PROLOG
 
 /**
  * @brief MWC40XXA8 state. Cannot be initialized to (0, 0, 0, 0) or to
- * (2^64 - 1, 2^32 - 1, 2^32 - 1, 2^64 - 1). Default initialization
+ * (2^8 - 1, 2^8 - 1, 2^8 - 1, carry_max). Default initialization
  * is (seed, seed, seed, 1) as suggested by S. Vigna.
  */
 typedef struct {
@@ -36,13 +36,13 @@ typedef struct {
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    static const uint8_t MWC_A1 = 227;
+    static const uint16_t MWC_A1 = 227U;
     Mwc40xxa8State *obj = state;
     uint32_t ans = 0;
     for (int i = 0; i < 4; i++) {
-        uint16_t t = MWC_A1 * (uint64_t) obj->x[3];
+        uint16_t t = (uint16_t) (MWC_A1 * (uint16_t) obj->x[3]);
         uint8_t ans8 = (uint8_t) ((obj->x[2] ^ obj->x[1]) + (obj->x[0] ^ (t >> 8)));
-        t += obj->c;
+        t = (uint8_t) (t + obj->c);
         obj->x[3] = obj->x[2];
         obj->x[2] = obj->x[1];
         obj->x[1] = obj->x[0];
@@ -69,7 +69,7 @@ static void *create(const CallerAPI *intf)
 {
     Mwc40xxa8State *obj = intf->malloc(sizeof(Mwc40xxa8State));
     Mwc40xxa8State_init(obj, intf->get_seed32());
-    return (void *) obj;
+    return obj;
 }
 
 
