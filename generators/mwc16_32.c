@@ -22,7 +22,7 @@ static inline uint64_t get_bits_raw(void *state)
     uint16_t x_hi = (uint16_t) (obj->x >> 16);
 //    obj->x = (uint32_t)63885 * x_lo + x_hi;
 //  Causes a glitch in GCC 10 (some UB during optimization?)
-    obj->x = 63885u * x_lo + x_hi; 
+    obj->x = 63885U * x_lo + x_hi; 
     return obj->x;
 }
 
@@ -30,9 +30,9 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Lcg32State *obj = intf->malloc(sizeof(Lcg32State));
-    uint32_t seed0 = intf->get_seed32();
-    obj->x = (seed0 & 0xFFFF) | (1ul << 16ul);
-    return (void *) obj;
+    const uint32_t seed0 = intf->get_seed32();
+    obj->x = (seed0 & 0xFFFF) | ((uint32_t)1U << 16U);
+    return obj;
 }
 
 
