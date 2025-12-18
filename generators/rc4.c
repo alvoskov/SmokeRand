@@ -45,7 +45,7 @@ static inline uint64_t get_bits_raw(void *state)
         j += ss;
         s[i] = s[j];
         s[j] = ss;
-        uint8_t u = s[i] + s[j];
+        uint8_t u = (uint8_t) (s[i] + s[j]);
         v = (v << 8) | s[u];
     }
     obj->i = i; obj->j = j;
