@@ -32,6 +32,21 @@
  *  Test Name                         Raw       Processed     Evaluation
  *  FPF-14+6/16:all                   R=  -7.5  p =1-7.3e-7   suspicious
  *  ...and 330 test result(s) without anomalies
+ *
+ * Version with Weyl
+ *
+ *rng=RNG_stdin32, seed=unknown
+ *length= 8 terabytes (2^43 bytes), time= 27994 seconds
+ *  Test Name                         Raw       Processed     Evaluation
+ *  FPF-14+6/16:all                   R=  -9.8  p =1-3.4e-9    VERY SUSPICIOUS
+ *  ...and 330 test result(s) without anomalies
+ *
+ *rng=RNG_stdin32, seed=unknown
+ *length= 16 terabytes (2^44 bytes), time= 54881 seconds
+ *  Test Name                         Raw       Processed     Evaluation
+ *  FPF-14+6/16:(9,14-0)              R=  -7.1  p =1-2.8e-6   unusual
+ *  FPF-14+6/16:all                   R= -17.5  p =1-8.3e-17    FAIL !
+ *  ...and 337 test result(s) without anomalies
  */
 #include "smokerand/cinterface.h"
 #include "smokerand/int128defs.h"
