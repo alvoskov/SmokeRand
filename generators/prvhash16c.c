@@ -36,10 +36,10 @@ typedef struct {
 
 static inline uint16_t PrvHashCore16State_get_bits(PrvHashCore16State *obj)
 {
-    obj->seed *= (uint16_t) (obj->lcg * 2U + 1U);
+    obj->seed = (uint16_t) (obj->seed * (obj->lcg * 2U + 1U));
 	const uint16_t rs = rotl16(obj->seed, 8);
-    obj->hash += (uint16_t) (rs + 0xAAAA);
-    obj->lcg += (uint16_t) (obj->seed + 0x5555);
+    obj->hash = (uint16_t) (obj->hash + rs + 0xAAAA);
+    obj->lcg  = (uint16_t) (obj->lcg + obj->seed + 0x5555);
     obj->seed ^= obj->hash;
     return obj->lcg ^ rs;
 }
