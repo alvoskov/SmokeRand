@@ -41,11 +41,11 @@ static inline uint64_t get_bits_raw(void *state)
     uint64_t v = 0;
     uint8_t *s = obj->s, i = obj->i, j = obj->j;
     for (size_t k = 0; k < 4; k++) {
-        uint8_t ss = s[++i];
-        j += ss;
+        const uint8_t ss = s[++i];
+        j = (uint8_t) (j + ss);
         s[i] = s[j];
         s[j] = ss;
-        uint8_t u = (uint8_t) (s[i] + s[j]);
+        const uint8_t u = (uint8_t) (s[i] + s[j]);
         v = (v << 8) | s[u];
     }
     obj->i = i; obj->j = j;
@@ -56,12 +56,12 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     RC4State *obj = intf->malloc(sizeof(RC4State));
-    uint64_t v = 0x9E3779B97F4A7C15 ^ intf->get_seed64();
+    uint64_t v = 0x9E3779B97F4A7C15U ^ intf->get_seed64();
     for (size_t i = 0; i < 256; i++) {
         obj->s[i] = (uint8_t) i;
     }
     for (size_t i = 0, j = 0; i < 256; i++) {
-        uint8_t ss = obj->s[i];
+        const uint8_t ss = obj->s[i];
         j = (j + ss + (v >> 56)) & 0xFF;
         obj->s[i] = obj->s[j];
         obj->s[j] = ss;
