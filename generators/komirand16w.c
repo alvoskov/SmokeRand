@@ -44,7 +44,7 @@ static inline uint16_t get_bits16(Komirand16WeylState *state)
     const uint16_t mul_lo = (uint16_t) (mul & 0xFFFF);
     const uint16_t mul_hi = (uint16_t) (mul >> 16);
     state->w = (uint16_t) (state->w + inc);
-    s2 += (uint16_t) (mul_hi + state->w);
+    s2 = (uint16_t) (s2 + mul_hi + state->w);
     s1 = (uint16_t) (mul_lo ^ s2);
     state->st1 = s1;
     state->st2 = s2;
