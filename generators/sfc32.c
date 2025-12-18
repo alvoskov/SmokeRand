@@ -41,7 +41,7 @@ static inline uint64_t get_bits_raw(void *state)
 {
     Sfc32State *obj = state;
     enum {BARREL_SHIFT = 21, RSHIFT = 9, LSHIFT = 3};
-    uint32_t tmp = obj->a + obj->b + obj->counter++;
+    const uint32_t tmp = obj->a + obj->b + obj->counter++;
     obj->a = obj->b ^ (obj->b >> RSHIFT);
     obj->b = obj->c + (obj->c << LSHIFT);
     obj->c = ((obj->c << BARREL_SHIFT) | (obj->c >> (32-BARREL_SHIFT))) + tmp;

@@ -36,7 +36,7 @@ typedef struct {
 
 static inline uint64_t Mtc16State_get_bits(Mtc16State *obj)
 {
-    uint16_t old = obj->a + obj->b;
+    const uint16_t old = (uint16_t) (obj->a + obj->b);
     obj->a = (uint16_t) ( (obj->b * 62317u) ^ ++obj->ctr );
     obj->b = rotl16(old, 10);
     return obj->a;
@@ -45,8 +45,8 @@ static inline uint64_t Mtc16State_get_bits(Mtc16State *obj)
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    uint32_t hi = (uint32_t) Mtc16State_get_bits(state);
-    uint32_t lo = (uint32_t) Mtc16State_get_bits(state);
+    const uint32_t hi = (uint32_t) Mtc16State_get_bits(state);
+    const uint32_t lo = (uint32_t) Mtc16State_get_bits(state);
     return (hi << 16) | lo;
 }
 
@@ -55,9 +55,9 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Mtc16State *obj = intf->malloc(sizeof(Mtc16State));
-    uint64_t seed = intf->get_seed64();
-    obj->a = seed & 0xFFFF;
-    obj->b = (seed >> 16) & 0xFFFF;
+    const uint64_t seed = intf->get_seed64();
+    obj->a   = seed & 0xFFFF;
+    obj->b   = (seed >> 16) & 0xFFFF;
     obj->ctr = (seed >> 32) & 0xFFFF;
     return (void *) obj;
 }

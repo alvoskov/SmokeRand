@@ -40,8 +40,8 @@ static inline uint16_t Xoroshiro32State_get_bits(Xoroshiro32State *obj)
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    uint32_t hi = Xoroshiro32State_get_bits(state);
-    uint32_t lo = Xoroshiro32State_get_bits(state);
+    const uint32_t hi = Xoroshiro32State_get_bits(state);
+    const uint32_t lo = Xoroshiro32State_get_bits(state);
     return (hi << 16) | lo;
 }
 

@@ -32,11 +32,11 @@ typedef struct {
 
 static uint8_t Gjrand8State_get_bits(Gjrand8State *obj)
 {
-	obj->b += obj->c; obj->a = rotl8(obj->a, 4); obj->c ^= obj->b;
-	obj->d += 0x35;
-	obj->a += obj->b; obj->c = rotl8(obj->c, 2); obj->b ^= obj->a;
-	obj->a += obj->c; obj->b = rotl8(obj->b, 5); obj->c += obj->a;
-	obj->b += obj->d;
+	obj->b += obj->c; obj->a = rotl8(obj->a, 4); obj->c ^= obj->b; // Line 1
+	obj->d += 0x35; // Line 2
+	obj->a += obj->b; obj->c = rotl8(obj->c, 2); obj->b ^= obj->a; // Line 3
+	obj->a += obj->c; obj->b = rotl8(obj->b, 5); obj->c += obj->a; // Line 4
+	obj->b += obj->d; // Line 5
 	return obj->a;
 }
 

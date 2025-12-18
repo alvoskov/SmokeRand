@@ -77,7 +77,7 @@ static inline uint8_t get_bits8(Xkiss8AwcState *obj)
     obj->x[2] = u;
     obj->x_c = (uint8_t) (t >> 8);
     // Weyl sequence part
-    obj->weyl += 151u;
+    obj->weyl = (uint8_t) (obj->weyl + 151U);
     // Generate output
     return (uint8_t) (obj->s[0] + u + obj->weyl);
 }

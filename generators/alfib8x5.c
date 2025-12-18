@@ -85,8 +85,9 @@ static void Alfib8State_init(Alfib8State *obj, uint32_t seed)
     uint8_t b = (uint8_t) ((seed >> 16) & 0xFF);
     uint8_t c = (uint8_t) ((seed >> 24) & 0xFF);
     for (int i = 0; i < LF8X5_WARMUP + LF8X5_BUFSIZE; i++) {
-        a ^= (uint8_t) (c ^ (x += 151));
-        b += a;
+        x = (uint8_t) (x + 151U);
+        a ^= (uint8_t) (c ^ x);
+        b = (uint8_t) (b + a);
         c = (uint8_t) ((c + ((b << 7) | (b >> 1))) ^ a);
         if (i >= LF8X5_WARMUP) {
             obj->x[i - LF8X5_WARMUP] = c ^ b;
