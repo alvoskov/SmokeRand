@@ -67,9 +67,9 @@ static inline uint16_t Xkiss16AwcState_get_bits(Xkiss16AwcState *obj)
     // xorshift16
     // https://gist.github.com/t-mat/8b2c183ae50480c7998f4d9ab2271b1d
     // http://www.retroprogramming.com/2017/07/xorshift-pseudorandom-numbers-in-z80.html
-    obj->xs ^= (uint16_t) (obj->xs << 7);
-    obj->xs ^= (uint16_t) (obj->xs >> 9);
-    obj->xs ^= (uint16_t) (obj->xs << 8);
+    obj->xs = (uint16_t) (obj->xs ^ (obj->xs << 7));
+    obj->xs = (uint16_t) (obj->xs ^ (obj->xs >> 9));
+    obj->xs = (uint16_t) (obj->xs ^ (obj->xs << 8));
     // AWC (add with carry) part
     uint32_t t = (uint32_t)obj->awc_x0 + (uint32_t)obj->awc_x1 + (uint32_t)obj->awc_c;
     obj->awc_x1 = obj->awc_x0;
