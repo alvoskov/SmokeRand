@@ -67,9 +67,9 @@ static inline uint16_t get_bits16(Arxfw16State *obj)
 {
     static const uint16_t inc = 0x9E37;
     uint16_t a = obj->a, b = obj->b;
-    b += (uint16_t) obj->w;
-    a += (uint16_t) ( rotl16(b, 3)  ^ rotl16(b, 8) ^ b);
-    b ^= (uint16_t) ( rotl16(a, 15) + rotl16(a, 8) + a );
+    b = (uint16_t) (b + obj->w);    
+    a = (uint16_t) (a + (rotl16(b, 3)  ^ rotl16(b, 8) ^ b));
+    b = (uint16_t) (b ^ (rotl16(a, 15) + rotl16(a, 8) + a));
     obj->a = b;
     obj->b = a;
     obj->w += inc;
