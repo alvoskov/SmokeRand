@@ -42,7 +42,7 @@ static uint8_t Gjrand8State_get_bits(Gjrand8State *obj)
     obj->b = (uint8_t) (obj->b ^ obj->a);
 	obj->a = (uint8_t) (obj->a + obj->c); // Part 4
     obj->b = rotl8(obj->b, 5);
-    obj->c = (obj->c + obj->a);
+    obj->c = (uint8_t) (obj->c + obj->a);
 	obj->b = (uint8_t) (obj->b + obj->d); // Part 5
 	return obj->a;
 }
