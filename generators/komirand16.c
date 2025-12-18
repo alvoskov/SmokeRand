@@ -37,7 +37,7 @@ static inline uint16_t get_bits16(Komirand16State *state)
     const uint32_t mul = (uint32_t) s1 * (uint32_t) s2;
     const uint16_t mul_lo = (uint16_t) (mul & 0xFFFF);
     const uint16_t mul_hi = (uint16_t) (mul >> 16);
-    s2 += (uint16_t) (mul_hi + inc);
+    s2 = (uint16_t) (s2 + mul_hi + inc);
     s1 = (uint16_t) (mul_lo ^ s2);
     state->st1 = s1;
     state->st2 = s2;
