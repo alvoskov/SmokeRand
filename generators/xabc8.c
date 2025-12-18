@@ -40,8 +40,9 @@ typedef struct {
 
 static inline uint8_t get_bits8(Xabc8State *obj)
 {
-    obj->a ^= (uint8_t) (obj->c ^ (obj->x += 151));
-    obj->b += obj->a;
+    obj->x = (uint8_t) (obj->x + 151U);
+    obj->a = (uint8_t) (obj->a ^ obj->c ^ obj->x);
+    obj->b = (uint8_t) (obj->b + obj->a);
     obj->c = (uint8_t) ( (obj->c + rotl8(obj->b, 7)) ^ obj->a );
     return obj->c ^ obj->b;
 }

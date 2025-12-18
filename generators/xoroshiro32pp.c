@@ -32,7 +32,7 @@ static inline uint16_t Xoroshiro32PPState_get_bits(Xoroshiro32PPState *obj)
 {
     const uint16_t s0 = obj->s[0];
     uint16_t s1 = obj->s[1];
-    const uint16_t result = rotl16(s0 + s1, 9) + s0;
+    const uint16_t result = rotl16((uint16_t)(s0 + s1), 9) + s0;
     s1 ^= s0;
     obj->s[0] = (uint16_t) (rotl16(s0, 13) ^ s1 ^ (s1 << 5)); // a, b
     obj->s[1] = rotl16(s1, 10); // c
@@ -41,8 +41,8 @@ static inline uint16_t Xoroshiro32PPState_get_bits(Xoroshiro32PPState *obj)
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    uint32_t hi = Xoroshiro32PPState_get_bits(state);
-    uint32_t lo = Xoroshiro32PPState_get_bits(state);
+    const uint32_t hi = Xoroshiro32PPState_get_bits(state);
+    const uint32_t lo = Xoroshiro32PPState_get_bits(state);
     return (hi << 16) | lo;
 }
 

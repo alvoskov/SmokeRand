@@ -3,9 +3,7 @@
 
 PRNG_CMODULE_PROLOG
 
-enum {
-    GR = 0x9e37
-};
+#define GR 0x9E37U
 
 typedef struct {
     uint16_t last_mix;
@@ -18,19 +16,19 @@ typedef struct {
 // biski64 generator function
 static inline uint16_t Biski16State_get_bits(Biski16State *obj)
 {
-    uint16_t output = GR * obj->mix;
-    uint16_t old_rot = rotl16(obj->last_mix, 11);
-    obj->last_mix = obj->ctr ^ obj->mix;
-    obj->mix = old_rot + output;
-    obj->ctr += GR;
+    const uint16_t output = (uint16_t) (GR * obj->mix);
+    const uint16_t old_rot = rotl16(obj->last_mix, 11);
+    obj->last_mix = (uint16_t) (obj->ctr ^ obj->mix);
+    obj->mix = (uint16_t) (old_rot + output);
+    obj->ctr = (uint16_t) (obj->ctr + GR);
     return output;
 }
 
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    uint32_t hi = Biski16State_get_bits(state);
-    uint32_t lo = Biski16State_get_bits(state);
+    const uint32_t hi = Biski16State_get_bits(state);
+    const uint32_t lo = Biski16State_get_bits(state);
     return (hi << 16) | lo;
 }
 

@@ -42,8 +42,8 @@ static uint16_t Gjrand16State_get_bits(Gjrand16State *obj)
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    uint32_t hi = Gjrand16State_get_bits(state);
-    uint32_t lo = Gjrand16State_get_bits(state);
+    const uint32_t hi = Gjrand16State_get_bits(state);
+    const uint32_t lo = Gjrand16State_get_bits(state);
     return (hi << 16) | lo;
 }
 

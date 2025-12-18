@@ -75,7 +75,7 @@ static inline uint16_t Xkiss16AwcState_get_bits(Xkiss16AwcState *obj)
     obj->awc_x1 = obj->awc_x0;
     obj->awc_c  = (uint16_t) (t >> K16_AWC_SH);
     obj->awc_x0 = (uint16_t) (t & K16_AWC_MASK);
-    obj->weyl += K16_WEYL_INC;
+    obj->weyl   = (uint16_t) (obj->weyl + K16_WEYL_INC);
     // Combined output
     uint16_t awc = rotl16(obj->awc_x0, 3) ^ (obj->awc_x1);
     return awc + rotl16(obj->xs + obj->weyl, obj->awc_x0 & 0xF);
@@ -84,8 +84,8 @@ static inline uint16_t Xkiss16AwcState_get_bits(Xkiss16AwcState *obj)
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    uint32_t hi = Xkiss16AwcState_get_bits(state);
-    uint32_t lo = Xkiss16AwcState_get_bits(state);
+    const uint32_t hi = Xkiss16AwcState_get_bits(state);
+    const uint32_t lo = Xkiss16AwcState_get_bits(state);
     return (hi << 16) | lo;
 }
 

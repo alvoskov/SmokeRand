@@ -36,7 +36,7 @@ typedef struct {
 
 static inline uint8_t Mtc8State_get_bits(Mtc8State *obj)
 {
-    uint8_t old = obj->a + obj->b;
+    const uint8_t old = (uint8_t) (obj->a + obj->b);
     obj->a = (uint8_t) ((obj->b * 123u) ^ ++obj->ctr);
     obj->b = rotl8(old, 3);
     return obj->a;
@@ -60,11 +60,11 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Mtc8State *obj = intf->malloc(sizeof(Mtc8State));
-    uint64_t seed = intf->get_seed64();
-    obj->a = seed & 0xFF;
-    obj->b = (seed >> 8) & 0xFF;
+    const uint64_t seed = intf->get_seed64();
+    obj->a   = seed & 0xFF;
+    obj->b   = (seed >> 8) & 0xFF;
     obj->ctr = (seed >> 16) & 0xFF;
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT32_PRNG("Mtc8", NULL)

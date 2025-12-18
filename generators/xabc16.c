@@ -41,8 +41,9 @@ typedef struct {
 
 static inline uint16_t get_bits16(Xabc16State *obj)
 {
-    obj->a ^= (uint16_t) (obj->c ^ (obj->x += 0x9E37));
-    obj->b += obj->a;
+    obj->x = (uint16_t) (obj->x + 0x9E37U);
+    obj->a = (uint16_t) (obj->a ^ obj->c ^ obj->x);
+    obj->b = (uint16_t) (obj->b + obj->a);
     obj->c = (uint16_t) ((obj->c + ((obj->b << 11) | (obj->b >> 5))) ^ obj->a);
     return obj->c ^ obj->b;
 }
@@ -50,9 +51,8 @@ static inline uint16_t get_bits16(Xabc16State *obj)
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    uint32_t hi = get_bits16(state);
-    uint32_t lo = get_bits16(state);
-
+    const uint32_t hi = get_bits16(state);
+    const uint32_t lo = get_bits16(state);
     return (hi << 16) | lo;
 }
 
