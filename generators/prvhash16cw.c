@@ -40,7 +40,7 @@ static inline uint16_t PrvHashCore16State_get_bits(PrvHashCore16State *obj)
     obj->w    = (uint16_t) (obj->w + 0x9E37U);
     obj->seed = (uint16_t) (obj->seed * (obj->lcg * 2U + 1U));
 	const uint16_t rs = rotl16(obj->seed, 8);
-    obj->hash += (uint16_t) (rs + 0xAAAA);
+    obj->hash  = (uint16_t) (obj->hash + rs + 0xAAAA);
     obj->lcg   = (uint16_t) (obj->lcg + obj->seed + obj->w);
     obj->seed ^= obj->hash;
     return obj->lcg ^ rs;
