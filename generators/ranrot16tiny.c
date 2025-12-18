@@ -36,7 +36,7 @@ typedef struct {
 
 static uint16_t RanRot16Tiny_next(RanRot16Tiny *obj)
 {
-    obj->w += 0x9E37;
+    obj->w = (uint16_t) (obj->w + 0x9E37U);
     uint16_t u = (uint16_t) (rotl16(obj->m1, 7) + rotl16(obj->m3, 3));
     u = (uint16_t) (u + rotl16(obj->w ^ (obj->w >> 8), obj->m2 & 0xF));
     obj->m3 = obj->m2;

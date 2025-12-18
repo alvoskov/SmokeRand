@@ -32,7 +32,7 @@ typedef struct {
 
 static uint8_t RanRot8Tiny_next(RanRot8Tiny *obj)
 {
-    obj->w += 151u;
+    obj->w = (uint8_t) (obj->w + 151u);
     uint8_t u = (uint8_t) (rotl8(obj->m1, 5) + rotl8(obj->m3, 3));
     u = (uint8_t) (u + rotl8(obj->w ^ (obj->w >> 4), obj->m2 & 0x7));
     obj->m3 = obj->m2;
