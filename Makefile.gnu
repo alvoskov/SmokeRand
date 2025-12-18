@@ -18,6 +18,7 @@ LIB_SOURCES_EXTRA =
 LIB_HEADERS_EXTRA =
 GEN_LFLAGS = 
 GEN_DISABLED =
+THREADLIB = -lpthread
 ifeq ($(PLATFORM_NAME), GCC)
     CC = gcc
     CXX = g++
@@ -35,6 +36,7 @@ else ifeq ($(PLATFORM_NAME), DJGPP)
     CXX = gpp
     AR = ar
     GEN_CFLAGS = -ffreestanding -nostdlib
+    THREADLIB =
     # NOTE: threefry xxtea may be refactored!
     GEN_DISABLED = icg64 mrg32k3a sezgin63 threefry wich1982 wich2006 xxtea
     PLATFORM_FLAGS = -m32 -march=i586 -DNOTHREADS -U__STRICT_ANSI__
@@ -45,18 +47,21 @@ else ifeq ($(PLATFORM_NAME), MINGW-HX)
     CXX = g++
     AR = ar
     GEN_CFLAGS = -fPIC -DNO_CUSTOM_DLLENTRY -DUSE_WINTHREADS
+    THREADLIB =
     PLATFORM_FLAGS = -m32 -march=i686
 else ifeq ($(PLATFORM_NAME), ZIGCC)
     CC = zig cc
     CXX = zic c++
     AR = zig ar
     GEN_CFLAGS = -fPIC
+    THREADLIB =
     PLATFORM_FLAGS = -DUSE_WINTHREADS -march=native
 else ifeq ($(PLATFORM_NAME), GENERIC)
     CC = gcc
     CXX = g++
     AR = ar
     GEN_CFLAGS = -fPIC
+    THREADLIB =
     PLATFORM_FLAGS = -DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY
 endif
 #-----------------------------------------------------------------------------
@@ -81,26 +86,26 @@ OBJDIR = obj
 BINDIR = bin
 LIBDIR = lib
 INCLUDEDIR = include/smokerand
-LFLAGS =  -L$(LIBDIR) -lsmokerand_bat -lsmokerand_core -lm
+LFLAGS =  -L$(LIBDIR) -lsmokerand_bat -lsmokerand_core -lm $(THREADLIB)
 ifeq ($(OS), Windows_NT)
-#GEN_LFLAGS = 
-#-Wl,--exclude-all-symbols
-EXE = .exe
-SO = .dll
+    #GEN_LFLAGS = 
+    #-Wl,--exclude-all-symbols
+    EXE = .exe
+    SO = .dll
+else ifeq ($(PLATFORM_NAME), DJGPP)
+    # DJGPP specific extensions: DXE3 modules and .exe for executables
+    EXE = .exe
+    SO = .dxe
 else
-#GEN_LFLAGS =
-EXE =
-SO = .so
-ifeq ($(PREFIX),)
-PREFIX = /usr/local
-endif
+    # UNIX-like systems
+    EXE =
+    SO = .so
+    LFLAGS += -ldl
+    ifeq ($(PREFIX),)
+        PREFIX = /usr/local
+    endif
 endif
 
-# DJGPP specific extensions: DXE3 modules and .exe for executables
-ifeq ($(PLATFORM_NAME), DJGPP)
-EXE = .exe
-SO = .dxe
-endif
 
 # Core library
 CORE_LIB = $(LIBDIR)/libsmokerand_core.a
