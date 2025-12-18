@@ -24,7 +24,9 @@ static inline uint64_t get_bits_raw(void *state)
     LFib4State *obj = state;
     uint32_t *t = obj->t;
     obj->c++;
-    uint8_t c1 = obj->c + 58, c2 = obj->c + 119, c3 = obj->c + 178;
+    const uint8_t c1 = (uint8_t) (obj->c + 58U);
+    const uint8_t c2 = (uint8_t) (obj->c + 119U);
+    const uint8_t c3 = (uint8_t) (obj->c + 178U);
     t[obj->c] += t[c1] + t[c2] + t[c3];
     return t[obj->c];
 }
@@ -39,14 +41,14 @@ static void LFib4State_init(LFib4State *obj, uint32_t jcong0)
     //uint64_t state = intf->get_seed64();
     for (int i = 0; i < 256; i++) {
         // KISS99 iteration
-        z = 36969 * (z & 65535) + (z >> 16);
-        w = 18000 * (w & 65535) + (w >> 16);
-        jcong = 69069 * jcong + 1234567;
+        z = 36969U * (z & 65535) + (z >> 16);
+        w = 18000U * (w & 65535) + (w >> 16);
+        jcong = 69069U * jcong + 1234567U;
         xs ^= (xs << 17);
         xs ^= (xs >> 13);
         xs ^= (xs << 5);
-        uint32_t mwc = (z << 16) + w;
-        uint32_t kiss = (mwc ^ jcong) + xs;
+        const uint32_t mwc = (z << 16) + w;
+        const uint32_t kiss = (mwc ^ jcong) + xs;
         // Write to LFIB4 table
         obj->t[i] = kiss;
     }
