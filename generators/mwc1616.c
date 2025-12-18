@@ -40,8 +40,8 @@ static inline uint64_t get_bits_raw(void *state)
 {
     Mwc1616State *obj = state;
     // MWC generators
-    obj->z = (uint32_t)36969 * (obj->z & 0xFFFF) + (obj->z >> 16);
-    obj->w = (uint32_t)18000 * (obj->w & 0xFFFF) + (obj->w >> 16);
+    obj->z = (uint32_t)36969U * (obj->z & 0xFFFF) + (obj->z >> 16);
+    obj->w = (uint32_t)18000U * (obj->w & 0xFFFF) + (obj->w >> 16);
     uint32_t mwc = (obj->z << 16) + obj->w;
     return mwc;
 }

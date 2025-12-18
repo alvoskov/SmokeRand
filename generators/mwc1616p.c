@@ -46,8 +46,8 @@ static inline uint64_t get_bits_raw(void *state)
     const uint16_t z_hi = (uint16_t) (obj->z >> 16);
     const uint16_t w_lo = (uint16_t) (obj->w & 0xFFFF);
     const uint16_t w_hi = (uint16_t) (obj->w >> 16);
-    obj->z = (uint32_t)61578u * z_lo + z_hi;
-    obj->w = (uint32_t)63885u * w_lo + w_hi;
+    obj->z = (uint32_t)61578U * z_lo + z_hi;
+    obj->w = (uint32_t)63885U * w_lo + w_hi;
     const uint32_t mwc = rotl32(obj->z, 16) + obj->w;
     return mwc;
 }
@@ -57,8 +57,8 @@ static void *create(const CallerAPI *intf)
 {
     Mwc1616PlusShared *obj = intf->malloc(sizeof(Mwc1616PlusShared));
     const uint32_t seed0 = intf->get_seed32();
-    obj->z = (seed0 & 0xFFFF) | (1ul << 16ul);
-    obj->w = (seed0 >> 16) | (1ul << 16ul);
+    obj->z = (seed0 & 0xFFFF) | ((uint32_t)1U << 16U);
+    obj->w = (seed0 >> 16)    | ((uint32_t)1U << 16U);
     return obj;
 }
 
