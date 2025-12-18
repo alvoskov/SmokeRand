@@ -18,13 +18,14 @@ static inline uint8_t get_bits8(Arxfw8ExState *obj)
 {
     static const uint16_t inc = 0x9D;
     uint8_t a = obj->a, b = obj->b;
-    b += (uint8_t) obj->w;
+    const uint16_t w = obj->w;
+    b = (uint8_t) (b + w);
     a = (uint8_t) (a + (rotl8(b, 1) ^ rotl8(b, 4) ^ b));
-    a = (uint8_t) (a ^ (obj->w >> 8));
+    a = (uint8_t) (a ^ (w >> 8));
     b = (uint8_t) (b ^ (rotl8(a, 7) + rotl8(a, 4) + a));
     obj->a = b;
     obj->b = a;
-    obj->w = (uint8_t) (obj->w + inc);
+    obj->w = (uint16_t) (w + inc);
     return obj->a ^ obj->b;
 }
 
