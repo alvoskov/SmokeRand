@@ -66,7 +66,7 @@ static size_t calc_bin_matrix_rank(uint32_t *a, size_t n)
         // Some useful offsets
         const size_t i_offset = i / 32;
         //const size_t i_offset_block = i / VECINT_NBITS;
-        const uint32_t i_mask = 1ul << (i % 32);
+        const uint32_t i_mask = (uint32_t)1U << (i % 32);
         // Find the j-th row where a(j,i) is not zero, swap it
         // with i-th row and make Gaussian elimination
         size_t j = rank;
