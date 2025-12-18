@@ -23,7 +23,7 @@ static inline uint8_t get_bits8(Arxfw8State *obj)
     b = (uint8_t) (b ^ (rotl8(a, 7) + rotl8(a, 4) + a));
     obj->a = b;
     obj->b = a;
-    obj->w += inc;
+    obj->w = (uint8_t) (obj->w + inc);
     return obj->a ^ obj->b;
 }
 
