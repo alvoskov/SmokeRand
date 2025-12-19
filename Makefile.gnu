@@ -87,7 +87,7 @@ ifeq ($(OS), Windows_NT)
     #-Wl,--exclude-all-symbols
     EXE = .exe
     SO = .dll
-    PLATFORM_FLAGS += -D__USE_MINGW_ANSI_STDIO=1
+    PLATFORM_FLAGS += -D__USE_MINGW_ANSI_STDIO=1 -D_WIN32_WINNT=0x502
 else ifeq ($(PLATFORM_NAME), DJGPP)
     # DJGPP specific extensions: DXE3 modules and .exe for executables
     EXE = .exe
