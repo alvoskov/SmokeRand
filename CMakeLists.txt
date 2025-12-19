@@ -126,8 +126,8 @@ set (GENERATORS
     mwc3232x mwc32x mwc32xxa8 mwc40xxa8 mwc4691 mwc48xxa16 mwc63x2 
     mwc64 mwc64x mwc64_2p58 mwc8222 mzran13 pcg32 pcg32_dxsm pcg32_xsl_rr 
     ncombo pcg64_64 pcg64_dxsm pcg64_xsl_rr philox philox2x32 philox32 
-    prvhash12c prvhash12cw prvhash16c prvhash64c prvhash64cw r1279 
-    r250 ran randu ranlux48 ranluxpp ranq1 ranq2 ranrot32 ranrot8tiny 
+    prvhash12c prvhash12cw prvhash16c prvhash16cw prvhash64c prvhash64cw 
+    r1279 r250 ran randu ranlux48 ranluxpp ranq1 ranq2 ranrot32 ranrot8tiny 
     ranrot16tiny ranrot32tiny ranrot64tiny ranrot_bi ranshi ranval 
     ranval64 rc4 rc4ok rge256ex rge256exctr rge256lite rge512ex rge512exctr 
     romutrio rrmxmx sapparot sapparot2 sapparot2_64 seed sezgin63 

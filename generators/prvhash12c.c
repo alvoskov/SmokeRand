@@ -34,12 +34,22 @@ typedef struct {
 } PrvHashCore16State;
 
 
+static inline uint16_t trunc12(int32_t x)
+{
+    return (uint16_t) (x & 0xFFF);
+}
+
+static inline uint16_t trunc12u(uint32_t x)
+{
+    return (uint16_t) (x & 0xFFF);
+}
+
 static inline uint16_t PrvHashCore16State_get_bits(PrvHashCore16State *obj)
 {
-    obj->seed *= (uint16_t) ( (obj->lcg * 2U + 1U) & 0xFFF);
-	const uint16_t rs = ((obj->seed << 6) | (obj->seed >> 6)) & 0xFFF;
-    obj->hash  = (uint16_t) ((obj->hash + rs + 0xAAA) & 0xFFF);
-    obj->lcg   = (uint16_t) ((obj->lcg + obj->seed + 0x555) & 0xFFF);
+    obj->seed = trunc12u(obj->seed * (obj->lcg * 2U + 1U));
+	const uint16_t rs = trunc12( (obj->seed << 6) | (obj->seed >> 6) );
+    obj->hash  = trunc12(obj->hash + rs + 0xAAA);
+    obj->lcg   = trunc12(obj->lcg + obj->seed + 0x555);
     obj->seed ^= obj->hash;
     return obj->lcg ^ rs;
 }
@@ -55,9 +65,13 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     PrvHashCore16State *obj = intf->malloc(sizeof(PrvHashCore16State));
-    obj->seed = (uint16_t) intf->get_seed64() & 0xFFF;
-    obj->lcg  = (uint16_t) intf->get_seed64() & 0xFFF;
-    obj->hash = (uint16_t) intf->get_seed64() & 0xFFF;
+    obj->seed = trunc12u(intf->get_seed32());
+    obj->lcg  = 0;
+    obj->hash = 0;
+    // Warmup
+    for (int i = 0; i < 8; i++) {
+        (void) get_bits_raw(obj);
+    }
     return obj;
 }
 

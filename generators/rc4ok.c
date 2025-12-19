@@ -46,12 +46,12 @@ static inline uint8_t RC4OKState_get_byte(RC4OKState *obj)
     uint8_t *s = obj->s, i = obj->i, j0, u;
     uint32_t j = obj->j;
 
-    i += 11;
-    j = (j << 1) | (j >> 31);
+    i = (uint8_t) (i + 11U);
+    j = rotl32(j, 1);
     j += s[i];
     j0 = j & 0xFF;
     swap_bytes(&s[i], &s[j0]);
-    u = s[i] + s[j0];
+    u = (uint8_t) (s[i] + s[j0]);
     obj->i = i; obj->j = j;
     return s[u];    
 }

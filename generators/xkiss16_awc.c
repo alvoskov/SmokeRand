@@ -77,15 +77,15 @@ static inline uint16_t Xkiss16AwcState_get_bits(Xkiss16AwcState *obj)
     obj->awc_c  = (uint16_t) (t >> K16_AWC_SH);
     obj->awc_x0 = (uint16_t) (t & K16_AWC_MASK);
     // Discrete Weyl sequence part
-    obj->weyl += K16_WEYL_INC;
+    obj->weyl = (uint16_t) (obj->weyl + K16_WEYL_INC);
     // Combined output
     return (uint16_t) (obj->weyl + obj->s[0] + obj->s[1] + obj->awc_x0);
 }
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    uint32_t hi = Xkiss16AwcState_get_bits(state);
-    uint32_t lo = Xkiss16AwcState_get_bits(state);
+    const uint32_t hi = Xkiss16AwcState_get_bits(state);
+    const uint32_t lo = Xkiss16AwcState_get_bits(state);
     return (hi << 16) | lo;
 }
 

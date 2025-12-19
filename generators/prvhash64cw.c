@@ -51,6 +51,10 @@ static void *create(const CallerAPI *intf)
     obj->lcg  = intf->get_seed64();
     obj->hash = intf->get_seed64();
     obj->w    = intf->get_seed64();
+    // Warmup
+    for (int i = 0; i < 8; i++) {
+        (void) get_bits_raw(obj);
+    }
     return obj;
 }
 

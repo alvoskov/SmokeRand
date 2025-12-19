@@ -19,6 +19,7 @@
  * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
+#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
@@ -32,11 +33,17 @@ typedef struct {
 
 static uint8_t Gjrand8State_get_bits(Gjrand8State *obj)
 {
-	obj->b += obj->c; obj->a = rotl8(obj->a, 4); obj->c ^= obj->b;
-	obj->d += 0x35;
-	obj->a += obj->b; obj->c = rotl8(obj->c, 2); obj->b ^= obj->a;
-	obj->a += obj->c; obj->b = rotl8(obj->b, 5); obj->c += obj->a;
-	obj->b += obj->d;
+	obj->b = (uint8_t) (obj->b + obj->c); // Part 1
+    obj->a = rotl8(obj->a, 4);
+    obj->c = (uint8_t) (obj->c ^ obj->b);
+	obj->d = (uint8_t) (obj->d + 0x35U);  // Part 2
+	obj->a = (uint8_t) (obj->a + obj->b); // Part 3
+    obj->c = rotl8(obj->c, 2);
+    obj->b = (uint8_t) (obj->b ^ obj->a);
+	obj->a = (uint8_t) (obj->a + obj->c); // Part 4
+    obj->b = rotl8(obj->b, 5);
+    obj->c = (uint8_t) (obj->c + obj->a);
+	obj->b = (uint8_t) (obj->b + obj->d); // Part 5
 	return obj->a;
 }
 
@@ -72,4 +79,24 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-MAKE_UINT32_PRNG("gjrand8", NULL)
+
+static int run_self_test(const CallerAPI *intf)
+{
+    static const uint32_t u_ref[4] = {
+        0x48C49B99, 0xF143EB7D, 0xADE11E34, 0xEA7760E1
+    };
+    Gjrand8State obj;
+    Gjrand8State_init(&obj, 0x12);
+    int is_ok = 1;
+    for (size_t i = 0; i < 4; i++) {
+        const uint32_t u = (uint32_t) get_bits_raw(&obj);
+        intf->printf("Out = %8.8" PRIX32 "; ref = %8.8" PRIX32 "\n",
+            u, u_ref[i]);
+        if (u != u_ref[i]) {
+            is_ok = 0;
+        }
+    }    
+    return is_ok;
+}
+
+MAKE_UINT32_PRNG("gjrand8", run_self_test)

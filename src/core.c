@@ -22,9 +22,6 @@
 #include <string.h>
 #include <time.h>
 #include <fcntl.h>
-#if defined(_MSC_VER) || defined(__WATCOMC__)
-#include <io.h>
-#endif
 
 #define THREAD_ORD_OFFSET 1
 
@@ -732,9 +729,7 @@ static ThreadRetVal THREADFUNC_SPEC battery_thread(void *data)
     TestsDispatcher *th_data = data;
     const TestsBattery *bat = th_data->bat;
     ThreadObj thrd = ThreadObj_current();
-    th_data->intf->printf("vvvvvvvvvv Thread %u (ID %llu) started vvvvvvvvvv\n",
-        thrd.ord, (unsigned long long) thrd.id);
-
+    th_data->intf->printf("vvvvvvvvvv Thread %u started vvvvvvvvvv\n", thrd.ord);
     ThreadQueue *queue = TestsDispatcher_get_queue_by_ord(th_data, thrd.ord);
     if (queue == NULL) {
         fprintf(stderr, "***** Thread %u: cannot find queue *****\n", thrd.ord);
@@ -760,8 +755,7 @@ static ThreadRetVal THREADFUNC_SPEC battery_thread(void *data)
         th_data->results[ti.ind].id = (unsigned int) (ti.ind + 1);
         th_data->results[ti.ind].thread_id = thrd.ord;
     }
-    th_data->intf->printf("^^^^^^^^^^ Thread %u (ID %llu) finished ^^^^^^^^^^\n",
-        thrd.ord, (unsigned long long) thrd.id);
+    th_data->intf->printf("^^^^^^^^^^ Thread %u finished ^^^^^^^^^^\n", thrd.ord);
     return 0;
 }
 
@@ -1192,31 +1186,6 @@ GeneratorInfo define_low32_generator(const GeneratorInfo *gi)
 ///////////////////////////////////////////////
 ///// Implementation of file input/output /////
 ///////////////////////////////////////////////
-
-
-/**
- * @brief Switches stdout to binary mode in MS Windows (needed for
- * correct output of binary data)
- */
-void set_bin_stdout(void)
-{
-#if defined(USE_LOADLIBRARY) || defined(NO_POSIX)
-    (void) _setmode( _fileno(stdout), _O_BINARY);
-#endif
-}
-
-
-/**
- * @brief Switches stdin to binary mode in MS Windows (needed for
- * correct input of binary data)
- */
-void set_bin_stdin(void)
-{
-#if defined(USE_LOADLIBRARY) || defined(NO_POSIX)
-    (void) _setmode( _fileno(stdin), _O_BINARY);
-#endif
-}
-
 
 static inline unsigned int
 maxlen_log2_to_nblocks32_log2(unsigned int maxlen_log2)

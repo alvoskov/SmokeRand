@@ -19,6 +19,7 @@
  * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
+#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
@@ -32,18 +33,28 @@ typedef struct {
 
 static uint16_t Gjrand16State_get_bits(Gjrand16State *obj)
 {
-	obj->b += obj->c; obj->a = rotl16(obj->a, 8); obj->c ^= obj->b;
-	obj->d += 0x96A5;
-	obj->a += obj->b; obj->c = rotl16(obj->c, 5); obj->b ^= obj->a;
-	obj->a += obj->c; obj->b = rotl16(obj->b, 10); obj->c += obj->a;
-	obj->b += obj->d;
+	obj->b = (uint16_t) (obj->b + obj->c); // Part 1
+    obj->a = rotl16(obj->a, 8);
+    obj->c = (uint16_t) (obj->c ^ obj->b);
+
+	obj->d = (uint16_t) (obj->d + 0x96A5U); // Part 2
+
+	obj->a = (uint16_t) (obj->a + obj->b); // Part 3
+    obj->c = rotl16(obj->c, 5);
+    obj->b = (uint16_t) (obj->b ^ obj->a);
+
+	obj->a = (uint16_t) (obj->a + obj->c); // Part 4
+    obj->b = rotl16(obj->b, 10);
+    obj->c = (uint16_t) (obj->c + obj->a);
+
+	obj->b = (uint16_t) (obj->b + obj->d); // Part 5
 	return obj->a;
 }
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    uint32_t hi = Gjrand16State_get_bits(state);
-    uint32_t lo = Gjrand16State_get_bits(state);
+    const uint32_t hi = Gjrand16State_get_bits(state);
+    const uint32_t lo = Gjrand16State_get_bits(state);
     return (hi << 16) | lo;
 }
 
@@ -67,4 +78,25 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-MAKE_UINT32_PRNG("gjrand16", NULL)
+
+static int run_self_test(const CallerAPI *intf)
+{
+    static const uint32_t u_ref[4] = {
+        0x59417EE0, 0x87DA95F6, 0x18759DE6, 0x3B6D29F4
+    };
+    Gjrand16State obj;
+    Gjrand16State_init(&obj, 0x1234);
+    int is_ok = 1;
+    for (size_t i = 0; i < 4; i++) {
+        const uint32_t u = (uint32_t) get_bits_raw(&obj);
+        intf->printf("Out = %8.8" PRIX32 "; ref = %8.8" PRIX32 "\n",
+            u, u_ref[i]);
+        if (u != u_ref[i]) {
+            is_ok = 0;
+        }
+    }
+    
+    return is_ok;
+}
+
+MAKE_UINT32_PRNG("gjrand16", run_self_test)

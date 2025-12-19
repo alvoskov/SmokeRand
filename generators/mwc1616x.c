@@ -60,8 +60,8 @@ static void *create(const CallerAPI *intf)
 {
     Mwc1616xShared *obj = intf->malloc(sizeof(Mwc1616xShared));
     uint32_t seed0 = intf->get_seed32();
-    obj->z = (seed0 & 0xFFFF) | (1ul << 16ul);
-    obj->w = (seed0 >> 16) | (1ul << 16ul);
+    obj->z = (seed0 & 0xFFFF) | ((uint32_t)1U << 16U);
+    obj->w = (seed0 >> 16)    | ((uint32_t)1U << 16U);
     return obj;
 }
 

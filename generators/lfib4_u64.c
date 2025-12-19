@@ -22,7 +22,9 @@ static inline uint64_t get_bits_raw(void *state)
     LFib4U64State *obj = state;
     uint64_t *t = obj->t;
     obj->c++;
-    uint8_t c1 = obj->c + 58, c2 = obj->c + 119, c3 = obj->c + 178;
+    const uint8_t c1 = (uint8_t) (obj->c + 58U);
+    const uint8_t c2 = (uint8_t) (obj->c + 119U);
+    const uint8_t c3 = (uint8_t) (obj->c + 178U);
     t[obj->c] += t[c1] + t[c2] + t[c3];
     return t[obj->c] >> 32;
 }

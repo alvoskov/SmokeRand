@@ -115,6 +115,7 @@ typedef ThreadRetVal (THREADFUNC_SPEC *ThreadFuncPtr)(void *);
 
 void init_thread_dispatcher(void);
 ThreadObj ThreadObj_create(ThreadFuncPtr thr_func, void *udata, unsigned int ord);
+int ThreadObj_equal(const ThreadObj *a, const ThreadObj *b);
 void ThreadObj_wait(ThreadObj *obj);
 ThreadObj ThreadObj_current(void);
 
@@ -131,5 +132,7 @@ void *dlsym_wrap(void *handle, const char *symname);
 void dlclose_wrap(void *handle);
 unsigned int get_cpu_numcores(void);
 int get_ram_info(RamInfo *info);
+void set_bin_stdout(void);
+void set_bin_stdin(void);
 
 #endif // __SMOKERAND_THREADS_INTF_H

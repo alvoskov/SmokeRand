@@ -8,6 +8,12 @@
  *
  * This software is licensed under the MIT license.
  */
+#if defined(_MSC_VER) || defined(__WATCOMC__) || defined(_WIN32)
+#undef __STRICT_ANSI__
+#include <io.h>
+#endif
+#include <fcntl.h>
+
 #include "smokerand/threads_intf.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,6 +66,18 @@ ThreadObj ThreadObj_create(ThreadFuncPtr thr_func, void *udata, unsigned int ord
 }
 
 /**
+ * @brief Checks if two threads are identical
+ */
+int ThreadObj_equal(const ThreadObj *a, const ThreadObj *b)
+{
+#ifdef USE_PTHREADS
+    return pthread_equal(a->id, b->id);
+#else
+    return a->id == b->id;
+#endif
+}
+
+/**
  * @brief Wait for thread completion.
  */
 void ThreadObj_wait(ThreadObj *obj)
@@ -72,7 +90,7 @@ void ThreadObj_wait(ThreadObj *obj)
     (void) obj;
 #endif
     for (int i = 0; i < nthreads; i++) {
-        if (obj->id == threads[i].id && threads[i].exists) {
+        if (ThreadObj_equal(obj, &threads[i]) && threads[i].exists) {
             threads[i].exists = 0;
         }
     }
@@ -92,7 +110,7 @@ ThreadObj ThreadObj_current(void)
     obj.id = THREAD_ID_UNKNOWN;
 #endif
     for (int i = 0; i < nthreads; i++) {
-        if (threads[i].id == obj.id && threads[i].exists) {
+        if (ThreadObj_equal(&obj, &threads[i]) && threads[i].exists) {
             return threads[i];
         }
     }
@@ -223,7 +241,37 @@ unsigned int get_cpu_numcores(void)
 #endif
 }
 
-//-------------------------------------------------------------
+///////////////////////////////////////////////////
+///// Functions for stdin/stdio modes control /////
+///////////////////////////////////////////////////
+
+/**
+ * @brief Switches stdout to binary mode in MS Windows (needed for
+ * correct output of binary data)
+ */
+void set_bin_stdout(void)
+{
+#if defined(USE_LOADLIBRARY) || defined(NO_POSIX)
+    (void) _setmode( _fileno(stdout), _O_BINARY);
+#endif
+}
+
+
+/**
+ * @brief Switches stdin to binary mode in MS Windows (needed for
+ * correct input of binary data)
+ */
+void set_bin_stdin(void)
+{
+#if defined(USE_LOADLIBRARY) || defined(NO_POSIX)
+    (void) _setmode( _fileno(stdin), _O_BINARY);
+#endif
+}
+
+
+//////////////////////////////////////////////////
+///// Functions for getting some system info /////
+//////////////////////////////////////////////////
 
 #ifdef __DJGPP__
 #include <dpmi.h>
