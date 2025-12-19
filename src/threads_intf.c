@@ -8,6 +8,12 @@
  *
  * This software is licensed under the MIT license.
  */
+#if defined(_MSC_VER) || defined(__WATCOMC__) || defined(_WIN32)
+#undef __STRICT_ANSI__
+#include <io.h>
+#endif
+#include <fcntl.h>
+
 #include "smokerand/threads_intf.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -223,7 +229,37 @@ unsigned int get_cpu_numcores(void)
 #endif
 }
 
-//-------------------------------------------------------------
+///////////////////////////////////////////////////
+///// Functions for stdin/stdio modes control /////
+///////////////////////////////////////////////////
+
+/**
+ * @brief Switches stdout to binary mode in MS Windows (needed for
+ * correct output of binary data)
+ */
+void set_bin_stdout(void)
+{
+#if defined(USE_LOADLIBRARY) || defined(NO_POSIX)
+    (void) _setmode( _fileno(stdout), _O_BINARY);
+#endif
+}
+
+
+/**
+ * @brief Switches stdin to binary mode in MS Windows (needed for
+ * correct input of binary data)
+ */
+void set_bin_stdin(void)
+{
+#if defined(USE_LOADLIBRARY) || defined(NO_POSIX)
+    (void) _setmode( _fileno(stdin), _O_BINARY);
+#endif
+}
+
+
+//////////////////////////////////////////////////
+///// Functions for getting some system info /////
+//////////////////////////////////////////////////
 
 #ifdef __DJGPP__
 #include <dpmi.h>

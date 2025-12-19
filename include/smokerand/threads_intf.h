@@ -131,5 +131,7 @@ void *dlsym_wrap(void *handle, const char *symname);
 void dlclose_wrap(void *handle);
 unsigned int get_cpu_numcores(void);
 int get_ram_info(RamInfo *info);
+void set_bin_stdout(void);
+void set_bin_stdin(void);
 
 #endif // __SMOKERAND_THREADS_INTF_H

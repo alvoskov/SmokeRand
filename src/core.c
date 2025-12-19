@@ -22,9 +22,6 @@
 #include <string.h>
 #include <time.h>
 #include <fcntl.h>
-#if defined(_MSC_VER) || defined(__WATCOMC__)
-#include <io.h>
-#endif
 
 #define THREAD_ORD_OFFSET 1
 
@@ -732,6 +729,7 @@ static ThreadRetVal THREADFUNC_SPEC battery_thread(void *data)
     TestsDispatcher *th_data = data;
     const TestsBattery *bat = th_data->bat;
     ThreadObj thrd = ThreadObj_current();
+    // TODO: thrd.id to integer is not portable!
     th_data->intf->printf("vvvvvvvvvv Thread %u (ID %llu) started vvvvvvvvvv\n",
         thrd.ord, (unsigned long long) thrd.id);
 
@@ -1192,31 +1190,6 @@ GeneratorInfo define_low32_generator(const GeneratorInfo *gi)
 ///////////////////////////////////////////////
 ///// Implementation of file input/output /////
 ///////////////////////////////////////////////
-
-
-/**
- * @brief Switches stdout to binary mode in MS Windows (needed for
- * correct output of binary data)
- */
-void set_bin_stdout(void)
-{
-#if defined(USE_LOADLIBRARY) || defined(NO_POSIX)
-    (void) _setmode( _fileno(stdout), _O_BINARY);
-#endif
-}
-
-
-/**
- * @brief Switches stdin to binary mode in MS Windows (needed for
- * correct input of binary data)
- */
-void set_bin_stdin(void)
-{
-#if defined(USE_LOADLIBRARY) || defined(NO_POSIX)
-    (void) _setmode( _fileno(stdin), _O_BINARY);
-#endif
-}
-
 
 static inline unsigned int
 maxlen_log2_to_nblocks32_log2(unsigned int maxlen_log2)

@@ -65,14 +65,9 @@ else ifeq ($(PLATFORM_NAME), GENERIC)
     PLATFORM_FLAGS = -DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY
 endif
 #-----------------------------------------------------------------------------
-ifeq ($(PLATFORM_NAME), DJGPP)
+# Wcast-align=strict for debugging for GCC >6 may be useful
 COMPILER_FLAGS = -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wpedantic \
-    -Wshadow -Wconversion -Wvla
-else
-
-COMPILER_FLAGS = -O3 -Werror -Wall -Wextra -Wstrict-aliasing=1 -Wpedantic \
-    -Wshadow -Wconversion -Wvla -Wcast-align=strict
-endif
+    -Wshadow -Wconversion -Wvla -Wcast-align
 
 CFLAGS = $(PLATFORM_FLAGS) -std=c99 $(COMPILER_FLAGS)
 CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 $(COMPILER_FLAGS)
@@ -92,6 +87,7 @@ ifeq ($(OS), Windows_NT)
     #-Wl,--exclude-all-symbols
     EXE = .exe
     SO = .dll
+    PLATFORM_FLAGS += -D__USE_MINGW_ANSI_STDIO=1
 else ifeq ($(PLATFORM_NAME), DJGPP)
     # DJGPP specific extensions: DXE3 modules and .exe for executables
     EXE = .exe
