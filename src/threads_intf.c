@@ -66,6 +66,18 @@ ThreadObj ThreadObj_create(ThreadFuncPtr thr_func, void *udata, unsigned int ord
 }
 
 /**
+ * @brief Checks if two threads are identical
+ */
+int ThreadObj_equal(const ThreadObj *a, const ThreadObj *b)
+{
+#ifdef USE_PTHREADS
+    return pthread_equal(a->id, b->id);
+#else
+    return a->id == b->id;
+#endif
+}
+
+/**
  * @brief Wait for thread completion.
  */
 void ThreadObj_wait(ThreadObj *obj)
@@ -78,7 +90,7 @@ void ThreadObj_wait(ThreadObj *obj)
     (void) obj;
 #endif
     for (int i = 0; i < nthreads; i++) {
-        if (obj->id == threads[i].id && threads[i].exists) {
+        if (ThreadObj_equal(obj, &threads[i]) && threads[i].exists) {
             threads[i].exists = 0;
         }
     }
@@ -98,7 +110,7 @@ ThreadObj ThreadObj_current(void)
     obj.id = THREAD_ID_UNKNOWN;
 #endif
     for (int i = 0; i < nthreads; i++) {
-        if (threads[i].id == obj.id && threads[i].exists) {
+        if (ThreadObj_equal(&obj, &threads[i]) && threads[i].exists) {
             return threads[i];
         }
     }

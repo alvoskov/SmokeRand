@@ -159,6 +159,7 @@ int entfuncs_test(void)
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
     #include <windows.h>
+    #include <wincrypt.h>
     #define WINDOWS_PLATFORM
 #else
     #include <fcntl.h>

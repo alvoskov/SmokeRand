@@ -729,10 +729,7 @@ static ThreadRetVal THREADFUNC_SPEC battery_thread(void *data)
     TestsDispatcher *th_data = data;
     const TestsBattery *bat = th_data->bat;
     ThreadObj thrd = ThreadObj_current();
-    // TODO: thrd.id to integer is not portable!
-    th_data->intf->printf("vvvvvvvvvv Thread %u (ID %llu) started vvvvvvvvvv\n",
-        thrd.ord, (unsigned long long) thrd.id);
-
+    th_data->intf->printf("vvvvvvvvvv Thread %u started vvvvvvvvvv\n", thrd.ord);
     ThreadQueue *queue = TestsDispatcher_get_queue_by_ord(th_data, thrd.ord);
     if (queue == NULL) {
         fprintf(stderr, "***** Thread %u: cannot find queue *****\n", thrd.ord);
@@ -758,8 +755,7 @@ static ThreadRetVal THREADFUNC_SPEC battery_thread(void *data)
         th_data->results[ti.ind].id = (unsigned int) (ti.ind + 1);
         th_data->results[ti.ind].thread_id = thrd.ord;
     }
-    th_data->intf->printf("^^^^^^^^^^ Thread %u (ID %llu) finished ^^^^^^^^^^\n",
-        thrd.ord, (unsigned long long) thrd.id);
+    th_data->intf->printf("^^^^^^^^^^ Thread %u finished ^^^^^^^^^^\n", thrd.ord);
     return 0;
 }
 

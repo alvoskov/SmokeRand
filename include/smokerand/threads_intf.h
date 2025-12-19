@@ -115,6 +115,7 @@ typedef ThreadRetVal (THREADFUNC_SPEC *ThreadFuncPtr)(void *);
 
 void init_thread_dispatcher(void);
 ThreadObj ThreadObj_create(ThreadFuncPtr thr_func, void *udata, unsigned int ord);
+int ThreadObj_equal(const ThreadObj *a, const ThreadObj *b);
 void ThreadObj_wait(ThreadObj *obj);
 ThreadObj ThreadObj_current(void);
 
