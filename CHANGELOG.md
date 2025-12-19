@@ -8,7 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ### Added
 
+- `arxfw8`, `arxfw8ex`, `arxfw16`, `arxfw64` generators.
 - `prvhash16cw` algorithm.
+- Internal self-tests for `gjrand8` and `gjrand16`.
+- `-D__USE_MINGW_ANSI_STDIO` flag for older versions of MinGW.
+
+### Changed
+
+- Improved initialization procedures for `a5rand`, `komirand`, `prvhash` PRNGs
+  families (recommended by their author, A.Vaneev)
+- Fixed `-Wconversion` warnings for GCC 6-9.
+- `pthread_t` is now not assumed to be integer (was bad for `pthread-win32`)
+
 
 ## [0.44] - 2025-12-15
 
