@@ -18,7 +18,7 @@ was used:
  Algorithm         | Output | express | brief | default | full | cpb  | bday64 | Grade | TestU01 | PractRand 
 -------------------|--------|---------|-------|---------|------|------|--------|-------|---------|-----------
  a5rand            | u64    | +       | +     | +       | +    | 0.37 |        | 4(0)  |         | >= 2 TiB
- a5rand32          | u32    | +       | 1/2   | 9       |      |      |        |       |         | 4 GiB
+ a5rand32          | u32    | +       | 1/2   | 9       |      |      |        |       | Small   | 4 GiB
  a5randw           | u64    | +       | +     | +       | +    | 0.41 |        | 4     |         | >= 1 TiB
  a5rand32w         | u32    | +       | 0/1   | 1       | 1    |      |        |       | +       | 256 GiB
  aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      | 5     | +il     | >= 32 TiB
