@@ -19,6 +19,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   families (recommended by their author, A.Vaneev)
 - Fixed `-Wconversion` warnings for GCC 6-9.
 - `pthread_t` is now not assumed to be integer (was bad for `pthread-win32`)
+- Bugfix: `inttypes.h` is excluded from PRNG plugins (may not present in
+  freestanding environments)
+- Custom DLL entry for MSYS added into `apidefs.h`.
 
 
 ## [0.44] - 2025-12-15

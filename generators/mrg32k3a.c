@@ -99,12 +99,12 @@ inline uint32_t make_seed(const CallerAPI *intf, const uint64_t m)
 static void *create(const CallerAPI *intf)
 {
     Mrg32k3aState *obj = intf->malloc(sizeof(Mrg32k3aState));
-    obj->s1[0] = make_seed(intf, m1);
-    obj->s1[1] = make_seed(intf, m1);
-    obj->s1[2] = make_seed(intf, m1);
-    obj->s2[0] = make_seed(intf, m2);
-    obj->s2[1] = make_seed(intf, m2);
-    obj->s2[2] = make_seed(intf, m2);
+    obj->s1[0] = make_seed(intf, (uint64_t) m1);
+    obj->s1[1] = make_seed(intf, (uint64_t) m1);
+    obj->s1[2] = make_seed(intf, (uint64_t) m1);
+    obj->s2[0] = make_seed(intf, (uint64_t) m2);
+    obj->s2[1] = make_seed(intf, (uint64_t) m2);
+    obj->s2[2] = make_seed(intf, (uint64_t) m2);
     return obj;
 }
 

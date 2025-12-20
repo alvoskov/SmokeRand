@@ -58,7 +58,7 @@ BatteryExitCode EXPORT battery_func(const GeneratorInfo *gen,
             sum += (double) gen->get_bits(obj.state) / (double) UINT64_MAX;
         }
     }
-    sum /= npoints;
+    sum /= (double) npoints;
     intf->printf("Mean = %.10f\n", sum);
     intf->printf("Test id:           %u\n", opts->test.id);
     intf->printf("Test name:         %s\n",

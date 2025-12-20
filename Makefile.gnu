@@ -16,29 +16,42 @@
 PLATFORM_NAME ?= GCC
 LIB_SOURCES_EXTRA =
 LIB_HEADERS_EXTRA =
-GEN_LFLAGS = 
+GEN_LFLAGS =
 GEN_DISABLED =
 THREADLIB = -lpthread
+
+
+ifeq ($(OS), Windows_NT)
+    FPIC_FLAGS =
+else ifeq ($(PLATFORM_NAME), DJGPP)
+    FPIC_FLAGS =
+else
+    FPIC_FLAGS = -fPIC
+endif
+GEN_CFLAGS = $(FPIC_CFLAGS)
+
 ifeq ($(PLATFORM_NAME), GCC)
     CC = gcc
     CXX = g++
     AR = ar
-    GEN_CFLAGS = -fPIC -ffreestanding -nostdlib
-    PLATFORM_FLAGS = -g -march=native
+    GEN_CFLAGS += -ffreestanding -nostdlib
+    GEN_LFLAGS = -lgcc
+    PLATFORM_FLAGS = -march=native
 else ifeq ($(PLATFORM_NAME), GCC32)
     CC = gcc
     CXX = g++
     AR = ar
-    GEN_CFLAGS = -fPIC  -DNO_CUSTOM_DLLENTRY
+    GEN_CFLAGS += -DNO_CUSTOM_DLLENTRY
+    GEN_LFLAGS = -lgcc
     PLATFORM_FLAGS = -m32 -march=native
 else ifeq ($(PLATFORM_NAME), DJGPP)
     CC = gcc
     CXX = gpp
     AR = ar
-    GEN_CFLAGS = -ffreestanding -nostdlib
+    GEN_CFLAGS += -ffreestanding -nostdlib
+    #GEN_LFLAGS = -lgcc
     THREADLIB =
-    # NOTE: threefry xxtea may be refactored!
-    GEN_DISABLED = icg64 mrg32k3a sezgin63 threefry wich1982 wich2006 xxtea
+    GEN_DISABLED = icg64 mrg32k3a sezgin63 wich1982 wich2006
     PLATFORM_FLAGS = -m32 -march=i586 -DNOTHREADS -U__STRICT_ANSI__
     LIB_SOURCES_EXTRA = pe32loader.c
     LIB_HEADERS_EXTRA = pe32loader.h
@@ -46,21 +59,20 @@ else ifeq ($(PLATFORM_NAME), MINGW-HX)
     CC = gcc
     CXX = g++
     AR = ar
-    GEN_CFLAGS = -fPIC -DNO_CUSTOM_DLLENTRY -DUSE_WINTHREADS
+    GEN_CFLAGS += -fPIC -DNO_CUSTOM_DLLENTRY -DUSE_WINTHREADS
+    #GEN_LFLAGS = -lgcc
     THREADLIB =
     PLATFORM_FLAGS = -m32 -march=i686
 else ifeq ($(PLATFORM_NAME), ZIGCC)
     CC = zig cc
     CXX = zic c++
     AR = zig ar
-    GEN_CFLAGS = -fPIC
     THREADLIB =
     PLATFORM_FLAGS = -DUSE_WINTHREADS -march=native
 else ifeq ($(PLATFORM_NAME), GENERIC)
     CC = gcc
     CXX = g++
     AR = ar
-    GEN_CFLAGS = -fPIC
     THREADLIB =
     PLATFORM_FLAGS = -DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY
 endif
@@ -73,6 +85,7 @@ CFLAGS = $(PLATFORM_FLAGS) -std=c99 $(COMPILER_FLAGS)
 CXXFLAGS = $(PLATFORM_FLAGS) -std=c++11 $(COMPILER_FLAGS)
 CFLAGS89 = $(PLATFORM_FLAGS) -std=c89 -O3 -Werror -Wall -Wextra -Wpedantic -Wshadow -Wvla
 LINKFLAGS = $(PLATFORM_FLAGS)
+SHARED_CFLAGS += $(CFLAGS)
 INCLUDE = -Iinclude
 
 APPSRCDIR = apps
@@ -184,10 +197,10 @@ $(BINDIR)/test_rdseed$(EXE): $(OBJDIR)/test_rdseed.o $(CORE_LIB) $(BAT_LIB)
 	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
 $(BINDIR)/bat_example$(SO): $(OBJDIR)/bat_example.o
-	$(CC) -shared -fPIC $(LINKFLAGS) $< -o $@ $(INCLUDE)
+	$(CC) -shared $(LINKFLAGS) $< -o $@ $(INCLUDE)
 
 $(OBJDIR)/bat_example.o: $(APPSRCDIR)/bat_example.c $(INTERFACE_HEADERS)
-	$(CC) -fPIC $(LINKFLAGS) -c $< -o $@ $(INCLUDE)
+	$(CC) $(SHARED_CFLAGS) $(INCLUDE) -c $< -o $@
 
 $(LIB_OBJFILES) $(BATLIB_OBJFILES): $(OBJDIR)/%.o : $(SRCDIR)/%.c $(LIB_HEADERS)
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@

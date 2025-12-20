@@ -68,16 +68,11 @@ static void default_free(void *state, const GeneratorInfo *gi, const CallerAPI *
  * It also relies on default prolog (intf static variable, some exports etc.),
  * see PRNG_CMODULE_PROLOG
  */
-#define MAKE_UINT_PRNG(prng_name, selftest_func, numofbits, get_prng_name_func) \
+#define MAKE_UINT_PRNG(prng_name, selftest_func, numofbits) \
 EXPORT uint64_t get_bits(void *state) { return get_bits_raw(state); } \
 GET_SUM_FUNC \
 int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf) { (void) intf; \
-    if (intf != NULL && get_prng_name_func != NULL) { \
-        const char *(*getname)(const CallerAPI *) = get_prng_name_func; \
-        gi->name = getname(intf); \
-    } else { \
-        gi->name = prng_name; \
-    } \
+    gi->name = prng_name; \
     gi->description = GEN_DESCRIPTION; \
     gi->nbits = numofbits; \
     gi->get_bits = get_bits; \
@@ -94,14 +89,14 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf) { (void) intf; 
  * unsigned 32-bit numbers.
  */
 #define MAKE_UINT32_PRNG(prng_name, selftest_func) \
-    MAKE_UINT_PRNG(prng_name, selftest_func, 32, NULL)
+    MAKE_UINT_PRNG(prng_name, selftest_func, 32)
 
 /**
  * @brief Some default boilerplate code for scalar PRNG that returns
  * unsigned 64-bit numbers.
  */
 #define MAKE_UINT64_PRNG(prng_name, selftest_func) \
-    MAKE_UINT_PRNG(prng_name, selftest_func, 64, NULL)
+    MAKE_UINT_PRNG(prng_name, selftest_func, 64)
 
 /**
  * @brief Generates two functions for a user defined `get_bits_SUFFIX_raw`:
