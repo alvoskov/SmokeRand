@@ -41,7 +41,6 @@
  * alvoskov@gmail.com
  */
 #include "smokerand/cinterface.h"
-#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
@@ -118,7 +117,8 @@ static int run_self_test(const CallerAPI *intf)
     for (unsigned long i = 0; i < 20000000; i++) {
         x = get_bits_raw(obj);
     }
-    intf->printf("x = %20.16" PRIX64 "; x_ref = %20.16" PRIX64 "\n", x, x_ref);
+    intf->printf("x = %20.16llX; x_ref = %20.16llX\n",
+        (unsigned long long) x, (unsigned long long) x_ref);
     intf->free(obj);
     return x == x_ref;
 }

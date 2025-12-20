@@ -23,7 +23,6 @@
  * was suggested by David Jones.
  */
 #include "smokerand/cinterface.h"
-#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
@@ -79,8 +78,8 @@ static int run_self_test(const CallerAPI *intf)
     for (long i = 0; i < 10000000; i++) {
         x = (uint32_t) get_bits_raw(obj);
     }
-    intf->printf("Observed: 0x%.8" PRIX32 "; expected: 0x%.8" PRIX32 "\n",
-        x, x_ref);
+    intf->printf("Observed: 0x%.8lX; expected: 0x%.8lX\n",
+        (unsigned long) x, (unsigned long) x_ref);
     intf->free(obj);
     return (x == x_ref) ? 1 : 0;
 }

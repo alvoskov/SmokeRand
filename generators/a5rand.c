@@ -19,7 +19,6 @@
  */
 #include "smokerand/cinterface.h"
 #include "smokerand/int128defs.h"
-#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
@@ -68,8 +67,8 @@ static int run_self_test(const CallerAPI *intf)
     int is_ok = 1;
     for (int i = 0; i < 8; i++) {
         const uint64_t u = get_bits_raw(&obj);
-        intf->printf("Out: %16.16" PRIX64 "; ref: %16.16" PRIX64 "\n",
-            u, u_ref[i]);
+        intf->printf("Out: %16.16llX; ref: %16.16llX\n",
+            (unsigned long long) u, (unsigned long long) u_ref[i]);
         if (u != u_ref[i]) {
             is_ok = 0;
         }

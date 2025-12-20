@@ -24,7 +24,6 @@
  * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
-#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
@@ -287,7 +286,8 @@ static int compare_data(const CallerAPI *intf, BlaBlaState *obj,
     int is_ok = 1;
     for (size_t i = 0; i < len; i++) {
         uint64_t u = get_bits(obj);
-        intf->printf("%3d %16" PRIx64 " %16" PRIx64, (int) i, u, ref_data[i]);
+        intf->printf("%3d %16llX %16llX", (int) i,
+            (unsigned long long) u, (unsigned long long) ref_data[i]);
         if (ref_data[i] != u) {
             is_ok = 0;
             intf->printf(" <--\n");

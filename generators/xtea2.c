@@ -18,7 +18,6 @@
  *    https://tomstdenis.tripod.com/xtea.pdf
  */
 #include "smokerand/cinterface.h"
-#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
@@ -107,7 +106,8 @@ static int run_self_test(const CallerAPI *intf)
     Xtea2State_block(obj);
     int is_ok = 1;
     for (size_t i = 0; i < 4; i++) {
-        intf->printf("Out = %" PRIX32 "; ref = %" PRIX32 "\n", obj->out[i], ref[i]);
+        intf->printf("Out = %lX; ref = %lX\n",
+            (unsigned long) obj->out[i], (unsigned long) ref[i]);
         if (obj->out[i] != ref[i]) {
             is_ok = 0;
         }

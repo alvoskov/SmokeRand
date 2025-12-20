@@ -1,7 +1,6 @@
 // PractaRand: 2 MiB
 #include "smokerand/cinterface.h"
 #include "smokerand/int128defs.h"
-#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 

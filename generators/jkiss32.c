@@ -34,7 +34,6 @@
  * was suggested by David Jones.
  */
 #include "smokerand/cinterface.h"
-#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
@@ -101,7 +100,8 @@ static int run_self_test(const CallerAPI *intf)
     for (long i = 0; i < 10000000; i++) {
         x = (uint32_t) get_bits_raw(obj);
     }
-    intf->printf("Output: %" PRIu32 "; reference: %" PRIu32 "\n", x, x_ref);
+    intf->printf("Output: %lu; reference: %lu\n",
+        (unsigned long) x, (unsigned long) x_ref);
     intf->free(obj);
     return (x == x_ref) ? 1 : 0;
 }

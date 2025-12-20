@@ -34,7 +34,6 @@
  * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
-#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
@@ -121,7 +120,7 @@ static int run_self_test(const CallerAPI *intf)
     for (int i = 0; i < 16; i++) {
         for (int j = 0; j < 8; j++) {
             const uint64_t u = get_bits_raw(obj);
-            intf->printf("0x%16.16" PRIX64 " ", u);
+            intf->printf("0x%16.16llX", (unsigned long long) u);
         }
         intf->printf("\n");
     }
@@ -135,7 +134,8 @@ static int run_self_test(const CallerAPI *intf)
     int is_ok = 1;
     for (int i = 0; i < 16; i++) {
         const uint64_t u = get_bits_raw(obj), u_ref = ref[i];
-        intf->printf("%16.16" PRIX64 " %16.16" PRIX64 "\n", u, u_ref);
+        intf->printf("%16.16llX %16.16llX\n",
+            (unsigned long long) u, (unsigned long long) u_ref);
         if (u != u_ref) {
             is_ok = 0;
         }

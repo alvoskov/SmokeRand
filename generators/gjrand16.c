@@ -19,7 +19,6 @@
  * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
-#include <inttypes.h>
 
 PRNG_CMODULE_PROLOG
 
@@ -89,8 +88,8 @@ static int run_self_test(const CallerAPI *intf)
     int is_ok = 1;
     for (size_t i = 0; i < 4; i++) {
         const uint32_t u = (uint32_t) get_bits_raw(&obj);
-        intf->printf("Out = %8.8" PRIX32 "; ref = %8.8" PRIX32 "\n",
-            u, u_ref[i]);
+        intf->printf("Out = %8.8lX; ref = %8.8lX\n",
+            (unsigned long) u, (unsigned long) u_ref[i]);
         if (u != u_ref[i]) {
             is_ok = 0;
         }

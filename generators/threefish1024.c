@@ -39,7 +39,6 @@
  * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
-#include <inttypes.h>
 
 #ifdef  __AVX2__
 #define TF1024_VEC_ENABLED
@@ -452,8 +451,8 @@ static int run_self_test(const CallerAPI *intf)
         const uint64_t u_vec = get_bits_vector_raw(vecobj);
         if (u_sc != u_vec) {
             is_ok = 0;
-            intf->printf("%ld: sc = %" PRIX64 " vec = %" PRIX64 "\n",
-                i, u_sc, u_vec);
+            intf->printf("%ld: sc = %llX vec = %llX\n",
+                i, (unsigned long long) u_sc, (unsigned long long) u_vec);
             break;
         }
     }
