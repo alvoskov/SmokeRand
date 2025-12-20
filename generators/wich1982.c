@@ -67,16 +67,16 @@ static uint64_t get_bits_raw(void *state)
     Wich1982State *obj = state;
     // Update generator state
     uint64_t s1 = obj->s1, s2 = obj->s2, s3 = obj->s3;
-    s1 = (171 * s1) % 30269;
-    s2 = (172 * s2) % 30307;
-    s3 = (170 * s3) % 30323;
+    s1 = (171U * s1) % 30269U;
+    s2 = (172U * s2) % 30307U;
+    s3 = (170U * s3) % 30323U;
     obj->s1 = (uint16_t) s1;
     obj->s2 = (uint16_t) s2;
     obj->s3 = (uint16_t) s3;
     // Output function
-    s1 = (s1 << 32) / 30269;
-    s2 = (s2 << 32) / 30307;
-    s3 = (s3 << 32) / 30323;
+    s1 = (s1 << 32) / 30269U;
+    s2 = (s2 << 32) / 30307U;
+    s3 = (s3 << 32) / 30323U;
     return (s1 + s2 + s3) & 0xFFFFFFFF;
 }
 
@@ -84,10 +84,32 @@ static void *create(const CallerAPI *intf)
 {
     Wich1982State *obj = intf->malloc(sizeof(Wich1982State));
     uint64_t s = intf->get_seed64();
-    obj->s1 = (uint16_t) (1 + (s % 30000));
-    obj->s2 = (uint16_t) (1 + ((s >> 16) % 30000));
-    obj->s3 = (uint16_t) (1 + ((s >> 32) % 30000));
+    obj->s1 = (uint16_t) (1 + (s % 30000U));
+    obj->s2 = (uint16_t) (1 + ((s >> 16) % 30000U));
+    obj->s3 = (uint16_t) (1 + ((s >> 32) % 30000U));
     return obj;
 }
 
-MAKE_UINT32_PRNG("Wich1982", NULL)
+static int run_self_test(const CallerAPI *intf)
+{
+    static const uint32_t u_ref[8] = {
+        0xB3685156, 0x0AE498E0, 0xC1A4F757, 0x03DB3127,
+        0x88AAA66D, 0xE8978276, 0xBC1C8373, 0x05109F87
+    };
+    Wich1982State obj = {1, 2, 3};
+    int is_ok = 1;
+    for (long i = 0; i < 1000000; i++) {
+        (void) get_bits_raw(&obj);
+    }
+    for (size_t i = 0; i < 8; i++) {
+        const uint32_t u = (uint32_t) get_bits_raw(&obj);
+        intf->printf("Out = %8.8lX; ref = %8.8lX\n",
+            (unsigned long) u, (unsigned long) u_ref[i]);
+        if (u != u_ref[i]) {
+            is_ok = 0;
+        }
+    }
+    return is_ok;
+}
+
+MAKE_UINT32_PRNG("Wich1982", run_self_test)

@@ -31,19 +31,15 @@
 #include <cinttypes>
 #include <cstdio>
 
+static constexpr size_t CHACHA_STATE_SIZE = 16;
+
 template<size_t nrounds>
 class ChaChaCore
 {
 protected:
-    static constexpr size_t STATE_SIZE = 16;
-    std::array<uint32_t, STATE_SIZE> x {
-        0x61707865, 0x3320646e, 0x79622d32, 0x6b206574,
-        0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c,
-        0x13121110, 0x17161514, 0x1b1a1918, 0x1f1e1d1c,
-        0x00000001, 0x09000000, 0x4a000000, 0x00000000
-    }; ///< Working state
-    std::array<uint32_t, STATE_SIZE> out; ///< Output state
-    size_t pos = STATE_SIZE; ///< Current position inside the output buffer
+    std::array<uint32_t, CHACHA_STATE_SIZE> x; ///< Working state
+    std::array<uint32_t, CHACHA_STATE_SIZE> out; ///< Output state
+    size_t pos = CHACHA_STATE_SIZE; ///< Current position inside the output buffer
 
     static inline uint32_t rotl32(uint32_t x, int r)
     {
@@ -73,10 +69,17 @@ protected:
             qround(2, 7, 8,13);
             qround(3, 4, 9,14);
         }
-        for (size_t i = 0; i < STATE_SIZE; i++) {
+        for (size_t i = 0; i < CHACHA_STATE_SIZE; i++) {
             out[i] += x[i];
         }
     }
+
+    ChaChaCore() : x{
+        0x61707865, 0x3320646e, 0x79622d32, 0x6b206574,
+        0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c,
+        0x13121110, 0x17161514, 0x1b1a1918, 0x1f1e1d1c,
+        0x00000001, 0x09000000, 0x4a000000, 0x00000000
+    } {}
     
 public:
     using result_type = uint32_t;
@@ -86,7 +89,7 @@ public:
     
     result_type operator()()
     {
-        if (pos >= STATE_SIZE) {
+        if (pos >= CHACHA_STATE_SIZE) {
             if (++x[12] == 0) { x[13]++; }
             generateBlock();
             pos = 0;
@@ -127,7 +130,7 @@ class ChaCha20 : public ChaChaCore<20>
             x[i + 12] = x_init[i + 8];
         }
         generateBlock();
-        for (size_t i = 0; i < STATE_SIZE; i++) {
+        for (size_t i = 0; i < CHACHA_STATE_SIZE; i++) {
             if (out_final[i] != out[i]) {
                 return false;
             }

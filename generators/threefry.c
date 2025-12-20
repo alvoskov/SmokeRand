@@ -56,41 +56,6 @@ enum {
 
 #define C240 0x1BD11BDAA9FC1A22U
 
-
-typedef enum {
-    TF256_UNKNOWN,
-    TF256_THREEFRY_SCALAR,
-    TF256_THREEFRY_AVX2,
-    TF256_THREEFISH_SCALAR,
-    TF256_THREEFISH_AVX2
-} Tf256Type;
-
-typedef struct {
-    Tf256Type type;
-    const char *name;
-} Tf256Info;
-
-static Tf256Info Tf256Info_get(const CallerAPI *intf)
-{
-    const char *param = intf->get_param();
-    if (!intf->strcmp(param, "threefry") || !intf->strcmp(param, "")) {
-        Tf256Info ti = {TF256_THREEFRY_SCALAR, "Threefry4x64x20"};
-        return ti;
-    } else if (!intf->strcmp(param, "threefish")) {
-        Tf256Info ti = {TF256_THREEFISH_SCALAR, "Threefry4x64x72 (Threefish)"};
-        return ti;
-    } else if (!intf->strcmp(param, "threefry-avx2")) {
-        Tf256Info ti = {TF256_THREEFRY_AVX2, "Threefry4x64x20:AVX2"};
-        return ti;
-    } else if (!intf->strcmp(param, "threefish-avx2")) {
-        Tf256Info ti = {TF256_THREEFISH_AVX2, "Threefry4x64x72:AVX2 (Threefish)"};
-        return ti;
-    } else {
-        Tf256Info ti = {TF256_UNKNOWN, "Threefry4x64:unknown"};
-        return ti;
-    }
-}
-
 static const int Rj0[8] = {14, 52, 23,  5,  25, 46, 58, 32};
 static const int Rj1[8] = {16, 57, 40, 37,  33, 12, 22, 32};
 
@@ -650,55 +615,117 @@ static inline uint64_t get_bits_raw(void *state)
 
 BUFGEN64_DEFINE_GET_BITS_RAW
 
+
 static void *create(const CallerAPI *intf)
 {
+    intf->printf("Not implemented\n");
+    return NULL;
+}
+
+static void *create_threefry_c99(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
     uint64_t k[NWORDS];
     for (size_t i = 0; i < NWORDS; i++) {
         k[i] = intf->get_seed64();
     }
-    Tf256Info info = Tf256Info_get(intf);
-    if (info.type == TF256_THREEFRY_SCALAR) {
-        intf->printf("Threefry4x64x20\n");
-        Tf256State *obj = intf->malloc(sizeof(Tf256State));
-        Tf256State_init(obj, k, 0);
-        return obj;
-    } else if (info.type == TF256_THREEFISH_SCALAR) {
-        intf->printf("Threefry4x64x72 (Threefish)\n");
-        Tf256State *obj = intf->malloc(sizeof(Tf256State));
-        Tf256State_init(obj, k, 1);
-        return obj;
-    } else if (info.type == TF256_THREEFRY_AVX2) {
-#ifdef THREEFRY_VEC_ENABLED
-        intf->printf("Threefry4x64x20-AVX2\n");
-        Tf256VecState *obj = intf->malloc(sizeof(Tf256VecState));
-        Tf256VecState_init(obj, k, 0);
-        return obj;
-#else
-        intf->printf("AVX2 is not supported on this platform\n");
-        return NULL;
-#endif
-    } else if (info.type == TF256_THREEFISH_AVX2) {
-#ifdef THREEFRY_VEC_ENABLED
-        intf->printf("Threefry4x64x72 (Threefish)\n");
-        Tf256VecState *obj = intf->malloc(sizeof(Tf256VecState));
-        Tf256VecState_init(obj, k, 1);
-        return obj;
-#else
-        intf->printf("AVX2 is not supported on this platform\n");
-        return NULL;
-#endif
-    } else {
-        intf->printf(
-            "Unknown parameter '%s' ('threefry', 'threefish', 'threefry-avx2',\n"
-            "    'threefish-avx2` are supported\n", intf->get_param());
-        return NULL;
-    }
+    Tf256State *obj = intf->malloc(sizeof(Tf256State));
+    Tf256State_init(obj, k, 0);
+    return obj;
 }
 
 
-static const char *get_prng_name(const CallerAPI *intf)
+static void *create_threefish_c99(const GeneratorInfo *gi, const CallerAPI *intf)
 {
-    return Tf256Info_get(intf).name;
+    (void) gi;
+    uint64_t k[NWORDS];
+    for (size_t i = 0; i < NWORDS; i++) {
+        k[i] = intf->get_seed64();
+    }
+    Tf256State *obj = intf->malloc(sizeof(Tf256State));
+    Tf256State_init(obj, k, 1);
+    return obj;
 }
 
-MAKE_UINT_PRNG("Threefry4x64", run_self_test, 64, get_prng_name)
+
+static void *create_threefry_avx2(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+#ifdef THREEFRY_VEC_ENABLED
+    uint64_t k[NWORDS];
+    for (size_t i = 0; i < NWORDS; i++) {
+        k[i] = intf->get_seed64();
+    }
+    Tf256VecState *obj = intf->malloc(sizeof(Tf256VecState));
+    Tf256VecState_init(obj, k, 0);
+    return obj;
+#else
+    intf->printf("AVX2 is not supported on this platform\n");
+    return NULL;
+#endif
+}
+
+
+static void *create_threefish_avx2(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+#ifdef THREEFRY_VEC_ENABLED
+    uint64_t k[NWORDS];
+    for (size_t i = 0; i < NWORDS; i++) {
+        k[i] = intf->get_seed64();
+    }
+    Tf256VecState *obj = intf->malloc(sizeof(Tf256VecState));
+    Tf256VecState_init(obj, k, 1);
+    return obj;
+#else
+    intf->printf("AVX2 is not supported on this platform\n");
+    return NULL;
+#endif
+}
+
+
+
+
+
+static const char description[] =
+"Threefry/ThreeFish PRNG\n"
+"param values are supported:\n"
+"  threefry       - ThreeFry4x64x20: portable version (default)\n"
+"  threefish      - ThreeFry4x64x72 or ThreeFish: portable version\n"
+#ifdef THREEFRY_VEC_ENABLED
+"  threefry-avx2  - ThreeFry4x64x20: AVX2 version\n"
+"  threefish-avx2 - ThreeFry4x64x72 or ThreeFish: AVX2 version\n"
+#endif
+"";
+
+EXPORT uint64_t get_bits(void *state)
+{
+    return get_bits_raw(state);
+}
+
+GET_SUM_FUNC
+
+
+/**
+ * @brief ThreeFry versions description
+ */
+static const GeneratorParamVariant gen_list[] = {
+    {"",               "ThreeFry4x64x20:c99",  64, create_threefry_c99,   get_bits, get_sum},
+    {"threefry",       "ThreeFry4x64x20:c99",  64, create_threefry_c99,   get_bits, get_sum},
+    {"threefish",      "ThreeFry4x64x72:c99",  64, create_threefish_c99,  get_bits, get_sum},
+#ifndef CHACHA_VECTOR_INTR
+    {"threefry-avx2",  "ThreeFry4x64x20:avx2", 64, create_threefry_avx2,  get_bits, get_sum},
+    {"threefish-avx2", "ThreeFry4x64x20:avx2", 64, create_threefish_avx2, get_bits, get_sum},
+#endif
+    GENERATOR_PARAM_VARIANT_EMPTY
+};
+
+
+int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
+{
+    const char *param = intf->get_param();
+    gi->description = description;
+    gi->self_test = run_self_test;
+    return GeneratorParamVariant_find(gen_list, intf, param, gi);
+}
+

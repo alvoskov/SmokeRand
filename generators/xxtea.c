@@ -56,42 +56,6 @@ enum {
     XXTEA256_NROUNDS = 12, ///< Number of rounds for 256-bit blocks.
 };
 
-typedef enum {
-    XXTEA_UNKNOWN,
-    XXTEA128_SCALAR,
-    XXTEA128_AVX2,
-    XXTEA256_SCALAR,
-    XXTEA256_AVX2
-} XxteaType;
-
-
-typedef struct {
-    XxteaType type;
-    const char *name;
-} XxteaInfo;
-
-
-static XxteaInfo XxteaInfo_get(const CallerAPI *intf)
-{
-    const char *ver = intf->get_param();
-    if (!intf->strcmp(ver, "128-scalar") || !intf->strcmp(ver, "")) {
-        XxteaInfo info = {XXTEA128_SCALAR, "XXTEA128-scalar"};
-        return info;
-    } else if (!intf->strcmp(ver, "256-scalar")) {
-        XxteaInfo info = {XXTEA256_SCALAR, "XXTEA256-scalar"};
-        return info;
-    } else if (!intf->strcmp(ver, "128-avx2")) {
-        XxteaInfo info = {XXTEA128_AVX2, "XXTEA128-avx2"};
-        return info;
-    } else if (!intf->strcmp(ver, "256-avx2")) {
-        XxteaInfo info = {XXTEA256_AVX2, "XXTEA256-avx2"};
-        return info;
-    } else {
-        XxteaInfo info = {XXTEA_UNKNOWN, "XXTEA:unknown"};
-        return info;
-    }
-}
-
 
 /**
  * @brief XXTEA128 PRNG state: scalar version.
@@ -502,43 +466,62 @@ BUFGEN32_DEFINE_GET_BITS_RAW
 
 static void *create(const CallerAPI *intf)
 {
+    intf->printf("Not implemented\n");
+    return NULL;
+}
+
+
+static void *create_128_c99(const GeneratorInfo *gi, const CallerAPI *intf)
+{
     uint32_t key[4];
-    uint64_t s0 = intf->get_seed64();
-    uint64_t s1 = intf->get_seed64();
-    key[0] = (uint32_t) s0; key[1] = (uint32_t) (s0 >> 32);
-    key[2] = (uint32_t) s1; key[3] = (uint32_t) (s1 >> 32);
-    XxteaInfo info = XxteaInfo_get(intf);
-    if (info.type == XXTEA128_SCALAR) {
-        Xxtea128State *obj = intf->malloc(sizeof(Xxtea128State));
-        Xxtea128State_init(obj, key);
-        return obj;
-    } else if (info.type == XXTEA256_SCALAR) {
-        Xxtea256State *obj = intf->malloc(sizeof(Xxtea256State));
-        Xxtea256State_init(obj, key);
-        return obj;
-    } else if (info.type == XXTEA128_AVX2) {
+    (void) gi;
+    seeds_to_array_u32(intf, key, 4);
+    Xxtea128State *obj = intf->malloc(sizeof(Xxtea128State));
+    Xxtea128State_init(obj, key);
+    return obj;    
+}
+
+
+static void *create_256_c99(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    uint32_t key[4];
+    (void) gi;
+    seeds_to_array_u32(intf, key, 4);
+    Xxtea256State *obj = intf->malloc(sizeof(Xxtea256State));
+    Xxtea256State_init(obj, key);
+    return obj;    
+}
+
+
+static void *create_128_avx2(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
 #ifdef XXTEA_VEC_ENABLED
-        Xxtea128VecState *obj = intf->malloc(sizeof(Xxtea128VecState));
-        Xxtea128VecState_init(obj, key);
-        return obj;
+    uint32_t key[4];
+    seeds_to_array_u32(intf, key, 4);
+    Xxtea128VecState *obj = intf->malloc(sizeof(Xxtea128VecState));
+    Xxtea128VecState_init(obj, key);
+    return obj;
 #else
-        intf->printf("AVX2 is not supported on this platform\n");
-        return NULL;
+    intf->printf("AVX2 is not supported on this platform\n");
+    return NULL;
 #endif
-    } else if (info.type == XXTEA256_AVX2) {
+}
+
+
+static void *create_256_avx2(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
 #ifdef XXTEA_VEC_ENABLED
-        Xxtea256VecState *obj = intf->malloc(sizeof(Xxtea256VecState));
-        Xxtea256VecState_init(obj, key);
-        return obj;
+    uint32_t key[4];
+    seeds_to_array_u32(intf, key, 4);
+    Xxtea256VecState *obj = intf->malloc(sizeof(Xxtea256VecState));
+    Xxtea256VecState_init(obj, key);
+    return obj;    
 #else
-        intf->printf("AVX2 is not supported on this platform\n");
-        return NULL;
+    intf->printf("AVX2 is not supported on this platform\n");
+    return NULL;
 #endif
-    } else {
-        intf->printf("Unknown version '%s' (128-scalar, 256-scalar, 128-avx2 or 256-avx2 are supported)\n",
-            intf->get_param());
-        return NULL;
-    }
 }
 
 ///////////////////////////////
@@ -550,11 +533,11 @@ static int cmp_vec4(const CallerAPI *intf, const uint32_t *out, const uint32_t *
     int is_ok = 1;
     intf->printf("\nOUT: ");
     for (int i = 0; i < 4; i++) {
-        intf->printf("0x%.8X ", out[i]);
+        intf->printf("0x%.8lX ", (unsigned long) out[i]);
     }
     intf->printf("\nREF: ");
     for (int i = 0; i < 4; i++) {
-        intf->printf("0x%.8X ", ref[i]);
+        intf->printf("0x%.8lX ", (unsigned long) ref[i]);
         if (ref[i] != out[i]) {
             is_ok = 0;
         }
@@ -614,7 +597,7 @@ int vector_test(const CallerAPI *intf)
         intf->printf("COPY %2d: ", i);
         for (int j = 0; j < 4; j++) {
             uint32_t u = obj->out[i + XXTEA_NCOPIES*j];
-            intf->printf("0x%.8X ", u);
+            intf->printf("0x%.8lX ", (unsigned long) u);
             if (u != ref[j]) {
                 is_ok = 0;
             }
@@ -623,7 +606,7 @@ int vector_test(const CallerAPI *intf)
     }
     intf->printf("REF:     ");
     for (int i = 0; i < 4; i++) {
-        intf->printf("0x%.8X ", ref[i]);
+        intf->printf("0x%.8lX ", (unsigned long) ref[i]);
     }
     intf->printf("\n");
     intf->free(obj);
@@ -675,7 +658,7 @@ int vector256_test(const CallerAPI *intf)
         intf->printf("COPY %2d: ", i);
         for (int j = 0; j < 8; j++) {
             uint32_t u = obj->out[i + XXTEA_NCOPIES*j];
-            intf->printf("0x%.8X ", u);
+            intf->printf("0x%.8lX ", (unsigned long) u);
             if (u != ref[j]) {
                 is_ok = 0;
             }
@@ -684,7 +667,7 @@ int vector256_test(const CallerAPI *intf)
     }
     intf->printf("REF:     ");
     for (int i = 0; i < 8; i++) {
-        intf->printf("0x%.8X ", ref[i]);
+        intf->printf("0x%.8lX ", (unsigned long) ref[i]);
     }
     intf->printf("\n");
     intf->free(obj);
@@ -711,9 +694,45 @@ static int run_self_test(const CallerAPI *intf)
 }
 
 
-static const char *get_prng_name(const CallerAPI *intf)
+static const char description[] =
+"XXTEA PRNG\n"
+"param values are supported:\n"
+"  128-scalar - XXTEA128: portable version (default)\n"
+"  256-scalar - XXTEA256: portable version\n"
+#ifdef THREEFRY_VEC_ENABLED
+"  128-avx2   - XXTEA128: AVX2 version\n"
+"  256-avx2   - XXTEA256: AVX2 version\n"
+#endif
+"";
+
+EXPORT uint64_t get_bits(void *state)
 {
-    return XxteaInfo_get(intf).name;
+    return get_bits_raw(state);
 }
 
-MAKE_UINT_PRNG("XXTEA", run_self_test, 32, get_prng_name)
+GET_SUM_FUNC
+
+
+/**
+ * @brief XXTEA versions description.
+ */
+static const GeneratorParamVariant gen_list[] = {
+    {"",           "XXTEA128:c99",  32, create_128_c99,  get_bits, get_sum},
+    {"128-scalar", "XXTEA128:c99",  32, create_128_c99,  get_bits, get_sum},
+    {"256-scalar", "XXTEA256:c99",  32, create_256_c99,  get_bits, get_sum},
+#ifndef CHACHA_VECTOR_INTR
+    {"128-avx2",   "XXTEA128:avx2", 32, create_128_avx2, get_bits, get_sum},
+    {"256-avx2",   "XXTEA256:avx2", 32, create_256_avx2, get_bits, get_sum},
+#endif
+    GENERATOR_PARAM_VARIANT_EMPTY
+};
+
+
+int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
+{
+    const char *param = intf->get_param();
+    gi->description = description;
+    gi->self_test = run_self_test;
+    return GeneratorParamVariant_find(gen_list, intf, param, gi);
+}
+
