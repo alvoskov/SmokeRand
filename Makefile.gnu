@@ -7,7 +7,7 @@
 # make -f Makefile.gnu PLATFORM_NAME=GCC
 #
 # Supported platforms: GCC, GCC32, DJGPP, MINGW-HX, ZIGCC
-# Note: GCC includes MinGW.
+# Note: GCC includes MinGW and MSYS.
 #
 # DJGPP platform compiles all generators as DXE3 modules using the dxe3gen
 # experimental linker supplied with DJGPP.
@@ -59,8 +59,8 @@ else ifeq ($(PLATFORM_NAME), MINGW-HX)
     CC = gcc
     CXX = g++
     AR = ar
-    GEN_CFLAGS += -fPIC -DNO_CUSTOM_DLLENTRY -DUSE_WINTHREADS
-    #GEN_LFLAGS = -lgcc
+    GEN_CFLAGS += -ffreestanding -nostdlib -DNO_CUSTOM_DLLENTRY -DUSE_WINTHREADS
+    GEN_LFLAGS = -lgcc
     THREADLIB =
     PLATFORM_FLAGS = -m32 -march=i686
 else ifeq ($(PLATFORM_NAME), ZIGCC)
