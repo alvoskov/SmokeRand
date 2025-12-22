@@ -5,8 +5,10 @@
  * cannot be less than 2^32 due to a linear counter-based part.
  * The "FW" means "Feystel-Weyl"
  *
- * WARNING! MINIMAL PERIOD IS 2^{32}! IT IS NOT ENOUGH FOR RELIABLE PRACTICAL
- * USAGE! Probability to achieve it is very low but exactly unknown.
+ * WARNING! The minimal guaranteed period is only 2^32, the average
+ * period is small is only about 2^47, bad seeds are theoretically possible.
+ * Usage of this generator for statistical, scientific and engineering
+ * computations is strongly discouraged!
  *
  * @copyright
  * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.

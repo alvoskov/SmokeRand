@@ -108,29 +108,29 @@ target_link_libraries(test_crand smokerand_bat smokerand_core ${COMMON_LIBS})
 # Generators list
 set (GENERATORS
     a5rand a5rand32 a5rand32w a5randw aes128 alfib alfib64x5 alfib8x5 
-    alfib alfib ara32 arxfw16 arxfw32 arxfw64 arxfw8 arxfw8ex biski16 
-    biski16 biski16 biski32 biski32 biski64 biski64sh biski64 biski64 
-    biski8 biski8 biski8 blabla chacha cmwc4096 cmwc4827 combo coveyou64 
-    cswb4288 cswb4288 cwg64 des drand48 efiix64x48 flea32x1 gjrand16 
-    gjrand32 gjrand64 gjrand8 gmwc128 hc256 hicg64 ia ia64 ibaa icg31x2 
-    icg64 icg64 isaac isaac64 jctr32 jctr64 jkiss jkiss32 jlkiss64 
-    kiss11 kiss11 kiss4691 kiss64 kiss93 kiss96 kiss99 komirand komirand16 
-    komirand16w komirand32 komirand32w komirandw kuzn lcg128 lcg32prime 
-    lcg42 lcg64 lcg64prime lcg64sc lcg64sc2 lcg69069 lcg96 lea lfib4 
-    lfib4 lfib lfib lfsr113 lfsr258 loop lrnd64 lrnd64 lxm macmarsa 
-    magma melg19937 melg44497 melg607 minstd mixmax mlfib17 mrg32k3a 
-    msws msws64 msws64x msws mt19937 mt19937 mtc16 mtc32 mtc64 mtc64hi 
-    mtc8 mularx128 mularx128 mularx128 mularx256 mularx64 mularx64 
-    mulberry32 mwc128 mwc128x mwc128xxa32 mwc1616 mwc1616p mwc1616x 
-    mwc16 mwc256xxa64 mwc3232x mwc32x mwc32xxa8 mwc40xxa8 mwc4691 
-    mwc48xxa16 mwc63x2 mwc64 mwc64x mwc64 mwc8222 mzran13 ncombo 
-    pcg32 pcg32 pcg32 pcg64 pcg64 pcg64 philox philox2x32 philox32 
-    prvhash12c prvhash12cw prvhash16c prvhash16cw prvhash64c prvhash64cw 
-    r1279 r250 ran randu ranlux48 ranluxpp ranq1 ranq2 ranrot16tiny 
-    ranrot32 ranrot32tiny ranrot64tiny ranrot8tiny ranrot ranshi 
-    ranval ranval64 rc4 rc4ok rge256ex rge256exctr rge256lite rge512ex 
-    rge512exctr romutrio rrmxmx sapparot sapparot2 sapparot2 seed 
-    sezgin63 sfc16 sfc32 sfc64 sfc8 shr3 skiss32 skiss64 smwc16x8 
+    alfib alfib ara32 arxfw16 arxfw32 arxfw64 arxfw8 arxfw8ex arxfw8ex2 
+    biski16 biski16 biski16 biski32 biski32 biski64 biski64sh biski64 
+    biski64 biski8 biski8 biski8 blabla chacha cmwc4096 cmwc4827 
+    combo coveyou64 cswb4288 cswb4288 cwg64 des drand48 efiix64x48 
+    flea32x1 gjrand16 gjrand32 gjrand64 gjrand8 gmwc128 hc256 hicg64 
+    ia ia64 ibaa icg31x2 icg64 icg64 isaac isaac64 jctr32 jctr64 
+    jkiss jkiss32 jlkiss64 kiss11 kiss11 kiss4691 kiss64 kiss93 kiss96 
+    kiss99 komirand komirand16 komirand16w komirand32 komirand32w 
+    komirandw kuzn lcg128 lcg32prime lcg42 lcg64 lcg64prime lcg64sc 
+    lcg64sc2 lcg69069 lcg96 lea lfib4 lfib4 lfib lfib lfsr113 lfsr258 
+    loop lrnd64 lrnd64 lxm macmarsa magma melg19937 melg44497 melg607 
+    minstd mixmax mlfib17 mrg32k3a msws msws64 msws64x msws mt19937 
+    mt19937 mtc16 mtc32 mtc64 mtc64hi mtc8 mularx128 mularx128 mularx128 
+    mularx256 mularx64 mularx64 mulberry32 mwc128 mwc128x mwc128xxa32 
+    mwc1616 mwc1616p mwc1616x mwc16 mwc256xxa64 mwc3232x mwc32x mwc32xxa8 
+    mwc40xxa8 mwc4691 mwc48xxa16 mwc63x2 mwc64 mwc64x mwc64 mwc8222 
+    mzran13 ncombo pcg32 pcg32 pcg32 pcg64 pcg64 pcg64 philox philox2x32 
+    philox32 prvhash12c prvhash12cw prvhash16c prvhash16cw prvhash64c 
+    prvhash64cw r1279 r250 ran randu ranlux48 ranluxpp ranq1 ranq2 
+    ranrot16tiny ranrot32 ranrot32tiny ranrot64tiny ranrot8tiny ranrot 
+    ranshi ranval ranval64 rc4 rc4ok rge256ex rge256exctr rge256lite 
+    rge512ex rge512exctr romutrio rrmxmx sapparot sapparot2 sapparot2 
+    seed sezgin63 sfc16 sfc32 sfc64 sfc8 shr3 skiss32 skiss64 smwc16x8 
     smwc192 smwc192lux smwc24 smwc48 smwc48lux smwc8x16 smwc96 speck128 
     speck128sc speck64 splitmix splitmix32 splitmix32cbc splitmix 
     sqxor sqxor32 stormdrop superduper64 superduper73 superduper96 
