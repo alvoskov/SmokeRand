@@ -238,9 +238,13 @@ $(GEN_BINDIR)/obj/ranluxpp.o : generators/ranluxpp.c \
 clean:
 ifeq ($(OS), Windows_NT)
 	del $(BINDIR)\smokerand.exe
+	del $(BINDIR)\bat_example.dll
 	del $(BINDIR)\calibrate_dc6.exe
 	del $(BINDIR)\calibrate_linearcomp.exe
 	del $(BINDIR)\sr_tiny.exe
+	del $(BINDIR)\test_base64.exe
+	del $(BINDIR)\test_chacha.exe
+	del $(BINDIR)\test_crand.exe
 	del $(BINDIR)\test_cpp11.exe
 	del $(BINDIR)\test_funcs.exe
 	del $(BINDIR)\test_rdseed.exe
@@ -251,9 +255,13 @@ ifeq ($(OS), Windows_NT)
 	del $(BINDIR)\generators\*.a /q
 else
 	rm -f $(BINDIR)/smokerand
+	rm -f $(BINDIR)/bat_example.so
 	rm -f $(BINDIR)/calibrate_dc6
 	rm -f $(BINDIR)/calibrate_linearcomp
 	rm -f $(BINDIR)/sr_tiny
+	rm -f $(BINDIR)/test_base64
+	rm -f $(BINDIR)/test_chacha
+	rm -f $(BINDIR)/test_crand
 	rm -f $(BINDIR)/test_funcs
 	rm -f $(BINDIR)/test_cpp11
 	rm -f $(BINDIR)/test_rdseed
