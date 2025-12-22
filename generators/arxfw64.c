@@ -1,4 +1,16 @@
-// express, brief, default,full
+/**
+ * @file arxfw64.c
+ * @brief ARX-FW-64 experimental chaotic generator.
+ * @details A simple and moderately fast chaotic generator. Its period
+ * cannot be less than 2^64 due to a linear counter-based part.
+ * The "FW" means "Feystel-Weyl"
+ *
+ * @copyright
+ * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 #include "smokerand/int128defs.h"
 

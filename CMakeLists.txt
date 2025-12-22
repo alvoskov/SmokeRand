@@ -108,9 +108,9 @@ target_link_libraries(test_crand smokerand_bat smokerand_core ${COMMON_LIBS})
 # Generators list
 set (GENERATORS
     a5rand a5rand32 a5rand32w a5randw aes128 alfib alfib64x5 alfib8x5 
-    alfib alfib ara32 arxfw16 arxfw64 arxfw8 arxfw8ex biski16 biski16 
-    biski16 biski32 biski32 biski64 biski64sh biski64 biski64 biski8 
-    biski8 biski8 blabla chacha cmwc4096 cmwc4827 combo coveyou64 
+    alfib alfib ara32 arxfw16 arxfw32 arxfw64 arxfw8 arxfw8ex biski16 
+    biski16 biski16 biski32 biski32 biski64 biski64sh biski64 biski64 
+    biski8 biski8 biski8 blabla chacha cmwc4096 cmwc4827 combo coveyou64 
     cswb4288 cswb4288 cwg64 des drand48 efiix64x48 flea32x1 gjrand16 
     gjrand32 gjrand64 gjrand8 gmwc128 hc256 hicg64 ia ia64 ibaa icg31x2 
     icg64 icg64 isaac isaac64 jctr32 jctr64 jkiss jkiss32 jlkiss64 
