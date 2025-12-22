@@ -28,7 +28,8 @@ else ifeq ($(PLATFORM_NAME), DJGPP)
 else
     FPIC_FLAGS = -fPIC
 endif
-GEN_CFLAGS = $(FPIC_CFLAGS)
+GEN_CFLAGS = $(FPIC_FLAGS)
+SHARED_CFLAGS = $(FPIC_FLAGS)
 
 ifeq ($(PLATFORM_NAME), GCC)
     CC = gcc
