@@ -367,6 +367,44 @@ Performance estimation for some 32-bit generators
  chacha:c99               | 00:19:50 |          |          |
 
 
+
+PractRand 0.94 results for `arxfw16` experimental generator.
+
+Version with `++`, i.e. an increment:
+
+     rng=RNG_stdin32, seed=unknown
+     length= 2 terabytes (2^41 bytes), time= 7651 seconds
+       no anomalies in 313 test result(s)
+
+     rng=RNG_stdin32, seed=unknown
+     length= 4 terabytes (2^42 bytes), time= 14449 seconds
+       Test Name                         Raw       Processed     Evaluation
+       Gap-16:A                          R=  -4.8  p =1-5.9e-4   unusual
+       ...and 322 test result(s) without anomalies
+
+     rng=RNG_stdin32, seed=unknown
+     length= 8 terabytes (2^43 bytes), time= 27521 seconds
+       Test Name                         Raw       Processed     Evaluation
+       FPF-14+6/16:all                   R=  -7.5  p =1-7.3e-7   suspicious
+       ...and 330 test result(s) without anomalies
+
+Version with Weyl sequence:
+
+     rng=RNG_stdin32, seed=unknown
+     length= 8 terabytes (2^43 bytes), time= 27994 seconds
+       Test Name                         Raw       Processed     Evaluation
+       FPF-14+6/16:all                   R=  -9.8  p =1-3.4e-9    VERY SUSPICIOUS
+       ...and 330 test result(s) without anomalies
+
+     rng=RNG_stdin32, seed=unknown
+     length= 16 terabytes (2^44 bytes), time= 54881 seconds
+       Test Name                         Raw       Processed     Evaluation
+       FPF-14+6/16:(9,14-0)              R=  -7.1  p =1-2.8e-6   unusual
+       FPF-14+6/16:all                   R= -17.5  p =1-8.3e-17    FAIL !
+       ...and 337 test result(s) without anomalies
+
+
+
 Note about `xorshift128+`: an initial rating was 3.25, manually corrected to 0
 because the upper 32 bits systematically fail the `hamming_ot_distr` and
 `hamming_ot_value` tests from the `full` battery.
