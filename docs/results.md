@@ -31,7 +31,7 @@ was used:
  ara32             | u32    | +       | 1     | 1       | 1    | 0.96 | +      | 2(0)  | +       | 512 MiB
  arxfw8            | u32    | +       | 18    | 33      |      | 4.4  | -(>>10)| 0     | -       | 2 MiB
  arxfw8ex          | u32    | +       | 3/5   | 8       |      | 5.0  | -(>>10)| 0     | -/Small | 128 MiB
- arxfw8ex2         | u32    | +       | +     | +       | +    | 3.8  |        | 4     | +       | >= 1 TiB
+ arxfw8ex2         | u32    | +       | +     | +       | +    | 3.8  |        | 3.5(0)| +       | 8 TiB
  arxfw16           | u32    | +       | +     | +       | +    | 2.6  | +      | 3.5(0)| +       | 8 TiB
  arxfw16ex2        | u32    | +       | +     | +       | +    | 3.1  | +      | 4     | +       | >= 8 TiB
  arxfw32           | u32    | +       | +     | +       | +    | 0.74 | +      | 4(0)  | +       | ?
@@ -573,6 +573,33 @@ About `mwc1616p`: fails PractRand at 32 TiB
       BCFN(2+0,13-0,T)                  R= +29.1  p =  4.4e-15    FAIL !
       DC6-9x1Bytes-1                    R=  +9.5  p =  3.5e-4   mildly suspicious
       ...and 345 test result(s) without anomalies
+
+Note about `arxfw8ex2`:
+
+    rng=RNG_stdin32, seed=unknown
+    length= 2 terabytes (2^41 bytes), time= 8523 seconds
+      no anomalies in 313 test result(s)
+
+    rng=RNG_stdin32, seed=unknown
+    length= 4 terabytes (2^42 bytes), time= 17271 seconds
+      Test Name                         Raw       Processed     Evaluation
+      FPF-14+6/16:all                   R=  -4.6  p =1-4.8e-4   unusual
+      ...and 322 test result(s) without anomalies
+
+    rng=RNG_stdin32, seed=unknown
+    length= 8 terabytes (2^43 bytes), time= 34344 seconds
+      Test Name                         Raw       Processed     Evaluation
+      FPF-14+6/16:all                   R=  -9.6  p =1-5.6e-9    VERY SUSPICIOUS
+      [Low1/32]Gap-16:B                 R=  -4.8  p =1-5.3e-4   unusual
+      ...and 329 test result(s) without anomalies
+
+    rng=RNG_stdin32, seed=unknown
+    length= 16 terabytes (2^44 bytes), time= 69150 seconds
+      Test Name                         Raw       Processed     Evaluation
+      FPF-14+6/16:(4,14-0)              R=  -6.8  p =1-5.6e-6   unusual
+      FPF-14+6/16:(12,14-0)             R=  -7.0  p =1-4.2e-6   unusual
+      FPF-14+6/16:all                   R= -18.9  p =1-3.7e-18    FAIL !
+      ...and 336 test result(s) without anomalies
 
 Sensitivity of dieharder is lower than TestU01 and PractRand:
 
