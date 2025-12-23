@@ -128,12 +128,12 @@ set (GENERATORS
     philox32 prvhash12c prvhash12cw prvhash16c prvhash16cw prvhash64c 
     prvhash64cw r1279 r250 ran randu ranlux48 ranluxpp ranq1 ranq2 
     ranrot16tiny ranrot32 ranrot32tiny ranrot64tiny ranrot8tiny ranrot 
-    ranshi ranval ranval64 rc4 rc4ok rge256ex rge256exctr rge256lite 
-    rge512ex rge512exctr romutrio rrmxmx sapparot sapparot2 sapparot2 
-    seed sezgin63 sfc16 sfc32 sfc64 sfc8 shr3 skiss32 skiss64 smwc16x8 
-    smwc192 smwc192lux smwc24 smwc48 smwc48lux smwc8x16 smwc96 speck128 
-    speck128sc speck64 splitmix splitmix32 splitmix32cbc splitmix 
-    sqxor sqxor32 stormdrop superduper64 superduper73 superduper96 
+    ranshi ranval ranval64 rc4 rc4ok rdrand rge256ex rge256exctr 
+    rge256lite rge512ex rge512exctr romutrio rrmxmx sapparot sapparot2 
+    sapparot2 seed sezgin63 sfc16 sfc32 sfc64 sfc8 shr3 skiss32 skiss64 
+    smwc16x8 smwc192 smwc192lux smwc24 smwc48 smwc48lux smwc8x16 
+    smwc96 speck128 speck128sc speck64 splitmix splitmix32 splitmix32cbc 
+    splitmix sqxor sqxor32 stormdrop superduper64 superduper73 superduper96 
     swb swblarge swblux swbmwc32 swbmwc64 swbw taus88 threefish1024 
     threefry threefry2x64 tinymt32 tinymt64 tylo64 ultra ultra64 
     v3b well1024a weyl wich1982 wich2006 wob2m wyrand xabc16 xabc32 
