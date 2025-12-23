@@ -54,7 +54,7 @@ local gen_sources = {
     'prvhash64cw',        'r1279',              'r250',               'ran', 
     'randu',              'ranlux48',           'ranluxpp',           'ranq1', 
     'ranq2',              'ranrot32',           'ranrot8tiny',        'ranrot16tiny', 
-    'ranrot32tiny',       'ranrot64tiny',       'ranrot_bi',          'ranshi', 
+    'ranrot32tiny',       'ranrot64tiny',       'ranrot_bi',          'ranshi',  
     'ranval',             'ranval64',           'rc4',                'rc4ok', 
     'rge256ex',           'rge256exctr',        'rge256lite',         'rge512ex', 
     'rge512exctr',        'romutrio',           'rrmxmx',             'sapparot', 
