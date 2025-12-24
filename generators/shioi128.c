@@ -1,5 +1,18 @@
 /**
+ * @file shioi128.c
  * @brief Shioi128 v1 - pseudorandom number generator
+ * @details Seiran128 is small and fast LFSR with the output scrambler.
+ * It has jump functions that can be found at:
+ * 
+ * - https://github.com/andanteyk/prng-seiran/blob/master/seiran128.c
+ * @copyright
+ * To the extent possible under law, the author has waived all copyright 
+ * and related or neighboring rights to this software.
+ * See: https://creativecommons.org/publicdomain/zero/1.0/
+ */
+
+/**
+ * @brief 
  *https://github.com/andanteyk/prng-shioi/blob/master/shioi128.c
 
  *To the extent possible under law, the author has waived all copyright 
