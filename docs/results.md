@@ -204,7 +204,7 @@ was used:
  philox            | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  philox2x32        | u32    | +       | +     | +       | +    | 1.6  | -      | 3     | +       | >= 32 TiB
  philox32          | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
- prvhash12c        | u32    | +       | 0/1   | 0/1     | 4    | 5.1  |        | 0     |         | 8 GiB
+ prvhash12c        | u32    | +       | 0/1   | 0/1     | 4    | 5.1  |        | 0     | Crush   | 8 GiB
  prvhash12cw       | u32    | +       | +     | +       | +    | 5.1  |        |       |         | 2 TiB
  prvhash16c        | u32    | +       | +     | +       | +    | 2.4  | +      | 4(0)  |         | 256 GiB
  prvhash16cw       | u32    | +       | +     | +       | +    | 2.4  | +      | 4(0)  |         | ?
