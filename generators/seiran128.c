@@ -1,11 +1,15 @@
 /**
+ * @file seiran128.c
  * @brief Seiran128 v1 - pseudorandom number generator
- *https://github.com/andanteyk/prng-seiran/blob/master/seiran128.c
-
- *To the extent possible under law, the author has waived all copyright 
- *and related or neighboring rights to this software.
- *See: https://creativecommons.org/publicdomain/zero/1.0/
-*/
+ * @details Seiran128 is small and fast LFSR with output scrambler.
+ * It has jump functions that can be found at:
+ * 
+ * - https://github.com/andanteyk/prng-seiran/blob/master/seiran128.c
+ * @copyright
+ * To the extent possible under law, the author has waived all copyright 
+ * and related or neighboring rights to this software.
+ * See: https://creativecommons.org/publicdomain/zero/1.0/
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
