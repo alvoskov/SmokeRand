@@ -5,7 +5,7 @@ function find_generators()
     if package.config:sub(1,1) == "\\" then
         local lines = io.popen([[dir "generators\*.c" /b]]):lines()
         for line in lines do
-            local _, _, gen = string.find(line, "(%w+)")
+            local _, _, gen = string.find(line, "([%w_]+)")
             table.insert(generators, gen)
         end
     else
