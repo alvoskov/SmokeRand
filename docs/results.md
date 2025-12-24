@@ -32,6 +32,7 @@ was used:
  arxfw8            | u32    | +       | 18    | 33      |      | 4.4  | -(>>10)| 0     | -       | 2 MiB
  arxfw8ex          | u32    | +       | 3/5   | 8       |      | 5.0  | -(>>10)| 0     | -/Small | 128 MiB
  arxfw8ex2         | u32    | +       | +     | +       | +    | 3.8  |        | 3.5(0)| +       | 8 TiB
+ arxfw8ex3         | u32    | +       | +     | +       | +    |      | +      |       |         | ?
  arxfw16           | u32    | +       | +     | +       | +    | 2.6  | +      | 3.5(0)| +       | 8 TiB
  arxfw16ex2        | u32    | +       | +     | +       | +    | 3.1  | +      | 4     | +       | >= 8 TiB
  arxfw32           | u32    | +       | +     | +       | +    | 0.74 | +      | 4(0)  | +       | ?
@@ -203,10 +204,10 @@ was used:
  philox            | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  philox2x32        | u32    | +       | +     | +       | +    | 1.6  | -      | 3     | +       | >= 32 TiB
  philox32          | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
- prvhash12c        | u32    | +       | 0/1   | 0/1     |      | 5.1  |        | 0     |         | 8 GiB
- prvhash12cw       | u32    | +       | +     | +       |      | 5.1  |        |       |         | ?
- prvhash16c        | u32    | +       | +     | +       | +    | 2.4  |        |       |         | 256 GiB
- prvhash16cw       | u32    | +       | +     | +       | +    | 2.4  |        |       |         | ?
+ prvhash12c        | u32    | +       | 0/1   | 0/1     | 4    | 5.1  |        | 0     |         | 8 GiB
+ prvhash12cw       | u32    | +       | +     | +       | +    | 5.1  |        |       |         | 2 TiB
+ prvhash16c        | u32    | +       | +     | +       | +    | 2.4  | +      | 4(0)  |         | 256 GiB
+ prvhash16cw       | u32    | +       | +     | +       | +    | 2.4  | +      | 4(0)  |         | ?
  prvhash64c        | u64    | +       | +     | +       | +    | 0.51 | +      | 4(0)  |         | ?
  prvhash64cw       | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 16 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
@@ -245,11 +246,13 @@ was used:
  sapparot          | u32    | +       | 2     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
  sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4(0)  |         | >= 16 TiB
+ seiran128         | u64    | +       | +     | +       | +    |      | +      | 4     |         | ?
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | -(>>10)| 0     | -       | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)| +       | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  | +       | >= 16 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
+ shioi128          | u64    | +       | +     | +       | +    |      | +      | 4     |         | ?
  skiss32           | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 16 TiB
  skiss64           | u64    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 8 TiB
  smwc16x8          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | >= Crush| >= 4 TiB
@@ -638,6 +641,31 @@ Note about `arxfw8ex2`:
       FPF-14+6/16:(12,14-0)             R=  -7.0  p =1-4.2e-6   unusual
       FPF-14+6/16:all                   R= -18.9  p =1-3.7e-18    FAIL !
       ...and 336 test result(s) without anomalies
+
+
+Note about `prvhash12cw`:
+
+    rng=RNG_stdin32, seed=unknown
+    length= 1 terabyte (2^40 bytes), time= 5610 seconds
+      no anomalies in 304 test result(s)
+
+    rng=RNG_stdin32, seed=unknown
+    length= 2 terabytes (2^41 bytes), time= 10964 seconds
+      Test Name                         Raw       Processed     Evaluation
+      [Low8/32]FPF-14+6/16:(0,14-0)     R=  +7.0  p =  4.4e-6   unusual
+      [Low8/32]FPF-14+6/16:(1,14-0)     R=  +7.5  p =  1.6e-6   mildly suspicious
+      [Low8/32]FPF-14+6/16:all          R=  +7.0  p =  4.9e-6   suspicious
+      ...and 310 test result(s) without anomalies
+
+    rng=RNG_stdin32, seed=unknown
+    length= 4 terabytes (2^42 bytes), time= 21983 seconds
+      Test Name                         Raw       Processed     Evaluation
+      [Low8/32]FPF-14+6/16:(0,14-0)     R= +13.0  p =  1.1e-11   VERY SUSPICIOUS
+      [Low8/32]FPF-14+6/16:(1,14-0)     R= +10.5  p =  2.4e-9   very suspicious
+      [Low8/32]FPF-14+6/16:(2,14-0)     R=  +9.5  p =  2.0e-8   suspicious
+      [Low8/32]FPF-14+6/16:all          R= +13.6  p =  2.8e-12    FAIL
+      ...and 319 test result(s) without anomalies
+
 
 Sensitivity of dieharder is lower than TestU01 and PractRand:
 
