@@ -1,14 +1,16 @@
 /**
- * @file arxfw8ex2.c
- * @brief ARX-FX8-EX2 is a combined generator that consists of
- * chaotic part and LFSR part. Designed for 8-bit processors.
+ * @file arxfw8ex3.c
+ * @brief ARX-FX8-EX3 is a combined generator that consists of
+ * chaotic part and linear LFSR and discrete Weyl sequence parts. Designed
+ * for 8-bit processors.
  * @details LFSR part has a period of \f$2^{32} - 1\f$ (suggested by Edward
  * Rosten), chaotic part (designed by A.L.Voskov) is based on an invertible
- * mapping. The main design goal was to implement a PRNG with decent quality
- * (passes SmokeRand `full`, TestU01 BigCrush, fails PractRand 0.94 at 16 TiB)
- * that is friendly to 8-bit processors.
+ * mapping. Dicrete Weyl sequence has a period of 256. The main design goal
+ * was to implement a PRNG with decent quality (passes SmokeRand ????,
+ * TestU01 ????, PractRand 0.94 at least up ???) that is friendly
+ * to 8-bit processors.
  *
- * WARNING! The minimal guaranteed period is only \f$2^{32} - 1\f$, the average
+ * WARNING! The minimal guaranteed period is only about \f$2^{40}\f$, the average
  * period is small and is only about 2^47, bad seeds are theoretically possible.
  * Usage of this generator for statistical, scientific and engineering
  * computations is strongly discouraged!
@@ -29,15 +31,16 @@
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief arxfw8ex2 PRNG state.
+ * @brief arxfw8ex3 PRNG state.
  */
 typedef struct {
     uint8_t a; ///< Chaotic part
     uint8_t b; ///< Chaotic part
     uint8_t xs[4]; ///< LFSR part
-} Arxfw8Ex2State;
+    uint8_t w; ///< Discrete Weyl sequence part
+} Arxfw8Ex3State;
 
-static inline uint8_t get_bits8(Arxfw8Ex2State *obj)
+static inline uint8_t get_bits8(Arxfw8Ex3State *obj)
 {
     // LFSR part
     uint8_t *xs = obj->xs;    
@@ -46,16 +49,18 @@ static inline uint8_t get_bits8(Arxfw8Ex2State *obj)
     xs[1] = xs[2];
     xs[2] = xs[3];
     xs[3] = (uint8_t) (xs[2] ^ t ^ (xs[2] >> 3) ^ (t << 1));
+    // Discrete Weyl sequence part
+    obj->w = (uint8_t) (obj->w + 151U);
     // ARX-FW mixer part: it is simplified because it is driven
     // by LFSR
     uint8_t a = obj->a, b = obj->b;
-    b = (uint8_t) (b + xs[3]); // LFSR injector
+    b = (uint8_t) (b + xs[3] + obj->w); // LFSR/Weyl injector
     a = (uint8_t) (a + (rotl8(b, 1) ^ rotl8(b, 4) ^ b));
     obj->a = b; obj->b = a;
     return obj->a ^ obj->b;
 }
 
-static inline uint64_t get_bits_raw(Arxfw8Ex2State *state)
+static inline uint64_t get_bits_raw(Arxfw8Ex3State *state)
 {
     const uint32_t a = get_bits8(state);
     const uint32_t b = get_bits8(state);
@@ -67,7 +72,7 @@ static inline uint64_t get_bits_raw(Arxfw8Ex2State *state)
 
 static void *create(const CallerAPI *intf)
 {
-    Arxfw8Ex2State *obj = intf->malloc(sizeof(Arxfw8Ex2State));
+    Arxfw8Ex3State *obj = intf->malloc(sizeof(Arxfw8Ex3State));
     uint64_t seed = intf->get_seed64();
     obj->a = (uint8_t) seed;
     obj->b = (uint8_t) (seed >> 8);
@@ -75,6 +80,7 @@ static void *create(const CallerAPI *intf)
     obj->xs[1] = (uint8_t) (seed >> 24);
     obj->xs[2] = (uint8_t) (seed >> 32);
     obj->xs[3] = (uint8_t) (seed >> 40) | 0x1;
+    obj->w     = (uint8_t) (seed >> 48);
         
     // Warmup
     for (int i = 0; i < 8; i++) {
@@ -83,4 +89,4 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-MAKE_UINT32_PRNG("arxfw8ex2", NULL)
+MAKE_UINT32_PRNG("arxfw8ex3", NULL)
