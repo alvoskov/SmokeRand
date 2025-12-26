@@ -101,6 +101,7 @@ uint64_t Entropy_seed64(Entropy *obj, uint64_t thread_id);
 void Entropy_print_seeds_log(const Entropy *obj, FILE *fp);
 uint64_t call_rdseed();
 uint64_t cpuclock(void);
+double get_cpu_freq(void);
 
 static inline int Entropy_is_init(const Entropy *obj)
 {
