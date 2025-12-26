@@ -214,6 +214,24 @@ uint32_t get_tick_count()
 #endif
 }
 
+
+double get_cpu_freq(void)
+{
+    FILE *fp = fopen("/proc/cpuinfo", "r");
+    if (fp == NULL) {
+        return 0.0;
+    }
+    char buf[256];
+    double freq = 0.0;
+    while (fgets(buf, 256, fp) != NULL) {
+        if (sscanf(buf, "cpu MHz : %lf", &freq) == 1) {
+            return freq;
+        }
+    }
+    fclose(fp);
+    return freq;
+}
+
 /**
  * @brief 128-bit bit machine ID obtained from Blake2s-128 hash function.
  * @details We don't care about little/big-endianness because this is
@@ -229,6 +247,7 @@ typedef union {
  */
 static MachineID get_machine_id()
 {
+    printf("===>%g\n", get_cpu_freq());
     MachineID machine_id = {.u64 = {0, 0}};
     char value[64];
     memset(value, 0, 64);
@@ -275,7 +294,7 @@ static MachineID get_machine_id()
         blake2s_128(machine_id.u8, value, strlen(value));
     }
     fclose(fp);
-#endif    
+#endif
     return machine_id;
 }
 
