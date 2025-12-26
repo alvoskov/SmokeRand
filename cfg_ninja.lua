@@ -193,7 +193,7 @@ end
 
 if platform == 'generic' then
     local sc = make_gcc_stub_cfg()
-    sc.cflags = "-DNO_X86_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY";
+    sc.cflags = "-DNO_CPU_EXTENSIONS -DNOTHREADS -DNO_CUSTOM_DLLENTRY";
     stub = make_gcc_stub(sc) .. gcc_rules
 elseif platform == 'gcc' or platform == 'mingw' then
     local sc = make_gcc_stub_cfg()

@@ -10,8 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 - `arxfw8`, `arxfw8ex`, `arxfw16`, `arxfw64` generators.
 - `prvhash16cw` algorithm.
+- `rdrand` algorithm (direct access to the x86 RDRAND, based on the code
+  by Scott Miller)
 - Internal self-tests for `gjrand8` and `gjrand16`.
 - `-D__USE_MINGW_ANSI_STDIO` flag for older versions of MinGW.
+- Preliminary aarch64 support
 
 ### Changed
 

@@ -16,7 +16,8 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
 elseif(CMAKE_C_COMPILER_ID STREQUAL "OpenWatcom")
     set(CMODULE_LINK_FLAGS " ")
     set(FREESTANDING " ")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -za99 -DNO_X86_EXTENSIONS -DNOTHREADS")
+    # Add -DNO_CPU_EXTENSIONS to cflags if RDTSC is not desired
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -za99 -DNOTHREADS")
 else()
     set(CMODULE_LINK_FLAGS " ")
     set(FREESTANDING " ")
@@ -109,7 +110,7 @@ target_link_libraries(test_crand smokerand_bat smokerand_core ${COMMON_LIBS})
 set (GENERATORS
     a5rand a5rand32 a5rand32w a5randw aes128 alfib alfib64x5 alfib8x5 
     alfib_lux alfib_mod ara32 arxfw16 arxfw16ex2 arxfw32 arxfw64 
-    arxfw8 arxfw8ex arxfw8ex2 arxfwex3 biski16 biski16_alt biski16_mul 
+    arxfw8 arxfw8ex arxfw8ex2 arxfw8ex3 biski16 biski16_alt biski16_mul 
     biski32 biski32_alt biski64 biski64sh biski64_alt biski64_mul 
     biski8 biski8_alt biski8_mul blabla chacha cmwc4096 cmwc4827 
     combo coveyou64 cswb4288 cswb4288_64 cwg64 des drand48 efiix64x48 

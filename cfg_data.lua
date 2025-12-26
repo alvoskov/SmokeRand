@@ -18,7 +18,7 @@ local gen_sources = {
     'aes128',             'alfib',              'alfib64x5',          'alfib8x5', 
     'alfib_lux',          'alfib_mod',          'ara32',              'arxfw16', 
     'arxfw16ex2',         'arxfw32',            'arxfw64',            'arxfw8', 
-    'arxfw8ex',           'arxfw8ex2',          'arxfwex3',           'biski16', 
+    'arxfw8ex',           'arxfw8ex2',          'arxfw8ex3',          'biski16', 
     'biski16_alt',        'biski16_mul',        'biski32',            'biski32_alt', 
     'biski64',            'biski64sh',          'biski64_alt',        'biski64_mul', 
     'biski8',             'biski8_alt',         'biski8_mul',         'blabla', 
