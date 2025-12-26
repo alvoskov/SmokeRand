@@ -33,13 +33,13 @@ PRNG_CMODULE_PROLOG
  */
 static int has_hwrng()
 {
-	int ret = 0;
+    int ret = 0;
 #ifdef __RDRND__
     unsigned int eax = 0, ebx = 0, ecx = 0, edx = 0;
     __get_cpuid(1, &eax, &ebx, &ecx, &edx);
     ret = (ecx & bit_RDRND) != 0;
 #endif
-	return ret;
+    return ret;
 }
 
 
@@ -75,6 +75,7 @@ static inline uint64_t get_bits_raw(RdrandState *obj)
 static void *create(const CallerAPI *intf)
 {
     if (!has_hwrng()) {
+        intf->printf("Not supported\n");
         return NULL;
     }
 #if defined(__RDRND__)
@@ -82,6 +83,7 @@ static void *create(const CallerAPI *intf)
     obj->dummy = 0;
     return obj;
 #else
+    intf->printf("Not supported\n");
     return NULL;
 #endif
 }

@@ -283,7 +283,7 @@ static MachineID get_machine_id()
 ///// CPU architecture dependent functions /////
 ////////////////////////////////////////////////
 
-#ifdef NO_X86_EXTENSIONS
+#ifdef NO_CPU_EXTENSIONS
 /**
  * @brief rdseed is unavailable: just return 0.
  */
@@ -349,15 +349,30 @@ uint64_t cpuclock(void)
     return clk * clocks_to_tics;
 }
 #else
+
 #if defined(__WATCOMC__)
-uint64_t __rdtsc(void);
-#pragma aux __rdtsc = " .586 " \
-    "rdtsc " value [eax edx];
+    uint64_t __rdtsc(void);
+    #pragma aux __rdtsc = " .586 " \
+        "rdtsc " value [eax edx];
 #elif (defined(WIN32) || defined(WIN64)) && !defined(__MINGW32__) && !defined(__MINGW64__)
-#include <intrin.h>
-#pragma intrinsic(__rdtsc)
+    #include <intrin.h>
+    #pragma intrinsic(__rdtsc)
+#elif defined(__x86_64__) || defined(__i386__)
+    #include <x86intrin.h>
+#elif defined(__aarch64__) || defined(_M_ARM64)
+    static inline uint64_t __rdtsc(void)
+    {
+        uint64_t freq;
+        __asm__ __volatile__("mrs %0, cntvct_el0" : "=r"(freq));
+        // pmccntr_el0 is usually disabled in a user-space mode
+        //__asm__ __volatile__("mrs %0, pmccntr_el0" : "=r"(freq));
+        return freq;
+    }
 #else
-#include <x86intrin.h>
+    static inline uint64_t __rdtsc(void)
+    {
+        return 0;
+    }
 #endif
 /**
  * @brief Calls x86-64 CPU rdseed instruction.

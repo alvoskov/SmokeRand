@@ -45,6 +45,13 @@ else ifeq ($(PLATFORM_NAME), GCC32)
     GEN_CFLAGS += -DNO_CUSTOM_DLLENTRY
     GEN_LFLAGS = -lgcc
     PLATFORM_FLAGS = -m32 -march=native
+else ifeq ($(PLATFORM_NAME), GCC_AARCH64_CROSS)
+    CC = aarch64-linux-gnu-gcc
+    CXX = aarch64-linux-gnu-g++
+    AR = ar
+    GEN_CFLAGS += -ffreestanding -nostdlib
+    GEN_LFLAGS = -lgcc
+    PLATFORM_FLAGS =
 else ifeq ($(PLATFORM_NAME), DJGPP)
     CC = gcc
     CXX = gpp
