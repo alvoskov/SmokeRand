@@ -217,6 +217,36 @@ uint32_t get_tick_count()
 
 double get_cpu_freq(void)
 {
+#ifdef WINDOWS_PLATFORM
+    HKEY hKey;
+    const char *subKey = "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0";
+    const char *valueName = "~MHz";
+    DWORD cpuSpeedMHz = 0, dataSize = sizeof(cpuSpeedMHz);
+    // Open the registry key
+    LSTATUS status = RegOpenKeyEx(
+        HKEY_LOCAL_MACHINE, // Top-level key
+        subKey,             // Subkey path
+        0,                  // Options
+        KEY_QUERY_VALUE,    // Desired access rights
+        &hKey               // Handle to the opened key
+    );
+    if (status != ERROR_SUCCESS) {
+        return 0.0;
+    } else {
+        // Query the value
+        status = RegQueryValueEx(
+            hKey,           // Handle to the opened key
+            valueName,      // Value name
+            NULL,           // Reserved
+            NULL,           // Type (can be NULL if not needed)
+            (LPBYTE) &cpuSpeedMHz, // Buffer for data
+            &dataSize       // Size of data buffer
+        );
+        // Close the registry key
+        RegCloseKey(hKey);
+        return (status == ERROR_SUCCESS) ? (double) cpuSpeedMHz : 0.0;
+    }
+#elif !defined(NO_POSIX)
     FILE *fp = fopen("/proc/cpuinfo", "r");
     if (fp == NULL) {
         return 0.0;
@@ -230,6 +260,9 @@ double get_cpu_freq(void)
     }
     fclose(fp);
     return freq;
+#else
+    return 0.0;
+#endif
 }
 
 /**
@@ -247,7 +280,6 @@ typedef union {
  */
 static MachineID get_machine_id()
 {
-    printf("===>%g\n", get_cpu_freq());
     MachineID machine_id = {.u64 = {0, 0}};
     char value[64];
     memset(value, 0, 64);
