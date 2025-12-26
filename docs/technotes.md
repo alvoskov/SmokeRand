@@ -143,6 +143,26 @@ at all, tested generators should be embedded into its source code.
 As it was mentioned above it is possible to use the same approach for DJGPP
 but it is disabled by default. See the `src/threads_intf.c` file for details.
 
+## Cross-compilation for AARCH64
+
+A good tutorial about the cross-compilation on GNU/Linux can be found
+[here](see https://azeria-labs.com/arm-on-x86-qemu-user/). `Makefile.gnu`
+has a section for such cross-compilation (`PLATFORM_NAME=GCC_AARCH64_CROSS`).
+
+Packages installation:
+
+```
+$ sudo apt install qemu-user qemu-user-static gcc-aarch64-linux-gnu
+$ sudo apt install binutils-aarch64-linux-gnu binutils-aarch64-linux-gnu-dbg
+$ sudo apt install build-essential
+```
+
+Cross-compilation and running inside the emulator:
+
+```
+$ aarch64-linux-gnu-gcc -o hello hello.c
+$ qemu-aarch64 -L /usr/aarch64-linux-gnu ./hello
+```
 
 # Batteries
 
