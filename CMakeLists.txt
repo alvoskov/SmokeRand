@@ -44,6 +44,7 @@ add_library(smokerand_core
     src/base64.c        include/smokerand/base64.h
     src/core.c          include/smokerand/core.h
     src/coretests.c     include/smokerand/coretests.h
+    src/cpuinfo.c       include/smokerand/cpuinfo.h
     src/blake2s.c       include/smokerand/blake2s.h
     src/entropy.c       include/smokerand/entropy.h
     src/extratests.c    include/smokerand/extratests.h

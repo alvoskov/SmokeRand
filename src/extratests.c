@@ -10,7 +10,7 @@
  *
  * This software is licensed under the MIT license.
  */
-#include "smokerand/entropy.h"
+#include "smokerand/cpuinfo.h"
 #include "smokerand/extratests.h"
 #include "smokerand/specfuncs.h"
 #include <math.h>

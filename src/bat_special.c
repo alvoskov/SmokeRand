@@ -1,3 +1,4 @@
+#include "smokerand/cpuinfo.h"
 #include "smokerand/entropy.h"
 #include "smokerand/bat_special.h"
 #include <stdio.h>

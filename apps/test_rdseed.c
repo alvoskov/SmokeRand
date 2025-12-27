@@ -1,4 +1,5 @@
-#include "smokerand/entropy.h"
+#include "smokerand/cpuinfo.h"
+#include <stdio.h>
 
 int main()
 {

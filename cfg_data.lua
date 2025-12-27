@@ -1,4 +1,5 @@
-local lib_sources = {'base64.c', 'core.c', 'coretests.c', 'blake2s.c', 'entropy.c',
+local lib_sources = {'base64.c', 'core.c', 'coretests.c', 'cpuinfo.c',
+    'blake2s.c', 'entropy.c',
     'extratests.c', 'fileio.c', 'lineardep.c', 'hwtests.c', 'specfuncs.c',
     'threads_intf.c'}
 
@@ -6,7 +7,7 @@ local bat_sources = {'bat_express.c', 'bat_brief.c', 'bat_default.c',
     'bat_file.c', 'bat_full.c', 'bat_special.c'}
 
 local lib_headers = {'apidefs.h', 'cinterface.h', 'base64.h', 'blake2s.h', 'core.h',
-    'coredefs.h', 'coretests.h', 'entropy.h', 'extratests.h', 'fileio.h',
+    'coredefs.h', 'coretests.h', 'cpuinfo.h', 'entropy.h', 'extratests.h', 'fileio.h',
     'hwtests.h', 'int128defs.h', 'lineardep.h', 'specfuncs.h',
     'threads_intf.h', 'x86exts.h'}
 
