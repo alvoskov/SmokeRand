@@ -130,29 +130,15 @@ SpeedResults battery_speed_test(const GeneratorInfo *gen, const CallerAPI *intf,
         speed_corr.cpb = NAN;
     }
 
-    //double cpb_corr = ticks_per_call_corr / nbytes;
-    // Some corrections for ARM processors
     const double cpu_freq_meas = speed_full.ticks_per_call / speed_full.ns_per_call * 1000.0;
     const double gb_per_sec = (double) nbytes / (1.0e-9 * speed_corr.ns_per_call) / pow(2.0, 30.0);
-    const double cpu_freq_os = get_cpu_freq();
-    if (cpu_freq_os == cpu_freq_os && cpu_freq_os > 0.0) {
-        const double coeff = cpu_freq_os / cpu_freq_meas;
-        if (coeff < 0.2 || coeff > 5.0) {
-            speed_full.ticks_per_call  *= coeff;
-            speed_full.cpb             *= coeff;
-            speed_dummy.ticks_per_call *= coeff;
-            speed_corr.ticks_per_call  *= coeff;
-            speed_corr.cpb             *= coeff;
-        }
-    }
     // Print report
     printf("Nanoseconds per call:\n");
     printf("  Raw result:                 %g\n", speed_full.ns_per_call);
     printf("  For empty 'dummy' PRNG:     %g\n", speed_dummy.ns_per_call);
     printf("  Corrected result:           %g\n", speed_corr.ns_per_call);
     printf("  Corrected result (GiB/sec): %g\n", gb_per_sec);
-    printf("CPU frequency (RDTSC):        %.1f MHz\n", cpu_freq_meas);
-    printf("CPU frequency from OS:        %.1f MHz\n", cpu_freq_os);
+    printf("CPU frequency:                %.1f MHz\n", cpu_freq_meas);
     printf("CPU ticks per call:\n");
     printf("  Raw result:                 %g\n", speed_full.ticks_per_call);
     printf("  Raw result (cpB):           %g\n", speed_full.cpb);
