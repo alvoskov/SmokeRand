@@ -10,6 +10,7 @@
  * This software is licensed under the MIT license.
  */
 #include "smokerand/cpuinfo.h"
+#include <stdio.h>
 #include <time.h>
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
@@ -72,7 +73,7 @@ double get_cpu_freq(void)
         &hKey               // Handle to the opened key
     );
     if (status != ERROR_SUCCESS) {
-        return (double) estimate_cpu_freq() / 1000.0;
+        return (double) estimate_cpu_freq() / 1e6;
     } else {
         // Query the value
         status = RegQueryValueEx(
@@ -100,12 +101,12 @@ double get_cpu_freq(void)
         }
     }
     if (freq == 0.0) {
-        freq = (double) estimate_cpu_freq() / 1000.0;
+        freq = (double) estimate_cpu_freq() / 1e6;
     }
     fclose(fp);
     return freq;
 #else
-    return (double) estimate_cpu_freq() / 1000.0;
+    return (double) estimate_cpu_freq() / 1e6;
 #endif
 }
 
@@ -175,11 +176,19 @@ uint64_t call_rdseed()
     #define AARCH64_RDTSC
     static inline uint64_t get_cntvct_el0(void)
     {
-        uint64_t freq;
-        __asm__ __volatile__("mrs %0, cntvct_el0" : "=r"(freq));
+        uint64_t ctr;
+        __asm__ __volatile__("mrs %0, cntvct_el0" : "=r"(ctr));
         // pmccntr_el0 is usually disabled in a user-space mode
-        //__asm__ __volatile__("mrs %0, pmccntr_el0" : "=r"(freq));
+        //__asm__ __volatile__("mrs %0, pmccntr_el0" : "=r"(ctr));
+        return ctr;
+    }
+
+    static inline uint64_t get_cntfrq_el0(void)
+    {
+        uint64_t freq;
+        __asm__ __volatile__("mrs %0, cntfrq_el0" : "=r"(freq));
         return freq;
+
     }
 #else
     #define NO_RDTSC
@@ -191,7 +200,13 @@ uint64_t cpuclock()
 #ifdef X86_RDTSC
     return __rdtsc();
 #elif defined(AARCH64_RDTSC)
-    return get_cntvct_el0();
+    static uint64_t coeff = 0;
+    if (coeff == 0) {
+        const double coeff_dbl = (double) get_cpu_freq() * 512e6 /
+            (double) get_cntfrq_el0();
+        coeff = (uint64_t) coeff_dbl;
+    }
+    return get_cntvct_el0() * coeff / 512;
 #else
     return emulate_cpuclock();
 #endif
