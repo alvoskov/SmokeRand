@@ -321,18 +321,18 @@ static inline uint32_t dos386_get_bios_pit(void)
  */
 static int dos386_random_rdtsc(FILE *fp, uint64_t *out, size_t len)
 {
-    uint64_t rdtsc_prev = __rdtsc(), delta_prev = 0;
+    uint64_t rdtsc_prev = cpuclock(), delta_prev = 0;
     uint64_t accum = dos386_get_bios_pit();
     for (size_t i = 0; i < len; i++) {
         size_t nbits_total = 0;
         for (int j = 0; j < 64 && nbits_total < 128; j++) {
             // Wait for the next tick of the PIT
             for (uint32_t t = dos386_get_bios_pit(); t == dos386_get_bios_pit(); ) {
-                for (uint64_t ct = __rdtsc(); ct % 1021 == 0; ct = __rdtsc()) {
+                for (uint64_t ct = cpuclock(); ct % 1021 == 0; ct = cpuclock()) {
                 }
             }
             // Extract random bits as "delta of the delta"
-            uint64_t rdtsc_cur =  __rdtsc();
+            uint64_t rdtsc_cur = cpuclock();
             uint64_t delta_cur = rdtsc_cur - rdtsc_prev;
             uint64_t rndbits;
             if (delta_cur > delta_prev) {

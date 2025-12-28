@@ -142,7 +142,8 @@ io.write("$(bindir)/smokerand.exe:" .. objstr .. "\n")
 io.write("\twcl386 -4s -fe=$(bindir)/smokerand.exe " .. objstr .. "\n")
 
 io.write("$(bindir)/test_funcs.exe: $(objdir)/test_funcs.obj \n")
-io.write("\twcl386 -4s -fe=$(bindir)/test_funcs.exe $(objdir)/base64.obj $(objdir)/blake2s.obj $(objdir)/core.obj " ..
+io.write("\twcl386 -4s -fe=$(bindir)/test_funcs.exe $(objdir)/base64.obj $(objdir)/blake2s.obj $(objdir)/cpuinfo.obj " ..
+    "$(objdir)/core.obj " ..
     "$(objdir)/specfuncs.obj $(objdir)/test_funcs.obj $(objdir)/entropy.obj " ..
     "$(objdir)/threads_intf.obj\n")
 
