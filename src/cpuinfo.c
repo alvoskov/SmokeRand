@@ -18,6 +18,44 @@
     #define WINDOWS_PLATFORM
 #endif
 
+
+#ifdef NO_CPU_EXTENSIONS
+    #define NO_RDTSC
+#elif defined(__WATCOMC__)
+    #define X86_RDTSC
+    uint64_t __rdtsc(void);
+    #pragma aux __rdtsc = " .586 " \
+        "rdtsc " value [eax edx];
+#elif (defined(WIN32) || defined(WIN64)) && !defined(__MINGW32__) && !defined(__MINGW64__)
+    #define X86_RDTSC
+    #include <intrin.h>
+    #pragma intrinsic(__rdtsc)
+#elif defined(__x86_64__) || defined(__i386__)
+    #define X86_RDTSC
+    #include <x86intrin.h>
+#elif defined(__aarch64__) || defined(_M_ARM64)
+    #define AARCH64_RDTSC
+    static inline uint64_t get_cntvct_el0(void)
+    {
+        uint64_t ctr;
+        __asm__ __volatile__("mrs %0, cntvct_el0" : "=r"(ctr));
+        // pmccntr_el0 is usually disabled in a user-space mode
+        //__asm__ __volatile__("mrs %0, pmccntr_el0" : "=r"(ctr));
+        return ctr;
+    }
+
+    static inline uint64_t get_cntfrq_el0(void)
+    {
+        uint64_t freq;
+        __asm__ __volatile__("mrs %0, cntfrq_el0" : "=r"(freq));
+        return freq;
+
+    }
+#else
+    #define NO_RDTSC
+#endif
+
+
 /**
  * @brief A crude estimation of CPU frequency based on `clock` function
  * and execution of arithmetic loops that cannot be optimized by compilers.
@@ -157,42 +195,6 @@ uint64_t call_rdseed()
     return rd;
 }
 
-
-#ifdef NO_CPU_EXTENSIONS
-    #define NO_RDTSC
-#elif defined(__WATCOMC__)
-    #define X86_RDTSC
-    uint64_t __rdtsc(void);
-    #pragma aux __rdtsc = " .586 " \
-        "rdtsc " value [eax edx];
-#elif (defined(WIN32) || defined(WIN64)) && !defined(__MINGW32__) && !defined(__MINGW64__)
-    #define X86_RDTSC
-    #include <intrin.h>
-    #pragma intrinsic(__rdtsc)
-#elif defined(__x86_64__) || defined(__i386__)
-    #define X86_RDTSC
-    #include <x86intrin.h>
-#elif defined(__aarch64__) || defined(_M_ARM64)
-    #define AARCH64_RDTSC
-    static inline uint64_t get_cntvct_el0(void)
-    {
-        uint64_t ctr;
-        __asm__ __volatile__("mrs %0, cntvct_el0" : "=r"(ctr));
-        // pmccntr_el0 is usually disabled in a user-space mode
-        //__asm__ __volatile__("mrs %0, pmccntr_el0" : "=r"(ctr));
-        return ctr;
-    }
-
-    static inline uint64_t get_cntfrq_el0(void)
-    {
-        uint64_t freq;
-        __asm__ __volatile__("mrs %0, cntfrq_el0" : "=r"(freq));
-        return freq;
-
-    }
-#else
-    #define NO_RDTSC
-#endif
 
 
 uint64_t cpuclock()
