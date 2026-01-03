@@ -5,7 +5,7 @@
  * the mod3 test from gjrand.
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -535,19 +535,16 @@ TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opt
 ///// Gap test implementation /////
 ///////////////////////////////////
 
-static int gap_test_guard(GeneratorState *obj, const GapOptions *opts)
+/**
+ * @brief Calculates the maximal gap length for the given probability (failure threshold)
+ * @param opts       Gap test settings.
+ * @param pgap_fail  p-value for failure threshold.
+ * @return Maximal gap length.
+ */
+static unsigned long long GapOptions_max_gaplen(const GapOptions *opts, double pgap_fail)
 {
-    int is_ok = 0;
-    uint64_t beta = 1ull << (obj->gi->nbits - opts->shl);
-    double p = 1.0 / (double) (1ull << opts->shl); // beta in the floating point format
-    unsigned long long nsamples = (unsigned long long) (-20.0 / log10(1.0 - p));
-    for (unsigned long i = 0; i < nsamples; i++) {
-        if (obj->gi->get_bits(obj->state) <= beta) {
-            is_ok = 1;
-            break;
-        }
-    }
-    return is_ok;
+    const double p = 1.0 / (double) (1ull << opts->shl); // beta in the floating point format
+    return (unsigned long long) ((log(pgap_fail) - log(p)) / log(1.0 - p));
 }
 
 /**
@@ -556,31 +553,28 @@ static int gap_test_guard(GeneratorState *obj, const GapOptions *opts)
  */
 TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
 {
+    const double pgap_fail = 1.0e-15;
     const double Ei_min = 10.0;
-    double p = 1.0 / (double) (1ull << opts->shl); // beta in the floating point format
-    uint64_t beta = 1ull << (obj->gi->nbits - opts->shl);
+    const double p = 1.0 / (double) (1ull << opts->shl); // beta in the floating point format
+    const uint64_t beta = 1ull << (obj->gi->nbits - opts->shl);
     uint64_t u;
-    unsigned long long ngaps = opts->ngaps;
-    size_t nbins = (size_t) (log(Ei_min / ((double) ngaps * p)) / log(1 - p));
+    const unsigned long long ngaps = opts->ngaps;
+    const size_t nbins = (size_t) (log(Ei_min / ((double) ngaps * p)) / log(1 - p));
     size_t *Oi = calloc(nbins + 1, sizeof(size_t));
     if (Oi == NULL) {
         fprintf(stderr, "***** gap_test: not enough memory *****\n");
         exit(EXIT_FAILURE);
     }
     unsigned long long nvalues = 0;
+    const unsigned long long max_gap_len = GapOptions_max_gaplen(opts, pgap_fail);
     TestResults ans = TestResults_create("Gap");
     obj->intf->printf("Gap test\n");
     obj->intf->printf("  alpha = 0.0; beta = %g; shl = %u;\n", p, opts->shl);
     obj->intf->printf("  ngaps = %llu (2^%.2f or 10^%.2f); nbins = %llu\n",
         ngaps, sr_log2((double) ngaps), log10((double) ngaps),
         (unsigned long long) nbins);
-    if (!gap_test_guard(obj, opts)) {
-        obj->intf->printf("  Generator output doesn't hit the gap! p <= 1e-15\n");
-        ans.p = 1.0e-15;
-        ans.alpha = 1.0 - ans.p;
-        ans.x = NAN;
-        return ans;
-    }
+    obj->intf->printf("  max_gap_len = %llu\n", max_gap_len);
+
     for (unsigned long long i = 0; i < ngaps; i++) {
         size_t gap_len = 0;
         u = obj->gi->get_bits(obj->state);
@@ -589,13 +583,21 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
             gap_len++;
             u = obj->gi->get_bits(obj->state);
             nvalues++;
+            if (gap_len >= max_gap_len) {
+                obj->intf->printf("  Generator output doesn't hit the gap! p <= %g\n", pgap_fail);
+                ans.p = pgap_fail;
+                ans.alpha = 1.0 - ans.p;
+                ans.x = NAN;
+                free(Oi);
+                return ans;
+            }
         }
         Oi[(gap_len < nbins) ? gap_len : nbins]++;
     }
     ans.penalty = PENALTY_GAP;
     ans.x = 0.0; // chi2emp
     for (size_t i = 0; i < nbins; i++) {
-        double Ei = p * pow(1.0 - p, (double) i) * (double) ngaps;
+        const double Ei = p * pow(1.0 - p, (double) i) * (double) ngaps;
         ans.x += calc_chi2emp_term(Oi[i], Ei);
     }
     free(Oi);

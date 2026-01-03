@@ -11,7 +11,7 @@
  * References:
  * 1. Hanlon J., Felix S. A Fast Hardware Pseudorandom Number Generator Based on
  *    xoroshiro128 // IEEE Transactions on Computers. 2023. V. 72. N 5.
-*     P.1518-1528. https://doi.org/10.1109/TC.2022.3204226
+ *    P.1518-1528. https://doi.org/10.1109/TC.2022.3204226
  * 2. https://www.jameswhanlon.com/the-hardware-pseudorandom-number-generator-of-the-graphcore-ipu.html
  * 3. D. Blackman, S. Vigna. Scrambled Linear Pseudorandom Number Generators
  *    // ACM Transactions on Mathematical Software (TOMS). 2021. V. 47. N 4.
@@ -24,7 +24,7 @@
  *
  * Reentrant implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.

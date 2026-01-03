@@ -8,13 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ### Added
 
-- `arxfw8`, `arxfw8ex`, `arxfw16`, `arxfw64` generators.
+- `arxfw8`, `arxfw8ex`, `arxfw8ex2`, `arxfw8ex3`, `arxfw16`, `arxfw16ex2`, `arxfw32`,
+  `arxfw64` nonlinear generators with linear parts.
+- `xkiss32_rot_aox`, `xoroshiro64aox`, `xoshiro128aox` generators that don't
+  use integers overflows; may be easy to port to Modula-2 and Oberon programming
+  languages.
+- `xorrot32` generator: designed as a part of `xkiss32_rot_aox` generator.
 - `prvhash16cw` algorithm.
 - `rdrand` algorithm (direct access to the x86 RDRAND, based on the code
   by Scott Miller)
 - Internal self-tests for `gjrand8` and `gjrand16`.
 - `-D__USE_MINGW_ANSI_STDIO` flag for older versions of MinGW.
-- Preliminary aarch64 support
+- Preliminary aarch64 support.
 
 ### Changed
 
@@ -24,6 +29,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `pthread_t` is now not assumed to be integer (was bad for `pthread-win32`)
 - Bugfix: `inttypes.h` is excluded from PRNG plugins (may not present in
   freestanding environments)
+- Bugfix: improved protection from infinite cycles in the gap test. See
+  `loop_antigap_w64` and `loop_7fff_w64` generators: they are test that are
+  designed to provoke such infinite loops.
 - Custom DLL entry for MSYS added into `apidefs.h`.
 
 

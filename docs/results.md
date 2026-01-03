@@ -309,11 +309,13 @@ was used:
  xkiss16_awc       | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
  xkiss16sh_awc     | u32    | +       | +     | +       | +    | 2.1  | +      | 3     | +       | 16 GiB
  xkiss32_awc       | u32    | +       | +     | +       | +    | 0.66 | +      | 4     | +       | >= 32 TiB
+ xkiss32_awc_rot   | u32    | +       | +     | +       | +    |      | +      | 4     | +       | >= 16 TiB
  xkiss32sh_awc     | u32    | +       | +     | +       | +    | 0.99 | +      | 4     | +       | >= 16 TiB
  xkiss64_awc       | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xoroshiro32       | u32    | 2       | 14    | 28/29   | 37/39| 1.4  | -(>>10)| 0     | -       | 32 KiB
  xoroshiro32pp     | u32    | +       | 1     | 2       | 6/8  | 1.5  | -(>>10)| 0     | Small   | 256 MiB
+ xoroshiro64aox    | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | ?
  xoroshiro64pp     | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 8 TiB
  xoroshiro64st     | u32    | 1       | 1     | 3       | 5    | 0.51 | -      | 1.75  | Small   | 1 MiB
  xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 32 TiB
@@ -332,6 +334,7 @@ was used:
  xoroshiro1024st   | u64    | 1       | 1     | 1       | 2    | 0.33 | +      | 3.5   |+lo/+hi  | 128 GiB
  xoroshiro1024stst | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +       | >= 16 TiB
  xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | +      | 0     | Small   | 128 KiB
+ xoshiro128aox     | u32    | +       | +     | +       | +    | 0.61 | +      | 4     | +       | >= 2 TiB
  xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      | 3     | +       | 8 MiB
  xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      | 4     | +       | >= 16 TiB
  xoshiro256p       | u64    | 1       | 1     | 2       | 3    | 0.20 | +      | 3.25  |         | 64 MiB
