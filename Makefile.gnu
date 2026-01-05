@@ -134,7 +134,7 @@ LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, $(LIB_HEADERS_EXTRA) \
     apidefs.h cinterface.h coredefs.h int128defs.h x86exts.h ../smokerand_core.h \
     base64.h core.h coretests.h cpuinfo.h \
     blake2s.h entropy.h extratests.h fileio.h lineardep.h hwtests.h specfuncs.h \
-    threads_intf.h )
+    threads_intf.h version.h)
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
 INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/coredefs.h \
     $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/int128defs.h \
@@ -148,8 +148,8 @@ BATLIB_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_express.h bat_brief.h bat_defau
     include/smokerand_bat.h
 BATLIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(BATLIB_SOURCES)))
 # Executables
-EXEC_NAMES = smokerand sr_tiny calibrate_linearcomp calibrate_dc6 \
-    test_base64 test_crand test_funcs test_rdseed
+EXEC_NAMES = smokerand sr_speed sr_tiny calibrate_linearcomp calibrate_dc6 \
+    test_base64 test_crand test_funcs test_rdseed test_syscrypto
 EXEC_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXEC_NAMES)))
 EXECXX_NAMES = test_cpp11 test_chacha
 EXECXX_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXECXX_NAMES)))
@@ -177,6 +177,9 @@ $(BAT_LIB): $(BATLIB_OBJFILES)
 $(BINDIR)/sr_tiny$(EXE): $(APPSRCDIR)/sr_tiny.c $(SRCDIR)/specfuncs.c include/smokerand/specfuncs.h
 	$(CC) $(CFLAGS89) $(LINKFLAGS) $(APPSRCDIR)/sr_tiny.c $(SRCDIR)/specfuncs.c -o $@ -lm $(INCLUDE) 
 
+$(BINDIR)/sr_speed$(EXE): $(APPSRCDIR)/sr_speed.c $(CORE_LIB) $(BAT_LIB) $(BAT_HEADERS)
+	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
+
 $(BINDIR)/smokerand$(EXE): $(OBJDIR)/smokerand.o $(CORE_LIB) $(BAT_LIB) $(BAT_HEADERS)
 	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
@@ -202,6 +205,9 @@ $(BINDIR)/test_funcs$(EXE): $(OBJDIR)/test_funcs.o $(CORE_LIB) $(BAT_LIB)
 	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
 $(BINDIR)/test_rdseed$(EXE): $(OBJDIR)/test_rdseed.o $(CORE_LIB) $(BAT_LIB)
+	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
+
+$(BINDIR)/test_syscrypto$(EXE): $(OBJDIR)/test_syscrypto.o $(CORE_LIB) $(BAT_LIB)
 	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
 $(BINDIR)/bat_example$(SO): $(OBJDIR)/bat_example.o

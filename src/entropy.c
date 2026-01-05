@@ -369,7 +369,7 @@ static int dos386_random_rdtsc(FILE *fp, uint64_t *out, size_t len)
  * @param[in]  len  Size of output buffer in bytes.
  * @return 0/1 - failure/success.
  */
-static int fill_from_random_device(unsigned char *out, size_t len)
+int fill_from_random_device(unsigned char *out, size_t len)
 {
 #ifdef WINDOWS_PLATFORM
     HCRYPTPROV hCryptProv;

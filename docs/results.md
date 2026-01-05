@@ -205,7 +205,7 @@ was used:
  philox2x32        | u32    | +       | +     | +       | +    | 1.6  | -      | 3     | +       | >= 32 TiB
  philox32          | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
  prvhash12c        | u32    | +       | 0/1   | 0/1     | 4    | 5.1  |        | 0     | Crush   | 8 GiB
- prvhash12cw       | u32    | +       | +     | +       | +    | 5.1  |        |       | >=Crush | 2 TiB
+ prvhash12cw       | u32    | +       | +     | +       | +    | 5.1  |        |       | +       | 2 TiB
  prvhash16c        | u32    | +       | +     | +       | +    | 2.4  | +      | 4(0)  |         | 256 GiB
  prvhash16cw       | u32    | +       | +     | +       | +    | 2.4  | +      | 4(0)  |         | ?
  prvhash64c        | u64    | +       | +     | +       | +    | 0.51 | +      | 4(0)  |         | ?
@@ -315,7 +315,7 @@ was used:
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xoroshiro32       | u32    | 2       | 14    | 28/29   | 37/39| 1.4  | -(>>10)| 0     | -       | 32 KiB
  xoroshiro32pp     | u32    | +       | 1     | 2       | 6/8  | 1.5  | -(>>10)| 0     | Small   | 256 MiB
- xoroshiro64aox    | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | ?
+ xoroshiro64aox    | u32    | +       | +     | +       | +    | 0.52 | +      | 3.5   | +       | 512 GiB
  xoroshiro64pp     | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 8 TiB
  xoroshiro64st     | u32    | 1       | 1     | 3       | 5    | 0.51 | -      | 1.75  | Small   | 1 MiB
  xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 32 TiB
@@ -334,7 +334,7 @@ was used:
  xoroshiro1024st   | u64    | 1       | 1     | 1       | 2    | 0.33 | +      | 3.5   |+lo/+hi  | 128 GiB
  xoroshiro1024stst | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +       | >= 16 TiB
  xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | +      | 0     | Small   | 128 KiB
- xoshiro128aox     | u32    | +       | +     | +       | +    | 0.61 | +      | 4     | +       | >= 2 TiB
+ xoshiro128aox     | u32    | +       | +     | +       | +    | 0.61 | +      | 4     | +       | >= 8 TiB
  xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      | 3     | +       | 8 MiB
  xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      | 4     | +       | >= 16 TiB
  xoshiro256p       | u64    | 1       | 1     | 2       | 3    | 0.20 | +      | 3.25  |         | 64 MiB
@@ -350,6 +350,10 @@ was used:
  xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   | >= Crush| >= 32 TiB
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   | >= Crush| >= 1 TiB
  xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   | >= Crush| >= 32 TiB
+ zibri128          | u64    | +       | 7     |         |      | 0.14 |        | 0     | -       | 32 KiB
+ zibri128ex        | u64    | +       | +     | +       | +    | 0.14 | +      | 4     | +HI     | >= 2 TiB
+ zibri192          | u64    | +       | 3/5   |         |      | 0.20 |        | 0     | Crush   | 2 MiB
+ zibri192ex        | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | ?
  ziff98            | u32    | +       | 3     | 3       | 3    | 0.47 | +      | 3.25  | Small   | 32 GiB
 
 Performance estimation for some 64-bit generators
@@ -683,6 +687,91 @@ are less sensitive, e.g. entropy test catches only randu.
 
 - Failed ENT: randu, lcg69069, drand48, shr3
 - Passes ENT: lcg32prime, lcg64, lfib31, swb
+
+# Notes about birthday spacings tests in PractRand 0.96
+
+A new statistical test, "birthday spacings systematic" was introduced in
+PractRand 0.96. It catches some 64-bit LCGs with prime modulo but often fails
+to detect additive lagged Fibonacci and subtract-with-borrow generators
+with large lags that are detected by SmokeRand.
+
+lcg64prime
+
+    rng=RNG_stdin64, seed=unknown
+    length= 32 gigabytes (2^35 bytes), time= 130 seconds
+      Test Name                         Raw       Processed     Evaluation
+      [Low16/64]Gap-16:B                R=  -6.6  p =1-1.6e-5   mildly suspicious
+      ...and 295 test result(s) without anomalies
+
+    rng=RNG_stdin64, seed=unknown
+    length= 64 gigabytes (2^36 bytes), time= 249 seconds
+      Test Name                         Raw       Processed     Evaluation
+      BDayS2(4,24)[64+2]                R= +10.4  p =  1.8e-20    FAIL !
+      ...and 307 test result(s) without anomalies
+
+
+sezgin63
+
+    rng=RNG_stdin32, seed=unknown
+    length= 32 gigabytes (2^35 bytes), time= 132 seconds
+      no anomalies in 228 test result(s)
+
+    rng=RNG_stdin32, seed=unknown
+    length= 64 gigabytes (2^36 bytes), time= 263 seconds
+      Test Name                         Raw       Processed     Evaluation
+      BDayS2(4,24)[64+3]                R= +14.9  p~=  1.4e-37    FAIL !!!
+      ...and 236 test result(s) without anomalies
+
+MWC64
+
+    rng=RNG_stdin32, seed=unknown
+    length= 32 gigabytes (2^35 bytes), time= 140 seconds
+      Test Name                         Raw       Processed     Evaluation
+      BDayS2(4,24)[64+1]                R=  +3.9  p =  5.3e-5   unusual
+      ...and 227 test result(s) without anomalies
+    
+    rng=RNG_stdin32, seed=unknown
+    length= 64 gigabytes (2^36 bytes), time= 270 seconds
+      Test Name                         Raw       Processed     Evaluation
+      BDayS2(4,24)[64+2]                R=  +9.7  p =  6.5e-18    FAIL !
+      ...and 236 test result(s) without anomalies
+
+LFIB-2281+
+
+    rng=RNG_stdin32, seed=unknown
+    length= 8 terabytes (2^43 bytes), time= 24704 seconds
+      Test Name                         Raw       Processed     Evaluation
+      [Low1/32]BCFN(2+4,13-0U)          R= +10.4  p =  4.3e-5   unusual
+      ...and 291 test result(s) without anomalies
+
+
+
+CSWB4288/64: >= 1 TiB
+
+SWBLARGE
+
+    rng=RNG_stdin32, seed=unknown
+    length= 128 gigabytes (2^37 bytes), time= 494 seconds
+      no anomalies in 246 test result(s)
+
+    rng=RNG_stdin32, seed=unknown
+    length= 256 gigabytes (2^38 bytes), time= 967 seconds
+      Test Name                         Raw       Processed     Evaluation
+      [Low1/32]BCFN(2+2,13-0U)          R= +10.3  p =  4.7e-5   mildly suspicious
+      ...and 254 test result(s) without anomalies
+
+    rng=RNG_stdin32, seed=unknown
+    length= 512 gigabytes (2^39 bytes), time= 2034 seconds
+      Test Name                         Raw       Processed     Evaluation
+      [Low1/32]BCFN(2+2,13-0U)          R= +17.5  p =  6.6e-9    VERY SUSPICIOUS
+      ...and 262 test result(s) without anomalies
+
+    rng=RNG_stdin32, seed=unknown
+    length= 1 terabyte (2^40 bytes), time= 4245 seconds
+      Test Name                         Raw       Processed     Evaluation
+      [Low1/32]BCFN(2+2,13-0U)          R= +35.0  p =  3.0e-18    FAIL !
+      ...and 270 test result(s) without anomalies
+
 
 # Notes about TMFn test from PractRand 0.94
 

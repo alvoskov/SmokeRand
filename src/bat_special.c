@@ -1,3 +1,14 @@
+/**
+ * @file bat_special.c
+ * @brief Contains implementations of special pseudobatteries for measuring
+ * PRNG speed, running its internal self-tests etc.
+ *
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cpuinfo.h"
 #include "smokerand/entropy.h"
 #include "smokerand/bat_special.h"
@@ -8,25 +19,6 @@
 #include <math.h>
 
 #define SUM_BLOCK_SIZE 32768
-
-/**
- * @brief Keeps PRNG speed measurements results.
- */
-typedef struct
-{
-    double ns_per_call; ///< Nanoseconds per call
-    double ticks_per_call; ///< Processor ticks per call
-    double cpb; ///< cpb (cycles/CPU ticks per byte)
-} SpeedResults;
-
-/**
- * @brief Speed measurement mode.
- */
-typedef enum {
-    SPEED_UINT, ///< Single value (emulates call of PRNG function)
-    SPEED_SUM   ///< Sum of values (emulates usage of inline PRNG)
-} SpeedMeasurementMode;
-
 
 /**
  * @brief PRNG speed measurement for uint output.
@@ -64,6 +56,10 @@ static SpeedResults measure_speed(const GeneratorInfo *gen, const CallerAPI *int
         size_t block_size = (mode == SPEED_UINT) ? 1 : SUM_BLOCK_SIZE;
         size_t nbytes = block_size * gen->nbits / 8;
         results.cpb = results.ticks_per_call / (double) nbytes;
+        // Convert to bytes per second
+        results.bytes_per_sec = (double) nbytes / (1.0e-9 * results.ns_per_call);
+        // Estimate CPU frequency (in MHz)
+        results.cpu_freq_meas = results.ticks_per_call / results.ns_per_call * 1000.0;
     }
     GeneratorState_destruct(&obj);
     return results;
@@ -109,8 +105,52 @@ static uint64_t dummy_get_sum(void *state, size_t len)
 }
 
 
+SpeedResults
+SpeedResults_subtract_baseline(const SpeedResults *full, const SpeedResults *baseline)
+{
+    SpeedResults corr;
+    corr.ns_per_call    = full->ns_per_call    - baseline->ns_per_call;
+    corr.ticks_per_call = full->ticks_per_call - baseline->ticks_per_call;
+    corr.cpb            = full->cpb            - baseline->cpb;
+    corr.bytes_per_sec  = 1.0 / (1.0/full->bytes_per_sec - 1.0/baseline->bytes_per_sec);
+    corr.cpu_freq_meas  = 0.5 * (full->cpu_freq_meas + baseline->cpu_freq_meas);
+    if (corr.ns_per_call    <= 0.0) corr.ns_per_call = NAN;
+    if (corr.ticks_per_call <= 0.0) corr.ticks_per_call = NAN;
+    if (corr.cpb            <= 0.0) corr.cpb = NAN;
+    if (corr.bytes_per_sec  <= 0.0) corr.bytes_per_sec = NAN;
+    return corr;
+}
 
-SpeedResults battery_speed_test(const GeneratorInfo *gen, const CallerAPI *intf,
+
+SpeedResults SpeedResults_calc_mean(const SpeedResults *a, const SpeedResults *b)
+{
+    SpeedResults res;
+    res.ns_per_call    = 0.5 * (a->ns_per_call    + b->ns_per_call);
+    res.ticks_per_call = 0.5 * (a->ticks_per_call + b->ticks_per_call);
+    res.cpb            = 0.5 * (a->cpb            + b->cpb);
+    res.bytes_per_sec  = 2.0 / (1.0/a->bytes_per_sec + 1.0/b->bytes_per_sec);
+    res.cpu_freq_meas  = 0.5 * (a->cpu_freq_meas  + b->cpu_freq_meas);
+    return res;
+}
+
+void SpeedResultsAll_print(const SpeedResultsAll *speed)
+{
+    printf("Nanoseconds per call:\n");
+    printf("  Raw result:                 %g\n", speed->full.ns_per_call);
+    printf("  For empty 'dummy' PRNG:     %g\n", speed->baseline.ns_per_call);
+    printf("  Corrected result:           %g\n", speed->corr.ns_per_call);
+    printf("  Corrected result (GiB/sec): %g\n", nbytes_to_gib(speed->corr.bytes_per_sec));
+    printf("CPU frequency:                %.1f MHz\n", speed->corr.cpu_freq_meas);
+    printf("CPU ticks per call:\n");
+    printf("  Raw result:                 %g\n", speed->full.ticks_per_call);
+    printf("  Raw result (cpB):           %g\n", speed->full.cpb);
+    printf("  For empty 'dummy' PRNG:     %g\n", speed->baseline.ticks_per_call);
+    printf("  Corrected result:           %g\n", speed->corr.ticks_per_call);
+    printf("  Corrected result (cpB):     %g\n\n", speed->corr.cpb);
+}
+
+
+SpeedResultsAll battery_speed_test(const GeneratorInfo *gen, const CallerAPI *intf,
     SpeedMeasurementMode mode)
 {
     GeneratorInfo dummy_gen = {.name = "dummy", .description = "DUMMY",
@@ -118,60 +158,57 @@ SpeedResults battery_speed_test(const GeneratorInfo *gen, const CallerAPI *intf,
         .get_bits = dummy_get_bits, .get_sum = dummy_get_sum,
         .self_test = NULL, .parent = NULL};
     dummy_gen.nbits = gen->nbits;
-    SpeedResults speed_full = measure_speed(gen, intf, mode);
-    SpeedResults speed_dummy = measure_speed(&dummy_gen, intf, mode);
-    SpeedResults speed_corr;
-    size_t block_size = (mode == SPEED_UINT) ? 1 : SUM_BLOCK_SIZE;
-    size_t nbytes = block_size * gen->nbits / 8;
-    speed_corr.ns_per_call = speed_full.ns_per_call - speed_dummy.ns_per_call;
-    speed_corr.ticks_per_call = speed_full.ticks_per_call - speed_dummy.ticks_per_call;
-    speed_corr.cpb = speed_full.cpb - speed_dummy.cpb;
-    if (speed_corr.cpb <= 0.0) {
-        speed_corr.cpb = NAN;
-    }
-
-    const double cpu_freq_meas = speed_full.ticks_per_call / speed_full.ns_per_call * 1000.0;
-    const double gb_per_sec = (double) nbytes / (1.0e-9 * speed_corr.ns_per_call) / pow(2.0, 30.0);
+    SpeedResultsAll speed;
+    speed.full     = measure_speed(gen, intf, mode);
+    speed.baseline = measure_speed(&dummy_gen, intf, mode);
+    speed.corr     = SpeedResults_subtract_baseline(&speed.full, &speed.baseline);
     // Print report
-    printf("Nanoseconds per call:\n");
-    printf("  Raw result:                 %g\n", speed_full.ns_per_call);
-    printf("  For empty 'dummy' PRNG:     %g\n", speed_dummy.ns_per_call);
-    printf("  Corrected result:           %g\n", speed_corr.ns_per_call);
-    printf("  Corrected result (GiB/sec): %g\n", gb_per_sec);
-    printf("CPU frequency:                %.1f MHz\n", cpu_freq_meas);
-    printf("CPU ticks per call:\n");
-    printf("  Raw result:                 %g\n", speed_full.ticks_per_call);
-    printf("  Raw result (cpB):           %g\n", speed_full.cpb);
-    printf("  For empty 'dummy' PRNG:     %g\n", speed_dummy.ticks_per_call);
-    printf("  Corrected result:           %g\n", speed_corr.ticks_per_call);
-    printf("  Corrected result (cpB):     %g\n\n", speed_corr.cpb);
+    SpeedResultsAll_print(&speed);
     // Corrected results
-    return speed_corr;
+    return speed;
 }
 
-BatteryExitCode battery_speed(const GeneratorInfo *gen, const CallerAPI *intf)
+
+SpeedBatteryResults SpeedBatteryResults_get(const GeneratorInfo *gen, const CallerAPI *intf)
 {
+    SpeedBatteryResults res;
     printf("===== Generator speed measurements =====\n");
     printf("----- Speed test for uint generation -----\n");
-    SpeedResults res_uint = battery_speed_test(gen, intf, SPEED_UINT);
+    res.uint = battery_speed_test(gen, intf, SPEED_UINT);
     printf("----- Speed test for uint sum generation -----\n");
     if (gen->get_sum == NULL) {
+        res.mean = res.uint;
         printf("  Not implemented\n");
     } else {
-        SpeedResults res_sum = battery_speed_test(gen, intf, SPEED_SUM);
-        double cpb_mean;
-        if (res_uint.cpb < 0.25 && res_sum.cpb > 0.0 &&
-            res_sum.cpb > res_uint.cpb) {
-            cpb_mean = res_sum.cpb;
+        res.sum = battery_speed_test(gen, intf, SPEED_SUM);
+        if (res.uint.corr.cpb < 0.25 && res.sum.corr.cpb > 0.0 &&
+            res.sum.corr.cpb > res.uint.corr.cpb) {
+            res.mean = res.sum;
         } else {
-            cpb_mean = (res_uint.cpb + res_sum.cpb) / 2.0;
+            res.mean.full     = SpeedResults_calc_mean(&res.uint.full, &res.sum.full);
+            res.mean.baseline = SpeedResults_calc_mean(&res.uint.baseline, &res.sum.baseline);
+            res.mean.corr     = SpeedResults_calc_mean(&res.uint.corr, &res.sum.corr);
         }
         printf("Average results:\n");
-        printf("  Corrected result (cpB):     %g\n\n", cpb_mean);
+        printf("  Corrected result (GiB/s):   %g\n",   nbytes_to_gib(res.mean.corr.bytes_per_sec));
+        printf("  Corrected result (cpB):     %g\n\n", res.mean.corr.cpb);
     }
+    return res;
+}
+
+/**
+ * @brief Measures pseudorandom number generator performance/speed
+ * in different modes
+ */
+BatteryExitCode battery_speed(const GeneratorInfo *gen, const CallerAPI *intf)
+{
+    (void) SpeedBatteryResults_get(gen, intf);
     return BATTERY_PASSED;
 }
 
+/**
+ * @brief Runs an internal self-test for the generator.
+ */
 BatteryExitCode battery_self_test(const GeneratorInfo *gen, const CallerAPI *intf)
 {
     if (gen->self_test == 0) {

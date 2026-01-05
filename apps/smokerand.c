@@ -22,7 +22,7 @@ void print_help(void)
 {
     static const char help_str[] = 
     "SmokeRand: a test suite for pseudorandom number generators\n"
-    "(C) 2024-2025 Alexey L. Voskov\n\n"
+    "(C) 2024-2026 Alexey L. Voskov\n\n"
     "Usage: smokerand battery generator_lib [keys]\n"
     "battery: battery name; supported batteries:\n"
     "  General purpose batteries\n"
@@ -535,16 +535,27 @@ static void print_ram_size(const CallerAPI *intf)
 
 int main(int argc, char *argv[])
 {
-    if (argc < 3) {
+    char *battery_name, *generator_lib;
+    if (argc < 2) {
         print_help();
         return 0;
+    } else if (argc < 3) {
+        if (!strcmp(argv[1], "--version")) {
+            printf("Smokerand %s\n", SMOKERAND_VERSION_FULL);
+            return 0;
+        } else {
+            battery_name = "default";
+            generator_lib = argv[1];
+        }
+    } else {
+        battery_name = argv[1];
+        generator_lib = argv[2];
     }
+
     SmokeRandSettings opts;
     if (SmokeRandSettings_load(&opts, argc, argv)) {
         return BATTERY_ERROR;
     }
-    char *battery_name = argv[1];
-    char *generator_lib = argv[2];
     int is_stdin32 = !strcmp(generator_lib, "stdin32");
     int is_stdin64 = !strcmp(generator_lib, "stdin64");
     int is_stdout = !strcmp(battery_name, "stdout");

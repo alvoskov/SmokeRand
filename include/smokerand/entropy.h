@@ -99,6 +99,7 @@ const uint32_t *Entropy_get_key(const Entropy *obj);
 char *Entropy_get_base64_key(const Entropy *obj);
 uint64_t Entropy_seed64(Entropy *obj, uint64_t thread_id);
 void Entropy_print_seeds_log(const Entropy *obj, FILE *fp);
+int fill_from_random_device(unsigned char *out, size_t len);
 
 static inline int Entropy_is_init(const Entropy *obj)
 {
