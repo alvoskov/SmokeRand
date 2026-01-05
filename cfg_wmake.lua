@@ -106,7 +106,7 @@ end
 io.write("lib_headers = " .. lib_headers_str .. "\n")
 
 -- Make "all" section
-io.write("all: $(bindir)/smokerand.exe $(bindir)/sr_dos32.exe " ..
+io.write("all: $(bindir)/smokerand.exe $(bindir)/sr_speed.exe $(bindir)/sr_dos32.exe " ..
     "$(bindir)/test_funcs.exe $(bindir)/srtiny16.exe $(bindir)/setvesa.com &\n")
 local gen_all_sources = {}
 for _, e in pairs(gen_sources) do table.insert(gen_all_sources, e) end
@@ -141,6 +141,13 @@ objstr_dos32 = objstr_dos32 .. " $(objdir_dos32)/pe32loader.obj"
 io.write("$(bindir)/smokerand.exe:" .. objstr .. "\n")
 io.write("\twcl386 -4s -fe=$(bindir)/smokerand.exe " .. objstr .. "\n")
 
+local objstr_speed = "$(objdir)/sr_speed.obj $(objdir)/base64.obj " ..
+    "$(objdir)/blake2s.obj $(objdir)/cpuinfo.obj " ..
+    "$(objdir)/core.obj $(objdir)/entropy.obj $(objdir)/bat_special.obj "..
+    "$(objdir)/threads_intf.obj"
+io.write("$(bindir)/sr_speed.exe: " .. objstr_speed .. "\n")
+io.write("\twcl386 -4s -fe=$(bindir)/sr_speed.exe " .. objstr_speed .. "\n")
+
 io.write("$(bindir)/test_funcs.exe: $(objdir)/test_funcs.obj \n")
 io.write("\twcl386 -4s -fe=$(bindir)/test_funcs.exe $(objdir)/base64.obj $(objdir)/blake2s.obj $(objdir)/cpuinfo.obj " ..
     "$(objdir)/core.obj " ..
@@ -157,6 +164,9 @@ io.write("\twcl386 -4s -fe=$(bindir)/sr_dos32.exe -bcl=" .. dosextender ..
 ---------- Object file with the main() function ----------
 io.write("$(objdir)/smokerand.obj: $(appsrcdir)/smokerand.c $(lib_headers)\n")
 io.write("\twcc386 $(cflags) -fo=$(objdir)/smokerand.obj $(appsrcdir)/smokerand.c\n")
+
+io.write("$(objdir)/sr_speed.obj: $(appsrcdir)/sr_speed.c $(lib_headers)\n")
+io.write("\twcc386 $(cflags) -fo=$(objdir)/sr_speed.obj $(appsrcdir)/sr_speed.c\n")
 
 io.write("$(objdir_dos32)/smokerand.obj: $(appsrcdir)/smokerand.c $(lib_headers)\n")
 io.write("\twcc386 $(cflags_dos32) -fo=$(objdir_dos32)/smokerand.obj $(appsrcdir)/smokerand.c\n")

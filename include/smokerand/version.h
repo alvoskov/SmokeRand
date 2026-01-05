@@ -27,7 +27,7 @@
     #define SMOKERAND_COMPILER "djgpp"
 #elif defined(__MSYS__)
     #define SMOKERAND_COMPILER "msys"
-#elif defined(__WATCOM__)
+#elif defined(__WATCOMC__)
     #define SMOKERAND_COMPILER "watcom"
 #elif defined(_MSC_VER)
     #define SMOKERAND_COMPILER "msvc"

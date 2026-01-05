@@ -9,7 +9,7 @@ local bat_sources = {'bat_express.c', 'bat_brief.c', 'bat_default.c',
 local lib_headers = {'apidefs.h', 'cinterface.h', 'base64.h', 'blake2s.h', 'core.h',
     'coredefs.h', 'coretests.h', 'cpuinfo.h', 'entropy.h', 'extratests.h', 'fileio.h',
     'hwtests.h', 'int128defs.h', 'lineardep.h', 'specfuncs.h',
-    'threads_intf.h', 'x86exts.h'}
+    'threads_intf.h', 'version.h', 'x86exts.h'}
 
 
 -- List of all generators; all of them are portable and have at least some
