@@ -12,7 +12,8 @@
  *
  * Adaptation for SmokeRand:
  *
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  */
 #include "smokerand/cinterface.h"
@@ -29,17 +30,16 @@ typedef struct {
     uint32_t aa; ///< Accumulator
     uint32_t bb; ///< Previous result
     int i;
-} IaState;
+} IbaaState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(IbaaState *obj)
 {
-    IaState *obj = state;
-    uint32_t x = obj->m[obj->i];
+    const uint32_t x = obj->m[obj->i];
     obj->aa = rotl32(obj->aa, 19) + obj->m[ind(obj->i + (SIZE/2))]; // set a
-    uint32_t y = obj->m[ind(x)] + obj->aa + obj->bb;
+    const uint32_t y = obj->m[ind(x)] + obj->aa + obj->bb;
     obj->m[obj->i] = y;                     // set m
-    uint32_t r = obj->m[ind(y>>ALPHA)] + x; // set r
+    const uint32_t r = obj->m[ind(y>>ALPHA)] + x; // set r
     obj->bb = r;
     obj->i++;
     obj->i = ind(obj->i);
@@ -48,7 +48,7 @@ static inline uint64_t get_bits_raw(void *state)
 
 static void *create(const CallerAPI *intf)
 {
-    IaState *obj = intf->malloc(sizeof(IaState));
+    IbaaState *obj = intf->malloc(sizeof(IbaaState));
     uint64_t seed = intf->get_seed64();
     obj->i = 0;
     obj->aa = 0;

@@ -8,7 +8,7 @@
  * - 26  SimpPoker, d = 64
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -22,9 +22,8 @@ typedef struct {
     uint64_t x;
 } Coveyou64State;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Coveyou64State *obj)
 {
-    Coveyou64State *obj = (Coveyou64State *) state;
     obj->x = (obj->x + 1) * obj->x;
     return obj->x >> 32;
 }
@@ -33,7 +32,7 @@ static void *create(const CallerAPI *intf)
 {
     Coveyou64State *obj = intf->malloc(sizeof(Coveyou64State));
     obj->x = intf->get_seed64();
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT32_PRNG("Coveyou64", NULL)

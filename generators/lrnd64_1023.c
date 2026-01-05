@@ -29,7 +29,7 @@
  *
  * The optimized reentrant implementation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -39,12 +39,12 @@
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief LRnd64 PRNG state.
+ * @brief LRnd64-1023 PRNG state.
  */
 typedef struct {
     uint64_t w[16];
     int8_t w_pos;
-} LRnd64State;
+} LRnd64x1023State;
 
 /**
  * @brief Creates LFSR example with taking into account
@@ -52,7 +52,7 @@ typedef struct {
  */
 void *create(const CallerAPI *intf)
 {
-    LRnd64State *obj = intf->malloc(sizeof(LRnd64State));
+    LRnd64x1023State *obj = intf->malloc(sizeof(LRnd64x1023State));
     for (int i = 0; i < 16; i++) {
         do {
             obj->w[i] = intf->get_seed64();
@@ -62,9 +62,8 @@ void *create(const CallerAPI *intf)
     return obj;
 }
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(LRnd64x1023State *obj)
 {
-    LRnd64State *obj = state;
     int8_t ind = obj->w_pos;
     int8_t ind_next = (ind + 1) & 0xF;
     uint64_t w0 = obj->w[ind];
@@ -79,4 +78,4 @@ static inline uint64_t get_bits_raw(void *state)
 }
 
 
-MAKE_UINT64_PRNG("LRND64", NULL)
+MAKE_UINT64_PRNG("LRND64_1023", NULL)

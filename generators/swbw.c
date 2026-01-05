@@ -7,7 +7,7 @@
  * 3. https://doi.org/10.1214/aoap/1177005878
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -31,12 +31,11 @@ typedef struct {
 } SwbWState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(SwbWState *obj)
 {
-    SwbWState *obj = state;
     uint32_t x;
-    int64_t xj = obj->x[obj->j], xi = obj->x[obj->i];
-    int64_t t = xj - xi - (int64_t) obj->c;
+    const int64_t xj = obj->x[obj->j], xi = obj->x[obj->i];
+    const int64_t t = xj - xi - (int64_t) obj->c;
     if (t >= 0) {
         x = (uint32_t) t;
         obj->c = 0;
@@ -63,7 +62,7 @@ static void *create(const CallerAPI *intf)
     obj->x[1] |= 1;
     obj->x[2] = (obj->x[2] >> 1) << 1;
     obj->i = SWB_A; obj->j = SWB_B;
-    return (void *) obj;
+    return obj;
 }
 
 

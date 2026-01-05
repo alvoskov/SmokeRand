@@ -13,7 +13,8 @@
  *
  * Adaptation for SmokeRand:
  *
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  */
 #include "smokerand/cinterface.h"
@@ -29,16 +30,15 @@ typedef struct {
     uint64_t m[SIZE]; ///< Memory: array of SIZE ALPHA-bit terms
     uint64_t bb; ///< Previous result
     int i;
-} IaState;
+} Ia64State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Ia64State *obj)
 {
-    IaState *obj = state;
-    uint64_t x = obj->m[obj->i];
-    uint64_t y = obj->m[ind(x)] + obj->bb;
+    const uint64_t x = obj->m[obj->i];
+    const uint64_t y = obj->m[ind(x)] + obj->bb;
     obj->m[obj->i] = y;                     // set m
-    uint64_t r = obj->m[ind(y>>ALPHA)] + x; // set r
+    const uint64_t r = obj->m[ind(y>>ALPHA)] + x; // set r
     obj->bb = r;
     obj->i++;
     obj->i = ind(obj->i);
@@ -48,7 +48,7 @@ static inline uint64_t get_bits_raw(void *state)
 
 static void *create(const CallerAPI *intf)
 {
-    IaState *obj = intf->malloc(sizeof(IaState));
+    Ia64State *obj = intf->malloc(sizeof(Ia64State));
     uint64_t seed = intf->get_seed64();
     obj->i = 0;
     obj->bb = 0;

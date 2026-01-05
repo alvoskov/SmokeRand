@@ -43,12 +43,10 @@
  * Portable subroutines for 128-bit multiplication, 128-bit addition
  * and adaptation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * All rights reserved.
- *
- * This software is provided under the Apache 2 License.
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 #include "smokerand/int128defs.h"
@@ -71,9 +69,8 @@ typedef struct {
 #define GMWC_A1      0xff002aae7d81a646U
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(GMWC128State *obj)
 {
-    GMWC128State *obj = state;
     uint64_t t_lo, t_hi, c_lo, c_hi;
     // 1) const __uint128_t t = GMWC_A1 * (__uint128_t) obj->x + obj->c;
     t_lo = unsigned_muladd128(GMWC_A1, obj->x, obj->c, &t_hi);

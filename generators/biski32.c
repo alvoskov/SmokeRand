@@ -29,7 +29,7 @@
  * @copyright
  * (c) 2025 Daniel Cota (https://github.com/danielcota/biski64)
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -44,12 +44,10 @@ typedef struct {
     uint32_t ctr;
 } Biski32State;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Biski32State *obj)
 {
-    Biski32State *obj = state;
-
-    uint32_t output = obj->mix + obj->loop_mix;
-    uint32_t old_loop_mix = obj->loop_mix;
+    const uint32_t output = obj->mix + obj->loop_mix;
+    const uint32_t old_loop_mix = obj->loop_mix;
     obj->loop_mix = obj->ctr ^ obj->mix;
     obj->mix = rotl32(obj->mix, 8) + rotl32(old_loop_mix, 20);
     obj->ctr += 0x99999999;

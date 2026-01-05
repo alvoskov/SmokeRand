@@ -30,7 +30,7 @@
  * @copyright The original algorithm was suggested by G. Marsaglia.
  * Reentrant implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -54,10 +54,9 @@ static void ComboState_init(ComboState *obj, uint32_t seed)
     obj->z = seed | 1u;
 }
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(ComboState *obj)
 {
-    ComboState *obj = state;
-    uint32_t v = obj->x * obj->y;
+    const uint32_t v = obj->x * obj->y;
     obj->x = obj->y;
     obj->y = v;
     obj->z = (obj->z & 65535u) * 30903u + (obj->z >> 16);

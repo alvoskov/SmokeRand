@@ -98,7 +98,7 @@
  *
  * The optimized reentrant implementation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -137,9 +137,8 @@ void *create(const CallerAPI *intf)
  * b_{j+256} = b_{j+32} + b_{j+8} + b_{j+4} + b_{j+1}
  * \f]
  */
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(LRnd64x255State *obj)
 {
-    LRnd64x255State *obj = state;
     int8_t ind = obj->w_pos;
     int8_t ind_next = (ind + 1) & 0x3;
     uint64_t w0 = obj->w[ind], w1 = obj->w[ind_next];

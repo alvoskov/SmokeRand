@@ -9,7 +9,7 @@
  * - https://ssau.ru/pagefiles/sbornik_pit_2021.pdf
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -33,9 +33,8 @@ typedef struct {
 } KISS64State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(KISS64State *obj)
 {
-    KISS64State *obj = state;
     // MWC generator
     uint64_t t = (obj->x << 58) + obj->c;
     obj->c = obj->x >> 6;
@@ -62,7 +61,7 @@ static void *create(const CallerAPI *intf)
     do { obj->c = intf->get_seed64() & mask58; } while (obj->c == 0);
     do { obj->y = intf->get_seed64(); } while (obj->y == 0);
     obj->z = intf->get_seed64();
-    return (void *) obj;
+    return obj;
 }
 
 

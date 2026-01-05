@@ -12,7 +12,8 @@
  *
  * Adaptation for SmokeRand:
  *
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  */
 #include "smokerand/cinterface.h"
@@ -31,13 +32,12 @@ typedef struct {
 } IaState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(IaState *obj)
 {
-    IaState *obj = state;
-    uint32_t x = obj->m[obj->i];
-    uint32_t y = obj->m[ind(x)] + obj->bb;
+    const uint32_t x = obj->m[obj->i];
+    const uint32_t y = obj->m[ind(x)] + obj->bb;
     obj->m[obj->i] = y;                     // set m
-    uint32_t r = obj->m[ind(y>>ALPHA)] + x; // set r
+    const uint32_t r = obj->m[ind(y>>ALPHA)] + x; // set r
     obj->bb = r;
     obj->i++;
     obj->i = ind(obj->i);

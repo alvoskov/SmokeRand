@@ -26,7 +26,8 @@
  *      u = x ^ (y * 2)
  *      print(hex(u))
  *
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -52,9 +53,9 @@ int32_t modinv32(int32_t p, int32_t a)
     int32_t u = a, v = p, x1 = 1, x2 = 0;
     if (a == 0) return 0;
     while (u != 1) {
-        int32_t q = v / u;
-        int32_t r = v - q * u;
-        int32_t x = x2 - q * x1;
+        const int32_t q = v / u;
+        const int32_t r = v - q * u;
+        const int32_t x = x2 - q * x1;
         v = u; u = r; x2 = x1; x1 = x;
     }
     if (x1 < 0)
@@ -62,9 +63,8 @@ int32_t modinv32(int32_t p, int32_t a)
     return x1;
 }
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Icg31x2State *obj)
 {
-    Icg31x2State *obj = state;
     obj->x1 = (modinv32(ICG32_MOD1, obj->x1) + 1) % ICG32_MOD1;
     obj->x2 = (modinv32(ICG32_MOD2, obj->x2) + 1) % ICG32_MOD2;
     return (uint32_t) obj->x1 ^ ( (uint32_t) obj->x2 << 1);

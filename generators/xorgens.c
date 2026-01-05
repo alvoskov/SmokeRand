@@ -15,7 +15,7 @@
  *
  * Copyright (C) 2004, 2006, 2008, 2017 R. P. Brent.
  *
- * Copyright (C) 2025 A.L. Voskov.
+ * Copyright (C) 2025-2026 A.L. Voskov.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License,
@@ -94,9 +94,8 @@ void xor4096i_init(Xorgens4096 *obj, uint64_t seed)
 }
 
 
-uint64_t get_bits_raw(void *state)
+uint64_t get_bits_raw(Xorgens4096 *obj)
 {
-    Xorgens4096 *obj = state;
     return xor4096i(obj);
 }
 
@@ -105,7 +104,7 @@ static void *create(const CallerAPI *intf)
     // 0xEE552A03E4F2D9FA --strange linearcomp seed
     Xorgens4096 *obj = intf->malloc(sizeof(Xorgens4096));
     xor4096i_init(obj, intf->get_seed64());
-    return (void *) obj;
+    return obj;
 }
 
 /**

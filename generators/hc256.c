@@ -185,9 +185,8 @@ static int run_self_test(const CallerAPI *intf)
     return is_ok;
 }
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Hc256State *obj)
 {
-    Hc256State *obj = state;
     if (obj->pos == 16) {
         Hc256State_encrypt(obj);
         obj->pos = 0;

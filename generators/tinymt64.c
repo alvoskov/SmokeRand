@@ -12,7 +12,7 @@
  *
  * Copyright (c) 2011, 2013 Mutsuo Saito, Makoto Matsumoto,
  * Hiroshima University and The University of Tokyo.
- * Copyright (c) 2024-2025 Alexey L. Voskov (Lomonosov Moscow State University)
+ * Copyright (c) 2024-2026 Alexey L. Voskov (Lomonosov Moscow State University)
  *
  * All rights reserved.
  * 
@@ -73,7 +73,7 @@ typedef struct {
  * This function certificate the period of 2^127-1.
  * @param random tinymt state vector.
  */
-static void period_certification(tinymt64_t * random)
+static void period_certification(tinymt64_t *random)
 {
     if ((random->status[0] & TINYMT64_MASK) == 0 &&
         random->status[1] == 0) {
@@ -88,7 +88,7 @@ static void period_certification(tinymt64_t * random)
  * Users should not call this function directly.
  * @param random tinymt internal status
  */
-inline static void tinymt64_next_state(tinymt64_t * random)
+inline static void tinymt64_next_state(tinymt64_t *random)
 {
     uint64_t x;
     random->status[0] &= TINYMT64_MASK;
@@ -111,7 +111,7 @@ inline static void tinymt64_next_state(tinymt64_t * random)
  * @param random tinymt state vector.
  * @param seed a 32-bit unsigned integer used as a seed.
  */
-void tinymt64_init(tinymt64_t * random, uint64_t seed)
+void tinymt64_init(tinymt64_t *random, uint64_t seed)
 {
     random->status[0] = seed ^ ((uint64_t) TINYMT64_MAT1 << 32);
     random->status[1] = TINYMT64_MAT2 ^ TINYMT64_TMAT;
@@ -128,12 +128,10 @@ void tinymt64_init(tinymt64_t * random, uint64_t seed)
  * @param random tinymt internal status
  * @return 32-bit unsigned integer r (0 <= r < 2^32)
  */
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(tinymt64_t *random)
 {
-    tinymt64_t *random = state;
-    tinymt64_next_state(random);
-
     uint64_t x;
+    tinymt64_next_state(random);
     x = random->status[0] ^ random->status[1];
     x = random->status[0] + random->status[1];
     x ^= random->status[0] >> TINYMT64_SH8;
@@ -148,7 +146,7 @@ static void *create(const CallerAPI *intf)
 {
     tinymt64_t *obj = intf->malloc(sizeof(tinymt64_t));
     tinymt64_init(obj, intf->get_seed32());
-    return (void *) obj;
+    return obj;
 }
 
 static int run_self_test(const CallerAPI *intf)

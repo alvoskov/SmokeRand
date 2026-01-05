@@ -18,7 +18,7 @@
  * 
  * Adaptation for C and SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -170,9 +170,8 @@ void EXPORT BlaBlaState_block_vector(BlaBlaState *obj)
 }
 
 
-static inline uint64_t get_bits_vector_raw(void *state)
+static inline uint64_t get_bits_vector_raw(BlaBlaState *obj)
 {
-    BlaBlaState *obj = state;
     uint64_t x = obj->out[obj->pos++];
     if (obj->pos == 32) {
         BlaBlaState_inc_counter(obj);
@@ -228,9 +227,8 @@ EXPORT void BlaBlaState_block_scalar(BlaBlaState *obj)
 
 
 
-static inline uint64_t get_bits_scalar_raw(void *state)
+static inline uint64_t get_bits_scalar_raw(BlaBlaState *obj)
 {
-    BlaBlaState *obj = state;
     uint64_t x = obj->out[obj->pos++];
     if (obj->pos == 32) {
         BlaBlaState_inc_counter(obj);

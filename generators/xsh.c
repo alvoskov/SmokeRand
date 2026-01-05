@@ -13,7 +13,7 @@
  *
  * Implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -30,9 +30,8 @@ typedef struct {
 } XSHState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(XSHState *obj)
 {
-    XSHState *obj = state;
     obj->x ^= (obj->x << 13);
     obj->x ^= (obj->x >> 17);
     obj->x ^= (obj->x << 43);

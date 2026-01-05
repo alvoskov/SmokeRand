@@ -20,7 +20,7 @@
  * 2. https://pracrand.sourceforge.net/
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -40,13 +40,11 @@ typedef struct {
 } Flea32x1State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Flea32x1State *obj)
 {
-    enum { SHIFT1 = 15, SHIFT2 = 27 };
-    Flea32x1State *obj = state;
-    uint32_t e = obj->a;
-    obj->a = rotl32(obj->b, SHIFT1);
-    obj->b = obj->c + rotl32(obj->d, SHIFT2);
+    const uint32_t e = obj->a;
+    obj->a = rotl32(obj->b, 15);
+    obj->b = obj->c + rotl32(obj->d, 27);
     obj->c = obj->d + obj->a;
     obj->d = e + obj->c;
     return obj->c;

@@ -1,7 +1,8 @@
 /**
  * @file macmarsa.c
  * @brief An implementation of MacLaren-Marsaglia generator.
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -11,7 +12,7 @@
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief 32-b
+ * @brief MacLaren-Marsaglia PRNG state.
  */
 typedef struct {
     uint32_t x; ///< 69069
@@ -25,9 +26,8 @@ static inline uint32_t lcg32(MMState *obj)
     return obj->x = 69069u * obj->x + 12345u;
 }
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(MMState *obj)
 {
-    MMState *obj = state;
     obj->y = 63885u * (obj->y & 0xFFFF) + (obj->y >> 16);
     unsigned int i = obj->y % 257;
     uint32_t out = obj->u[i];
@@ -44,7 +44,7 @@ static void *create(const CallerAPI *intf)
     for (int i = 0; i < 257; i++) {
         obj->u[i] = lcg32(obj);
     }
-    return (void *) obj;
+    return obj;
 }
 
 

@@ -28,7 +28,7 @@
  *
  * Conversion to `jctr32` counter-based PRNG:
  * 
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -111,10 +111,9 @@ static inline void Jctr32State_inc_counter(Jctr32State *obj)
 }
 
 
-static inline uint64_t get_bits_scalar_raw(void *state)
+static inline uint64_t get_bits_scalar_raw(Jctr32State *obj)
 {
-    Jctr32State *obj = state;
-    uint32_t x = obj->out[obj->pos++];
+    const uint32_t x = obj->out[obj->pos++];
     if (obj->pos == 8) {
         Jctr32State_inc_counter(obj);
         Jctr32State_block(obj);
@@ -249,11 +248,10 @@ static inline void Jctr32VecState_inc_counter(Jctr32VecState *obj)
 }
 
 
-static inline uint64_t get_bits_vector_raw(void *state)
+static inline uint64_t get_bits_vector_raw(Jctr32VecState *obj)
 {
-    Jctr32VecState *obj = state;
-    size_t i = (obj->pos & 0x7), j = (obj->pos >> 3);    
-    uint64_t x = obj->out[i].u32[j];
+    const size_t i = (obj->pos & 0x7), j = (obj->pos >> 3);    
+    const uint64_t x = obj->out[i].u32[j];
     obj->pos++;
     if (obj->pos == 8 * JCTR32_NCOPIES) {
         Jctr32VecState_inc_counter(obj);

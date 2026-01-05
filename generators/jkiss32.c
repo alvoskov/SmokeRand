@@ -25,7 +25,8 @@
  * 2. https://groups.google.com/g/comp.lang.fortran/c/5Bi8cFoYwPE
  * 3. https://talkchess.com/viewtopic.php?t=38313&start=10
  *
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -49,9 +50,8 @@ typedef struct {
 } JKISS32State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(JKISS32State *obj)
 {
-    JKISS32State *obj = state;
     // xorshift part
     obj->y ^= obj->y << 5;
     obj->y ^= obj->y >> 7;

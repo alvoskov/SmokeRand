@@ -39,7 +39,7 @@
  *
  * Adaptation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  */
 #include "smokerand/cinterface.h"
@@ -73,12 +73,11 @@ static void Cmwc4827State_init(Cmwc4827State *obj, uint32_t xcng, uint32_t xs)
     obj->c = 1271;
 }
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Cmwc4827State *obj)
 {
-    Cmwc4827State *obj = state;
     obj->pos = (obj->pos < 4826) ? obj->pos + 1 : 0;
     const uint32_t x = obj->x[obj->pos];
-    uint32_t t = (x << 12) + obj->c;
+    const uint32_t t = (x << 12) + obj->c;
     obj->c = (x >> 20) - (t < x);
     return obj->x[obj->pos] = ~(t - x);
 }

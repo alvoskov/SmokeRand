@@ -47,9 +47,9 @@ int64_t modinv64(int64_t p, int64_t a)
     int64_t u = a, v = p, x1 = 1, x2 = 0;
     if (a == 0) return 0;
     while (u != 1) {
-        int64_t q = v / u;
-        int64_t r = v - q * u;
-        int64_t x = x2 - q * x1;
+        const int64_t q = v / u;
+        const int64_t r = v - q * u;
+        const int64_t x = x2 - q * x1;
         v = u; u = r; x2 = x1; x1 = x;
     }
     if (x1 < 0)
@@ -58,9 +58,8 @@ int64_t modinv64(int64_t p, int64_t a)
 }
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Icg64State *obj)
 {
-    Icg64State *obj = state;
     obj->x = (modinv64(ICG64_MOD, obj->x) + 1) % ICG64_MOD;
     return (uint64_t) obj->x >> 31;
 }

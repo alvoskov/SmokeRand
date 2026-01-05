@@ -25,7 +25,8 @@
  *         x = (6906969069 * pow(x, -1, 2**64) + 1234513250) % 2**64
  *     print(hex(x))
  *
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -53,9 +54,8 @@ static uint64_t modinv64_p2(uint64_t x)
     return y;
 }
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Icg64State *obj)
 {
-    Icg64State *obj = state;
     obj->x = 6906969069ull * modinv64_p2(obj->x) + 1234513250ull;
     return obj->x >> 32;
 }

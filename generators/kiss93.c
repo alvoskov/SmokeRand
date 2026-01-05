@@ -3,7 +3,8 @@
  * @brief KISS93 pseudorandom number generator. It passes SmallCrush
  * but fails the LinearComp (r = 29) test in the Crush battery (N72).
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -23,9 +24,8 @@ typedef struct {
     uint32_t xs2;
 } KISS93State;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(KISS93State *obj)
 {
-    KISS93State *obj = state;
     // LCG
     obj->lcg = 69069U * obj->lcg + 23606797U;
     // Some LFSR

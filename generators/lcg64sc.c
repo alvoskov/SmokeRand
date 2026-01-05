@@ -7,7 +7,8 @@
  * `default`, `full` batteries. TestU01 SmallCrush/Crush/BigCrush passed.
  * For BigCrush: +HI/+LO.
  *
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -16,9 +17,8 @@
 
 PRNG_CMODULE_PROLOG
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Lcg64State *obj)
 {
-    Lcg64State *obj = state;
     uint64_t out = obj->x ^ (obj->x >> 32);
     out *= 6906969069U;
     out = out ^ rotl64(out, 17) ^ rotl64(out, 53);

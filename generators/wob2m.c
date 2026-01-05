@@ -12,7 +12,7 @@
  *
  * Implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -31,9 +31,8 @@ typedef struct {
 } Wob2MState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Wob2MState *obj)
 {
-    Wob2MState *obj = state;
     uint64_t temp = obj->a + obj->count++;
     obj->a = obj->b + rotl64(temp, 12);
     obj->b = 0x0581af43eb71d8b3 * temp ^ rotl64(obj->a, 28);

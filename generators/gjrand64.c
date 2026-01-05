@@ -10,7 +10,7 @@
  * @copyright The gjrand64 algorithm is designed by D. Blackman (aka G. Jones).
  * Reentrant implementation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -30,9 +30,8 @@ typedef struct {
 } Gjrand64State;
 
 
-static uint64_t get_bits_raw(void *state)
+static uint64_t get_bits_raw(Gjrand64State *obj)
 {
-    Gjrand64State *obj = state;
 	obj->b += obj->c; obj->a = rotl64(obj->a, 32); obj->c ^= obj->b;
 	obj->d += 0x55aa96a5;
 	obj->a += obj->b; obj->c = rotl64(obj->c, 23); obj->b ^= obj->a;

@@ -37,7 +37,7 @@
  * @copyright The CSWB4288 algorithm was developed by G. Marsaglia.
  * 64-bit version and reentrant implementation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  */
 #include "smokerand/cinterface.h"
@@ -57,21 +57,20 @@ typedef struct {
 } Cswb4288x64State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Cswb4288x64State *obj)
 {
-    Cswb4288x64State *obj = state;
     if (obj->ind < CSWB64_LAGR) {
         return obj->q[obj->ind++];
     } else {
         for (int i = 0; i < CSWB64_LAGS; i++) {
-            uint64_t t = obj->q[i];
-            uint64_t h = obj->q[i + (CSWB64_LAGR - CSWB64_LAGS)] + obj->c;
+            const uint64_t t = obj->q[i];
+            const uint64_t h = obj->q[i + (CSWB64_LAGR - CSWB64_LAGS)] + obj->c;
             obj->c = t < h;
             obj->q[i] = h - t - 1;
         }
         for (int i = CSWB64_LAGS; i < CSWB64_LAGR; i++) {
-            uint64_t t = obj->q[i];
-            uint64_t h = obj->q[i - CSWB64_LAGS] + obj->c;
+            const uint64_t t = obj->q[i];
+            const uint64_t h = obj->q[i - CSWB64_LAGS] + obj->c;
             obj->c = t < h;
             obj->q[i] = h - t - 1;
         }
