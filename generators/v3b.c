@@ -52,7 +52,7 @@
  * 
  * Reimplementation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -77,9 +77,8 @@ static inline void v3b_mixer(uint32_t *v, int shift1, int shift2)
 }
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(V3bState *obj)
 {
-    V3bState *obj = state;
     if (obj->pos == 0) {
         v3b_mixer(obj->v, 21, 12);
         v3b_mixer(obj->v, 19, 24);

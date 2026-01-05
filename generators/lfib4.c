@@ -7,8 +7,10 @@
  * 1. http://www.cse.yorku.ca/~oz/marsaglia-rng.html
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 
@@ -19,9 +21,8 @@ typedef struct {
     uint8_t c;
 } LFib4State;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(LFib4State *obj)
 {
-    LFib4State *obj = state;
     uint32_t *t = obj->t;
     obj->c++;
     const uint8_t c1 = (uint8_t) (obj->c + 58U);
@@ -44,7 +45,7 @@ static void LFib4State_init(LFib4State *obj, uint32_t jcong0)
         z = 36969U * (z & 65535) + (z >> 16);
         w = 18000U * (w & 65535) + (w >> 16);
         jcong = 69069U * jcong + 1234567U;
-        xs ^= (xs << 17);
+        xs ^= (xs << 17); // Note: bad SHR3 from original is kept here!
         xs ^= (xs >> 13);
         xs ^= (xs << 5);
         const uint32_t mwc = (z << 16) + w;

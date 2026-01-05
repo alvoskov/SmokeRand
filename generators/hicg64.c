@@ -34,7 +34,8 @@
  *         x_m2, x_m1 = x_m1, x_new
  *     print(hex(x_m1))
  *
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -63,11 +64,10 @@ static uint64_t modinv64_p2(uint64_t x)
     return y;
 }
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Hicg64State *obj)
 {
     static const uint64_t a = 1886906, b = 706715, c = 807782;
-    Hicg64State *obj = state;
-    uint64_t x_new = a * modinv64_p2(obj->x_m1) + b * obj->x_m2 + c;
+    const uint64_t x_new = a * modinv64_p2(obj->x_m1) + b * obj->x_m2 + c;
     obj->x_m2 = obj->x_m1;
     obj->x_m1 = x_new;
     return x_new;

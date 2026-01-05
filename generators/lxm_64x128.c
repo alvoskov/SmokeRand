@@ -18,7 +18,7 @@
  *
  * C implementation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -36,12 +36,11 @@ typedef struct {
     uint64_t x1;  ///< LFSR state
 } LXMState;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(LXMState *obj)
 {
     static const uint64_t a = 0xd1342543de82ef95ull; // LCG multiplier
     static const uint64_t c = 12345; // LCG constant
     static const uint64_t lea64_m = 0xdaba0b6eb09322e3ull; // LEA64 multiplier
-    LXMState *obj = state;
     // Create output from PRNG state using LEA64 mixing function
     uint64_t z = obj->lcg + obj->x0;
     // Mixing function (lea64)
@@ -70,7 +69,7 @@ static void *create(const CallerAPI *intf)
     if (obj->x0 == 0 && obj->x1 == 0) {
         obj->x1 = 0xDEADBEEFDEADBEEF;
     }
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT64_PRNG("LXM(L64X128MixRandom)", NULL)

@@ -52,7 +52,7 @@
  *
  * Adaptation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  */
 #include "smokerand/cinterface.h"
@@ -68,21 +68,20 @@ typedef struct {
     int ind;
 } Cswb4288State;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Cswb4288State *obj)
 {
-    Cswb4288State *obj = state;
     if (obj->ind < 4288) {
         return obj->q[obj->ind++];
     } else {
         for (size_t i = 0; i < 4160; i++) {
-            uint32_t t = obj->q[i];
-            uint32_t h = obj->q[i + 128] + obj->c;
+            const uint32_t t = obj->q[i];
+            const uint32_t h = obj->q[i + 128] + obj->c;
             obj->c = t < h;
             obj->q[i] = h - t - 1;
         }
         for (size_t i = 4160; i < 4288; i++) {
-            uint32_t t = obj->q[i];
-            uint32_t h = obj->q[i - 4160] + obj->c;
+            const uint32_t t = obj->q[i];
+            const uint32_t h = obj->q[i - 4160] + obj->c;
             obj->c = t < h;
             obj->q[i] = h - t - 1;
         }
@@ -137,4 +136,3 @@ static int run_self_test(const CallerAPI *intf)
 
 
 MAKE_UINT32_PRNG("Cswb4288", run_self_test)
-

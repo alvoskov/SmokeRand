@@ -32,11 +32,10 @@ typedef struct {
 } Gjrand32State;
 
 
-static uint32_t get_bits_raw(void *state)
+static uint32_t get_bits_raw(Gjrand32State *obj)
 {
-    Gjrand32State *obj = state;
 	obj->b += obj->c; obj->a = rotl32(obj->a, 16); obj->c ^= obj->b;
-	obj->d += 0x96a5;
+	obj->d += 0x96a5U;
 	obj->a += obj->b; obj->c = rotl32(obj->c, 11); obj->b ^= obj->a;
 	obj->a += obj->c; obj->b = rotl32(obj->b, 19); obj->c += obj->a;
 	obj->b += obj->d;

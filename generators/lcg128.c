@@ -23,7 +23,7 @@
  *    V. 52. N. 2. P. 443-458. https://doi.org/10.1002/spe.3030
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -38,7 +38,7 @@ static void *create(const CallerAPI *intf)
 {
     Lcg128State *obj = intf->malloc(sizeof(Lcg128State));
     Lcg128State_seed(obj, intf);
-    return (void *) obj;
+    return obj;
 }
 
 /////////////////////////////

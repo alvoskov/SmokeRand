@@ -15,7 +15,7 @@
  * 
  * Implementation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -34,9 +34,8 @@ static const uint64_t
     WH06_A2 = 23000, WH06_MOD2 = 2147483423,
     WH06_A3 = 33000, WH06_MOD3 = 2147483123;
 
-static uint64_t get_bits_raw(void *state)
+static uint64_t get_bits_raw(Wich2006State *obj)
 {
-    Wich2006State *obj = state;
     // Update generator state
     uint32_t *s = obj->s;
     s[0] = (uint32_t) ((WH06_A0 * s[0]) % WH06_MOD0);

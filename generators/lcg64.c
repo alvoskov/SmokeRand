@@ -10,7 +10,8 @@
  *    V. 52. N. 2. P. 443-458. https://doi.org/10.1002/spe.3030
  * 2. TAOCP2.
  *
- * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -23,9 +24,8 @@ PRNG_CMODULE_PROLOG
 ///// Marsaglia version /////
 /////////////////////////////
 
-static inline uint64_t get_bits_marsaglia_raw(void *state)
+static inline uint64_t get_bits_marsaglia_raw(Lcg64State *obj)
 {
-    Lcg64State *obj = state;
     obj->x = obj->x * 6906969069ULL + 1ULL;
     return obj->x >> 32;
 }
@@ -36,9 +36,8 @@ MAKE_GET_BITS_WRAPPERS(marsaglia)
 ///// Version from TAOCP (by Hayes) /////
 /////////////////////////////////////////
 
-static inline uint64_t get_bits_taocp_raw(void *state)
+static inline uint64_t get_bits_taocp_raw(Lcg64State *obj)
 {
-    Lcg64State *obj = state;
     obj->x = obj->x * 6364136223846793005ULL + 1442695040888963407ULL;
     return obj->x >> 32;
 }
@@ -49,9 +48,8 @@ MAKE_GET_BITS_WRAPPERS(taocp)
 ///// Steele & Vigna version /////
 //////////////////////////////////
 
-static inline uint64_t get_bits_steele_raw(void *state)
+static inline uint64_t get_bits_steele_raw(Lcg64State *obj)
 {
-    Lcg64State *obj = state;
     obj->x = obj->x * 0xf1357aea2e62a9c5ULL + 1442695040888963407ULL;
     return obj->x >> 32;
 }

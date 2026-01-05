@@ -18,7 +18,7 @@
  *
  * Adaptation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -45,14 +45,13 @@ typedef struct {
 } Efiix64x48State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Efiix64x48State *obj)
 {
-    Efiix64x48State *obj = state;
-    uint64_t iterated = obj->iteration_table  [obj->i % ITERATION_SIZE];
-    uint64_t indirect = obj->indirection_table[obj->c % INDIRECTION_SIZE];
+    const uint64_t iterated = obj->iteration_table  [obj->i % ITERATION_SIZE];
+    const uint64_t indirect = obj->indirection_table[obj->c % INDIRECTION_SIZE];
     obj->indirection_table[obj->c % INDIRECTION_SIZE] = iterated + obj->a;
     obj->iteration_table  [obj->i % ITERATION_SIZE  ] = indirect;
-    uint64_t old = obj->a ^ obj->b;
+    const uint64_t old = obj->a ^ obj->b;
     obj->a = obj->b + obj->i++;
     obj->b = obj->c + indirect;
     obj->c = old + rotl64(obj->c, 25);

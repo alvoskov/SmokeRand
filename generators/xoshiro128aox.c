@@ -46,9 +46,8 @@ typedef struct {
 } Xoshiro128AoxState;
 
 
-uint64_t get_bits_raw(void *state)
+uint64_t get_bits_raw(Xoshiro128AoxState *obj)
 {
-    Xoshiro128AoxState *obj = state;
     const uint32_t sx = obj->s[0] ^ obj->s[1], sa = obj->s[0] & obj->s[1];
     const uint32_t result = sx ^ (rotl32(sa, 1) | rotl32(sa, 2));
     const uint32_t t = obj->s[1] << 9;

@@ -12,7 +12,7 @@
  *
  * Copyright (c) 2011, 2013 Mutsuo Saito, Makoto Matsumoto,
  * Hiroshima University and The University of Tokyo.
- * Copyright (c) 2024-2025 Alexey L. Voskov (Lomonosov Moscow State University)
+ * Copyright (c) 2024-2026 Alexey L. Voskov (Lomonosov Moscow State University)
  *
  * All rights reserved.
  * 
@@ -140,9 +140,8 @@ void tinymt32_init(tinymt32_t * random, uint32_t seed)
  * @param random tinymt internal status
  * @return 32-bit unsigned integer r (0 <= r < 2^32)
  */
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(tinymt32_t *random)
 {
-    tinymt32_t *random = state;
     tinymt32_next_state(random);
     uint32_t t0, t1;
     t0 = random->status[3];
@@ -160,7 +159,7 @@ static void *create(const CallerAPI *intf)
 {
     tinymt32_t *obj = intf->malloc(sizeof(tinymt32_t));
     tinymt32_init(obj, intf->get_seed32());
-    return (void *) obj;
+    return obj;
 }
 
 static int run_self_test(const CallerAPI *intf)

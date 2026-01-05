@@ -20,14 +20,11 @@
  *    // Statistics & Probability Letters. 2004. V. 66. N 2. P.183-187.
  *    https://doi.org/10.1016/j.spl.2003.11.001.
  *
- * @copyright (c) 2024 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * The KISS99 algorithm is developed by George Marsaglia.
- *
- * All rights reserved.
- *
- * This software is provided under the Apache 2 License.
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 #include <limits.h>
@@ -65,9 +62,8 @@ typedef struct {
     int j;
 } LFibFloat;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(LFibFloat *obj)
 {
-    LFibFloat *obj = (LFibFloat *) state;
     static const double M_2_POW_32 = 4294967296.0;
     // Subtractive Lagged Fibbonaci part
     double x = obj->U[obj->i] - obj->U[obj->j], out;
@@ -107,7 +103,7 @@ static void *create(const CallerAPI *intf)
     }
 */
     obj->i = LFIB_A; obj->j = LFIB_B;
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT32_PRNG("LFib_RANMAR", NULL)

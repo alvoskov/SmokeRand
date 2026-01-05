@@ -41,9 +41,8 @@ void *create(const CallerAPI *intf)
     b = ((y[(i)] << (shl1)) ^ y[(i)]) >> (shr); \
     y[(i)] = ((y[(i)] & mask) << (shl2)) ^ b;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Lfsr113State *obj)
 {
-    Lfsr113State *obj = state;    
     uint32_t *y = obj->y, b;
     ROUND(0,  6, 13, 0xFFFFFFFE, 18)
     ROUND(1,  2, 27, 0xFFFFFFF8, 2)

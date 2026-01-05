@@ -47,7 +47,7 @@
  * 
  * Implementation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -62,9 +62,8 @@ typedef struct {
     uint16_t s3;
 } Wich1982State;
 
-static uint64_t get_bits_raw(void *state)
+static uint64_t get_bits_raw(Wich1982State *obj)
 {
-    Wich1982State *obj = state;
     // Update generator state
     uint64_t s1 = obj->s1, s2 = obj->s2, s3 = obj->s3;
     s1 = (171U * s1) % 30269U;

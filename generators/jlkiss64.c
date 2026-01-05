@@ -10,7 +10,8 @@
  *    http://www0.cs.ucl.ac.uk/staff/D.Jones/GoodPracticeRNG.pdf
  * 2. https://groups.google.com/group/sci.stat.math/msg/b555f463a2959bb7/
  *
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -33,9 +34,8 @@ typedef struct {
 } JLKISS64State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(JLKISS64State *obj)
 {
-    JLKISS64State *obj = state;
     // LCG part
     obj->x = 1490024343005336237ULL * obj->x + 123456789;
     // xorshift part (don't set y to 0)

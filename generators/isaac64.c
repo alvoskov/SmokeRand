@@ -22,7 +22,7 @@
  * Adaptation for C99 and SmokeRand (data types, interface, internal
  * self-test, slight modification of seeding procedure):
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -146,9 +146,8 @@ void Isaac64State_init(Isaac64State *obj, uint64_t seed)
 }
 
 
-static uint64_t get_bits_raw(void *state)
+static uint64_t get_bits_raw(Isaac64State *obj)
 {
-    Isaac64State *obj = state;
     if (obj->pos-- == 0) {
         Isaac64State_block(obj);
         obj->pos = RANDSIZ - 1;

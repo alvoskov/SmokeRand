@@ -15,7 +15,7 @@
  * Implementation for SmokeRand:
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -39,10 +39,9 @@ typedef struct {
 } SwbMwc32State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(SwbMwc32State *obj)
 {
     static const uint32_t MWC_A = 30903;
-    SwbMwc32State *obj = state;
     // SWB part
     const uint32_t xj = obj->x[obj->j], xi = obj->x[obj->i];
     const uint32_t t = xj - xi - obj->c;

@@ -17,7 +17,7 @@
  *
  * Implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -35,9 +35,8 @@ typedef struct {
     uint32_t c;
 } Ara32State;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Ara32State *obj)
 {
-    Ara32State *obj = state;
     obj->a += rotl32(obj->b + obj->c, 7);
     obj->b += rotl32(obj->c + obj->a, 11);
     obj->c += rotl32(obj->a + obj->b, 15);
@@ -51,7 +50,7 @@ static void *create(const CallerAPI *intf)
     obj->a = intf->get_seed32();
     obj->b = intf->get_seed32();
     obj->c = intf->get_seed32() | 0x1;
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT32_PRNG("ara32", NULL)

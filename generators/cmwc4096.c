@@ -12,7 +12,7 @@
  *
  * Implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -27,12 +27,11 @@ typedef struct {
     uint32_t i;
 } Cmwc4096State;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Cmwc4096State *obj)
 {
     const uint64_t a = 18782ull;
-    Cmwc4096State *obj = state;
     obj->i = (obj->i + 1) & 4095;
-    uint64_t t = a * obj->Q[obj->i] + obj->c;
+    const uint64_t t = a * obj->Q[obj->i] + obj->c;
     obj->c = (uint32_t) (t >> 32);
     uint32_t x = (uint32_t) (t + obj->c);
     if (x < obj->c) {

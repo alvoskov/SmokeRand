@@ -4,7 +4,7 @@
  * @details PractRand 0.94: >= 1 TiB, `full`
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -13,9 +13,8 @@
 
 PRNG_CMODULE_PROLOG
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Lcg64State *obj)
 {
-    Lcg64State *obj = state;
     uint32_t out = (uint32_t) (obj->x >> 32);
     out = (out >> 16) ^ out;
     out = 69069U * out;

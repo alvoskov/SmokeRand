@@ -37,7 +37,7 @@
  * KEYS/NONCES GENERATION AND OTHER CRYPTOGRAPHICAL APPLICATION!
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -228,9 +228,8 @@ void ChaCha_init(ChaChaState *obj, size_t nrounds, const uint32_t *seed)
 }
 
 
-static inline uint64_t get_bits_c99_raw(void *state)
+static inline uint64_t get_bits_c99_raw(ChaChaState *obj)
 {
-    ChaChaState *obj = state;
     if (obj->pos >= 16) {
         ChaCha_inc_counter(obj);
         ChaCha_block_c99(obj);
@@ -241,9 +240,8 @@ static inline uint64_t get_bits_c99_raw(void *state)
 
 MAKE_GET_BITS_WRAPPERS(c99)
 
-static inline uint64_t get_bits_c99ctr32_raw(void *state)
+static inline uint64_t get_bits_c99ctr32_raw(ChaChaState *obj)
 {
-    ChaChaState *obj = state;
     if (obj->pos >= 16) {
         ChaCha_inc_counter32(obj);
         ChaCha_block_c99(obj);
@@ -411,9 +409,8 @@ void ChaCha_block_avx(ChaChaState *obj)
 
 
 
-static inline uint64_t get_bits_avx_raw(void *state)
+static inline uint64_t get_bits_avx_raw(ChaChaState *obj)
 {
-    ChaChaState *obj = state;
     if (obj->pos >= 16) {
         ChaCha_inc_counter(obj);
         ChaCha_block_avx(obj);
@@ -425,9 +422,8 @@ static inline uint64_t get_bits_avx_raw(void *state)
 MAKE_GET_BITS_WRAPPERS(avx)
 
 
-static inline uint64_t get_bits_avxctr32_raw(void *state)
+static inline uint64_t get_bits_avxctr32_raw(ChaChaState *obj)
 {
-    ChaChaState *obj = state;
     if (obj->pos >= 16) {
         ChaCha_inc_counter32(obj);
         ChaCha_block_avx(obj);
@@ -641,9 +637,8 @@ void EXPORT ChaChaVec_init(ChaChaVecState *obj, size_t nrounds, const uint32_t *
 }
 
 
-static uint64_t get_bits_vector_raw(void *state)
+static uint64_t get_bits_vector_raw(ChaChaVecState *obj)
 {
-    ChaChaVecState *obj = state;
     if (obj->pos >= 64) {
         ChaChaVec_inc_counter(obj);
         ChaChaVec_block(obj);

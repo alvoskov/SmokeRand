@@ -9,7 +9,7 @@
  *  http://dx.doi.org/10.1090/S0025-5718-99-00996-5
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -18,12 +18,11 @@
 
 PRNG_CMODULE_PROLOG
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Lcg32State *obj)
 {
     const uint64_t a = 1588635695UL;
     const uint64_t m = 4294967291UL; // 2^32 - 5
     const uint64_t c = 123U;
-    Lcg32State *obj = state;
 #if SIZE_MAX == UINT32_MAX
     // Implementation for 32-bit systems;
     // 64-bit mod may require runtime library funcions on such platforms

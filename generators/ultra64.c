@@ -26,7 +26,7 @@
  * @copyright The original algorithm was suggested by G. Marsaglia.
  * Reentrant implementation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -57,11 +57,10 @@ static void Ultra64State_init(Ultra64State *obj, uint64_t seed)
 }
 
 
-static uint64_t get_bits_raw(void *state)
+static uint64_t get_bits_raw(Ultra64State *obj)
 {
     static const uint64_t MWC_A = 0xff676488; // 2^32 - 10001272
-    Ultra64State *obj = state;
-    uint64_t u = obj->x[obj->r] * obj->x[obj->s];
+    const uint64_t u = obj->x[obj->r] * obj->x[obj->s];
     obj->x[obj->r] = u;
     if (obj->r == 0) {
         obj->r = ULTRA_R;

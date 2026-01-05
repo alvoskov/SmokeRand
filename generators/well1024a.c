@@ -16,7 +16,7 @@
  * 
  * Implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -63,15 +63,14 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Well1024aState *obj)
 {
-    Well1024aState *obj = state;
     static const unsigned int m1 = 3, m2 = 24, m3 = 10;
     const unsigned int neg1ind = IND(POS_MASK);
     uint32_t *s = obj->s;
-    uint32_t z0 = s[neg1ind]; // VRm1
-    uint32_t z1 = s[obj->pos] ^ m3pos(8, s[IND(m1)]);
-    uint32_t z2 = m3neg(-19, s[IND(m2)]) ^ m3neg(-14, s[IND(m3)]);
+    const uint32_t z0 = s[neg1ind]; // VRm1
+    const uint32_t z1 = s[obj->pos] ^ m3pos(8, s[IND(m1)]);
+    const uint32_t z2 = m3neg(-19, s[IND(m2)]) ^ m3neg(-14, s[IND(m3)]);
     s[obj->pos] = z1 ^ z2; // newV1
     s[neg1ind] = m3neg(-11, z0) ^ m3neg(-7, z1) ^ m3neg(-13, z2); // newV0
     obj->pos = neg1ind;

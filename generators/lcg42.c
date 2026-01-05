@@ -6,7 +6,8 @@
  * 1. Demidovich B.P., Maron I.A. Computational Mathematics.
  *    Mir Publishers, 1981.
  *
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -17,9 +18,8 @@ PRNG_CMODULE_PROLOG
 
 #define P42_MASK 0x3FFFFFFFFFF
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Lcg64State *obj)
 {
-    Lcg64State *obj = state;
     obj->x = (obj->x * 762939453125ULL ) & P42_MASK;
     return obj->x >> 10;
 }

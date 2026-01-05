@@ -27,7 +27,7 @@
  *
  * Implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -49,17 +49,16 @@ typedef struct {
 } XorWowState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(XorWowState *obj)
 {
     const uint32_t d_inc = 362437;
-    XorWowState *obj = state;
-    uint32_t t = (obj->x ^ (obj->x >> 2));
+    const uint32_t t = (obj->x ^ (obj->x >> 2));
     obj->x = obj->y;
     obj->y = obj->z;
     obj->z = obj->w;
     obj->w = obj->v;
     obj->v = (obj->v ^ (obj->v << 4)) ^ (t ^ (t << 1));
-    uint32_t ans = (obj->d += d_inc) + obj->v;
+    const uint32_t ans = (obj->d += d_inc) + obj->v;
     return ans;
 }
 

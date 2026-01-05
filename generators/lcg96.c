@@ -24,7 +24,7 @@
  * test `bspace4_8d_dec`. They also fail TMFn test from PractRand 0.94.
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -41,9 +41,8 @@ PRNG_CMODULE_PROLOG
 /**
  * @brief A cross-compiler implementation of 96-bit LCG.
  */
-static inline uint64_t get_bits_ext_raw(void *state)
+static inline uint64_t get_bits_ext_raw(Lcg128State *obj)
 {
-    Lcg128State *obj = state;
     Lcg128State_a128_iter(obj, 0xdc879768, 0x60b11728995deb95, 1);
     // mod 2^96
     obj->x_high = ((obj->x_high << 32) >> 32);
@@ -77,7 +76,7 @@ static void *create_ext(const GeneratorInfo *gi, const CallerAPI *intf)
     Lcg128State *obj = intf->malloc(sizeof(Lcg128State));
     Lcg128State_init(obj, 0, intf->get_seed64() | 0x1);
     (void) gi;
-    return (void *) obj;
+    return obj;
 }
 
 ////////////////////////////////
@@ -105,14 +104,13 @@ typedef struct {
 /**
  * @brief A portable implementation of 96-bit LCG.
  */
-static inline uint64_t get_bits_c99_raw(void *state)
+static inline uint64_t get_bits_c99_raw(Lcg96x32State *obj)
 {
     //                           lower        medium     high
     static const uint32_t a[] = {0x3bda4a15, 0xfa75832c, 0xf429e3c0};
     static const uint32_t c = 1;
     uint32_t row0[3], row1[2], row2;
     uint64_t mul, sum;
-    Lcg96x32State *obj = state;
     // Row 0
     mul = MUL64(a[0], obj->x[0]); row0[0] = LO64(mul);
     mul = MUL64(a[0], obj->x[1]) + HI64(mul); row0[1] = LO64(mul);

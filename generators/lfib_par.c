@@ -27,7 +27,7 @@
  *    https://doi.org/10.1007/3-540-44839-X_1
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -96,9 +96,8 @@ static LFibDynDescr generators[] = {
  * for moderate lags. For small lags it may be slower, for large --
  * has very similar speed.
  */
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(LFibDyn_State *obj)
 {
-    LFibDyn_State *obj = state;
     uint64_t *x = obj->u;
     if (obj->pos < obj->r) {
         return x[obj->pos++] >> 32;
