@@ -33,7 +33,7 @@
     #define SMOKERAND_COMPILER "msvc"
 #elif defined(__MINGW32__) || defined(__MINGW64__)
     #define SMOKERAND_COMPILER "mingw"
-#elif defined(__GCC__)
+#elif defined(__GNUC__)
     #define SMOKERAND_COMPILER "gcc"
 #else
     #define SMOKERAND_COMPILER "unknown"
