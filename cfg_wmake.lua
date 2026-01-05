@@ -107,7 +107,8 @@ io.write("lib_headers = " .. lib_headers_str .. "\n")
 
 -- Make "all" section
 io.write("all: $(bindir)/smokerand.exe $(bindir)/sr_speed.exe $(bindir)/sr_dos32.exe " ..
-    "$(bindir)/test_funcs.exe $(bindir)/srtiny16.exe $(bindir)/setvesa.com &\n")
+    "$(bindir)/test_funcs.exe $(bindir)/test_syscrypto.exe $(bindir)/srtiny16.exe " ..
+    "$(bindir)/setvesa.com &\n")
 local gen_all_sources = {}
 for _, e in pairs(gen_sources) do table.insert(gen_all_sources, e) end
 for _, e in pairs(gen_asm_sources) do table.insert(gen_all_sources, e) end
@@ -131,22 +132,27 @@ for _, v in pairs(bat_sources) do
     table.insert(sources, v)
 end
 table.insert(sources, "smokerand.c")
-local objstr, objstr_dos32 = "", ""
+local objstr, objstr_dos32, objstr_genexec = "", "", ""
 for _, v in pairs(sources) do
     objstr = objstr .. " $(objdir)/" .. v:gsub("%.c", ".obj")
     objstr_dos32 = objstr_dos32 .. " $(objdir_dos32)/" .. v:gsub("%.c", ".obj")
+    if v ~= "smokerand.c" then
+        objstr_genexec = objstr_genexec .. " $(objdir)/" .. v:gsub("%.c", ".obj")
+    end
 end
 objstr_dos32 = objstr_dos32 .. " $(objdir_dos32)/pe32loader.obj"
 -- b) Line with commands
 io.write("$(bindir)/smokerand.exe:" .. objstr .. "\n")
 io.write("\twcl386 -4s -fe=$(bindir)/smokerand.exe " .. objstr .. "\n")
 
-local objstr_speed = "$(objdir)/sr_speed.obj $(objdir)/base64.obj " ..
-    "$(objdir)/blake2s.obj $(objdir)/cpuinfo.obj " ..
-    "$(objdir)/core.obj $(objdir)/entropy.obj $(objdir)/bat_special.obj "..
-    "$(objdir)/threads_intf.obj"
+local objstr_speed = "$(objdir)/sr_speed.obj " .. objstr_genexec;
 io.write("$(bindir)/sr_speed.exe: " .. objstr_speed .. "\n")
 io.write("\twcl386 -4s -fe=$(bindir)/sr_speed.exe " .. objstr_speed .. "\n")
+
+local objstr_syscrypto = "$(objdir)/test_syscrypto.obj " .. objstr_genexec;
+io.write("$(bindir)/test_syscrypto.exe: " .. objstr_syscrypto .. "\n")
+io.write("\twcl386 -4s -fe=$(bindir)/test_syscrypto.exe " .. objstr_syscrypto .. "\n")
+
 
 io.write("$(bindir)/test_funcs.exe: $(objdir)/test_funcs.obj \n")
 io.write("\twcl386 -4s -fe=$(bindir)/test_funcs.exe $(objdir)/base64.obj $(objdir)/blake2s.obj $(objdir)/cpuinfo.obj " ..
@@ -167,6 +173,9 @@ io.write("\twcc386 $(cflags) -fo=$(objdir)/smokerand.obj $(appsrcdir)/smokerand.
 
 io.write("$(objdir)/sr_speed.obj: $(appsrcdir)/sr_speed.c $(lib_headers)\n")
 io.write("\twcc386 $(cflags) -fo=$(objdir)/sr_speed.obj $(appsrcdir)/sr_speed.c\n")
+
+io.write("$(objdir)/test_syscrypto.obj: $(appsrcdir)/test_syscrypto.c $(lib_headers)\n")
+io.write("\twcc386 $(cflags) -fo=$(objdir)/test_syscrypto.obj $(appsrcdir)/test_syscrypto.c\n")
 
 io.write("$(objdir_dos32)/smokerand.obj: $(appsrcdir)/smokerand.c $(lib_headers)\n")
 io.write("\twcc386 $(cflags_dos32) -fo=$(objdir_dos32)/smokerand.obj $(appsrcdir)/smokerand.c\n")
@@ -258,7 +267,9 @@ io.write("\twasm -q $(appsrcdir)/setvesa.asm -fo=$(objdir)/setvesa.obj\n")
 io.write("clean: .SYMBOLIC\n")
 io.write("\tdel $(bindir)\\smokerand.exe\n")
 io.write("\tdel $(bindir)\\sr_dos32.exe\n")
+io.write("\tdel $(bindir)\\sr_speed.exe\n")
 io.write("\tdel $(bindir)\\srtiny16.exe\n")
+io.write("\tdel $(bindir)\\test_crypto.exe\n")
 io.write("\tdel $(bindir)\\test_funcs.exe\n")
 io.write("\tdel $(objdir)\\*.obj\n")
 io.write("\tdel $(gen_bindir)\\obj\\*.obj\n")
