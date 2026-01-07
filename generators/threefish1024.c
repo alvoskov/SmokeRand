@@ -33,7 +33,7 @@
  *
  * Implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -68,7 +68,6 @@ enum {
 #define C240 0x1BD11BDAA9FC1A22U
 
 //////////////////////////////////////////////////////////
-///// 
 
 /**
  * @brief Threefish-1024 scalar pseudorandom number generator state, it doesn't
@@ -174,9 +173,8 @@ static void Tf1024State_init(Tf1024State *obj, const uint64_t *k, const uint64_t
 }
 
 
-static uint64_t get_bits_scalar_raw(void *state)
+static uint64_t get_bits_scalar_raw(Tf1024State *obj)
 {
-    Tf1024State *obj = state;
     if (obj->pos >= TF1024_NWORDS) {
         obj->p[0]++;
         Tf1024State_block(obj);
@@ -338,9 +336,8 @@ static inline void Tf1024VecState_inc_counter(Tf1024VecState *obj)
     }    
 }
 
-static uint64_t get_bits_vector_raw(void *state)
+static uint64_t get_bits_vector_raw(Tf1024VecState *obj)
 {
-    Tf1024VecState *obj = state;
     if (obj->pos >= TF1024_NWORDS * TF1024_NCOPIES) {
         Tf1024VecState_inc_counter(obj);
         Tf1024VecState_block(obj);

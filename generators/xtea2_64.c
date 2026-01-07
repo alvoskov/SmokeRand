@@ -69,9 +69,8 @@ static void *create(const CallerAPI *intf)
 }
 
 
-static uint64_t get_bits_raw(void *state)
+static uint64_t get_bits_raw(Xtea2x64State *obj)
 {
-    Xtea2x64State *obj = state;
     if (obj->pos >= 2) {
         obj->ctr[0]++;
         Xtea2x64State_block(obj);

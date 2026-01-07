@@ -24,7 +24,7 @@
  * 4. https://github.com/lpareja99/spectral-test-knuth
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -42,9 +42,8 @@ typedef struct {
 } Mwc1616xShared;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Mwc1616xShared *obj)
 {
-    Mwc1616xShared *obj = state;
     const uint16_t z_lo = (uint16_t) (obj->z & 0xFFFF);
     const uint16_t z_hi = (uint16_t) (obj->z >> 16);
     const uint16_t w_lo = (uint16_t) (obj->w & 0xFFFF);

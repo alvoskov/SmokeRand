@@ -17,7 +17,7 @@
  *
  * Adaptation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  */
 #include "smokerand/cinterface.h"
@@ -43,11 +43,10 @@ static void Mwc8222State_init(Mwc8222State *obj, uint64_t seed)
     }
 }
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Mwc8222State *obj)
 {
     static const uint64_t a = 809430660ULL;
-    Mwc8222State *obj = state;
-    uint64_t t = a * obj->x[++obj->pos] + obj->c;
+    const uint64_t t = a * obj->x[++obj->pos] + obj->c;
     obj->c = (uint32_t) (t >> 32);
     obj->x[obj->pos] = (uint32_t) t;
     return obj->x[obj->pos];

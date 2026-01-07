@@ -2,7 +2,7 @@
  * @file randu.c
  * @brief An implementation of RANDU - low-quality 32-bit LCG.
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -11,9 +11,8 @@
 
 PRNG_CMODULE_PROLOG
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Lcg32State *obj)
 {
-    Lcg32State *obj = state;
     obj->x = (uint32_t)65539u * obj->x + 12345u;
     return obj->x;
 }
@@ -23,7 +22,7 @@ static void *create(const CallerAPI *intf)
 {
     Lcg32State *obj = intf->malloc(sizeof(Lcg32State));
     obj->x = intf->get_seed32();
-    return (void *) obj;
+    return obj;
 }
 
 

@@ -1,9 +1,10 @@
 /**
  * @file biski32.c
  * @brief biski32 is a chaotic generator developed by Daniel Cota.
- * @details Its design resembles one round of Feistel network. Biski32
- * passes the `express`, `brief`, `default` and `full` batteries but
- * still fails the Hamming weights distribution test (histogram) at large
+ * @details Its design resembles one round of Feistel network. It has
+ * two version: `v2` (default) that passes based on the suggestion
+ * from [2] and the `v1` (the original version) from [1] that 
+ * fails the Hamming weights distribution test (histogram) at large
  * samples (`hamming_distr`):
  *
  *    Hamming weights distribution test (histogram)
@@ -24,6 +25,7 @@
  *
  * References:
  * 1. https://github.com/danielcota/biski64
+ * 2. https://www.reddit.com/r/RNG/comments/1ptyn5c/comment/nxoh0y7/
  *
  *
  * @copyright
@@ -44,7 +46,27 @@ typedef struct {
     uint32_t ctr;
 } Biski32State;
 
-static inline uint64_t get_bits_raw(Biski32State *obj)
+///////////////////////////////////////////////////
+///// The newer version with optimized shifts /////
+///////////////////////////////////////////////////
+
+static inline uint64_t get_bits_ver2_raw(Biski32State *obj)
+{
+    const uint32_t output = obj->mix + obj->loop_mix;
+    const uint32_t old_loop_mix = obj->loop_mix;
+    obj->loop_mix = obj->ctr ^ obj->mix;
+    obj->mix = rotl32(obj->mix, 7) + rotl32(old_loop_mix, 19);
+    obj->ctr += 0x99999999;
+    return output;
+}
+
+MAKE_GET_BITS_WRAPPERS(ver2)
+
+/////////////////////////////////////////////////////////////////
+///// The initial version that fails the hamming_distr test /////
+/////////////////////////////////////////////////////////////////
+
+static inline uint64_t get_bits_ver1_raw(Biski32State *obj)
 {
     const uint32_t output = obj->mix + obj->loop_mix;
     const uint32_t old_loop_mix = obj->loop_mix;
@@ -54,6 +76,11 @@ static inline uint64_t get_bits_raw(Biski32State *obj)
     return output;
 }
 
+MAKE_GET_BITS_WRAPPERS(ver1)
+
+/////////////////////////////////////////
+///// Interfaces and initialization /////
+/////////////////////////////////////////
 
 static void *create(const CallerAPI *intf)
 {
@@ -64,4 +91,26 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-MAKE_UINT32_PRNG("biski32", NULL)
+
+static const GeneratorParamVariant gen_list[] = {
+    {"",   "biski32:v2", 32, default_create, get_bits_ver2, get_sum_ver2},
+    {"v2", "biski32:v2", 32, default_create, get_bits_ver2, get_sum_ver2},
+    {"v1", "biski32:v1", 32, default_create, get_bits_ver1, get_sum_ver1},
+    GENERATOR_PARAM_VARIANT_EMPTY
+};
+
+
+static const char description[] =
+"biski32 is a chaotic PRNG with a linear part developed by Daniel Cota.\n"
+"The next param values are supported:\n"
+"  v2 - the updated version with improved quality (default)\n"
+"  v1 - the original version that fails the hamming_distr test\n";
+
+
+int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
+{
+    const char *param = intf->get_param();
+    gi->description = description;
+    gi->self_test = NULL;
+    return GeneratorParamVariant_find(gen_list, intf, param, gi);
+}

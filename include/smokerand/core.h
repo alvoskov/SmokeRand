@@ -187,6 +187,10 @@ void set_bin_stdout(void);
 void set_bin_stdin(void);
 void GeneratorInfo_bits_to_file(GeneratorInfo *gen,
     const CallerAPI *intf, unsigned int maxlen_log2);
+void GeneratorInfo_floats_to_file(GeneratorInfo *gen,
+    const CallerAPI *intf, unsigned int maxlen_log2);
+void GeneratorInfo_accurate_floats_to_file(GeneratorInfo *gen,
+    const CallerAPI *intf, unsigned int maxlen_log2);
 
 ////////////////////////////////////////
 ///// Some useful inline functions /////
@@ -295,6 +299,30 @@ static inline uint64_t reverse_bits64(uint64_t x)
     x = ((x & 0xCCCCCCCCCCCCCCCC) >> 2)  | ((x & 0x3333333333333333) << 2);
     x = ((x & 0xAAAAAAAAAAAAAAAA) >> 1)  | ((x & 0x5555555555555555) << 1);
     return x;
+}
+
+/**
+ * @brief Count leading zeros for an unsigned 64-bit integer.
+ */
+static inline unsigned int countl_zero_u64(uint64_t x)
+{
+#ifdef __GNUC__
+    if (x == 0) { // To prevent undefined behaviour
+        return 64;
+    }
+    return (unsigned int) __builtin_clzll(x);
+#else
+    // A cross-platform version
+    unsigned int n = 64;
+    uint64_t y;
+    y = x >> 32; if (y != 0) { n = n - 32; x = y; }
+    y = x >> 16; if (y != 0) { n = n - 16; x = y; }
+    y = x >>  8; if (y != 0) { n = n -  8; x = y; }
+    y = x >>  4; if (y != 0) { n = n -  4; x = y; }
+    y = x >>  2; if (y != 0) { n = n -  2; x = y; }
+    y = x >>  1; if (y != 0) return n - 2;
+    return n - x;
+#endif
 }
 
 #endif // __SMOKERAND_CORE_H

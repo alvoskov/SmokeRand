@@ -11,7 +11,7 @@
  *
  * Constants tuning and reentrant version for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -21,10 +21,9 @@
 
 PRNG_CMODULE_PROLOG
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Lcg64State *obj)
 {
-    const uint64_t a = 6906969069ull;
-    Lcg64State *obj = state;
+    static const uint64_t a = 6906969069ull;
     // Just ordinary 128-bit LCG
     obj->x = a * obj->x + 1;
     // Output DXSM (double xor, shift, multiply) function

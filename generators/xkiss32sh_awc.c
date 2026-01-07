@@ -13,7 +13,8 @@
  * 2. https://groups.google.com/g/comp.lang.fortran/c/5Bi8cFoYwPE
  * 3. https://talkchess.com/viewtopic.php?t=38313&start=10
  *
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.

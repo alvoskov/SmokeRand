@@ -12,7 +12,7 @@
  * @copyright xoroshiro64* algorithms were suggested by D.Blackman
  * and S.Vigna. Reentrant version for SmokeRand:
  * 
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -29,9 +29,8 @@ typedef struct {
 } Xoroshiro64StState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Xoroshiro64StState *obj)
 {
-    Xoroshiro64StState *obj = state;
     const uint32_t s0 = obj->s[0];
     uint32_t s1 = obj->s[1];
     const uint32_t result = s0 * 0x9E3779BB;

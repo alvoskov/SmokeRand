@@ -15,7 +15,7 @@
  *
  * xoroshiro64++ modification and its version for SmokeRand:
  * 
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -32,9 +32,8 @@ typedef struct {
 } Xoroshiro64PPState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Xoroshiro64PPState *obj)
 {
-    Xoroshiro64PPState *obj = state;
     const uint32_t s0 = obj->s[0];
     uint32_t s1 = obj->s[1];
     const uint32_t result = rotl32(s0 + s1, 7) + s0;

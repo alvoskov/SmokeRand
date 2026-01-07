@@ -1,8 +1,44 @@
-// full, bigcrush, birthday, practrand >= 2 TiB
+/**
+ * @file xkiss32_awc_rot.c
+ * @brief A modification of KISS algorithm (2007 version) by J. Marsaglia
+ * with parameters tuned by A.L. Voskov to get rid of integers overflows
+ * that may be useful for porting to Modula-2 and Oberon.
+ * @details It doesn't use multiplication: it is a combination or xoroshiro64,
+ * and AWC (add with carry) generator. Doesn't require 64-bit integers.
+ * Actually this is PRNG is an experimental attempt to make high quality PRNG
+ * for Oberon-07 with the next restrictions:
+ *
+ * - No integer overflows during addition and multiplication.
+ * - Only ROR, LSH and bitwise XOR are allowed inside LFSR part.
+ * - Only 32-bit integers are allowed.
+ *
+ * This generator passes SmokeRand `full` battery, TestU01 BigCrush and
+ * PractRand 0.94 at least up to 16 TiB.
+ *
+ * References:
+ *
+ * 1. David Jones, UCL Bioinformatics Group. Good Practice in (Pseudo) Random
+ *    Number Generation for Bioinformatics Applications
+ *    http://www0.cs.ucl.ac.uk/staff/D.Jones/GoodPracticeRNG.pdf
+ * 2. https://groups.google.com/g/comp.lang.fortran/c/5Bi8cFoYwPE
+ * 3. https://talkchess.com/viewtopic.php?t=38313&start=10
+ *
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ *
+ * The KISS algorithm is developed by George Marsaglia, its JKISS version
+ * was suggested by David Jones.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 
+/**
+ * @brief XKISS32/AWC/ROT pseudorandom number generator state.
+ */
 typedef struct {
     uint32_t x;
     uint32_t awc_x0;

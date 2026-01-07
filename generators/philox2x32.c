@@ -20,7 +20,7 @@
  *
  * Implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -157,9 +157,8 @@ static int run_self_test(const CallerAPI *intf)
 ///// Module external interface /////
 /////////////////////////////////////
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Philox2x32State *obj)
 {
-    Philox2x32State *obj = state;
     if (obj->pos >= Nw) {
         Philox2x32State_inc_counter(obj);
         Philox2x32State_block10(obj);

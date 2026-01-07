@@ -35,8 +35,10 @@
  *    25th International Conference on Computing in High Energy and Nuclear
  *    Physics (CHEP 2021). V. 251. https://doi.org/10.1051/epjconf/202125103008
  *
- * @copyright (c) 2020-2021 Jonas Hahfeld, Jirka Hladky (original library);
- * (c) 2024 Alexey L. Voskov (modifications for TestU01-threads, MinGW and MSVC)
+ * @copyright
+ * (c) 2020-2021 Jonas Hahfeld, Jirka Hladky (original library);
+ * (c) 2024-2026 Alexey L. Voskov (modifications for TestU01-threads,
+ * MinGW and MSVC)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -124,9 +126,8 @@ static inline void RanluxppState_next(RanluxppState *r)
 /////////////////////
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(RanluxppState *obj)
 {
-    RanluxppState *obj = state;
     if (obj->pos == 9) {
         RanluxppState_next(obj);
         obj->pos = 0;
@@ -138,7 +139,7 @@ static void *create(const CallerAPI *intf)
 {
     RanluxppState *obj = intf->malloc(sizeof(RanluxppState));
     RanluxppState_init(obj, intf->get_seed64(), DEFAULT_P);
-    return (void *) obj;
+    return obj;
 }
 
 /**
@@ -169,7 +170,7 @@ static int run_self_test(const CallerAPI *intf)
     RanluxppState *obj = intf->malloc(sizeof(RanluxppState));
     RanluxppState_init(obj, 1, DEFAULT_P);
     for (size_t i = 0; i < sizeof(x_ref) / sizeof(x_ref[0]); i++) {
-        uint64_t x = get_bits_raw(obj);
+        const uint64_t x = get_bits_raw(obj);
         if (x != x_ref[i]) {
             passed = 0;
         }
@@ -179,4 +180,3 @@ static int run_self_test(const CallerAPI *intf)
 }
 
 MAKE_UINT64_PRNG("RANLUX++:u64", run_self_test)
-

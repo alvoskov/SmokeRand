@@ -23,7 +23,7 @@
  *
  * Reengineering to RGE256ex and reentrant C version for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -32,13 +32,14 @@
 
 PRNG_CMODULE_PROLOG
 
+/**
+ * @brief RGE256ex-ctr counter-based PRNG-state.
+ */
 typedef struct {
-    uint32_t ctr[8];
-    uint32_t out[8];
-    int pos;
+    uint32_t ctr[8]; ///< Counter (input block)
+    uint32_t out[8]; ///< Output buffer
+    int pos;         ///< Position inside the output buffer
 } RGE256ExCtrState;
-
-
 
 
 static inline void RGE256ExCtrState_block(RGE256ExCtrState *obj)
@@ -74,9 +75,8 @@ static void RGE256ExCtrState_init(RGE256ExCtrState *obj, const uint32_t *seed)
     obj->pos = 0;
 }
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(RGE256ExCtrState *obj)
 {
-    RGE256ExCtrState *obj = state;
     if (obj->pos >= 8) {
         if (++obj->ctr[0] == 0) obj->ctr[1]++;
         RGE256ExCtrState_block(obj);

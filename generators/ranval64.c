@@ -16,8 +16,11 @@
  *    pseudorandom number generators
  *    https://burtleburtle.net/bob/rand/talksmall.html
  *
- * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright The ranval64 algorithm was developed by Bob Jenkins.
+ *
+ * Reentrant implementation for SmokeRand:
+ *
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -37,9 +40,8 @@ typedef struct {
 } Ranval64State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Ranval64State *obj)
 {
-    Ranval64State *obj = state;
     const uint64_t e = obj->a - rotl64(obj->b,  7);
     obj->a = obj->b ^ rotl64(obj->c, 13);
     obj->b = obj->c + rotl64(obj->d, 37);
@@ -51,13 +53,13 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Ranval64State *obj = intf->malloc(sizeof(Ranval64State));
-    uint64_t seed = intf->get_seed64();
+    const uint64_t seed = intf->get_seed64();
     obj->a = 0xf1ea5eed;
     obj->b = obj->c = obj->d = seed;
     for (int i = 0; i < 20; i++) {
         (void) get_bits_raw(obj);
     }
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT64_PRNG("Ranval64", NULL)

@@ -10,7 +10,7 @@
  *
  * Reentrant version for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -20,10 +20,9 @@
 
 PRNG_CMODULE_PROLOG
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Lcg128State *obj)
 {
     const uint64_t a = 0xda942042e4dd58b5ULL;
-    Lcg128State *obj = state;
     // Just ordinary 128-bit LCG
     (void) Lcg128State_a64_iter(obj, a, 1);
     // Output DXSM (double xor, shift, multiply) function

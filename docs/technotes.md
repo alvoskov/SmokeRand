@@ -264,3 +264,34 @@ may be seen as too pessimistic quality estimation of some generators. But
 it is partially based on the idea that usage of non-cryptographic generators
 that even pass all tests (have 4.0 final grade) is an intentional downgrade
 in quality, bithack that requires a special justification.
+
+# About checking statitical tests
+
+SmokeRand includes a large collection of generators that was used and still
+can be used for checking correctness of its statistical tests. Examples:
+
+1. `chacha` (ChaCha12), `aes128`, `speck128` (Speck128/128) - all tests
+   should pass, occasional `SUSPICIOUS` values are possible.
+2. `des`, `pcg64_64`, `splitmix64` - pass `full` battery but fail
+   `birthday` battery.
+3. `ara32`, `flea31x1`: fail the mod3 test even in the `brief` battery.
+4. `biski64`: systematic `SUSPICIOUS` and/or `FAIL` values at `hamming_distr`
+   test (XORing part) in the `full` battery.
+5. `chacha` with the `--param=avx-ctr32` parameter fails the `gap_inv1024`
+   test from the `full` battery.
+6. `lcg64prime`: fails `bspace64_1d` even in the `brief` battery.
+7. `mwc64`: fails only `bspace21_3d` in the `brief` battery and probably some
+   other tests in `default` and `full` batteries.
+8. `lcg128` and `lcg96`: fail the `bspace4_8d_dec` test for the 64-bit output
+   (default mode); `lcg128` with the `--param=x128u32` parameter passed the
+   `brief` battery but fails the same test in the `default` battery.
+9. `mwc4691`: fails the `gap16_count0` test since the `brief` battery, it
+   is the only test that it fails in SmokeRand batteries.
+10. `ranrot32`: fails the `hamming_ot_u128` test in the `brief` battery.
+11. `ranq2`: fails the `matrixrank_4096` test (but not linear complexity tests).
+12. `swbmwc32`: fails the `gap_inv8` test, it is the only test that it fails
+   in SmokeRand batteries.
+13. `lfib_par` with the `--param=607+` parameter: fails the `bspace32_1d`,
+    `gap_inv512` and `gap16_count0` tests from the `brief` battery.
+14. `lfib_par` with the `--param=19937+` parameter: fails the `gap16_count0`
+    test in the `default` and `full` batteries.

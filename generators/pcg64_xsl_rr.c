@@ -18,7 +18,7 @@
  *
  * Implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -28,15 +28,14 @@
 
 PRNG_CMODULE_PROLOG
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Lcg128State *obj)
 {
-    Lcg128State *obj = state;
     // Just ordinary 128-bit LCG
-    (void) Lcg128State_a128_iter(state, 0x2360ED051FC65DA4, 0x4385DF649FCCF645, 1);    
+    (void) Lcg128State_a128_iter(obj, 0x2360ED051FC65DA4, 0x4385DF649FCCF645, 1);    
     // Output XSL RR function
-    uint64_t x_lo = obj->x_low, x_hi = obj->x_high;
-    int rot = (int) (x_hi >> 58); // 64 - 6
-    uint64_t xsl = x_hi ^ x_lo;
+    const uint64_t x_lo = obj->x_low, x_hi = obj->x_high;
+    const int rot = (int) (x_hi >> 58); // 64 - 6
+    const uint64_t xsl = x_hi ^ x_lo;
     return rotr64(xsl, rot);
 }
 
@@ -45,7 +44,7 @@ static void *create(const CallerAPI *intf)
 {
     Lcg128State *obj = intf->malloc(sizeof(Lcg128State));
     Lcg128State_seed(obj, intf);
-    return (void *) obj;
+    return obj;
 }
 
 /**
@@ -54,11 +53,7 @@ static void *create(const CallerAPI *intf)
  */
 static int run_self_test(const CallerAPI *intf)
 {
-//#ifdef UINT128_ENABLED
-//    Lcg128State obj = {.x = 1234567890};
-//#else
     Lcg128State obj = { .x_low = 1234567890, .x_high = 0 };
-//#endif
     uint64_t u, u_ref = 0x8DE320BB801095E2;
     for (size_t i = 0; i < 1000000; i++) {
         u = get_bits_raw(&obj);

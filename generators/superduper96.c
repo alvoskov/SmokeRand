@@ -13,7 +13,7 @@
  *
  * Implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -31,9 +31,8 @@ typedef struct {
 } SuperDuper96State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(SuperDuper96State *obj)
 {
-    SuperDuper96State *obj = state;
     obj->lcg = 69069u * obj->lcg + 12345u;
     obj->xs ^= obj->xs >> 13;
     obj->xs ^= obj->xs << 17;
@@ -45,7 +44,7 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     SuperDuper96State *obj = intf->malloc(sizeof(SuperDuper96State));
-    uint64_t seed = intf->get_seed64();
+    const uint64_t seed = intf->get_seed64();
     obj->lcg = (uint32_t) (seed & 0xFFFFFFFF);
     obj->xs  = (uint32_t) (seed >> 32);
     if (obj->xs == 0) {

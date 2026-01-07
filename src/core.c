@@ -4,7 +4,7 @@
  * of statistical tests.
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -1199,8 +1199,19 @@ maxlen_log2_to_nblocks32_log2(unsigned int maxlen_log2)
     }
 }
 
+static inline unsigned long long
+maxlen_log2_to_nfloats(unsigned int maxlen_log2)
+{
+    if (maxlen_log2 == 0) {
+        return 1ULL << 20;
+    } else {
+        return 1ULL << maxlen_log2;
+    }
+}
+
+
 /**
- * @brief Dump an output PRNG to the stdout in the format suitable
+ * @brief Dump a PRNG output to the stdout in the format suitable
  * for PractRand.
  */
 void GeneratorInfo_bits_to_file(GeneratorInfo *gen,
@@ -1228,4 +1239,86 @@ void GeneratorInfo_bits_to_file(GeneratorInfo *gen,
             fwrite(buf, sizeof(uint64_t), 256, stdout);
         }
     }
+    gen->free(state, gen, intf);
+}
+
+/**
+ * @brief Dump a PRNG output to the stdout in the human-readable floating
+ * point format using the "one output - one number" principle even if it
+ * does reduce an accessible range (e.g. for 32-bit generators).
+ */
+void GeneratorInfo_floats_to_file(GeneratorInfo *gen,
+    const CallerAPI *intf, unsigned int maxlen_log2)
+{
+    void *state = gen->create(gen, intf);
+    const unsigned long long nfloats = maxlen_log2_to_nfloats(maxlen_log2);
+    if (gen->nbits == 32) {
+        const double inv32 = pow(2.0, -32.0);
+        for (unsigned long long i = 0; i < nfloats; i++) {
+            const uint32_t u = (uint32_t) gen->get_bits(state);
+            fprintf(stdout, "%.20g\n", (double) u * inv32);
+        }
+    } else {
+        const double inv64 = pow(2.0, -64.0);
+        for (unsigned long long i = 0; i < nfloats; i++) {
+            const uint64_t u = gen->get_bits(state);
+            fprintf(stdout, "%.20g\n", (double) u * inv64);
+        }
+    }
+    gen->free(state, gen, intf);
+}
+
+/**
+ * @brief Generate an unsigned 64-bit integer using a given PRNG
+ */
+static inline uint64_t generate_u64(GeneratorInfo *gen, void *state)
+{
+    if (gen->nbits == 32) {
+        // 32-bit PRNG: concatenate two integers
+        const uint64_t lo = gen->get_bits(state);
+        const uint64_t hi = gen->get_bits(state);
+        return (hi << 32) | lo;
+    } else {
+        // 64-bit PRNG: just return its output
+        return gen->get_bits(state);
+    }
+}
+
+static double make_accurate_float(GeneratorInfo *gen, void *state)
+{
+    union {
+        uint64_t u;
+        double   f;
+    } res;
+    uint64_t e = 0x3FE; // 1023 - 1022 = -1; For [0.5; 1) interval
+    uint64_t out = generate_u64(gen, state);
+    const unsigned int lz = countl_zero_u64(out);
+    if (lz <= 11U) {
+        e -= lz;
+    } else {
+        unsigned int lz2 = countl_zero_u64(generate_u64(gen, state));
+        if (lz2 == 64U) {
+            lz2 += countl_zero_u64(generate_u64(gen, state));
+        }
+        e -= lz2 + 11U;
+    }
+    res.u = (e << 52) | (out & 0xFFFFFFFFFFFFF);
+    return res.f;
+}
+
+/**
+ * @brief Dump a PRNG output to the stdout in the human-readable floating
+ * point format using an accurate method of floats formation that can use
+ * more than 1 PRNG output.
+ */
+void GeneratorInfo_accurate_floats_to_file(GeneratorInfo *gen,
+    const CallerAPI *intf, unsigned int maxlen_log2)
+{
+    void *state = gen->create(gen, intf);
+    const unsigned long long nfloats = maxlen_log2_to_nfloats(maxlen_log2);
+    for (unsigned long long i = 0; i < nfloats; i++) {
+        const double f = make_accurate_float(gen, state);
+        fprintf(stdout, "%.20g\n", f);
+    }
+    gen->free(state, gen, intf);
 }

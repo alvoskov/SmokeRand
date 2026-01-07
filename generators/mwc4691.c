@@ -29,7 +29,7 @@
  *
  * Adaptation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  */
 #include "smokerand/cinterface.h"
@@ -45,13 +45,11 @@ typedef struct {
     int j;
 } Mwc4691State;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Mwc4691State *obj)
 {
-    uint32_t t, x;
-    Mwc4691State *obj = state;
     obj->j = (obj->j < 4690) ? obj->j + 1 : 0;
-    x = obj->Q[obj->j];
-    t = (x << 13) + obj->c + x;
+    const uint32_t x = obj->Q[obj->j];
+    const uint32_t t = (x << 13) + obj->c + x;
     obj->c = (t < x) + (x >> 19);
     obj->Q[obj->j] = t;
     return obj->Q[obj->j];
@@ -76,7 +74,7 @@ static void *create(const CallerAPI *intf)
     Mwc4691State *obj = intf->malloc(sizeof(Mwc4691State));
     uint64_t seed = intf->get_seed64();
     Mwc4691State_init(obj, (uint32_t) (seed >> 32), (uint32_t)(seed & 0xFFFFFFFF) | 1);
-    return (void *) obj;
+    return obj;
 }
 
 

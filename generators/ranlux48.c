@@ -8,7 +8,7 @@
  * 4. TAOCP2
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -42,8 +42,8 @@ typedef struct {
 static inline uint32_t get_bits24_nolux(SwbLuxState *obj)
 {
     uint32_t x;
-    int32_t xj = (int32_t) obj->x[obj->j], xi = (int32_t) obj->x[obj->i];
-    int32_t t = xj - xi - (int32_t) obj->c;
+    const int32_t xj = (int32_t) obj->x[obj->j], xi = (int32_t) obj->x[obj->i];
+    const int32_t t = xj - xi - (int32_t) obj->c;
     if (t >= 0) {
         x = (uint32_t) t;
         obj->c = 0;
@@ -71,9 +71,8 @@ static inline uint32_t get_bits24(SwbLuxState *obj)
 /**
  * @brief This wrapper implements "luxury levels".
  */
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(SwbLuxState *obj)
 {
-    SwbLuxState *obj = state;
     uint32_t x = get_bits24(obj) >> 16;
     x |= (get_bits24(obj) & POW24_M1) << 8;
     return x;
@@ -107,7 +106,7 @@ static int luxury_to_skip(int luxury)
 
 static void *create(const CallerAPI *intf)
 {
-    int luxury = get_luxury(intf);
+    const int luxury = get_luxury(intf);
     if (luxury == -1) {
         return NULL;
     }
@@ -124,7 +123,7 @@ static void *create(const CallerAPI *intf)
     obj->skip = luxury_to_skip(luxury);
     intf->printf("SWB(24,10,2^24)[luxury=%d;%d,%d]\n",
         luxury, SWB_A, SWB_A + obj->skip);
-    return (void *) obj;
+    return obj;
 }
 
 

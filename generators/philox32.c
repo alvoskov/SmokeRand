@@ -20,7 +20,7 @@
  *
  * Implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -63,10 +63,10 @@ static inline void philox_bumpkey(uint32_t *key)
 
 static inline void philox_round(uint32_t *out, const uint32_t *key)
 {
-    uint64_t mul0 = out[0] * 0xD2511F53ull;
-    uint64_t mul1 = out[2] * 0xCD9E8D57ull;
-    uint32_t hi0 = (uint32_t) (mul0 >> 32), lo0 = (uint32_t) mul0;
-    uint32_t hi1 = (uint32_t) (mul1 >> 32), lo1 = (uint32_t) mul1;
+    const uint64_t mul0 = out[0] * 0xD2511F53ull;
+    const uint64_t mul1 = out[2] * 0xCD9E8D57ull;
+    const uint32_t hi0 = (uint32_t) (mul0 >> 32), lo0 = (uint32_t) mul0;
+    const uint32_t hi1 = (uint32_t) (mul1 >> 32), lo1 = (uint32_t) mul1;
     out[0] = hi1 ^ out[1] ^ key[0]; out[1] = lo1;
     out[2] = hi0 ^ out[3] ^ key[1]; out[3] = lo0;
 }
@@ -166,9 +166,8 @@ static int run_self_test(const CallerAPI *intf)
 ///// Module external interface /////
 /////////////////////////////////////
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Philox32State *obj)
 {
-    Philox32State *obj = state;
     if (obj->pos >= Nw) {
         Philox32State_inc_counter(obj);
         Philox32State_block10(obj);

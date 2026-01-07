@@ -12,7 +12,7 @@
  *
  * Adaptation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -32,10 +32,9 @@ typedef struct {
 } Xorshift128State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Xorshift128State *obj)
 {
-    Xorshift128State *obj = state;
-    uint32_t t = (obj->x ^ (obj->x << 11));
+    const uint32_t t = (obj->x ^ (obj->x << 11));
     obj->x = obj->y;
     obj->y = obj->z;
     obj->z = obj->w;
@@ -51,7 +50,7 @@ static void *create(const CallerAPI *intf)
     obj->y = intf->get_seed32();
     obj->z = intf->get_seed32();
     obj->w = intf->get_seed32() | 0x1; // State mustn't be all zeros
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT32_PRNG("Xorshift128", NULL)

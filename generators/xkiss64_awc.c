@@ -28,7 +28,8 @@
  *    http://www0.cs.ucl.ac.uk/staff/D.Jones/GoodPracticeRNG.pdf
  * 4. https://talkchess.com/viewtopic.php?t=38313&start=10
  *
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -53,9 +54,8 @@ typedef struct {
 } Kiss64AwcState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Kiss64AwcState *obj)
 {
-    Kiss64AwcState *obj = state;
     // xorshift64 part
     obj->xsh ^= obj->xsh << 13;
     obj->xsh ^= obj->xsh >> 17;
@@ -83,7 +83,7 @@ static void *create(const CallerAPI *intf)
         obj->xsh = 0x123456789ABCDEF;
     }
     obj->weyl   = intf->get_seed64();
-    return (void *) obj;
+    return obj;
 }
 
 /**

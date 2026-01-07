@@ -25,7 +25,7 @@
  * 4. https://github.com/lpareja99/spectral-test-knuth
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -42,13 +42,12 @@ typedef struct {
     uint64_t w;
 } Mwc3232xShared;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Mwc3232xShared *obj)
 {
-    Mwc3232xShared *obj = state;
-    uint32_t z_lo = (uint32_t) (obj->z & 0xFFFFFFFF);
-    uint32_t z_hi = (uint32_t) (obj->z >> 32);
-    uint32_t w_lo = (uint32_t) (obj->w & 0xFFFFFFFF);
-    uint32_t w_hi = (uint32_t) (obj->w >> 32);
+    const uint32_t z_lo = (uint32_t) (obj->z & 0xFFFFFFFF);
+    const uint32_t z_hi = (uint32_t) (obj->z >> 32);
+    const uint32_t w_lo = (uint32_t) (obj->w & 0xFFFFFFFF);
+    const uint32_t w_hi = (uint32_t) (obj->w >> 32);
     obj->z = 4294441395ull * z_lo + z_hi; // 2^32 - 525901
     obj->w = 4294440669ull * w_lo + w_hi; // 2^32 - 526627    
     return ((obj->z << 32) | (obj->z >> 32)) ^ obj->w;
@@ -58,10 +57,10 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Mwc3232xShared *obj = intf->malloc(sizeof(Mwc3232xShared));
-    uint64_t seed0 = intf->get_seed64();
+    const uint64_t seed0 = intf->get_seed64();
     obj->z = (seed0 >> 32) | (1ull << 32ull);
     obj->w = (seed0 & 0xFFFFFFFF) | (1ull << 32ull);
-    return (void *) obj;
+    return obj;
 }
 
 
