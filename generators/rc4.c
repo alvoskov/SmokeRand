@@ -16,7 +16,7 @@
  *    https://eprint.iacr.org/2023/1486
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -35,9 +35,8 @@ typedef struct {
 } RC4State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(RC4State *obj)
 {
-    RC4State *obj = state;
     uint64_t v = 0;
     uint8_t *s = obj->s, i = obj->i, j = obj->j;
     for (size_t k = 0; k < 4; k++) {
@@ -72,7 +71,7 @@ static void *create(const CallerAPI *intf)
     for (size_t k = 0; k < 32; k++) {
         (void) get_bits_raw(obj);
     }
-    return (void *) obj;
+    return obj;
 }
 
 

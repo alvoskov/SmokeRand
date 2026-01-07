@@ -13,7 +13,8 @@
  * 2. https://groups.google.com/g/comp.lang.fortran/c/5Bi8cFoYwPE
  * 3. https://talkchess.com/viewtopic.php?t=38313&start=10
  *
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -26,7 +27,7 @@
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief Xkiss32AwcState PRNG state.
+ * @brief Xkiss32/AWC PRNG state.
  */
 typedef struct {
     uint32_t s[2];
@@ -36,9 +37,8 @@ typedef struct {
 } Xkiss32AwcState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Xkiss32AwcState *obj)
 {
-    Xkiss32AwcState *obj = state;
     // xoroshiro64 part
     uint32_t s0 = obj->s[0], s1 = obj->s[1];
     s1 ^= s0;
@@ -58,14 +58,14 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     Xkiss32AwcState *obj = intf->malloc(sizeof(Xkiss32AwcState));
-    uint64_t seed_xs = intf->get_seed64();
-    uint64_t seed = intf->get_seed64();
+    const uint64_t seed_xs = intf->get_seed64();
+    const uint64_t seed = intf->get_seed64();
     obj->s[0] = (uint32_t) (seed_xs & 0xFFFFFFFF);
     obj->s[1] = (uint32_t) ((seed_xs >> 32) | 0x1);
     obj->awc_x0 = (uint32_t) ((seed >> 32) & 0x3ffffff);
     obj->awc_x1 = (uint32_t) (seed & 0x3ffffff);
     obj->awc_c  = (obj->awc_x0 == 0 && obj->awc_x1 == 0) ? 1 : 0;
-    return (void *) obj;
+    return obj;
 }
 
 /**

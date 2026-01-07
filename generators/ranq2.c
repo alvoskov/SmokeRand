@@ -10,7 +10,7 @@
  *
  * Thread-safe reimplementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -30,9 +30,8 @@ typedef struct {
 } RanQ2State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(RanQ2State *obj)
 {
-    RanQ2State *obj = state;
     obj->v ^= obj->v >> 17;
     obj->v ^= obj->v << 31;
     obj->v ^= obj->v >> 8;

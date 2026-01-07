@@ -22,7 +22,7 @@
  * - https://github.com/stolendata/ranrot_bi/blob/master/ranrot_bi.h
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -36,9 +36,8 @@ typedef struct {
     uint64_t lo;
 } RanrotBiState;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(RanrotBiState *obj)
 {
-    RanrotBiState *obj = state;
     obj->hi = ( obj->hi << 19 ) + ( obj->hi >> 23 );
     obj->lo = ( obj->lo << 29 ) + ( obj->lo >> 31 );
 
@@ -53,7 +52,7 @@ static void *create(const CallerAPI *intf)
     RanrotBiState *obj = intf->malloc(sizeof(RanrotBiState));
     obj->lo = intf->get_seed64();
     obj->hi = ~obj->lo; // Replacement to random seed doesn't improve PRNG
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT64_PRNG("RANROT_BI", NULL)

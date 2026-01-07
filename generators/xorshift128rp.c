@@ -18,7 +18,7 @@
  * @copyright The xorshift128r+ algorithm is suggested by Çabuk, Aydin et al.
  * Reentrant implementation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -35,9 +35,8 @@ typedef struct {
 } Xorshift128RpState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Xorshift128RpState *obj)
 {
-    Xorshift128RpState *obj = state;
     uint64_t x = obj->s[0];
     uint64_t const y = obj->s[1];
     obj->s[0] = y;
@@ -57,7 +56,7 @@ static void *create(const CallerAPI *intf)
     if (obj->s[0] == 0 && obj->s[1] == 0) {
         obj->s[1] = 0x9E3779B97F4A7C15;
     }
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT64_PRNG("Xorshift128R+", NULL)

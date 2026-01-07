@@ -38,9 +38,8 @@ typedef struct {
 } Xoroshiro1024StStState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Xoroshiro1024StStState *obj)
 {
-    Xoroshiro1024StStState *obj = state;
     const int q = obj->p;
     const uint64_t s0 = obj->s[obj->p = (obj->p + 1) & 15];
     uint64_t s15 = obj->s[q];
@@ -60,7 +59,7 @@ static void *create(const CallerAPI *intf)
     for (size_t i = 0; i < 16; i++) {
         obj->s[i] = intf->get_seed64() | 0x1;
     }
-    return (void *) obj;    
+    return obj;
 }
 
 

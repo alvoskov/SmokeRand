@@ -22,7 +22,7 @@
  * in the `xoroshiro128pp_avx.c` PRNG.
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -68,9 +68,8 @@ typedef struct {
 ///// Scalar (cross-platform) version /////
 ///////////////////////////////////////////
 
-static inline uint64_t get_bits_scalar_raw(void *state)
+static inline uint64_t get_bits_scalar_raw(Xorshift128PPState *obj)
 {
-    Xorshift128PPState *obj = state;
     const uint64_t s0 = obj->s[1];
     uint64_t s1 = obj->s[0];
     const uint64_t result = rotl64(s0 + s1, 17) + s0;
@@ -151,9 +150,8 @@ void Xorshift128PPVecState_block(Xorshift128PPVecState *obj)
 #endif
 }
 
-static inline uint64_t get_bits_vector_raw(void *state)
+static inline uint64_t get_bits_vector_raw(Xorshift128PPVecState *obj)
 {
-    Xorshift128PPVecState *obj = state;
     if (obj->pos >= NCOPIES) {
         Xorshift128PPVecState_block(obj);
         obj->pos = 0;

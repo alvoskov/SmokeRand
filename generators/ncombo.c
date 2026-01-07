@@ -29,7 +29,7 @@
  * @copyright The original algorithm was suggested by G. Marsaglia.
  * Reentrant implementation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -39,10 +39,12 @@
 
 PRNG_CMODULE_PROLOG
 
-
+/**
+ * @brief NCOMBO combined generator state.
+ */
 typedef struct {
-    uint32_t x[2];
-    uint32_t y[3];
+    uint32_t x[2]; ///< Multiplicative generator.
+    uint32_t y[3]; ///< Subtractive generator.
 } NcomboState;
 
 static void NcomboState_init(NcomboState *obj, uint64_t seed)
@@ -55,11 +57,10 @@ static void NcomboState_init(NcomboState *obj, uint64_t seed)
     obj->y[2] = 0xDEADBEEF;
 }
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(NcomboState *obj)
 {
-    NcomboState *obj = state;
     // Multiplicative part
-    uint32_t v_mul = obj->x[0] * obj->x[1];
+    const uint32_t v_mul = obj->x[0] * obj->x[1];
     obj->x[0] = obj->x[1];
     obj->x[1] = v_mul;
     // Subtractive part

@@ -11,7 +11,7 @@
  *
  * Thread-safe reimplementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -29,9 +29,8 @@ typedef struct {
 } Xorshift64StState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Xorshift64StState *obj)
 {
-    Xorshift64StState *obj = state;
     obj->v ^= obj->v >> 12;
     obj->v ^= obj->v << 25;
     obj->v ^= obj->v >> 27;

@@ -28,7 +28,7 @@
  *
  * Reengineering to RGE512ex and reentrant C version for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -37,12 +37,14 @@
 
 PRNG_CMODULE_PROLOG
 
+/**
+ * @brief RGE512ex PRNG state.
+ */
 typedef struct {
-    uint64_t s[8];
-    uint64_t ctr;
+    uint64_t s[8]; ///< Chaotic (nonlinear) part.
+    uint64_t ctr;  ///< Linear (discrete Weyl sequence) part.
     int pos;
 } RGE512ExState;
-
 
 
 static void RGE512ExState_next(RGE512ExState *obj)

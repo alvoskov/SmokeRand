@@ -6,9 +6,17 @@
  * References:
  * 1. L'Ecuyer P. Tables of Maximally Equidistributed Combined LFSR
  *    Generators // Mathematics of Computation. 1999. V. 68. N 225.
- *    P.261-269
+ *    P.261-269. https://doi.org/10.1090/S0025-5718-99-01039-X
  * 2. https://www-labs.iro.umontreal.ca/~simul/rng/lfsr113.c
-*/
+ * @copyright The LFSR113 algorithm was developed by P. L'Ecuyer.
+ *
+ * Reentrant implementation for SmokeRand:
+ *
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG

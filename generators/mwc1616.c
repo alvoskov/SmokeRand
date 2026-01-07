@@ -16,7 +16,7 @@
  * - http://www0.cs.ucl.ac.uk/staff/d.jones/GoodPracticeRNG.pdf
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -36,10 +36,8 @@ typedef struct {
 } Mwc1616State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Mwc1616State *obj)
 {
-    Mwc1616State *obj = state;
-    // MWC generators
     obj->z = (uint32_t)36969U * (obj->z & 0xFFFF) + (obj->z >> 16);
     obj->w = (uint32_t)18000U * (obj->w & 0xFFFF) + (obj->w >> 16);
     uint32_t mwc = (obj->z << 16) + obj->w;

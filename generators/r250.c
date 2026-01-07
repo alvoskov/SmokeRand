@@ -35,7 +35,7 @@
  * 3. https://doi.org/10.1103/PhysRevE.52.3205
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -54,10 +54,9 @@ typedef struct {
     int j;
 } RGenState;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(RGenState *obj)
 {
-    RGenState *obj = state;
-    uint32_t x = obj->x[obj->i] ^ obj->x[obj->j];
+    const uint32_t x = obj->x[obj->i] ^ obj->x[obj->j];
     obj->x[obj->i] = x;
     if (--obj->i == 0) obj->i = RGEN_A;
 	if (--obj->j == 0) obj->j = RGEN_A;
@@ -73,7 +72,7 @@ static void *create(const CallerAPI *intf)
         obj->x[k] = (uint32_t) pcg_bits64(&state);
     }
     obj->i = RGEN_A; obj->j = RGEN_B;
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT32_PRNG("R250", NULL)

@@ -22,7 +22,7 @@
  *    P.175-181. https://doi.org/10.1016/j.cam.2016.11.006.
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -39,9 +39,8 @@ typedef struct {
 } Xorshift128PlusState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Xorshift128PlusState *obj)
 {
-    Xorshift128PlusState *obj = state;
     uint64_t s1 = obj->s[0];
     const uint64_t s0 = obj->s[1];
     const uint64_t result = s0 + s1;
@@ -60,7 +59,7 @@ static void *create(const CallerAPI *intf)
     if (obj->s[0] == 0 && obj->s[1] == 0) {
         obj->s[1] = 0x9E3779B97F4A7C15;
     }
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT64_PRNG("Xorshift128+", NULL)

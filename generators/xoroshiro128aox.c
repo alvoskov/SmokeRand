@@ -41,9 +41,8 @@ typedef struct {
 } Xoroshiro128AoxState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Xoroshiro128AoxState *obj)
 {
-    Xoroshiro128AoxState *obj = state;
     uint64_t s0 = obj->s[0], s1 = obj->s[1];
     uint64_t sx = s0 ^ s1, sa = s0 & s1;
     obj->s[0] = rotl64(s0, 24) ^ sx ^ (sx << 16); // a, b
@@ -57,7 +56,7 @@ static void *create(const CallerAPI *intf)
     Xoroshiro128AoxState *obj = intf->malloc(sizeof(Xoroshiro128AoxState));
     obj->s[0] = intf->get_seed64();
     obj->s[1] = intf->get_seed64() | 0x1;
-    return (void *) obj;    
+    return obj;
 }
 
 MAKE_UINT64_PRNG("xoroshiro128aox", NULL)

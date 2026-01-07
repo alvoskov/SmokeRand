@@ -13,7 +13,7 @@
  *
  * Implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -31,9 +31,8 @@ typedef struct {
 } SuperDuper73State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(SuperDuper73State *obj)
 {
-    SuperDuper73State *obj = state;
     obj->lcg *= 69069u;
     obj->xs = obj->xs ^ (obj->xs >> 15);
     obj->xs = obj->xs ^ (obj->xs << 17);
@@ -44,13 +43,13 @@ static inline uint64_t get_bits_raw(void *state)
 static void *create(const CallerAPI *intf)
 {
     SuperDuper73State *obj = intf->malloc(sizeof(SuperDuper73State));
-    uint64_t seed = intf->get_seed64();
+    const uint64_t seed = intf->get_seed64();
     obj->lcg = (uint32_t) ( (seed & 0xFFFFFFFF) | 0x1);
     obj->xs = (uint32_t) (seed >> 32); // TODO: FIX IT!
     if (obj->xs == 0) {
         obj->xs = 0xDEADBEEF;
     }
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT32_PRNG("SuperDuper73", NULL)

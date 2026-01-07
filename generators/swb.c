@@ -17,7 +17,7 @@
  * Implementation for SmokeRand:
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -40,9 +40,8 @@ typedef struct {
 } SwbState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(SwbState *obj)
 {
-    SwbState *obj = state;
     uint32_t t = obj->x[obj->j] - obj->x[obj->i] - obj->c;
     if (obj->x[obj->j] < t) {
         t -= 5; // The base is 2^{32} - 5

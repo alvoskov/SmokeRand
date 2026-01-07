@@ -66,9 +66,8 @@ void Xtea2State_init(Xtea2State *obj, const uint32_t *key)
     obj->pos = 0;
 }
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Xtea2State *obj)
 {
-    Xtea2State *obj = state;
     if (obj->pos == 4) {
         Xtea2State_block(obj);
         if (++obj->ctr[0] == 0) { obj->ctr[1]++; }

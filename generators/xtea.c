@@ -21,7 +21,7 @@
  *
  * @copyright Implementation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -74,10 +74,9 @@ typedef struct {
 /////////////////////////////////////////
 
 
-static inline uint64_t get_bits_scalar_raw(void *state)
+static inline uint64_t get_bits_scalar_raw(XteaState *obj)
 {
     static const uint32_t DELTA = 0x9e3779b9;
-    XteaState *obj = state;
     uint32_t sum = 0, y, z;
     union {
         uint32_t v[2];
@@ -101,12 +100,7 @@ MAKE_GET_BITS_WRAPPERS(scalar)
 static void *create_scalar(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     XteaState *obj = intf->malloc(sizeof(XteaState));
-    uint64_t s0 = intf->get_seed64();
-    uint64_t s1 = intf->get_seed64();
-    obj->key[0] = (uint32_t) s0;
-    obj->key[1] = (uint32_t) (s0 >> 32);
-    obj->key[2] = (uint32_t) s1;
-    obj->key[3] = (uint32_t) (s1 >> 32);
+    seeds_to_array_u32(intf, obj->key, 4);
     obj->ctr = 0;
     (void) gi;
     return obj;
@@ -117,7 +111,7 @@ static int run_self_test_scalar(const CallerAPI *intf)
     XteaState obj = {.ctr = 0x547571AAAF20A390,
         .key = {0x27F917B1, 0xC1DA8993, 0x60E2ACAA, 0xA6EB923D}};
     uint64_t u_ref = 0x0A202283D26428AF;
-    uint64_t u = get_bits_scalar_raw(&obj);
+    const uint64_t u = get_bits_scalar_raw(&obj);
     intf->printf("----- Scalar version self-test -----\n");
     intf->printf("Results: out = %llX; ref = %llX\n",
         (unsigned long long) u,
@@ -225,9 +219,8 @@ static inline void XteaVecState_inc_ctr(XteaVecState *obj)
 }
 
 
-static inline uint64_t get_bits_vector_raw(void *state)
+static inline uint64_t get_bits_vector_raw(XteaVecState *obj)
 {
-    XteaVecState *obj = state;
     if (obj->pos >= XTEA_NCOPIES) {
         XteaVecState_block(obj);
         XteaVecState_inc_ctr(obj);
@@ -245,11 +238,8 @@ MAKE_GET_BITS_WRAPPERS(vector)
 static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     XteaVecState *obj = intf->malloc(sizeof(XteaVecState));
-    uint64_t s0 = intf->get_seed64();
-    uint64_t s1 = intf->get_seed64();
     uint32_t key[4];
-    key[0] = (uint32_t) s0; key[1] = (uint32_t) (s0 >> 32);
-    key[2] = (uint32_t) s1; key[3] = (uint32_t) (s1 >> 32);
+    seeds_to_array_u32(intf, key, 4);
     XteaVecState_init(obj, key);
     const char *mode_name = intf->get_param();
     if (!intf->strcmp(mode_name, "vector-ctr") || !intf->strcmp(mode_name, "")) {

@@ -5,7 +5,7 @@
  * @details Passes SmallCrush, Crush and BigCrush batteries
  * ("Weyl sequence" variant).
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -19,15 +19,14 @@ PRNG_CMODULE_PROLOG
  * @brief SQXOR 64-bit PRNG state.
  */
 typedef struct {
-    uint64_t w; /**< "Weyl sequence" counter state */
+    uint64_t w; ///< "Weyl sequence" counter state
 } SqXorState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(SqXorState *obj)
 {
     const uint64_t s = 0x9E3779B97F4A7C15;
-    SqXorState *obj = state;
-    uint64_t ww = obj->w += s; // "Weyl sequence" variant
+    const uint64_t ww = obj->w += s; // "Weyl sequence" variant
     uint64_t sq_hi;
     // Round 1
     uint64_t x = unsigned_mul128(ww, ww, &sq_hi); // |32bit|32bit||32bit|32bit||
@@ -60,7 +59,7 @@ static void *create(const CallerAPI *intf)
 {
     SqXorState *obj = intf->malloc(sizeof(SqXorState));
     obj->w = intf->get_seed64();
-    return (void *) obj;
+    return obj;
 }
 
 

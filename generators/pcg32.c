@@ -12,7 +12,7 @@
  *
  * Implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -23,11 +23,10 @@ PRNG_CMODULE_PROLOG
 
 typedef Lcg64State Pcg32State;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Pcg32State *obj)
 {
-    Pcg32State *obj = state;
-    uint32_t xorshifted = (uint32_t) ( ((obj->x >> 18) ^ obj->x) >> 27 );
-    int rot = (int) (obj->x >> 59);
+    const uint32_t xorshifted = (uint32_t) ( ((obj->x >> 18) ^ obj->x) >> 27 );
+    const int rot = (int) (obj->x >> 59);
     obj->x = obj->x * 6364136223846793005ull + 12345ull;
     return rotr32(xorshifted, rot);
 }
@@ -36,7 +35,7 @@ static void *create(const CallerAPI *intf)
 {
     Pcg32State *obj = intf->malloc(sizeof(Pcg32State));
     obj->x = intf->get_seed64();
-    return (void *) obj;
+    return obj;
 }
 
 static int run_self_test(const CallerAPI *intf)

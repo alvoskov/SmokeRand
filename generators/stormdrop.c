@@ -15,7 +15,7 @@
  *    With Efficient Resource Usage
  *    https://medium.com/@wilparsons/stormdrop-is-a-new-32-bit-prng-that-passes-statistical-tests-with-efficient-resource-usage-59b6d6d9c1a8
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -36,9 +36,8 @@ typedef struct {
 ///// The newer variant /////
 /////////////////////////////
 
-static inline uint64_t get_bits_raw_new(void *state)
+static inline uint64_t get_bits_new_raw(StormDropState *obj)
 {
-    StormDropState *obj = state;
     // This variant fails `bspace16_4d` from `full` battery
     obj->entropy += obj->entropy << 16;
     obj->state[0] += obj->state[1] ^ obj->entropy;
@@ -51,28 +50,14 @@ static inline uint64_t get_bits_raw_new(void *state)
     return obj->entropy ^= obj->state[3];          
 }
 
-static uint64_t get_bits_new(void *state)
-{
-    return get_bits_raw_new(state);
-}
-
-
-static uint64_t get_sum_new(void *state, size_t len)
-{
-    uint64_t sum = 0;
-    for (size_t i = 0; i < len; i++) {
-        sum += get_bits_raw_new(state);
-    }
-    return sum;
-}
+MAKE_GET_BITS_WRAPPERS(new)
 
 /////////////////////////////
 ///// The older variant /////
 /////////////////////////////
 
-static inline uint64_t get_bits_raw_old(void *state)
+static inline uint64_t get_bits_old_raw(StormDropState *obj)
 {
-    StormDropState *obj = state;
     // This variant fails MatrixRank (but not LinearComp) tests
     obj->entropy ^= obj->entropy << 16;            
     obj->state[0] ^= obj->entropy;                 
@@ -86,21 +71,7 @@ static inline uint64_t get_bits_raw_old(void *state)
     return obj->entropy ^= obj->state[3];          
 }
 
-static uint64_t get_bits_old(void *state)
-{
-    return get_bits_raw_old(state);
-}
-
-
-static uint64_t get_sum_old(void *state, size_t len)
-{
-    uint64_t sum = 0;
-    for (size_t i = 0; i < len; i++) {
-        sum += get_bits_raw_old(state);
-    }
-    return sum;
-}
-
+MAKE_GET_BITS_WRAPPERS(old)
 
 //////////////////////
 ///// Interfaces /////
@@ -110,16 +81,33 @@ static void *create(const CallerAPI *intf)
 {
     StormDropState *obj = intf->malloc(sizeof(StormDropState));
     obj->entropy = intf->get_seed32();
-    obj->state[0] = intf->get_seed32();
-    obj->state[1] = intf->get_seed32();
-    obj->state[2] = intf->get_seed32();
-    obj->state[3] = intf->get_seed32();
-    return (void *) obj;
+    seeds_to_array_u32(intf, obj->state, 4);
+    return obj;
 }
+
+
+static const GeneratorParamVariant gen_list[] = {
+    {"",    "StormDrop:new", 32, default_create, get_bits_new, get_sum_new},
+    {"new", "StormDrop:new", 32, default_create, get_bits_new, get_sum_new},
+    {"old", "StormDrop:old", 32, default_create, get_bits_old, get_sum_old},
+    GENERATOR_PARAM_VARIANT_EMPTY
+};
+
+
+static const char description[] =
+"StormDrop is an experimental chaotic generator with a linear part (counter)\n"
+"The next param values are supported:\n"
+"  new - Newer version (default)\n"
+"  old - Older version\n";
 
 
 int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
 {
+    const char *param = intf->get_param();
+    gi->description = description;
+    gi->self_test = NULL;
+    return GeneratorParamVariant_find(gen_list, intf, param, gi);
+/*
     const char *param = intf->get_param();
     gi->description = NULL;
     gi->create = default_create;
@@ -141,4 +129,5 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
         gi->get_sum = NULL;
     }
     return 1;
+*/
 }

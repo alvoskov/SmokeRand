@@ -19,7 +19,7 @@
  *
  * Adaptation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -36,9 +36,8 @@ typedef struct {
 } Xoroshiro128PlusState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Xoroshiro128PlusState *obj)
 {
-    Xoroshiro128PlusState *obj = state;
     const uint64_t s0 = obj->s[0];
     uint64_t s1 = obj->s[1];
     const uint64_t result = s0 + s1;
@@ -54,7 +53,7 @@ static void *create(const CallerAPI *intf)
     Xoroshiro128PlusState *obj = intf->malloc(sizeof(Xoroshiro128PlusState));
     obj->s[0] = intf->get_seed64();
     obj->s[1] = intf->get_seed64() | 0x1;
-    return (void *) obj;    
+    return obj;
 }
 
 

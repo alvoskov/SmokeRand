@@ -15,7 +15,7 @@
  * The Tylo64 modification was suggested by Tyge Løvset.
  * 
  * Adaptation for SmokeRand:
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -34,9 +34,8 @@ typedef struct {
 } Tylo64State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Tylo64State *obj)
 {
-    Tylo64State *obj = state;
     const uint64_t b = obj->b, out = obj->a ^ obj->counter++;
     obj->a = (b + (b << 3)) ^ (b >> 11);
     obj->b = ((b << 24) | (b >> 40)) + out;
@@ -58,8 +57,8 @@ static void Tylo64State_init(Tylo64State *obj, uint64_t s0, uint64_t s1)
 static void *create(const CallerAPI *intf)
 {
     Tylo64State *obj = intf->malloc(sizeof(Tylo64State));    
-    uint64_t s0 = intf->get_seed64();
-    uint64_t s1 = intf->get_seed64();
+    const uint64_t s0 = intf->get_seed64();
+    const uint64_t s1 = intf->get_seed64();
     Tylo64State_init(obj, s0, s1);
     return obj;
 }
@@ -69,7 +68,7 @@ static int run_self_test(const CallerAPI *intf)
     static const uint64_t u_ref = 0x8DF0BE72825CB80E;
     Tylo64State obj;
     Tylo64State_init(&obj, 3, 2);
-    uint64_t u = get_bits_raw(&obj);
+    const uint64_t u = get_bits_raw(&obj);
     intf->printf("Output: %llX; reference: %llX\n",
         (unsigned long long) u, (unsigned long long) u_ref);
     return u == u_ref;    

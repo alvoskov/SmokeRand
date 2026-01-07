@@ -16,7 +16,11 @@
  *    pseudorandom number generators
  *    https://burtleburtle.net/bob/rand/talksmall.html
  *
- * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright The ranval algorithm was developed by Bob Jenkins.
+ *
+ * Reentrant implementation for SmokeRand:
+ *
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -36,10 +40,9 @@ typedef struct {
 } RanvalState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(RanvalState *obj)
 {
-    RanvalState *obj = state;
-    uint32_t e = obj->a - rotl32(obj->b, 23);
+    const uint32_t e = obj->a - rotl32(obj->b, 23);
     obj->a = obj->b ^ rotl32(obj->c, 16);
     obj->b = obj->c + rotl32(obj->d, 11);
     obj->c = obj->d + e;
@@ -62,7 +65,7 @@ static void *create(const CallerAPI *intf)
 {
     RanvalState *obj = intf->malloc(sizeof(RanvalState));
     RanvalState_init(obj, intf->get_seed32());
-    return (void *) obj;
+    return obj;
 }
 
 static int run_self_test(const CallerAPI *intf)

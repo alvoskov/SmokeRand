@@ -41,6 +41,9 @@ void print_help(void)
     "  - selftest   Runs PRNG internal self-test (if available).\n"
     "  - speed      Measure speed of the generator\n"
     "  - stdout     Sends PRNG output to stdout in the binary form.\n"
+    "  - stdoutfl   Sends PRNG output to stdout in the floating point form.\n"
+    "  - stdoutflx  Sends PRNG output to stdout in the floating point form\n"
+    "               using an improved algorithm of generation\n"
     "generator_lib: name of dynamic library with PRNG or special mode name.\n"
     "  Special modes names:\n"
     "  - stdin32, stdin64  Get random sequence from stdin\n"
@@ -50,6 +53,7 @@ void print_help(void)
     "    reverse-bits   Reverse bits in the generator output\n"
     "    interleaved32  Process 64-bit generator output as interleaving 32-bit words\n"
     "    high32, low32  Analyse higher/lower 32 bits of 64-bit generator\n"
+    "  --maxlen_log2=n  Limit the binary output to the 2^n floats (12 <= n <= 63)\n"
     "  --report-brief Show only failures in the report\n"
     "  --seed=data Use the user supplied string (data) as a seed\n"
     "  --testid=id     Run only the test with the given numeric id\n"
@@ -164,7 +168,7 @@ static BatteryExitCode process_argument(SmokeRandSettings *obj,
 
 DEFINE_NUMARG_CALLBACK(nthreads, "nthreads", argval > 0)
 DEFINE_NUMARG_CALLBACK(testid, "testid", argval > 0)
-DEFINE_NUMARG_CALLBACK(maxlen_log2, "maxlen_log2", argval < 12 || argval > 63)
+DEFINE_NUMARG_CALLBACK(maxlen_log2, "maxlen_log2", 12 <= argval || argval <= 63)
 
 
 static BatteryExitCode SmokeRandSettings_numarg_load(SmokeRandSettings *obj,
@@ -441,6 +445,10 @@ BatteryExitCode run_battery(const char *battery_name, GeneratorInfo *gi,
         ans = battery_shared_lib(filename, gi, intf, &bat_opts);
     } else if (!strcmp(battery_name, "stdout")) {
         GeneratorInfo_bits_to_file(gi, intf, opts->maxlen_log2);
+    } else if (!strcmp(battery_name, "stdoutfl")) {
+        GeneratorInfo_floats_to_file(gi, intf, opts->maxlen_log2);
+    } else if (!strcmp(battery_name, "stdoutflx")) {
+        GeneratorInfo_accurate_floats_to_file(gi, intf, opts->maxlen_log2);
     } else {
         for (const BatteryEntry *entry = batteries; entry->name != NULL; entry++) {
             if (!strcmp(battery_name, entry->name)) {
@@ -556,9 +564,12 @@ int main(int argc, char *argv[])
     if (SmokeRandSettings_load(&opts, argc, argv)) {
         return BATTERY_ERROR;
     }
-    int is_stdin32 = !strcmp(generator_lib, "stdin32");
-    int is_stdin64 = !strcmp(generator_lib, "stdin64");
-    int is_stdout = !strcmp(battery_name, "stdout");
+    const int is_stdin32 = !strcmp(generator_lib, "stdin32");
+    const int is_stdin64 = !strcmp(generator_lib, "stdin64");
+    const int is_stdout =
+        !strcmp(battery_name, "stdout") ||
+        !strcmp(battery_name, "stdoutfl") ||
+        !strcmp(battery_name, "stdoutflx") ;
     set_use_stderr_for_printf(is_stdout); // Messages mustn't be in PRNG output
 
     if (opts.nthreads > 1 && (is_stdin32 || is_stdin64)) {

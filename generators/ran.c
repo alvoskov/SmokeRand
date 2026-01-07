@@ -9,7 +9,7 @@
  *
  * Thread-safe reimplementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -29,18 +29,17 @@ typedef struct {
 } RanState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(RanState *obj)
 {
-    RanState *obj = state;
-    /* 64-bit LCG part */
+    // 64-bit LCG part
     obj->u = obj->u * 2862933555777941757ull + 7046029254386353087ull;
-    /* xorshift32 part */
+    // xorshift32 part
     obj->v ^= obj->v >> 17;
     obj->v ^= obj->v << 31;
     obj->v ^= obj->v >> 8;
-    /* MWC part */
+    // MWC part
     obj->w = 4294957665u * (obj->w & 0xffffffff) + (obj->w >> 32);
-    /* Output function (LCG is scrambled) */
+    // Output function (LCG is scrambled)
     uint64_t x = obj->u ^ (obj->u << 21);
     x ^= x >> 35;
     x ^= x << 4;

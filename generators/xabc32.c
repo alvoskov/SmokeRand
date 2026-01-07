@@ -19,7 +19,7 @@
  * 4. https://www.stix.id.au/wiki/Fast_8-bit_pseudorandom_number_generator
  *
  * @copyright
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -38,9 +38,8 @@ typedef struct {
 
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Xabc32State *obj)
 {
-    Xabc32State *obj = state;    
     obj->a ^= obj->c ^ (obj->x += 0x9E3779B9);
     obj->b += obj->a;
     obj->c = (obj->c + rotr32(obj->b, 9)) ^ obj->a;

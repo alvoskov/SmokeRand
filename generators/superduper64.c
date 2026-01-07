@@ -12,7 +12,7 @@
  * https://groups.google.com/g/comp.sys.sun.admin/c/GWdUThc_JUg/m/_REyWTjwP7EJ
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -29,10 +29,9 @@ typedef struct {
     uint64_t xs;
 } SuperDuper64State;
 
-static inline uint64_t superduper64_get_bits(void *state)
+static inline uint64_t superduper64_get_bits(SuperDuper64State *obj)
 {
-    SuperDuper64State *obj = state;
-    obj->lcg = 6906969069 * obj->lcg + 1234567;
+    obj->lcg = 6906969069U * obj->lcg + 1234567U;
     obj->xs ^= (obj->xs << 13);
     obj->xs ^= (obj->xs >> 17);
     obj->xs ^= (obj->xs << 43);
@@ -88,7 +87,7 @@ static void *create(const CallerAPI *intf)
     do {
         obj->xs = intf->get_seed64();
     } while (obj->xs == 0);
-    return (void *) obj;
+    return obj;
 }
 
 static const char description[] =
@@ -110,30 +109,4 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
     gi->description = description;
     gi->self_test = NULL;
     return GeneratorParamVariant_find(gen_list, intf, param, gi);
-
-/*
-    const char *param = intf->get_param();
-    gi->description = NULL;
-    gi->create = default_create;
-    gi->free = default_free;
-    gi->self_test = NULL;
-    gi->parent = NULL;
-    if (!intf->strcmp(param, "u64") || !intf->strcmp(param, "")) {
-        gi->name = "SuperDuper64:u64";
-        gi->nbits = 64;
-        gi->get_bits = get_bits_u64;
-        gi->get_sum = get_sum_u64;
-    } else if (!intf->strcmp(param, "u32")) {
-        gi->name = "SuperDuper64:u32";
-        gi->nbits = 32;
-        gi->get_bits = get_bits_u32;
-        gi->get_sum = get_sum_u32;
-    } else {
-        gi->name = "SuperDuper:unknown";
-        gi->nbits = 64;
-        gi->get_bits = NULL;
-        gi->get_sum = NULL;
-    }
-    return 1;
-*/
 }

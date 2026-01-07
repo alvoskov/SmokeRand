@@ -24,7 +24,7 @@
  *
  * Reentrant C version for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -33,6 +33,9 @@
 
 PRNG_CMODULE_PROLOG
 
+/**
+ * @brief RGE256lite chaotic PRNG state.
+ */
 typedef struct {
     uint32_t s[8];
     int nrounds;
