@@ -121,29 +121,29 @@ set (GENERATORS
     combo coveyou64 cswb4288 cswb4288_64 cwg64 des drand48 efiix64x48 
     flea32x1 gjrand16 gjrand32 gjrand64 gjrand8 gmwc128 hc256 hicg64 
     ia ia64 ibaa icg31x2 icg64 icg64_p2 isaac isaac64 jctr32 jctr64 
-    jkiss jkiss32 jlkiss64 kiss11_32 kiss11_64 kiss16 kiss4691 kiss64 
-    kiss93 kiss96 kiss99 komirand komirand16 komirand16w komirand32 
-    komirand32w komirandw kuzn lcg128 lcg32prime lcg42 lcg64 lcg64prime 
-    lcg64sc lcg64sc2 lcg69069 lcg96 lea lfib4 lfib4_u64 lfib_par 
-    lfib_ranmar lfsr113 lfsr258 loop_7fff_w64 loop_antigap_w64 lrnd64_1023 
-    lrnd64_255 lxm_64x128 macmarsa magma melg19937 melg44497 melg607 
-    minstd mixmax mlfib17_5 mrc32 mrg32k3a msws msws64 msws64x msws_ctr 
-    mt19937 mt19937_64 mtc16 mtc32 mtc64 mtc64hi mtc8 mularx128 mularx128_str 
-    mularx128_u32 mularx256 mularx64_r2 mularx64_u32 mulberry32 mwc128 
-    mwc128x mwc128xxa32 mwc1616 mwc1616p mwc1616x mwc16_32 mwc256xxa64 
-    mwc3232x mwc32x mwc32xxa8 mwc40xxa8 mwc4691 mwc48xxa16 mwc63x2 
-    mwc64 mwc64x mwc64_2p58 mwc8222 mwcsh mzran13 ncombo pcg32 pcg32_dxsm 
-    pcg32_xsl_rr pcg64_64 pcg64_dxsm pcg64_xsl_rr philox philox2x32 
-    philox32 prvhash12c prvhash12cw prvhash16c prvhash16cw prvhash64c 
-    prvhash64cw r1279 r250 ran randu ranlux48 ranluxpp ranq1 ranq2 
-    ranrot16tiny ranrot32 ranrot32tiny ranrot64tiny ranrot8tiny ranrot_bi 
-    ranshi ranval ranval64 rc4 rc4ok rdrand rge256ex rge256exctr 
-    rge256lite rge512ex rge512exctr romutrio rrmxmx sapparot sapparot2 
-    sapparot2_64 sd32ex sd64 sd96 seed seiran128 sezgin63 sfc16 sfc32 
-    sfc64 sfc8 shioi128 shr3 skiss32 skiss64 smwc16x8 smwc192 smwc192lux 
-    smwc24 smwc48 smwc48lux smwc8x16 smwc96 speck128 speck128sc speck64_128 
-    splitmix splitmix32 splitmix32cbc splitmix_g1 sqxor sqxor32 stormdrop 
-    superduper64 superduper64_sh8 superduper73 superduper96 superduper96_sh4 
+    jkiss jkiss32 jlkiss64 kiss11_32 kiss11_64 kiss4691 kiss64 kiss93 
+    kiss96 kiss99 komirand komirand16 komirand16w komirand32 komirand32w 
+    komirandw kuzn lcg128 lcg32prime lcg42 lcg64 lcg64prime lcg64sc 
+    lcg64sc2 lcg69069 lcg96 lea lfib4 lfib4_u64 lfib_par lfib_ranmar 
+    lfsr113 lfsr258 loop_7fff_w64 loop_antigap_w64 lrnd64_1023 lrnd64_255 
+    lxm_64x128 macmarsa magma melg19937 melg44497 melg607 minstd 
+    mixmax mlfib17_5 mrc16 mrc32 mrc64 mrg32k3a msws msws64 msws64x 
+    msws_ctr mt19937 mt19937_64 mtc16 mtc32 mtc64 mtc64hi mtc8 mularx128 
+    mularx128_str mularx128_u32 mularx256 mularx64_r2 mularx64_u32 
+    mulberry32 mwc128 mwc128x mwc128xxa32 mwc1616 mwc1616p mwc1616x 
+    mwc16_32 mwc256xxa64 mwc3232x mwc32x mwc32xxa8 mwc40xxa8 mwc4691 
+    mwc48xxa16 mwc63x2 mwc64 mwc64x mwc64_2p58 mwc8222 mzran13 ncombo 
+    pcg32 pcg32_dxsm pcg32_xsl_rr pcg64_64 pcg64_dxsm pcg64_xsl_rr 
+    philox philox2x32 philox32 prvhash12c prvhash12cw prvhash16c 
+    prvhash16cw prvhash64c prvhash64cw r1279 r250 ran randu ranlux48 
+    ranluxpp ranq1 ranq2 ranrot16tiny ranrot32 ranrot32tiny ranrot64tiny 
+    ranrot8tiny ranrot_bi ranshi ranval ranval64 rc4 rc4ok rdrand 
+    rge256ex rge256exctr rge256lite rge512ex rge512exctr romutrio 
+    rrmxmx sapparot sapparot2 sapparot2_64 seed seiran128 sezgin63 
+    sfc16 sfc32 sfc64 sfc8 shioi128 shr3 skiss32 skiss64 smwc16x8 
+    smwc192 smwc192lux smwc24 smwc48 smwc48lux smwc8x16 smwc96 speck128 
+    speck128sc speck64_128 splitmix splitmix32 splitmix32cbc splitmix_g1 
+    sqxor sqxor32 stormdrop superduper64 superduper73 superduper96 
     swb swblarge swblux swbmwc32 swbmwc64 swbw taus88 threefish1024 
     threefry threefry2x64 tinymt32 tinymt64 tylo64 ultra ultra64 
     v3b well1024a weyl wich1982 wich2006 wob2m wyrand xabc16 xabc32 

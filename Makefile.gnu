@@ -177,7 +177,7 @@ $(BAT_LIB): $(BATLIB_OBJFILES)
 $(BINDIR)/sr_tiny$(EXE): $(APPSRCDIR)/sr_tiny.c $(SRCDIR)/specfuncs.c include/smokerand/specfuncs.h
 	$(CC) $(CFLAGS89) $(LINKFLAGS) $(APPSRCDIR)/sr_tiny.c $(SRCDIR)/specfuncs.c -o $@ -lm $(INCLUDE) 
 
-$(BINDIR)/sr_speed$(EXE): $(APPSRCDIR)/sr_speed.c $(CORE_LIB) $(BAT_LIB) $(BAT_HEADERS)
+$(BINDIR)/sr_speed$(EXE): $(OBJDIR)/sr_speed.o $(CORE_LIB) $(BAT_LIB) $(BAT_HEADERS)
 	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
 $(BINDIR)/smokerand$(EXE): $(OBJDIR)/smokerand.o $(CORE_LIB) $(BAT_LIB) $(BAT_HEADERS)
@@ -254,6 +254,7 @@ ifeq ($(OS), Windows_NT)
 	del $(BINDIR)\bat_example.dll
 	del $(BINDIR)\calibrate_dc6.exe
 	del $(BINDIR)\calibrate_linearcomp.exe
+	del $(BINDIR)\sr_speed.exe
 	del $(BINDIR)\sr_tiny.exe
 	del $(BINDIR)\test_base64.exe
 	del $(BINDIR)\test_chacha.exe
@@ -261,6 +262,7 @@ ifeq ($(OS), Windows_NT)
 	del $(BINDIR)\test_cpp11.exe
 	del $(BINDIR)\test_funcs.exe
 	del $(BINDIR)\test_rdseed.exe
+	del $(BINDIR)\test_syscrypto.exe
 	del $(OBJDIR)\*.o /q
 	del $(LIBDIR)\*.a /q
 	del $(BINDIR)\generators\*.dll /q
@@ -271,6 +273,7 @@ else
 	rm -f $(BINDIR)/bat_example.so
 	rm -f $(BINDIR)/calibrate_dc6
 	rm -f $(BINDIR)/calibrate_linearcomp
+	rm -f $(BINDIR)/sr_speed
 	rm -f $(BINDIR)/sr_tiny
 	rm -f $(BINDIR)/test_base64
 	rm -f $(BINDIR)/test_chacha
@@ -278,6 +281,7 @@ else
 	rm -f $(BINDIR)/test_funcs
 	rm -f $(BINDIR)/test_cpp11
 	rm -f $(BINDIR)/test_rdseed
+	rm -f $(BINDIR)/test_syscrypto
 	rm -f $(OBJDIR)/*.o
 	rm -f $(LIBDIR)/*
 	rm -f $(BINDIR)/generators/*.so

@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   use integers overflows; may be easy to port to Modula-2 and Oberon programming
   languages.
 - `xorrot32` generator: designed as a part of `xkiss32_rot_aox` generator.
+- `zibri128`, `zibri128ex`, `zibri192`, `zibri192ex` generators.
 - `prvhash16cw` algorithm.
 - `rdrand` algorithm (direct access to the x86 RDRAND, based on the code
   by Scott Miller)
