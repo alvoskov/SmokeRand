@@ -50,7 +50,7 @@
  * 3. https://github.com/lpareja99/spectral-test-knuth
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -70,11 +70,10 @@ typedef struct {
 } MWC63x2State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(MWC63x2State *obj)
 {
     static const int64_t A0 = 1073100393, A1 = 1073735529;
     // static const int64_t A0 = 4005, A1 = 3939; // Bad multipliers
-    MWC63x2State *obj = state;
     // MWC 1 iteration
     const int64_t c1 = obj->mwc1 >> 32, x1 = obj->mwc1 & MASK32;
     obj->mwc1 = A0 * x1 + c1;

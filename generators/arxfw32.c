@@ -6,12 +6,12 @@
  * The "FW" means "Feystel-Weyl"
  *
  * WARNING! The minimal guaranteed period is only 2^32, the average
- * period is small is only about 2^47, bad seeds are theoretically possible.
+ * period is about 2^95, bad seeds are theoretically possible.
  * Usage of this generator for statistical, scientific and engineering
- * computations is strongly discouraged!
+ * computations is not recommended!
  *
  * @copyright
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -22,7 +22,7 @@
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief arxfw64 PRNG state.
+ * @brief arxfw32 PRNG state.
  */
 typedef struct {
     uint32_t a;

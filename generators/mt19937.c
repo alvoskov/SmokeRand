@@ -11,9 +11,16 @@
  *    equidistributed uniform pseudorandom number generator" // ACM Trans.
  *    on Modeling and Computer Simulation. 1998. V. 8. N 1. P.3-30.
  *    https://doi.org/10.1145/272991.272995
+ * 4. Alain Schumacher and Takuji Nishimura and Makoto Matsumoto.
+ *    Some Patterns of Duplications in the outputs of Mersenne Twister
+ *    Pseudorandom Number Generator MT19937. 2026.
+ *    https://arxiv.org/abs/2512.21678.
+ * 5. Shin Harase. On the F2-linear relations of Mersenne Twister pseudorandom
+ *    number generators // Mathematics and Computers in Simulation. 2014.
+ *    V. 100. P. 101-113. https://doi.org/10.1016/j.matcom.2014.02.002
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -22,8 +29,8 @@
 
 PRNG_CMODULE_PROLOG
 
-#define MTWIST_N           624
-#define MTWIST_M           397
+#define MTWIST_N 624
+#define MTWIST_M 397
 
 typedef struct {
     uint32_t state[MTWIST_N];

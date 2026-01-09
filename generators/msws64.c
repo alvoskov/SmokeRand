@@ -18,7 +18,7 @@
  *
  * Implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -36,10 +36,9 @@ typedef struct {
 } Msws64State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Msws64State *obj)
 {
     static const uint64_t s = 0xe9acc0f334e93bd5ull;
-    Msws64State *obj = state;
     obj->x = obj->x * obj->x + (obj->mcg *= s);
     obj->x = (obj->x >> 32) | (obj->x << 32);
     return obj->x ^ obj->mcg;
@@ -51,7 +50,7 @@ static void *create(const CallerAPI *intf)
     Msws64State *obj = intf->malloc(sizeof(Msws64State));
     obj->x   = intf->get_seed64();
     obj->mcg = intf->get_seed64() | 0x1;
-    return (void *) obj;
+    return obj;
 }
 
 

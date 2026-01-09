@@ -2,7 +2,7 @@
  * @file hwtests.c
  * @brief Hamming weights bases tests implementation, mainly DC6.
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -630,7 +630,7 @@ TestResults hamming_ot_long_test(GeneratorState *obj, const HammingOtLongOptions
 }
 
 
-double hamming_distr_calc_zemp(unsigned long long *o, size_t nbits)
+double hamming_distr_calc_zemp(const unsigned long long *o, size_t nbits)
 {
     static const double NORM_STD = 1.3; // Empirical standard deviation
     double chi2emp = 0.0;

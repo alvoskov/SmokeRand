@@ -38,12 +38,11 @@ typedef struct {
  * @details The multiplier were selected by using spectral tests
  * from TAOCP and SmallCrush test.
  */
-static inline uint32_t get_bits16(void *state)
+static inline uint32_t get_bits16(MWC32XState *obj)
 {
     const uint32_t A0 = 63885; // Selected from Knuth spectral test
-    MWC32XState *obj = state;
-    uint16_t c = (uint16_t) (obj->data >> 16);
-    uint16_t x = (uint16_t) (obj->data & 0xFFFF);
+    const uint16_t c = (uint16_t) (obj->data >> 16);
+    const uint16_t x = (uint16_t) (obj->data & 0xFFFF);
     obj->data = A0 * x + c;
     return x ^ c;
 //    return x ^ (x >> 8);
@@ -67,7 +66,7 @@ static void *create(const CallerAPI *intf)
     do {
         obj->data = intf->get_seed32() << 1;
     } while (obj->data == 0);
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT32_PRNG("MWC32X", NULL)

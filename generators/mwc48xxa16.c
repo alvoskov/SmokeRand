@@ -15,7 +15,7 @@
  * 3. Sebastiano Vigna. MWC128. https://prng.di.unimi.it/MWC128.c
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -25,19 +25,18 @@
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief MWC32XXA8 state. Cannot be initialized to (0, 0, 0, 0) or to
- * (2^64 - 1, 2^32 - 1, 2^32 - 1, 2^64 - 1). Default initialization
- * is (seed, seed, seed, 1) as suggested by S. Vigna.
+ * @brief MWC48XXA16 state. Cannot be initialized to (0, 0, 0) or to
+ * (2^64 - 1, 2^16 - 1, carry_max). Default initialization is (seed, seed, 1)
+ * as suggested by S. Vigna.
  */
 typedef struct {
     uint16_t x[2];
     uint16_t c;
 } Mwc48xxa16State;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Mwc48xxa16State *obj)
 {
     static const uint32_t MWC_A1 = 52563U;
-    Mwc48xxa16State *obj = state;
     uint32_t ans = 0;
     for (int i = 0; i < 2; i++) {
         uint32_t t = MWC_A1 * (uint32_t) obj->x[1];

@@ -18,7 +18,7 @@
  * (c) 2021 Shin Harase (Ritsumeikan University, harase @ fc.ritsumei.ac.jp),
  * Takamitsu Kimoto
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -111,9 +111,8 @@ static uint64_t case_4(MelgState *obj)
     return x;
 }
 
-static uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(MelgState *obj)
 {
-    MelgState *obj = state;
     return obj->function_p(obj);
 }
 

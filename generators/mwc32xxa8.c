@@ -15,7 +15,7 @@
  * 3. Sebastiano Vigna. MWC128. https://prng.di.unimi.it/MWC128.c
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -33,10 +33,9 @@ typedef struct {
     uint8_t c;    ///< Carry value.
 } Mwc32xxa8State;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Mwc32xxa8State *obj)
 {
-    static const uint16_t MWC_A1 = 228;
-    Mwc32xxa8State *obj = state;
+    static const uint16_t MWC_A1 = 228U;
     uint32_t ans = 0;
     for (int i = 0; i < 4; i++) {
         uint16_t t = (uint16_t) (MWC_A1 * (uint16_t) obj->x[2]);

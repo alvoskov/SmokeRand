@@ -31,12 +31,11 @@
  *
  * Adaptation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
  */
-
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
@@ -355,9 +354,8 @@ uint64_t DESState_decrypt(DESState *obj, uint64_t in)
 
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(DESState *obj)
 {
-    DESState *obj = state;
     obj->out = DESState_encrypt(obj, obj->ctr++);
     return obj->out;
 }
@@ -367,7 +365,7 @@ static void *create(const CallerAPI *intf)
 {
     DESState *obj = intf->malloc(sizeof(DESState));
     DESState_init(obj, intf->get_seed64() >> 8);
-    return (void *) obj;
+    return obj;
 }
 
 

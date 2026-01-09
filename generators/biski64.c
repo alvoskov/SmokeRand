@@ -1,10 +1,11 @@
 /**
  * @file biski64.c
  * @brief biski64 is a chaotic generator developed by Daniel Cota.
- * @details Its design resembles one round of Feistel network. Biski64
- * passes the `express`, `brief`, `default` and `full` battery but
- * still fails the Hamming weights distribution test (histogram) at large
- * samples:
+ * @details Its design resembles one round of Feistel network. It has
+ * two version: `v2` (default) that passes based on the suggestion
+ * from [2] and the `v1` (the original version) from [1] that 
+ * fails the Hamming weights distribution test (histogram) at large
+ * samples (`hamming_distr`):
  *
  * Run 1 (unknown seed)
  *
@@ -66,10 +67,9 @@
  *    Elapsed time:  00:57:21
  *    Used seed:     _01_UcLhv8b1LS4V8pKSVW22yjP7JirNbzRVt4QBfihW/ps=
  *
- *
  * References:
  * 1. https://github.com/danielcota/biski64
- *
+ * 2. https://www.reddit.com/r/RNG/comments/1ptyn5c/comment/nxoh0y7/
  *
  * @copyright
  * (c) 2025 Daniel Cota (https://github.com/danielcota/biski64)
@@ -90,7 +90,57 @@ typedef struct {
 } Biski64State;
 
 
-static inline uint64_t get_bits_raw(Biski64State *obj)
+///////////////////////////////////////////////////
+///// The newer version with optimized shifts /////
+///////////////////////////////////////////////////
+
+static inline uint64_t get_bits_ver2_raw(Biski64State *obj)
+{
+    const uint64_t output = obj->mix + obj->loop_mix;
+    const uint64_t old_loop_mix = obj->loop_mix;
+    obj->loop_mix = obj->ctr ^ obj->mix;
+    obj->mix = rotl64(obj->mix, 17) + rotl64(old_loop_mix, 39);
+    obj->ctr += 0x9999999999999999ULL;
+    return output;
+}
+
+/**
+ * @brief Reference vectors were obtained by A.L. Voskov.
+ */
+static int run_self_test_ver2(const CallerAPI *intf)
+{
+    static const uint64_t ref[] = {
+        0x6AF9D0A2194CCE99, 0x948FB48477501BA9, 0xE31AA9363C3235C0,
+        0x531AAF6D493496D2, 0x8B78FF0EEE7D83BB};
+    int is_ok = 1;
+    Biski64State *obj = create(intf);
+    obj->ctr      = 0x1e9a57bc80e6721d;
+    obj->mix      = 0x22118258a9d111a0;
+    obj->loop_mix = 0x346edce5f713f8ed;
+    for (int i = 0; i < 16; i++) { // Reproduction of the original warmup
+        (void) get_bits_ver2_raw(obj);  // prodecure.
+    }
+    for (int i = 0; i < 5; i++) {
+        const uint64_t u = get_bits_ver2_raw(obj);
+        intf->printf("Ref: 0x%16.16llX; Out: 0x%16.16llX\n",
+            (unsigned long long) ref[i], (unsigned long long) u);
+        if (ref[i] != u) {
+            is_ok = 0;
+        }
+    }
+    intf->free(obj);
+    return is_ok;
+}
+
+
+MAKE_GET_BITS_WRAPPERS(ver2)
+
+/////////////////////////////////////////////////////////////////
+///// The initial version that fails the hamming_distr test /////
+/////////////////////////////////////////////////////////////////
+
+
+static inline uint64_t get_bits_ver1_raw(Biski64State *obj)
 {
     const uint64_t output = obj->mix + obj->loop_mix;
     const uint64_t old_loop_mix = obj->loop_mix;
@@ -99,6 +149,41 @@ static inline uint64_t get_bits_raw(Biski64State *obj)
     obj->ctr += 0x9999999999999999ULL;
     return output;
 }
+
+MAKE_GET_BITS_WRAPPERS(ver1)
+
+/**
+ * @brief Based on the reference implementation of the author (Daniel Cota)
+ */
+static int run_self_test_ver1(const CallerAPI *intf)
+{
+    static const uint64_t ref[] = {
+        0x2e9dc0924480bb1a, 0x8fd2b3f2f2f047d9, 0x17bbf82c6284b8bd,
+        0x9da272374079400f, 0xdf49f285347354a1};
+    int is_ok = 1;
+    Biski64State *obj = create(intf);
+    obj->ctr      = 0x1e9a57bc80e6721d;
+    obj->mix      = 0x22118258a9d111a0;
+    obj->loop_mix = 0x346edce5f713f8ed;
+    for (int i = 0; i < 16; i++) { // Reproduction of the original warmup
+        (void) get_bits_ver1_raw(obj);  // prodecure.
+    }
+    for (int i = 0; i < 5; i++) {
+        const uint64_t u = get_bits_ver1_raw(obj);
+        intf->printf("Ref: 0x%16.16llX; Out: 0x%16.16llX\n",
+            (unsigned long long) ref[i], (unsigned long long) u);
+        if (ref[i] != u) {
+            is_ok = 0;
+        }
+    }
+    intf->free(obj);
+    return is_ok;
+}
+
+
+/////////////////////////////////////////
+///// Interfaces and initialization /////
+/////////////////////////////////////////
 
 /**
  * @brief The seeding procedure is simplified here (no SplitMix and warmup:
@@ -114,31 +199,41 @@ static void *create(const CallerAPI *intf)
 }
 
 /**
- * @brief Based on the reference implementation of the author (Daniel Cota)
+ * @brief An internal self test for both versions.
  */
 static int run_self_test(const CallerAPI *intf)
 {
-    static const uint64_t ref[] = {
-        0x2e9dc0924480bb1a, 0x8fd2b3f2f2f047d9, 0x17bbf82c6284b8bd,
-        0x9da272374079400f, 0xdf49f285347354a1};
     int is_ok = 1;
-    Biski64State *obj = create(intf);
-    obj->ctr      = 0x1e9a57bc80e6721d;
-    obj->mix      = 0x22118258a9d111a0;
-    obj->loop_mix = 0x346edce5f713f8ed;
-    for (int i = 0; i < 16; i++) { // Reproduction of the original warmup
-        (void) get_bits_raw(obj);  // prodecure.
+    intf->printf("--- Testing ver1\n");
+    if (!run_self_test_ver1(intf)) {
+        is_ok = 0;
     }
-    for (int i = 0; i < 5; i++) {
-        const uint64_t u = get_bits_raw(obj);
-        intf->printf("Out: 0x%16.16llX; Ref: 0x%16.16llX\n",
-            (unsigned long long) ref[i], (unsigned long long) u);
-        if (ref[i] != u) {
-            is_ok = 0;
-        }
+    intf->printf("--- Testing ver2\n");
+    if (!run_self_test_ver2(intf)) {
+        is_ok = 0;
     }
-    intf->free(obj);
     return is_ok;
 }
 
-MAKE_UINT64_PRNG("biski64", run_self_test)
+static const GeneratorParamVariant gen_list[] = {
+    {"",   "biski64:v2", 64, default_create, get_bits_ver2, get_sum_ver2},
+    {"v2", "biski64:v2", 64, default_create, get_bits_ver2, get_sum_ver2},
+    {"v1", "biski64:v1", 64, default_create, get_bits_ver1, get_sum_ver1},
+    GENERATOR_PARAM_VARIANT_EMPTY
+};
+
+
+static const char description[] =
+"biski64 is a chaotic PRNG with a linear part developed by Daniel Cota.\n"
+"The next param values are supported:\n"
+"  v2 - the updated version with improved quality (default)\n"
+"  v1 - the original version that fails the hamming_distr test\n";
+
+
+int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
+{
+    const char *param = intf->get_param();
+    gi->description = description;
+    gi->self_test = run_self_test;
+    return GeneratorParamVariant_find(gen_list, intf, param, gi);
+}

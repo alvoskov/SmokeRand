@@ -35,10 +35,9 @@ typedef struct {
 /**
  * @brief MWC128 PRNG implementation.
  */
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(MWC128State *obj)
 {
     static const uint64_t MWC_A1 = 0xffebb71d94fcdaf9;
-    MWC128State *obj = state;
     obj->x = unsigned_muladd128(MWC_A1, obj->x, obj->c, &obj->c);
     return obj->x;
 }
@@ -50,7 +49,7 @@ static void *create(const CallerAPI *intf)
     MWC128State *obj = intf->malloc(sizeof(MWC128State));
     obj->x = intf->get_seed64();
     obj->c = 1;
-    return (void *) obj;
+    return obj;
 }
 
 
