@@ -25,10 +25,9 @@ typedef struct {
 } Mwc64State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Mwc64State *obj)
 {
-    Mwc64State *obj = state;
-    uint64_t t = (obj->x << 58) + obj->c;
+    const uint64_t t = (obj->x << 58) + obj->c;
     obj->c = obj->x >> 6;
     obj->x += t;
     obj->c += (obj->x < t);
@@ -41,7 +40,7 @@ static void *create(const CallerAPI *intf)
     Mwc64State *obj = intf->malloc(sizeof(Mwc64State));
     do {obj->x = intf->get_seed64(); } while (obj->x == 0);    
     obj->c = intf->get_seed64() >> 16;
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT64_PRNG("Mwc64_2p58", NULL)

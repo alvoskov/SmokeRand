@@ -526,7 +526,6 @@ static int parse_hamming_distr(TestDescription *out, const TestInfo *obj, char *
 }
 
 
-
 static int parse_hamming_ot(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
     GET_LIMITED_INTVALUE(nbytes, 65536, 1ll << 50ll)

@@ -1,8 +1,8 @@
 # Tests results
 
-A table in this document contains pseudorandom number generators results obtained
-from SmokeRand, TestU01 and PractRand test suites. The next grading algorithm
-was used:
+A table in this document contains pseudorandom number generators results
+obtained from SmokeRand, TestU01 and PractRand 0.94 test suites. The next
+grading algorithm was used:
 
 1. An initial grade was obtained from SmokeRand `full` battery.
 2. If PRNG failed `birthday` or `freq` battery - then 1 is subtracted for each
@@ -30,7 +30,7 @@ was used:
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 1 TiB
  ara32             | u32    | +       | 1     | 1       | 1    | 0.96 | +      | 2(0)  | +       | 512 MiB
  arxfw8            | u32    | +       | 18    | 33      |      | 4.4  | -(>>10)| 0     | -       | 2 MiB
- arxfw8ex          | u32    | +       | 3/5   | 8       |      | 5.0  | -(>>10)| 0     | -/Small | 128 MiB
+ arxfw8ex          | u32    | +       | 3/5   | 8       | 16   | 5.0  | -(>>10)| 0     | -/Small | 128 MiB
  arxfw8ex2         | u32    | +       | +     | +       | +    | 3.8  | +      | 3.5(0)| +       | 8 TiB
  arxfw8ex3         | u32    | +       | +     | +       | +    |      | +      | 4(0)  | +       | >= 16 TiB
  arxfw16           | u32    | +       | +     | +       | +    | 2.6  | +      | 3.5(0)| +       | 8 TiB
@@ -44,10 +44,12 @@ was used:
  biski8_alt        | u32    | +       | 17    | 31      | 31   | 1.4  | -(>>10)| 0     | -       | 2 MiB
  biski16           | u32    | +       | +     | +       | 1    | 0.81 | +      | 2(0)  | +       | 1 TiB
  biski16_alt       | u32    | +       | +     | +       | +    | 1.1  | +      | 3.5(0)| +       | 1 TiB
- biski32           | u32    | +       | +     | +       | +    | 0.32 | +      | 3.5(0)| +       | >= 8 TiB
+ biski32_v2        | u32    | +       | +     | +       | +    |      | +      | 4(0)  | +       | >= 4 TiB
+ biski32_v1        | u32    | +       | +     | +       | +    | 0.32 | +      | 3.5(0)| +       | >= 8 TiB
  biski32_alt       | u32    | +       | +     | +       | +    | 0.43 | +      | 4(0)  | +       | >= 16 TiB
- biski64           | u64    | +       | +     | +       | +    | <0.1 | +      | 3     | +il     | >= 32 TiB
- biski64_alt       | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 32 TiB(?)
+ biski64_v2        | u64    | +       | +     | +       | +    | 0.14 | +      | 4     |         | >= 2 TiB
+ biski64_v1        | u64    | +       | +     | +       | +    | 0.14 | +      | 3     | +il     | >= 32 TiB
+ biski64_alt       | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 32 TiB(?)
  blabla2           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     | +il     | >= 16 TiB
  blabla4           | u64    | +       | +     | +       | +    | 0.58 | +      | 4     |         | >= 8 TiB
  blabla10          | u64    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 16 TiB
@@ -156,6 +158,9 @@ was used:
  minstd            | u32    | 1       | 16    | 32      | 37   | 1.4  | -(>>10)| 0     | -       | 256 KiB
  mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 16 TiB
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | +      | 4     | +       | >= 32 TiB
+ mrc16             | u32    | +       | +     | +       | +    | 1.1  | +      | 3.5(0)| +       | 1 TiB
+ mrc32             | u32    | +       | +     | +       | +    | 0.35 | +      | 4(0)  |         | >= 8 TiB
+ mrc64             | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | ?
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.59 | +      | 3.25  | Small   | 128 GiB
  mt19937_64        | u64    | +       | 3     | 3       | 3    | 0.45 | +      | 3.25  | Small   | 256 GiB
  mt19937_64_full   | u64    | +       | 3     | 3       | 3    | 0.46 | +      | 3.25  | Small   | 256 GiB
@@ -246,7 +251,7 @@ was used:
  sapparot          | u32    | +       | 2     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
  sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4(0)  |         | >= 16 TiB
- seiran128         | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | ?
+ seiran128         | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 1 TiB
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | -(>>10)| 0     | -       | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)| +       | 128 GiB(stdin32)*
@@ -255,7 +260,7 @@ was used:
  shioi128          | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 1 TiB
  skiss32           | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 16 TiB
  skiss64           | u64    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 8 TiB
- smwc16x8          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | >= Crush| >= 4 TiB
+ smwc16x8          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | +       | >= 4 TiB
  smwc192bad        | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 16 TiB(?)
  speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         | >= 4 TiB
  speck128          | u64    | +       | +     | +       | +    | 3.8  | +      | 5     | >= Crush| >= 32 TiB
@@ -345,14 +350,14 @@ was used:
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     | >= Crush| >= 32 TiB
  xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     | >= Crush| >= 8 TiB
  xtea2             | u32    | +       | +     | +       | +    | 12   |        |       | >= Crush| >= 8 TiB
- xtea2_64          | u64    | +       | +     | +       |      | 28   |        |       |         | ?
+ xtea2_64          | u64    | +       | +     | +       |      | 28   |        |       | +IL     | ?
  xxtea128          | u32    | +       | +     | +       | +    | 18   | +      | 4.5   | >= Crush| >= 1 TiB
  xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   | >= Crush| >= 32 TiB
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   | >= Crush| >= 1 TiB
  xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   | >= Crush| >= 32 TiB
- zibri128          | u64    | +       | 7     |         |      | 0.14 |        | 0     | -       | 32 KiB
+ zibri128          | u64    | +       | 7     | 13      |      | 0.14 |        | 0     | -       | 32 KiB
  zibri128ex        | u64    | +       | +     | +       | +    | 0.14 | +      | 4     | +HI     | >= 2 TiB
- zibri192          | u64    | +       | 3/5   |         |      | 0.20 |        | 0     | Crush   | 2 MiB
+ zibri192          | u64    | +       | 3/5   | 9       |      | 0.20 |        | 0     | Crush   | 2 MiB
  zibri192ex        | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | ?
  ziff98            | u32    | +       | 3     | 3       | 3    | 0.47 | +      | 3.25  | Small   | 32 GiB
 

@@ -10,7 +10,7 @@
  *
  * Implementation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -30,9 +30,8 @@ typedef struct {
 } Mtc64HiState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Mtc64HiState *obj)
 {
-    Mtc64HiState *obj = state;
     uint64_t hi, old;
     old = unsigned_mul128(obj->a, 0x9e3779b97f4a7c15ull, &hi);
     obj->a = hi ^ obj->b;
@@ -47,7 +46,7 @@ static void *create(const CallerAPI *intf)
     obj->a = intf->get_seed64();
     obj->b = intf->get_seed64();
     obj->ctr = intf->get_seed64();
-    return (void *) obj;
+    return obj;
 }
 
 

@@ -1266,6 +1266,7 @@ TestResults word16_freq_test(GeneratorState *obj)
     return nbit_words_freq_test(obj, &opts);
 }
 
+
 ///////////////////////////////////////////////
 ///// Interfaces (wrappers) for batteries /////
 ///////////////////////////////////////////////

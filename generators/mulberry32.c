@@ -8,7 +8,7 @@
  * 
  * Adaptation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * All rights reserved.
@@ -23,13 +23,12 @@ PRNG_CMODULE_PROLOG
  * @brief Mulberry 32-bit PRNG state.
  */
 typedef struct {
-    uint32_t w; /**< "Weyl sequence" counter state */
+    uint32_t w; ///< "Weyl sequence" counter state
 } Mulberry32State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(Mulberry32State *obj)
 {
-    Mulberry32State *obj = state;
     uint32_t z = (obj->w += 0x6D2B79F5U);
     z = (z ^ (z >> 15)) * (z | 1U);
     z ^= z + (z ^ (z >> 7)) * (z | 61U);
@@ -40,7 +39,7 @@ static void *create(const CallerAPI *intf)
 {
     Mulberry32State *obj = intf->malloc(sizeof(Mulberry32State));
     obj->w = intf->get_seed32();
-    return (void *) obj;
+    return obj;
 }
 
 

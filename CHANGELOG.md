@@ -6,10 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ## Unreleased
 
+## [0.45] - 2026-01-10
+
 ### Added
 
 - `arxfw8`, `arxfw8ex`, `arxfw8ex2`, `arxfw8ex3`, `arxfw16`, `arxfw16ex2`, `arxfw32`,
   `arxfw64` nonlinear generators with linear parts.
+- `biski32` and `biski64` modifications with improved shifts (cease to fail Hamming
+  weights based test).
+- `mrc16`, `mrc32`, `mrc64` generators.
 - `xkiss32_rot_aox`, `xoroshiro64aox`, `xoshiro128aox` generators that don't
   use integers overflows; may be easy to port to Modula-2 and Oberon programming
   languages.
@@ -20,6 +25,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - Internal self-tests for `gjrand8` and `gjrand16`.
 - `-D__USE_MINGW_ANSI_STDIO` flag for older versions of MinGW.
 - Preliminary aarch64 support.
+- `stdoutfl` and `stdoutflx` outputs: double precision numbers output in the
+  human-readable format. May be useful for e.g. exporting of cryptographic 
+  generators output to Python, Octave etc.
+- `--version` command line key.
 
 ### Changed
 

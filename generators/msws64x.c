@@ -13,7 +13,7 @@
  *
  * MSWS64X modification and its implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -32,10 +32,9 @@ typedef struct {
 } MswsState;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(MswsState *obj)
 {
     static const uint64_t s = 0x9e3779b97f4a7c15;
-    MswsState *obj = state;
     uint64_t sq_hi;
     obj->x += (obj->w += s);
     obj->x = unsigned_mul128(obj->x, obj->x, &sq_hi); // |32bit|32bit||32bit|32bit||

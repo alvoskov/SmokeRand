@@ -14,7 +14,7 @@
  * Passes BigCrush.
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -36,10 +36,9 @@ typedef struct {
 } MLFib17_5_State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(MLFib17_5_State *obj)
 {
-    MLFib17_5_State *obj = state;
-    uint64_t x = obj->U[obj->i] * obj->U[obj->j];
+    const uint64_t x = obj->U[obj->i] * obj->U[obj->j];
     obj->U[obj->i] = x;
     if (--obj->i == 0) obj->i = LFIB_A;
 	if (--obj->j == 0) obj->j = LFIB_A;
@@ -56,7 +55,7 @@ static void *create(const CallerAPI *intf)
         obj->U[k] = pcg_bits64(&state) | 0x1; // Must be ODD!
     }
     obj->i = LFIB_A; obj->j = LFIB_B;
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT32_PRNG("MLFib17_5", NULL)

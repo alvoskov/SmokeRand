@@ -33,7 +33,7 @@
  *    -----------------------------------------------------------------------
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * The MWC algorithm was proposed by G.Marsaglia.
@@ -51,10 +51,9 @@ typedef struct {
     uint64_t data;
 } MWC64State;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(MWC64State *obj)
 {
     const uint64_t A0 = 0xff676488; // 2^32 - 10001272
-    MWC64State *obj = state;
     uint32_t c = (uint32_t) (obj->data >> 32);
     uint32_t x = (uint32_t) (obj->data & 0xFFFFFFFF);
     obj->data = A0 * x + c;
@@ -68,7 +67,7 @@ static void *create(const CallerAPI *intf)
     do {
         obj->data = intf->get_seed64() << 1;
     } while (obj->data == 0);
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT32_PRNG("MWC64", NULL)

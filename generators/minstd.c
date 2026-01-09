@@ -28,7 +28,7 @@
  * 2. https://programmingpraxis.com/2014/01/14/minimum-standard-random-number-generator/
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -40,11 +40,10 @@ PRNG_CMODULE_PROLOG
 /**
  * @brief minstd "Integer version 2" based on Schrage's method.
  */
-static inline uint64_t get_bits_mul32_raw(void *state)
+static inline uint64_t get_bits_mul32_raw(Lcg32State *obj)
 {
     static const int32_t m = 2147483647, a = 16807;
     static const int32_t q = 127773, r = 2836; // (m div a) and (m mod a)
-    Lcg32State *obj = state;
     const int32_t x = (int32_t) obj->x;
     const int32_t hi = x / q;
     const int32_t lo = x - q * hi; // It is x mod q
@@ -59,12 +58,11 @@ MAKE_GET_BITS_WRAPPERS(mul32)
  * @brief minstd "Real version 1" based on 64-bit multiplication with
  * two 32-bit input arguments.
  */
-static inline uint64_t get_bits_mul64_raw(void *state)
+static inline uint64_t get_bits_mul64_raw(Lcg32State *obj)
 {
-    Lcg32State *obj = state;
-    uint64_t prod = 16807ULL * obj->x;
-    uint32_t q = (uint32_t) (prod & 0x7FFFFFFFU);
-    uint32_t p = (uint32_t) (prod >> 31);
+    const uint64_t prod = 16807ULL * obj->x;
+    const uint32_t q = (uint32_t) (prod & 0x7FFFFFFFU);
+    const uint32_t p = (uint32_t) (prod >> 31);
     obj->x = p + q;
     if (obj->x >= 0x7FFFFFFFU) {
         obj->x -= 0x7FFFFFFFU;
@@ -80,7 +78,7 @@ static void *create(const CallerAPI *intf)
 {
     Lcg32State *obj = intf->malloc(sizeof(Lcg32State));
     obj->x = (uint32_t) (intf->get_seed64() >> 33);
-    return (void *) obj;
+    return obj;
 }
 
 
@@ -90,7 +88,7 @@ int run_self_test(const CallerAPI *intf)
     Lcg32State obj;
     obj.x = 1;
     for (size_t i = 0; i < 10000; i++) {
-        get_bits_mul32_raw(&obj.x);
+        get_bits_mul32_raw(&obj);
     }
     int is_ok = 1;
     intf->printf("Mul32 version testing results\n");
@@ -100,7 +98,7 @@ int run_self_test(const CallerAPI *intf)
 
     obj.x = 1;
     for (size_t i = 0; i < 10000; i++) {
-        get_bits_mul32_raw(&obj.x);
+        get_bits_mul64_raw(&obj);
     }
 
     intf->printf("Mul64 version testing results\n");

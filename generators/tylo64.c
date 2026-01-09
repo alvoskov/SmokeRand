@@ -38,7 +38,7 @@ static inline uint64_t get_bits_raw(Tylo64State *obj)
 {
     const uint64_t b = obj->b, out = obj->a ^ obj->counter++;
     obj->a = (b + (b << 3)) ^ (b >> 11);
-    obj->b = ((b << 24) | (b >> 40)) + out;
+    obj->b = rotl64(b, 24) + out;
     return out;
 }
 

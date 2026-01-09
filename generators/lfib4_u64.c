@@ -22,9 +22,8 @@ typedef struct {
     uint8_t c;
 } LFib4U64State;
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(LFib4U64State *obj)
 {
-    LFib4U64State *obj = state;
     uint64_t *t = obj->t;
     obj->c++;
     const uint8_t c1 = (uint8_t) (obj->c + 58U);
@@ -43,7 +42,7 @@ static void *create(const CallerAPI *intf)
         obj->t[i] = pcg_bits64(&state);
     }
     obj->c = 0;
-    return (void *) obj;
+    return obj;
 }
 
 
