@@ -30,6 +30,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   human-readable format. May be useful for e.g. exporting of cryptographic 
   generators output to Python, Octave etc.
 - `--version` command line key.
+- `bin/sr_speed` executable for comparison of several PRNG performance.
+- `bin/test_syscrypto` executable that applies statistical test to the
+  system-level (OS) CSPRNG such as `/dev/urandom`.
 
 ### Changed
 
@@ -43,7 +46,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   `loop_antigap_w64` and `loop_7fff_w64` generators: they are test that are
   designed to provoke such infinite loops.
 - Custom DLL entry for MSYS added into `apidefs.h`.
-
+- Some code cleanup.
 
 ## [0.44] - 2025-12-15
 
