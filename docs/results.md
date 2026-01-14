@@ -160,7 +160,7 @@ grading algorithm was used:
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | +      | 4     | +       | >= 32 TiB
  mrc16             | u32    | +       | +     | +       | +    | 1.1  | +      | 3.5(0)| +       | 1 TiB
  mrc32             | u32    | +       | +     | +       | +    | 0.35 | +      | 4(0)  | +       | >= 8 TiB
- mrc64             | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 8 TiB
+ mrc64             | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 16 TiB
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.59 | +      | 3.25  | Small   | 128 GiB
  mt19937_64        | u64    | +       | 3     | 3       | 3    | 0.45 | +      | 3.25  | Small   | 256 GiB
  mt19937_64_full   | u64    | +       | 3     | 3       | 3    | 0.46 | +      | 3.25  | Small   | 256 GiB
@@ -350,15 +350,16 @@ grading algorithm was used:
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     | >= Crush| >= 32 TiB
  xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     | >= Crush| >= 8 TiB
  xtea2             | u32    | +       | +     | +       | +    | 12   |        |       | >= Crush| >= 8 TiB
- xtea2_64          | u64    | +       | +     | +       |      | 28   |        |       | +IL     | ?
+ xtea2_64          | u64    | +       | +     | +       | +    | 28   |        |       | +IL     | >= 4 TiB
  xxtea128          | u32    | +       | +     | +       | +    | 18   | +      | 4.5   | >= Crush| >= 1 TiB
  xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   | >= Crush| >= 32 TiB
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   | >= Crush| >= 1 TiB
  xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   | >= Crush| >= 32 TiB
+ zibri64ex         | u32    | +       | +     | +       | +    |      | +      | 4     | +       | ?
  zibri128          | u64    | +       | 7     | 13      |      | 0.14 |        | 0     | -       | 32 KiB
  zibri128ex        | u64    | +       | +     | +       | +    | 0.14 | +      | 4     | +HI     | >= 2 TiB
  zibri192          | u64    | +       | 3/5   | 9       |      | 0.20 |        | 0     | Crush   | 2 MiB
- zibri192ex        | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | ?
+ zibri192ex        | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | >= 4 TiB
  ziff98            | u32    | +       | 3     | 3       | 3    | 0.47 | +      | 3.25  | Small   | 32 GiB
 
 Performance estimation for some 64-bit generators
