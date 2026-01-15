@@ -47,7 +47,7 @@ grading algorithm was used:
  biski32_v2        | u32    | +       | +     | +       | +    |      | +      | 4(0)  | +       | >= 4 TiB
  biski32_v1        | u32    | +       | +     | +       | +    | 0.32 | +      | 3.5(0)| +       | >= 8 TiB
  biski32_alt       | u32    | +       | +     | +       | +    | 0.43 | +      | 4(0)  | +       | >= 16 TiB
- biski64_v2        | u64    | +       | +     | +       | +    | 0.14 | +      | 4     |         | >= 2 TiB
+ biski64_v2        | u64    | +       | +     | +       | +    | 0.14 | +      | 4     | +il     | >= 2 TiB
  biski64_v1        | u64    | +       | +     | +       | +    | 0.14 | +      | 3     | +il     | >= 32 TiB
  biski64_alt       | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 32 TiB(?)
  blabla2           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     | +il     | >= 16 TiB
@@ -102,6 +102,7 @@ grading algorithm was used:
  komirandw         | u64    | +       | +     | +       | +    | 0.52 | +      | 4     |         | >= 8 TiB
  kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 5     | +       | >= 4 TiB
  lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>10)| 0     | -       | 512 MiB
+ lcg32sc           | u32    | +       | 1     |         |      |      |        | 0     | Small   | 512 MiB
  lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     | -       | 16 KiB
  lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | +      | 0     | Small   | 16 MiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | 0     | +-      | >= 32 TiB
@@ -171,7 +172,7 @@ grading algorithm was used:
  mtc64hi           | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 2 TiB
  mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | +      | 3.5   | +       | 2 TiB
  msws              | u32    | +       | +     | +       | +    | 0.72 | +      | 4     | +       | >= 16 TiB
- msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 8 TiB
+ msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     | +il     | >= 8 TiB
  msws64            | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 32 TiB
  msws64x           | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 32 TiB
  mularx64_r2       | u32    | +       | 1     | 1       | 1    | 1.5  | -      | 1     |         | 1 TiB
@@ -211,8 +212,8 @@ grading algorithm was used:
  philox32          | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
  prvhash12c        | u32    | +       | 0/1   | 0/1     | 4    | 5.1  |        | 0     | Crush   | 8 GiB
  prvhash12cw       | u32    | +       | +     | +       | +    | 5.1  |        |       | +       | 2 TiB
- prvhash16c        | u32    | +       | +     | +       | +    | 2.4  | +      | 4(0)  |         | 256 GiB
- prvhash16cw       | u32    | +       | +     | +       | +    | 2.4  | +      | 4(0)  |         | >= 2 TiB
+ prvhash16c        | u32    | +       | +     | +       | +    | 2.4  | +      | 4(0)  | +       | 256 GiB
+ prvhash16cw       | u32    | +       | +     | +       | +    | 2.4  | +      | 4(0)  | +       | >= 2 TiB
  prvhash64c        | u64    | +       | +     | +       | +    | 0.51 | +      | 4(0)  |         | >= 1 TiB
  prvhash64cw       | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 16 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
@@ -355,7 +356,7 @@ grading algorithm was used:
  xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   | >= Crush| >= 32 TiB
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   | >= Crush| >= 1 TiB
  xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   | >= Crush| >= 32 TiB
- zibri64ex         | u32    | +       | +     | +       | +    |      | +      | 4     | +       | ?
+ zibri64ex         | u32    | +       | +     | +       | +    |      | +      | 3.5(0)| +       | 4 TiB
  zibri128          | u64    | +       | 7     | 13      |      | 0.14 |        | 0     | -       | 32 KiB
  zibri128ex        | u64    | +       | +     | +       | +    | 0.14 | +      | 4     | +HI     | >= 2 TiB
  zibri192          | u64    | +       | 3/5   | 9       |      | 0.20 |        | 0     | Crush   | 2 MiB
