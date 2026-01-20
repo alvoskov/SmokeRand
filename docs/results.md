@@ -167,7 +167,7 @@ grading algorithm was used:
  mt19937_64_full   | u64    | +       | 3     | 3       | 3    | 0.46 | +      | 3.25  | Small   | 256 GiB
  mtc8              | u32    | 1       | 20/21 | 35      | 39   | 1.9  |        | 0     | -       | 2 MiB
  mtc16             | u32    | +       | +     | +       | +    | 1.3  | +      | 3.5(0)| +       | 512 GiB(stdin32)*
- mtc32             | u32    | +       | +     | +       | +    | 0.39 | +      | 4(0)  | >= Crush| >= 4 TiB
+ mtc32             | u32    | +       | +     | +       | +    | 0.39 | +      | 4(0)  | +       | >= 4 TiB
  mtc64             | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 16 TiB
  mtc64hi           | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 2 TiB
  mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | +      | 3.5   | +       | 2 TiB
@@ -357,9 +357,9 @@ grading algorithm was used:
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   | >= Crush| >= 1 TiB
  xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   | >= Crush| >= 32 TiB
  zibri64ex         | u32    | +       | +     | +       | +    |      | +      | 3.5(0)| +       | 4 TiB
- zibri128          | u64    | +       | 7     | 13      |      | 0.14 |        | 0     | -       | 32 KiB
- zibri128ex        | u64    | +       | +     | +       | +    | 0.14 | +      | 4     | +HI     | >= 2 TiB
- zibri192          | u64    | +       | 3/5   | 9       |      | 0.20 |        | 0     | Crush   | 2 MiB
+ zibri128          | u64    | +       | 7     | 13      | 15/16| 0.14 |        | 0     | -       | 32 KiB
+ zibri128ex        | u64    | +       | +     | +       | +    | 0.14 | +      | 4     | +HI     | >= 16 TiB
+ zibri192          | u64    | +       | 3/5   | 9       | 11   | 0.20 |        | 0     | Crush   | 2 MiB
  zibri192ex        | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | >= 4 TiB
  ziff98            | u32    | +       | 3     | 3       | 3    | 0.47 | +      | 3.25  | Small   | 32 GiB
 
