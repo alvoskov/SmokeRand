@@ -13,6 +13,9 @@
  *    Number Generation for Bioinformatics Applications
  *    http://www0.cs.ucl.ac.uk/staff/D.Jones/GoodPracticeRNG.pdf
  * 2. https://groups.google.com/group/sci.stat.math/msg/b555f463a2959bb7/
+ * 3. George Marsaglia. Random Number Generators // Journal of Modern Applied
+ *    Statistical Methods. 2003. V. 2. N 1. P. 2-13.
+ *    https://doi.org/10.22237/jmasm/1051747320
  *
  * @copyright
  * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
@@ -20,7 +23,7 @@
  *
  * This software is licensed under the MIT license.
  *
- * The KISS99 algorithm is developed by George Marsaglia, its JKISS modification
+ * The KISS03 algorithm is developed by George Marsaglia, its JKISS modification
  * was suggested by David Jones.
  */
 #include "smokerand/cinterface.h"
