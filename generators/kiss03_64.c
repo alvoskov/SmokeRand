@@ -16,6 +16,11 @@
  * 3. xorshift32 was replaced to xorshift64 with constants from [2].
  * 4. 32-bit LCG was replaced to the 64-bit LCG.
  *
+ * This generator has a period around \f$ 2^{255} \f$:
+ *
+ * - xorshift64: \f$ 2^{64} - 1 \f$, LCG: \f$ 2^{64} \f$.
+ * - MWC: \f$ a\cdot 2^{64} - 1 \approx 2^{127} \f$.
+ *
  * Spectral test for \f$ t=2-8 \f$ (\f$ \mu \f$ values):
  *
  * - LCG: 1.7905 4.2978 2.9836 2.7304 2.3194 2.4991 0.5027

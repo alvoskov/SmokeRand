@@ -32,7 +32,7 @@ grading algorithm was used:
  arxfw8            | u32    | +       | 18    | 33      |      | 4.4  | -(>>10)| 0     | -       | 2 MiB
  arxfw8ex          | u32    | +       | 3/5   | 8       | 16   | 5.0  | -(>>10)| 0     | -/Small | 128 MiB
  arxfw8ex2         | u32    | +       | +     | +       | +    | 3.8  | +      | 3.5(0)| +       | 8 TiB
- arxfw8ex3         | u32    | +       | +     | +       | +    |      | +      | 4(0)  | +       | >= 16 TiB
+ arxfw8ex3         | u32    | +       | +     | +       | +    | 4.0  | +      | 4(0)  | +       | >= 16 TiB
  arxfw16           | u32    | +       | +     | +       | +    | 2.6  | +      | 3.5(0)| +       | 8 TiB
  arxfw16ex2        | u32    | +       | +     | +       | +    | 3.1  | +      | 4     | +       | >= 8 TiB
  arxfw32           | u32    | +       | +     | +       | +    | 0.74 | +      | 4(0)  | +       | >= 16 TiB
@@ -44,7 +44,7 @@ grading algorithm was used:
  biski8_alt        | u32    | +       | 17    | 31      | 31   | 1.4  | -(>>10)| 0     | -       | 2 MiB
  biski16           | u32    | +       | +     | +       | 1    | 0.81 | +      | 2(0)  | +       | 1 TiB
  biski16_alt       | u32    | +       | +     | +       | +    | 1.1  | +      | 3.5(0)| +       | 1 TiB
- biski32_v2        | u32    | +       | +     | +       | +    |      | +      | 4(0)  | +       | >= 4 TiB
+ biski32_v2        | u32    | +       | +     | +       | +    | 0.31 | +      | 4(0)  | +       | >= 4 TiB
  biski32_v1        | u32    | +       | +     | +       | +    | 0.32 | +      | 3.5(0)| +       | >= 8 TiB
  biski32_alt       | u32    | +       | +     | +       | +    | 0.43 | +      | 4(0)  | +       | >= 16 TiB
  biski64_v2        | u64    | +       | +     | +       | +    | 0.14 | +      | 4     | +il     | >= 2 TiB
@@ -90,21 +90,21 @@ grading algorithm was used:
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss96            | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 32 TiB(?)
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
- kiss03            | u32    | +       | +     | +       | +    |      |        |       |         | ?
- kiss03_64         | u64    | +       | +     | +       | +    |      | +      |       |         | ?
- kiss64            | u64    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
+ kiss03            | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | ?
+ kiss03_64         | u64    | +       | +     | +       | +    | 0.46 | +      | 4     |         | ?
+ kiss64            | u64    | +       | +     | +       | +    | 0.40 | +      | 4     | +       | >= 32 TiB
  kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     | +       | >= 16 TiB
  kiss11_64         | u64    | +       | +     | +       | +    | 0.60 | +      | 4     |         | >= 32 TiB
  kiss4691          | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 32 TiB
- komirand16        | u32    | 1-7     | 19-20 | 40      |      |      |        | 0     | -       | 64 KiB
- komirand16w       | u32    | 1-4     | 20-21 | 39      |      |      |        | 0     | -       | 16 MiB
+ komirand16        | u32    | 1-7     | 19-20 | 40      |      | 2.1  |        | 0     | -       | 64 KiB
+ komirand16w       | u32    | 1-4     | 20-21 | 39      |      | 2.1  |        | 0     | -       | 16 MiB
  komirand32        | u32    | +       | 1     | 2       | 10   | 0.63 | -(>>10)| 0     | Small   | 2-8 GiB
  komirand32w       | u32    | +       | +     | +       | +    | 1.0  | +      | 4(0)  | +       | >= 2 TiB
  komirand          | u64    | +       | +     | +       | +    | 0.49 | +      | 4(0)  |         | >= 16 TiB
  komirandw         | u64    | +       | +     | +       | +    | 0.52 | +      | 4     |         | >= 8 TiB
  kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 5     | +       | >= 4 TiB
  lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>10)| 0     | -       | 512 MiB
- lcg32sc           | u32    | +       | 1     | 2       | 8.9  |      |        | 0     | Small   | 512 MiB
+ lcg32sc           | u32    | +       | 1     | 2       | 8.9  | 0.62 |        | 0     | Small   | 512 MiB
  lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     | -       | 16 KiB
  lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | +      | 0     | Small   | 16 MiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | 0     | +-      | >= 32 TiB
@@ -285,6 +285,10 @@ grading algorithm was used:
  swb               | u32    | 1       | 6     | 7       | 9    | 3.2  | +      | 0     | Small   | 128 MiB
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | 2     | Crush   | 4 TiB
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 8 TiB
+ swblux64[luxury=0]| u64    | 1       | 7     | 11      |      | 0.56 |        | 0     | -hi     | 4 MiB
+ swblux64[luxury=1]| u64    | +       | 1     | 1       |      | 0.93 |        | 0     | >=shi   | 2 GiB
+ swblux64[luxury=2]| u64    | +       | +     | +       |      | 1.5  |        |       |         | >= 8 TiB(?)
+ swblux64[luxury=3]| u64    | +       | +     |         |      | 2.7  |        |       |         | ?
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | +      | 0     | Crush   | 512 GiB
  swbmwc32          | u32    | +       | 1     | 1       | 1    | 0.87 | +      | 0     | Small   | 128 GiB
  swbmwc64          | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |+_lo/+_hi| >= 32 TiB
@@ -358,10 +362,10 @@ grading algorithm was used:
  xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   | >= Crush| >= 32 TiB
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   | >= Crush| >= 1 TiB
  xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   | >= Crush| >= 32 TiB
- zibri64ex         | u32    | +       | +     | +       | +    |      | +      | 3.5(0)| +       | 4 TiB
- zibri128          | u64    | +       | 7     | 13      | 15/16| 0.14 |        | 0     | -       | 32 KiB
+ zibri64ex         | u32    | +       | +     | +       | +    | 0.43 | +      | 3.5(0)| +       | 4 TiB
+ zibri128          | u64    | +       | 7     | 13      | 15/16| 0.14 | +      | 0     | -       | 32 KiB
  zibri128ex        | u64    | +       | +     | +       | +    | 0.14 | +      | 4     | +HI     | >= 16 TiB
- zibri192          | u64    | +       | 3/5   | 9       | 11   | 0.20 |        | 0     | Crush   | 2 MiB
+ zibri192          | u64    | +       | 3/5   | 9       | 11   | 0.20 | +      | 0     | Crush   | 2 MiB
  zibri192ex        | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | >= 4 TiB
  ziff98            | u32    | +       | 3     | 3       | 3    | 0.47 | +      | 3.25  | Small   | 32 GiB
 
