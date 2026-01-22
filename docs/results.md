@@ -251,6 +251,9 @@ grading algorithm was used:
  rge512ex-ctr-avx2 | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |+IL,+H   | >= 16 TiB
  romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      | 4(0)  |         | >= 32 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
+ rwc32sm           | u32    | +       | +     | +       |      | 0.83 |        |       |         | ?
+ rwc32             | u32    | +       | +     | +       | +    | 0.55 |        |       |         | ?
+ rwc64             | u64    | +       | +     | +       |      | 0.33 | +      |       |         | ?
  sapparot          | u32    | +       | 2     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
  sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4(0)  |         | >= 16 TiB
@@ -287,8 +290,8 @@ grading algorithm was used:
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 8 TiB
  swblux64[luxury=0]| u64    | 1       | 7     | 11      |      | 0.56 |        | 0     | -hi     | 4 MiB
  swblux64[luxury=1]| u64    | +       | 1     | 1       |      | 0.93 |        | 0     | >=shi   | 2 GiB
- swblux64[luxury=2]| u64    | +       | +     | +       |      | 1.5  |        |       |         | >= 8 TiB(?)
- swblux64[luxury=3]| u64    | +       | +     |         |      | 2.7  |        |       |         | ?
+ swblux64[luxury=2]| u64    | +       | +     | +       | +    | 1.5  |        |       |         | >= 8 TiB(?)
+ swblux64[luxury=3]| u64    | +       | +     | +       |      | 2.7  |        |       |         | ?
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | +      | 0     | Crush   | 512 GiB
  swbmwc32          | u32    | +       | 1     | 1       | 1    | 0.87 | +      | 0     | Small   | 128 GiB
  swbmwc64          | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |+_lo/+_hi| >= 32 TiB
