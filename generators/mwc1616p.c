@@ -13,6 +13,9 @@
  *    MWC1616. Improves equidistribution of bits and allows to pass BCFN
  *    test from PractRand (based on Hamming weights).
  *
+ * Note: occasionally shows suspicious values in the test 78 from BigCrush
+ * (`RandomWalk1 J (L=10000, r=0)`)
+ *
  * References:
  *
  * 1. G. Marsaglia "Multiply-With-Carry (MWC) generators" (from DIEHARD
