@@ -251,8 +251,8 @@ grading algorithm was used:
  rge512ex-ctr-avx2 | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |+IL,+H   | >= 16 TiB
  romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      | 4(0)  |         | >= 32 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
- rwc32sm           | u32    | +       | +     | +       |      | 0.83 |        |       |         | ?
- rwc32             | u32    | +       | +     | +       | +    | 0.55 |        |       |         | ?
+ rwc32sm           | u32    | +       | +     | +       | 1    | 0.83 |        | 1     | Small   | ?
+ rwc32             | u32    | +       | +     | +       | +    | 0.55 |        |       | >= Crush| ?
  rwc64             | u64    | +       | +     | +       |      | 0.33 | +      |       |         | ?
  sapparot          | u32    | +       | 2     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
