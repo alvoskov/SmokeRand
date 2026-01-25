@@ -252,9 +252,9 @@ grading algorithm was used:
  romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      | 4(0)  |         | >= 32 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
  rwc32sm           | u32    | +       | +     | +       | 1    | 0.83 | +      | 1     | Small   | >= 2 TiB
- rwc32             | u32    | +       | +     | +       | +    | 0.55 | +      | 4     | +       | ?
- rwc64             | u64    | +       | +     | +       | +    | 0.33 | +      | 4     |         | ?
- rwc64large        | u64    | +       | +     | +       | +    |      | +      | 4     |         | ?
+ rwc32             | u32    | +       | +     | +       | +    | 0.55 | +      | 4     | +       | >= 8 TiB
+ rwc64             | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +hi     | >= 8 TiB
+ rwc64large        | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  sapparot          | u32    | +       | 2     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
  sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4(0)  |         | >= 16 TiB
@@ -289,10 +289,10 @@ grading algorithm was used:
  swb               | u32    | 1       | 6     | 7       | 9    | 3.2  | +      | 0     | Small   | 128 MiB
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | 2     | Crush   | 4 TiB
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 8 TiB
- swblux64[luxury=0]| u64    | 1       | 7     | 11      |      | 0.56 |        | 0     | -hi     | 4 MiB
- swblux64[luxury=1]| u64    | +       | 1     | 1       |      | 0.93 |        | 0     | >=shi   | 2 GiB
+ swblux64[luxury=0]| u64    | 1       | 7     | 11      | 15   | 0.56 | +      | 0     | -hi     | 4 MiB
+ swblux64[luxury=1]| u64    | +       | 1     | 1       | 4    | 0.93 | +      | 0     | >=shi   | 2 GiB
  swblux64[luxury=2]| u64    | +       | +     | +       | +    | 1.5  |        |       |         | >= 8 TiB(?)
- swblux64[luxury=3]| u64    | +       | +     | +       |      | 2.7  |        |       |         | ?
+ swblux64[luxury=3]| u64    | +       | +     | +       | +    | 2.7  |        |       |         | ?
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | +      | 0     | Crush   | 512 GiB
  swbmwc32          | u32    | +       | 1     | 1       | 1    | 0.87 | +      | 0     | Small   | 128 GiB
  swbmwc64          | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |+_lo/+_hi| >= 32 TiB
@@ -325,7 +325,7 @@ grading algorithm was used:
  xkiss16_awc       | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
  xkiss16sh_awc     | u32    | +       | +     | +       | +    | 2.1  | +      | 3     | +       | 16 GiB
  xkiss32_awc       | u32    | +       | +     | +       | +    | 0.66 | +      | 4     | +       | >= 32 TiB
- xkiss32_awc_rot   | u32    | +       | +     | +       | +    |      | +      | 4     | +       | >= 16 TiB
+ xkiss32_awc_rot   | u32    | +       | +     | +       | +    | 0.99 | +      | 4     | +       | >= 16 TiB
  xkiss32sh_awc     | u32    | +       | +     | +       | +    | 0.99 | +      | 4     | +       | >= 16 TiB
  xkiss64_awc       | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
