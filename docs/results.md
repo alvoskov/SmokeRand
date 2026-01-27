@@ -290,9 +290,9 @@ grading algorithm was used:
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | 2     | Crush   | 4 TiB
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 8 TiB
  swblux64[luxury=0]| u64    | 1       | 7     | 11      | 15   | 0.56 | +      | 0     | -hi     | 4 MiB
- swblux64[luxury=1]| u64    | +       | 1     | 1       | 4    | 0.93 | +      | 0     | >=shi   | 2 GiB
- swblux64[luxury=2]| u64    | +       | +     | +       | +    | 1.5  |        |       |         | >= 8 TiB(?)
- swblux64[luxury=3]| u64    | +       | +     | +       | +    | 2.7  |        |       |         | ?
+ swblux64[luxury=1]| u64    | +       | 1     | 1       | 4    | 0.93 | +      | 0     | Small   | 2 GiB
+ swblux64[luxury=2]| u64    | +       | +     | +       | +    | 1.5  |        |       | Crush   | >= 8 TiB(?)
+ swblux64[luxury=3]| u64    | +       | +     | +       | +    | 2.7  |        |       |         | >= 2 TiB
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | +      | 0     | Crush   | 512 GiB
  swbmwc32          | u32    | +       | 1     | 1       | 1    | 0.87 | +      | 0     | Small   | 128 GiB
  swbmwc64          | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |+_lo/+_hi| >= 32 TiB
