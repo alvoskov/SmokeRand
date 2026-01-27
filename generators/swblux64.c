@@ -36,6 +36,15 @@
  * Luxury levels (decimation) improve PRNG quality, it is not recommended
  * to use the 0-2 levels in a general purpose PRNG.
  *
+ * Note about --param=2 version: it does fail BigCrush (higher half):
+ *
+ *           Test                          p-value
+ *     ----------------------------------------------
+ *     10  CollisionOver, t = 14           3.2e-5
+ *     11  CollisionOver, t = 21          3.8e-10
+ *     12  CollisionOver, t = 21           1.9e-6
+ *     ----------------------------------------------
+ *
  * References:
  *
  * 1. George Marsaglia, Arif Zaman. A New Class of Random Number Generators //
@@ -173,12 +182,70 @@ static const char description[] =
 "  2 - swb64_lux2[13,42]\n"
 "  3 - swb64_lux3[13,83]\n";
 
+/**
+ * @brief An internal self-test
+ * @details The next code was used for the test vector generation:
+ *
+ *    class Swb64:
+ *        def __init__(self):
+ *            self.a, self.b = 13, 7
+ *            self.x = [x + 1000 for x in range(0, self.a)]
+ *            self.c = 1
+ *
+ *        def next(self):
+ *            xj, xi = self.x[self.b - 1], self.x[self.a - 1]
+ *            t = (xj - xi - self.c) % 2**64
+ *            self.c = 1 if xj < t else 0
+ *            self.x = [t] + self.x[:-1]
+ *            return t
+ *
+ *    swb = Swb64()
+ *
+ *    for i in range(1_000_000):
+ *        swb.next()
+ *
+ *    for i in range(16):
+ *        print(hex(swb.next()))
+ *
+ */
+static int run_self_test(const CallerAPI *intf)
+{
+    static const uint64_t u_ref[] = {
+        0x69a9cdd6c63ed355, 0xc48119f8a063719a, 0x8d6a86605e7ec754,
+        0x9c4a47702785aa51, 0xc2342980fb6d22a2, 0xdf0b316d28a4a53a,
+        0xc92bc711d1225e9e, 0xb4d9cea46aedff76, 0x20e7bcda51f57749,
+        0xe7547f8de529688e, 0xd6ddf16b6b07ea5d, 0x3b6dff7cadc502c4,
+        0x89ccd703c6ccf913, 0x5f81f93b0ae38b49, 0xf058b4abca8a8ddc,
+        0x937d3679f376aff4
+    };
+
+    int is_ok = 1;
+    Swb64State *obj = create_lux(intf, 0);
+    for (unsigned int i = 0; i < SWB_A; i++) {
+        obj->x[i] = 1000U + i;
+    }
+    obj->c = 1;
+    for (long i = 0; i < 1000000; i++) {
+        (void) get_bits(obj);
+    }
+    for (int i = 0; i < 16; i++) {
+        const uint64_t u = get_bits(obj);
+        intf->printf("%llX %llX\n",
+            (unsigned long long) u, (unsigned long long) u_ref[i]);
+        if (u != u_ref[i]) {
+            is_ok = 0;
+        }
+    }
+    intf->free(obj);
+    return is_ok;
+}
+
 
 int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
 {
     const char *param = intf->get_param();
     gi->description = description;
-    gi->self_test = NULL;
+    gi->self_test = run_self_test;
     return GeneratorParamVariant_find(gen_list, intf, param, gi);
 }
 
