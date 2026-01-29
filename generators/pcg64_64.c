@@ -24,11 +24,15 @@
 
 PRNG_CMODULE_PROLOG
 
-typedef struct { uint64_t state;  uint64_t inc; } Pcg64State;
+typedef struct {
+    uint64_t state; ///< LCG state
+    uint64_t inc;   ///< LCG increment, must be odd
+} Pcg64State;
 
 static inline uint64_t get_bits_raw(Pcg64State *obj)
 {
-    uint64_t word = ((obj->state >> ((obj->state >> 59) + 5)) ^ obj->state) * 12605985483714917081ull;
+    const uint64_t word = ((obj->state >> ((obj->state >> 59) + 5)) ^ obj->state) *
+        12605985483714917081ull;
     obj->state = obj->state * 6364136223846793005ull + obj->inc;
     return (word >> 43) ^ word;
 }
@@ -37,8 +41,8 @@ static void *create(const CallerAPI *intf)
 {
     Pcg64State *obj = intf->malloc(sizeof(Pcg64State));
     obj->state = intf->get_seed64();
-    obj->inc   = intf->get_seed64();
-    return (void *) obj;
+    obj->inc   = intf->get_seed64() | 1; // Odd increment
+    return obj;
 }
 
 MAKE_UINT64_PRNG("PCG64", NULL)
