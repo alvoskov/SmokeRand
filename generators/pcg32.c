@@ -21,26 +21,33 @@
 
 PRNG_CMODULE_PROLOG
 
-typedef Lcg64State Pcg32State;
+typedef struct {
+    uint64_t state; ///< LCG state
+    uint64_t inc;   ///< LCG increment, must be odd
+} Pcg32State;
 
 static inline uint64_t get_bits_raw(Pcg32State *obj)
 {
-    const uint32_t xorshifted = (uint32_t) ( ((obj->x >> 18) ^ obj->x) >> 27 );
-    const int rot = (int) (obj->x >> 59);
-    obj->x = obj->x * 6364136223846793005ull + 12345ull;
+    const uint32_t xorshifted = (uint32_t) ( ((obj->state >> 18) ^ obj->state) >> 27 );
+    const int rot = (int) (obj->state >> 59);
+    obj->state = obj->state * 6364136223846793005ull + obj->inc;
+
     return rotr32(xorshifted, rot);
 }
 
 static void *create(const CallerAPI *intf)
 {
     Pcg32State *obj = intf->malloc(sizeof(Pcg32State));
-    obj->x = intf->get_seed64();
+
+    obj->state = intf->get_seed64();
+    obj->inc   = intf->get_seed64() | 1;
+
     return obj;
 }
 
 static int run_self_test(const CallerAPI *intf)
 {
-    Pcg32State obj = { .x = 0x123456789ABCDEF};
+    Pcg32State obj = { .state = 0x123456789ABCDEF, .inc = 12345ull };
     static const uint32_t x_ref = 0x62435AA4;
     uint32_t x;
     for (int i = 0; i < 10000; i++) {
