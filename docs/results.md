@@ -104,7 +104,7 @@ grading algorithm was used:
  komirandw         | u64    | +       | +     | +       | +    | 0.52 | +      | 4     |         | >= 8 TiB
  kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 5     | +       | >= 4 TiB
  lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>10)| 0     | -       | 512 MiB
- lcg32sc           | u32    | +       | 1     | 2       | 8.9  | 0.62 |        | 0     | Small   | 512 MiB
+ lcg32sc           | u32    | +       | 1     | 2       | 8/9  | 0.62 | -(>>10)| 0     | Small   | 512 MiB
  lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     | -       | 16 KiB
  lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | +      | 0     | Small   | 16 MiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | 0     | +-      | >= 32 TiB
@@ -212,8 +212,8 @@ grading algorithm was used:
  philox            | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  philox2x32        | u32    | +       | +     | +       | +    | 1.6  | -      | 3     | +       | >= 32 TiB
  philox32          | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
- prvhash12c        | u32    | +       | 0/1   | 0/1     | 4    | 5.1  |        | 0     | Crush   | 8 GiB
- prvhash12cw       | u32    | +       | +     | +       | +    | 5.1  |        |       | +       | 2 TiB
+ prvhash12c        | u32    | +       | 0/1   | 0/1     | 4    | 5.1  | -(>>10)| 0     | Crush   | 8 GiB
+ prvhash12cw       | u32    | +       | +     | +       | +    | 5.1  | +      | 3.5(0)| +       | 2 TiB
  prvhash16c        | u32    | +       | +     | +       | +    | 2.4  | +      | 3.5(0)| +       | 256 GiB
  prvhash16cw       | u32    | +       | +     | +       | +    | 2.4  | +      | 3.5(0)| +       | 4 TiB
  prvhash64c        | u64    | +       | +     | +       | +    | 0.51 | +      | 4(0)  |         | >= 1 TiB
@@ -308,7 +308,7 @@ grading algorithm was used:
  threefish1024_avx | u64    | +       | +     | +       | +    | 1.3  | +      | 5     | +(il)   | >= 2 TiB
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
- tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |>=C(il)  | >= 32 TiB
+ tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     | +(il)   | >= 32 TiB
  ultra             | u32    | +       | +     | +       | 1    | 0.81 | +      | 2     | +       | 4 GiB
  ultra64           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |+_lo/+_hi| >= 16 TiB
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     | +       | >= 32 TiB
