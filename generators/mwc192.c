@@ -23,9 +23,9 @@ PRNG_CMODULE_PROLOG
  * For simplicity, we suggest to set c = 1 and x, y to a 128-bit seed.
  */
 typedef struct {
-    uint64_t x;
-    uint64_t y;
-    uint64_t c;
+    uint64_t x; ///< x_{n-2}
+    uint64_t y; ///< x_{n-1}
+    uint64_t c; ///< carry
 } MWC192State;
 
 #define MWC_A2 0xffa04e67b3c95d86
@@ -35,15 +35,15 @@ typedef struct {
  */
 static inline uint64_t get_bits_raw(MWC192State *obj)
 {
-	const uint64_t result = obj->y;
-	// muladd128() returns the high bits, and puts the low bits in the last param
-    uint64_t t            = unsigned_muladd128(MWC_A2, obj->x, obj->c, &obj->c);
+    const uint64_t result = obj->y;
+    // muladd128() returns the high bits, and puts the low bits in the last param
+    const uint64_t t      = unsigned_muladd128(MWC_A2, obj->x, obj->c, &obj->c);
 
-	obj->x = obj->y;
-	obj->y = t;
-	// C is set to the lower bits in the muladd128() above
+    obj->x = obj->y;
+    obj->y = t;
+    // C is set to the lower bits in the muladd128() above
 
-	return result;
+    return result;
 }
 
 static void *create(const CallerAPI *intf)
