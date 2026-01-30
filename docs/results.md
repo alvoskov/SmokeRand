@@ -194,6 +194,8 @@ grading algorithm was used:
  mwc128            | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 16 TiB
  mwc128x           | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 32 TiB
  mwc128xxa32       | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 32 TiB
+ mwc192            | u64    | +       | +     | +       | +    |      | +      | 4     |         | >= 1 TiB
+ mwc256            | u64    | +       | +     | +       | +    |      | +      | 4     |         | >= 1 TiB
  mwc256xxa64       | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 32 TiB
  mwc1616           | u32    | 1       | 10/11 | 13/19   | 20   | 0.48 | -      | 0     | -/Small | 16 MiB
  mwc1616p          | u32    | +       | +     | +       | +    | 0.55 | +      | 4     | +(?)    | 16 TiB
@@ -291,7 +293,7 @@ grading algorithm was used:
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 8 TiB
  swblux64[luxury=0]| u64    | 1       | 7     | 11      | 15   | 0.56 | +      | 0     | -hi     | 4 MiB
  swblux64[luxury=1]| u64    | +       | 1     | 1       | 4    | 0.93 | +      | 0     | Small   | 2 GiB
- swblux64[luxury=2]| u64    | +       | +     | +       | +    | 1.5  |        |       | Crush   | >= 8 TiB(?)
+ swblux64[luxury=2]| u64    | +       | +     | +       | +    | 1.5  |        |       | Crush   | 16 TiB
  swblux64[luxury=3]| u64    | +       | +     | +       | +    | 2.7  |        |       |         | >= 2 TiB
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | +      | 0     | Crush   | 512 GiB
  swbmwc32          | u32    | +       | 1     | 1       | 1    | 0.87 | +      | 0     | Small   | 128 GiB

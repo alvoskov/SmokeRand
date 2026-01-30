@@ -53,14 +53,18 @@ BatteryExitCode battery_full(const GeneratorInfo *gen, const CallerAPI *intf,
 
     // CollisionOver tests options
     static const CollOverNDOptions
+        collover20_2d      = {.nbits_per_dim = 20, .ndims = 2, COLLOVER_LO_PROPS},
+        collover20_2d_high = {.nbits_per_dim = 20, .ndims = 2, COLLOVER_HI_PROPS},
+        collover13_3d      = {.nbits_per_dim = 13, .ndims = 3, COLLOVER_LO_PROPS},
+        collover13_3d_high = {.nbits_per_dim = 13, .ndims = 3, COLLOVER_HI_PROPS},
         collover8_5d       = {.nbits_per_dim = 8,  .ndims = 5, COLLOVER_LO_PROPS},
         collover8_5d_high  = {.nbits_per_dim = 8,  .ndims = 5, COLLOVER_HI_PROPS},
         collover5_8d       = {.nbits_per_dim = 5,  .ndims = 8, COLLOVER_LO_PROPS},
         collover5_8d_high  = {.nbits_per_dim = 5,  .ndims = 8, COLLOVER_HI_PROPS},
-        collover13_3d      = {.nbits_per_dim = 13, .ndims = 3, COLLOVER_LO_PROPS},
-        collover13_3d_high = {.nbits_per_dim = 13, .ndims = 3, COLLOVER_HI_PROPS},
-        collover20_2d      = {.nbits_per_dim = 20, .ndims = 2, COLLOVER_LO_PROPS},
-        collover20_2d_high = {.nbits_per_dim = 20, .ndims = 2, COLLOVER_HI_PROPS};
+        collover3_13d      = {.nbits_per_dim = 3,  .ndims = 13, COLLOVER_LO_PROPS},
+        collover3_13d_high = {.nbits_per_dim = 3,  .ndims = 13, COLLOVER_HI_PROPS},
+        collover2_20d      = {.nbits_per_dim = 2,  .ndims = 20, COLLOVER_LO_PROPS},
+        collover2_20d_high = {.nbits_per_dim = 2,  .ndims = 20, COLLOVER_HI_PROPS};
 
     // Gap test
     static const GapOptions
@@ -131,6 +135,10 @@ BatteryExitCode battery_full(const GeneratorInfo *gen, const CallerAPI *intf,
         {"collover8_5d_high",    collisionover_test_wrap, &collover8_5d_high},
         {"collover5_8d",         collisionover_test_wrap, &collover5_8d},
         {"collover5_8d_high",    collisionover_test_wrap, &collover5_8d_high},
+        {"collover3_13d",        collisionover_test_wrap, &collover3_13d},
+        {"collover3_13d_high",   collisionover_test_wrap, &collover3_13d_high},
+        {"collover2_20d",        collisionover_test_wrap, &collover2_20d},
+        {"collover2_20d_high",   collisionover_test_wrap, &collover2_20d_high},
         {"gap_inv8",             gap_test_wrap, &gap_inv8},
         {"gap_inv512",           gap_test_wrap, &gap_inv512},
         {"gap_inv1024",          gap_test_wrap, &gap_inv1024},
