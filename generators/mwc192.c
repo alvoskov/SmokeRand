@@ -36,11 +36,12 @@ typedef struct {
 static inline uint64_t get_bits_raw(MWC192State *obj)
 {
 	const uint64_t result = obj->y;
-	const __uint128_t t   = MWC_A2 * (__uint128_t)obj->x + obj->c;
+	// muladd128() returns the high bits, and puts the low bits in the last param
+    uint64_t t            = unsigned_muladd128(MWC_A2, obj->x, obj->c, &obj->c);
 
 	obj->x = obj->y;
-	obj->y = (uint64_t)t;
-	obj->c = (uint64_t)(t >> 64);
+	obj->y = t;
+	// C is set to the lower bits in the muladd128() above
 
 	return result;
 }
