@@ -1,0 +1,106 @@
+/**
+ * @file mwc256.c
+ * @brief MWC256 - 256-bit PRNG based on MWC method.
+ * @details Multiply-with-carry PRNG with a period about 2^255.
+ * Passes SmallCrush, Crush and BigCrush tests.
+ *
+ *    import sympy
+ *    a, b = 0xfff62cf2ccc0cdaf, 2**64
+ *    m = a*b**3 - 1
+ *    print(hex(m))
+ *    print(sympy.isprime(m), sympy.n_order(b, m) / m)
+ *    x = b**3 + 2*b**2 + b*0x87654321 + 0x12345678
+ *    mul = pow(b, -1, m)
+ *    print("mul: ", hex(mul))
+ *    for i in range(1000000):
+ *        x = (mul * x) % m
+ *    for i in range(20):
+ *        print("--->", hex((x // 2**128) % 2**64), hex(x))
+ *        x = (mul * x) % m
+ *
+ * References:
+ *
+ * 1. Sebastiano Vigna. MWC256. https://prng.di.unimi.it/MWC256.c
+ *
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
+#include "smokerand/cinterface.h"
+#include "smokerand/int128defs.h"
+
+PRNG_CMODULE_PROLOG
+
+/**
+ * @brief MWC256 state.
+ * @details
+ * The state must be initialized so that 0 < c < MWC_A3 - 1.
+ * For simplicity, we suggest to set c = 1 and x, y, z to a 192-bit seed.
+ */
+typedef struct {
+    uint64_t x; ///< x_{n-3}
+    uint64_t y; ///< x_{n-2}
+    uint64_t z; ///< x_{n-1}
+    uint64_t c; ///< carry
+} MWC256State;
+
+#define MWC_A3 0xfff62cf2ccc0cdaf
+
+/**
+ * @brief MWC256 PRNG implementation.
+ */
+static inline uint64_t get_bits_raw(MWC256State *obj)
+{
+    const uint64_t result = obj->z;
+    // muladd128() returns the high bits, and puts the low bits in the last param
+    const uint64_t t      = unsigned_muladd128(MWC_A3, obj->x, obj->c, &obj->c);
+
+    obj->x = obj->y;
+    obj->y = obj->z;
+    obj->z = t;
+    // C is set to the lower bits in the muladd128() above
+
+	return result;
+}
+
+static void *create(const CallerAPI *intf)
+{
+    MWC256State *obj = intf->malloc(sizeof(MWC256State));
+
+    obj->x = intf->get_seed64();
+    obj->y = intf->get_seed64();
+    obj->z = intf->get_seed64();
+    obj->c = 1;
+
+    return obj;
+}
+
+static int run_self_test(const CallerAPI *intf)
+{
+    static const uint64_t u_ref[] = {
+        0xbb4f79c926af7dbd, 0x7e896e59b9c8c205, 0xab0084cc81c8837d,
+        0x79ce794c7bc4b013, 0x18de2894f80eb740, 0x624806418f7b090e,
+        0x1fb264fbe694e8e1, 0x6274d4a88d097419, 0x51ee99b5b4f827a4,
+        0xd8c16a7ebbb765a9
+    };
+    MWC256State obj = {.x = 0x12345678, .y = 0x87654321, .z = 2, .c = 1};
+    int is_ok = 1;
+    for (long i = 0; i < 1000000; i++) {
+        (void) get_bits_raw(&obj);
+    }
+    intf->printf("%18s %18s\n", "Output", "Reference");
+    for (int i = 0; i < 10; i++) {
+        const uint64_t u = get_bits_raw(&obj);
+        intf->printf("0x%.16llX 0x%.16llX\n",
+            (unsigned long long) u, (unsigned long long) u_ref[i]);
+        if (u_ref[i] != u) {
+            is_ok = 0;
+        }
+    }
+    return is_ok;
+}
+
+
+MAKE_UINT64_PRNG("MWC256", run_self_test)
