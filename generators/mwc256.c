@@ -2,7 +2,9 @@
  * @file mwc256.c
  * @brief MWC256 - 256-bit PRNG based on MWC method.
  * @details Multiply-with-carry PRNG with a period about 2^255.
- * Passes SmallCrush, Crush and BigCrush tests.
+ * Passes SmallCrush, Crush and BigCrush tests. MWC is a special
+ * form of the linear congruential generator with prime m, see
+ * the next Python script that generates the test vectors:
  *
  *    import sympy
  *    a, b = 0xfff62cf2ccc0cdaf, 2**64
@@ -17,6 +19,10 @@
  *    for i in range(20):
  *        print("--->", hex((x // 2**128) % 2**64), hex(x))
  *        x = (mul * x) % m
+ *
+ * The memory layout of PRNG state is reversed in comparison to the
+ * original implemenation by S.Vigna: it improves performance for the
+ * "function call" scenario.
  *
  * References:
  *
@@ -40,10 +46,8 @@ PRNG_CMODULE_PROLOG
  * For simplicity, we suggest to set c = 1 and x, y, z to a 192-bit seed.
  */
 typedef struct {
-    uint64_t x; ///< x_{n-3}
-    uint64_t y; ///< x_{n-2}
-    uint64_t z; ///< x_{n-1}
-    uint64_t c; ///< carry
+    uint64_t x[3]; ///< (x_{n-1}, x_{n-2}, x_{n-3})
+    uint64_t c;    ///< carry
 } MWC256State;
 
 #define MWC_A3 0xfff62cf2ccc0cdaf
@@ -53,27 +57,22 @@ typedef struct {
  */
 static inline uint64_t get_bits_raw(MWC256State *obj)
 {
-    const uint64_t result = obj->z;
-    // muladd128() returns the high bits, and puts the low bits in the last param
-    const uint64_t t      = unsigned_muladd128(MWC_A3, obj->x, obj->c, &obj->c);
-
-    obj->x = obj->y;
-    obj->y = obj->z;
-    obj->z = t;
-    // C is set to the lower bits in the muladd128() above
-
+    const uint64_t result = obj->x[0];
+    // lo/&obj->c - lower/higher 64 bits of the 128-bit result
+    const uint64_t lo = unsigned_muladd128(MWC_A3, obj->x[2], obj->c, &obj->c);
+    obj->x[2] = obj->x[1];
+    obj->x[1] = obj->x[0];
+    obj->x[0] = lo;
 	return result;
 }
 
 static void *create(const CallerAPI *intf)
 {
     MWC256State *obj = intf->malloc(sizeof(MWC256State));
-
-    obj->x = intf->get_seed64();
-    obj->y = intf->get_seed64();
-    obj->z = intf->get_seed64();
+    obj->x[0] = intf->get_seed64();
+    obj->x[1] = intf->get_seed64();
+    obj->x[2] = intf->get_seed64();
     obj->c = 1;
-
     return obj;
 }
 
@@ -89,7 +88,7 @@ static int run_self_test(const CallerAPI *intf)
         0x1fb264fbe694e8e1, 0x6274d4a88d097419, 0x51ee99b5b4f827a4,
         0xd8c16a7ebbb765a9
     };
-    MWC256State obj = {.x = 0x12345678, .y = 0x87654321, .z = 2, .c = 1};
+    MWC256State obj = {{2, 0x87654321, 0x12345678}, .c = 1};
     int is_ok = 1;
     for (long i = 0; i < 1000000; i++) {
         (void) get_bits_raw(&obj);
