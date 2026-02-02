@@ -100,7 +100,7 @@ grading algorithm was used:
  komirand16w       | u32    | 1-4     | 20-21 | 39      |      | 2.1  |        | 0     | -       | 16 MiB
  komirand32        | u32    | +       | 1     | 2       | 10   | 0.63 | -(>>10)| 0     | Small   | 2-8 GiB
  komirand32w       | u32    | +       | +     | +       | +    | 1.0  | +      | 4(0)  | +       | >= 2 TiB
- komirand          | u64    | +       | +     | +       | +    | 0.49 | +      | 4(0)  |         | >= 16 TiB
+ komirand          | u64    | +       | +     | +       | +    | 0.49 | +      | 4(0)  |+H/+L/+IL| >= 16 TiB
  komirandw         | u64    | +       | +     | +       | +    | 0.52 | +      | 4     |         | >= 8 TiB
  kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 5     | +       | >= 4 TiB
  lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>10)| 0     | -       | 512 MiB
