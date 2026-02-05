@@ -1158,9 +1158,9 @@ GeneratorInfo define_high32_generator(const GeneratorInfo *gi)
     return gi_env;
 }
 
-/////////////////////////////////////////////////////////////////
-///// Implementationof generator that returns lower 32 bits /////
-/////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+///// Implementation of generator that returns lower 32 bits /////
+//////////////////////////////////////////////////////////////////
 
 static uint64_t get_bits64_low32(void *state)
 {
@@ -1182,6 +1182,60 @@ GeneratorInfo define_low32_generator(const GeneratorInfo *gi)
     gi_env.get_sum = NULL;
     return gi_env;
 }
+
+////////////////////////////////////////////////////////////
+///// Implementation of generator that returns 31 bits /////
+////////////////////////////////////////////////////////////
+
+
+static inline uint32_t murmur3x2_mixer(uint32_t s)
+{
+    // Round 1
+    s ^= s >> 16;
+    s *= 0x85ebca6bU;
+    s ^= s >> 13;
+    s *= 0xc2b2ae35U;
+    s ^= s >> 16;
+    // Round 0
+    s *= 69069U;
+    s ^= rotl32(s, 7) ^ rotl32(s, 23);
+    return s;
+}
+
+
+static uint64_t get_bits64_uint31(void *state)
+{
+    EnvelopedGeneratorState *obj = state;
+    uint32_t x = (uint32_t) obj->parent_gi->get_bits(obj->parent_state);
+    const uint64_t mwc = obj->i32buf.val.u64;
+    obj->i32buf.val.u64 = 0xff676488U * (mwc & 0xFFFFFFFFU) + (mwc >> 32);
+    const uint32_t mwc_out = (uint32_t) ((mwc >> 32) ^ mwc);
+    return x | (mwc_out & 0x1);
+}
+
+void *create_enveloped_uint31(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    EnvelopedGeneratorState *obj = intf->malloc(sizeof(EnvelopedGeneratorState));
+    obj->parent_gi = gi->parent;
+    obj->parent_state = gi->parent->create(gi->parent, intf);
+    obj->i32buf.val.u64 = 0x1;
+    return obj;
+}
+
+
+GeneratorInfo define_uint31_generator(const GeneratorInfo *gi)
+{
+    GeneratorInfo gi_env = *gi;
+    gi_env.name = "Uint31";
+    gi_env.parent = gi;
+    gi_env.nbits = 32;
+    gi_env.create = create_enveloped_uint31;
+    gi_env.free = free_enveloped;
+    gi_env.get_bits = get_bits64_uint31;
+    gi_env.get_sum = NULL;
+    return gi_env;
+}
+
 
 ///////////////////////////////////////////////
 ///// Implementation of file input/output /////

@@ -2,7 +2,7 @@
  * @file smokerand.c
  * @brief SmokeRand command line interface.
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -53,6 +53,9 @@ void print_help(void)
     "    reverse-bits   Reverse bits in the generator output\n"
     "    interleaved32  Process 64-bit generator output as interleaving 32-bit words\n"
     "    high32, low32  Analyse higher/lower 32 bits of 64-bit generator\n"
+    "    uint31         Autocomplete 31-bit generator (the lowest bit is 0)\n"
+    "                   to the 32-bit one using SplitMix32 mixer for the lowest\n"
+    "                   bit generation.\n"
     "  --maxlen_log2=n  Limit the binary output to the 2^n floats (12 <= n <= 63)\n"
     "  --report-brief Show only failures in the report\n"
     "  --seed=data Use the user supplied string (data) as a seed\n"
@@ -72,6 +75,7 @@ typedef enum {
     FILTER_INTERLEAVED32,
     FILTER_HIGH32,
     FILTER_LOW32,
+    FILTER_UINT31,
     FILTER_UNKNOWN
 } GeneratorFilter;
 
@@ -86,6 +90,8 @@ GeneratorFilter GeneratorFilter_from_name(const char *name)
         return FILTER_HIGH32;
     } else if (!strcmp("low32", name)) {
         return FILTER_LOW32;
+    } else if (!strcmp("uint31", name)) {
+        return FILTER_UINT31;
     } else {
         return FILTER_UNKNOWN;
     }
@@ -516,6 +522,12 @@ static void apply_filter(GeneratorInfo **gi, GeneratorFilter filter, GeneratorIn
         fprintf(stderr, "All tests will be applied to the lower 32 bits only\n");
         break;
 
+    case FILTER_UINT31:
+        *filter_gen = define_uint31_generator(*gi);
+        *gi = filter_gen;
+        fprintf(stderr, "The lower bit will be added automatically\n");
+        break;
+
     case FILTER_NONE:
     case FILTER_UNKNOWN:
         break;
@@ -608,6 +620,11 @@ int main(int argc, char *argv[])
             return BATTERY_ERROR;
         }
         GeneratorInfo *gi = &mod.gen;
+        if (gi->nbits != 32 && opts.filter == FILTER_UINT31) {
+            fprintf(stderr, "This filter is supported only for 32-bit generators\n");
+            CallerAPI_free();
+            return BATTERY_ERROR;
+        }
         if (gi->nbits != 64 && (opts.filter == FILTER_INTERLEAVED32 ||
             opts.filter == FILTER_HIGH32 || opts.filter == FILTER_LOW32)) {
             fprintf(stderr, "This filter is supported only for 64-bit generators\n");
