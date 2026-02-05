@@ -17,8 +17,8 @@
  * the required multiplication instruction is available on x86 architecture
  * since 80386.
  *
- * This version of minstd uses the output scrambler that extends its 31-bit
- * output to 32 bits by the `(x << 1) | (x >> 30)` transformation.
+ * It is a 31-bit generator that should be tested with the `--filter=uint31`
+ * key.
  *
  * Reference:
  *
