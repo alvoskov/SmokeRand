@@ -1188,17 +1188,13 @@ GeneratorInfo define_low32_generator(const GeneratorInfo *gi)
 ////////////////////////////////////////////////////////////
 
 
-static inline uint32_t murmur3x2_mixer(uint32_t s)
+static inline uint32_t murmur3_mixer(uint32_t s)
 {
-    // Round 1
     s ^= s >> 16;
     s *= 0x85ebca6bU;
     s ^= s >> 13;
     s *= 0xc2b2ae35U;
     s ^= s >> 16;
-    // Round 0
-    s *= 69069U;
-    s ^= rotl32(s, 7) ^ rotl32(s, 23);
     return s;
 }
 
@@ -1206,19 +1202,32 @@ static inline uint32_t murmur3x2_mixer(uint32_t s)
 static uint64_t get_bits64_uint31(void *state)
 {
     EnvelopedGeneratorState *obj = state;
-    uint32_t x = (uint32_t) obj->parent_gi->get_bits(obj->parent_state);
+    const uint32_t u = (uint32_t) obj->parent_gi->get_bits(obj->parent_state);
+    // Create a filler for the lowest bit with MWC64X
     const uint64_t mwc = obj->i32buf.val.u64;
-    obj->i32buf.val.u64 = 0xff676488U * (mwc & 0xFFFFFFFFU) + (mwc >> 32);
-    const uint32_t mwc_out = (uint32_t) ((mwc >> 32) ^ mwc);
-    return x | (mwc_out & 0x1);
+    const uint32_t x = (uint32_t) mwc, c = (uint32_t)(mwc >> 32);
+    obj->i32buf.val.u64 = 0xff676488U*(uint64_t)x + (uint64_t)c;
+    // Add the lowest bit
+    return u | (murmur3_mixer(u ^ x ^ c) & 0x1U);
 }
 
+/**
+ * @brief Create an envelope generator for the 31 bit PRNG that always has
+ * 0 in the lowest bit (such format is required by TestU01). To prevent failures
+ * of some SmokeRand batteries this filter adds an extra pseudorandom lowest bit
+ * to the PRNG output. It is generated as murmur3mix(x ^ MWC64X) & 0x1.
+ *
+ * May be a stream cipher would be better for such autocompletion but it is a
+ * bithack anyway, so this experimental procedure probably will be ok.
+ */
 void *create_enveloped_uint31(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     EnvelopedGeneratorState *obj = intf->malloc(sizeof(EnvelopedGeneratorState));
     obj->parent_gi = gi->parent;
     obj->parent_state = gi->parent->create(gi->parent, intf);
-    obj->i32buf.val.u64 = 0x1;
+    const uint64_t x = obj->parent_gi->get_bits(obj->parent_state) & 0xFFFFFFFFU;
+    const uint64_t c = obj->parent_gi->get_bits(obj->parent_state) & 0x7FFFFFFFU;
+    obj->i32buf.val.u64 = ((c | 0x1U) << 32) | x;
     return obj;
 }
 
