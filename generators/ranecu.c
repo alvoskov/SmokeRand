@@ -1,22 +1,44 @@
-// https://doi.org/10.1145/62959.62969
-// q = floor(m / a)
-// r = m mod a
-//m0, m1, s = 2147483563, 2147483399, [1, 2]
-//for i in range(10000000):
-//    s[0] = (40014 * s[0]) % m0
-//    s[1] = (40692 * s[1]) % m1
-//
-//for i in range(16):
-//    s[0] = (40014 * s[0]) % m0
-//    s[1] = (40692 * s[1]) % m1
-//    z = (s[0] - s[1]) % 2147483562
-//    print(z)
-//       Test                          p-value
-// ----------------------------------------------
-// 13  BirthdaySpacings, t = 4        1.6e-90
-// ----------------------------------------------
-// All other tests were passed
-
+/**
+ * @file ranecu.c
+ * @brief ranecu (or CombLec88) is a combination of two 32-bit LCGs with prime
+ * multipliers.
+ * @details It is a 31-bit generator that should be tested with the
+ * `--filter=uint31` key.
+ *
+ * References:
+ * 
+ * 1. P. L'Ecuyer Efficient and portable combined random number generators //
+ *    Communications of the ACM. 1998. V. 31. N 6. P.742-751
+ *    https://doi.org/10.1145/62959.62969
+ *
+ * Python script for an internal self-test generation:
+ *
+ *    q = floor(m / a)
+ *    r = m mod a
+ *    m0, m1, s = 2147483563, 2147483399, [1, 2]
+ *    for i in range(10000000):
+ *        s[0] = (40014 * s[0]) % m0
+ *        s[1] = (40692 * s[1]) % m1
+ *
+ *    for i in range(16):
+ *        s[0] = (40014 * s[0]) % m0
+ *        s[1] = (40692 * s[1]) % m1
+ *        z = (s[0] - s[1]) % 2147483562
+ *        print(z)
+ *
+ * Interesting Crush results:
+ *
+ *           Test                          p-value
+ *     ----------------------------------------------
+ *     13  BirthdaySpacings, t = 4        1.6e-90
+ *     ----------------------------------------------
+ *     All other tests were passed
+ *
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
@@ -47,8 +69,8 @@ static inline uint64_t get_bits_raw(RanecuState *obj)
 static void *create(const CallerAPI *intf)
 {
     RanecuState *obj = intf->malloc(sizeof(RanecuState));
-    obj->s[0] = (int32_t) (intf->get_seed32() % MOD0);
-    obj->s[1] = (int32_t) (intf->get_seed32() % MOD1);
+    obj->s[0] = (int32_t) (intf->get_seed64() % MOD0);
+    obj->s[1] = (int32_t) (intf->get_seed64() % MOD1);
     if (obj->s[0] == 0) obj->s[0] = 1234567;
     if (obj->s[1] == 0) obj->s[1] = 7654321;
     return obj;
