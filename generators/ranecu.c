@@ -1,9 +1,10 @@
 /**
  * @file ranecu.c
- * @brief ranecu (or CombLec88) is a combination of two 32-bit LCGs with prime
+ * @brief ranecu (or CombLec88) is a combination of two 31-bit LCGs with prime
  * multipliers.
  * @details It is a 31-bit generator that should be tested with the
- * `--filter=uint31` key.
+ * `--filter=uint31` key. It systematically fails the `bspace16_4d_high` test
+ * in the `default` and `full` SmokeRand batteries
  *
  * References:
  * 
@@ -13,16 +14,17 @@
  *
  * Python script for an internal self-test generation:
  *
- *    q = floor(m / a)
- *    r = m mod a
+ *    import sympy
+ *    a0, a1 = 40014, 40692
  *    m0, m1, s = 2147483563, 2147483399, [1, 2]
+ *    print('m0 is prime: ', sympy.isprime(m0))
+ *    print('  Period: ', sympy.n_order(a0, m0), '; m0 = ', m0)
+ *    print('m1 is prime: ', sympy.isprime(m1))
+ *    print('  Period: ', sympy.n_order(a1, m1), '; m1 = ', m1)
  *    for i in range(10000000):
- *        s[0] = (40014 * s[0]) % m0
- *        s[1] = (40692 * s[1]) % m1
- *
+ *        s[0], s[1] = (a0 * s[0]) % m0, (a1 * s[1]) % m1
  *    for i in range(16):
- *        s[0] = (40014 * s[0]) % m0
- *        s[1] = (40692 * s[1]) % m1
+ *        s[0], s[1] = (a0 * s[0]) % m0, (a1 * s[1]) % m1
  *        z = (s[0] - s[1]) % 2147483562
  *        print(z)
  *
@@ -34,7 +36,8 @@
  *     ----------------------------------------------
  *     All other tests were passed
  *
- * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -57,6 +60,7 @@ static inline void lcg31(int32_t *s, int32_t a, int32_t m, int32_t r, int32_t q)
     if (*s < 0) *s += m;
 }
 
+
 static inline uint64_t get_bits_raw(RanecuState *obj)
 {
     lcg31(&obj->s[0], 40014, MOD0, 12211, 53668);
@@ -76,6 +80,10 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
+/**
+ * @brief An internal self-test for the ranecu PRNG; the test vectors
+ * were obtained from the Python 3.x test script.
+ */
 static int run_self_test(const CallerAPI *intf)
 {
     static const uint32_t u_ref[16] = {
