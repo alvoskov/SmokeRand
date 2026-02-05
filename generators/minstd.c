@@ -17,8 +17,8 @@
  * the required multiplication instruction is available on x86 architecture
  * since 80386.
  *
- * This version of minstd uses the output scrambler that extends its 31-bit
- * output to 32 bits by the `(x << 1) | (x >> 30)` transformation.
+ * It is a 31-bit generator that should be tested with the `--filter=uint31`
+ * key.
  *
  * Reference:
  *
@@ -49,7 +49,7 @@ static inline uint64_t get_bits_mul32_raw(Lcg32State *obj)
     const int32_t lo = x - q * hi; // It is x mod q
     const int32_t t = a * lo - r * hi;
     obj->x = (uint32_t) ((t < 0) ? (t + m) : t);
-    return (obj->x << 1) | (obj->x >> 30);
+    return obj->x << 1;
 }
 
 MAKE_GET_BITS_WRAPPERS(mul32)
@@ -67,7 +67,7 @@ static inline uint64_t get_bits_mul64_raw(Lcg32State *obj)
     if (obj->x >= 0x7FFFFFFFU) {
         obj->x -= 0x7FFFFFFFU;
     }
-    return (obj->x << 1) | (obj->x >> 30);
+    return obj->x << 1;
 }
 
 
