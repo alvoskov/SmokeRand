@@ -1007,7 +1007,12 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
         printf("==================== '%s' battery test #%d report ====================\n",
             bat->name, testid);
     }
-    printf("Generator name:    %s\n", gen->name);
+    printf("Generator name:    %s", gen->name);
+    if (gen->parent != NULL) {
+        printf(":%s\n", gen->parent->name);
+    } else {
+        printf("\n");
+    }
     printf("Output size, bits: %d\n", (int) gen->nbits);
     char *seed_key_txt = Entropy_get_base64_key(&entropy);
     if (seed_key_txt != NULL) {
@@ -1187,7 +1192,11 @@ GeneratorInfo define_low32_generator(const GeneratorInfo *gi)
 ///// Implementation of generator that returns 31 bits /////
 ////////////////////////////////////////////////////////////
 
-
+/**
+ * @brief Finalization mixer from the Murmur3 hash function.
+ * @details The reference implementation may be found at
+ * https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp
+ */
 static inline uint32_t murmur3_mixer(uint32_t s)
 {
     s ^= s >> 16;
