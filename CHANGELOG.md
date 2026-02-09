@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - uint31 filter for analysis of 31-bit generators such as `minstd` and
   `ranecu`. This filter adds a high-quality pseudorandom bit to the end.
   The `mwc64x_u31` generator was added for its verification.
+- `ara64`, `arx32`, `arx64` generators.
 - `kiss03` and `kiss03_64` generators.
 - `mad0` and `mall` generator.
 - `mwc192` and `mwc256` generators (suggested by Scott Baker)
