@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ## Unreleased
 
+### Added
+
+- uint31 filter for analysis of 31-bit generators such as `minstd` and
+  `ranecu`. This filter adds a high-quality pseudorandom bit to the end.
+  The `mwc64x_u31` generator was added for its verification.
+- `kiss03` and `kiss03_64` generators.
+- `mad0` and `mall` generator.
+- `mwc192` and `mwc256` generators (suggested by Scott Baker)
+- `pcg32` and `pcg64_64`: random odd increment (by Scott Baker)
+- `ran2`, `ranecu`, `lcg61prime`, `lcg64bd` generators.
+- `rwc32`, `rwc32sm`, `rwc64`, `rwc64large` generators.
+- `swblux64` generator (64-bit SWB with different luxury levels)
+- `collover2_20d` and `collover2_20d_high` tests were added to the `default`.
+  and `full` batteries to catch the `swblux64` generator at `--param=2`.
+- `collover3_13d` and `collover3_13d_high` tests were added to the `full`
+  battery.
+
+### Changed
+
+- Generator name is printed in the report even if the filter is applied: e.g.
+  it is `Interleaved:SplitMix` instead of `Interleaved`.
+
 ## [0.45] - 2026-01-10
 
 ### Added
