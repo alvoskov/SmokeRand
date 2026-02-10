@@ -29,9 +29,9 @@ grading algorithm was used:
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | +      | 3.75  | +       | 4 GiB
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 1 TiB
  ara32             | u32    | +       | 1     | 1       | 1    | 0.96 | +      | 2(0)  | +       | 512 MiB
- ara64             | u64    | +       | 1     | 1       | 1    |      | +      | 2(0)  |         | 1 GiB
- arx32             | u32    | +       | +     | +       | +    |      | +      | 3.5(0)|         | 1 TiB
- arx64             | u32    | +       | +     | +       | +    |      | +      | 4(0)  |         | >= 4 TiB
+ ara64             | u64    | +       | 1     | 1       | 1    | 0.50 | +      | 2(0)  |         | 1 GiB
+ arx32             | u32    | +       | +     | +       | +    | 1.0  | +      | 3.5(0)| +       | 1 TiB
+ arx64             | u32    | +       | +     | +       | +    | 0.50 | +      | 4(0)  |         | >= 4 TiB
  arxfw8            | u32    | +       | 18    | 33      |      | 4.4  | -(>>10)| 0     | -       | 2 MiB
  arxfw8ex          | u32    | +       | 3/5   | 8       | 16   | 5.0  | -(>>10)| 0     | -/Small | 128 MiB
  arxfw8ex2         | u32    | +       | +     | +       | +    | 3.8  | +      | 3.5(0)| +       | 8 TiB
@@ -39,7 +39,7 @@ grading algorithm was used:
  arxfw16           | u32    | +       | +     | +       | +    | 2.6  | +      | 3.5(0)| +       | 8 TiB
  arxfw16ex2        | u32    | +       | +     | +       | +    | 3.1  | +      | 4     | +       | >= 8 TiB
  arxfw32           | u32    | +       | +     | +       | +    | 0.74 | +      | 4(0)  | +       | >= 16 TiB
- arxfw64           | u32    | +       | +     | +       | +    | 0.38 | +      | 4     | +IL     | >= 2 TiB
+ arxfw64           | u32    | +       | +     | +       | +    | 0.38 | +      | 4     | +IL     | >= 8 TiB
  biski8_mul        | u32    | 1       | 19    | 33      | 41   | 2.2  | -(>>10)| 0     | -       | 512 KiB
  biski16_mul       | u32    | +       | 2     | 3       | 6    | 1.6  | -      | 0     | -       | 16 GiB
  biski64_mul       | u64    | +       | +     | +       | +    | 0.18 | +      | 4     |         | >= 2 TiB
@@ -721,6 +721,18 @@ A new statistical test, "birthday spacings systematic" was introduced in
 PractRand 0.96. It catches some 64-bit LCGs with prime modulo but often fails
 to detect additive lagged Fibonacci and subtract-with-borrow generators
 with large lags that are detected by SmokeRand.
+
+lcg61prime
+
+    rng=RNG_stdin32, seed=unknown
+    length= 4 gigabytes (2^32 bytes), time= 15.8 seconds
+      no anomalies in 199 test result(s)
+
+    rng=RNG_stdin32, seed=unknown
+    length= 8 gigabytes (2^33 bytes), time= 31.4 seconds
+      Test Name                         Raw       Processed     Evaluation
+      BDayS2(4,24)[64+0]                R= +13.6  p~=  4.8e-32    FAIL !!!
+      ...and 208 test result(s) without anomalies
 
 lcg64prime
 
