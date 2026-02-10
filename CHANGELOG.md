@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   The `mwc64x_u31` generator was added for its verification.
 - `ara64`, `arx32`, `arx64` generators.
 - `kiss03` and `kiss03_64` generators.
+- `lcg61prime` generator.
 - `mad0` and `mall` generator.
 - `mwc192` and `mwc256` generators (suggested by Scott Baker)
 - `pcg32` and `pcg64_64`: random odd increment (by Scott Baker)
