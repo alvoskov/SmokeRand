@@ -29,7 +29,7 @@ grading algorithm was used:
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | +      | 3.75  | +       | 4 GiB
  alfib_mod         | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 1 TiB
  ara32             | u32    | +       | 1     | 1       | 1    | 0.96 | +      | 2(0)  | +       | 512 MiB
- ara64             | u64    | +       | 1     | 1       | 1    | 0.50 | +      | 2(0)  |         | 1 GiB
+ ara64             | u64    | +       | 1     | 1       | 1    | 0.50 | +      | 2(0)  |+H/+L/+il| 1 GiB
  arx32             | u32    | +       | +     | +       | +    | 1.0  | +      | 3.5(0)| +       | 1 TiB
  arx64             | u32    | +       | +     | +       | +    | 0.50 | +      | 4(0)  |         | >= 4 TiB
  arxfw8            | u32    | +       | 18    | 33      |      | 4.4  | -(>>10)| 0     | -       | 2 MiB
@@ -109,7 +109,7 @@ grading algorithm was used:
  lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>10)| 0     | -       | 512 MiB
  lcg32sc           | u32    | +       | 1     | 2       | 8/9  | 0.62 | -(>>10)| 0     | Small   | 512 MiB
  lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     | -       | 16 KiB
- lcg61prime        | u32    | +       | 3     | 5       | 5    |      |        | 0     | Small   | >= 2 TiB
+ lcg61prime        | u32    | +       | 3     | 5       | 5    |      |        | 0     | Small   | >= 16 TiB
  lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | +      | 0     | Small   | 16 MiB
  lcg64bd           | u32    | +       | +     | +       | +    |      |        | 3.5   | +       | 32 GiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | 0     | +-      | >= 32 TiB
