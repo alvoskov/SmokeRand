@@ -1,5 +1,5 @@
 /**
- * @file rwc64.c
+ * @file rwc32.c
  * @brief
  * @details Period is around 2^125, it was a modification initially
  * made by A.L. Voskov an error (-2/-3 instead -1/-2 lags) but it
