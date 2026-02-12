@@ -1,13 +1,16 @@
 /**
  * @file rwc32.c
  * @brief
- * @details Period is around 2^125, it was a modification initially
+ * @details Its period is around 2^125, it was a modification initially
  * made by A.L. Voskov an error (-2/-3 instead -1/-2 lags) but it
  * showed good empirical properties.
  *
  * References:
  *
  * 1. https://www.stat.berkeley.edu/~spector/s243/mother.c
+ * 2. M. Goresky, A. Klapper. Efficient multiply-with-carry random number
+ *    generators with maximal period // ACM Trans. Model. Comput. Simul. 2003.
+ *    V. 13. N 4. P. 310-321. https://doi.org/10.1145/945511.945514
  *
  * @copyright
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
@@ -49,4 +52,22 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-MAKE_UINT32_PRNG("rwc32", NULL)
+
+static int run_self_test(const CallerAPI *intf)
+{
+    Rwc32State obj = {.x = 12345678, .y = 87654321, .z = 12345, .c = 1};
+    const uint32_t u_ref = 0x1EC5DE26;
+    for (long i = 0; i < 10000000; i++) {
+        (void) get_bits_raw(&obj);
+    }
+    const uint32_t u = (uint32_t) get_bits_raw(&obj);
+    intf->printf("c = 0x%lX; x = 0x%lX; y = 0x%lX; z = 0x%lX\n",
+        (unsigned long) obj.c, (unsigned long) obj.x,
+        (unsigned long) obj.y, (unsigned long) obj.z);
+    intf->printf("Out=0x%lX; ref=0x%lX\n",
+        (unsigned long) u, (unsigned long) u_ref);
+    return u == u_ref ? 1 : 0;
+    
+}
+
+MAKE_UINT32_PRNG("rwc32", run_self_test)

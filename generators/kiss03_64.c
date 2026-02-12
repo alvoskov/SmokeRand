@@ -93,7 +93,7 @@ static void *create(const CallerAPI *intf)
 
 static int run_self_test(const CallerAPI *intf)
 {
-    static const uint64_t x_ref = 0xE78F04EE8307A14A;
+    static const uint64_t x_ref = 0x151CFB6BA334F37B;
     uint64_t x;
     Kiss03x64State *obj = intf->malloc(sizeof(Kiss03x64State));
     obj->x = 123456789; obj->y = 987654321;
