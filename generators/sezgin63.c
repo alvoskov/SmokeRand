@@ -39,28 +39,36 @@ typedef struct {
 } Lcg63State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t Lcg63State_get_bits(Lcg63State *obj)
 {
     static const int64_t m = 9223372036854775783LL; // 2^63 - 25
     static const int64_t a = 3163036175LL; // See Line 4 in Table 1
     static const int64_t b = 2915986895LL;
     static const int64_t c = 2143849158LL;
-    Lcg63State *obj = state;    
     obj->x = a * (obj->x % b) - c*(obj->x / b);
     if (obj->x < 0LL) {
         obj->x += m;
     }
-    return (uint64_t) obj->x >> 31;
+    return (uint64_t) obj->x;
+//    return (uint64_t) obj->x >> 31;
 }
 
-static void *create(const CallerAPI *intf)
+
+static inline uint64_t get_bits_u32_raw(void *state)
 {
-    Lcg63State *obj = intf->malloc(sizeof(Lcg63State));
-    do {
-        obj->x = intf->get_seed64() & ((1ull << 63) - 1);
-    } while (obj->x == 0);
-    return (void *) obj;
+    return Lcg63State_get_bits(state) >> 31;
 }
+
+MAKE_GET_BITS_WRAPPERS(u32)
+
+
+static inline uint64_t get_bits_u63_raw(void *state)
+{
+    return Lcg63State_get_bits(state) << 1;
+}
+
+MAKE_GET_BITS_WRAPPERS(u63)
+
 
 /**
  * @brief An internal self-test
@@ -79,11 +87,44 @@ static int run_self_test(const CallerAPI *intf)
     static const uint32_t x_ref = 0x3523699d;
     uint32_t x;
     for (int i = 0; i < 1000; i++) {
-        x = (uint32_t) get_bits_raw(&obj);
+        x = (uint32_t) get_bits_u32_raw(&obj);
     }
     intf->printf("Output: %X; reference: %X\n",
         (unsigned int) x, (unsigned int) x_ref);
     return x == x_ref;
 }
 
-MAKE_UINT32_PRNG("Sezgin63", run_self_test)
+
+/////////////////////
+///// Interface /////
+/////////////////////
+
+static void *create(const CallerAPI *intf)
+{
+    Lcg63State *obj = intf->malloc(sizeof(Lcg63State));
+    do {
+        obj->x = intf->get_seed64() & ((1ull << 63) - 1);
+    } while (obj->x == 0);
+    return obj;
+}
+
+static const char description[] =
+"Sezgin63: a 63-bit MCG with prime m designed by Sezgin F. and Sezgin T.M.\n"
+"The next param values are supported:\n"
+"    u32 - output made from the upper 32 bits (default)\n"
+"    u63 - 63-bit output (the uint63 filter is required)\n";
+
+static const GeneratorParamVariant gen_list[] = {
+    {"",      "Sezgin63:u32", 32, default_create, get_bits_u32, get_sum_u32},
+    {"u32",   "Sezgin63:u32", 32, default_create, get_bits_u32, get_sum_u32},
+    {"u63",   "Sezgin63:u63", 64, default_create, get_bits_u63, get_sum_u63},
+};
+
+
+int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
+{
+    const char *param = intf->get_param();
+    gi->description = description;
+    gi->self_test = run_self_test;
+    return GeneratorParamVariant_find(gen_list, intf, param, gi);
+}

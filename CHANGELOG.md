@@ -11,7 +11,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - uint31 filter for analysis of 31-bit generators such as `minstd` and
   `ranecu`. This filter adds a high-quality pseudorandom bit to the end.
   The `mwc64x_u31` generator was added for its verification.
+- uint63 filter for analysis of 63-bit generators was added.
 - `ara64`, `arx32`, `arx64` generators.
+- `combmrg96` generator.
 - `kiss03` and `kiss03_64` generators.
 - `lcg61prime` generator.
 - `mad0` and `mall` generator.
@@ -27,6 +29,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ### Changed
 
+- `aes128.c` bibliography is extended by the reference to the article by
+  Hellekalek P., Wegenkittl S. (2003) devoted to usage of AES for Monte-Carlo
+  simulation.
+- `sezgin63.c`: both 32-bit and 63-bit outputs are supported. The 63-bit mode
+  is useful for testing the `uint63` filter.
+- `gmwc128.c`: wrong parameters in the Doxygen documentation were fixed.
 - Generator name is printed in the report even if the filter is applied: e.g.
   it is `Interleaved:SplitMix` instead of `Interleaved`.
 

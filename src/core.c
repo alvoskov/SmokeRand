@@ -1255,6 +1255,36 @@ GeneratorInfo define_uint31_generator(const GeneratorInfo *gi)
 }
 
 
+////////////////////////////////////////////////////////////
+///// Implementation of generator that returns 63 bits /////
+////////////////////////////////////////////////////////////
+
+static uint64_t get_bits64_uint63(void *state)
+{
+    EnvelopedGeneratorState *obj = state;
+    const uint64_t u = obj->parent_gi->get_bits(obj->parent_state);
+    // Create a filler for the lowest bit with MWC64X
+    const uint64_t mwc = obj->i32buf.val.u64;
+    const uint32_t x = (uint32_t) mwc, c = (uint32_t)(mwc >> 32);
+    obj->i32buf.val.u64 = 0xff676488U*(uint64_t)x + (uint64_t)c;
+    // Add the lowest bit
+    return u | (murmur3_mixer((uint32_t)u ^ x ^ c) & 0x1U);
+}
+
+GeneratorInfo define_uint63_generator(const GeneratorInfo *gi)
+{
+    GeneratorInfo gi_env = *gi;
+    gi_env.name = "Uint63";
+    gi_env.parent = gi;
+    gi_env.nbits = 64;
+    gi_env.create = create_enveloped_uint31;
+    gi_env.free = free_enveloped;
+    gi_env.get_bits = get_bits64_uint63;
+    gi_env.get_sum = NULL;
+    return gi_env;
+}
+
+
 ///////////////////////////////////////////////
 ///// Implementation of file input/output /////
 ///////////////////////////////////////////////

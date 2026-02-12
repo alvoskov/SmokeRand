@@ -191,12 +191,12 @@ filters than transform 64-bit PRNG into a 32-bit one:
 - Higher 32 bits (default): `--filter=high32`
 - Lower 32 bits: `--filter=low32`
 
-There is also a `--filter=uint31` filter that is designed for testing generators
-that return only 31 bits in the upper 31 bits of the 32-bit unsigned integer and
-set the lowest bit to 0. This filter will replace the lowest bit to the high
-quality pseudorandom bit using the `murmur3mix(mwc64x ^ out) & 0x1` pseudorandom
-function. The `mwc64x` built-in PRNG will be initialized using the tested
-generator.
+There are also a `--filter=uint31` and `--filter=uint63` filters that are
+designed for testing generators that return only 31/63 bits in the upper 31/63
+bits of the 32/64-bit unsigned integer and set the lowest bit to 0. This filter
+will replace the lowest bit to the high quality pseudorandom bit using the
+`murmur3mix(mwc64x ^ out) & 0x1` pseudorandom function. The `mwc64x` built-in
+PRNG will be initialized using the tested generator.
 
 ## More details
 
