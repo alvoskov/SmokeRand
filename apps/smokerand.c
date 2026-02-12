@@ -53,9 +53,9 @@ void print_help(void)
     "    reverse-bits   Reverse bits in the generator output\n"
     "    interleaved32  Process 64-bit generator output as interleaving 32-bit words\n"
     "    high32, low32  Analyse higher/lower 32 bits of 64-bit generator\n"
-    "    uint31         Autocomplete 31-bit generator (the lowest bit is 0)\n"
-    "                   to the 32-bit one using SplitMix32 mixer for the lowest\n"
-    "                   bit generation.\n"
+    "    uint31, uint63 Autocomplete 31/63-bit generator (the lowest bit is 0)\n"
+    "                   to the 32/64-bit one using Murmur3 mixer for the lowest bit\n"
+    "                   generation.\n"
     "  --maxlen_log2=n  Limit the binary output to the 2^n floats (12 <= n <= 63)\n"
     "  --report-brief Show only failures in the report\n"
     "  --seed=data Use the user supplied string (data) as a seed\n"
@@ -76,6 +76,7 @@ typedef enum {
     FILTER_HIGH32,
     FILTER_LOW32,
     FILTER_UINT31,
+    FILTER_UINT63,
     FILTER_UNKNOWN
 } GeneratorFilter;
 
@@ -92,6 +93,8 @@ GeneratorFilter GeneratorFilter_from_name(const char *name)
         return FILTER_LOW32;
     } else if (!strcmp("uint31", name)) {
         return FILTER_UINT31;
+    } else if (!strcmp("uint63", name)) {
+        return FILTER_UINT63;
     } else {
         return FILTER_UNKNOWN;
     }
@@ -528,6 +531,12 @@ static void apply_filter(GeneratorInfo **gi, GeneratorFilter filter, GeneratorIn
         fprintf(stderr, "The lower bit will be added automatically\n");
         break;
 
+    case FILTER_UINT63:
+        *filter_gen = define_uint63_generator(*gi);
+        *gi = filter_gen;
+        fprintf(stderr, "The lower bit will be added automatically\n");
+        break;
+
     case FILTER_NONE:
     case FILTER_UNKNOWN:
         break;
@@ -622,6 +631,11 @@ int main(int argc, char *argv[])
         GeneratorInfo *gi = &mod.gen;
         if (gi->nbits != 32 && opts.filter == FILTER_UINT31) {
             fprintf(stderr, "This filter is supported only for 32-bit generators\n");
+            CallerAPI_free();
+            return BATTERY_ERROR;
+        }
+        if (gi->nbits != 64 && opts.filter == FILTER_UINT63) {
+            fprintf(stderr, "This filter is supported only for 64-bit generators\n");
             CallerAPI_free();
             return BATTERY_ERROR;
         }
