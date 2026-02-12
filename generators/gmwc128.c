@@ -28,14 +28,14 @@
  *     print("a0 = ", hex(a0))
  *     a0inv = pow(a0, -1, 2**64)
  *     print("a0inv = ", hex(a0inv))
- *     m = a1*2**64 - a0
+ *     m = a1*2**64 + minus_a0
  *     print("m = ", hex(m))
  *
  * The output is in a perfect agreement with constants suggested by Vigna.
  *
  *     a0 =  0xff82f7b5b27f77a1
  *     a0inv =  0x9b1eea3792a42c61
- *     m = 0xff002aae7d81a645007d084a4d80885f
+ *     m = 0xff002aae7d81a646007d084a4d80885f
  *
  * @copyright The implementation is based on public domain code by
  * S.Vigna (vigna@acm.org).

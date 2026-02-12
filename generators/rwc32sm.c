@@ -16,7 +16,7 @@
  *
  * It corresponds to the next multplicative congruential generator:
  *
- * \f]
+ * \f[
  * \begin{array}{l}
  * m=a_2b^2 + a_1b - 1\\
  * a_\mathrm{MCG} = b^{-1} \mod m\\
@@ -81,8 +81,7 @@ static int run_self_test(const CallerAPI *intf)
         (unsigned long) obj.c, (unsigned long) obj.x, (unsigned long) obj.y);
     intf->printf("Out=0x%lX; ref=0x%lX\n",
         (unsigned long) u, (unsigned long) u_ref);
-    return u == u_ref ? 1 : 0;
-    
+    return u == u_ref ? 1 : 0;    
 }
 
 MAKE_UINT32_PRNG("rwc32sm", run_self_test)
