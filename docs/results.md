@@ -63,7 +63,7 @@ grading algorithm was used:
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | +      | 4     | +       | >= 32 TiB
  cmwc4827          | u32    | +       | 1     | 1       | 1    | 0.44 | +      | 2     | +       | 512 MiB
  combo             | u32    | +       | 4     | 6       | 8    | 0.75 | +      | 0     | Small   | 4 GiB
- combmrg96         | u31    | +       | +     | +       |      |      |        |       |         | ?
+ combmrg96         | u31    | +       | +     | +       | +    | 1.9  | N/A    | 4     | +       | >= 8 TiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
  cswb4288          | u32    | +       | 1     | 1       | 4/5  | 0.90 | +      | 0     | Crush   | >= 32 TiB
  cswb4288_64       | u64    | +       | 1     | 2       | 4/5  | 0.52 | +      | 0     | +lo/+hi | >= 32 TiB
@@ -110,9 +110,9 @@ grading algorithm was used:
  lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>10)| 0     | -       | 512 MiB
  lcg32sc           | u32    | +       | 1     | 2       | 8/9  | 0.62 | -(>>10)| 0     | Small   | 512 MiB
  lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     | -       | 16 KiB
- lcg61prime        | u32    | +       | 3     | 5       | 5    |      |        | 0     | Small   | >= 16 TiB
+ lcg61prime        | u32    | +       | 3     | 5       | 5    | 2.0  |        | 0     | Small   | >= 16 TiB
  lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | +      | 0     | Small   | 16 MiB
- lcg64bd           | u32    | +       | +     | +       | +    |      |        | 3.5   | +       | 32 GiB
+ lcg64bd           | u32    | +       | +     | +       | +    | 0.60 |        | 3.5   | +       | 32 GiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | 0     | +-      | >= 32 TiB
  lcg64sc           | u64    | +       | +     | +       | +    | 0.30 | -      | 3     |+HI/+LO  | >= 16 TiB
  lcg64sc2          | u32    | +       | +     | +       | +    | 0.69 | +      | 4     | +       | >= 16 TiB
@@ -271,7 +271,7 @@ grading algorithm was used:
  sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4(0)  |         | >= 16 TiB
  seiran128         | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 1 TiB
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB
- sezgin63_u63      | u63    | +       | +     | +       | 1/2  |      | N/A    | 1     | Crush   | ?
+ sezgin63_u63      | u63    | +       | +     | +       | 1/2  | 1.6  | N/A    | 1     | Crush   | ?
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | -(>>10)| 0     | -       | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)| +       | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  | +       | >= 16 TiB
@@ -788,6 +788,8 @@ LFIB-2281+
 
 
 CSWB4288/64: >= 1 TiB
+
+RWC32SM >= 8 TiB
 
 SWBLARGE
 
