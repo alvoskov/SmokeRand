@@ -20,12 +20,14 @@ static uint64_t get_bits_raw(MAllState *obj)
         1492UL*m1[6] + 1215UL*m1[7] + 1066UL*m1[8] + 12013UL*m1[9]);
     uint32_t num2 = (uint32_t) ((uint32_t)m2[0] + // Carry
         1111UL*m2[2] + 2222UL*m2[3] + 3333UL*m2[4] + 4444UL*m2[5] + 
-        5555UL*m2[6] + 6666UL*m2[7] + 7777UL*m2[8] + 9272UL*m2[9]);
+        5555UL*m2[6] + 6666UL*m2[7] + 7777UL*m2[8] + 10261UL*m2[9]); // 9272
     // Calculate new carries/values pairs
     m1[0] = (uint16_t) (num1 >> 16); m1[1] = (uint16_t) (num1 & 0xFFFFU);
     m2[0] = (uint16_t) (num2 >> 16); m2[1] = (uint16_t) (num2 & 0xFFFFU);
     // Concatenate the 32-bit output
-    return ((uint32_t)m1[1] << 16) | (uint32_t)m2[1];
+    uint32_t out = ((uint32_t)m1[1] << 16) | (uint32_t)m2[1];
+    out = out ^ rotl32(out, 7) ^ rotl32(out, 23); // Our experimental mixer
+    return out;
 }
 
 

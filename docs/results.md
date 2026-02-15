@@ -162,6 +162,8 @@ grading algorithm was used:
  magma             | u64    | +       | +     | +       | +    | 25   |        |       | +       | >= 1 TiB
  magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      | 3     |         | >= 16 TiB
  magma_avx-cbc     | u64    | +       | +     | +       | +    | 7.1  | +      | 4     |         | >= 2 TiB
+ mall32            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 8 TiB
+ mall64            | u64    | +       | +     | +       | +    | 1.2  | +      | 4     |+H/+L/+IL| >= 8 TiB
  melg607           | u64    | 2       | 3     | 5       | 7    | 0.73 | +      | 2.25  | Small   | 8 MiB
  melg19937         | u64    | +       | 3     | 3       | 3    | 0.73 | +      | 3.25  | Small   | 256 GiB
  melg44497         | u64    | +       | +     | 3       | 3    | 0.75 | +      | 3.25  | Small   | 2 TiB
@@ -321,9 +323,9 @@ grading algorithm was used:
  threefish1024_avx | u64    | +       | +     | +       | +    | 1.3  | +      | 5     | +(il)   | >= 2 TiB
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
- tychei            | u32    | +       | +     | +       |      |      |        |       |         | ?
- tychei64          | u64    | +       | +     | +       |      |      |        |       |         | ?
- tychei64w         | u64    | +       | +     | +       |      |      |        |       |         | ?
+ tychei            | u32    | +       | +     | +       | +    | 0.76 | +      | 4(0)  |         | ?
+ tychei64          | u64    | +       | +     | +       | +    | 0.38 | +      | 4(0)  |         | ?
+ tychei64w         | u64    | +       | +     | +       | +    | 0.42 | +      |       |         | >= 8 TiB
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     | +(il)   | >= 32 TiB
  ultra             | u32    | +       | +     | +       | 1    | 0.81 | +      | 2     | +       | 4 GiB
  ultra64           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |+_lo/+_hi| >= 16 TiB
