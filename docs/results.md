@@ -162,7 +162,7 @@ grading algorithm was used:
  magma             | u64    | +       | +     | +       | +    | 25   |        |       | +       | >= 1 TiB
  magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      | 3     |         | >= 16 TiB
  magma_avx-cbc     | u64    | +       | +     | +       | +    | 7.1  | +      | 4     |         | >= 2 TiB
- mall16ex          | u32    | +       | +     | +       |      | 2.0  |        |       |         | ?
+ mall16ex          | u32    | +       | +     | +       | +    | 2.0  |        |       |         | ?
  mall32            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 8 TiB
  mall64            | u64    | +       | +     | +       | +    | 1.1  | +      | 4     |+H/+L/+IL| >= 8 TiB
  melg607           | u64    | 2       | 3     | 5       | 7    | 0.73 | +      | 2.25  | Small   | 8 MiB
@@ -231,6 +231,9 @@ grading algorithm was used:
  prvhash16cw       | u32    | +       | +     | +       | +    | 2.4  | +      | 3.5(0)| +       | 4 TiB
  prvhash64c        | u64    | +       | +     | +       | +    | 0.51 | +      | 4(0)  |         | >= 16 TiB
  prvhash64cw       | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 16 TiB
+ pqrng32           | u32    | 5       | 18    | 35      |      |      |        | 0     | -       | 2 KiB
+ pqrng64           | u32    | +       | +     | 1       | 1    |      |        | 3     | >= Crush| 16 GiB
+ pqrng128          | u64    | +       | +     | +       | +    |      |        | 4     |         | ?
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
  ran2              | u31    | +       | +     | +       | +    | 3.2  | N/A    | 4     | +       | 2 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      | 0     |S_lo/+_hi| 512 KiB
