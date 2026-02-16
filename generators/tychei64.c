@@ -1,4 +1,30 @@
 /**
+ * @file tychei64.c
+ * @brief 64-bit modification of Tyche-i nonlinear chaotic PRNG that
+ * uses rotation constants from BlaBla experimental stream cipher.
+ * @details
+ *
+ * WARNING! It has no guaranteed minimal period, bad seeds are theoretically
+ * possible. Usage of this generator for statistical, scientific and
+ * engineering computations is strongly discouraged!
+ *
+ * References:
+ *
+ * 1. Samuel Neves & Filipe Araujo. Fast and Small Nonlinear Pseudorandom
+ *    Number Generators for Computer Simulation // Parallel Processing and
+ *    Applied Mathematics (PPAM 2011) P.92-101.
+ *    https://doi.org/10.1007/978-3-642-31464-3_10
+ * 2. https://github.com/veorq/blabla/blob/master/BlaBla.swift
+ *
+ * @copyright
+ * Tyche-i PRNG was designed by Samuel Neves & Filipe Araujo.
+ *
+ * 64-bit modification based on BlaBla rotation constants:
+ * 
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 #include <stdint.h>

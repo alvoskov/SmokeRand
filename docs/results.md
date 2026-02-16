@@ -162,8 +162,9 @@ grading algorithm was used:
  magma             | u64    | +       | +     | +       | +    | 25   |        |       | +       | >= 1 TiB
  magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      | 3     |         | >= 16 TiB
  magma_avx-cbc     | u64    | +       | +     | +       | +    | 7.1  | +      | 4     |         | >= 2 TiB
+ mall16ex          | u32    | +       | +     | +       |      | 2.0  |        |       |         | ?
  mall32            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 8 TiB
- mall64            | u64    | +       | +     | +       | +    | 1.2  | +      | 4     |+H/+L/+IL| >= 8 TiB
+ mall64            | u64    | +       | +     | +       | +    | 1.1  | +      | 4     |+H/+L/+IL| >= 8 TiB
  melg607           | u64    | 2       | 3     | 5       | 7    | 0.73 | +      | 2.25  | Small   | 8 MiB
  melg19937         | u64    | +       | 3     | 3       | 3    | 0.73 | +      | 3.25  | Small   | 256 GiB
  melg44497         | u64    | +       | +     | 3       | 3    | 0.75 | +      | 3.25  | Small   | 2 TiB
