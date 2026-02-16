@@ -1,5 +1,27 @@
 /**
- * https://doi.org/10.1007/978-3-642-31464-3_10
+ * @file tychei.c
+ * @brief Tyche-i nonlinear chaotic PRNG.
+ * @details
+ *
+ * WARNING! It has no guaranteed minimal period, bad seeds are theoretically
+ * possible. Usage of this generator for statistical, scientific and
+ * engineering computations is strongly discouraged!
+ * References:
+ *
+ * 1. Samuel Neves & Filipe Araujo. Fast and Small Nonlinear Pseudorandom
+ *    Number Generators for Computer Simulation // Parallel Processing and
+ *    Applied Mathematics (PPAM 2011) P.92-101.
+ *    https://doi.org/10.1007/978-3-642-31464-3_10
+ *
+ * @copyright
+ * Tyche-i PRNG was designed by Samuel Neves & Filipe Araujo.
+ *
+ * Reentrant C99 implementation for SmokeRand:
+ * 
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 #include <stdint.h>

@@ -1,3 +1,46 @@
+/**
+ * @file mall64.c
+ * @brief "Mother-of-all" 64-bit PRNG made by A.L. Voskov is a modification
+ * of the similar 32-bit PRNG by G. Marsaglia from DIEHARD CD-ROM.
+ * @details It is a MWC/RWC (multiply-with-carry/recursion-with-carry)
+ * generator: a MCG (multiplicative congruential generator) with a specific
+ * for of prime modulus that allows an efficient implementation. Its period
+ * is around 2^319. It is also theoretically possible to make a jump function.
+ *
+ * See Eq.6 in the article by Goresky and Klapper to map it to the LCG.
+ *
+ * It is a fairly slow generator (around 1-1.5 cpb) and is interesting more
+ * as an experiment.
+ *
+ * References:
+ *
+ * 1. https://web.archive.org/web/20160125103112/http://stat.fsu.edu/pub/diehard/
+ * 2. https://web.archive.org/web/20070402163410/http://www.cs.hku.hk/%7Ediehard/cdrom/
+ * 3. https://pbcrypto.basicaware.de/ShowAlgorithm.aspx?id=45
+ * 4. https://www.stat.berkeley.edu/~spector/s243/mother.c
+ * 5. M. Goresky, A. Klapper. Efficient multiply-with-carry random number
+ *    generators with maximal period // ACM Trans. Model. Comput. Simul. 2003.
+ *    V. 13. N 4. P. 310-321. https://doi.org/10.1145/945511.945514
+ *
+ * Python 3.x script for parameters check:
+ *
+ *    import sympy, math
+ *    b = 2**64
+ *    m = 18000_69069_69069_69069*b**4 + 69069_69069*b**3 + \
+ *        1147_1147*b**2 + 90050_90050*b - 1
+ *    print(sympy.isprime(m), sympy.isprime((m-1)//2))
+ *    period = sympy.n_order(b, m)
+ *    print(period, math.log2(period))
+ *
+ * @copyright The "Mother-of-all" 32-bit PRNG was developed by G. Marsaglia.
+ *
+ * 64-bit modification and its reentrant C99 implementation for SmokeRand:
+ *
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 #include "smokerand/int128defs.h"
 

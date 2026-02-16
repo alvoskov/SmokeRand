@@ -44,4 +44,4 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-MAKE_UINT32_PRNG("Mall", NULL)
+MAKE_UINT32_PRNG("Mall16ex", NULL)
