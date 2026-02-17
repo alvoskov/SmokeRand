@@ -1,6 +1,8 @@
 /**
+ * @file tf0_64.c
+ * @details
  * 1. Klimov, A., Shamir, A. (2003) A New Class of Invertible Mappings. In:
- *    Kaliski, B.S., Koç, ç.K., Paar, C. (eds) Cryptographic Hardware and
+ *    Kaliski, B.S., KoÃ§, Ã§.K., Paar, C. (eds) Cryptographic Hardware and
  *    Embedded Systems - CHES 2002. CHES 2002. Lecture Notes in Computer
  *    Science, vol 2523. Springer, Berlin, Heidelberg.
  *    https://doi.org/10.1007/3-540-36400-5_34
