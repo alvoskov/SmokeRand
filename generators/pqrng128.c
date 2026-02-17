@@ -33,4 +33,19 @@ static void *create(const CallerAPI *intf)
 }
 
 
-MAKE_UINT64_PRNG("PQRNG128", NULL)
+static int run_self_test(const CallerAPI *intf)
+{
+    Pqrng128State obj = {.x_low = 123456789, .x_high = 0};
+    const uint64_t u_ref = 0xfca6c45fab770809;
+    for (int i = 0; i < 10000; i++) {
+        (void) get_bits_raw(&obj);
+    }
+    const uint64_t u = get_bits_raw(&obj);
+    intf->printf("Out=0x%llX; ref=0x%llX\n",
+        (unsigned long long) u, (unsigned long long) u_ref);
+    return u == u_ref ? 1 : 0;
+    
+}
+
+
+MAKE_UINT64_PRNG("PQRNG128", run_self_test)
