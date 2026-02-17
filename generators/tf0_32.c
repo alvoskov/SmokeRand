@@ -1,4 +1,3 @@
-//0x517CC1B5
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
@@ -6,7 +5,7 @@ PRNG_CMODULE_PROLOG
 
 static inline uint64_t get_bits_raw(Lcg32State *obj)
 {
-    obj->x = obj->x + ((obj->x * obj->x) | 5);
+    obj->x += obj->x * obj->x | 5;
     return obj->x;
 }
 

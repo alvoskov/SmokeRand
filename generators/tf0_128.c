@@ -1,11 +1,17 @@
-/*
-x = 123456789;
-for i in range(10001):
-    x = (x + (x*x | 5)) % 2**128
-print(hex(x // 2**64), hex(x))
-https://doi.org/10.1007/3-540-36400-5_34
-https://doi.org/10.1007/978-3-540-24654-1_18
-*/
+/**
+ * @file tf0_128.c
+ * @details
+ *
+ *    x, c = 123456789, 2**62 + 5
+ *    for i in range(10001):
+ *        x = (x + (x**2 | c)) % 2**128
+ *    print(hex(x // 2**64), hex(x))
+ *
+ * 
+ * https://doi.org/10.1007/3-540-36400-5_34
+ * https://doi.org/10.1007/978-3-540-24654-1_18
+ *
+ */
 
 #include "smokerand/cinterface.h"
 #include "smokerand/int128defs.h"
@@ -18,7 +24,7 @@ typedef Lcg128State Tf0128State;
 
 static inline uint64_t get_bits_raw(Tf0128State *obj)
 {
-    //obj->x = obj->x + (obj->x * obj->x | (2**63 + 5));
+    //obj->x = obj->x + (obj->x * obj->x | (2**62 + 5));
     uint64_t hi = obj->x_high, lo = obj->x_low;
     umuladd_128x128p64w(obj->x_high, obj->x_low, &hi, &lo, 0);
     lo |= (1ULL << 62) + 5ULL;
@@ -40,7 +46,7 @@ static void *create(const CallerAPI *intf)
 static int run_self_test(const CallerAPI *intf)
 {
     Tf0128State obj = {.x_low = 123456789, .x_high = 0};
-    const uint64_t u_ref = 0x81842387cd7e5265;
+    const uint64_t u_ref = 0x83DE185759C615FB;
     for (int i = 0; i < 10000; i++) {
         (void) get_bits_raw(&obj);
     }
