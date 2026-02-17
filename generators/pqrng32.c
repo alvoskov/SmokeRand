@@ -4,10 +4,24 @@
  * @details This PRNG is developed by Karl-Uwe Frank and is based
  * on a nonlinear invertible mapping.
  *
+ * It is based on the next formula:
+ *
+ * \f[
+ * x_n = \left(x_{n-1} \oplus r\right) p \mod 2^{32}
+ * \f]
+ *
+ * The author recommends the \f$ r \mod 8 = 5 \f$ and \f$ p \mod 8 = 3 \f$
+ * constraints but from [3,4] it can be concluded that the milder constraints
+ * \f$ r \mod 2 = 1 \f$ and \f$ p \mod 4 = 3 \f$ are enough.
+ *
  * References:
  *
  * 1. http://www.freecx.co.uk/pqRNG/
  * 2. https://groups.google.com/g/sci.crypt.random-numbers/c/55AFQvcsaoU
+ * 3. https://www.mi-ras.ru/obs_sem/2005/051117/ana_r.pdf
+ * 4. V. S. Anachin. Uniformly distributed sequences of p-adic integers //
+ *    Mathematical Notes. 1994. V. 55. P. 109–133.
+ *    https://doi.org/10.1007/BF02113290
  *
  * The next empirical test proves the full period of this generator
  * (only for the 32-bit version):

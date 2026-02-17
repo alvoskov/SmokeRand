@@ -231,9 +231,9 @@ grading algorithm was used:
  prvhash16cw       | u32    | +       | +     | +       | +    | 2.4  | +      | 3.5(0)| +       | 4 TiB
  prvhash64c        | u64    | +       | +     | +       | +    | 0.51 | +      | 4(0)  |         | >= 16 TiB
  prvhash64cw       | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 16 TiB
- pqrng32           | u32    | 5       | 18    | 35      |      |      |        | 0     | -       | 2 KiB
- pqrng64           | u32    | +       | +     | 1       | 1    |      |        | 3     | >= Crush| 16 GiB
- pqrng128          | u64    | +       | +     | +       | +    |      |        | 4     |         | ?
+ pqrng32           | u32    | 5       | 18    | 35      |      | 0.50 |        | 0     | -       | 2 KiB
+ pqrng64           | u32    | +       | +     | 1       | 1    | 0.64 |        | 3     | >= Crush| 16 GiB
+ pqrng128          | u64    | +       | +     | +       | +    | 0.35 |        | 4     |         | >= 8 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
  ran2              | u31    | +       | +     | +       | +    | 3.2  | N/A    | 4     | +       | 2 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      | 0     |S_lo/+_hi| 512 KiB
@@ -319,6 +319,9 @@ grading algorithm was used:
  taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  | Small   | 32 KiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      | 3     |+_lo/+_hi| 32 GiB
+ tf0_32            | u32    | 5       | 18    |         |      |      |        | 0     |         | 2 KiB
+ tf0_64            | u32    | 1       | 2     | 3       |      | 0.45 |        | 0     |         | 32 MiB
+ tf0_128           | u64    | +       | 1     | 1       |      | 0.39 |        |       |         | ?
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 8 TiB
  threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | >= 32 TiB
