@@ -18,10 +18,10 @@ typedef Lcg128State Tf0128State;
 
 static inline uint64_t get_bits_raw(Tf0128State *obj)
 {
-    //obj->x = obj->x + (obj->x * obj->x | 5);
+    //obj->x = obj->x + (obj->x * obj->x | (2**63 + 5));
     uint64_t hi = obj->x_high, lo = obj->x_low;
     umuladd_128x128p64w(obj->x_high, obj->x_low, &hi, &lo, 0);
-    lo |= 5;
+    lo |= (1ULL << 62) + 5ULL;
     unsigned_add128(&hi, &lo, obj->x_low); hi += obj->x_high;
     obj->x_high = hi; obj->x_low = lo;
     return hi;
