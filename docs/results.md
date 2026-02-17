@@ -232,7 +232,7 @@ grading algorithm was used:
  prvhash64c        | u64    | +       | +     | +       | +    | 0.51 | +      | 4(0)  |         | >= 16 TiB
  prvhash64cw       | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 16 TiB
  pqrng32           | u32    | 5       | 18    | 35      |      | 0.50 |        | 0     | -       | 2 KiB
- pqrng64           | u32    | +       | +     | 1       | 1    | 0.64 |        | 3     | >= Crush| 16 GiB
+ pqrng64           | u32    | +       | +     | 1       | 1    | 0.64 |        | 3     | +       | 16 GiB
  pqrng128          | u64    | +       | +     | +       | +    | 0.35 |        | 4     |         | >= 8 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
  ran2              | u31    | +       | +     | +       | +    | 3.2  | N/A    | 4     | +       | 2 TiB
@@ -319,9 +319,9 @@ grading algorithm was used:
  taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  | Small   | 32 KiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      | 3     |+_lo/+_hi| 32 GiB
- tf0_32            | u32    | 5       | 18    |         |      |      |        | 0     |         | 2 KiB
- tf0_64            | u32    | 1       | 2     | 3       |      | 0.45 |        | 0     |         | 32 MiB
- tf0_128           | u64    | +       | 1     | 1       |      | 0.39 |        |       |         | ?
+ tf0_32            | u32    | 5       | 18    |         |      |      |        | 0     | -       | 2 KiB
+ tf0_64            | u32    | +       | +     | 1       |      | 0.45 |        |       | >= Crush| 2 GiB
+ tf0_128           | u64    | +       | +     | +       | +    | 0.39 |        |       |         | >= 2 TiB
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 8 TiB
  threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | >= 32 TiB
@@ -331,7 +331,7 @@ grading algorithm was used:
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
  tychei            | u32    | +       | +     | +       | +    | 0.76 | +      | 4(0)  |         | ?
- tychei64          | u64    | +       | +     | +       | +    | 0.38 | +      | 4(0)  |         | ?
+ tychei64          | u64    | +       | +     | +       | +    | 0.38 | +      | 4(0)  |         | >= 16 TiB
  tychei64w         | u64    | +       | +     | +       | +    | 0.42 | +      |       |         | >= 8 TiB
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     | +(il)   | >= 32 TiB
  ultra             | u32    | +       | +     | +       | 1    | 0.81 | +      | 2     | +       | 4 GiB
