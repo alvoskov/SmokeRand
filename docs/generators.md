@@ -34,6 +34,7 @@ be divided into several groups:
   ranval, ranval64, sfc, wob2m.
 - Chaotic generators based on irreversible mappings: a5rand, msws, romutrio,
   komirand.
+- Based on T-functions with proven periods: pqrng, tf0
 - Other: coveyou64, mrg32k3a, romutrio.
 
 

@@ -16,16 +16,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `combmrg96` generator.
 - `kiss03` and `kiss03_64` generators.
 - `lcg61prime` generator.
-- `mad0` and `mall` generator.
+- `mad0` generator.
+- "Mother-of-all" family (`mall16ex`, `mall32`, `mall64`) was added.
+  `ex` and `64` modifications were made by A.L. Voskov.
 - `mwc192` and `mwc256` generators (suggested by Scott Baker)
-- `pcg32` and `pcg64_64`: random odd increment (by Scott Baker)
+- pqrng family (`pqrng32`, `pqrng64`, `pqrng128`) by Karl-Uwe Frank was added;
+  They are based on T-functions with proven periods by V. S. Anachin.
 - `ran2`, `ranecu`, `lcg61prime`, `lcg64bd` generators.
 - `rwc32`, `rwc32sm`, `rwc64`, `rwc64large` generators.
 - `swblux64` generator (64-bit SWB with different luxury levels)
-- `collover2_20d` and `collover2_20d_high` tests were added to the `default`.
-  and `full` batteries to catch the `swblux64` generator at `--param=2`.
-- `collover3_13d` and `collover3_13d_high` tests were added to the `full`
-  battery.
+- TF0 family (`tf0_32`, `tf0_32sc2`, `tf0_64`, `tf0_64sc`, `tf0_64sc2`,
+  `tf0_128` was added (based on an invertible mapping by Klimov and Shamir
+  with the maximal period, uses T-functions). They were tuned by A.L. Voskov
+  to improve the statistical quality.
 
 ### Changed
 
@@ -35,8 +38,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `sezgin63.c`: both 32-bit and 63-bit outputs are supported. The 63-bit mode
   is useful for testing the `uint63` filter.
 - `gmwc128.c`: wrong parameters in the Doxygen documentation were fixed.
+- `pcg32` and `pcg64_64`: random odd increment (by Scott Baker)
 - Generator name is printed in the report even if the filter is applied: e.g.
   it is `Interleaved:SplitMix` instead of `Interleaved`.
+- `collover2_20d` and `collover2_20d_high` tests were added to the `default`.
+  and `full` batteries to catch the `swblux64` generator at `--param=2`.
+- `collover3_13d` and `collover3_13d_high` tests were added to the `full`
+  battery.
 
 ## [0.45] - 2026-01-10
 
