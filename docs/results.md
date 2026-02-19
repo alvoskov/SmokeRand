@@ -322,10 +322,11 @@ grading algorithm was used:
  tf0_32            | u32    | 5       | 18    |         |      | 0.48 |        | 0     | -       | 2 KiB
  tf0_32sc2         | u32    | +       | 1     | 2       | 8    | 0.57 |        | 0     |         | 512 MiB
  tf0_64            | u32    | +       | +     | 1       | 1    | 0.45 |        | 3     | +       | 2 GiB
- tf0_64sc          | u32    | +       | +     | +       | +    | 0.50 |        |       | >= Crush| >= 8 TiB(?)
+ tf0_64sc          | u32    | +       | +     | +       | +    | 0.50 |        |       | >= Crush| 16 TiB
  tf0_64sc2         | u64    | +       | +     | +       | +    | 0.40 |        |       |         | >= 2 TiB
  tf0_128           | u64    | +       | +     | +       | +    | 0.39 |        |       |         | >= 16 TiB
- tf0duper32        | u32    | +       | +     | +       | +    | 0.70 |        |       | >=Crush | ?
+ tf0duper32        | u32    | +       | +     | +       | +    | 0.70 |        |       | +       | ?
+ tf0duper64        | u64    | +       | +     | +       |      |      |        |       |         | ?
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 8 TiB
  threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | >= 32 TiB
@@ -364,6 +365,8 @@ grading algorithm was used:
  xoroshiro64pp     | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 8 TiB
  xoroshiro64st     | u32    | 1       | 1     | 3       | 5    | 0.51 | -      | 1.75  | Small   | 1 MiB
  xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 32 TiB
+ xorrot32          | u32    |         |       |         |      |      |        |       |         | 32 KiB
+ xorrot64          | u64    | 2       | 3     | 5/6     |      |      |        |       |         | 32 KiB
  xorshift64        | u64    | 2       | 6     | 12      | 15/16| 0.49 | -      | 0     | -       | 32 KiB
  xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |S_lo/+_hi| 512 KiB
  xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB
