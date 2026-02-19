@@ -13,12 +13,11 @@ typedef struct {
 
 static inline uint64_t get_bits_raw(Tf0Duper64State *obj)
 {
-    const uint64_t tf = obj->tf;
-    const uint64_t out = (tf ^ rotl64(tf, 17) ^ rotl64(tf, 53)) + obj->xs;
-    obj->tf += tf * tf | 0x40000005;
+    const uint64_t s = rotl64(obj->tf, 11) + obj->xs;
+    obj->tf += obj->tf * obj->tf | 0x40000005;
     obj->xs ^= obj->xs << 5;
     obj->xs ^= rotl64(obj->xs, 13) ^ rotl64(obj->xs, 47);
-    return out;
+    return s ^ (s >> 32);
 }
 
 
