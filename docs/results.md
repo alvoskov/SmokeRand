@@ -325,7 +325,7 @@ grading algorithm was used:
  tf0_64sc          | u32    | +       | +     | +       | +    | 0.50 |        |       | >= Crush| 16 TiB
  tf0_64sc2         | u64    | +       | +     | +       | +    | 0.40 |        |       |         | >= 2 TiB
  tf0_128           | u64    | +       | +     | +       | +    | 0.39 |        |       |         | >= 16 TiB
- tf0duper32        | u32    | +       | +     | +       | +    | 0.70 |        |       | +       | ?
+ tf0duper32        | u32    | +       | +     | +       |      | 0.70 |        |       | +       | ?
  tf0duper64        | u64    | +       | +     | +       |      |      |        |       |         | ?
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 8 TiB

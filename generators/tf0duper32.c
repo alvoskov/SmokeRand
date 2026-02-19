@@ -1,5 +1,3 @@
-// Crush/Default
-//rotl32(obj->tf, 5) + obj->xs; // Failed BRank at 8 TiB in PractRand
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
@@ -15,12 +13,11 @@ typedef struct {
 
 static inline uint64_t get_bits_raw(Tf0Duper32State *obj)
 {
-    const uint32_t tf = obj->tf;
-    const uint32_t out = (tf ^ rotl32(tf, 7) ^ rotl32(tf, 23)) + obj->xs;
-    obj->tf += tf * tf | 0x5;
+    const uint32_t s = rotl32(obj->tf, 5) + obj->xs;
+    obj->tf += obj->tf * obj->tf | 0x4005;
     obj->xs ^= obj->xs << 1;
     obj->xs ^= rotl32(obj->xs, 9) ^ rotl32(obj->xs, 27);
-    return out;
+    return s ^ (s >> 16); // To prevent PractRand failure at 8 TiB
 }
 
 
