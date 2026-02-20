@@ -13,7 +13,7 @@ def make_xorrot32w8(a, b, c):
     B = I + lfsr.gfpow(ROL, b) + lfsr.gfpow(ROL, c)
 
     T = np.vstack((
-        np.hstack((O, O, O, A)),
+        np.hstack((O, O, I, A)),
         np.hstack((I, O, O, O)),
         np.hstack((O, I, O, O)),
         np.hstack((O, O, I, B)),
