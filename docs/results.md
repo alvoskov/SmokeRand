@@ -325,8 +325,8 @@ grading algorithm was used:
  tf0_64sc          | u32    | +       | +     | +       | +    | 0.50 |        |       | >= Crush| 16 TiB
  tf0_64sc2         | u64    | +       | +     | +       | +    | 0.40 |        |       |         | >= 2 TiB
  tf0_128           | u64    | +       | +     | +       | +    | 0.39 |        |       |         | >= 16 TiB
- tf0duper32        | u32    | +       | +     | +       |      | 0.70 |        |       | +       | ?
- tf0duper64        | u64    | +       | +     | +       |      | 0.40 |        |       |         | ?
+ tf0duper32        | u32    | +       | +     | +       | +    | 0.70 |        | 4     | +       | >= 16 TiB(?)
+ tf0duper64        | u64    | +       | +     | +       | +    | 0.40 |        | 4     |         | ?
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 8 TiB
  threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | >= 32 TiB
@@ -367,10 +367,11 @@ grading algorithm was used:
  xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 32 TiB
  xorrot32          | u32    | 2       | 16    | 32      |      | 0.55 |        | 0     | -       | 32 KiB
  xorrot64          | u64    | 2       | 3     | 5/6     |      | 0.33 |        |       | -       | 32 KiB
- xorrot64sc        | u64    | +       | +     | +       |      | 0.44 |        |       |         | ?
+ xorrot64sc        | u64    | +       | +     | +       | +    | 0.44 |        |       |         | ?
+ xorrot64w8sc      | u64    | +       | +     | +       |      |      |        |       |         | ?
  xorrot64w32       | u32    | 2       | 3     | 7/8     |      | 0.35 |        | 0     | -       | 32 KiB
- xorrot64w32sc     | u32    | +       | +     | +       |      | 0.44 |        |       |         | ?
- xorrot64w16sc     | u32    | +       | +     | +       |      | 2.1  |        |       |         | ?
+ xorrot64w32sc     | u32    | +       | +     | +       | +    | 0.44 |        |       | >=Crush | ?
+ xorrot64w16sc     | u32    | +       | +     | +       |      | 2.1  |        |       | >=Crush | ?
  xorrot128         | u64    | 2       | 5     | 7       |      | 0.20 |        | 0     | Small   | 256 KiB
  xorrot128sc       | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | >= 8 TiB
  xorshift64        | u64    | 2       | 6     | 12      | 15/16| 0.49 | -      | 0     | -       | 32 KiB
@@ -394,6 +395,7 @@ grading algorithm was used:
  xoshiro256p       | u64    | 1       | 1     | 2       | 3    | 0.20 | +      | 3.25  |         | 64 MiB
  xoshiro256pp      | u64    | +       | +     | +       | +    | 0.22 | +      | 4     |         | >= 16 TiB
  xoshiro256stst    | u64    | +       | +     | +       | +    | 0.22 | +      | 4     |         | >= 4 TiB
+ xsadd             | u32    | 1       | 1/2   | 4       |      |      |        | 0     | >= Crush| 8 MiB
  xsh               | u64    | 2       | 9     | 14      | 18   | 0.43 | -      | 0     | -       | 32 KiB
  xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     | +IL     | >= 4 TiB
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     | >= Crush| >= 32 TiB

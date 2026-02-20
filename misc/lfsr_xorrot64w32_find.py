@@ -15,7 +15,8 @@ def make_xorrot64x2(a, b, c):
     T = np.vstack((np.hstack((O, A)), np.hstack((I, B))))
     return lfsr.gf2mat_to_list(T)
 
-abc = range(1,32)#[1] + list(filter(lambda x: sympy.isprime(x), range(3, n)))
+#abc = [1] + list(filter(lambda x: sympy.isprime(x), range(3, n)))
+abc = range(1,32)
 for a in abc:
     for b in abc:
         print(a, b)
