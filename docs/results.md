@@ -367,7 +367,8 @@ grading algorithm was used:
  xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 32 TiB
  xorrot32          | u32    | 2       | 16    | 32      |      | 0.55 |        | 0     | -       | 32 KiB
  xorrot64          | u64    | 2       | 3     | 5/6     |      | 0.33 |        |       | -       | 32 KiB
- xorrot64w32       | u32    | 2       | 3     | 7/8     |      | 0.35 |        | 0     | -       | ?
+ xorrot64sc        | u64    | +       | +     | +       |      | 0.44 |        |       |         | ?
+ xorrot64w32       | u32    | 2       | 3     | 7/8     |      | 0.35 |        | 0     | -       | 32 KiB
  xorrot64w32sc     | u32    | +       | +     | +       |      | 0.44 |        |       |         | ?
  xorrot64w16sc     | u32    | +       | +     | +       |      | 2.1  |        |       |         | ?
  xorrot128         | u64    | 2       | 5     | 7       |      | 0.20 |        | 0     | Small   | 256 KiB
