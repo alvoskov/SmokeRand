@@ -33,9 +33,10 @@ typedef struct {
 
 static inline uint64_t get_bits_raw(Xorrot64State *obj)
 {
+    const uint64_t out = rotl64(obj->x * 6906969069U, 11) - obj->x;
     obj->x ^= obj->x << 5;
     obj->x ^= rotl64(obj->x, 13) ^ rotl64(obj->x, 47);
-    return obj->x;
+    return out;
 }
 
 

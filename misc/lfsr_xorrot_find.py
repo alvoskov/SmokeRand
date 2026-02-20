@@ -4,7 +4,7 @@ import sympy
 gen = lfsr.XorGenMaker(64)
 abc = list(filter(lambda x: sympy.isprime(x), range(3, 64)))
 print(abc)
-for a in abc:
+for a in [2]:
     for b in abc:
         print(a, b)
         for c in abc:

@@ -26,6 +26,10 @@ def make_eye_matrix(n):
         I[i][i] = 1
     return galois.GF(2)(I)
 
+def make_zero_matrix(n):
+    I = [[0] * n for _ in range(n)]
+    return galois.GF(2)(I)
+
 def make_shr_matrix(n):
     R = [[0] * n for _ in range(n)]
     for i in range(n - 1):

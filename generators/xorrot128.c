@@ -1,11 +1,14 @@
 /**
- * @file xorrot64.c
- * @brief xorrot64 is a LFSR with 64-bit state, its period is \f$2^{64} - 1\f$.
+ * @file xorrot128.c
+ * @brief xorrot128 is a LFSR with 128-bit state, its period is \f$2^{128} - 1\f$.
  * @details The algorithm is suggested by A. L. Voskov. It uses a reversible
- * operation based on XORs of odd numbers of rotations from [1]. Seems to be
- * slightly better than the classical xorshift64.
+ * operation based on XORs of odd numbers of rotations from [1].
  *
- * Some fairly good triples: (5, 13, 47), (3, 23, 47), (7, 23, 29).
+ * Some full period shifts with bad `hamming_distr`/`full`: (11,3,47)/1e-16,
+ * (1,5,31)/1e-6, (1,31,41): 1e-6, (31,7,31): 1e-100
+ *
+ * Some full period shifts with good `hamming distr`/`full`:
+ * (1,7,61)/0.001 (bad birthday spacings), (1,17,29)/3e-4 (much better)
  *
  * References:
  *
@@ -28,21 +31,23 @@ PRNG_CMODULE_PROLOG
 
 typedef struct {
     uint64_t x;
-} Xorrot64State;
+    uint64_t y;
+} Xorrot128State;
 
-
-static inline uint64_t get_bits_raw(Xorrot64State *obj)
+static inline uint64_t get_bits_raw(Xorrot128State *obj)
 {
-    obj->x ^= obj->x << 5;
-    obj->x ^= rotl64(obj->x, 13) ^ rotl64(obj->x, 47);
-    return obj->x;
+    const uint64_t x0 = obj->x, y0 = obj->y;
+    obj->x = obj->y;
+    obj->y = x0 ^ (x0 << 1) ^ y0 ^ rotl64(y0, 17) ^ rotl64(y0, 29);
+    return x0;
 }
 
 
 static void *create(const CallerAPI *intf)
 {
-    Xorrot64State *obj = intf->malloc(sizeof(Xorrot64State));
+    Xorrot128State *obj = intf->malloc(sizeof(Xorrot128State));
     obj->x = intf->get_seed64();
+    obj->y = intf->get_seed64();
     if (obj->x == 0) {
         obj->x = 0xDEADBEEF;
     }
@@ -50,4 +55,4 @@ static void *create(const CallerAPI *intf)
 }
 
 
-MAKE_UINT64_PRNG("xorrot64", NULL)
+MAKE_UINT64_PRNG("xorrot128", NULL)

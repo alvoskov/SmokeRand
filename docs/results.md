@@ -326,7 +326,7 @@ grading algorithm was used:
  tf0_64sc2         | u64    | +       | +     | +       | +    | 0.40 |        |       |         | >= 2 TiB
  tf0_128           | u64    | +       | +     | +       | +    | 0.39 |        |       |         | >= 16 TiB
  tf0duper32        | u32    | +       | +     | +       |      | 0.70 |        |       | +       | ?
- tf0duper64        | u64    | +       | +     | +       |      |      |        |       |         | ?
+ tf0duper64        | u64    | +       | +     | +       |      | 0.40 |        |       |         | ?
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 8 TiB
  threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | >= 32 TiB
@@ -365,8 +365,13 @@ grading algorithm was used:
  xoroshiro64pp     | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 8 TiB
  xoroshiro64st     | u32    | 1       | 1     | 3       | 5    | 0.51 | -      | 1.75  | Small   | 1 MiB
  xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 32 TiB
- xorrot32          | u32    |         |       |         |      |      |        |       |         | 32 KiB
- xorrot64          | u64    | 2       | 3     | 5/6     |      |      |        |       |         | 32 KiB
+ xorrot32          | u32    | 2       | 16    | 32      |      | 0.55 |        | 0     | -       | 32 KiB
+ xorrot64          | u64    | 2       | 3     | 5/6     |      | 0.33 |        |       | -       | 32 KiB
+ xorrot64w32       | u32    | 2       | 3     | 7/8     |      | 0.35 |        | 0     | -       | ?
+ xorrot64w32sc     | u32    | +       | +     | +       |      | 0.44 |        |       |         | ?
+ xorrot64w16sc     | u32    | +       | +     | +       |      | 2.1  |        |       |         | ?
+ xorrot128         | u64    | 2       | 5     | 7       |      | 0.20 |        | 0     | Small   | 256 KiB
+ xorrot128sc       | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | >= 8 TiB
  xorshift64        | u64    | 2       | 6     | 12      | 15/16| 0.49 | -      | 0     | -       | 32 KiB
  xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |S_lo/+_hi| 512 KiB
  xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB
