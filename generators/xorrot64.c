@@ -11,6 +11,10 @@
  *
  * 1. Ronald L. Rivest. On the invertibility of the XOR of rotations of
  *    a binary word https://people.csail.mit.edu/rivest/pubs/Riv11e.prepub.pdf
+ * 2. Marsaglia G. Xorshift RNGs // Journal of Statistical Software. 2003.
+ *    V. 8. N. 14. P.1-6. https://doi.org/10.18637/jss.v008.i14
+ * 3. xoshiro / xoroshiro generators and the PRNG shootout
+ *    https://prng.di.unimi.it/
  *
  * @copyright
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
