@@ -116,30 +116,15 @@ class TestLfsrs(unittest.TestCase):
         T = self.gen64.make_xorrot_matrix(5, 13, 47)
         self.assertTrue(is_full_period(T, False))
 
+    def test_poly(self):
+        coeffs = [0] * 608
+        coeffs[607] = 1; coeffs[273] = 1; coeffs[0] = 1
+        coeffs = coeffs[::-1]
+        poly = galois.Poly(coeffs, field=galois.GF(2))
+        print(poly)
+        self.assertTrue(poly.is_primitive())
+
 
 if __name__ == '__main__':
     unittest.main()
 
-"""
-
-gen = XorGenMaker(64)
-abc = list(filter(lambda x: sympy.isprime(x), range(3, 64)))
-print(abc)
-for a in abc:
-    for b in abc:
-        print(a, b)
-        for c in abc:
-            T = gen.make_xorrot_matrix(a, b, c)
-            if is_full_period(T, False):
-                print("=====>", a, b, c)
-
-
-# Basic example
-print("----------------")
-coeffs = [0] * 608
-coeffs[607] = 1; coeffs[273] = 1; coeffs[0] = 1
-coeffs = coeffs[::-1]
-poly = galois.Poly(coeffs, field=galois.GF(2))
-print(poly)
-print(poly.is_primitive())
-"""

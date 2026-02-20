@@ -1,20 +1,7 @@
 /**
- * @file xorrot64.c
- * @brief xorrot64 is a LFSR with 64-bit state, its period is \f$2^{64} - 1\f$.
- * @details The algorithm is suggested by A. L. Voskov. It uses a reversible
- * operation based on XORs of odd numbers of rotations from [1]. Seems to be
- * slightly better than the classical xorshift64.
- *
- * Some fairly good triples: (5, 13, 47), (3, 23, 47), (7, 23, 29).
- *
- * References:
- *
- * 1. Ronald L. Rivest. On the invertibility of the XOR of rotations of
- *    a binary word https://people.csail.mit.edu/rivest/pubs/Riv11e.prepub.pdf
- * 2. Marsaglia G. Xorshift RNGs // Journal of Statistical Software. 2003.
- *    V. 8. N. 14. P.1-6. https://doi.org/10.18637/jss.v008.i14
- * 3. xoshiro / xoroshiro generators and the PRNG shootout
- *    https://prng.di.unimi.it/
+ * @file xorrot64sc.c
+ * @brief xorrot64sc is scrambled version of xorrot64,
+ * its period is \f$2^{64} - 1\f$.
  *
  * @copyright
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
@@ -51,4 +38,4 @@ static void *create(const CallerAPI *intf)
 }
 
 
-MAKE_UINT64_PRNG("xorrot64", NULL)
+MAKE_UINT64_PRNG("xorrot64*-", NULL)
