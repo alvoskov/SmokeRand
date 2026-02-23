@@ -1,6 +1,6 @@
 /**
- * @file xorrot64sc.c
- * @brief xorrot64sc is scrambled version of xorrot64,
+ * @file xorrot64mn.c
+ * @brief xorrot64mn is scrambled version of xorrot64,
  * its period is \f$2^{64} - 1\f$.
  *
  * @copyright

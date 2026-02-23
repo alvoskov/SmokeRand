@@ -324,9 +324,9 @@ grading algorithm was used:
  tf0_64            | u32    | +       | +     | 1       | 1    | 0.45 |        | 3     | +       | 2 GiB
  tf0_64sc          | u32    | +       | +     | +       | +    | 0.50 |        |       | >= Crush| 16 TiB
  tf0_64sc2         | u64    | +       | +     | +       | +    | 0.40 |        |       |         | >= 2 TiB
- tf0_128           | u64    | +       | +     | +       | +    | 0.39 |        |       |         | >= 16 TiB
+ tf0_128           | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 16 TiB
  tf0duper32        | u32    | +       | +     | +       | +    | 0.70 |        | 4     | +       | >= 16 TiB(?)
- tf0duper64        | u64    | +       | +     | +       | +    | 0.40 |        | 4     |         | ?
+ tf0duper64        | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 8 TiB(?)
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 8 TiB
  threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | >= 32 TiB
@@ -366,14 +366,20 @@ grading algorithm was used:
  xoroshiro64st     | u32    | 1       | 1     | 3       | 5    | 0.51 | -      | 1.75  | Small   | 1 MiB
  xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 32 TiB
  xorrot32          | u32    | 2       | 16    | 32      |      | 0.55 |        | 0     | -       | 32 KiB
- xorrot64          | u64    | 2       | 3     | 5/6     |      | 0.33 |        |       | -       | 32 KiB
- xorrot64sc        | u64    | +       | +     | +       | +    | 0.44 |        |       |         | ?
- xorrot64w8sc      | u64    | +       | +     | +       |      |      |        |       |         | ?
- xorrot64w32       | u32    | 2       | 3     | 7/8     |      | 0.35 |        | 0     | -       | 32 KiB
- xorrot64w32sc     | u32    | +       | +     | +       | +    | 0.44 |        |       | >=Crush | ?
- xorrot64w16sc     | u32    | +       | +     | +       |      | 2.1  |        |       | >=Crush | ?
- xorrot128         | u64    | 2       | 5     | 7       |      | 0.20 |        | 0     | Small   | 256 KiB
- xorrot128sc       | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | >= 8 TiB
+ xorrot64          | u64    | 2       | 3     | 5/6     | 9    | 0.33 | -      | 0     | -       | 32 KiB
+ xorrot64mrt       | u64    | +       | +     | +       | +    | 0.44 | -      | 3     |         | ?
+ xorrot64mn        | u64    | +       | +     | +       | +    | 0.44 | +      | 4     |         | ?
+ xorrot64w8sc      | u64    | +       | +     | +       | +    | 3.2  |        |       | >=Crush | 64 GiB
+ xorrot64w32       | u32    | 2       | 3/4   | 8/9     | 12/13| 0.35 |        | 0     | -       | 32 KiB
+ xorrot64w32mn     | u32    | +       | +     | +       |      | 0.44 |        |       | >=Crush | ?
+ xorrot64w16       | u32    | 2       | 3     | 5       | 7    | 1.5  |        | 2.25  | -       | 32 KiB
+ xorrot64w16nn     | u32    | +       | +     | +       | +    | 1.8  |        | 4     | +       | >= 8 TiB
+ xorrot128         | u64    | 2       | 3     | 5       | 7/8  | 0.30 |        |       |         | 256 KiB
+ xorrot128mn       | u64    | +       | +     | +       | +    | 0.42 |        | 4     |         | ?
+ xorrot128w32      | u32    | 2       | 3     | 5       | 7    | 0.48 |        | 2.25  | Small   | 256 KiB
+ xorrot128w32mrt   | u32    | +       | +     | +       | +    | 0.62 | +      | 4     | +       | >= 1 TiB
+ xorrot256         | u64    | 2       | 3     | 5       | 7    | 0.30 | +      | 2.25  |         | 1 MiB
+ xorrot256mrt      | u64    | +       | +     | +       | +    | 0.34 | +      | 4     |         | >= 2 TiB
  xorshift64        | u64    | 2       | 6     | 12      | 15/16| 0.49 | -      | 0     | -       | 32 KiB
  xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |S_lo/+_hi| 512 KiB
  xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB
@@ -395,7 +401,7 @@ grading algorithm was used:
  xoshiro256p       | u64    | 1       | 1     | 2       | 3    | 0.20 | +      | 3.25  |         | 64 MiB
  xoshiro256pp      | u64    | +       | +     | +       | +    | 0.22 | +      | 4     |         | >= 16 TiB
  xoshiro256stst    | u64    | +       | +     | +       | +    | 0.22 | +      | 4     |         | >= 4 TiB
- xsadd             | u32    | 1       | 1/2   | 4       |      |      |        | 0     | >= Crush| 8 MiB
+ xsadd             | u32    | 1       | 1/2   | 4       | 9    | 1.3  |        | 0     | +       | 8 MiB
  xsh               | u64    | 2       | 9     | 14      | 18   | 0.43 | -      | 0     | -       | 32 KiB
  xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     | +IL     | >= 4 TiB
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     | >= Crush| >= 32 TiB
@@ -941,3 +947,8 @@ Examples of false failures in SmokeRand 0.42 in gap16_count0 test (fixed in 0.43
 smokerand.exe brief generators/chacha.dll --seed=_01_UU3t9pAb3d5FYNSe6nbg3ew3LMZtRMkA4p84wYkBr60= --testname=gap16_count0
 smokerand.exe brief generators/aes128.dll --seed=_01_9FvOZLUeS9/Pl7c9rZBvJlLmKK85Oo8qGfpwgl4GGvA= --testname=gap16_count0
 smokerand.exe brief generators/speck128.dll --testname=gap16_count0 --seed=_01_iQNhejvPDb2ImAIwDMyWe+ZnqFFX3riJn0aorb3XvWc=
+
+
+Strange behaviour (suspicious and badly reproducible value of hamming_ot_u128) for
+xorrot64w16 in the `full` battery. Seed:
+`_0B_f8lx95sFBeaoJ61wnRmALp2pMeyWYwNPfMrlBjpkGo0=`

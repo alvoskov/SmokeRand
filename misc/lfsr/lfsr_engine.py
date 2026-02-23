@@ -6,14 +6,7 @@ from sympy.abc import x
 
 
 def gfpow(a, n):
-    if n == 1:
-        return a.copy()
-    else:    
-        p = a @ a
-        for i in range(n - 2):
-            p = p @ a
-        return p
-
+    return np.linalg.matrix_power(a, n)
 
 def gf2mat_to_list(T):
     return list(map(lambda x: list(map(lambda v: int(v), list(x))), list(T)))
@@ -78,8 +71,33 @@ class XorGenMaker:
         T = (I + gfpow(L, a)) @ (I + gfpow(ROL, b) + gfpow(ROL, c))
         return gf2mat_to_list(T)
 
+    def make_xorrot2w_matrix(self, a, b, c):
+        I, O = self.I, self.O
+        A = I + gfpow(self.L, a)
+        B = I + gfpow(self.ROL, b) + gfpow(self.ROL, c)
+        T = np.vstack((
+            np.hstack((I, A)),
+            np.hstack((I, B))
+        ))
+        return gf2mat_to_list(T)
+
+    def make_xorrot4w_matrix(self, a, b, c):
+        I, O = self.I, self.O
+        A = I + gfpow(self.L, a)
+        B = I + gfpow(self.ROL, b) + gfpow(self.ROL, c)
+        T = np.vstack((
+            np.hstack((I, O, I, A)),
+            np.hstack((I, O, O, O)),
+            np.hstack((O, I, O, O)),
+            np.hstack((O, O, I, B))
+        ))
+        return gf2mat_to_list(T)
+
+
 
 def is_full_period(T, verbose = True):
+    if len(T) == 0:
+        return False
     K = GF(2)
     dM = DomainMatrix(T, (len(T), len(T)), K)
     p = dM.charpoly()
@@ -97,6 +115,7 @@ def is_full_period(T, verbose = True):
 class TestLfsrs(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestLfsrs, self).__init__(*args, **kwargs)
+        self.gen16 = XorGenMaker(16)
         self.gen32 = XorGenMaker(32)
         self.gen64 = XorGenMaker(64)
 
@@ -115,14 +134,6 @@ class TestLfsrs(unittest.TestCase):
     def test_xorshift64_bad(self):
         T = self.gen64.make_xorshift_matrix(17, 13, 43)
         self.assertFalse(is_full_period(T, False))
-
-    def test_xorrot32(self):
-        T = self.gen32.make_xorrot_matrix(1, 9, 27)
-        self.assertTrue(is_full_period(T, False))
-
-    def test_xorrot64(self):
-        T = self.gen64.make_xorrot_matrix(5, 13, 47)
-        self.assertTrue(is_full_period(T, False))
 
     def test_xoroshiro128(self):
         """
@@ -145,6 +156,45 @@ class TestLfsrs(unittest.TestCase):
         T = gf2mat_to_list(T)
         self.assertTrue(is_full_period(T, False))
 
+    def test_xoshiro256(self):
+        """
+        https://arxiv.org/pdf/1805.01407
+        | I I I  0  |
+        | I I Sa Rb |
+        | 0 I I  0  |
+        | I 0 0  Rb |
+        """
+        sh1, sh2 = 17, 45
+        O, L, R, I = self.gen64.O, self.gen64.L, self.gen64.ROL, self.gen64.I
+        Sa, Rb = gfpow(L, sh1), gfpow(R, sh2)
+        T = np.vstack((
+            np.hstack((I, I, I,  O)),
+            np.hstack((I, I, Sa, Rb)),
+            np.hstack((O, I, I,  O)),
+            np.hstack((I, O, O,  Rb)),
+        ))
+        T = gf2mat_to_list(T)
+        self.assertTrue(is_full_period(T, False))
+
+    def test_xorshift128(self):
+        """
+        | O O O A |
+        | I O O O |
+        | O I O O |
+        | O O I B |
+        """
+        sh1, sh2, sh3 = 11, 8, 19
+        O, L, R, I = self.gen32.O, self.gen32.L, self.gen32.R, self.gen32.I
+        A = (I + gfpow(L, sh1)) @ (I + gfpow(R, sh2))
+        B = I + gfpow(R, sh3)
+        T = np.vstack((
+            np.hstack((O, O, O, A)),
+            np.hstack((I, O, O, O)),
+            np.hstack((O, I, O, O)),
+            np.hstack((O, O, I, B)),
+        ))
+        T = gf2mat_to_list(T)
+        self.assertTrue(is_full_period(T, False))
 
     def test_xsadd(self):
         sh1, sh2, sh3 = 15, 18, 11

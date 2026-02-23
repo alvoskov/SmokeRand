@@ -1,7 +1,7 @@
 /**
- * @file xorrot128sc.c
- * @brief xorrot128sc is a scrambled version of xorrot128,
- * its period is \f$2^{64} - 1\f$.
+ * @file xorrot128mn.c
+ * @brief xorrot128mn is a scrambled version of xorrot128,
+ * its period is \f$2^{128} - 1\f$.
  *
  * @copyright
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
@@ -23,8 +23,8 @@ static inline uint64_t get_bits_raw(Xorrot128State *obj)
 {
     const uint64_t x0 = obj->x, y0 = obj->y;
     const uint64_t out = rotl64(x0 * 6906969069U, 11) - y0;
-    obj->x = obj->y;
-    obj->y = x0 ^ (x0 << 1) ^ y0 ^ rotl64(y0, 17) ^ rotl64(y0, 29);
+    obj->x = x0 ^ obj->y;
+    obj->y = (x0 << 3) ^ obj->x ^ rotl64(y0, 17) ^ rotl64(y0, 52);
     return out;
 }
 

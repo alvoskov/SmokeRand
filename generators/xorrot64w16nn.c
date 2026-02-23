@@ -1,15 +1,6 @@
 /**
- * @file xorrot64w16sc.c
- * @brief A scrambled LFSR for 16-bit computers that has the \f$2^{64} - 1\f$
- * period.
- * @details Even without scrambler it fails only 5 tests in the `default`
- * battery and behaves well in the `hamming_distr` test. It uses the next
- * step matrix:
- *
- *                  | 0 0 I A |
- *     |x y z w | * | I 0 0 0 |
- *                  | 0 I 0 0 |
- *                  | 0 0 I B |
+ * @file xorrot64w16nn.c
+ * @brief A scrambled version of xorrot64w16.
  * @copyright
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
@@ -32,10 +23,10 @@ static inline uint16_t get_bits16(Xorrot64w16State *obj)
 {
     const uint16_t x0 = obj->x, w0 = obj->w;
     const uint16_t out = (uint16_t) (rotl16(x0 - w0, 3) - w0);
-    obj->x = obj->y;
+    obj->x = (uint16_t) x0 ^ obj->y;
     obj->y = obj->z;
-    obj->z = x0 ^ w0;
-    obj->w = (uint16_t) ((x0 << 3) ^ obj->z ^ rotl16(w0, 4) ^ rotl16(w0, 11));
+    obj->z = (uint16_t) (x0 ^ w0);
+    obj->w = (uint16_t) ((x0 << 3) ^ obj->z ^ rotl16(w0, 7) ^ rotl16(w0, 13));
     return out;
 }
 
