@@ -43,4 +43,18 @@ static void *create(const CallerAPI *intf)
 }
 
 
-MAKE_UINT32_PRNG("xorrot32", NULL)
+static int run_self_test(const CallerAPI *intf)
+{
+    const uint32_t u_ref = 0x40C52DA7;
+    uint32_t u;
+    Xorrot32State obj = {.x = 0x12345678};
+    for (long i = 0; i < 10000000; i++) {
+        u = (uint32_t) get_bits_raw(&obj);
+    }
+    intf->printf("u = %lX; u_ref = %lX\n",
+        (unsigned long) u, (unsigned long) u_ref);
+    return u == u_ref;
+}
+
+
+MAKE_UINT32_PRNG("xorrot32", run_self_test)

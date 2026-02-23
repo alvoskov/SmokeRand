@@ -4,11 +4,12 @@
  * @details The algorithm is suggested by A. L. Voskov. It uses a reversible
  * operation based on XORs of odd numbers of rotations from [1].
  *
- * Some full period shifts with bad `hamming_distr`/`full`: (11,3,47)/1e-16,
- * (1,5,31)/1e-6, (1,31,41): 1e-6, (31,7,31): 1e-100
+ * The next binary matrix is used:
  *
- * Some full period shifts with good `hamming distr`/`full`:
- * (1,7,61)/0.001 (bad birthday spacings), (1,17,29)/3e-4 (much better)
+ *    |x w| * | I A |
+ *            | I B |
+ *
+ * Possible triples: (3,17,52) and (2,27,57)
  *
  * References:
  *
@@ -34,11 +35,12 @@ typedef struct {
     uint64_t y;
 } Xorrot128State;
 
+
 static inline uint64_t get_bits_raw(Xorrot128State *obj)
 {
     const uint64_t x0 = obj->x, y0 = obj->y;
-    obj->x = obj->y;
-    obj->y = x0 ^ (x0 << 1) ^ y0 ^ rotl64(y0, 17) ^ rotl64(y0, 29);
+    obj->x = x0 ^ obj->y;
+    obj->y = (x0 << 3) ^ obj->x ^ rotl64(y0, 17) ^ rotl64(y0, 52);
     return x0;
 }
 
@@ -54,5 +56,24 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
+/**
+ * @brief An internal self-test based on test vectors independently
+ * generated in Python 3.x scripts (see `misc/lfsr/xorrot_gentestvec.py`).
+ * These generators are based on explicit matrix arithmetics in GF(2).
+ */
+static int run_self_test(const CallerAPI *intf)
+{
+    const uint64_t x_ref = 0xd81c2efae4247c15, y_ref = 0x7898f6b63ff4640a;
+    Xorrot128State obj = {.x = 0x123456789ABCDEF, .y = 0xFEDCBA987654321};
+    for (long i = 0; i < 10000000; i++) {
+        (void) get_bits_raw(&obj);
+    }
+    intf->printf("x_out = %llX; x_ref = %llX\n",
+        (unsigned long long) obj.x, (unsigned long long) x_ref);
+    intf->printf("y_out = %llX; y_ref = %llX\n",
+        (unsigned long long) obj.y, (unsigned long long) y_ref);
+    return (obj.x == x_ref && obj.y == y_ref);
+}
 
-MAKE_UINT64_PRNG("xorrot128", NULL)
+
+MAKE_UINT64_PRNG("xorrot128", run_self_test)

@@ -1,6 +1,6 @@
 /**
- * @file xorrot64w32sc.c
- * @brief xorrot64w32sc is a scrambler version of xorrot64w32,
+ * @file xorrot64w32mn.c
+ * @brief xorrot64w32mn is a scrambler version of xorrot64w32,
  * its period is \f$2^{64} - 1\f$.
  *
  * @copyright

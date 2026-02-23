@@ -1,6 +1,7 @@
 /**
  * @file xorrot64w32.c
- * @brief xorrot64 is a LFSR with 64-bit state, its period is \f$2^{64} - 1\f$.
+ * @brief xorrot64w32 is a LFSR with 64-bit state consisting of two 32-bit
+ * unsigned integers, its period is \f$2^{64} - 1\f$.
  * @details The algorithm is suggested by A. L. Voskov. It uses a reversible
  * operation based on XORs of odd numbers of rotations from [1].
  *
@@ -13,17 +14,8 @@
  * 3. xoshiro / xoroshiro generators and the PRNG shootout
  *    https://prng.di.unimi.it/
  *
- * Some explored triples (`hamming_distr` from `full` battery + all `brief`):
- * 
- * - (1 9 31)/1e-161/27 and (3 1 10)/1e-155/27: bad collover
- * - (5 13 25)/24.6e-189/29.3 (no linear artefacts at brief)
- * 
- * Other less explored triples:
- *
- * (5 4 17)/1e-210/31, (5 6 13)/1e-202/30, (5 7 27)/1e-251/33,
- * (5 13 20)/1.92e-204/31, (7 8 29)/1e-236/33, (5 3 15), (5 16 25), (5 17 20),
- * (5 18 25), (7 2 15), (7 3 4), (7 5 10), (7 15 18), (7 17 21), (7 17 28),
- * (7 22 31), (17 11 17)/0/60, (17 11 29)/0/59
+ * - Good triple: (5,12,25) but fails bspace16_4d in `full`
+ * - Probably acceptable triples (worse in HW tests): (3,8,29), (5,15,24)
  *
  * @copyright
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
@@ -44,8 +36,8 @@ typedef struct {
 static inline uint64_t get_bits_raw(Xorrot64w32State *obj)
 {
     const uint32_t x0 = obj->x, y0 = obj->y;
-    obj->x = obj->y;
-    obj->y = x0 ^ (x0 << 5) ^ y0 ^ rotl32(y0, 13) ^ rotl32(y0, 25);
+    obj->x = x0 ^ obj->y;
+    obj->y = (x0 << 5) ^ obj->x ^ rotl32(y0, 12) ^ rotl32(y0, 25);
     return x0;
 }
 
@@ -62,4 +54,24 @@ static void *create(const CallerAPI *intf)
 }
 
 
-MAKE_UINT32_PRNG("xorrot64w32", NULL)
+/**
+ * @brief An internal self-test based on test vectors independently
+ * generated in Python 3.x scripts (see `misc/lfsr/xorrot_gentestvec.py`).
+ * These generators are based on explicit matrix arithmetics in GF(2).
+ */
+static int run_self_test(const CallerAPI *intf)
+{
+    const uint32_t x_ref = 0xc5b70c13, y_ref = 0xa696794a;
+    Xorrot64w32State obj = {.x = 0x12345678, .y = 0xFEDCBA98};
+    for (long i = 0; i < 10000000; i++) {
+        (void) get_bits_raw(&obj);
+    }
+    intf->printf("x_out = %lX; x_ref = %lX\n",
+        (unsigned long) obj.x, (unsigned long) x_ref);
+    intf->printf("y_out = %lX; y_ref = %lX\n",
+        (unsigned long) obj.y, (unsigned long) y_ref);
+    return (obj.x == x_ref && obj.y == y_ref);
+}
+
+
+MAKE_UINT32_PRNG("xorrot64w32", run_self_test)
