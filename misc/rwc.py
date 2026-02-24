@@ -37,26 +37,28 @@ class RwcGenerator:
         return txt
 
 
+def run_generator(gen):
+    for i in range(1_000_000):
+        gen.next()
+    gen.next(); print(gen)
+    gen.next(); print(gen)
+    gen.next(); print(gen)
+    gen.next(); print(gen)
+
+print("----- 64-bit Mother-of-All ----")
 gen64 = RwcGenerator(c=12345, x=[1234, 5678, 8765, 4321], a = [18000690696906969069, 6906969069, 11471147, 9005090050], b=2**64)
 gen64.check_constants()
+run_generator(gen64)
 
-for i in range(1_000_000):
-    gen64.next()
-gen64.next(); print(gen64)
-gen64.next(); print(gen64)
-gen64.next(); print(gen64)
-gen64.next(); print(gen64)
-
-
+print("----- 32-bit Mother-of-All ----")
 gen = RwcGenerator()
 gen.check_constants()
+run_generator(gen)
 
-for i in range(1_000_000):
-    gen.next()
-gen.next(); print(gen)
-gen.next(); print(gen)
-gen.next(); print(gen)
-gen.next(); print(gen)
+print("----- 32-bit RWC for Excel ----")
+gen48 = RwcGenerator(c=12345, x=[12345, 87654321, 12345678], a = [29386, 29386, 0], b=2**32)
+gen48.check_constants()
+run_generator(gen48)
 
 
 

@@ -23,12 +23,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - pqrng family (`pqrng32`, `pqrng64`, `pqrng128`) by Karl-Uwe Frank was added;
   They are based on T-functions with proven periods by V. S. Anachin.
 - `ran2`, `ranecu`, `lcg61prime`, `lcg64bd` generators.
-- `rwc32`, `rwc32sm`, `rwc64`, `rwc64large` generators.
+- `rwc32`, `rwc32u48`, `rwc32sm`, `rwc64`, `rwc64large` generators.
 - `swblux64` generator (64-bit SWB with different luxury levels)
 - TF0 family (`tf0_32`, `tf0_32sc2`, `tf0_64`, `tf0_64sc`, `tf0_64sc2`,
   `tf0_128` was added (based on an invertible mapping by Klimov and Shamir
   with the maximal period, uses T-functions). They were tuned by A.L. Voskov
   to improve the statistical quality.
+- `tf0duper32` and `tf0duper64` generators were added (designed by A.L. Voskov)
+  They resemble SuperDuper but use the "crazy T-function" TF0 instead of LCG
+  and xorrot instead of xorshift and equipped with a simple scrambler.
+- `xorrot` PRNG family was added (designed by A.L. Voskov), also `lfsr`
+  Python 3.x scripts for its construction were added into the `misc` directory.
+  They use `sympy` and `galois` libraries.
 
 ### Changed
 

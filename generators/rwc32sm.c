@@ -84,4 +84,5 @@ static int run_self_test(const CallerAPI *intf)
     return u == u_ref ? 1 : 0;    
 }
 
+
 MAKE_UINT32_PRNG("rwc32sm", run_self_test)
