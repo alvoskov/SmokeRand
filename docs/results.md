@@ -222,6 +222,7 @@ grading algorithm was used:
  pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | 3     | +       | >= 32 TiB
  pcg64_dxsm        | u64    | +       | +     | +       | +    | 0.53 | +      | 4     |         | >= 16 TiB
  pcg64_xsl_rr      | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
+ pcg128            | u64    | +       | +     | +       |      | 0.59 | +      |       |         | ?
  philox            | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  philox2x32        | u32    | +       | +     | +       | +    | 1.6  | -      | 3     | +       | >= 32 TiB
  philox32          | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
@@ -233,7 +234,7 @@ grading algorithm was used:
  prvhash64cw       | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 16 TiB
  pqrng32           | u32    | 5       | 18    | 35      |      | 0.50 |        | 0     | -       | 2 KiB
  pqrng64           | u32    | +       | +     | 1       | 1    | 0.64 |        | 3     | +       | 16 GiB
- pqrng128          | u64    | +       | +     | +       | +    | 0.35 |        | 4     |         | >= 8 TiB
+ pqrng128          | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | >= 8 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
  ran2              | u31    | +       | +     | +       | +    | 3.2  | N/A    | 4     | +       | 2 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      | 0     |S_lo/+_hi| 512 KiB
@@ -271,7 +272,7 @@ grading algorithm was used:
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
  rwc32sm           | u32    | +       | +     | +       | 1    | 0.83 | +      | 1     | Small   | >= 2 TiB
  rwc32             | u32    | +       | +     | +       | +    | 0.55 | +      | 4     | +       | >= 8 TiB
- rwc32u48          | u32    | +       | +     | +       | +    |      | +      | 4     | +       | >= 4 TiB
+ rwc32u48          | u32    | +       | +     | +       | +    | 0.47 | +      | 4     | +       | >= 4 TiB
  rwc64             | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +hi     | >= 8 TiB
  rwc64large        | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  sapparot          | u32    | +       | 2     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
@@ -320,7 +321,7 @@ grading algorithm was used:
  taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  | Small   | 32 KiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      | 3     |+_lo/+_hi| 32 GiB
- tf0_32            | u32    | 5       | 18    |         |      | 0.48 |        | 0     | -       | 2 KiB
+ tf0_32            | u32    | 5       | 18    | 33      |      | 0.48 |        | 0     | -       | 2 KiB
  tf0_32sc2         | u32    | +       | 1     | 2       | 8    | 0.57 |        | 0     |         | 512 MiB
  tf0_64            | u32    | +       | +     | 1       | 1    | 0.45 |        | 3     | +       | 2 GiB
  tf0_64sc          | u32    | +       | +     | +       | +    | 0.50 |        |       | >= Crush| 16 TiB
@@ -368,15 +369,15 @@ grading algorithm was used:
  xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 32 TiB
  xorrot32          | u32    | 2       | 16    | 32      |      | 0.55 |        | 0     | -       | 32 KiB
  xorrot64          | u64    | 2       | 3     | 5/6     | 9    | 0.33 | -      | 0     | -       | 32 KiB
- xorrot64mrt       | u64    | +       | +     | +       | +    | 0.44 | -      | 3     |         | ?
+ xorrot64mrt       | u64    | +       | +     | +       | +    | 0.44 | -      | 3     |         | >= 8 TiB
  xorrot64mn        | u64    | +       | +     | +       | +    | 0.44 | +      | 4     |         | ?
  xorrot64w8sc      | u64    | +       | +     | +       | +    | 3.2  |        |       | >=Crush | 64 GiB
  xorrot64w32       | u32    | 2       | 3/4   | 8/9     | 12/13| 0.35 |        | 0     | -       | 32 KiB
  xorrot64w32mn     | u32    | +       | +     | +       |      | 0.44 |        |       | >=Crush | ?
  xorrot64w16       | u32    | 2       | 3     | 5       | 7    | 1.5  |        | 2.25  | -       | 32 KiB
  xorrot64w16nn     | u32    | +       | +     | +       | +    | 1.8  |        | 4     | +       | >= 8 TiB
- xorrot128         | u64    | 2       | 3     | 5       | 7/8  | 0.30 |        |       |         | 256 KiB
- xorrot128mn       | u64    | +       | +     | +       | +    | 0.42 |        | 4     |         | ?
+ xorrot128         | u64    | 2       | 3     | 5       | 7/8  | 0.30 | +      |       |         | 256 KiB
+ xorrot128mn       | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | ?
  xorrot128w32      | u32    | 2       | 3     | 5       | 7    | 0.48 |        | 2.25  | Small   | 256 KiB
  xorrot128w32mrt   | u32    | +       | +     | +       | +    | 0.62 | +      | 4     | +       | >= 1 TiB
  xorrot256         | u64    | 2       | 3     | 5       | 7    | 0.30 | +      | 2.25  |         | 1 MiB
