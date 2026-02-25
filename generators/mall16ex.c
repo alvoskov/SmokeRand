@@ -1,7 +1,37 @@
+/**
+ * @file mall16ex.c
+ * @brief A modification of 16-bit "mother-of-all" PRNG by G. Marsaglia.
+ * @details The modification was made by A.L. Voskov and include the
+ * next changes:
+ *
+ * 1. Improved multiplier in the second component (so the modulus is prime
+ *    now)
+ * 2. Output scrambler that hides some linear defects due to a very small
+ *    base value (2^16).
+ *
+ * References:
+ *
+ * 1. https://www.stat.berkeley.edu/~spector/s243/mother.c
+ * 2. M. Goresky, A. Klapper. Efficient multiply-with-carry random number
+ *    generators with maximal period // ACM Trans. Model. Comput. Simul. 2003.
+ *    V. 13. N 4. P. 310-321. https://doi.org/10.1145/945511.945514
+ *
+ * @copyright The "Mother-of-all" 16-bit PRNG was developed by G. Marsaglia.
+ *
+ * Improved modification with an output function (scrambler):
+ *
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 
+/**
+ * @brief 16-bit "Mother-of-all" PRNG state.
+ */
 typedef struct {
     uint16_t m1[10]; ///< (c, x_{n-1}, x_{n-2}, ...)
     uint16_t m2[10]; ///< (c, x_{n-1}, x_{n-2}, ...)
