@@ -109,6 +109,10 @@ def is_full_period(T, verbose = True):
         print(Poly(p, x, domain = K))
         print("Our coeffs list: ", coeffs)
         print(poly)
+        print("Factorization")
+        factors = poly.factors()
+        for f in factors[0]:
+            print("  Factor: ", f, "; is_primitive: ", f.is_primitive())
     return poly.is_primitive()
 
 
