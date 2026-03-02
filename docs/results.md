@@ -242,6 +242,7 @@ grading algorithm was used:
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      | 3.5   |+_lo/+_hi| 2 MiB
  randu             | u32    | 6       | 23    | 41      | 45   | 0.41 | -(>>10)| 0     | -       | 1 KiB
  ranecu            | u31    | +       | +     | 1       | 1    | 3.1  | N/A    | 1     | Small   | 2 TiB
+ ranlim32          | u32    | +       | +     | +       | +    |      |        |       | +       | >= 1 TiB(?)
  ranlux++          | u64    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 32 TiB
  ranrot_bi         | u64    | +       | +     | 1       | 2/4  | 0.33 | +      | 0     |+IL/+H/+L| 8 GiB
  ranrot32[7/3]     | u32    | +       | 3     | 5/6     | 6    | 0.58 | +      | 0     | Small   | 128 MiB
@@ -270,11 +271,11 @@ grading algorithm was used:
  rge512ex-ctr      | u64    | +       | +     | +       | +    | 0.85 | +      | 4     |         | >= 1 TiB
  rge512ex-ctr-avx2 | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |+IL,+H   | >= 16 TiB
  romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      | 4(0)  |         | >= 32 TiB
- romuduojr         | u64    | +       | +     | +       |      |      |        | (0)   |         | ?
+ romuduojr         | u64    | +       | +     | +       | +    |      |        | 4(0)  |         | >= 2 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
  rwc32sm           | u32    | +       | +     | +       | 1    | 0.83 | +      | 1     | Small   | >= 2 TiB
  rwc32             | u32    | +       | +     | +       | +    | 0.55 | +      | 4     | +       | >= 8 TiB
- rwc32u48          | u32    | +       | +     | +       | +    | 0.47 | +      | 4     | +       | >= 16 TiB
+ rwc32u48          | u32    | +       | +     | +       | +    | 0.47 | +      | 4     | +       | >= 32 TiB
  rwc64             | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +hi     | >= 8 TiB
  rwc64large        | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  sapparot          | u32    | +       | 2     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
