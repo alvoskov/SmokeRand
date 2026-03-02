@@ -162,7 +162,7 @@ grading algorithm was used:
  magma             | u64    | +       | +     | +       | +    | 25   |        |       | +       | >= 1 TiB
  magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      | 3     |         | >= 16 TiB
  magma_avx-cbc     | u64    | +       | +     | +       | +    | 7.1  | +      | 4     |         | >= 2 TiB
- mall16ex          | u32    | +       | +     | +       | +    | 2.0  | +      | 4     | +       | ?
+ mall16ex          | u32    | +       | +     | +       | +    | 2.0  | +      | 3.5   | +       | 1 TiB
  mall32            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 8 TiB
  mall64            | u64    | +       | +     | +       | +    | 1.1  | +      | 4     |+H/+L/+IL| >= 8 TiB
  melg607           | u64    | 2       | 3     | 5       | 7    | 0.73 | +      | 2.25  | Small   | 8 MiB
@@ -236,6 +236,7 @@ grading algorithm was used:
  pqrng64           | u32    | +       | +     | 1       | 1    | 0.64 |        | 3     | +       | 16 GiB
  pqrng128          | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | >= 8 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
+ ranhash           | u64    | +       | +     | 1       |      |      |        |       |         | 8 TiB
  ran2              | u31    | +       | +     | +       | +    | 3.2  | N/A    | 4     | +       | 2 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      | 0     |S_lo/+_hi| 512 KiB
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      | 3.5   |+_lo/+_hi| 2 MiB
@@ -338,7 +339,7 @@ grading algorithm was used:
  threefish1024_avx | u64    | +       | +     | +       | +    | 1.3  | +      | 5     | +(il)   | >= 2 TiB
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
- tychei            | u32    | +       | +     | +       | +    | 0.76 | +      | 4(0)  |         | ?
+ tychei            | u32    | +       | +     | +       | +    | 0.76 | +      | 4(0)  |         | >= 8 TiB
  tychei64          | u64    | +       | +     | +       | +    | 0.38 | +      | 4(0)  |         | >= 16 TiB
  tychei64w         | u64    | +       | +     | +       | +    | 0.42 | +      |       |         | >= 8 TiB
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     | +(il)   | >= 32 TiB
@@ -377,8 +378,8 @@ grading algorithm was used:
  xorrot64w32mn     | u32    | +       | +     | +       | +    | 0.44 |        | 4     | >=Crush | ?
  xorrot64w16       | u32    | 2       | 3     | 5       | 7    | 1.5  |        | 2.25  | -       | 32 KiB
  xorrot64w16nn     | u32    | +       | +     | +       | +    | 1.8  |        | 4     | +       | >= 8 TiB
- xorrot128         | u64    | 2       | 3     | 5       | 7/8  | 0.30 | +      |       |         | 256 KiB
- xorrot128mn       | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | ?
+ xorrot128         | u64    | 2       | 3     | 5       | 7/8  | 0.30 | +      |       | Small   | 256 KiB
+ xorrot128mn       | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 8 TiB
  xorrot128w32      | u32    | 2       | 3     | 5       | 7    | 0.48 | +      | 2.25  | Small   | 256 KiB
  xorrot128w32mrt   | u32    | +       | +     | +       | +    | 0.62 | +      | 4     | +       | >= 1 TiB
  xorrot256         | u64    | 2       | 3     | 5       | 7    | 0.30 | +      | 2.25  |         | 1 MiB
@@ -739,6 +740,23 @@ Note about `prvhash12cw`:
       [Low8/32]FPF-14+6/16:all          R= +13.6  p =  2.8e-12    FAIL
       ...and 319 test result(s) without anomalies
 
+Note about `ranhash`:
+
+    rng=RNG_stdin64, seed=unknown
+    length= 4 terabytes (2^42 bytes), time= 12962 seconds
+      no anomalies in 422 test result(s)
+
+    rng=RNG_stdin64, seed=unknown
+      length= 8 terabytes (2^43 bytes), time= 25702 seconds
+      Test Name                         Raw       Processed     Evaluation
+      BCFN(2+0,13-0,T)                  R= +14.6  p =  2.3e-7   very suspicious
+      ...and 433 test result(s) without anomalies
+
+    rng=RNG_stdin64, seed=unknown
+    length= 16 terabytes (2^44 bytes), time= 54722 seconds
+      Test Name                         Raw       Processed     Evaluation
+      BCFN(2+0,13-0,T)                  R= +33.8  p =  1.2e-17    FAIL !
+      ...and 444 test result(s) without anomalies
 
 Sensitivity of dieharder is lower than TestU01 and PractRand:
 
