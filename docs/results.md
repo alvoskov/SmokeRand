@@ -236,13 +236,13 @@ grading algorithm was used:
  pqrng64           | u32    | +       | +     | 1       | 1    | 0.64 |        | 3     | +       | 16 GiB
  pqrng128          | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | >= 8 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
- ranhash           | u64    | +       | +     | 1       |      |      |        |       |         | 8 TiB
+ ranhash           | u64    | +       | +     | 1       | 1    |      |        | 2     |         | 8 TiB
  ran2              | u31    | +       | +     | +       | +    | 3.2  | N/A    | 4     | +       | 2 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      | 0     |S_lo/+_hi| 512 KiB
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      | 3.5   |+_lo/+_hi| 2 MiB
  randu             | u32    | 6       | 23    | 41      | 45   | 0.41 | -(>>10)| 0     | -       | 1 KiB
  ranecu            | u31    | +       | +     | 1       | 1    | 3.1  | N/A    | 1     | Small   | 2 TiB
- ranlim32          | u32    | +       | +     | +       | +    |      |        |       | +       | >= 1 TiB(?)
+ ranlim32          | u32    | +       | +     | +       | +    |      |        | 4     | +       | >= 16 TiB
  ranlux++          | u64    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 32 TiB
  ranrot_bi         | u64    | +       | +     | 1       | 2/4  | 0.33 | +      | 0     |+IL/+H/+L| 8 GiB
  ranrot32[7/3]     | u32    | +       | 3     | 5/6     | 6    | 0.58 | +      | 0     | Small   | 128 MiB
