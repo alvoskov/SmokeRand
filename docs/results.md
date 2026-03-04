@@ -327,7 +327,7 @@ grading algorithm was used:
  tf0_32            | u32    | 5       | 18    | 33      |      | 0.48 |        | 0     | -       | 2 KiB
  tf0_32sc2         | u32    | +       | 1     | 2       | 8    | 0.57 |        | 0     |         | 512 MiB
  tf0_64            | u32    | +       | +     | 1       | 1    | 0.45 |        | 3     | +       | 2 GiB
- tf0_64sc          | u32    | +       | +     | +       | +    | 0.50 | +      | 4     | >= Crush| 16 TiB
+ tf0_64sc          | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 16 TiB
  tf0_64sc2         | u64    | +       | +     | +       | +    | 0.40 | -      | 3     |         | >= 2 TiB
  tf0_128           | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |+lo      | >= 16 TiB
  tf0duper32        | u32    | +       | +     | +       | +    | 0.70 | +      | 4     | +       | >= 16 TiB(?)
@@ -376,7 +376,7 @@ grading algorithm was used:
  xorrot64mn        | u64    | +       | +     | +       | +    | 0.44 | +      | 4     |         | ?
  xorrot64w8sc      | u64    | +       | +     | +       | +    | 3.2  |        |       | >=Crush | 64 GiB
  xorrot64w32       | u32    | 2       | 3/4   | 8/9     | 12/13| 0.35 |        | 0     | -       | 32 KiB
- xorrot64w32mn     | u32    | +       | +     | +       | +    | 0.44 |        | 4     | >=Crush | ?
+ xorrot64w32mn     | u32    | +       | +     | +       | +    | 0.44 |        | 4     | +       | ?
  xorrot64w16       | u32    | 2       | 3     | 5       | 7    | 1.5  |        | 2.25  | -       | 32 KiB
  xorrot64w16nn     | u32    | +       | +     | +       | +    | 1.8  |        | 4     | +       | >= 8 TiB
  xorrot128         | u64    | 2       | 3     | 5       | 7/8  | 0.30 | +      |       | Small   | 256 KiB
@@ -384,7 +384,7 @@ grading algorithm was used:
  xorrot128w32      | u32    | 2       | 3     | 5       | 7    | 0.48 | +      | 2.25  | Small   | 256 KiB
  xorrot128w32mrt   | u32    | +       | +     | +       | +    | 0.62 | +      | 4     | +       | >= 1 TiB
  xorrot256         | u64    | 2       | 3     | 5       | 7    | 0.30 | +      | 2.25  |         | 1 MiB
- xorrot256mrt      | u64    | +       | +     | +       | +    | 0.34 | +      | 4     |         | >= 2 TiB
+ xorrot256mrt      | u64    | +       | +     | +       | +    | 0.34 | +      | 4     |         | >= 16 TiB
  xorshift64        | u64    | 2       | 6     | 12      | 15/16| 0.49 | -      | 0     | -       | 32 KiB
  xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |S_lo/+_hi| 512 KiB
  xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB
