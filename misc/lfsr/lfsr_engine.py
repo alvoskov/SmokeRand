@@ -93,6 +93,23 @@ class XorGenMaker:
         ))
         return gf2mat_to_list(T)
 
+    def make_xorrot8w_matrix(self, a, b, c):
+        I, O = self.I, self.O
+        A = I + gfpow(self.L, a)
+        B = I + gfpow(self.ROL, b) + gfpow(self.ROL, c)
+        T = np.vstack((
+            np.hstack((O, O, O, O,  O, O, I, A)),
+            np.hstack((I, O, O, O,  O, O, O, O)),
+            np.hstack((O, I, O, O,  O, O, O, O)),
+            np.hstack((O, O, I, O,  O, O, O, O)),
+
+            np.hstack((O, O, O, I,  O, O, O, O)),
+            np.hstack((O, O, O, O,  I, O, O, O)),
+            np.hstack((O, O, O, O,  O, I, O, O)),
+            np.hstack((O, O, O, O,  O, O, I, B))
+        ))
+        return gf2mat_to_list(T)
+
 
 
 def is_full_period(T, verbose = True):

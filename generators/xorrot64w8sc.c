@@ -48,5 +48,30 @@ static void *create(const CallerAPI *intf)
 }
 
 
+/**
+ * @brief An internal self-test based on test vectors independently
+ * generated in Python 3.x scripts (see `misc/lfsr/xorrot_gentestvec.py`).
+ * These generators are based on explicit matrix arithmetics in GF(2).
+ */
+static int run_self_test(const CallerAPI *intf)
+{
+    const uint64_t x_ref[8] = {0x79, 0xa0, 0x88, 0x2D, 0xF7, 0xF7, 0xA8, 0xfB};
+    Xorrot64w8State obj = {.x = {8, 1, 2, 3, 4, 5, 6, 7}, .ind = 0};
+    
+    for (long i = 0; i < 10000000 / 4; i++) {
+        (void) get_bits_raw(&obj);
+    }
+    int is_ok = 1;
+    for (int i = 0; i < 8; i++) {
+        const int ind = (obj.ind + i + 1) % 8;
+        intf->printf("x_out = %llX; x_ref = %llX\n",
+            (unsigned int) obj.x[ind], (unsigned int) x_ref[i]);
+        if (obj.x[ind] != x_ref[i]) {
+            is_ok = 0;
+        }
+    }
+    return is_ok;
+}
 
-MAKE_UINT32_PRNG("xorrot64w8--", NULL)
+
+MAKE_UINT32_PRNG("xorrot64w8--", run_self_test)

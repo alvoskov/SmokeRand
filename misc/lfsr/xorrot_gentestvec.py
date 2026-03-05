@@ -81,9 +81,17 @@ def genvec_xorrot32():
     T = gen32.make_xorrot_matrix(1, 9, 27)
     gen_test_vectors(T, [0x12345678], wordsize=32, period=2**32-1)
 
+def genvec_xorrot64w8():
+    print("----- xorrot64w8 -----")
+    gen8 = lfsr.XorGenMaker(8)
+    T = gen8.make_xorrot8w_matrix(5, 2, 3);
+    gen_test_vectors(T, [1, 2, 3, 4, 5, 6, 7, 8], wordsize=8, period=2**64-1)
+
+
 genvec_xorrot256()
 genvec_xorrot128()
 genvec_xorrot64w32()
 genvec_xorrot64w16()
 genvec_xorrot128w32()
 genvec_xorrot32()
+genvec_xorrot64w8()
