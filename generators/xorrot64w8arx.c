@@ -4,17 +4,24 @@ PRNG_CMODULE_PROLOG
 
 typedef struct {
     int ind;
+    uint8_t a;
+    uint8_t b;
     uint8_t x[8];
-} Xorrot64w8State;
+} Xorrot64w8ArxState;
 
 
-static inline uint8_t get_bits8(Xorrot64w8State *obj)
+static inline uint8_t get_bits8(Xorrot64w8ArxState *obj)
 {
     const int ind7 = obj->ind;
     obj->ind = (obj->ind + 1) & 0x7;
     const int ind0 = obj->ind;
     const uint8_t x0 = obj->x[ind0], x7 = obj->x[ind7];
-    const uint8_t out = (uint8_t) (rotl8((uint8_t)(x0 - x7), 2) - x7);
+    // ARX-FW mixer part: it is simplified because it is driven by LFSR
+    uint8_t a = obj->a, b = obj->b;
+    b = (uint8_t) (b + x0); // LFSR injector
+    a = (uint8_t) (a + (rotl8(b, 1) ^ rotl8(b, 4) ^ b));
+    obj->a = b; obj->b = a;
+    const uint8_t out = (uint8_t) (a ^ b);
     // replace x6 and x7
     const uint8_t x0x7 = (uint8_t) (x0 ^ x7);
     obj->x[ind7] = x0x7;
@@ -35,7 +42,7 @@ static inline uint64_t get_bits_raw(void *state)
 
 static void *create(const CallerAPI *intf)
 {
-    Xorrot64w8State *obj = intf->malloc(sizeof(Xorrot64w8State));
+    Xorrot64w8ArxState *obj = intf->malloc(sizeof(Xorrot64w8ArxState));
     obj->ind = 0;
     uint64_t seed = intf->get_seed64();
     if (seed == 0) {
@@ -44,6 +51,8 @@ static void *create(const CallerAPI *intf)
     for (size_t i = 0; i < 8; i++) {
         obj->x[i] = (uint8_t) (seed >> (i * 8));
     }
+    obj->a = (uint8_t) (obj->x[0] + obj->x[1]);
+    obj->b = (uint8_t) (obj->x[2] + obj->x[3]);
     return obj;
 }
 
@@ -56,7 +65,7 @@ static void *create(const CallerAPI *intf)
 static int run_self_test(const CallerAPI *intf)
 {
     const uint64_t x_ref[8] = {0x79, 0xa0, 0x88, 0x2D, 0xF7, 0xF7, 0xA8, 0xfB};
-    Xorrot64w8State obj = {.x = {8, 1, 2, 3, 4, 5, 6, 7}, .ind = 0};
+    Xorrot64w8ArxState obj = {.x = {8, 1, 2, 3, 4, 5, 6, 7}, .ind = 0};
     
     for (long i = 0; i < 10000000 / 4; i++) {
         (void) get_bits_raw(&obj);
@@ -74,4 +83,6 @@ static int run_self_test(const CallerAPI *intf)
 }
 
 
-MAKE_UINT32_PRNG("xorrot64w8--", run_self_test)
+MAKE_UINT32_PRNG("xorrot64w8arx", run_self_test)
+
+
