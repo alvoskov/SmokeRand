@@ -375,8 +375,9 @@ grading algorithm was used:
  xorrot64mrt       | u64    | +       | +     | +       | +    | 0.44 | -      | 3     |         | >= 8 TiB
  xorrot64mn        | u64    | +       | +     | +       | +    | 0.44 | +      | 4     |         | >= 4 TiB
  xorrot64w8sc      | u64    | +       | +     | +       | +    | 3.2  |        |       | >=Crush | 64 GiB
+ xorrot64w8arx     | u32    | +       | +     | +       | +    |      |        |       | >=Crush | >= 16 TiB
  xorrot64w32       | u32    | 2       | 3/4   | 8/9     | 12/13| 0.35 |        | 0     | -       | 32 KiB
- xorrot64w32mn     | u32    | +       | +     | +       | +    | 0.44 |        | 4     | +       | ?
+ xorrot64w32mn     | u32    | +       | +     | +       | +    | 0.44 |        | 4     | +       | >= 1 TiB
  xorrot64w16       | u32    | 2       | 3     | 5       | 7    | 1.5  |        | 2.25  | -       | 32 KiB
  xorrot64w16nn     | u32    | +       | +     | +       | +    | 1.8  |        | 4     | +       | >= 8 TiB
  xorrot128         | u64    | 2       | 3     | 5       | 7/8  | 0.30 | +      |       | Small   | 256 KiB
