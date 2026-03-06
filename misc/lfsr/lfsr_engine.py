@@ -156,6 +156,21 @@ class TestLfsrs(unittest.TestCase):
         T = self.gen64.make_xorshift_matrix(17, 13, 43)
         self.assertFalse(is_full_period(T, False))
 
+    def test_xorshift128w64(self):
+        """
+        https://vigna.di.unimi.it/ftp/papers/xorshiftplus.pdf
+        """
+        O, I = self.gen64.O, self.gen64.I
+        L, R = self.gen64.L, self.gen64.R
+        A = (I + gfpow(L, 23)) @ (I + gfpow(R, 17))
+        B = I + gfpow(R, 26)
+        T = np.vstack((
+            np.hstack((O, A)),
+            np.hstack((I, B)),
+        ))
+        self.assertTrue(is_full_period(gf2mat_to_list(T), False))
+
+
     def test_xoroshiro128(self):
         """
         https://arxiv.org/pdf/1805.01407
