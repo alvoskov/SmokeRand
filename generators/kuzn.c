@@ -16,6 +16,10 @@
  *
  * This is better result than the 2 rounds distinguisher decribed by Klinec
  * et al. [9].
+ *
+ * WARNING! This program is designed as a general purpose high quality PRNG
+ * for simulations and statistical testing. IT IS NOT DESIGNED FOR ENCRYPTION,
+ * KEYS/NONCES GENERATION AND OTHER CRYPTOGRAPHICAL APPLICATION!
  * 
  * References:
  * 
@@ -47,7 +51,8 @@
  *    SciTePress, pages 134-146. DOI: https://doi.org/10.5220/0011267600003283
  * 10. https://rekovalev.site/kuznechik-crypto/#code
  *
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.

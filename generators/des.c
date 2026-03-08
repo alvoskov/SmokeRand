@@ -6,6 +6,10 @@
  * 30 cpb. It also equipped with an internal self-test based on the test
  * suggested by Ronald L. Rivest.
  *
+ * WARNING! This program is designed as a general purpose high quality PRNG
+ * for simulations and statistical testing. IT IS NOT DESIGNED FOR ENCRYPTION,
+ * KEYS/NONCES GENERATION AND OTHER CRYPTOGRAPHICAL APPLICATION!
+ *
  * References:
  *
  * - FIPS PUB 46-3. Data Encryption Standard (DES)
