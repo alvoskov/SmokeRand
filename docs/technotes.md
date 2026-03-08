@@ -79,7 +79,7 @@ Recommended configuration:
   LCGs and MWCs, RANLUX++, wyrand etc.
 - 64-bit CPU; in the case of x86-64 -- support of RDTSC and RDSEED instructions
   and AVX2 instructions set by a compiler.
-- Multithreading support: pthreads (POSIX threads) library of WinAPI threads.
+- Multithreading support: pthreads (POSIX threads) library or WinAPI threads.
 - CMake or Ninja + Lua 5.x for compilation by means of MSVC. Or Lua 5.x for
   compilation by means of Open Watcom C.
 - 16 GiB of RAM, especially for multithreaded mode and/or `birthday` battery.

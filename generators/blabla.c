@@ -7,6 +7,10 @@
  * cipher. But BlaBla cryptographic analysis has not been not published
  * and its real cryptographic quality is unknown.
  *
+ * WARNING! This program is designed as a general purpose high quality PRNG
+ * for simulations and statistical testing. IT IS NOT DESIGNED FOR ENCRYPTION,
+ * KEYS/NONCES GENERATION AND OTHER CRYPTOGRAPHICAL APPLICATION!
+ *
  * References:
  * 1. https://github.com/veorq/blabla/blob/master/BlaBla.swift
  * 2. RFC7693. The BLAKE2 Cryptographic Hash and Message Authentication Code

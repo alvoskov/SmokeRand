@@ -20,6 +20,10 @@
  *    for generation of pseudorandom numbers and even for encryption
  *    in the CTR mode.
  *
+ * WARNING! This program is designed as a general purpose high quality PRNG
+ * for simulations and statistical testing. IT IS NOT DESIGNED FOR ENCRYPTION,
+ * KEYS/NONCES GENERATION AND OTHER CRYPTOGRAPHICAL APPLICATION!
+ *
  * References:
  *
  * 1. Morris Dworkin. NIST Special Publication 800-38A. Recommendation for

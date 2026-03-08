@@ -43,6 +43,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   simulation.
 - `sezgin63.c`: both 32-bit and 63-bit outputs are supported. The 63-bit mode
   is useful for testing the `uint63` filter.
+- `speck128.c`: output of scalar/portable and vectorized/AVX2 versions are
+  now identical.
 - `gmwc128.c`: wrong parameters in the Doxygen documentation were fixed.
 - `pcg32` and `pcg64_64`: random odd increment (by Scott Baker)
 - Generator name is printed in the report even if the filter is applied: e.g.

@@ -25,5 +25,6 @@ for i in range(1, 8):
     for j in range(1, 8):
         for k in range(j + 1, 8):
             T = make_xorrot32w8(i, j, k)
-            print(i, j, k, lfsr.is_full_period(T, False))
+            if lfsr.is_full_period(T, False):
+                print(i, j, k)
 

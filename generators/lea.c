@@ -16,6 +16,10 @@
  * as for little-endian architectures like x86. More test vectors can be found
  * in the Crypto++ library distribution [4].
  *
+ * WARNING! This program is designed as a general purpose high quality PRNG
+ * for simulations and statistical testing. IT IS NOT DESIGNED FOR ENCRYPTION,
+ * KEYS/NONCES GENERATION AND OTHER CRYPTOGRAPHICAL APPLICATION!
+ *
  * References:
  *
  * 1. Hong D., Lee J.K., Kim D.C., Kwon D., Ryu K.H., Lee D.G. LEA: A 128-Bit
