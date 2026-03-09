@@ -94,7 +94,8 @@ grading algorithm was used:
  icg64             | u32    | +       | +     | +       | +    | 113  |        |       | >=Crush | >= 1 TiB
  icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  | +      | 0     | Small   | 32 MiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
- kiss96            | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 32 TiB(?)
+ kiss96(orig)      | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 32 TiB(?)
+ kiss96(corr)      | u32    | +       | +     | +       |      | 1.1  |        |       | >=Crush | ?
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  kiss03            | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  kiss03_64         | u64    | +       | +     | +       | +    | 0.46 | +      | 4     |+HI/LO/IL| >= 16 TiB
@@ -376,7 +377,7 @@ grading algorithm was used:
  xorrot64          | u64    | 2       | 3     | 5/6     | 9    | 0.33 | -      | 0     | -       | 32 KiB
  xorrot64mrt       | u64    | +       | +     | +       | +    | 0.44 | -      | 3     |         | >= 8 TiB
  xorrot64mn        | u64    | +       | +     | +       | +    | 0.44 | +      | 4     |         | >= 4 TiB
- xorrot64w8sc      | u64    | +       | +     | +       | +    | 3.2  |        |       | >=Crush | 64 GiB
+ xorrot64w8sc      | u64    | +       | +     | +       | +    | 3.2  |        | 3.5   | +       | 64 GiB
  xorrot64w8arx     | u32    | +       | +     | +       | +    | 4.1  |        | 4     | +       | >= 16 TiB
  xorrot64w32       | u32    | 2       | 3/4   | 8/9     | 12/13| 0.35 |        | 0     | -       | 32 KiB
  xorrot64w32mn     | u32    | +       | +     | +       | +    | 0.44 |        | 4     | +       | >= 1 TiB
