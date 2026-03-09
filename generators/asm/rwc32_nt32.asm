@@ -1,14 +1,19 @@
 ;
-; xoshiro128pp_nt32.asm  An implementation of xoshiro128+ 32-bit PRNG
-; in 80386 assembly language for wasm and Windows NT. The CDECL calling
-; convention is used for all functions.
+; rwc32_nt32.asm  An implementation of RWC32: a simple multiply-with-carry
+; generator (called also RWC or recursion with carry) It is written in 80386
+; assembly language for wasm and Windows NT. The CDECL calling convention
+; is used for all functions.
+;
+; u_n = 1111111464*(x_{n-3} + x_{n-2}) + c_{n-1}
+; x_n = u_n mod 2^32
+; c_n = u_n div 2^32
 ;
 ; It is significantly faster than C implementation compiled by Open Watcom.
 ;
-; The xoshiro128+ generator uses the 16-byte state with the next layout:
-; [s0; s1; s2; s3] where si are 32-bit words.
+; The RWC32 generator uses the 16-byte state with the next layout:
+; [x; y; z; c] where x, y and z and c are 32-bit words.
 ;
-; (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+; (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
 ; alvoskov@gmail.com
 ; 
 ; This software is licensed under the MIT license.
@@ -18,7 +23,7 @@
 include consts.inc
 
 ; Reference value for an internal self-test
-out_ref equ 1E354D68h
+out_ref equ 1EC5DE26h
 
 .code
 
@@ -35,10 +40,10 @@ create proc
     add  esp, 4
     mov  esi, eax                 ; Save address of the PRNG state
     call [ebp + get_seed64_ind]   ; Call intf->get_seed64 function
-    mov  [esi], eax               ; x1 = seed (lower 32 bits)
-    mov  [esi + 8], eax           ; x2 = seed (lower 32 bits)
-    mov  dword ptr [esi +  4], 1  ; c1 = 1
-    mov  dword ptr [esi + 12], 1  ; c2 = 1    
+    mov  [esi], eax               ; x = seed (lower 32 bits)
+    mov  [esi + 8], eax           ; y = seed (lower 32 bits)
+    mov  dword ptr [esi +  4], 1  ; z = 1
+    mov  dword ptr [esi + 12], 1  ; c = 1    
     mov  eax, esi                 ; Return the address
     pop  esi
     pop  ebp
@@ -65,54 +70,45 @@ free endp
 ; uint64_t get_bits(void *state)
 ; Generate one 32-bit unsigned integer.
 ;
-; The used algorithm:
-; res = rotl32(s0 + s3, 7) + s0
-; t = s1 << 9;
-; s2 ^= s0
-; s3 ^= s1
-; s1 ^= s2
-; s0 ^= s3
-; s2 ^= t
-; s3 = rotl32(s3, 11)
-; return res
+; const uint64_t new = 1111111464ULL*((uint64_t)obj->y + obj->z) + obj->c;
+; obj->z = obj->y;
+; obj->y = obj->x;
+; obj->x = (uint32_t) new;
+; obj->c = (uint32_t) (new >> 32);
+; return obj->x;
 ;
 get_bits proc
     push ebp
-    push edi
-    push esi
     push ebx
-    mov  ebp, [esp + 20]  ; Get pointer to the PRNG state
-    ; Make result: res[eax] = rotl32(s0 + s3, 7) + s0
-    mov  eax, [ebp]       ; eax = s0 (will be transformed to output)
-    mov  edi, eax         ; edi = s0 (will be used further)
-    mov  edx, [ebp + 12]  ; edx = s3
-    mov  ebx, edx         ; working copy of s3
-    add  ebx, eax         ; s0 + s3
-    rol  ebx, 7           ; rol32 (s0 + s3, 7)
-    add  eax, ebx         ; <-- the result in eax
-    ; Update the LFSR state
-    ; a) load into registers: edi,ebx,ecx,edx = s0,s1,s2,s3
-    mov  ebx, [ebp + 4]   ; ebx = s1
-    mov  esi, ebx         ; t(esi) = s1 << 9
-    shl  esi, 9
-    mov  ecx, [ebp + 8]   ; ecx = s2
-    ; b) update state
-    xor  ecx, edi         ; s2 ^= s0
-    xor  edx, ebx         ; s3 ^= s1
-    xor  ebx, ecx         ; s1 ^= s2
-    xor  edi, edx         ; s0 ^= s3
-    xor  ecx, esi         ; s2 ^= t
-    rol  edx, 11          ; s3 = rotl32(s3, 11)
-    ; c) Save to the memory
-    mov  [ebp],      edi
-    mov  [ebp + 4],  ebx
-    mov  [ebp + 8],  ecx
-    mov  [ebp + 12], edx
+    mov  ebp, [esp + 12]  ; Get pointer to the PRNG state
+    ; Load data and make z=y, y=z update
+    mov  ecx, [ebp]       ; ecx = x
+    mov  ebx, [ebp + 4]   ; ebx = y
+    mov  edx, [ebp + 8]   ; edx = z
+    mov  [ebp + 4], ecx   ; y = x
+    mov  [ebp + 8], ebx   ; z = y
+    ; Put y + z into ecx:ebx
+    xor  ecx, ecx         ; Buffer for upper 32 bits
+    add  ebx, edx         ; eax += z
+    adc  ecx, 0
+    ; 1111111464ULL*(y + z)
+    mov  eax, ecx         ; ecx:ebx = a * ecx:ebx: upper 32 bits
+    mov  edx, 1111111464
+    mul  edx
+    mov  ecx, eax         
+    mov  eax, ebx         ; ecx:ebx = a * ecx:ebx : lower 32 bits
+    mov  edx, 1111111464
+    mul  edx
+    add  ecx, edx
+    ; Add carry
+    add  eax, [ebp + 12]
+    adc  ecx, 0
+    ; Update x and carry
+    mov  [ebp],      eax ; x = eax (lower 32 bits)
+    mov  [ebp + 12], ecx ; c = ecx (higher 32 bits)
     ; Output function
-    xor  edx, edx
+    xor  edx, edx ; Output is edx:eax, but upper 32 bits are 0
     pop  ebx
-    pop  esi
-    pop  edi
     pop  ebp
     ret
 get_bits endp
@@ -126,7 +122,7 @@ run_self_test proc
     push ebx
     mov  ebp, [esp + 12] ; Pointer to CallerAPI struct
     ; Generate reference value
-    mov  ecx, 10000
+    mov  ecx, 10000001
 loop_gen_ref:
     push ecx
     push offset prng_test_obj
@@ -143,7 +139,7 @@ loop_gen_ref:
     push eax
     push offset printf_fmt
     call [ebp + printf_ind]
-    add  esp, 12    
+    add  esp, 12
     xor  edx, edx ; Comparison result
     mov  eax, ebx ; Comparison result
     pop  ebx
@@ -173,9 +169,9 @@ gen_getinfo endp
 ; Data section. We need it because PRNG state for an internal self-test
 ; should be mutable.
 .data
-    prng_name  db 'xoshiro128++:asm', 0
-    prng_descr db 'xoshiro128++ implementation for 80386', 0
-    prng_test_obj dd 012345678h, 087654321h, 0DEADBEEFh, 0F00FC7C8h
+    prng_name  db 'rwc32:asm', 0
+    prng_descr db 'RWC32 implementation for 80386', 0
+    prng_test_obj dd 12345678, 87654321, 12345, 1
     printf_fmt db 'Output: %X, reference: %X', 13, 10, 0
 
 end
