@@ -24,6 +24,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   They are based on T-functions with proven periods by V. S. Anachin.
 - `ran2`, `ranecu`, `lcg61prime`, `lcg64bd` generators.
 - `rwc32`, `rwc32u48`, `rwc32sm`, `rwc64`, `rwc64large` generators.
+- `rwc32_nt32`: a version of the `rwc32` generator for 80386 and wasm, i.e.
+  Open Watcom assembler.
 - `swblux64` generator (64-bit SWB with different luxury levels)
 - TF0 family (`tf0_32`, `tf0_32sc2`, `tf0_64`, `tf0_64sc`, `tf0_64sc2`,
   `tf0_128` was added (based on an invertible mapping by Klimov and Shamir
@@ -53,6 +55,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   and `full` batteries to catch the `swblux64` generator at `--param=2`.
 - `collover3_13d` and `collover3_13d_high` tests were added to the `full`
   battery.
+- `xoshiro128pp_nt32`: bugfix inside the internal self-test.
 
 ## [0.45] - 2026-01-10
 

@@ -144,9 +144,10 @@ loop_gen_ref:
     push offset printf_fmt
     call [ebp + printf_ind]
     add  esp, 12    
+    xor  edx, edx ; Comparison result
     mov  eax, ebx ; Comparison result
-    pop  ebp
     pop  ebx
+    pop  ebp
     ret
 run_self_test endp
 
