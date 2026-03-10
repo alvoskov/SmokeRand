@@ -1,8 +1,9 @@
 /**
- * @file mwc_kiss96.c
+ * @file mwcsc_kiss96.c
  * @brief MWC generator taken from KISS96 generator (the version from
- * DIEHARD test suite) equipped with an output scrambler. Passes
- * `express`, `brief`, `default` and `full` batteries
+ * DIEHARD test suite) equipped with an output scrambler. Passes:
+ * - `express`, `brief`, `default` and `full` batteries
+ * - PractRand 0.94 at least for >= 2 TiB
  * @details This version of KISS generator was suggested by G.Marsaglia
  * and included in his DIEHARD test suite. It is a combined generator
  * made from 32-bit LCG ("69069"), xorshift32 and some generalized

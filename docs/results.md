@@ -95,7 +95,7 @@ grading algorithm was used:
  icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  | +      | 0     | Small   | 32 MiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss96(orig)      | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 32 TiB(?)
- kiss96(corr)      | u32    | +       | +     | +       |      | 1.1  | +      |       | >=Crush | ?
+ kiss96(corr)      | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 2 TiB
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  kiss03            | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  kiss03_64         | u64    | +       | +     | +       | +    | 0.46 | +      | 4     |+HI/LO/IL| >= 16 TiB
@@ -216,6 +216,8 @@ grading algorithm was used:
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |+il      | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 1 GiB
  mwc8222           | u32    | +       | +     | +       | +    | 0.59 | +      | 4     | +       | >= 32 TiB
+ mwc_kiss96        | u32    | 2       | 14    |         |      |      |        | 0     | -       | 32 KiB
+ mwcsc_kiss96      | u32    | +       | +     | +       | +    |      |        |       |         | >= 2 TiB
  mzran13           | u32    | 1       | 4     | 8/9     | 11   | 1.2  | +      | 0     | Small   | 64 KiB
  ncombo            | u32    | 2       | 5     | 8/9     | 11   | 1.4  | +      | 0     | Small   | 64 KiB
  pcg32             | u32    | +       | +     | +       | +    | 0.44 | +      | 3.5   | +       | 32 TiB
