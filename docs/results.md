@@ -95,7 +95,7 @@ grading algorithm was used:
  icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  | +      | 0     | Small   | 32 MiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss96(orig)      | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 32 TiB(?)
- kiss96(corr)      | u32    | +       | +     | +       |      | 1.1  |        |       | >=Crush | ?
+ kiss96(corr)      | u32    | +       | +     | +       |      | 1.1  | +      |       | >=Crush | ?
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  kiss03            | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  kiss03_64         | u64    | +       | +     | +       | +    | 0.46 | +      | 4     |+HI/LO/IL| >= 16 TiB
