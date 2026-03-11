@@ -95,7 +95,7 @@ grading algorithm was used:
  icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  | +      | 0     | Small   | 32 MiB
  kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss96(orig)      | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 32 TiB(?)
- kiss96(corr)      | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 2 TiB
+ kiss96(corr)      | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 16 TiB(?)
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  kiss03            | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  kiss03_64         | u64    | +       | +     | +       | +    | 0.46 | +      | 4     |+HI/LO/IL| >= 16 TiB
@@ -240,7 +240,7 @@ grading algorithm was used:
  pqrng64           | u32    | +       | +     | 1       | 1    | 0.64 |        | 3     | +       | 16 GiB
  pqrng128          | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | >= 8 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
- ranhash           | u64    | +       | +     | 1       | 1    | 0.25 |        | 2     |         | 8 TiB
+ ranhash           | u64    | +       | +     | 1       | 1    | 0.25 | -      | 2     |         | 8 TiB
  ran2              | u31    | +       | +     | +       | +    | 3.2  | N/A    | 4     | +       | 2 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      | 0     |S_lo/+_hi| 512 KiB
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      | 3.5   |+_lo/+_hi| 2 MiB
@@ -299,7 +299,7 @@ grading algorithm was used:
  smwc192bad        | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 16 TiB(?)
  speck64_128       | u64    | +       | +     | +       | +    | 6.1  | -      | 3     |         | >= 4 TiB
  speck128          | u64    | +       | +     | +       | +    | 3.6  | +      | 5     | >= Crush| >= 32 TiB
- speck128_r16      | u64    | +       | +     | +       |      | 1.7  |        | 4     |         | ?
+ speck128_r16      | u64    | +       | +     | +       | +    | 1.7  |        | 4     |         | >= 8 TiB(?)
  speck128_avx(full)| u64    | +       | +     | +       | +    | 0.84 | +      | 5     | +IL     | >= 16 TiB
  speck128_avx(r16) | u64    | +       | +     | +       | +    | 0.46 | +      | 4     |         | >= 32 TiB
  splitmix          | u64    | +       | +     | +       | +    | 0.12 | -      | 3     | +       | >= 32 TiB
