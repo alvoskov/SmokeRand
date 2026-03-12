@@ -33,4 +33,19 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-MAKE_UINT32_PRNG("Tf0Duper32", NULL)
+static int run_self_test(const CallerAPI *intf)
+{
+    static const uint32_t x_ref = 0x657F5782;
+    uint32_t x;
+    Tf0Duper32State *obj = intf->malloc(sizeof(Tf0Duper32State));
+    obj->tf = 123456789; obj->xs = 987654321;
+    for (long i = 0; i < 10000000; i++) {
+        x = (uint32_t) get_bits_raw(obj);
+    }
+    intf->printf("Observed: 0x%.8lX; expected: 0x%.8lX\n",
+        (unsigned long) x, (unsigned long) x_ref);
+    intf->free(obj);
+    return (x == x_ref) ? 1 : 0;
+}
+
+MAKE_UINT32_PRNG("Tf0Duper32", run_self_test)
