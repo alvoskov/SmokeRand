@@ -66,7 +66,7 @@ grading algorithm was used:
  combo             | u32    | +       | 4     | 6       | 8    | 0.75 | +      | 0     | Small   | 4 GiB
  combmrg96         | u31    | +       | +     | +       | +    | 1.9  | N/A    | 4     | +       | >= 8 TiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
- coveyou128        | u64    | +       | 1     | 1       | 1    | 0.36 | ?      | 3     | +lo     | 64 GiB
+ coveyou128        | u64    | +       | 1     | 1       | 1    | 0.36 | +      | 3     | +lo     | 64 GiB
  cswb4288          | u32    | +       | 1     | 1       | 4/5  | 0.90 | +      | 0     | Crush   | >= 32 TiB
  cswb4288_64       | u64    | +       | 1     | 2       | 4/5  | 0.52 | +      | 0     | +lo/+hi | >= 32 TiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +lo/+hi | >= 16 TiB
@@ -99,9 +99,9 @@ grading algorithm was used:
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  kiss03            | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  kiss03_64         | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |+HI/LO/IL| >= 16 TiB
- kiss32rot         | u32    | +       | +     | +       |      | 0.68 |        |       | >=Crush | >= 8 TiB
+ kiss32rot         | u32    | +       | +     | +       | +    | 0.68 | +      | 4     | +       | >= 8 TiB
  kiss64            | u64    | +       | +     | +       | +    | 0.44 | +      | 4     | +       | >= 32 TiB
- kiss64rot         | u64    | +       | +     | +       |      | 0.37 |        |       |         | ?
+ kiss64rot         | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |         | >= 2 TiB
  kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     | +       | >= 16 TiB
  kiss11_64         | u64    | +       | +     | +       | +    | 0.60 | +      | 4     |         | >= 32 TiB
  kiss4691          | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 32 TiB
