@@ -66,7 +66,7 @@ grading algorithm was used:
  combo             | u32    | +       | 4     | 6       | 8    | 0.75 | +      | 0     | Small   | 4 GiB
  combmrg96         | u31    | +       | +     | +       | +    | 1.9  | N/A    | 4     | +       | >= 8 TiB
  coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
- coveyou128        | u64    | +       | 1     | 1       | 1    | 0.36 | ?      | 3     |         | 64 GiB
+ coveyou128        | u64    | +       | 1     | 1       | 1    | 0.36 | ?      | 3     | +lo     | 64 GiB
  cswb4288          | u32    | +       | 1     | 1       | 4/5  | 0.90 | +      | 0     | Crush   | >= 32 TiB
  cswb4288_64       | u64    | +       | 1     | 2       | 4/5  | 0.52 | +      | 0     | +lo/+hi | >= 32 TiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +lo/+hi | >= 16 TiB
@@ -98,8 +98,10 @@ grading algorithm was used:
  kiss96(corr)      | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 16 TiB(?)
  kiss99            | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  kiss03            | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
- kiss03_64         | u64    | +       | +     | +       | +    | 0.46 | +      | 4     |+HI/LO/IL| >= 16 TiB
- kiss64            | u64    | +       | +     | +       | +    | 0.40 | +      | 4     | +       | >= 32 TiB
+ kiss03_64         | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |+HI/LO/IL| >= 16 TiB
+ kiss32rot         | u32    | +       | +     | +       |      | 0.68 |        |       | >=Crush | >= 8 TiB
+ kiss64            | u64    | +       | +     | +       | +    | 0.44 | +      | 4     | +       | >= 32 TiB
+ kiss64rot         | u64    | +       | +     | +       |      | 0.37 |        |       |         | ?
  kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     | +       | >= 16 TiB
  kiss11_64         | u64    | +       | +     | +       | +    | 0.60 | +      | 4     |         | >= 32 TiB
  kiss4691          | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 32 TiB
@@ -216,8 +218,8 @@ grading algorithm was used:
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |+il      | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 1 GiB
  mwc8222           | u32    | +       | +     | +       | +    | 0.59 | +      | 4     | +       | >= 32 TiB
- mwc_kiss96        | u32    | 2       | 14    |         |      |      |        | 0     | -       | 32 KiB
- mwcsc_kiss96      | u32    | +       | +     | +       | +    |      |        |       |         | >= 2 TiB
+ mwc_kiss96        | u32    | 2       | 14    | 28      |      | 0.47 |        | 0     | -       | 32 KiB
+ mwcsc_kiss96      | u32    | +       | +     | +       | +    | 0.62 | -      | 3     | +       | >= 2 TiB
  mzran13           | u32    | 1       | 4     | 8/9     | 11   | 1.2  | +      | 0     | Small   | 64 KiB
  ncombo            | u32    | 2       | 5     | 8/9     | 11   | 1.4  | +      | 0     | Small   | 64 KiB
  pcg32             | u32    | +       | +     | +       | +    | 0.44 | +      | 3.5   | +       | 32 TiB
@@ -240,7 +242,7 @@ grading algorithm was used:
  pqrng64           | u32    | +       | +     | 1       | 1    | 0.64 |        | 3     | +       | 16 GiB
  pqrng128          | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | >= 8 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
- ranhash           | u64    | +       | +     | 1       | 1    | 0.25 | -      | 2     |         | 8 TiB
+ ranhash           | u64    | +       | +     | 1       | 1    | 0.25 | -      | 2     |+IL/+L/+H| 8 TiB
  ran2              | u31    | +       | +     | +       | +    | 3.2  | N/A    | 4     | +       | 2 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      | 0     |S_lo/+_hi| 512 KiB
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      | 3.5   |+_lo/+_hi| 2 MiB
@@ -345,7 +347,7 @@ grading algorithm was used:
  threefish1024_avx | u64    | +       | +     | +       | +    | 1.3  | +      | 5     | +(il)   | >= 2 TiB
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
- tychei            | u32    | +       | +     | +       | +    | 0.76 | +      | 4(0)  |         | >= 8 TiB
+ tychei            | u32    | +       | +     | +       | +    | 0.76 | +      | 4(0)  | +       | >= 8 TiB
  tychei64          | u64    | +       | +     | +       | +    | 0.38 | +      | 4(0)  |         | >= 16 TiB
  tychei64w         | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 8 TiB
  tylo64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     | +(il)   | >= 32 TiB
@@ -412,7 +414,7 @@ grading algorithm was used:
  xoshiro256p       | u64    | 1       | 1     | 2       | 3    | 0.20 | +      | 3.25  |         | 64 MiB
  xoshiro256pp      | u64    | +       | +     | +       | +    | 0.22 | +      | 4     |         | >= 16 TiB
  xoshiro256stst    | u64    | +       | +     | +       | +    | 0.22 | +      | 4     |         | >= 4 TiB
- xsadd             | u32    | 1       | 1/2   | 4       | 9    | 1.3  |        | 0     | +       | 8 MiB
+ xsadd             | u32    | 1       | 1/2   | 4       | 9    | 1.3  | +      | 0     | +       | 8 MiB
  xsh               | u64    | 2       | 9     | 14      | 18   | 0.43 | -      | 0     | -       | 32 KiB
  xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     | +IL     | >= 4 TiB
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     | >= Crush| >= 32 TiB
