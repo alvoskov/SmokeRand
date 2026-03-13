@@ -250,24 +250,24 @@ $(GEN_BINDIR)/obj/ranluxpp.o : generators/ranluxpp.c \
 
 clean:
 ifeq ($(OS), Windows_NT)
-	del $(BINDIR)\smokerand.exe
-	del $(BINDIR)\bat_example.dll
-	del $(BINDIR)\calibrate_dc6.exe
-	del $(BINDIR)\calibrate_linearcomp.exe
-	del $(BINDIR)\sr_speed.exe
-	del $(BINDIR)\sr_tiny.exe
-	del $(BINDIR)\test_base64.exe
-	del $(BINDIR)\test_chacha.exe
-	del $(BINDIR)\test_crand.exe
-	del $(BINDIR)\test_cpp11.exe
-	del $(BINDIR)\test_funcs.exe
-	del $(BINDIR)\test_rdseed.exe
-	del $(BINDIR)\test_syscrypto.exe
-	del $(OBJDIR)\*.o /q
-	del $(LIBDIR)\*.a /q
-	del $(BINDIR)\generators\*.dll /q
-	del $(BINDIR)\generators\obj\*.o
-	del $(BINDIR)\generators\*.a /q
+	cmd /c "del $(BINDIR)\smokerand.exe"
+	cmd /c "del $(BINDIR)\bat_example.dll"
+	cmd /c "del $(BINDIR)\calibrate_dc6.exe"
+	cmd /c "del $(BINDIR)\calibrate_linearcomp.exe"
+	cmd /c "del $(BINDIR)\sr_speed.exe"
+	cmd /c "del $(BINDIR)\sr_tiny.exe"
+	cmd /c "del $(BINDIR)\test_base64.exe"
+	cmd /c "del $(BINDIR)\test_chacha.exe"
+	cmd /c "del $(BINDIR)\test_crand.exe"
+	cmd /c "del $(BINDIR)\test_cpp11.exe"
+	cmd /c "del $(BINDIR)\test_funcs.exe"
+	cmd /c "del $(BINDIR)\test_rdseed.exe"
+	cmd /c "del $(BINDIR)\test_syscrypto.exe"
+	cmd /c "del $(OBJDIR)\*.o /q"
+	cmd /c "del $(LIBDIR)\*.a /q"
+	cmd /c "del $(BINDIR)\generators\*.dll /q"
+	cmd /c "del $(BINDIR)\generators\obj\*.o"
+	cmd /c "del $(BINDIR)\generators\*.a /q"
 else
 	rm -f $(BINDIR)/smokerand
 	rm -f $(BINDIR)/bat_example.so
