@@ -66,4 +66,4 @@ static void *create(const CallerAPI *intf)
 }
 
 
-MAKE_UINT32_PRNG("MWC_KISS96", NULL)
+MAKE_UINT32_PRNG("MWCSC_KISS96", NULL)
