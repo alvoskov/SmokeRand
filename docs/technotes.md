@@ -295,3 +295,65 @@ can be used for checking correctness of its statistical tests. Examples:
     `gap_inv512` and `gap16_count0` tests from the `brief` battery.
 14. `lfib_par` with the `--param=19937+` parameter: fails the `gap16_count0`
     test in the `default` and `full` batteries.
+
+# About some compilers optimizations
+
+It seems that GCC 15.2 at `-O3` optimization level tries to vectorize the code
+to agressively and slows down some generators (KISS, Biski, Mother-of-All),
+especiall if they are called as small functions (`get_bits`). An example for
+`mall32` PRNG is given below. The `-fno-tree-slp-vectorize` in GCC should be
+used for PRNG plugins compilation.
+
+GCC 15.2 (w64devkit):
+
+    mov          rdx,rcx
+    mov          ecx,[rcx][4]
+    mov          eax,[rdx]
+    vmovd        xmm1,[rdx][00C]
+    vmovq        xmm0,rcx
+    imul         rcx,rcx,0000005D4
+    mov          r8d,[rdx][8]
+    imul         rax,rax,07DD4FFC7
+    vpinsrd      xmm0,xmm0,r8d,1
+    vadd         rax,rcx
+    mov          ecx,[rdx][010]
+    add          rax,rcx
+    vmovd        ecx,xmm1
+    imul         rcx,rcx,0000013FB
+    add          rax,rcx
+    mov          ecx,r8d
+    imul         rcx,rcx,0000006F0
+    add          rax,rcx
+    vpinsrd      xmm1,xmm1,eax,1
+    mov          rcx,rax
+    mov          eax,eax
+    vpunpcklqdq  xmm0,xmm0,xmm1
+    shr          rcx,020 ;' '
+    vmov         [rdx][010],ecx
+    vmovdqu      [rdx],xmm0
+    retn
+
+GCC 10.3 (TDM-GCC):
+
+    mov          edx,[rcx][4]
+    mov          eax,[rcx]
+    mov          r10,rdx
+    imul         rax,rax,07DD4FFC7
+    imul         rdx,rdx,0000005D4
+    mov          r8d,[rcx][00C]
+    mov          r9d,[rcx][8]
+    add          rax,rdx
+    mov          edx,[rcx][010]
+    mov          [rcx],r10d
+    add          rax,rdx
+    mov          edx,r8d
+    imul         rdx,rdx,0000013FB
+    mov          [rcx][4],r9d
+    mov          [rcx][8],r8d
+    add          rax,rdx
+    mov          edx,r9d
+    imul         rdx,rdx,0000006F0
+    add          rax,rdx
+    mov          [rcx][00C],rax
+    mov          eax,eax
+    retn

@@ -570,7 +570,7 @@ int main(int argc, char *argv[])
         return 0;
     } else if (argc < 3) {
         if (!strcmp(argv[1], "--version")) {
-            printf("Smokerand %s\n", SMOKERAND_VERSION_FULL);
+            printf("SmokeRand %s\n", SMOKERAND_VERSION_FULL);
             return 0;
         } else {
             battery_name = "default";
@@ -646,6 +646,7 @@ int main(int argc, char *argv[])
             return BATTERY_ERROR;
         }
         apply_filter(&gi, opts.filter, &filter_gen);
+        intf.printf("SmokeRand %s\n", SMOKERAND_VERSION_FULL);
         GeneratorInfo_print(gi, is_stdout);
         print_ram_size(&intf);
         BatteryExitCode ans = run_battery(battery_name, gi, &intf, &opts);
