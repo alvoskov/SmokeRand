@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
-## Unreleased
+## [0.46] - 2026-03-14
 
 ### Added
 
@@ -15,6 +15,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `ara64`, `arx32`, `arx64` generators.
 - `combmrg96` generator.
 - `kiss03` and `kiss03_64` generators.
+- `kiss32rot` and `kiss64rot` generators: modifications of KISS99/03 generators
+  made by A.L.Voskov (the use xorrot instead of xorshift and apply a rotation
+  to the LCG in the output function.
 - `lcg61prime` generator.
 - `mad0` generator.
 - "Mother-of-all" family (`mall16ex`, `mall32`, `mall64`) was added.
@@ -47,7 +50,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   is useful for testing the `uint63` filter.
 - `speck128.c`: output of scalar/portable and vectorized/AVX2 versions are
   now identical.
-- `gmwc128.c`: wrong parameters in the Doxygen documentation were fixed.
 - `pcg32` and `pcg64_64`: random odd increment (by Scott Baker)
 - Generator name is printed in the report even if the filter is applied: e.g.
   it is `Interleaved:SplitMix` instead of `Interleaved`.
@@ -55,6 +57,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   and `full` batteries to catch the `swblux64` generator at `--param=2`.
 - `collover3_13d` and `collover3_13d_high` tests were added to the `full`
   battery.
+
+### Bugfix
+
+- `-fno-tree-slp-vectorize` key in Makefile.gnu was added for all PRNG plugins
+  to prevent performance degradation in GCC 15.2 with the `-O3` optimization
+  settings due to excessive code vectorization.
+- `kiss96.c`: fixed typos in the MWC part (they were present in both Marsaglia
+  FORTRAN version and its port in TestU01)
+- `gmwc128.c`: wrong parameters in the Doxygen documentation were fixed.
 - `xoshiro128pp_nt32`: bugfix inside the internal self-test.
 
 ## [0.45] - 2026-01-10

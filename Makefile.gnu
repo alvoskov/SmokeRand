@@ -35,7 +35,10 @@ ifeq ($(PLATFORM_NAME), GCC)
     CC = gcc
     CXX = g++
     AR = ar
-    GEN_CFLAGS += -ffreestanding -nostdlib
+    # Note -fno-tree-slp-vectorize is needed for GCC 15.2 to avoid performance
+    # degradation for some algorithms due to excessive vectorization: e.g.
+    # in mall32, KISS family etc.
+    GEN_CFLAGS += -fno-tree-slp-vectorize -ffreestanding -nostdlib
     GEN_LFLAGS = -lgcc
     PLATFORM_FLAGS = -march=native
 else ifeq ($(PLATFORM_NAME), GCC32)

@@ -39,6 +39,12 @@
  * 1. https://github.com/lemire/testingRNG/issues/17
  * 2. https://github.com/Zibri
  * 3. http://www.zibri.org/
+ *
+ * @copyright
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 
