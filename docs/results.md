@@ -97,7 +97,7 @@ grading algorithm was used:
  kiss96(orig)      | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 32 TiB(?)
  kiss96(corr)      | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 16 TiB(?)
  kiss99(orig)      | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
- kiss99(corr)      | u32    | +       | +     | +       | +    | 1.0  |        | 4     | +       | ?
+ kiss99(corr)      | u32    | +       | +     | +       | +    | 1.0  |        | 4     | +       | >= 8 TiB
  kiss03            | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  kiss03_64         | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |+HI/LO/IL| >= 16 TiB
  kiss32rot         | u32    | +       | +     | +       | +    | 0.68 | +      | 4     | +       | >= 8 TiB
