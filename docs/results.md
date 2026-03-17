@@ -41,6 +41,7 @@ grading algorithm was used:
  arxfw16ex2        | u32    | +       | +     | +       | +    | 3.1  | +      | 4     | +       | >= 8 TiB
  arxfw32           | u32    | +       | +     | +       | +    | 0.74 | +      | 4(0)  | +       | >= 16 TiB
  arxfw64           | u32    | +       | +     | +       | +    | 0.38 | +      | 4     | +IL     | >= 8 TiB
+ bbs64             | u64    | +       | +     | +       | +    |      |        | 3.5   | Small   | 256 GiB
  biski8_mul        | u32    | 1       | 19    | 33      | 41   | 2.2  | -(>>10)| 0     | -       | 512 KiB
  biski16_mul       | u32    | +       | 2     | 3       | 6    | 1.6  | -      | 0     | -       | 16 GiB
  biski64_mul       | u64    | +       | +     | +       | +    | 0.18 | +      | 4     |         | >= 2 TiB
@@ -412,7 +413,7 @@ grading algorithm was used:
  xoshiro128aox     | u32    | +       | +     | +       | +    | 0.61 | +      | 4     | +       | >= 8 TiB
  xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      | 3     | +       | 8 MiB
  xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      | 4     | +       | >= 16 TiB
- xoshiro256p       | u64    | 1       | 1     | 2       | 3    | 0.20 | +      | 3.25  |         | 64 MiB
+ xoshiro256p       | u64    | 1       | 1     | 2       | 3    | 0.20 | +      | 3.25  |+l/+h/+il| 64 MiB
  xoshiro256pp      | u64    | +       | +     | +       | +    | 0.22 | +      | 4     |         | >= 16 TiB
  xoshiro256stst    | u64    | +       | +     | +       | +    | 0.22 | +      | 4     |         | >= 4 TiB
  xsadd             | u32    | 1       | 1/2   | 4       | 9    | 1.3  | +      | 0     | +       | 8 MiB
