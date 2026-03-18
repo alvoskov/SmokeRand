@@ -71,7 +71,7 @@ static void *create(const CallerAPI *intf)
 static inline uint64_t get_bits_raw(Lcg128State *obj)
 {
     static const uint64_t a = 0xf8ed5c3f9698fdceU, mask = 0x7fffffffffffffffU;
-    uint64_t m_buf[2], t_hi;
+    uint64_t m_buf[3], t_hi;
     // a*x
     m_buf[0] = unsigned_mul128(a, obj->x_low, &t_hi);
     m_buf[1] = unsigned_muladd128(a, obj->x_high, t_hi, &m_buf[2]);
