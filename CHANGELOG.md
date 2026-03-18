@@ -18,7 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `kiss32rot` and `kiss64rot` generators: modifications of KISS99/03 generators
   made by A.L.Voskov (the use xorrot instead of xorshift and apply a rotation
   to the LCG in the output function.
-- `lcg61prime` generator.
+- `lcg61prime` and `lcg127prime` generators.
 - `mad0` generator.
 - "Mother-of-all" family (`mall16ex`, `mall32`, `mall64`) was added.
   `ex` and `64` modifications were made by A.L. Voskov.
