@@ -124,6 +124,7 @@ grading algorithm was used:
  lcg64sc           | u64    | +       | +     | +       | +    | 0.30 | -      | 3     |+HI/+LO  | >= 16 TiB
  lcg64sc2          | u32    | +       | +     | +       | +    | 0.69 | +      | 4     | +       | >= 16 TiB
  lcg96             | u32    | +       | 1     | 1       | 1    | 0.78 | +      | 3     | +       | 32 GiB
+ lcg127prime       | u64    | +       | +     | +       |      |      |        |       |         | ?
  lcg128            | u64    | +       | 1     | 1       | 1    | 0.35 | +      | 3     | +       | 64 GiB
  lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | 3     | +       | 64 GiB
  lcg128_u32_full   | u32    | +       | +     | 1       | 1    | 0.75 | +      | 3     | +       | >= 32 TiB
@@ -230,7 +231,7 @@ grading algorithm was used:
  pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | 3     | +       | >= 32 TiB
  pcg64_dxsm        | u64    | +       | +     | +       | +    | 0.53 | +      | 4     |         | >= 16 TiB
  pcg64_xsl_rr      | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
- pcg128            | u64    | +       | +     | +       | +    | 0.59 | +      | 4     |         | >= 2 TiB
+ pcg128            | u64    | +       | +     | +       | +    | 0.59 | +      | 4     |+H/+L/~CI| >= 2 TiB
  philox            | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  philox2x32        | u32    | +       | +     | +       | +    | 1.6  | -      | 3     | +       | >= 32 TiB
  philox32          | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
@@ -392,7 +393,7 @@ grading algorithm was used:
  xorrot128         | u64    | 2       | 3     | 5       | 7/8  | 0.30 | +      |       | Small   | 256 KiB
  xorrot128mn       | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 8 TiB
  xorrot128w32      | u32    | 2       | 3     | 5       | 7    | 0.48 | +      | 2.25  | Small   | 256 KiB
- xorrot128w32mrt   | u32    | +       | +     | +       | +    | 0.62 | +      | 4     | +       | >= 1 TiB
+ xorrot128w32mrt   | u32    | +       | +     | +       | +    | 0.62 | +      | 4     | +       | >= 16 TiB
  xorrot256         | u64    | 2       | 3     | 5       | 7    | 0.30 | +      | 2.25  |         | 1 MiB
  xorrot256mrt      | u64    | +       | +     | +       | +    | 0.34 | +      | 4     |         | >= 16 TiB
  xorshift64        | u64    | 2       | 6     | 12      | 15/16| 0.49 | -      | 0     | -       | 32 KiB
