@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
-## [0.46] - 2026-03-14
+## [0.46] - 2026-03-20
 
 ### Added
 
@@ -17,8 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `kiss03` and `kiss03_64` generators.
 - `kiss32rot` and `kiss64rot` generators: modifications of KISS99/03 generators
   made by A.L.Voskov (the use xorrot instead of xorshift and apply a rotation
-  to the LCG in the output function.
-- `lcg61prime` and `lcg127prime` generators.
+  to the LCG in the output function).
+- `lcg61prime`, `lcg127prime`, `lcg128prime` generators.
 - `mad0` generator.
 - "Mother-of-all" family (`mall16ex`, `mall32`, `mall64`) was added.
   `ex` and `64` modifications were made by A.L. Voskov.
