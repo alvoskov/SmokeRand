@@ -42,7 +42,7 @@ else ifeq ($(PLATFORM_NAME), GCC32)
     CC = gcc
     CXX = g++
     AR = ar
-    GEN_CFLAGS += -DNO_CUSTOM_DLLENTRY
+    GEN_CFLAGS += -ffreestanding -nostdlib
     GEN_LFLAGS = -lgcc
     PLATFORM_FLAGS = -m32 -march=native
 else ifeq ($(PLATFORM_NAME), GCC_AARCH64_CROSS)
