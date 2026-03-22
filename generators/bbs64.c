@@ -37,8 +37,8 @@ typedef struct {
 
 static inline uint64_t get_bits_raw(Bbs64State *obj)
 {
-    static const uint64_t m = 4294967087ULL * 4294957307ULL;
-    static const uint64_t d = 0ULL - m;
+    const uint64_t m = 4294967087ULL * 4294957307ULL;
+    const uint64_t d = 0ULL - m;
 
     uint64_t hi, lo;
     lo = unsigned_mul128(obj->x, obj->x, &hi);
