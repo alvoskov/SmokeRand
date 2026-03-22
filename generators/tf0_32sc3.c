@@ -1,3 +1,12 @@
+/**
+ * @file tf0_64sc2.c
+ * @brief A scrambled version of the tf0_32 generator.
+ * @copyright
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG

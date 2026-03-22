@@ -1,3 +1,13 @@
+/**
+ * @file tf0_32.c
+ * @brief A 32-bit modification of tf0_64 PRNG, the generator based on the
+ * Klimov-Shamir "crazy" T-function tf0.
+ * @copyright
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG

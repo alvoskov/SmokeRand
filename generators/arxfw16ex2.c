@@ -5,7 +5,6 @@
  * @details It was made as a toy generator to make a scaled down version of
  * arxfw64 PRNG suitable for 16-bit processors such as Intel 8086.
  * The "FW" means "Feystel-Weyl"
- 
  *
  * @copyright
  * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.

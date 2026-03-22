@@ -1,14 +1,13 @@
 /**
  * @file arxfw8ex3.c
- * @brief ARX-FX8-EX3 is a combined generator that consists of
+ * @brief ARX-FW8-EX3 is a combined generator that consists of
  * chaotic part and linear LFSR and discrete Weyl sequence parts. Designed
  * for 8-bit processors.
  * @details LFSR part has a period of \f$2^{32} - 1\f$ (suggested by Edward
  * Rosten), chaotic part (designed by A.L.Voskov) is based on an invertible
  * mapping. Dicrete Weyl sequence has a period of 256. The main design goal
- * was to implement a PRNG with decent quality (passes SmokeRand ????,
- * TestU01 ????, PractRand 0.94 at least up ???) that is friendly
- * to 8-bit processors.
+ * was to implement a PRNG with decent quality that is friendly to 8-bit
+ * processors.
  *
  * WARNING! The minimal guaranteed period is only about \f$2^{40}\f$, the average
  * period is small and is only about 2^47, bad seeds are theoretically possible.
@@ -20,7 +19,7 @@
  * 1. Edward Rosten. https://github.com/edrosten/8bit_rng
  *
  * @copyright
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.

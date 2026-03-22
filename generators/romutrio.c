@@ -4,8 +4,12 @@
  * It passes `brief`, 'default` and `full` batteries of SmokeRand,
  * it also passes BigCrush and PractRand.
  *
- * WARNING! IT HAS NO GUARANTEED MINIMAL PERIOD! BAD SEEDS ARE POSSIBLE!
- * DON'T USE THIS PRNG FOR ANY SERIOUS WORK!
+ * @details It is a chaotic generator based on the invertible nonlinear mapping.
+ * Its average period can be estimated as \f$ 2^{191}\f$.
+ *
+ * WARNING! It has no guaranteed minimal period, bad seeds are theoretically
+ * possible. Usage of this generator for statistical, scientific and
+ * engineering computations is strongly discouraged!
  *
  * References:
  *
@@ -17,7 +21,7 @@
  *
  * Implementation for SmokeRand:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.

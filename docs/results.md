@@ -58,7 +58,7 @@ grading algorithm was used:
  blabla2           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     | +il     | >= 16 TiB
  blabla4           | u64    | +       | +     | +       | +    | 0.58 | +      | 4     |         | >= 8 TiB
  blabla10          | u64    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 16 TiB
- chacha8           | u32    | +       | +     | +       | +    | 2.1  |        | 5     |         | ?
+ chacha8           | u32    | +       | +     | +       | +    | 2.1  | +      | 5     |         | ?
  chacha8_avx2      | u32    | +       | +     | +       | +    | 0.53 | +      | 5     |         | ?
  chacha12          | u32    | +       | +     | +       | +    | 3.0  | +      | 5     | +       | >= 32 TiB
  chacha12_avx      | u32    | +       | +     | +       | +    | 2.0  | +      | 5     | +       | >= 32 TiB
@@ -128,7 +128,7 @@ grading algorithm was used:
  lcg96             | u32    | +       | 1     | 1       | 1    | 0.78 | +      | 3     | +       | 32 GiB
  lcg127prime       | u64    | +       | +     | +       | +    | 0.76 | +      | 4     |+H/+L/+IL| >= 1 TiB
  lcg128            | u64    | +       | 1     | 1       | 1    | 0.35 | +      | 3     | +       | 64 GiB
- lcg128prime       | u64    | +       | +     | +       | +    |      | +      | 4     | +IL     | >= 1 TiB
+ lcg128prime       | u64    | +       | +     | +       | +    | 0.45 | +      | 4     | +IL     | >= 1 TiB
  lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | 3     | +       | 64 GiB
  lcg128_u32_full   | u32    | +       | +     | 1       | 1    | 0.75 | +      | 3     | +       | >= 32 TiB
  lcg69069          | u32    | 6       | 20    | 38/39   | 43/44| 0.38 | -(>>10)| 0     | -       | 2 KiB
@@ -224,7 +224,7 @@ grading algorithm was used:
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |+il      | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 1 GiB
  mwc8222           | u32    | +       | +     | +       | +    | 0.59 | +      | 4     | +       | >= 32 TiB
- mwc_kiss96        | u32    | 2       | 14    | 28      |      | 0.47 |        | 0     | -       | 32 KiB
+ mwc_kiss96        | u32    | 2       | 14    | 28      | 35   | 0.47 |        | 0     | -       | 32 KiB
  mwcsc_kiss96      | u32    | +       | +     | +       | +    | 0.62 | -      | 3     | +       | >= 2 TiB
  mzran13           | u32    | 1       | 4     | 8/9     | 11   | 1.2  | +      | 0     | Small   | 64 KiB
  ncombo            | u32    | 2       | 5     | 8/9     | 11   | 1.4  | +      | 0     | Small   | 64 KiB
@@ -244,8 +244,8 @@ grading algorithm was used:
  prvhash16cw       | u32    | +       | +     | +       | +    | 2.4  | +      | 3.5(0)| +       | 4 TiB
  prvhash64c        | u64    | +       | +     | +       | +    | 0.51 | +      | 4(0)  |         | >= 16 TiB
  prvhash64cw       | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 16 TiB
- pqrng32           | u32    | 5       | 18    | 35      |      | 0.50 |        | 0     | -       | 2 KiB
- pqrng64           | u32    | +       | +     | 1       | 1    | 0.64 |        | 3     | +       | 16 GiB
+ pqrng32           | u32    | 5       | 18    | 35      | 39   | 0.50 | -(>>10)| 0     | -       | 2 KiB
+ pqrng64           | u32    | +       | +     | 1       | 1    | 0.64 | +      | 3     | +       | 16 GiB
  pqrng128          | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | >= 8 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
  ranhash           | u64    | +       | +     | 1       | 1    | 0.25 | -      | 2     |+IL/+L/+H| 8 TiB
@@ -282,8 +282,9 @@ grading algorithm was used:
  rge512ex          | u64    | +       | +     | +       | +    | 0.34 | +      | 4     | +IL     | >= 8 TiB
  rge512ex-ctr      | u64    | +       | +     | +       | +    | 0.85 | +      | 4     |         | >= 1 TiB
  rge512ex-ctr-avx2 | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |+IL,+H   | >= 16 TiB
- romutrio          | u64    | +       | +     | +       | +    | 0.15 | +      | 4(0)  |         | >= 32 TiB
- romuduojr         | u64    | +       | +     | +       | +    | 0.16 | +      | 4(0)  |         | >= 2 TiB
+ romutrio          | u64    | +       | +     | +       | +    | 0.16 | +      | 4(0)  |         | >= 32 TiB
+ romuduojr         | u64    | +       | +     | +       | +    | 0.11 | +      | 4(0)  |         | >= 2 TiB
+ romuduojrw        | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 1 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
  rwc32sm           | u32    | +       | +     | +       | 1    | 0.83 | +      | 1     | Small   | >= 2 TiB
  rwc32             | u32    | +       | +     | +       | +    | 0.55 | +      | 4     | +       | >= 8 TiB
@@ -337,7 +338,7 @@ grading algorithm was used:
  taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  | Small   | 32 KiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      | 3     |+_lo/+_hi| 32 GiB
- tf0_32            | u32    | 5       | 18    | 33      |      | 0.48 |        | 0     | -       | 2 KiB
+ tf0_32            | u32    | 5       | 18    | 33      | 38   | 0.48 |        | 0     | -       | 2 KiB
  tf0_32sc2         | u32    | +       | 1     | 2       | 8    | 0.57 |        | 0     | Small   | 512 MiB
  tf0_64            | u32    | +       | +     | 1       | 1    | 0.45 |        | 3     | +       | 2 GiB
  tf0_64sc          | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 16 TiB
@@ -383,16 +384,16 @@ grading algorithm was used:
  xoroshiro64pp     | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 8 TiB
  xoroshiro64st     | u32    | 1       | 1     | 3       | 5    | 0.51 | -      | 1.75  | Small   | 1 MiB
  xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 32 TiB
- xorrot32          | u32    | 2       | 16    | 32      |      | 0.55 |        | 0     | -       | 32 KiB
+ xorrot32          | u32    | 2       | 16    | 32      | 41   | 0.55 |        | 0     | -       | 32 KiB
  xorrot64          | u64    | 2       | 3     | 5/6     | 9    | 0.33 | -      | 0     | -       | 32 KiB
  xorrot64mrt       | u64    | +       | +     | +       | +    | 0.44 | -      | 3     |         | >= 8 TiB
  xorrot64mn        | u64    | +       | +     | +       | +    | 0.44 | +      | 4     |         | >= 4 TiB
  xorrot64w8sc      | u64    | +       | +     | +       | +    | 3.2  |        | 3.5   | +       | 64 GiB
  xorrot64w8arx     | u32    | +       | +     | +       | +    | 4.1  |        | 4     | +       | >= 16 TiB
- xorrot64w32       | u32    | 2       | 3/4   | 8/9     | 12/13| 0.35 |        | 0     | -       | 32 KiB
- xorrot64w32mn     | u32    | +       | +     | +       | +    | 0.44 |        | 4     | +       | >= 1 TiB
+ xorrot64w32       | u32    | 2       | 3/4   | 8/9     | 12/13| 0.35 | -      | 0     | -       | 32 KiB
+ xorrot64w32mn     | u32    | +       | +     | +       | +    | 0.44 | +      | 4     | +       | >= 1 TiB
  xorrot64w16       | u32    | 2       | 3     | 5       | 7    | 1.5  |        | 2.25  | -       | 32 KiB
- xorrot64w16nn     | u32    | +       | +     | +       | +    | 1.8  |        | 4     | +       | >= 8 TiB
+ xorrot64w16nn     | u32    | +       | +     | +       | +    | 1.8  | +      | 4     | +       | >= 8 TiB
  xorrot128         | u64    | 2       | 3     | 5       | 7/8  | 0.30 | +      |       | Small   | 256 KiB
  xorrot128mn       | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 8 TiB
  xorrot128w32      | u32    | 2       | 3     | 5       | 7    | 0.48 | +      | 2.25  | Small   | 256 KiB
