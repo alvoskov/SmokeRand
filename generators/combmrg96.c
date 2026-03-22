@@ -43,7 +43,9 @@ static uint64_t get_bits_raw(CombMrg96State *obj)
     if (p2 < 0) p2 += m1;
     y[2] = y[1]; y[1] = y[0]; y[0] = (int32_t) p2;
     // Output function
-    const int32_t out = (y[0] < y[1]) ? (y[0] - y[1] + m1) : (y[0] - y[1]);
+    const int32_t out = (int32_t) (
+        (y[0] < y[1]) ? (y[0] - y[1] + m1) : (y[0] - y[1])
+    );
     return (uint32_t)out << 1;    
 }
 
