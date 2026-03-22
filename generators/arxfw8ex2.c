@@ -1,12 +1,10 @@
 /**
  * @file arxfw8ex2.c
- * @brief ARX-FX8-EX2 is a combined generator that consists of
+ * @brief ARX-FW8-EX2 is a combined generator that consists of
  * chaotic part and LFSR part. Designed for 8-bit processors.
  * @details LFSR part has a period of \f$2^{32} - 1\f$ (suggested by Edward
  * Rosten), chaotic part (designed by A.L.Voskov) is based on an invertible
- * mapping. The main design goal was to implement a PRNG with decent quality
- * (passes SmokeRand `full`, TestU01 BigCrush, fails PractRand 0.94 at 16 TiB)
- * that is friendly to 8-bit processors.
+ * mapping. 
  *
  * WARNING! The minimal guaranteed period is only \f$2^{32} - 1\f$, the average
  * period is small and is only about 2^47, bad seeds are theoretically possible.

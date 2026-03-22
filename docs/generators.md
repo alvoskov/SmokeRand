@@ -1,42 +1,154 @@
 # Implemented algorithms
 
 A lot of pseudorandom number generators are supplied with SmokeRand. They can
-be divided into several groups:
+be divided into several groups.
 
-- Cryptographical, i.e. based on block and stream ciphers: aes128, chacha,
-  hc256, isaac, isaac64, kuzn, lea, rc4ok, speck128 (different modifications),
-  threefish/threefish1024, xtea, xxtea etc.
-- Obsolete cryptographical: DES, GOST R 34.12-2015 "Magma", RC4.
-- Counter-based scramblers based on cryptographical primitives: blabla (closer
-  to experimental stream cipher), philox, philox32, speck128_r16, threefry.
-- Other counter-based PRNGs: jctr32, jctr64
-- Lagged Fibonacci: alfib, alfib_lux, alfib_mod, mlfib17_5, lfib_par,
-  lfib_ranmar, r250, r1279.
-- Linear congruental: cmwc4096, drand48, lcg32prime, lcg42, lcg64, lcg64prime,
-  lcg96, lcg128, lcg69069, minstd, mwc1616, mwc64, mwc128, randu, ranluxpp,
-  seizgin63.
-- Linear congruental with output scrambling: mwc64x, mwc128x, mwc1616x,
-  mwc3232x, pcg32, pcg64, pcg64_xsl_rr.
-- "Weyl sequence" (LCG with a=1) with output scrambling: mulberry32, rrmxmx,
-  splitmix, splitmix32, sqxor, sqxor32, wyrand.
-- "Weyl sequence" injected into reversible nonlinear transformation: sfc8,
-  sfc16, sfc32, sfc64, v3b, wob2m.
-- "Weyl sequence" injected into irreversible nonlinear transformation: cwg64,
-  msws, stormdrop, stormdrop_old.
-- Subtract with borrow: swb, swblarge, swblux, swbw.
-- LSFR without scrambling: shr3, xsh, xorshift128, lfsr113, lfsr258, well1024a.
-- LSFR with scrambling: xorshift128p, xorshift128pp, xoroshiro128p,
-  xoroshiro128pp, xoroshiro1024st, xoroshiro1024stst, xorwow.
-- GSFR: mt19937, tinymt32, tinymt64.
-- Combined generators: kiss93, kiss99, kiss64, lxm_64x128, superduper73,
-  superduper64, superduper96, swbmwc32, swbmwc64, xkiss etc.
-- Chaotic nonlinear generators based on reversible mappings: gjrand, prvhash,
-  ranval, ranval64, sfc, wob2m.
-- Chaotic generators based on irreversible mappings: a5rand, msws, romutrio,
-  komirand.
-- Based on T-functions with proven periods: pqrng, tf0
-- Other: coveyou64, mrg32k3a, romutrio.
+## Cryptographical generators
 
+These generators are based on block or stream ciphers. Of course our
+implementations are not designed for security related applications and mustn't
+be used for such purposes. Some of them have platform-dependend command line
+options (like `--param=8-avx2` for `chacha`) to activate fast SIMD
+platform-dependent implementations.
+
+AES (`aes128`), ChaCha8/12/20 (`chacha`), ThreeFish1024-CTR (`threefish1024`)
+and Speck128/128 (`speck128`) can be used as reference PRNGs for statistical
+tests calibration, simulations etc. Their hardware accelerated implementations
+are fast (often around 0.6-1.5 cpb) and give the same results as scalar ones.
+
+- 128-bit block ciphers: aes128, kuzn, lea, speck128, xxtea etc.
+- Block ciphers with large block sizes: ThreeFish-1024, xxtea.
+- Stream ciphers with arbitrary access: chacha (widely used), blabla
+  (experimental)
+- Other stream ciphers: hc256, isaac, isaac64, rc4ok
+- Obsolete cryptogrpahical: DES, GOST R 34.12-2015 "Magma", RC4.
+
+## Counter based generators (CBPRNG)
+
+CBPRNG resemble block ciphers but use weaker output functions. Examples:
+
+- Widely used: philox, philox32, threefry.
+- Experimental (obtained by A.L. Voskov from existing solutions):
+  speck128_r16 (Speck128/128 with halved number of rounds), jctr32, jctr64
+  (based on very experimental block cipher by Bob Jenkins).
+- Counter-based with non-bijective output function: msws_ctr.
+- "Weyl sequence" (LCG with a=1 and c<>0) with output scrambling: mulberry32,
+  ranhash, rrmxmx, splitmix, splitmix32, sqxor, sqxor32, wyrand.
+
+## Lagged Fibonacci generators
+
+- Additive/subtractive generators with two lags: alfib, alfib_lux, lfib_par.
+- Multiplicative generator: mlfib17_5
+- Additive generators with several lags: alfib64x5, lfib4.
+  
+
+## Linear congruential generators
+
+- With \f$m = 2^k\f$: drand48, lcg42, lcg64, lcg96, lcg128, lcg69069, randu.
+- With prime m: lcg32prime, lcg61prime, lcg64prime, lcg127prime, lcg128prime,
+  minstd, ranluxpp, seizgin63.
+- MWC (multiply-with-carry): cmwc4096, cmwc4827, mwc4691, mwc8222, mwc64,
+  mwc128, mwc192, mwc256, gmwc128.
+- MWC with several lags: rwc32sm, mall32 (by G. Marsaglia), rwc32, rwc64,
+  rwc64, mall64, mall16ex (modifications made by A.L. Voskov).
+- MWC with output scrambling: mwc64x, mwc128x.
+- PCG (LCG with output scramblers):  pcg32, pcg64, pcg64_64, pcg64_dxsm,
+  pcg64_xsl_rr, pcg128 etc.
+- Other scrambled LCGs: lcg64bd, lcg64sc, lcg64sc2, lcg64bd.
+- Subtract with borrow: cswb4288, cswb4288_64, ranlux48, swb, swblarge, swblux,
+  swblux64.
+
+## LFSR/GFSR
+
+- Mersenne Twister: mt19937, mt19937_64.
+- Scrambled LFSRs from MT19937 developers: tinymt32, tinymt64 ("Tiny Mersenne
+  Twisters"), xsadd.
+- Some large LFSRs: melg607, melg19937, melg44497, well1024a.
+- LFSRs by M.V. Iakobovskii: lrnd64_255, lrnd_1023.
+- xorshift: shr3 (xorshift32), xsh (xorshift64), xorshift128.
+- xorshift-like with scramblers: xorshift128p, xorshift128pp, xoroshiro128aox,
+  xoroshiro128p, xoroshiro128pp, xoroshiro1024st, xoroshiro1024stst.
+- xorrot family (by A.L. Voskov): xorrot32, xorrot64, xorrot64w32, xorrot64w16,
+  xorrot128, xorrot128w32, xorrot256.
+- xorrot with output scramblers (by A.L. Voskov): xorrot64mn, xorrot64mrt,
+  xorrot64w8sc, xorrot64w16nn, xorrot64w32mn, xorrot128mn, xorrot128w32mrt,
+  xorrot256mrt.
+- Combined LFSRs: lfsr113, lfsr258, taus88.
+- XOR based lagged Fibonacci: r250, r1279, ziff98.
+
+## Combined generators
+
+- KISS family (classic) kiss93, kiss96, kiss99, kiss03, kiss64.
+- KISS family without multiplication: jkiss32 (the original version by
+  G.Marsaglia), xkiss8_awc, xkiss16_awc, xkiss16sh_awc, xkiss32_awc_rot,
+  xkiss32sh, xkiss64_awc (modifications made by A.L. Voskov)
+- KISS-style generators from "Numerical Recipes" (3rd edition): ran, ranlim32.
+- KISS with extended state: kiss4691, kiss11_32, kiss11_64, skiss32, skiss64.
+- KISS with improved output functions and xorrot LFSR (by A.L. Voskov):
+  kiss32rot, kiss64rot.
+- SuperDuper generators by G. Marsaglia: superduper73, superduper64,
+  superduper96. Also ranq2 from "Numerical Recipes" (3rd edition).
+- tf0duper32 and tf0duper64: SuperDuper modifications developed by A.L. Voskov.
+  They use Klimov-Shamir T-function instead of LCG, xorrot instead of xorshift.
+  Also their output functions are more sophisticated than in the original
+  SuperDuper.
+- LXM (KISS-like with output scrambler): lxm_64x128.
+- Two MWC: mwc1616, mwc1616x, mwc3232x.
+- Multipicative LFIB + MWC: ultra, ultra64.
+- Additive LFIB + discrete Weyl sequence: lfib_ranmar.
+- SWB + MWC: swbmwc32, swbmwc64.
+- SWB + discrete Weyl sequence: swbw.
+- mrg32k3a
+- ranecu and ran2
+- xorshift128 + discrete Weyl sequence: xorwow
+- Wichmann-Hill generators: wich1982, wich2006.
+- alfib_mod
+
+## Chaotic nonlinear generators
+
+- Reversible mappings with linear part (discrete Weyl sequence): biski8,
+  biski16, biski32, biski64, efiix64x48, gjrand8, gjrand16, gjrand32, gjrand64,
+  prvhash64cw, sfc8, sfc16, sfc32, sfc64, tychei64w,
+  v3b, wob2m, zibri64ex, zibri128, zibri128ex, zibri192, zibri192ex.
+- Reversible mappings without linear part: flea32x1, ranval, ranval64,
+  prvhash64c, ranrot_bi, romutrio(?), romuduojr(?), tychei, tychei64.
+- Irreversible mappings with linear part: a5randw, msws, cwg64, komirandw,
+  stormdrop.
+- Irreversible mappings without linear part: a5rand, komirand.
+
+## Other nonlinear generators
+
+These generators are based on some nonlinear mappings with proven period.
+
+- bbs64 (a toy version of Blum-Blum-Shub algorithm that returns all bits)
+- Coveyou generators: coveyou32, coveyou64, coveyou128.
+- ICG (Inversive congruential generator): icg31x2, icg64, icg64_p2, hicg64.
+- Based on Klimov-Shamir T-function: tf0_32, tf0_64, tf0_64, tf0_128. Some
+  scrambled versions resembling PCG are also included.
+- LCG-like with XOR instead of addition: pqrng32, pqrng64, pqrng128 by
+  Karl-Uwe Frank. Actually based on some invertible an ergodic mappings
+  obtained by V.S. Anashin.
+
+The tf0 and pqrng generators are not widely known; they use some nonlinear
+T-functions that have proven full periods.
+
+pqrng T-function:
+
+\f[
+x_n = \left(x_{n-1} \oplus r\right) p \mod 2^{k}
+\f]
+
+tf0 T-function (also known as Klimov-Shamir "crazy" T-functon)
+
+\f[
+x_n = x_{n-1} + \left(x_{n-1}^2 \lor C\right) \mod 2^{k}
+\f]
+
+These T-functions are vulnerable to the `bspace4_8d_dec` test, just as LCGs
+with power of 2 modulo, but perform better in other modifications of birthday
+spacings and collision over tests.
+
+## Some information about algorithms
 
  Algorithm         | Description
 -------------------|-------------------------------------------------------------------------

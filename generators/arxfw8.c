@@ -1,4 +1,26 @@
-// PractRand: 2 MiB
+/**
+ * @file arxfw8.c
+ * @brief ARX-FW8 is a combined generator that consists of
+ * chaotic part and 8-bit counter. Designed for 8-bit processors.
+ * @details 8-bit coiunter ("discrete Weyl sequence") has a period of
+ * \f$2^{8}\f$, chaotic part (designed by A.L.Voskov) is based on an invertible
+ * mapping.
+ *
+ * WARNING! The minimal guaranteed period is only \f$2^{8}\f$, the average
+ * period is small and is only about \f$2^{23}\f$, bad seeds are theoretically
+ * possible. Usage of this generator for statistical, scientific and
+ * engineering computations is strongly discouraged!
+ *
+ * References:
+ *
+ * 1. Edward Rosten. https://github.com/edrosten/8bit_rng
+ *
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 #include "smokerand/int128defs.h"
 

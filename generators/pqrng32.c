@@ -41,7 +41,8 @@
  *        return 0;
  *    }
  *
- * @copyright pqrng algorithm was developed by Karl-Uwe Frank.
+ * @copyright pqrng algorithm was developed by Karl-Uwe Frank and is based
+ * on invertible mappings suggested by V. S. Anashin.
  *
  * Reentrant C99 implementation for SmokeRand:
  *

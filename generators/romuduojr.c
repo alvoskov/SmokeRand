@@ -1,9 +1,12 @@
 /**
  * @file romuduojr.c
  * @brief Implementation of RomuDuoJr PRNG developed by Mark A. Overton.
+ * @details It is a chaotic generator based on the invertible nonlinear mapping.
+ * Its average period can be estimated as \f$ 2^{127}\f$.
  *
- * WARNING! IT HAS NO GUARANTEED MINIMAL PERIOD! BAD SEEDS ARE POSSIBLE!
- * DON'T USE THIS PRNG FOR ANY SERIOUS WORK!
+ * WARNING! It has no guaranteed minimal period, bad seeds are theoretically
+ * possible. Usage of this generator for statistical, scientific and
+ * engineering computations is strongly discouraged!
  *
  * References:
  *

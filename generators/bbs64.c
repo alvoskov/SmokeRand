@@ -11,16 +11,16 @@
  * 2. http://www.ciphersbyritter.com/NEWS2/TESTSBBS.HTM
  *
  *
- * Crush:
+ * TestU01 Crush:
  *
- *      Test                          p-value
- * ----------------------------------------------
- * 76  LongestHeadRun, r = 0           7.9e-8
- * ----------------------------------------------
- * All other tests were passed
+ *          Test                          p-value
+ *     ----------------------------------------------
+ *      76  LongestHeadRun, r = 0           7.9e-8
+ *     ----------------------------------------------
+ *     All other tests were passed
  *
  * @copyright
- * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -85,4 +85,3 @@ static int run_self_test(const CallerAPI *intf)
 
 
 MAKE_UINT64_PRNG("bbs64", run_self_test)
-
