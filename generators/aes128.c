@@ -20,6 +20,10 @@
  *    for generation of pseudorandom numbers and even for encryption
  *    in the CTR mode.
  *
+ * WARNING! This program is designed as a general purpose high quality PRNG
+ * for simulations and statistical testing. IT IS NOT DESIGNED FOR ENCRYPTION,
+ * KEYS/NONCES GENERATION AND OTHER CRYPTOGRAPHICAL APPLICATION!
+ *
  * References:
  *
  * 1. Morris Dworkin. NIST Special Publication 800-38A. Recommendation for
@@ -38,6 +42,9 @@
  *    Rijndael cipher (now AES)
  *    https://github.com/zakird/zdlibc/blob/master/rijndael-alg-fst.c
  * 8. Tiny AES in C. https://github.com/kokke/tiny-AES-c
+ * 9. Hellekalek P., Wegenkittl S. Empirical evidence concerning AES //
+ *    ACM Trans. Model. Comput. Simul. 2003. V.13. N 4. P.322-333.
+ *    https://doi.org/10.1145/945511.945515.
  *
  * @copyright Cross-platform implementation is based on the optimised ANSI C
  * code for the Rijndael cipher (now AES) by the next authors:
@@ -49,7 +56,7 @@
  * That implementation is in public domain. Simplification, adaptation
  * for SmokeRand and hardware AESNI based implementation+:
  *
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -65,7 +72,7 @@ PRNG_CMODULE_PROLOG
 #endif
 
 /**
- * @brief AES 128-bit block friendy to strict aliasing.
+ * @brief AES 128-bit block friendly to strict aliasing.
  */
 typedef union {
 #ifdef AESNI_ENABLED

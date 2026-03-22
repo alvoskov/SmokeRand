@@ -1,4 +1,21 @@
-// https://github.com/lemire/testingRNG/issues/17
+/**
+ * @file zibri192.c
+ * @brief Zibri192 is a chaotic generator.
+ * @details 
+ *
+ * References:
+ *
+ * 1. https://github.com/lemire/testingRNG/issues/17
+ * 2. https://github.com/Zibri
+ * 3. http://www.zibri.org/
+ *
+ * @copyright Implementation for SmokeRand:
+ *
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG

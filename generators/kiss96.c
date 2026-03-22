@@ -13,6 +13,23 @@
  * The algorithm for this MWC is taken from DIEHARD FORTRAN source code
  * and uses some bithacks to implement it without 64-bit data types.
  *
+ * The original FORTRAN source code:
+ *
+ *    do 33 jj=1,4096
+ *    x=69069*x+1
+ *    y=xor(y,lshift(y,13))
+ *    y=xor(y,rshift(y,17))
+ *    y=xor(y,lshift(y,5))
+ *    k=rshift(z,2)+rshift(w,3)+rshift(carry,2)
+ *    m=w+w+z+carry
+ *    z=w
+ *    w=m
+ *    carry=rshift(k,30)
+ *    33              b(jj)=x+y+w
+ *
+ * It seems that the original code (and its version for C) contains an
+ * implementation error.
+ *
  * @copyright The KISS96 algorithm was developed by George Marsaglia.
  *
  * Reentrant implementation for SmokeRand:
@@ -52,17 +69,29 @@ static void Kiss96State_init(Kiss96State *obj, uint64_t seed)
 }
 
 
+/*
+*/
+
 static inline uint64_t get_bits_raw(Kiss96State *obj)
 {
     obj->x = obj->x * 69069u + 1u;
     obj->y ^= obj->y << 13;
     obj->y ^= obj->y >> 17;
     obj->y ^= obj->y << 5;
-    uint32_t k = (obj->z >> 2) + (obj->w >> 3) + (obj->c >> 2);
-    uint32_t m = obj->w + obj->w + obj->z + obj->c;
+#if SIZE_MAX <= UINT32_MAX
+    const uint32_t lo = obj->w + obj->w + obj->z + obj->c;
+    const uint32_t csum = ((obj->w << 1) & 0x3)
+        + (obj->z & 0x3) + obj->c;
+    const uint32_t hi = (obj->z >> 2) + (obj->w >> 1) + (csum >> 2);
     obj->z = obj->w;
-    obj->w = m;
-    obj->c = k >> 30;
+    obj->w = lo;
+    obj->c = hi >> 30;
+#else
+    const uint64_t m = 2U*(uint64_t)obj->w + (uint64_t)obj->z + (uint64_t)obj->c;
+    obj->z = obj->w;
+    obj->w = (uint32_t)m;
+    obj->c = (uint32_t)(m >> 32);
+#endif
     return obj->x + obj->y + obj->w;
 }
 
@@ -73,4 +102,25 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-MAKE_UINT32_PRNG("KISS96", NULL)
+
+/**
+ * @brief An internal self-test
+ */
+static int run_self_test(const CallerAPI *intf)
+{
+    const uint32_t refval = 3320424011U;
+    uint32_t val = 0;
+    Kiss96State obj = {.x = 12345, .y = 54321,
+        .z = 67890, .w = 0xABCDEF, .c = 1};
+    for (long i = 1; i < 1000000; i++) {
+        val = (uint32_t) get_bits_raw(&obj);
+        //intf->printf("%X %X %X\n", obj.z, obj.w, obj.c);
+    }
+    intf->printf("Reference value: %u\n", refval);
+    intf->printf("Obtained value:  %u\n", val);
+    intf->printf("Difference:      %u\n", refval - val);
+    return refval == val;
+}
+
+
+MAKE_UINT32_PRNG("KISS96", run_self_test)

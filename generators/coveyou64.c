@@ -31,7 +31,7 @@ static inline uint64_t get_bits_raw(Coveyou64State *obj)
 static void *create(const CallerAPI *intf)
 {
     Coveyou64State *obj = intf->malloc(sizeof(Coveyou64State));
-    obj->x = intf->get_seed64();
+    obj->x = ((intf->get_seed64() << 2) + 2); // x0 mod 4 = 2
     return obj;
 }
 

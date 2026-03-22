@@ -135,8 +135,8 @@ Four batteries are implemented in SmokeRand:
 ---------|-----------------|---------------------|---------------------
  express | 7               | 2^26                | 2^27
  brief   | 25              | 2^35                | 2^36
- default | 42              | 2^37                | 2^38
- full    | 46              | 2^40                | 2^41
+ default | 44              | 2^37                | 2^38
+ full    | 50              | 2^40                | 2^41
 
 Custom batteries of tests also can be created as both scripts and dynamic
 libraries.
@@ -190,6 +190,13 @@ filters than transform 64-bit PRNG into a 32-bit one:
 - Interleaved 32-bit parts: `--filter=interleaved32`
 - Higher 32 bits (default): `--filter=high32`
 - Lower 32 bits: `--filter=low32`
+
+There are also a `--filter=uint31` and `--filter=uint63` filters that are
+designed for testing generators that return only 31/63 bits in the upper 31/63
+bits of the 32/64-bit unsigned integer and set the lowest bit to 0. This filter
+will replace the lowest bit to the high quality pseudorandom bit using the
+`murmur3mix(mwc64x ^ out) & 0x1` pseudorandom function. The `mwc64x` built-in
+PRNG will be initialized using the tested generator.
 
 ## More details
 

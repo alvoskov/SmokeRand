@@ -4,7 +4,71 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
-## Unreleased
+## [0.46] - 2026-03-22
+
+### Added
+
+- uint31 filter for analysis of 31-bit generators such as `minstd` and
+  `ranecu`. This filter adds a high-quality pseudorandom bit to the end.
+  The `mwc64x_u31` generator was added for its verification.
+- uint63 filter for analysis of 63-bit generators was added.
+- `ara64`, `arx32`, `arx64` generators.
+- `combmrg96` generator.
+- `kiss03` and `kiss03_64` generators.
+- `kiss32rot` and `kiss64rot` generators: modifications of KISS99/03 generators
+  made by A.L.Voskov (the use xorrot instead of xorshift and apply a rotation
+  to the LCG in the output function).
+- `lcg61prime`, `lcg127prime`, `lcg128prime` generators.
+- `mad0` generator.
+- "Mother-of-all" family (`mall16ex`, `mall32`, `mall64`) was added.
+  `ex` and `64` modifications were made by A.L. Voskov.
+- `mwc192` and `mwc256` generators (suggested by Scott Baker)
+- pqrng family (`pqrng32`, `pqrng64`, `pqrng128`) by Karl-Uwe Frank was added;
+  They are based on T-functions with proven periods by V. S. Anachin.
+- `ran2`, `ranecu`, `lcg61prime`, `lcg64bd` generators.
+- `romuduojrw` generator (RomuDuoJr generator with a counter; modification was
+  made by A.L. Voskov.
+- `rwc32`, `rwc32u48`, `rwc32sm`, `rwc64`, `rwc64large` generators.
+- `rwc32_nt32`: a version of the `rwc32` generator for 80386 and wasm, i.e.
+  Open Watcom assembler.
+- `swblux64` generator (64-bit SWB with different luxury levels)
+- TF0 family (`tf0_32`, `tf0_32sc2`, `tf0_64`, `tf0_64sc`, `tf0_64sc2`,
+  `tf0_128` was added (based on an invertible mapping by Klimov and Shamir
+  with the maximal period, uses T-functions). They were tuned by A.L. Voskov
+  to improve the statistical quality.
+- `tf0duper32` and `tf0duper64` generators were added (designed by A.L. Voskov)
+  They resemble SuperDuper but use the "crazy T-function" TF0 instead of LCG
+  and xorrot instead of xorshift and equipped with a simple scrambler.
+- `xorrot` PRNG family was added (designed by A.L. Voskov), also `lfsr`
+  Python 3.x scripts for its construction were added into the `misc` directory.
+  They use `sympy` and `galois` libraries.
+
+### Changed
+
+- `aes128.c` bibliography is extended by the reference to the article by
+  Hellekalek P., Wegenkittl S. (2003) devoted to usage of AES for Monte-Carlo
+  simulation.
+- `sezgin63.c`: both 32-bit and 63-bit outputs are supported. The 63-bit mode
+  is useful for testing the `uint63` filter.
+- `speck128.c`: output of scalar/portable and vectorized/AVX2 versions are
+  now identical.
+- `pcg32` and `pcg64_64`: random odd increment (by Scott Baker)
+- Generator name is printed in the report even if the filter is applied: e.g.
+  it is `Interleaved:SplitMix` instead of `Interleaved`.
+- `collover2_20d` and `collover2_20d_high` tests were added to the `default`.
+  and `full` batteries to catch the `swblux64` generator at `--param=2`.
+- `collover3_13d` and `collover3_13d_high` tests were added to the `full`
+  battery.
+
+### Bugfix
+
+- `-fno-tree-slp-vectorize` key in Makefile.gnu was added for all PRNG plugins
+  to prevent performance degradation in GCC 15.2 with the `-O3` optimization
+  settings due to excessive code vectorization.
+- `kiss96.c`: fixed typos in the MWC part (they were present in both Marsaglia
+  FORTRAN version and its port in TestU01)
+- `gmwc128.c`: wrong parameters in the Doxygen documentation were fixed.
+- `xoshiro128pp_nt32`: bugfix inside the internal self-test.
 
 ## [0.45] - 2026-01-10
 
