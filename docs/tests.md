@@ -134,6 +134,7 @@ from these runs are summed. This sum obeys Poisson distribution.
  bspace21_3d | 21    | 3    | -         | 5       | 10        | 250
  bspace16_4d | 16    | 4    | -         | 5       | 10        | 250
  bspace8_8d  | 8     | 8    | -         | 5       | 10        | 250
+ bspace4_16d | 4     | 16   | -         | -       | 10        | 250
  bspace8_4d  | 8     | 4    | 256       | -       | -         | -
  bspace4_8d  | 4     | 8    | 128       | -       | -         | -
 
@@ -178,6 +179,8 @@ only when \f$ n \ll d^t \f$.
  collover13_3d | 13    | 3    | 3       | 5         | 50
  collover8_5d  | 8     | 5    | 3       | 5         | 50
  collover5_8d  | 5     | 8    | 3       | 5         | 50
+ collover3_13d | 3     | 13   | -       | -         | -
+ collover2_20d | 2     | 20   | -       | 5         | 50
 
 ## Gap test
 

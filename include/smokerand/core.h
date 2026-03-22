@@ -4,7 +4,7 @@
  * of statistical tests.
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -171,6 +171,8 @@ GeneratorInfo define_reversed_generator(const GeneratorInfo *gi);
 GeneratorInfo define_interleaved_generator(const GeneratorInfo *gi);
 GeneratorInfo define_high32_generator(const GeneratorInfo *gi);
 GeneratorInfo define_low32_generator(const GeneratorInfo *gi);
+GeneratorInfo define_uint31_generator(const GeneratorInfo *gi);
+GeneratorInfo define_uint63_generator(const GeneratorInfo *gi);
 
 
 typedef struct {

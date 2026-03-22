@@ -8,6 +8,12 @@
  * - https://www.thecodingforums.com/threads/64-bit-kiss-rngs.673657/
  * - https://ssau.ru/pagefiles/sbornik_pit_2021.pdf
  *
+ * It uses the 128-bit MWC generator with the next prime modulus:
+ *
+ * \f[
+ * m = (2^{58} + 1)\cdot 2^{64} - 1
+ * \f]
+ *
  * @copyright
  * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com

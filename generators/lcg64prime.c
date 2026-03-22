@@ -76,6 +76,12 @@ static void *create(const CallerAPI *intf)
 /**
  * @brief Self-test to prevent problems during re-implementation
  * in MSVC and other plaforms that don't support int128.
+ * @details Python 3.x script for the internal self-test generation:
+ *
+ *    a, x = 13891176665706064842, 1
+ *    for i in range(100000):
+ *        x = (a * x) % (2**64 - 59)
+ *    print(x)
  */
 static int run_self_test(const CallerAPI *intf)
 {

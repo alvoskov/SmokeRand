@@ -28,14 +28,14 @@
  *     print("a0 = ", hex(a0))
  *     a0inv = pow(a0, -1, 2**64)
  *     print("a0inv = ", hex(a0inv))
- *     m = a1*2**64 - a0
+ *     m = a1*2**64 + minus_a0
  *     print("m = ", hex(m))
  *
  * The output is in a perfect agreement with constants suggested by Vigna.
  *
  *     a0 =  0xff82f7b5b27f77a1
  *     a0inv =  0x9b1eea3792a42c61
- *     m = 0xff002aae7d81a645007d084a4d80885f
+ *     m = 0xff002aae7d81a646007d084a4d80885f
  *
  * @copyright The implementation is based on public domain code by
  * S.Vigna (vigna@acm.org).
@@ -71,16 +71,16 @@ typedef struct {
 
 static inline uint64_t get_bits_raw(GMWC128State *obj)
 {
-    uint64_t t_lo, t_hi, c_lo, c_hi;
+    uint64_t t_lo, t_hi;
     // 1) const __uint128_t t = GMWC_A1 * (__uint128_t) obj->x + obj->c;
     t_lo = unsigned_muladd128(GMWC_A1, obj->x, obj->c, &t_hi);
     // 2) obj->x = GMWC_A0INV * (uint64_t)t;
     obj->x = GMWC_A0INV * t_lo;
     // 3) obj->c = (t + GMWC_MINUSA0 * (__uint128_t)obj->x) >> 64;
-    c_lo = unsigned_mul128(GMWC_MINUSA0, obj->x, &c_hi);
-    unsigned_add128(&c_hi, &c_lo, t_lo);
-    c_hi += t_hi;
-    obj->c = c_hi;
+    (void) unsigned_muladd128(GMWC_MINUSA0, obj->x, t_lo, &obj->c);
+    obj->c += t_hi;
+//    c_hi += t_hi;
+//    obj->c = c_hi;
 	return obj->x;
 }
 

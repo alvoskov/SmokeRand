@@ -1,0 +1,115 @@
+/**
+ * @file lcg127prime.c
+ * @brief A classical 127-bit MCG with prime modulus that returns only
+ * lower bits of its state.
+ * @details The next recurrent formula is used:
+ *
+ * \f[
+ * x_{n+1} = ax_{n} \mod (2^{127} - 1)
+ * \f]
+ *
+ * Only lower 64 bits are returned.
+ *
+ * The multiplier is 17937094319065857486 (`0xf8ed5c3f9698fdce`), it provides
+ * the maximal period \f$ m - 2 \f$. Spectral test results:
+ *
+ *    t = 2; mu = 1.8349; fd = .7112; log2(v) = 63; v2 = 99374208123136570596894628735347314690
+ *    t = 3; mu = 1.6861; fd = .6578; log2(v) = 41; v2 = 16739627555523343660972826
+ *    t = 4; mu = 1.2675; fd = .5986; log2(v) = 31; v2 = 6610860253200439842
+ *    t = 5; mu = 1.1204; fd = .5960; log2(v) = 24; v2 = 1055739544879002
+ *    t = 6; mu = 1.7299; fd = .6457; log2(v) = 20; v2 = 3847514297892
+ *    t = 7; mu = 1.6635; fd = .6400; log2(v) = 17; v2 = 62167354038
+ *    t = 8; mu = .5754;  fd = .5539; log2(v) = 15; v2 = 2216161376
+ *
+ *    Merit = .5539; Merit_H = .6570
+ *
+ * The period can be verified by the next Python 3.x script:
+ *
+ *    import sympy
+ *    sympy.n_order(17937094319065857486, 2**127 - 1) - (2**127 - 1)
+ *
+ * MCG uses a bithack for relatively fast (1.0 cpb) implementation based on
+ * a trick from [1]. Of course it is fairly slow (comparable to hardware
+ * accelerated AES or ChaCha) but is usually much faster than a classical
+ * minstd implementation based on Schrage's algorithm (on modern x86-64 CPUs).
+ * Of course quality of our 127-bit MCG is much higher than minstd.
+ *
+ * \f[
+ * u \mod (2^{127} - 1) = H 2^{127} + L \mod m = H\cdot m + H + L \mod m =
+ * H + L \mod m
+ * \f]
+ *
+ * The \f$ H + L \f$ sum is always less than \f$ 2m \f$ that allows
+ * to exclude division.
+ *
+ * References:
+ *
+ * 1. https://programmingpraxis.com/2014/01/14/minimum-standard-random-number-generator/
+ *
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
+#include "smokerand/cinterface.h"
+#include "smokerand/int128defs.h"
+
+PRNG_CMODULE_PROLOG
+
+
+static void *create(const CallerAPI *intf)
+{
+    Lcg128State *obj = intf->malloc(sizeof(Lcg128State));    
+    Lcg128State_seed(obj, intf);
+    obj->x_high >>= 1;
+    obj->x_low |= 1;
+    return obj;
+}
+
+
+static inline uint64_t get_bits_raw(Lcg128State *obj)
+{
+    static const uint64_t a = 0xf8ed5c3f9698fdceU, mask = 0x7fffffffffffffffU;
+    uint64_t m_buf[3], t_hi;
+    // a*x
+    m_buf[0] = unsigned_mul128(a, obj->x_low, &t_hi);
+    m_buf[1] = unsigned_muladd128(a, obj->x_high, t_hi, &m_buf[2]);
+    // m = h*(2**127 - 1) + l where l <= 2**127 - 1
+    const uint64_t h = (m_buf[2] << 1) | (m_buf[1] >> 63);
+    m_buf[1] &= mask;
+    // l += h
+    unsigned_add128(&m_buf[1], &m_buf[0], h);
+    if (m_buf[1] >> 63 != 0) {
+        m_buf[1] &= mask;
+        m_buf[0]++;
+    }
+    // Update the state
+    obj->x_low = m_buf[0];
+    obj->x_high = m_buf[1];
+    // Return the lower 64 bits
+    return obj->x_low;
+}
+
+/**
+ * @brief An internal self-test based on Python 3.x generated values.
+ * @details The next script was used:
+ *
+ *    a, x = 0xf8ed5c3f9698fdce, 1
+ *    for i in range(1000000):
+ *        x = (a*x) % (2**127 - 1)
+ *    print(hex(x % 2**64))
+ */
+static int run_self_test(const CallerAPI *intf)
+{
+    Lcg128State obj = {.x_low = 1, .x_high = 0};
+    uint64_t u, u_ref = 0xae22043bcb750fe8;
+    for (size_t i = 0; i < 1000000; i++) {
+        u = get_bits_raw(&obj);
+    }
+    intf->printf("Result: %llX; reference value: %llX\n", u, u_ref);
+    return u == u_ref;
+}
+
+
+MAKE_UINT64_PRNG("LCG127prime", run_self_test)

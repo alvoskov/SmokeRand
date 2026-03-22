@@ -6,6 +6,10 @@
  * Blocks longer than 256 bits should be avoided due to the vulnerability
  * described by E. Yarrkov for the 6-round version of XXTEA [2].
  *
+ * WARNING! This program is designed as a general purpose high quality PRNG
+ * for simulations and statistical testing. IT IS NOT DESIGNED FOR ENCRYPTION,
+ * KEYS/NONCES GENERATION AND OTHER CRYPTOGRAPHICAL APPLICATION!
+ *
  * References:
  * 1. Wheeler D.J., Needham R.M. Correction to XTEA.
  *    https://www.movable-type.co.uk/scripts/xxtea.pdf

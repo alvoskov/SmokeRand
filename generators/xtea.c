@@ -6,6 +6,10 @@
  * suspectible to birthday paradox attack in CTR mode (fails the `birthday`
  * battery). Even in CBC mode it is prone to Sweet32 attack.
  *
+ * WARNING! This program is designed as a general purpose high quality PRNG
+ * for simulations and statistical testing. IT IS NOT DESIGNED FOR ENCRYPTION,
+ * KEYS/NONCES GENERATION AND OTHER CRYPTOGRAPHICAL APPLICATION!
+ *
  * References:
  *
  * - https://www.cix.co.uk/~klockstone/xtea.pdf

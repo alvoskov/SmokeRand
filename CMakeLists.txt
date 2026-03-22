@@ -7,24 +7,24 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMODULE_C_FLAGS )
+set(CMODULE_LINK_FLAGS " ")
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    set(CMODULE_LINK_FLAGS "-nostdlib")
-    set(FREESTANDING "-ffreestanding")
+    set(CMODULE_LINK_FLAGS "-nostdlib -lgcc")
+    list(APPEND CMODULE_C_FLAGS -fno-tree-slp-vectorize)
+    list(APPEND CMODULE_C_FLAGS -ffreestanding)    
     add_compile_options(-march=native -O3 -Werror -Wall -Wextra)
     add_compile_options(-Wstrict-aliasing=1 -Wpedantic -Wshadow -Wconversion)
     add_compile_options(-Wvla -Wcast-align=strict)
 elseif(CMAKE_C_COMPILER_ID STREQUAL "OpenWatcom")
     set(CMODULE_LINK_FLAGS " ")
-    set(FREESTANDING " ")
+    set(CMODULE_C_FLAGS " ")
     # Add -DNO_CPU_EXTENSIONS to cflags if RDTSC is not desired
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -za99 -DNOTHREADS")
-else()
-    set(CMODULE_LINK_FLAGS " ")
-    set(FREESTANDING " ")
 endif()
 
 # Some CMake settings
-set(CMAKE_VERBOSE_MAKEFILE FALSE)
+#set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -114,55 +114,65 @@ target_link_libraries(test_crand smokerand_bat smokerand_core ${COMMON_LIBS})
 # Generators list
 set (GENERATORS
     a5rand a5rand32 a5rand32w a5randw aes128 alfib alfib64x5 alfib8x5 
-    alfib_lux alfib_mod ara32 arxfw16 arxfw16ex2 arxfw32 arxfw64 
-    arxfw8 arxfw8ex arxfw8ex2 arxfw8ex3 biski16 biski16_alt biski16_mul 
-    biski32 biski32_alt biski64 biski64sh biski64_alt biski64_mul 
-    biski8 biski8_alt biski8_mul blabla chacha cmwc4096 cmwc4827 
-    combo coveyou64 cswb4288 cswb4288_64 cwg64 des drand48 efiix64x48 
-    flea32x1 gjrand16 gjrand32 gjrand64 gjrand8 gmwc128 hc256 hicg64 
-    ia ia64 ibaa icg31x2 icg64 icg64_p2 isaac isaac64 jctr32 jctr64 
-    jkiss jkiss32 jlkiss64 kiss11_32 kiss11_64 kiss4691 kiss64 kiss93 
-    kiss96 kiss99 komirand komirand16 komirand16w komirand32 komirand32w 
-    komirandw kuzn lcg128 lcg32prime lcg42 lcg64 lcg64prime lcg64sc 
-    lcg64sc2 lcg69069 lcg96 lea lfib4 lfib4_u64 lfib_par lfib_ranmar 
-    lfsr113 lfsr258 loop_7fff_w64 loop_antigap_w64 lrnd64_1023 lrnd64_255 
-    lxm_64x128 macmarsa magma melg19937 melg44497 melg607 minstd 
-    mixmax mlfib17_5 mrc16 mrc32 mrc64 mrg32k3a msws msws64 msws64x 
-    msws_ctr mt19937 mt19937_64 mtc16 mtc32 mtc64 mtc64hi mtc8 mularx128 
-    mularx128_str mularx128_u32 mularx256 mularx64_r2 mularx64_u32 
-    mulberry32 mwc128 mwc128x mwc128xxa32 mwc1616 mwc1616p mwc1616x 
-    mwc16_32 mwc256xxa64 mwc3232x mwc32x mwc32xxa8 mwc40xxa8 mwc4691 
-    mwc48xxa16 mwc63x2 mwc64 mwc64x mwc64_2p58 mwc8222 mzran13 ncombo 
-    pcg32 pcg32_dxsm pcg32_xsl_rr pcg64_64 pcg64_dxsm pcg64_xsl_rr 
-    philox philox2x32 philox32 prvhash12c prvhash12cw prvhash16c 
-    prvhash16cw prvhash64c prvhash64cw r1279 r250 ran randu ranlux48 
-    ranluxpp ranq1 ranq2 ranrot16tiny ranrot32 ranrot32tiny ranrot64tiny 
-    ranrot8tiny ranrot_bi ranshi ranval ranval64 rc4 rc4ok rdrand 
-    rge256ex rge256exctr rge256lite rge512ex rge512exctr romutrio 
-    rrmxmx sapparot sapparot2 sapparot2_64 seed seiran128 sezgin63 
+    alfib_lux alfib_mod ara32 ara64 arx32 arx64 arxfw16 arxfw16ex2 
+    arxfw32 arxfw64 arxfw8 arxfw8ex arxfw8ex2 arxfw8ex3 bbs64 biski16 
+    biski16_alt biski16_mul biski32 biski32_alt biski64 biski64sh 
+    biski64_alt biski64_mul biski8 biski8_alt biski8_mul blabla chacha 
+    cmwc4096 cmwc4827 combmrg96 combo coveyou128 coveyou64 cswb4288 
+    cswb4288_64 cwg64 des drand48 efiix64x48 flea32x1 gjrand16 gjrand32 
+    gjrand64 gjrand8 gmwc128 hc256 hicg64 ia ia64 ibaa icg31x2 icg64 
+    icg64_p2 isaac isaac64 jctr32 jctr64 jkiss jkiss32 jlkiss64 kiss03 
+    kiss03_64 kiss11_32 kiss11_64 kiss32rot kiss4691 kiss64 kiss64rot 
+    kiss93 kiss96 kiss99 komirand komirand16 komirand16w komirand32 
+    komirand32w komirandw kuzn lcg127prime lcg128 lcg128prime lcg32prime 
+    lcg32sc lcg42 lcg61prime lcg64 lcg64bd lcg64prime lcg64sc lcg64sc2 
+    lcg69069 lcg96 lea lfib4 lfib4_u64 lfib_par lfib_ranmar lfsr113 
+    lfsr258 loop_7fff_w64 loop_antigap_w64 lrnd64_1023 lrnd64_255 
+    lxm_64x128 macmarsa mad0 magma mall16ex mall32 mall64 melg19937 
+    melg44497 melg607 minstd mixmax mlfib17_5 mrc16 mrc32 mrc64 mrg32k3a 
+    msws msws64 msws64x msws_ctr mt19937 mt19937_64 mtc16 mtc32 mtc64 
+    mtc64hi mtc8 mularx128 mularx128_str mularx128_u32 mularx256 
+    mularx64_r2 mularx64_u32 mulberry32 mwc128 mwc128x mwc128xxa32 
+    mwc1616 mwc1616p mwc1616x mwc16_32 mwc192 mwc256 mwc256xxa64 
+    mwc3232x mwc32x mwc32xxa8 mwc40xxa8 mwc4691 mwc48xxa16 mwc63x2 
+    mwc64 mwc64x mwc64x_u31 mwc64_2p58 mwc8222 mwcsc_kiss96 mwc_kiss96 
+    mzran13 ncombo pcg128 pcg32 pcg32_dxsm pcg32_xsl_rr pcg64_64 
+    pcg64_dxsm pcg64_xsl_rr philox philox2x32 philox32 pqrng128 pqrng32 
+    pqrng64 prvhash12c prvhash12cw prvhash16c prvhash16cw prvhash64c 
+    prvhash64cw r1279 r250 ran ran2 randu ranecu ranhash ranlim32 
+    ranlux48 ranluxpp ranq1 ranq2 ranrot16tiny ranrot32 ranrot32tiny 
+    ranrot64tiny ranrot8tiny ranrot_bi ranshi ranval ranval64 rc4 
+    rc4ok rdrand rge256ex rge256exctr rge256lite rge512ex rge512exctr 
+    romuduojr romuduojrw romutrio rrmxmx rwc32 rwc32sm rwc32u48 rwc64 
+    rwc64large sapparot sapparot2 sapparot2_64 seed seiran128 sezgin63 
     sfc16 sfc32 sfc64 sfc8 shioi128 shr3 skiss32 skiss64 smwc16x8 
     smwc192 smwc192lux smwc24 smwc48 smwc48lux smwc8x16 smwc96 speck128 
     speck128sc speck64_128 splitmix splitmix32 splitmix32cbc splitmix_g1 
     sqxor sqxor32 stormdrop superduper64 superduper73 superduper96 
-    swb swblarge swblux swbmwc32 swbmwc64 swbw taus88 threefish1024 
-    threefry threefry2x64 tinymt32 tinymt64 tylo64 ultra ultra64 
-    v3b well1024a weyl wich1982 wich2006 wob2m wyrand xabc16 xabc32 
-    xabc64 xabc8 xkiss16sh_awc xkiss16_awc xkiss32sh_awc xkiss32_awc 
-    xkiss32_awc_rot xkiss64_awc xkiss8_awc xorgens xoroshiro1024st 
-    xoroshiro1024stst xoroshiro128 xoroshiro128aox xoroshiro128p 
-    xoroshiro128pp xoroshiro128pp_vec xoroshiro32 xoroshiro32pp xoroshiro64aox 
-    xoroshiro64pp xoroshiro64st xoroshiro64stst xorrot32 xorshift128 
-    xorshift128p xorshift128pp xorshift128rp xorshift64 xorshift64st 
-    xorwow xoshiro128aox xoshiro128p xoshiro128pp xoshiro256p xoshiro256pp 
-    xoshiro256stst xsh xtea xtea2 xtea2_64 xxtea zibri128 zibri128ex 
-    zibri192 zibri192ex zibri64ex ziff98 
+    swb swblarge swblux swblux64 swbmwc32 swbmwc64 swbw taus88 tf0duper32 
+    tf0duper64 tf0_128 tf0_32 tf0_32sc2 tf0_32sc3 tf0_64 tf0_64sc 
+    tf0_64sc2 threefish1024 threefry threefry2x64 tinymt32 tinymt64 
+    tychei tychei64 tychei64w tylo64 ultra ultra64 v3b well1024a 
+    weyl wich1982 wich2006 wob2m wyrand xabc16 xabc32 xabc64 xabc8 
+    xkiss16sh_awc xkiss16_awc xkiss32sh_awc xkiss32_awc xkiss32_awc_rot 
+    xkiss64_awc xkiss8_awc xorgens xoroshiro1024st xoroshiro1024stst 
+    xoroshiro128 xoroshiro128aox xoroshiro128p xoroshiro128pp xoroshiro128pp_vec 
+    xoroshiro32 xoroshiro32pp xoroshiro64aox xoroshiro64pp xoroshiro64st 
+    xoroshiro64stst xorrot128 xorrot128mn xorrot128w32 xorrot128w32mrt 
+    xorrot256 xorrot256mrt xorrot32 xorrot64 xorrot64mn xorrot64mrt 
+    xorrot64w16 xorrot64w16nn xorrot64w32 xorrot64w32mn xorrot64w8arx 
+    xorrot64w8sc xorshift128 xorshift128p xorshift128pp xorshift128rp 
+    xorshift64 xorshift64st xorwow xoshiro128aox xoshiro128p xoshiro128pp 
+    xoshiro256p xoshiro256pp xoshiro256stst xsadd xsh xtea xtea2 
+    xtea2_64 xxtea zibri128 zibri128ex zibri192 zibri192ex zibri64ex 
+    ziff98 
 )
 
 # Examples of plugins, i.e. modules with PRNGs
 foreach(prng_name ${GENERATORS})
     add_library(${prng_name} SHARED generators/${prng_name}.c include/smokerand/cinterface.h)
     set_target_properties(${prng_name} PROPERTIES LINK_FLAGS ${CMODULE_LINK_FLAGS})
-    target_compile_options(${prng_name} PRIVATE ${FREESTANDING}) 
+    target_compile_options(${prng_name} PRIVATE ${CMODULE_C_FLAGS}) 
     set_target_properties(${prng_name} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
     set_target_properties(${prng_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
     set_target_properties(${prng_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/generators)
