@@ -9,13 +9,11 @@ for file in $script_dir/../bin/generators/*.so; do
     if [ -f "$file" ]; then
         echo "Processing file: $file"
         $script_dir/../bin/smokerand selftest $file
-        if [ $? -eq 0 ]; then
-            npassed=$((npassed + 1))
-        elif [ $? -eq 1 ]; then
-            nfailed=$((nfailed + 1))
-        elif [ $? -eq 2 ]; then
-            nunknown=$((nunknown + 1))
-        fi
+        case $? in
+            0) npassed=$((npassed + 1)) ;;
+            1) nfailed=$((nfailed + 1)) ;;
+            2) nunknown=$((nunknown + 1)) ;;
+        esac
     fi
 done
 
