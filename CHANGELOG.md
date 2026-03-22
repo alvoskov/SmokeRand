@@ -26,6 +26,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - pqrng family (`pqrng32`, `pqrng64`, `pqrng128`) by Karl-Uwe Frank was added;
   They are based on T-functions with proven periods by V. S. Anachin.
 - `ran2`, `ranecu`, `lcg61prime`, `lcg64bd` generators.
+- `romuduojrw` generator (RomuDuoJr generator with a counter; modification was
+  made by A.L. Voskov.
 - `rwc32`, `rwc32u48`, `rwc32sm`, `rwc64`, `rwc64large` generators.
 - `rwc32_nt32`: a version of the `rwc32` generator for 80386 and wasm, i.e.
   Open Watcom assembler.
