@@ -22,7 +22,7 @@ typedef struct {
 static inline uint16_t get_bits16(Xorrot64w16State *obj)
 {
     const uint16_t x0 = obj->x, w0 = obj->w;
-    const uint16_t out = (uint16_t) (rotl16(x0 - w0, 3) - w0);
+    const uint16_t out = (uint16_t) (rotl16((uint16_t) (x0 - w0), 3) - w0);
     obj->x = (uint16_t) x0 ^ obj->y;
     obj->y = obj->z;
     obj->z = (uint16_t) (x0 ^ w0);
