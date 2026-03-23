@@ -361,7 +361,7 @@ grading algorithm was used:
  ultra             | u32    | +       | +     | +       | 1    | 0.81 | +      | 2     | +       | 4 GiB
  ultra64           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |+_lo/+_hi| >= 16 TiB
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     | +       | >= 32 TiB
- w1rand            | u64    | +       | +     | +       | +    |      |        |       |         | ?
+ w1rand            | u64    | +       | +     | +       | +    |      | +      | 3.5   |         | 1 TiB
  wich1982          | u32    | +       | 5     | 11      | 13   | 2.3  | -      | 0     | -       | 256 GiB
  wich2006          | u32    | +       | +     | +       | +    | 4.6  | +      | 4     | +       | >= 16 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
@@ -774,6 +774,30 @@ Note about `ranhash`:
       Test Name                         Raw       Processed     Evaluation
       BCFN(2+0,13-0,T)                  R= +33.8  p =  1.2e-17    FAIL !
       ...and 444 test result(s) without anomalies
+
+
+Note about `w1rand`:
+
+    rng=RNG_stdin64, seed=unknown
+    length= 512 gigabytes (2^39 bytes), time= 1554 seconds
+      no anomalies in 383 test result(s)
+
+    rng=RNG_stdin64, seed=unknown
+    length= 1 terabyte (2^40 bytes), time= 3108 seconds
+      Test Name                         Raw       Processed     Evaluation
+      [Low4/64]FPF-14+6/16:(0,14-0)     R= +10.7  p =  1.6e-9   very suspicious
+      [Low4/64]FPF-14+6/16:(1,14-0)     R=  +6.6  p =  9.5e-6   unusual
+      [Low4/64]FPF-14+6/16:all          R=  +6.6  p =  1.0e-5   mildly suspicious
+      ...and 394 test result(s) without anomalies
+
+    rng=RNG_stdin64, seed=unknown
+    length= 2 terabytes (2^41 bytes), time= 5977 seconds
+      Test Name                         Raw       Processed     Evaluation
+      [Low4/64]FPF-14+6/16:(0,14-0)     R= +22.0  p =  5.6e-20    FAIL !
+      [Low4/64]FPF-14+6/16:(1,14-0)     R= +16.9  p =  2.9e-15    FAIL
+      [Low4/64]FPF-14+6/16:(2,14-0)     R=  +7.6  p =  1.3e-6   unusual
+      [Low4/64]FPF-14+6/16:all          R= +16.9  p =  2.3e-15    FAIL !
+      ...and 405 test result(s) without anomalies
 
 Sensitivity of dieharder is lower than TestU01 and PractRand:
 
