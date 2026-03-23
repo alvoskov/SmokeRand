@@ -126,7 +126,7 @@ grading algorithm was used:
  lcg64sc           | u64    | +       | +     | +       | +    | 0.30 | -      | 3     |+HI/+LO  | >= 16 TiB
  lcg64sc2          | u32    | +       | +     | +       | +    | 0.69 | +      | 4     | +       | >= 16 TiB
  lcg96             | u32    | +       | 1     | 1       | 1    | 0.78 | +      | 3     | +       | 32 GiB
- lcg127prime       | u64    | +       | +     | +       | +    | 0.76 | +      | 4     |+H/+L/+IL| >= 1 TiB
+ lcg127prime       | u64    | +       | +     | +       | +    | 0.76 | +      | 4     |+H/+L/+IL| >= 4 TiB
  lcg128            | u64    | +       | 1     | 1       | 1    | 0.35 | +      | 3     | +       | 64 GiB
  lcg128prime       | u64    | +       | +     | +       | +    | 0.45 | +      | 4     | +IL     | >= 1 TiB
  lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | 3     | +       | 64 GiB
