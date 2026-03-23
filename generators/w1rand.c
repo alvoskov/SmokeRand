@@ -1,8 +1,11 @@
 /**
  * @file w1rand.c
  * @brief A simple wyrand-style PRNG.
- * @details
- * 1. https://github.com/lemire/testingRNG/issues/28
+ * @details Developed by wangyi-fudan as a modification of wyrand with sligtly
+ * improved performance.
+ *
+ * 1. https://github.com/wangyi-fudan/wyhash
+ * 2. https://github.com/lemire/testingRNG/issues/28
  *
  * @copyright
  * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
