@@ -126,7 +126,7 @@ grading algorithm was used:
  lcg64sc           | u64    | +       | +     | +       | +    | 0.30 | -      | 3     |+HI/+LO  | >= 16 TiB
  lcg64sc2          | u32    | +       | +     | +       | +    | 0.69 | +      | 4     | +       | >= 16 TiB
  lcg96             | u32    | +       | 1     | 1       | 1    | 0.78 | +      | 3     | +       | 32 GiB
- lcg127prime       | u64    | +       | +     | +       | +    | 0.76 | +      | 4     |+H/+L/+IL| >= 4 TiB
+ lcg127prime       | u64    | +       | +     | +       | +    | 0.76 | +      | 4     |+H/+L/+IL| >= 16 TiB
  lcg128            | u64    | +       | 1     | 1       | 1    | 0.35 | +      | 3     | +       | 64 GiB
  lcg128prime       | u64    | +       | +     | +       | +    | 0.45 | +      | 4     | +IL     | >= 1 TiB
  lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | 3     | +       | 64 GiB
@@ -224,6 +224,7 @@ grading algorithm was used:
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |+il      | >= 32 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 1 GiB
  mwc8222           | u32    | +       | +     | +       | +    | 0.59 | +      | 4     | +       | >= 32 TiB
+ mwc8222_v2        | u32    | +       | +     | +       | +    |      |        |       | >=Crush | ?
  mwc_kiss96        | u32    | 2       | 14    | 28      | 35   | 0.47 |        | 0     | -       | 32 KiB
  mwcsc_kiss96      | u32    | +       | +     | +       | +    | 0.62 | -      | 3     | +       | >= 2 TiB
  mzran13           | u32    | 1       | 4     | 8/9     | 11   | 1.2  | +      | 0     | Small   | 64 KiB
