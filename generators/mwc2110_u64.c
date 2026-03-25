@@ -3,6 +3,7 @@
  * @brief A 64-bit MWC generator with large lag (32) and base 2^64 - 1.
  * Has period around 2^2110.
  * @details
+ *
  *    import sympy, random
  *    b = 2**64 - 1
  *    random.seed(12345)
@@ -18,6 +19,7 @@
  *                if sympy.n_order(b, m) == m - 1:
  *                    print("^^^^^^^^^^")
  *                    break
+ *
  * @copyright
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
@@ -30,16 +32,16 @@
 PRNG_CMODULE_PROLOG
 
 /**
- * @brief MWC8222 PRNG state.
+ * @brief MWC2110-u64 PRNG state.
  */
 typedef struct {
     uint64_t x[32]; ///< Generated values
     uint64_t c; ///< Carry
     unsigned int pos; ///< Current position in the buffer
-} Mwc2048u64State;
+} Mwc2110u64State;
 
 
-static void Mwc2048u64State_init(Mwc2048u64State *obj, uint64_t seed)
+static void Mwc2110u64State_init(Mwc2110u64State *obj, uint64_t seed)
 {
     obj->pos = 32;
     obj->c = 1234567890U; // Must be less than the multiplier
@@ -56,7 +58,7 @@ static void Mwc2048u64State_init(Mwc2048u64State *obj, uint64_t seed)
 }
 
 
-static void fill_buffer(Mwc2048u64State *obj)
+static void Mwc2110u64State_fill_buffer(Mwc2110u64State *obj)
 {
     static const uint64_t MWC_A = 0x4ef2ab6150c177ae;
     for (int i = 0; i < 32; i++) {
@@ -73,10 +75,10 @@ static void fill_buffer(Mwc2048u64State *obj)
     }
 }
 
-static inline uint64_t get_bits_raw(Mwc2048u64State *obj)
+static inline uint64_t get_bits_raw(Mwc2110u64State *obj)
 {
     if (obj->pos == 32) {
-        fill_buffer(obj);
+        Mwc2110u64State_fill_buffer(obj);
         obj->pos = 0;
     }
     return obj->x[obj->pos++];
@@ -106,7 +108,7 @@ static inline uint64_t get_bits_raw(Mwc2048u64State *obj)
 static int run_self_test(const CallerAPI *intf)
 {
     uint64_t u, u_ref = 0x390da689f519e678;
-    Mwc2048u64State *obj = intf->malloc(sizeof(Mwc2048u64State));    
+    Mwc2110u64State *obj = intf->malloc(sizeof(Mwc2110u64State));    
     for (unsigned int i = 0; i < 32; i++) {
         obj->x[i] = i;
     }
@@ -124,8 +126,8 @@ static int run_self_test(const CallerAPI *intf)
 
 static void *create(const CallerAPI *intf)
 {
-    Mwc2048u64State *obj = intf->malloc(sizeof(Mwc2048u64State));
-    Mwc2048u64State_init(obj, intf->get_seed64());
+    Mwc2110u64State *obj = intf->malloc(sizeof(Mwc2110u64State));
+    Mwc2110u64State_init(obj, intf->get_seed64());
     return obj;
 }
 
