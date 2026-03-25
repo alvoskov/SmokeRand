@@ -20,6 +20,9 @@
  *                    print("^^^^^^^^^^")
  *                    break
  *
+ * Note: both \f$ m \f$ and all \f$ m - 1 \f$ cofactors were proven to be prime
+ * by means of Primo 4.3.3, see the misc/mwc2110_cert directory.
+ *
  * @copyright
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
