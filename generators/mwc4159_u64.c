@@ -1,11 +1,10 @@
 /**
  * @file mwc4159_u64.c
- * @brief A 64-bit MWC generator with large lag (32) and base 2^64 - 1.
+ * @brief A 64-bit MWC generator with large lag (64) and base 2^64 - 1.
  * Has period around 2^4159 (~2^{4158.946}).
  * @details See mwc2110_u64 source code for Python 3.x script for multipliers
  * search!
  *
- * TODO: NOT DONE YET!
  * Note: both \f$ m \f$ and all \f$ m - 1 \f$ cofactors were proven to be prime
  * by means of Primo 4.3.3, see the misc/mwc2110_cert directory.
  *
