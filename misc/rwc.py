@@ -32,7 +32,7 @@ class RwcGenerator:
         lcg_calc = self.to_lcg()
         txt = f"c=0x{self.c:X} x = "
         for xi in self.x:
-            txt += f"0x{hex(xi)} "
+            txt += f"0x{xi:X} "
         txt += f"\n  lcg={self.lcg:X} lcg_calc={lcg_calc:X}"
         return txt
 
@@ -45,29 +45,24 @@ def run_generator(gen):
     gen.next(); print(gen)
     gen.next(); print(gen)
 
-print("----- 64-bit Mother-of-All ----")
+
+print("----- 64-bit Mother-of-All -----")
 gen64 = RwcGenerator(c=12345, x=[1234, 5678, 8765, 4321], a = [18000690696906969069, 6906969069, 11471147, 9005090050], b=2**64)
 gen64.check_constants()
 run_generator(gen64)
 
-print("----- 32-bit Mother-of-All ----")
+print("----- 32-bit Mother-of-All -----")
 gen = RwcGenerator()
 gen.check_constants()
 run_generator(gen)
 
-print("----- 32-bit RWC for Excel ----")
+print("----- 32-bit RWC for Excel -----")
 gen48 = RwcGenerator(c=12345, x=[12345, 87654321, 12345678], a = [29386, 29386, 0], b=2**32)
 gen48.check_constants()
 run_generator(gen48)
 
+print("----- 64-bit large RWC -----")
+genlarge = RwcGenerator(c=1, x=list(range(64)), a = [0x6b2b8accbeb42f68, 1] + ([0] * 62), b=2**64)
+gen.check_constants()
+run_generator(genlarge)
 
-
-"""
-    sum_lo  = unsigned_mul128(18000690696906969069U, obj->x[0], &sum_hi); // x(n-4)
-    prod_lo = unsigned_mul128(6906969069U,           obj->x[1], &prod_hi); // x(n-3)
-    unsigned_add128(&sum_hi, &sum_lo, prod_lo); sum_hi += prod_hi;
-    prod_lo = unsigned_mul128(11471147U,             obj->x[2], &prod_hi); // x(n-2)
-    unsigned_add128(&sum_hi, &sum_lo, prod_lo); sum_hi += prod_hi;
-    prod_lo = unsigned_mul128(9005090050U,           obj->x[3], &prod_hi); // x(n-1)
-    unsigned_add128(&sum_hi, &sum_lo, prod_lo); sum_hi += prod_hi;    
-"""
