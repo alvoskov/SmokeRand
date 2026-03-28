@@ -38,7 +38,7 @@ class RwcGenerator:
 
 
 def run_generator(gen):
-    for i in range(1_000_000):
+    for i in range(100_000):
         gen.next()
     gen.next(); print(gen)
     gen.next(); print(gen)
@@ -46,6 +46,12 @@ def run_generator(gen):
     gen.next(); print(gen)
 
 
+print("----- 64-bit huge RWC -----")
+genlarge = RwcGenerator(c=1, x=list(range(256)), a = [0xbd4e5d1a2d5969e5, 1] + ([0] * 254), b=2**64)
+#gen.check_constants()
+run_generator(genlarge)
+
+"""
 print("----- 64-bit Mother-of-All -----")
 gen64 = RwcGenerator(c=12345, x=[1234, 5678, 8765, 4321], a = [18000690696906969069, 6906969069, 11471147, 9005090050], b=2**64)
 gen64.check_constants()
@@ -66,3 +72,4 @@ genlarge = RwcGenerator(c=1, x=list(range(64)), a = [0x6b2b8accbeb42f68, 1] + ([
 gen.check_constants()
 run_generator(genlarge)
 
+"""
