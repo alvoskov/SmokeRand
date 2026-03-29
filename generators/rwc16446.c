@@ -27,7 +27,6 @@
  *    generators with maximal period // ACM Trans. Model. Comput. Simul. 2003.
  *    V. 13. N 4. P. 310-321. https://doi.org/10.1145/945511.945514
  *
- * TODO: DO THIS!!!
  * Note: both \f$ m \f$ and all \f$ m - 1 \f$ cofactors were proven to be prime
  * by means of Primo 4.3.3, see the misc/mwc2110_cert directory.
  *
@@ -46,7 +45,7 @@ PRNG_CMODULE_PROLOG
 #define RWC16446_LAGMASK 0xFF
 
 /**
- * @brief RWC4157 PRNG state.
+ * @brief RWC16446 PRNG state.
  */
 typedef struct {
     uint64_t x[RWC16446_LAG]; ///< Generated values
@@ -69,8 +68,7 @@ static inline uint64_t tf0sc_next(uint64_t *state)
     return u;
 }
 
-
-static inline uint64_t get_bits_raw(Rwc16446State *obj)
+static inline uint64_t Rwc16446State_next(Rwc16446State *obj)
 {
     static const uint64_t a = 0xbd4e5d1a2d5969e5U; // 13640942688363178469 
     const unsigned int j = (obj->i + 1) & RWC16446_LAGMASK;
@@ -83,6 +81,28 @@ static inline uint64_t get_bits_raw(Rwc16446State *obj)
     obj->i = j;
     return new_lo;
 }
+
+/**
+ * @brief A modification with the raw output from the linear part.
+ */
+static inline uint64_t get_bits_linear_raw(Rwc16446State *obj)
+{
+    return Rwc16446State_next(obj);
+}
+
+MAKE_GET_BITS_WRAPPERS(linear)
+
+/**
+ * @brief A modification with the lightweight scrambler.
+ */
+static inline uint64_t get_bits_scrambled_raw(Rwc16446State *obj)
+{    
+    const uint64_t u = obj->x[obj->i];
+    (void) Rwc16446State_next(obj);
+    return u ^ rotl64(u, 17) ^ rotl64(u, 53);
+}
+
+MAKE_GET_BITS_WRAPPERS(scrambled)
 
 /**
  * @brief Initializes the generator using the supplied 128-bit seed.
@@ -101,7 +121,7 @@ static void Rwc16446State_init(Rwc16446State *obj, const uint64_t seed[2])
     }
     // Warmup
     for (int i = 0; i < RWC16446_LAG * RWC16446_LAG; i++) {
-        get_bits_raw(obj);
+        (void) get_bits_linear_raw(obj);
     }
 }
 
@@ -120,9 +140,9 @@ static int run_self_test(const CallerAPI *intf)
     obj->c = 1;
     obj->i = 0;
     for (long i = 0; i < 100000; i++) {
-        (void) get_bits_raw(obj);
+        (void) get_bits_linear(obj);
     }
-    const uint64_t u = get_bits_raw(obj), u_ref = 0x51B030FF96ACA476U;
+    const uint64_t u = get_bits_linear(obj), u_ref = 0x51B030FF96ACA476U;
     intf->free(obj);
     intf->printf("Output: 0x%llX; reference: 0x%llX\n",
         (unsigned long long) u, (unsigned long long) u_ref);
@@ -140,4 +160,25 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-MAKE_UINT64_PRNG("rwc16446", run_self_test)
+static const GeneratorParamVariant gen_list[] = {
+    {"",    "rwc16446rrx", 64, default_create, get_bits_scrambled, get_sum_scrambled},
+    {"tr",  "rwc16446rrx", 64, default_create, get_bits_scrambled, get_sum_scrambled},
+    {"lin", "rwc16446lin", 64, default_create, get_bits_linear,    get_sum_linear},
+    GENERATOR_PARAM_VARIANT_EMPTY
+};
+
+
+static const char description[] =
+"RWC16446 is a modification of MWC (multiply with carry) generator with\n"
+"two lags. Its period is about 2^16446. The default variant is equipped\n"
+"with a lightweight scrambler. The next param values are supported:\n"
+"  rrx - a modification with the scrambler (default)\n"
+"  lin - just direct output without scrambler\n";
+
+int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
+{
+    const char *param = intf->get_param();
+    gi->description = description;
+    gi->self_test = run_self_test;
+    return GeneratorParamVariant_find(gen_list, intf, param, gi);
+}

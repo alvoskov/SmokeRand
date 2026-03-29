@@ -295,7 +295,8 @@ grading algorithm was used:
  rwc64             | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +hi     | >= 8 TiB
  rwc64large        | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  rwc4157           | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | ?
- rwc16446          | u64    | +       | +     | +       |      |      |        |       |         | ?
+ rwc16446lin       | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |+HI      | ?
+ rwc16446rrx       | u64    | +       | +     | +       | +    | 0.28 | +      | 4     |         | >= 4 TiB
  sapparot          | u32    | +       | 2     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
  sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4(0)  |         | >= 16 TiB
@@ -896,6 +897,8 @@ CSWB4228/64: >= 8 TiB
 CSWB4288/64: >= 1 TiB
 
 RWC32SM >= 8 TiB
+
+RWC14664RRX >= 4 TiB
 
 SWBLARGE
 
