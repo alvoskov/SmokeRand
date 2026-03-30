@@ -59,7 +59,7 @@ grading algorithm was used:
  blabla4           | u64    | +       | +     | +       | +    | 0.58 | +      | 4     |         | >= 8 TiB
  blabla10          | u64    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 16 TiB
  chacha8           | u32    | +       | +     | +       | +    | 2.1  | +      | 5     |         | ?
- chacha8_avx2      | u32    | +       | +     | +       | +    | 0.53 | +      | 5     |         | ?
+ chacha8_avx2      | u32    | +       | +     | +       | +    | 0.53 | +      | 5     | +       | ?
  chacha12          | u32    | +       | +     | +       | +    | 3.0  | +      | 5     | +       | >= 32 TiB
  chacha12_avx      | u32    | +       | +     | +       | +    | 2.0  | +      | 5     | +       | >= 32 TiB
  chacha12_avx2     | u32    | +       | +     | +       | +    | 0.78 | +      | 5     | +       | >= 16 TiB
@@ -294,9 +294,9 @@ grading algorithm was used:
  rwc32u48          | u32    | +       | +     | +       | +    | 0.47 | +      | 4     | +       | >= 32 TiB
  rwc64             | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +hi     | >= 8 TiB
  rwc64large        | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
- rwc4157           | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | ?
- rwc16446lin       | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |+HI      | >= 8 TiB
- rwc16446rrx       | u64    | +       | +     | +       | +    | 0.28 | +      | 4     |         | >= 4 TiB
+ rwc4157           | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |+HI      | >= 1 TiB
+ rwc16446lin       | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |+HI/+LO  | >= 8 TiB
+ rwc16446rrx       | u64    | +       | +     | +       | +    | 0.28 | +      | 4     |+HI      | >= 4 TiB
  sapparot          | u32    | +       | 2     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
  sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4(0)  |         | >= 16 TiB
@@ -828,6 +828,22 @@ PractRand 0.96. It catches some 64-bit LCGs with prime modulo but often fails
 to detect additive lagged Fibonacci and subtract-with-borrow generators
 with large lags that are detected by SmokeRand.
 
+
+  Generator     | PractRand 0.96
+----------------|----------------
+ CSWB4228/64:   | >= 8 TiB(?)
+ lcg61prime     | 4 GiB
+ lcg64prime     | 32 GiB
+ lcg127prime    | >= 1 TiB
+ LFIB-2281+     | >= 8 TiB(?)
+ MWC64          | 32 GiB
+ RWC32SM        | >= 8 TiB
+ RWC146641(lin) | >= 8 TiB
+ RWC14664RRX    | >= 4 TiB
+ sezgin63       | 32 GiB
+ SWBLARGE       | 512 GiB
+
+
 lcg61prime
 
     rng=RNG_stdin32, seed=unknown
@@ -889,17 +905,6 @@ LFIB-2281+
       Test Name                         Raw       Processed     Evaluation
       [Low1/32]BCFN(2+4,13-0U)          R= +10.4  p =  4.3e-5   unusual
       ...and 291 test result(s) without anomalies
-
-
-
-CSWB4228/64: >= 8 TiB
-
-CSWB4288/64: >= 1 TiB
-
-RWC32SM >= 8 TiB
-
-RWC146641(lin) >= 8 TiB
-RWC14664RRX >= 4 TiB
 
 SWBLARGE
 
