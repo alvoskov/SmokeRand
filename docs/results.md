@@ -100,7 +100,7 @@ grading algorithm was used:
  kiss96(orig)      | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 32 TiB(?)
  kiss96(corr)      | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 16 TiB(?)
  kiss99(orig)      | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
- kiss99(corr)      | u32    | +       | +     | +       | +    | 1.0  |        | 4     | +       | >= 8 TiB
+ kiss99(corr)      | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 8 TiB
  kiss03            | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  kiss03_64         | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |+HI/LO/IL| >= 16 TiB
  kiss32rot         | u32    | +       | +     | +       | +    | 0.68 | +      | 4     | +       | >= 8 TiB
@@ -257,7 +257,7 @@ grading algorithm was used:
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      | 3.5   |+_lo/+_hi| 2 MiB
  randu             | u32    | 6       | 23    | 41      | 45   | 0.41 | -(>>10)| 0     | -       | 1 KiB
  ranecu            | u31    | +       | +     | 1       | 1    | 3.1  | N/A    | 1     | Small   | 2 TiB
- ranlim32          | u32    | +       | +     | +       | +    | 1.3  |        | 4     | +       | >= 16 TiB
+ ranlim32          | u32    | +       | +     | +       | +    | 1.3  | +      | 4     | +       | >= 16 TiB
  ranlux++          | u64    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 32 TiB
  ranrot_bi         | u64    | +       | +     | 1       | 2/4  | 0.33 | +      | 0     |+IL/+H/+L| 8 GiB
  ranrot32[7/3]     | u32    | +       | 3     | 5/6     | 6    | 0.58 | +      | 0     | Small   | 128 MiB
@@ -295,7 +295,7 @@ grading algorithm was used:
  rwc64             | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +hi     | >= 8 TiB
  rwc64large        | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  rwc4157           | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | ?
- rwc16446lin       | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |+HI      | ?
+ rwc16446lin       | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |+HI      | >= 8 TiB
  rwc16446rrx       | u64    | +       | +     | +       | +    | 0.28 | +      | 4     |         | >= 4 TiB
  sapparot          | u32    | +       | 2     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
@@ -898,6 +898,7 @@ CSWB4288/64: >= 1 TiB
 
 RWC32SM >= 8 TiB
 
+RWC146641(lin) >= 8 TiB
 RWC14664RRX >= 4 TiB
 
 SWBLARGE
