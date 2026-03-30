@@ -53,20 +53,6 @@ typedef struct {
     unsigned int i; ///< Current position in the buffer
 } Rwc16446State;
 
-/**
- * @brief A simple nonlinear generator based on the Klimov-Shamir "crazy"
- * TF0 function with some ad-hoc output scrambler.
- * @details See `tf0_sc2` PRNG for details. The generator quaility is fairly
- * high.
- */
-static inline uint64_t tf0sc_next(uint64_t *state)
-{
-    *state += *state * *state | 0x40000005;
-    uint64_t u = *state ^ (*state >> 32);
-    u *= 6906969069U;
-    u = u ^ rotl64(u, 17) ^ rotl64(u, 53);
-    return u;
-}
 
 static inline uint64_t Rwc16446State_next(Rwc16446State *obj)
 {
@@ -106,18 +92,26 @@ MAKE_GET_BITS_WRAPPERS(scrambled)
 
 /**
  * @brief Initializes the generator using the supplied 128-bit seed.
- * @details The seed is expanded by means of two simple nonlinear PRNGs
+ * @details The seed is expanded by means of a simple nonlinear PRNG
  * with subsequent "warmup" stage to decorrelate the PRNG copies.
+ * The nonlinear PRNG is based on Klimov-Shamir "crazy" T-function with some
+ * ad-hoc scrambler. The empirical quality is fairly good.
  */
 static void Rwc16446State_init(Rwc16446State *obj, const uint64_t seed[2])
 {
     obj->i = RWC16446_LAG;
     obj->c = 1234567890U; // Must be less than the multiplier
-    // Seed expansion
-    uint64_t st0 = seed[0], st1 = seed[1];
+    // Seed expansion using the next PRNG:
+    //obj->x = obj->x + (obj->x * obj->x | (2**62 + 5));
+    uint64_t hi = seed[0], lo = seed[1];
     for (int i = 0; i < RWC16446_LAG; i++) {
-        obj->x[i] = tf0sc_next(&st0);
-        obj->x[i] += tf0sc_next(&st1);
+        umuladd_128x128p64w(hi, lo, &hi, &lo, 0); // x*x
+        lo |= (1ULL << 62) + 5ULL; // (x*x) | C
+        const uint64_t hi_old = hi; // x += x*x | C
+        unsigned_add128(&hi, &lo, lo); hi += hi_old;
+        // Scrambler
+        const uint64_t u = hi ^ (hi >> 32);
+        obj->x[i] = u ^ rotl64(u, 17) ^ rotl64(u, 53);
     }
     // Warmup
     for (int i = 0; i < RWC16446_LAG * RWC16446_LAG; i++) {
