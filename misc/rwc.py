@@ -46,10 +46,23 @@ def run_generator(gen):
     gen.next(); print(gen)
 
 
+print("----- MWC-FP -----")
+genlarge = RwcGenerator(c=0, x=[2**256], a=[16166422908038702740], b=2**256 + 1)
+print(hex(genlarge.lcg), hex(genlarge.c), hex(genlarge.x[0]))
+for i in range(5):
+    genlarge.next()
+    print(hex(genlarge.lcg), hex(genlarge.c), hex(genlarge.x[0]))
+    genlarge.next()
+    print(hex(genlarge.lcg), hex(genlarge.c), hex(genlarge.x[0]))
+
+#print(genlarge.check_constants())
+
+"""
 print("----- 64-bit huge RWC -----")
 genlarge = RwcGenerator(c=1, x=list(range(256)), a = [0xbd4e5d1a2d5969e5, 1] + ([0] * 254), b=2**64)
 #gen.check_constants()
 run_generator(genlarge)
+"""
 
 """
 print("----- 64-bit Mother-of-All -----")

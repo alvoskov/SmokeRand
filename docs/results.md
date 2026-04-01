@@ -226,7 +226,7 @@ grading algorithm was used:
  mwc4159_u64       | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | >= 4 TiB
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 1 GiB
  mwc8222           | u32    | +       | +     | +       | +    | 0.59 | +      | 4     | +       | >= 32 TiB
- mwc8222_v2        | u32    | +       | +     | +       | +    | 0.93 |        |       | +       | ?
+ mwc8222_v2        | u32    | +       | +     | +       | +    | 0.93 |        | 3.5   | +       | 2 TiB
  mwc_kiss96        | u32    | 2       | 14    | 28      | 35   | 0.47 |        | 0     | -       | 32 KiB
  mwcsc_kiss96      | u32    | +       | +     | +       | +    | 0.62 | -      | 3     | +       | >= 2 TiB
  mzran13           | u32    | 1       | 4     | 8/9     | 11   | 1.2  | +      | 0     | Small   | 64 KiB
@@ -287,7 +287,7 @@ grading algorithm was used:
  rge512ex-ctr-avx2 | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |+IL,+H   | >= 16 TiB
  romutrio          | u64    | +       | +     | +       | +    | 0.16 | +      | 4(0)  |         | >= 32 TiB
  romuduojr         | u64    | +       | +     | +       | +    | 0.11 | +      | 4(0)  |         | >= 2 TiB
- romuduojrw        | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 1 TiB
+ romuduojrw        | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 16 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
  rwc32sm           | u32    | +       | +     | +       | 1    | 0.83 | +      | 1     | Small   | >= 2 TiB
  rwc32             | u32    | +       | +     | +       | +    | 0.55 | +      | 4     | +       | >= 8 TiB
