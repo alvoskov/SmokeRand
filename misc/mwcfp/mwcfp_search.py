@@ -1,9 +1,9 @@
 import sympy, random
-b = 2**128 + 2
+b = 2**64 + 2
 
 for i in range(10000000):
-    a = random.randint(2**63 + 1, 2**64 - 1)
-    #a = random.randint(2**31 + 1, 2**32 - 1)
+    #a = random.randint(2**63 + 1, 2**64 - 1)
+    a = random.randint(2**31 + 1, 2**32 - 1)
     #a = 16166422908038702740
     m = a*b - 1
     if sympy.isprime(m):
