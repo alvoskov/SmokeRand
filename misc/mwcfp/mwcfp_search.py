@@ -1,5 +1,5 @@
 import sympy, random
-b = 2**2048 + 2
+b = 2**128 + 2
 
 for i in range(10000000):
     a = random.randint(2**63 + 1, 2**64 - 1)

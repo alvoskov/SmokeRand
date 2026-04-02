@@ -51,6 +51,13 @@ typedef struct {
 
 
 typedef struct {
+    uint64_t x[3];
+    uint64_t c;
+    int pos;
+} MwcFp128u64State;
+
+
+typedef struct {
     uint64_t x[5];
     uint64_t c;
     int pos;
@@ -210,6 +217,10 @@ static void *funcname(const GeneratorInfo *gi, const CallerAPI *intf) \
     return obj; \
 }
 
+GENERATE_GET_BITS64_FUNC(get_bits_mwc128u64_raw, MwcFp128u64State, 15588520075796777254U, 2)
+GENERATE_CREATE_BITS64_FUNC(create_mwc128u64, MwcFp128u64State, 2)
+MAKE_GET_BITS_WRAPPERS(mwc128u64)
+
 GENERATE_GET_BITS64_FUNC(get_bits_mwc256u64_raw, MwcFp256u64State, 18145911855674681826U, 4)
 GENERATE_CREATE_BITS64_FUNC(create_mwc256u64, MwcFp256u64State, 4)
 MAKE_GET_BITS_WRAPPERS(mwc256u64)
@@ -304,6 +315,7 @@ static const GeneratorParamVariant gen_list[] = {
     {"1024u64", "mwc1024u64", 64, create_mwc1024u64, get_bits_mwc1024u64, get_sum_mwc1024u64},
     {"256u64", "mwc256u64", 64, create_mwc256u64, get_bits_mwc256u64, get_sum_mwc256u64},
     {"256u32", "mwc256u32", 32, create_mwc256u32, get_bits_mwc256u32, get_sum_mwc256u32},
+    {"128u64", "mwc128u64", 64, create_mwc128u64, get_bits_mwc128u64, get_sum_mwc128u64},
 //    {"32u32",  "mwc32u32",  32, create_mwc32u32,  get_bits_mwc32u32,  get_sum_mwc32u32},
     GENERATOR_PARAM_VARIANT_EMPTY
 };
