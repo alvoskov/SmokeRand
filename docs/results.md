@@ -59,7 +59,7 @@ grading algorithm was used:
  blabla4           | u64    | +       | +     | +       | +    | 0.58 | +      | 4     |         | >= 8 TiB
  blabla10          | u64    | +       | +     | +       | +    | 1.2  | +      | 4     |         | >= 16 TiB
  chacha8           | u32    | +       | +     | +       | +    | 2.1  | +      | 5     |         | ?
- chacha8_avx2      | u32    | +       | +     | +       | +    | 0.53 | +      | 5     | +       | ?
+ chacha8_avx2      | u32    | +       | +     | +       | +    | 0.53 | +      | 5     | +       | >= 16 TiB
  chacha12          | u32    | +       | +     | +       | +    | 3.0  | +      | 5     | +       | >= 32 TiB
  chacha12_avx      | u32    | +       | +     | +       | +    | 2.0  | +      | 5     | +       | >= 32 TiB
  chacha12_avx2     | u32    | +       | +     | +       | +    | 0.78 | +      | 5     | +       | >= 16 TiB
