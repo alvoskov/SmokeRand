@@ -76,6 +76,13 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
+static inline uint64_t sub64b(uint64_t *a, uint64_t b)
+{
+    const uint64_t t = *a - b;
+    const uint64_t c = (t > *a) ? 1 : 0; // borrow
+    *a = t;
+    return c;
+}
 
 static inline uint64_t get_bits_raw(Lcg128PrimeState *obj)
 {
@@ -85,15 +92,17 @@ static inline uint64_t get_bits_raw(Lcg128PrimeState *obj)
         // m = a*x
         m_buf[0] = unsigned_mul128(a, obj->x_low, &t_hi);
         m_buf[1] = unsigned_muladd128(a, obj->x_high, t_hi, &m_buf[2]);
-        while (m_buf[2] != 0 || (m_buf[1] == 0xFFFFFFFFFFFFFFFFU &&
-                                 m_buf[0] >= 0xFFFFFFFFFFFFFF61U)) {
-            // mhi_buf = 159 * H
-            mhi_buf[0] = unsigned_mul128(d, m_buf[2], &mhi_buf[1]);
-            // 159*H + L; 159*H is inside m hi_buf
-            const uint64_t mbuf1_in = m_buf[1];
-            unsigned_add128(&m_buf[1], &m_buf[0], mhi_buf[0]);
-            m_buf[2] = (mbuf1_in > m_buf[1]) ? 1 : 0; // carry
-            unsigned_add128(&m_buf[2], &m_buf[1], mhi_buf[1]);
+        // mhi_buf = 159 * H
+        mhi_buf[0] = unsigned_mul128(d, m_buf[2], &mhi_buf[1]);
+        // 159*H + L; 159*H is inside m hi_buf
+        const uint64_t mbuf1_in = m_buf[1];
+        unsigned_add128(&m_buf[1], &m_buf[0], mhi_buf[0]);
+        m_buf[2] = (mbuf1_in > m_buf[1]) ? 1 : 0; // carry
+        unsigned_add128(&m_buf[2], &m_buf[1], mhi_buf[1]);
+        // -= m if needed
+        if (m_buf[2] != 0 || (~m_buf[1] == 0U &&
+                               m_buf[0] >= 0xFFFFFFFFFFFFFF61U)) {
+            unsigned_add128(&m_buf[1], &m_buf[0], 0x60U);
         }
         // Update the state
         obj->x_low = m_buf[0];
