@@ -70,7 +70,7 @@ static void *create(const CallerAPI *intf)
 
 static inline uint64_t get_bits_raw(Lcg128State *obj)
 {
-    static const uint64_t a = 0xf8ed5c3f9698fdceU, mask = 0x7fffffffffffffffU;
+    static const uint64_t a = 13433445539930070091U, mask = 0x7fffffffffffffffU;
     uint64_t m_buf[3], t_hi;
     // a*x
     m_buf[0] = unsigned_mul128(a, obj->x_low, &t_hi);
@@ -80,7 +80,7 @@ static inline uint64_t get_bits_raw(Lcg128State *obj)
     m_buf[1] &= mask;
     // l += h
     unsigned_add128(&m_buf[1], &m_buf[0], h);
-    if (m_buf[1] >> 63 != 0 || (~m_buf[0] == 0U && m_buf[1] == mask)) {
+    if (m_buf[1] >> 63 != 0/* || (~m_buf[0] == 0U && m_buf[1] == mask)*/) {
         unsigned_add128(&m_buf[1], &m_buf[0], 1U);
     }
     // Update the state
@@ -94,7 +94,7 @@ static inline uint64_t get_bits_raw(Lcg128State *obj)
  * @brief An internal self-test based on Python 3.x generated values.
  * @details The next script was used:
  *
- *    a, x = 0xf8ed5c3f9698fdce, 1
+ *    a, x = 13433445539930070091, 1
  *    for i in range(1000000):
  *        x = (a*x) % (2**127 - 1)
  *    print(hex(x % 2**64))
@@ -102,7 +102,7 @@ static inline uint64_t get_bits_raw(Lcg128State *obj)
 static int run_self_test(const CallerAPI *intf)
 {
     Lcg128State obj = {.x_low = 1, .x_high = 0};
-    uint64_t u, u_ref = 0xae22043bcb750fe8;
+    uint64_t u, u_ref = 0xe490c2a6c3e38bcd ;
     for (size_t i = 0; i < 1000000; i++) {
         u = get_bits_raw(&obj);
     }
