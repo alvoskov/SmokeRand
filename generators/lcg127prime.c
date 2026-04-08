@@ -80,7 +80,9 @@ static inline uint64_t get_bits_raw(Lcg128State *obj)
     m_buf[1] &= mask;
     // l += h
     unsigned_add128(&m_buf[1], &m_buf[0], h);
-    if (m_buf[1] >> 63 != 0 || (~m_buf[0] == 0U && m_buf[1] == mask)) {
+    // Note: 2^127 - 1 cannot appear because it will be reduced to 0
+    // (and it is prevented by a correct initializaton)
+    if (m_buf[1] >> 63 != 0) {
         unsigned_add128(&m_buf[1], &m_buf[0], 1U);
     }
     // Update the state
