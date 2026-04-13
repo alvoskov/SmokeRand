@@ -1,6 +1,6 @@
 import math
 class MwcPf:
-    def __init__(self, a=13115896780146644418, b=2**512 + 2, c=0, x=2**512):
+    def __init__(self, a=16996179571824182298, b=2**512 + 2, c=0, x=2**512):
         self.a = a
         self.b = b
         self.c = c
@@ -45,4 +45,7 @@ def generate_test_vectors(gen):
             print(gen)
 
 generate_test_vectors(MwcPf())
-generate_test_vectors(MwcPf(a=3906776790, b=2**256 + 2, c=0, x=2**256))
+generate_test_vectors(MwcPf(a=4238794375, b=2**256 + 2, c=0, x=2**256))
+
+generate_test_vectors(MwcPf(a=4291122658, b=2**64 + 2, c=0, x=2**64))
+generate_test_vectors(MwcPf(a=17741297344439402706, b=2**128 + 2, c=0, x=2**128))

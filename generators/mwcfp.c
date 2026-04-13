@@ -1,8 +1,57 @@
 /**
  * @file mwcfp.c
- * @details See the `misc/mwcfp` directory.
+ * @brief A modification of MWC generator with base \f$ 2^k + 2 \f$ that has
+ * full period and theoretically proven distribution properties.
+ * @details MWC-FP PRNG family was designed by A.L. Voskov. See the
+ * `misc/mwcfp` directory for some theoretical details, test vectors
+ * generators etc.
+ *
+ * Some multipliers for 32-bit PRNGs:
+ *
+ *  Base       | lag | Multiplier | log2(m-1) | (m - 1) // 2
+ * ------------|-----|------------|-----------|--------------------------
+ * 2**64 + 2   | 2   | 4291122658 | 96.00     | 7 * 61609 * p
+ * 2**128 + 2  | 4   | 4142557070 | 159.95    | 47 * p
+ * 2**256 + 2  | 8   | 4238794375 | 287.97    | 7 * 23 * 439**2 * p
+ * 2**512 + 2  | 16  | 4294137855 | 544.00    | 47 * 67 * 1789 * 1165579 * p
+ * 2**1024 + 2 | 32  | 4287999874 | 1055.00   | 5 * 7 * 17 * 41 * 1151 * 3253 * 62633 * p
+ * 2**2048 + 2 | 64  | 4273733971 | 2079.99   | 2 * 6373 * p
+ *
+ * Some multipliers for 64-bit PRNGs:
+ *
+ *  Base       | lag | Multiplier           | log2(m-1) | (m - 1) // 2
+ * ------------|-----|----------------------|-----------|-----------------------
+ * 2**128 + 2  | 2   | 17741297344439402706 | 191.94    | 859 * 246131 * p
+ * 2**256 + 2  | 4   | 17873945764845871615 | 319.95    | 103 * p
+ * 2**512 + 2  | 8   | 16996179571824182298 | 575.88    | 14071 * 32999 * p
+ * 2**1024 + 2 | 16  | 18439945329244120106 | 1088.00   | 73 * 647 * 2617 * 165709 * p
+ * 2**2048 + 2 | 32  | 18235832631006504774 | 2111.98   | 5 * 11 * 23 * 23293 * p
+ * 2**4096 + 2 | 64  | 17633152884372258591 | 4159.93   | 2 * 29 * p
+ *
+ * All prime moduli and their m - 1 were certified by means of Primo 4.3.3.
+ *
+ * Tests results
+ *
+ *  Generator  | SmokeRand | TestU01  | PractRand 0.96 | cpb
+ * ------------|-----------|----------|----------------|-----
+ *  mwc64u32   | full      |          | >= 4 TiB       | 0.68
+ *  mwc128u32  |           |          |                | 0.68
+ *  mwc256u32  | >=default |          |                | 0.90
+ *  mwc512u32  |           |          |                | 1.3
+ *  mwc1024u32 |           |          |                | 0.8
+ *  mwc2048u32 |           |          |                | 1.0
+ *  mwc128u64  | full      |          |                | 0.46
+ *  mwc256u64  | >=default |          |                | 0.41
+ *  mwc512u64  | >=default |          |                | 0.61
+ *  mwc1024u64 | >=default |          |                | 0.80
+ *  mwc2048u64 | >=default |          |                | 0.45
+ *  mwc4096u64 | >=default |          |                | 0.55
+ *
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
-
 #include "smokerand/cinterface.h"
 #include "smokerand/int128defs.h"
 
@@ -10,18 +59,11 @@ PRNG_CMODULE_PROLOG
 
 #define MAKE_MWCFP_STRUCT(type, inttype, lag) \
 typedef struct { \
-    inttype x[lag + 1]; \
+    inttype x[(lag) + 1]; \
     inttype c; \
     int pos; \
 } type;
 
-MAKE_MWCFP_STRUCT(MwcFp64u32State,   uint32_t, 2) // lag 2
-MAKE_MWCFP_STRUCT(MwcFp128u64State,  uint64_t, 2)
-MAKE_MWCFP_STRUCT(MwcFp256u64State,  uint64_t, 4) // lag 4
-
-MAKE_MWCFP_STRUCT(MwcFp256u32State,  uint32_t, 8) // lag 8
-MAKE_MWCFP_STRUCT(MwcFp512u64State,  uint64_t, 8)
-MAKE_MWCFP_STRUCT(MwcFp1024u64State, uint64_t, 16) // lag 16
 
 static inline uint32_t sub32b(uint32_t *a, uint32_t b)
 {
@@ -162,36 +204,33 @@ static void *funcname(const GeneratorInfo *gi, const CallerAPI *intf) \
     return obj; \
 }
 
-// Smokerand `full`, >= 1 TiB in PractRand
-GENERATE_GET_BITS32_FUNC(get_bits_mwc64u32_raw, MwcFp64u32State, 4280626598U, 2)
-GENERATE_CREATE_BITS32_FUNC(create_mwc64u32, MwcFp64u32State, 2)
-MAKE_GET_BITS_WRAPPERS(mwc64u32)
+
+#define DECLARE_MWCFP32_VARIANT(funcname, type, mul, lag) \
+MAKE_MWCFP_STRUCT(type, uint32_t, lag) \
+GENERATE_GET_BITS32_FUNC(get_bits_##funcname##_raw, type, mul, lag) \
+GENERATE_CREATE_BITS32_FUNC(create_##funcname, type, lag) \
+MAKE_GET_BITS_WRAPPERS(funcname)
+
+#define DECLARE_MWCFP64_VARIANT(funcname, type, mul, lag) \
+MAKE_MWCFP_STRUCT(type, uint64_t, lag) \
+GENERATE_GET_BITS64_FUNC(get_bits_##funcname##_raw, type, mul, lag) \
+GENERATE_CREATE_BITS64_FUNC(create_##funcname, type, lag) \
+MAKE_GET_BITS_WRAPPERS(funcname)
 
 
-GENERATE_GET_BITS64_FUNC(get_bits_mwc128u64_raw, MwcFp128u64State, 15588520075796777254U, 2)
-GENERATE_CREATE_BITS64_FUNC(create_mwc128u64, MwcFp128u64State, 2)
-MAKE_GET_BITS_WRAPPERS(mwc128u64)
+DECLARE_MWCFP32_VARIANT(mwc64u32,   MwcFp64u32State,   4291122658U, 2)
+DECLARE_MWCFP32_VARIANT(mwc128u32,  MwcFp128u32State,  4142557070U, 4)
+DECLARE_MWCFP32_VARIANT(mwc256u32,  MwcFp256u32State,  4238794375U, 8)
+DECLARE_MWCFP32_VARIANT(mwc512u32,  MwcFp512u32State,  4294137855U, 16)
+DECLARE_MWCFP32_VARIANT(mwc1024u32, MwcFp1024u32State, 4287999874U, 32)
+DECLARE_MWCFP32_VARIANT(mwc2048u32, MwcFp2048u32State, 4273733971U, 64)
 
-
-GENERATE_GET_BITS64_FUNC(get_bits_mwc256u64_raw, MwcFp256u64State, 18145911855674681826U, 4)
-GENERATE_CREATE_BITS64_FUNC(create_mwc256u64, MwcFp256u64State, 4)
-MAKE_GET_BITS_WRAPPERS(mwc256u64)
-
-
-GENERATE_GET_BITS32_FUNC(get_bits_mwc256u32_raw, MwcFp256u32State, 3906776790U, 8)
-GENERATE_CREATE_BITS32_FUNC(create_mwc256u32, MwcFp256u32State, 8)
-MAKE_GET_BITS_WRAPPERS(mwc256u32)
-
-GENERATE_GET_BITS64_FUNC(get_bits_mwc512u64_raw, MwcFp512u64State, 13115896780146644418U, 8)
-GENERATE_CREATE_BITS64_FUNC(create_mwc512u64, MwcFp512u64State, 8)
-MAKE_GET_BITS_WRAPPERS(mwc512u64)
-
-GENERATE_GET_BITS64_FUNC(get_bits_mwc1024u64_raw, MwcFp1024u64State, 16279984197873894135U, 16)
-GENERATE_CREATE_BITS64_FUNC(create_mwc1024u64, MwcFp1024u64State, 1)
-MAKE_GET_BITS_WRAPPERS(mwc1024u64)
-
-
-
+DECLARE_MWCFP64_VARIANT(mwc128u64,  MwcFp128u64State,  17741297344439402706U, 2)
+DECLARE_MWCFP64_VARIANT(mwc256u64,  MwcFp256u64State,  17873945764845871615U, 4)
+DECLARE_MWCFP64_VARIANT(mwc512u64,  MwcFp512u64State,  16996179571824182298U, 8)
+DECLARE_MWCFP64_VARIANT(mwc1024u64, MwcFp1024u64State, 18439945329244120106U, 16)
+DECLARE_MWCFP64_VARIANT(mwc2048u64, MwcFp2048u64State, 18235832631006504774U, 32)
+DECLARE_MWCFP64_VARIANT(mwc4096u64, MwcFp4096u64State, 17633152884372258591U, 64)
 
 
 static inline void *create(const CallerAPI *intf)
@@ -201,65 +240,99 @@ static inline void *create(const CallerAPI *intf)
 }
 
 
-static int test64(const CallerAPI *intf)
+static int run_test64(const CallerAPI *intf, uint64_t (*get_bits)(void *),
+    void *obj, const uint64_t *u_ref, int lag)
 {
-    MwcFp512u64State obj = {.x = {
-        0xFDA936613D964DE2, 0x230E2714AB73277A, 0x2D7BE8A211C78E77, 0x3338F1F72C51C29D,
-        0xB999BD769AADFFC3, 0x5CD57E1B2A0CD2AC, 0x680C9013808B8B4B, 0x0000000000000001,
-        0x0000000000000000}, .c = 0x59B3E275D49C70BC, .pos = 8
-    };
-    static const uint64_t u_ref[8] = {
-        0x2B5551C4D471D646, 0x06C82C311FE8E96B, 0x0970F57639CF763D, 0xF9B6C42413F7E6C0,
-        0x442E1F05A9761116, 0x2A37666B6EACFAF4, 0x7CA892C9C8A8C893, 0x58748796433867A6
-    };
-    for (long i = 0; i < 80000; i++) {
-        (void) get_bits_mwc512u64_raw(&obj);
+    for (long i = 0; i < 10000 * lag; i++) {
+        (void) get_bits(obj);
     }
     int is_ok = 1;
     for (int i = 0; i < 8; i++) {
-        const uint64_t u = get_bits_mwc512u64_raw(&obj);
+        const uint64_t u = get_bits(obj);
         intf->printf("%llX ", (unsigned long long) u);
-        if (i % 8 == 7) {
-            intf->printf("| %llX %llX\n",
-                (unsigned long long) obj.c, (unsigned long long) obj.x[8]);
-        }
         if (u != u_ref[i]) {
             is_ok = 0;
         }
     }
     intf->printf("\n");
     return is_ok;
+}
+
+
+static int run_test32(const CallerAPI *intf, uint64_t (*get_bits)(void *),
+    void *obj, const uint32_t *u_ref, int lag)
+{
+    for (long i = 0; i < 10000 * lag; i++) {
+        (void) get_bits(obj);
+    }
+    int is_ok = 1;
+    for (int i = 0; i < 8; i++) {
+        const uint32_t u = (uint32_t) get_bits(obj);
+        intf->printf("%lX ", (unsigned long) u);
+        if (u != u_ref[i]) {
+            is_ok = 0;
+        }
+    }
+    intf->printf("\n");
+    return is_ok;
+}
+
+
+static int test64(const CallerAPI *intf)
+{
+    MwcFp512u64State obj = {.x = {
+        0x324486EF33B244DE, 0xBDF3EFA8BFFC4712, 0xC8DBBD5E28D756DF, 0xD30EE545B1860CE8,
+        0x8812CF194A614701, 0xC8EF05BA91470D22, 0x15D944BA02AA4CE7, 0x0000000000000001,
+        0x0000000000000000}, .c = 0x3B6DDCC704530974, .pos = 8
+    };
+    static const uint64_t u_ref[8] = {
+        0xA4A7BCED2B2A12DA, 0xA87A2252C527DBC0, 0xF40FD080694601A9, 0x4B434187C33BC54B,
+        0x7136A7C65B18A544, 0x6B34FD3E458AE6DF, 0x2EAAB4F627081604, 0xD21AE89EE2D61327
+    };
+    return run_test64(intf, get_bits_mwc512u64, &obj, u_ref, 8);
 }
 
 
 static int test32(const CallerAPI *intf)
 {
     MwcFp256u32State obj = {.x = {
-        0xACB71003, 0x6F48A711, 0xAC5BE03C, 0xC8F6F2ED, 0x5E9FAD90,
-        0xB5C426CA, 0x196FE0B6, 0x00000001, 0x00000000}, .c = 0xB782937E, .pos = 8
+        0x9D2B5B2E, 0xD83D1A25, 0x867FCA2B, 0x20F8F49A, 0xAD432DE0,
+        0x1673FAF4, 0x03647D52, 0x00000001, 0x00000000}, .c = 0x1D3D06BE, .pos = 8
     };
     static const uint32_t u_ref[8] = {
-        0xB57B4261, 0x1AAAD0F7, 0x4AC01366, 0x3C8356DE,
-        0x5F3224B0, 0x851648E9, 0xCBA327C0, 0xD9731AC3
+        0x293E4C79, 0x2883B11C, 0x87454D93, 0xC7341131,
+        0x1D1E3837, 0x83D663FE, 0x2EC235C2, 0xB1AD09BA
     };
-    for (long i = 0; i < 80000; i++) {
-        (void) get_bits_mwc256u32_raw(&obj);
-    }
-    int is_ok = 1;
-    for (int i = 0; i < 8; i++) {
-        const uint32_t u = (uint32_t) get_bits_mwc256u32_raw(&obj);
-        intf->printf("%lX ", (unsigned long) u);
-        if (i % 8 == 7) {
-            intf->printf("| %lX %lX\n",
-                (unsigned long) obj.c, (unsigned long) obj.x[8]);
-        }
-        if (u != u_ref[i]) {
-            is_ok = 0;
-        }
-    }
-    intf->printf("\n");
-    return is_ok;
+    return run_test32(intf, get_bits_mwc256u32, &obj, u_ref, 8);
 }
+
+
+static int test64_sm(const CallerAPI *intf)
+{
+    MwcFp128u64State obj = {.x = {
+        0x0A2DE7FD1B0B2669, 0x0000000000000001, 0x0000000000000000},
+        .c = 0xE93C76E554BC3DDE, .pos = 2
+    };
+    static const uint64_t u_ref[8] = {
+        0x481CB82ECABB99BA, 0x73A05D57E9365E0E, 0x41E47A1CE2DBDE18, 0xB18E46EC2E938B17,
+        0x8D667D5038185DD4, 0x21054F6D3FF80F10, 0x1B6CD39E1B27B198, 0x87DD038B41026317
+    };
+    return run_test64(intf, get_bits_mwc128u64, &obj, u_ref, 2);
+}
+
+
+static int test32_sm(const CallerAPI *intf)
+{
+    MwcFp64u32State obj = {.x = {
+        0x003AB792, 0x00000001, 0x00000000}, .c = 0x9BDC771C, .pos = 2
+    };
+    static const uint32_t u_ref[8] = {
+        0x662AE453, 0xC23220FD, 0xC82713AC, 0xE0F99B0F,
+        0x23DD0069, 0x885B140D, 0xC2589D18, 0x22E5CCFB
+    };
+    return run_test32(intf, get_bits_mwc64u32, &obj, u_ref, 2);
+}
+
 
 
 
@@ -267,17 +340,27 @@ static int run_self_test(const CallerAPI *intf)
 {
     const int is32 = test32(intf);
     const int is64 = test64(intf);
-    return is32 | is64;
+    const int is32_sm = test32_sm(intf);
+    const int is64_sm = test64_sm(intf);
+    return is32 & is64 & is32_sm & is64_sm;
 }
 
 static const GeneratorParamVariant gen_list[] = {
-    {"",       "mwc512u64", 64, create_mwc512u64, get_bits_mwc512u64, get_sum_mwc512u64},
-    {"64u32",  "mwc64u32", 32, create_mwc64u32, get_bits_mwc64u32, get_sum_mwc64u32},
-    {"128u64", "mwc128u64", 64, create_mwc128u64, get_bits_mwc128u64, get_sum_mwc128u64},
-    {"256u64", "mwc256u64", 64, create_mwc256u64, get_bits_mwc256u64, get_sum_mwc256u64},
-    {"256u32", "mwc256u32", 32, create_mwc256u32, get_bits_mwc256u32, get_sum_mwc256u32},
-    {"512u64", "mwc512u64", 64, create_mwc512u64, get_bits_mwc512u64, get_sum_mwc512u64},
+    {"",        "mwc512u64",  64, create_mwc512u64, get_bits_mwc512u64, get_sum_mwc512u64},
+    // 32-bit generators
+    {"64u32",   "mwc64u32",   32, create_mwc64u32,   get_bits_mwc64u32,   get_sum_mwc64u32},
+    {"128u32",  "mwc128u32",  32, create_mwc128u32,  get_bits_mwc128u32,  get_sum_mwc128u32},
+    {"256u32",  "mwc256u32",  32, create_mwc256u32,  get_bits_mwc256u32,  get_sum_mwc256u32},
+    {"512u32",  "mwc512u32",  32, create_mwc512u32,  get_bits_mwc512u32,  get_sum_mwc512u32},
+    {"1024u32", "mwc1024u32", 32, create_mwc1024u32, get_bits_mwc1024u32, get_sum_mwc1024u32},
+    {"2048u32", "mwc2048u32", 32, create_mwc2048u32, get_bits_mwc2048u32, get_sum_mwc2048u32},
+    // 64-bit generators
+    {"128u64",  "mwc128u64",  64, create_mwc128u64,  get_bits_mwc128u64,  get_sum_mwc128u64},
+    {"256u64",  "mwc256u64",  64, create_mwc256u64,  get_bits_mwc256u64,  get_sum_mwc256u64},
+    {"512u64",  "mwc512u64",  64, create_mwc512u64,  get_bits_mwc512u64,  get_sum_mwc512u64},
     {"1024u64", "mwc1024u64", 64, create_mwc1024u64, get_bits_mwc1024u64, get_sum_mwc1024u64},
+    {"2048u64", "mwc2048u64", 64, create_mwc2048u64, get_bits_mwc2048u64, get_sum_mwc2048u64},
+    {"4096u64", "mwc4096u64", 64, create_mwc4096u64, get_bits_mwc4096u64, get_sum_mwc4096u64},
     GENERATOR_PARAM_VARIANT_EMPTY
 };
 
