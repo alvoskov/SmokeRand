@@ -34,18 +34,18 @@
  *
  *  Generator  | SmokeRand | TestU01  | PractRand 0.96 | cpb
  * ------------|-----------|----------|----------------|-----
- *  mwc64u32   | full      |          | >= 4 TiB       | 0.68
+ *  mwc64u32   | full      | +        | >= 4 TiB       | 0.68
  *  mwc128u32  |           |          |                | 0.68
  *  mwc256u32  | >=default |          |                | 0.90
  *  mwc512u32  |           |          |                | 1.3
  *  mwc1024u32 |           |          |                | 0.8
  *  mwc2048u32 |           |          |                | 1.0
  *  mwc128u64  | full      |          |                | 0.46
- *  mwc256u64  | >=default |          |                | 0.41
- *  mwc512u64  | >=default |          |                | 0.61
- *  mwc1024u64 | >=default |          |                | 0.80
- *  mwc2048u64 | >=default |          |                | 0.45
- *  mwc4096u64 | >=default |          |                | 0.55
+ *  mwc256u64  | full      |          |                | 0.41
+ *  mwc512u64  | full      |          |                | 0.61
+ *  mwc1024u64 | full      |          |                | 0.80
+ *  mwc2048u64 | full      |          |                | 0.45
+ *  mwc4096u64 | full      |          |                | 0.55
  *
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
