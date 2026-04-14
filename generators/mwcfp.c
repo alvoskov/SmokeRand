@@ -39,13 +39,13 @@
  *  mwc256u32  | >=default |          |                | 0.90
  *  mwc512u32  | >=default |          |                | 1.3
  *  mwc1024u32 | >=default |          |                | 0.8
- *  mwc2048u32 |           |          |                | 1.0
+ *  mwc2048u32 | >=default |          |                | 1.0
  *  mwc128u64  | full/b64  |          | >= 8 TiB       | 0.46
  *  mwc256u64  | full      |          |                | 0.41
  *  mwc512u64  | full      |          |                | 0.61
  *  mwc1024u64 | full      |          |                | 0.80
  *  mwc2048u64 | full      |          |                | 0.45
- *  mwc4096u64 | full      |          |                | 0.55
+ *  mwc4096u64 | full      |          | >= 4 TiB       | 0.55
  *
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
@@ -205,17 +205,44 @@ static void *funcname(const GeneratorInfo *gi, const CallerAPI *intf) \
 }
 
 
+#define GENERATE_GET_BITS64_RRX_FUNC(funcname, type) \
+static inline uint64_t get_bits_##funcname##_rrx_raw(type *obj) \
+{ \
+    const uint64_t u = get_bits_##funcname##_raw(obj); \
+    return u ^ rotl64(u, 17) ^ rotl64(u, 53); \
+}
+
+
+#define GENERATE_GET_BITS32_RRX_FUNC(funcname, type) \
+static inline uint64_t get_bits_##funcname##_rrx_raw(type *obj) \
+{ \
+    const uint32_t u = (uint32_t) get_bits_##funcname##_raw(obj); \
+    return u ^ rotl32(u, 7) ^ rotl32(u, 23); \
+}
+
+
 #define DECLARE_MWCFP32_VARIANT(funcname, type, mul, lag) \
 MAKE_MWCFP_STRUCT(type, uint32_t, lag) \
 GENERATE_GET_BITS32_FUNC(get_bits_##funcname##_raw, type, mul, lag) \
 GENERATE_CREATE_BITS32_FUNC(create_##funcname, type, lag) \
-MAKE_GET_BITS_WRAPPERS(funcname)
+GENERATE_GET_BITS32_RRX_FUNC(funcname, type) \
+MAKE_GET_BITS_WRAPPERS(funcname) \
+MAKE_GET_BITS_WRAPPERS(funcname##_rrx) \
+
+
+
 
 #define DECLARE_MWCFP64_VARIANT(funcname, type, mul, lag) \
 MAKE_MWCFP_STRUCT(type, uint64_t, lag) \
 GENERATE_GET_BITS64_FUNC(get_bits_##funcname##_raw, type, mul, lag) \
 GENERATE_CREATE_BITS64_FUNC(create_##funcname, type, lag) \
-MAKE_GET_BITS_WRAPPERS(funcname)
+GENERATE_GET_BITS64_RRX_FUNC(funcname, type) \
+MAKE_GET_BITS_WRAPPERS(funcname) \
+MAKE_GET_BITS_WRAPPERS(funcname##_rrx)
+
+
+
+
 
 
 DECLARE_MWCFP32_VARIANT(mwc64u32,   MwcFp64u32State,   4291122658U, 2)
@@ -345,33 +372,48 @@ static int run_self_test(const CallerAPI *intf)
     return is32 & is64 & is32_sm & is64_sm;
 }
 
+#define MAKE_MWCFP_ENTRY(param, tag, nbits, name) \
+    {param,       tag,       nbits, create_##name, get_bits_##name,       get_sum_##name}, \
+    {param "rrx", tag "rrx", nbits, create_##name, get_bits_##name##_rrx, get_sum_##name##_rrx},
+
 static const GeneratorParamVariant gen_list[] = {
-    {"",        "mwc512u64",  64, create_mwc512u64, get_bits_mwc512u64, get_sum_mwc512u64},
+    MAKE_MWCFP_ENTRY("",        "mwc512u64",  64, mwc512u64)
     // 32-bit generators
-    {"64u32",   "mwc64u32",   32, create_mwc64u32,   get_bits_mwc64u32,   get_sum_mwc64u32},
-    {"128u32",  "mwc128u32",  32, create_mwc128u32,  get_bits_mwc128u32,  get_sum_mwc128u32},
-    {"256u32",  "mwc256u32",  32, create_mwc256u32,  get_bits_mwc256u32,  get_sum_mwc256u32},
-    {"512u32",  "mwc512u32",  32, create_mwc512u32,  get_bits_mwc512u32,  get_sum_mwc512u32},
-    {"1024u32", "mwc1024u32", 32, create_mwc1024u32, get_bits_mwc1024u32, get_sum_mwc1024u32},
-    {"2048u32", "mwc2048u32", 32, create_mwc2048u32, get_bits_mwc2048u32, get_sum_mwc2048u32},
+    MAKE_MWCFP_ENTRY("64u32",   "mwc64u32",   32, mwc64u32)
+    MAKE_MWCFP_ENTRY("128u32",  "mwc128u32",  32, mwc128u32)
+    MAKE_MWCFP_ENTRY("256u32",  "mwc256u32",  32, mwc256u32)
+    MAKE_MWCFP_ENTRY("512u32",  "mwc512u32",  32, mwc512u32)
+    MAKE_MWCFP_ENTRY("1024u32", "mwc1024u32", 32, mwc1024u32)
+    MAKE_MWCFP_ENTRY("2048u32", "mwc2048u32", 32, mwc2048u32)
     // 64-bit generators
-    {"128u64",  "mwc128u64",  64, create_mwc128u64,  get_bits_mwc128u64,  get_sum_mwc128u64},
-    {"256u64",  "mwc256u64",  64, create_mwc256u64,  get_bits_mwc256u64,  get_sum_mwc256u64},
-    {"512u64",  "mwc512u64",  64, create_mwc512u64,  get_bits_mwc512u64,  get_sum_mwc512u64},
-    {"1024u64", "mwc1024u64", 64, create_mwc1024u64, get_bits_mwc1024u64, get_sum_mwc1024u64},
-    {"2048u64", "mwc2048u64", 64, create_mwc2048u64, get_bits_mwc2048u64, get_sum_mwc2048u64},
-    {"4096u64", "mwc4096u64", 64, create_mwc4096u64, get_bits_mwc4096u64, get_sum_mwc4096u64},
+    MAKE_MWCFP_ENTRY("128u64",  "mwc128u64",  64, mwc128u64)
+    MAKE_MWCFP_ENTRY("256u64",  "mwc256u64",  64, mwc256u64)
+    MAKE_MWCFP_ENTRY("512u64",  "mwc512u64",  64, mwc512u64)
+    MAKE_MWCFP_ENTRY("1024u64", "mwc1024u64", 64, mwc1024u64)
+    MAKE_MWCFP_ENTRY("2048u64", "mwc2048u64", 64, mwc2048u64)
+    MAKE_MWCFP_ENTRY("4096u64", "mwc4096u64", 64, mwc4096u64)
     GENERATOR_PARAM_VARIANT_EMPTY
 };
 
 
-static const char description[] =
-"mwcfp\n";
+static char description[8192] = "";
 
+static void fill_description(const CallerAPI *intf)
+{
+    int pos = 0;
+    pos += intf->snprintf(description + pos, (size_t) (8192 - pos), "%s", "MWCFP\n");
+    for (const GeneratorParamVariant *gen = gen_list; gen->name != NULL; gen++) {
+        pos += intf->snprintf(description + pos, (size_t) (8192 - pos), "  %12s : %s\n",
+            gen->param, gen->name);
+    }
+}
 
 int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
 {
     const char *param = intf->get_param();
+    if (description[0] == 0) {
+        fill_description(intf);
+    }
     gi->description = description;
     gi->self_test = run_self_test;
     return GeneratorParamVariant_find(gen_list, intf, param, gi);

@@ -1033,3 +1033,9 @@ smokerand.exe brief generators/speck128.dll --testname=gap16_count0 --seed=_01_i
 Strange behaviour (suspicious and badly reproducible value of hamming_ot_u128) for
 xorrot64w16 in the `full` battery. Seed:
 `_0B_f8lx95sFBeaoJ61wnRmALp2pMeyWYwNPfMrlBjpkGo0=`
+
+
+
+Note: mwcfp suspicious values:
+
+smokerand full generators/mwcfp.dll --param=128u32 --seed=_05_6pi7r+mVZ+TatK5oc0N7os4guFJPy5HHikYblTacQYM=
