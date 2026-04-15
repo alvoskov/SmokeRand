@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
+## [0.47] - 2026-04-15
+
+### Added
+
+- `mwcfp`: a MWC modification with theoretically proven n-dimensional
+  equidistribution (by A.L. Voskov)
+- `mwc2110_u64`, `mwc4159_u64`, `rwc4157`, `rwc16446` custom MWC generators
+  by A.L. Voskov (with Primo 4.3.3 certificates in the `misc` directory).
+- `mwc8222_v2`: another modification of MWC8222 with proven n-dimensional
+  equidistribution but without `0xFFFFFFFF` in the output at all
+  (the algorithm was designed by G. Marsaglia)
+- `w1rand` new PRNG from wyrand author.
+- `wyrand`: some newer versions with other constants.
+- SmokeRand version is now printed in the report.
+
+### Changed
+
+- Better multipliers for `lcg127prime` and `lcg128prime`.
+
+### Bugfix
+
+- Correct processing of command line arguments with omitted battery name,
+  e.g. `smokerand generators/kiss99.so --threads` for `default` battery.
+
 ## [0.46] - 2026-03-22
 
 ### Added

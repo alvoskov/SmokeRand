@@ -1,0 +1,52 @@
+[PRIMO - Primality Certificate]
+Version=4.3.3 - LX64
+WebSite=https://www.ellipsa.eu/
+Format=4
+ID=B4977051AB510
+Created=Mar-28-2026 11:47:16 PM
+TestCount=3
+Status=Candidate certified prime
+
+[Comments]
+Put here any comment...
+
+[Running Times (Wall-Clock)]
+1stPhase=0.07s
+2ndPhase=0.03s
+Total=0.10s
+
+[Running Times (Processes)]
+1stPhase=0.07s
+2ndPhase=0.03s
+Total=0.10s
+
+[Candidate]
+File=/mnt/c/c_prog/SmokeRand/misc/rwc_cert/rwc32u48.in
+Expression=29386*(2**96 + 2**64) - 1
+N=$72CA000072C9FFFFFFFFFFFFFFFF
+HexadecimalSize=28
+DecimalSize=34
+BinarySize=111
+
+[1]
+S=$F999AEC
+W=$12FBE73FDF422B4
+A=0
+B=$5
+T=$2
+
+[2]
+S=$1A6
+Q=$1C
+
+[3]
+S=$5E249
+W=$27F682C207
+A=0
+B=$11
+T=$1
+
+[Signature]
+1=$27CE4064677A214208BE81130A940033450A5FCEF6A36C12
+2=$E44610AE09291686D491325A844EF7F18CA57E49421D0484
+

@@ -10,6 +10,17 @@
  *
  * Only lower 64 bits are returned.
  *
+ * Some multipliers:
+ *
+ * a                    | PractRand 0.96 | SmokeRand | TestU01
+ * ---------------------|----------------|-----------|-------------
+ * 13433445539930070091 | >= 16 TiB      | full      | +HI/+LO/+IL
+ * 13732206192813620784 | >= 16 TiB      | full      | +HI/+LO/+IL
+ * 13765565284850700217 | >= 16 TiB      | full      | +HI/+LO/+IL
+ *
+ *
+ * Experimental multiplier with worse spectral properties:
+ *
  * The multiplier is 17937094319065857486 (`0xf8ed5c3f9698fdce`), it provides
  * the maximal period \f$ m - 2 \f$. Spectral test results:
  *
@@ -68,9 +79,9 @@ static void *create(const CallerAPI *intf)
 }
 
 
-static inline uint64_t get_bits_raw(Lcg128State *obj)
+static inline uint64_t get_bits_generic_raw(Lcg128State *obj, uint64_t a)
 {
-    static const uint64_t a = 0xf8ed5c3f9698fdceU, mask = 0x7fffffffffffffffU;
+    static const uint64_t mask = 0x7fffffffffffffffU;
     uint64_t m_buf[3], t_hi;
     // a*x
     m_buf[0] = unsigned_mul128(a, obj->x_low, &t_hi);
@@ -80,9 +91,13 @@ static inline uint64_t get_bits_raw(Lcg128State *obj)
     m_buf[1] &= mask;
     // l += h
     unsigned_add128(&m_buf[1], &m_buf[0], h);
+    // Note: 1) 2^127 - 1 cannot appear because it will be reduced to 0
+    // (and it is prevented by a correct initializaton)
+    // 2) This step will generate garbage in the highest bit of `x_high`
+    // (because we subtract 2**128 - 1 instead of 2**127 - 1 but it will
+    // be excluded anyway during the `m_buf[1] &= mask` step.
     if (m_buf[1] >> 63 != 0) {
-        m_buf[1] &= mask;
-        m_buf[0]++;
+        unsigned_add128(&m_buf[1], &m_buf[0], 1U);
     }
     // Update the state
     obj->x_low = m_buf[0];
@@ -91,11 +106,37 @@ static inline uint64_t get_bits_raw(Lcg128State *obj)
     return obj->x_low;
 }
 
+
+static inline uint64_t get_bits_mul1_raw(Lcg128State *obj)
+{
+    return get_bits_generic_raw(obj, 13433445539930070091U);
+}
+
+MAKE_GET_BITS_WRAPPERS(mul1)
+
+
+static inline uint64_t get_bits_mul2_raw(Lcg128State *obj)
+{
+    return get_bits_generic_raw(obj, 13732206192813620784U);
+}
+
+MAKE_GET_BITS_WRAPPERS(mul2)
+
+
+static inline uint64_t get_bits_mul3_raw(Lcg128State *obj)
+{
+    return get_bits_generic_raw(obj, 13765565284850700217U);
+}
+
+MAKE_GET_BITS_WRAPPERS(mul3)
+
+
+
 /**
  * @brief An internal self-test based on Python 3.x generated values.
  * @details The next script was used:
  *
- *    a, x = 0xf8ed5c3f9698fdce, 1
+ *    a, x = 13433445539930070091, 1
  *    for i in range(1000000):
  *        x = (a*x) % (2**127 - 1)
  *    print(hex(x % 2**64))
@@ -103,13 +144,37 @@ static inline uint64_t get_bits_raw(Lcg128State *obj)
 static int run_self_test(const CallerAPI *intf)
 {
     Lcg128State obj = {.x_low = 1, .x_high = 0};
-    uint64_t u, u_ref = 0xae22043bcb750fe8;
+    uint64_t u, u_ref = 0xe490c2a6c3e38bcd ;
     for (size_t i = 0; i < 1000000; i++) {
-        u = get_bits_raw(&obj);
+        u = get_bits_mul1_raw(&obj);
     }
     intf->printf("Result: %llX; reference value: %llX\n", u, u_ref);
     return u == u_ref;
 }
 
 
-MAKE_UINT64_PRNG("LCG127prime", run_self_test)
+static const GeneratorParamVariant gen_list[] = {
+    {"",          "Lcg127prime:mul1", 64, default_create, get_bits_mul1, get_sum_mul1},
+    {"mul1",      "Lcg127prime:mul1", 64, default_create, get_bits_mul1, get_sum_mul1},
+    {"mul2",      "Lcg127prime:mul2", 64, default_create, get_bits_mul2, get_sum_mul2},
+    {"mul3",      "Lcg127prime:mul3", 64, default_create, get_bits_mul3, get_sum_mul3},
+    GENERATOR_PARAM_VARIANT_EMPTY
+};
+
+
+static const char description[] =
+"The x = ax mod 2**127 - 1 LCG that returns the lower 64 bits.\n"
+"The next param values are supported:\n"
+"  mul1 - a = 13433445539930070091 (default version)\n"
+"  mul2 - a = 13732206192813620784\n"
+"  mul3 - a = 13765565284850700217\n";
+
+
+int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
+{
+    const char *param = intf->get_param();
+    gi->description = description;
+    gi->self_test = run_self_test;
+    return GeneratorParamVariant_find(gen_list, intf, param, gi);
+}
+
