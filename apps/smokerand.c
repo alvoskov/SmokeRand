@@ -23,7 +23,7 @@ void print_help(void)
     static const char help_str[] = 
     "SmokeRand: a test suite for pseudorandom number generators\n"
     "(C) 2024-2026 Alexey L. Voskov\n\n"
-    "Usage: smokerand battery generator_lib [keys]\n"
+    "Usage: smokerand [battery] generator_lib [keys]\n"
     "battery: battery name; supported batteries:\n"
     "  General purpose batteries\n"
     "  - express    Express battery (32-64 MiB of data)\n"
@@ -577,8 +577,18 @@ int main(int argc, char *argv[])
             generator_lib = argv[1];
         }
     } else {
-        battery_name = argv[1];
-        generator_lib = argv[2];
+        // Check if battery name is omitted
+        if (strlen(argv[2]) >= 2 && argv[2][0] == '-' && argv[2][0] == '-') {
+            // Battery name is omitted: use `default`
+            battery_name = "default";
+            generator_lib = argv[1];
+            argc++; // New offsets for `SmokeRandSettings_load`
+            argv--;
+        } else {
+            // Battery name is given
+            battery_name = argv[1];
+            generator_lib = argv[2];
+        }
     }
 
     SmokeRandSettings opts;
