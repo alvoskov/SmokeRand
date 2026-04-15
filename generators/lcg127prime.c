@@ -15,8 +15,8 @@
  * a                    | PractRand 0.96 | SmokeRand | TestU01
  * ---------------------|----------------|-----------|-------------
  * 13433445539930070091 | >= 16 TiB      | full      | +HI/+LO/+IL
- * 13732206192813620784 | >= 2 TiB       | full      | 
- * 13765565284850700217 | >= 16 TiB      | full      | +HI/+LO/
+ * 13732206192813620784 | >= 16 TiB      | full      | +HI/+LO/+IL
+ * 13765565284850700217 | >= 16 TiB      | full      | +HI/+LO/+IL
  *
  *
  * Experimental multiplier with worse spectral properties:

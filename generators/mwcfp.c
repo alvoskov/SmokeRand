@@ -216,8 +216,9 @@ static inline uint64_t get_bits_##funcname##_rrx_raw(type *obj) \
 #define GENERATE_GET_BITS32_RRX_FUNC(funcname, type) \
 static inline uint64_t get_bits_##funcname##_rrx_raw(type *obj) \
 { \
-    const uint32_t u = (uint32_t) get_bits_##funcname##_raw(obj); \
-    return u ^ rotl32(u, 7) ^ rotl32(u, 23); \
+    uint32_t u = (uint32_t) get_bits_##funcname##_raw(obj); \
+    u = u ^ rotl32(u, 11) ^ rotl32(u, 27); \
+    return u;\
 }
 
 
@@ -258,6 +259,9 @@ DECLARE_MWCFP64_VARIANT(mwc512u64,  MwcFp512u64State,  16996179571824182298U, 8)
 DECLARE_MWCFP64_VARIANT(mwc1024u64, MwcFp1024u64State, 18439945329244120106U, 16)
 DECLARE_MWCFP64_VARIANT(mwc2048u64, MwcFp2048u64State, 18235832631006504774U, 32)
 DECLARE_MWCFP64_VARIANT(mwc4096u64, MwcFp4096u64State, 17633152884372258591U, 64)
+
+DECLARE_MWCFP32_VARIANT(mwc64u32bad,   MwcFp64u32BadState,   123U, 2) // 123
+DECLARE_MWCFP64_VARIANT(mwc128u64bad,  MwcFp128u64BadState,  243U, 2) // 243
 
 
 static inline void *create(const CallerAPI *intf)
@@ -392,6 +396,9 @@ static const GeneratorParamVariant gen_list[] = {
     MAKE_MWCFP_ENTRY("1024u64", "mwc1024u64", 64, mwc1024u64)
     MAKE_MWCFP_ENTRY("2048u64", "mwc2048u64", 64, mwc2048u64)
     MAKE_MWCFP_ENTRY("4096u64", "mwc4096u64", 64, mwc4096u64)
+    // Bad generators
+    MAKE_MWCFP_ENTRY("64u32bad",   "mwc64u32bad",   32, mwc64u32bad)
+    MAKE_MWCFP_ENTRY("128u64bad",  "mwc128u64bad",  64, mwc128u64bad)
     GENERATOR_PARAM_VARIANT_EMPTY
 };
 
