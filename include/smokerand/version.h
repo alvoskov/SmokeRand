@@ -15,7 +15,7 @@
 /**
  * @brief SmokeRand version number (set manually)
  */
-#define SMOKERAND_VERSION "0.46"
+#define SMOKERAND_VERSION "0.47"
 
 //////////////////////////////////
 ///// Compiler autodetection /////

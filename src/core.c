@@ -14,6 +14,7 @@
 #include "smokerand/entropy.h"
 #include "smokerand/specfuncs.h"
 #include "smokerand/threads_intf.h"
+#include "smokerand/version.h"
 #include <math.h>
 #include <float.h>
 #include <stdio.h>
@@ -1014,6 +1015,7 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
         printf("\n");
     }
     printf("Output size, bits: %d\n", (int) gen->nbits);
+    printf("SmokeRand version: %s\n", SMOKERAND_VERSION_FULL);
     char *seed_key_txt = Entropy_get_base64_key(&entropy);
     if (seed_key_txt != NULL) {
         printf("Used seed:         _%.2X_%s\n\n", opts->nthreads, seed_key_txt);
