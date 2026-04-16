@@ -343,7 +343,7 @@ int PE32MemoryImage_apply_imports(PE32MemoryImage *img, PE32BasicInfo *info)
  */
 PE32MemoryImage *PE32BasicInfo_load(PE32BasicInfo *info, FILE *fp)
 {
-    PE32MemoryImage *img = calloc(sizeof(PE32MemoryImage), 1);
+    PE32MemoryImage *img = calloc(1, sizeof(PE32MemoryImage));
     if (img == NULL) {
         snprintf(errmsg, ERRMSG_MAXLEN, "PE32BasicInfo_load: not enough memory");
         return NULL;
