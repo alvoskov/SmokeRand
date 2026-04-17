@@ -45,7 +45,7 @@
  *  mwc512u64  | full      |          |                | 0.61
  *  mwc1024u64 | full      |          |                | 0.80
  *  mwc2048u64 | full      |          |                | 0.45
- *  mwc4096u64 | full      |          | >= 4 TiB       | 0.55
+ *  mwc4096u64 | full      |          | >= 16 TiB(?)   | 0.55
  *
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com

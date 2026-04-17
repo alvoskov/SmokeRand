@@ -17,7 +17,7 @@
  * ---------------------|----------------|-----------|-------------
  * 17914599225194756760 | >= 16 TiB      | full      | +HI/+LO/+IL
  * 17739802050595713108 | >= 16 TiB      | full      | +HI
- * 18250064560775652398 | >= 16 TiB      | full      |
+ * 18250064560775652398 | >= 16 TiB      | full      | +HI/+LO/+IL
  *
  * Experimental multiplier with worse spectral properties:
  *
