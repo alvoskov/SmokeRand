@@ -35,17 +35,18 @@
  *  Generator  | SmokeRand | TestU01  | PractRand 0.96 | cpb
  * ------------|-----------|----------|----------------|-----
  *  mwc64u32   | full/b64  | +        | >= 16 TiB      | 0.68
- *  mwc128u32  | >=default |          |                | 0.68
- *  mwc256u32  | >=default |          |                | 0.90
- *  mwc512u32  | >=default |          |                | 1.3
- *  mwc1024u32 | >=default |          |                | 0.8
- *  mwc2048u32 | >=default |          |                | 1.0
+ *  mwc128u32  | full      |          |                | 0.68
+ *  mwc256u32  | full      |          |                | 0.90
+ *  mwc512u32  | full      |          |                | 1.3
+ *  mwc1024u32 | full      |          |                | 0.8
+ *  mwc2048u32 | full      |          |                | 1.0
  *  mwc128u64  | full/b64  |          | >= 8 TiB       | 0.46
  *  mwc256u64  | full      |          |                | 0.41
  *  mwc512u64  | full      |          |                | 0.61
  *  mwc1024u64 | full      |          |                | 0.80
  *  mwc2048u64 | full      |          |                | 0.45
- *  mwc4096u64 | full      |          | >= 4 TiB       | 0.55
+ *  mwc4096u64 | full      |          | >= 16 TiB(?)   | 0.55
+ *  mwc16384u64| full      |          |                | 0.52
  *
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
@@ -246,19 +247,22 @@ MAKE_GET_BITS_WRAPPERS(funcname##_rrx)
 
 
 
-DECLARE_MWCFP32_VARIANT(mwc64u32,   MwcFp64u32State,   4291122658U, 2)
-DECLARE_MWCFP32_VARIANT(mwc128u32,  MwcFp128u32State,  4142557070U, 4)
-DECLARE_MWCFP32_VARIANT(mwc256u32,  MwcFp256u32State,  4238794375U, 8)
-DECLARE_MWCFP32_VARIANT(mwc512u32,  MwcFp512u32State,  4294137855U, 16)
-DECLARE_MWCFP32_VARIANT(mwc1024u32, MwcFp1024u32State, 4287999874U, 32)
-DECLARE_MWCFP32_VARIANT(mwc2048u32, MwcFp2048u32State, 4273733971U, 64)
+DECLARE_MWCFP32_VARIANT(mwc64u32,    MwcFp64u32State,    4291122658U, 2)
+DECLARE_MWCFP32_VARIANT(mwc128u32,   MwcFp128u32State,   4142557070U, 4)
+DECLARE_MWCFP32_VARIANT(mwc256u32,   MwcFp256u32State,   4238794375U, 8)
+DECLARE_MWCFP32_VARIANT(mwc512u32,   MwcFp512u32State,   4294137855U, 16)
+DECLARE_MWCFP32_VARIANT(mwc1024u32,  MwcFp1024u32State,  4287999874U, 32)
+DECLARE_MWCFP32_VARIANT(mwc2048u32,  MwcFp2048u32State,  4273733971U, 64)
 
-DECLARE_MWCFP64_VARIANT(mwc128u64,  MwcFp128u64State,  17741297344439402706U, 2)
-DECLARE_MWCFP64_VARIANT(mwc256u64,  MwcFp256u64State,  17873945764845871615U, 4)
-DECLARE_MWCFP64_VARIANT(mwc512u64,  MwcFp512u64State,  16996179571824182298U, 8)
-DECLARE_MWCFP64_VARIANT(mwc1024u64, MwcFp1024u64State, 18439945329244120106U, 16)
-DECLARE_MWCFP64_VARIANT(mwc2048u64, MwcFp2048u64State, 18235832631006504774U, 32)
-DECLARE_MWCFP64_VARIANT(mwc4096u64, MwcFp4096u64State, 17633152884372258591U, 64)
+DECLARE_MWCFP64_VARIANT(mwc128u64,   MwcFp128u64State,   17741297344439402706U, 2)
+DECLARE_MWCFP64_VARIANT(mwc256u64,   MwcFp256u64State,   17873945764845871615U, 4)
+DECLARE_MWCFP64_VARIANT(mwc512u64,   MwcFp512u64State,   16996179571824182298U, 8)
+DECLARE_MWCFP64_VARIANT(mwc1024u64,  MwcFp1024u64State,  18439945329244120106U, 16)
+DECLARE_MWCFP64_VARIANT(mwc2048u64,  MwcFp2048u64State,  18235832631006504774U, 32)
+DECLARE_MWCFP64_VARIANT(mwc4096u64,  MwcFp4096u64State,  17633152884372258591U, 64)
+DECLARE_MWCFP64_VARIANT(mwc16384u64, MwcFp16384u64State, 17183301495294525414U, 256)
+
+
 
 DECLARE_MWCFP32_VARIANT(mwc64u32bad,   MwcFp64u32BadState,   123U, 2) // 123
 DECLARE_MWCFP64_VARIANT(mwc128u64bad,  MwcFp128u64BadState,  243U, 2) // 243
@@ -381,21 +385,22 @@ static int run_self_test(const CallerAPI *intf)
     {param "rrx", tag "rrx", nbits, create_##name, get_bits_##name##_rrx, get_sum_##name##_rrx},
 
 static const GeneratorParamVariant gen_list[] = {
-    MAKE_MWCFP_ENTRY("",        "mwc512u64",  64, mwc512u64)
+    MAKE_MWCFP_ENTRY("",        "mwc512u64",   64, mwc512u64)
     // 32-bit generators
-    MAKE_MWCFP_ENTRY("64u32",   "mwc64u32",   32, mwc64u32)
-    MAKE_MWCFP_ENTRY("128u32",  "mwc128u32",  32, mwc128u32)
-    MAKE_MWCFP_ENTRY("256u32",  "mwc256u32",  32, mwc256u32)
-    MAKE_MWCFP_ENTRY("512u32",  "mwc512u32",  32, mwc512u32)
-    MAKE_MWCFP_ENTRY("1024u32", "mwc1024u32", 32, mwc1024u32)
-    MAKE_MWCFP_ENTRY("2048u32", "mwc2048u32", 32, mwc2048u32)
+    MAKE_MWCFP_ENTRY("64u32",   "mwc64u32",    32, mwc64u32)
+    MAKE_MWCFP_ENTRY("128u32",  "mwc128u32",   32, mwc128u32)
+    MAKE_MWCFP_ENTRY("256u32",  "mwc256u32",   32, mwc256u32)
+    MAKE_MWCFP_ENTRY("512u32",  "mwc512u32",   32, mwc512u32)
+    MAKE_MWCFP_ENTRY("1024u32", "mwc1024u32",  32, mwc1024u32)
+    MAKE_MWCFP_ENTRY("2048u32", "mwc2048u32",  32, mwc2048u32)
     // 64-bit generators
-    MAKE_MWCFP_ENTRY("128u64",  "mwc128u64",  64, mwc128u64)
-    MAKE_MWCFP_ENTRY("256u64",  "mwc256u64",  64, mwc256u64)
-    MAKE_MWCFP_ENTRY("512u64",  "mwc512u64",  64, mwc512u64)
-    MAKE_MWCFP_ENTRY("1024u64", "mwc1024u64", 64, mwc1024u64)
-    MAKE_MWCFP_ENTRY("2048u64", "mwc2048u64", 64, mwc2048u64)
-    MAKE_MWCFP_ENTRY("4096u64", "mwc4096u64", 64, mwc4096u64)
+    MAKE_MWCFP_ENTRY("128u64",  "mwc128u64",   64, mwc128u64)
+    MAKE_MWCFP_ENTRY("256u64",  "mwc256u64",   64, mwc256u64)
+    MAKE_MWCFP_ENTRY("512u64",  "mwc512u64",   64, mwc512u64)
+    MAKE_MWCFP_ENTRY("1024u64", "mwc1024u64",  64, mwc1024u64)
+    MAKE_MWCFP_ENTRY("2048u64", "mwc2048u64",  64, mwc2048u64)
+    MAKE_MWCFP_ENTRY("4096u64", "mwc4096u64",  64, mwc4096u64)
+    MAKE_MWCFP_ENTRY("16384u64","mwc16384u64", 64, mwc16384u64)
     // Bad generators
     MAKE_MWCFP_ENTRY("64u32bad",   "mwc64u32bad",   32, mwc64u32bad)
     MAKE_MWCFP_ENTRY("128u64bad",  "mwc128u64bad",  64, mwc128u64bad)
