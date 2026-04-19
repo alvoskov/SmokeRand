@@ -16,6 +16,7 @@
  * 2**512 + 2  | 16  | 4294137855 | 544.00    | 47 * 67 * 1789 * 1165579 * p
  * 2**1024 + 2 | 32  | 4287999874 | 1055.00   | 5 * 7 * 17 * 41 * 1151 * 3253 * 62633 * p
  * 2**2048 + 2 | 64  | 4273733971 | 2079.99   | 2 * 6373 * p
+ * 2**8192 + 2 | 256 | 3649336883 | 8223.76   | 2 * p
  *
  * Some multipliers for 64-bit PRNGs:
  *
@@ -27,6 +28,7 @@
  * 2**1024 + 2 | 16  | 18439945329244120106 | 1088.00   | 73 * 647 * 2617 * 165709 * p
  * 2**2048 + 2 | 32  | 18235832631006504774 | 2111.98   | 5 * 11 * 23 * 23293 * p
  * 2**4096 + 2 | 64  | 17633152884372258591 | 4159.93   | 2 * 29 * p
+ * 2**16384 + 2| 256 | 17183301495294525414 | 16447.90  | 5 * 5 * p
  *
  * All prime moduli and their m - 1 were certified by means of Primo 4.3.3.
  *
@@ -40,6 +42,7 @@
  *  mwc512u32  | full      |          |                | 1.3
  *  mwc1024u32 | full      |          |                | 0.8
  *  mwc2048u32 | full      |          |                | 1.0
+ *  mwc8192u32 | full      |          |                | ?
  *  mwc128u64  | full/b64  |          | >= 8 TiB       | 0.46
  *  mwc256u64  | full      |          |                | 0.41
  *  mwc512u64  | full      |          |                | 0.61
@@ -253,6 +256,7 @@ DECLARE_MWCFP32_VARIANT(mwc256u32,   MwcFp256u32State,   4238794375U, 8)
 DECLARE_MWCFP32_VARIANT(mwc512u32,   MwcFp512u32State,   4294137855U, 16)
 DECLARE_MWCFP32_VARIANT(mwc1024u32,  MwcFp1024u32State,  4287999874U, 32)
 DECLARE_MWCFP32_VARIANT(mwc2048u32,  MwcFp2048u32State,  4273733971U, 64)
+DECLARE_MWCFP32_VARIANT(mwc8192u32,  MwcFp8192u32State,  3649336883U, 256)
 
 DECLARE_MWCFP64_VARIANT(mwc128u64,   MwcFp128u64State,   17741297344439402706U, 2)
 DECLARE_MWCFP64_VARIANT(mwc256u64,   MwcFp256u64State,   17873945764845871615U, 4)
@@ -393,6 +397,7 @@ static const GeneratorParamVariant gen_list[] = {
     MAKE_MWCFP_ENTRY("512u32",  "mwc512u32",   32, mwc512u32)
     MAKE_MWCFP_ENTRY("1024u32", "mwc1024u32",  32, mwc1024u32)
     MAKE_MWCFP_ENTRY("2048u32", "mwc2048u32",  32, mwc2048u32)
+    MAKE_MWCFP_ENTRY("8192u32", "mwc8192u32",  32, mwc8192u32)
     // 64-bit generators
     MAKE_MWCFP_ENTRY("128u64",  "mwc128u64",   64, mwc128u64)
     MAKE_MWCFP_ENTRY("256u64",  "mwc256u64",   64, mwc256u64)
