@@ -37,7 +37,7 @@
  *  Generator  | SmokeRand | TestU01  | PractRand 0.96 | cpb
  * ------------|-----------|----------|----------------|-----
  *  mwc64u32   | full/b64  | +        | >= 16 TiB      | 0.68
- *  mwc128u32  | full      |          |                | 0.68
+ *  mwc128u32  | full      | +        |                | 0.68
  *  mwc256u32  | full      |          |                | 0.90
  *  mwc512u32  | full      |          |                | 1.3
  *  mwc1024u32 | full      | +        |                | 0.8
