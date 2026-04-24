@@ -43,8 +43,8 @@
  *  mwc1024u32 | full      | +           |                | 0.8
  *  mwc2048u32 | full      | +           |                | 1.0
  *  mwc8192u32 | full      | +           | >= 16 TiB      | 0.96
- *  mwc128u64  | full/b64  | +IL/+HI/+LO | >= 8 TiB       | 0.46
- *  mwc256u64  | full      |             |                | 0.41
+ *  mwc128u64  | full/b64  | +IL/+HI/+LO | >= 16 TiB      | 0.46
+ *  mwc256u64  | full      | +IL         |                | 0.41
  *  mwc512u64  | full      |             |                | 0.61
  *  mwc1024u64 | full      |             |                | 0.80
  *  mwc2048u64 | full      |             |                | 0.45
