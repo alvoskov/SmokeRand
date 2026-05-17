@@ -21,6 +21,7 @@
 typedef struct {
     unsigned long long n; ///< Number of values
     unsigned int e; ///< Leave only values with zeros in lower (e - 1) bits
+    unsigned int nbits_per_value; ///< 32 or 64
 } BirthdayOptions;
 
 
@@ -52,7 +53,7 @@ typedef struct {
 } UnitSphereOptions;
 
 
-TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts);
+unsigned long long birthday_test_ndups(GeneratorState *obj, const BirthdayOptions *opts, uint64_t *buf);
 TestResults ising2d_test(GeneratorState *obj, const Ising2DOptions *opts);
 TestResults unit_sphere_volume_test(GeneratorState *gs, const UnitSphereOptions *opts);
 

@@ -52,15 +52,30 @@ static inline BirthdayOptions BirthdayOptions_create(const GeneratorInfo *gi,
     const unsigned int b = 2*log2_len;
     opts.e = (a >= b) ? (a - b) : 0;
     opts.n = 1ull << log2_len;
+    opts.nbits_per_value = nbits_per_value;
     return opts;
 }
 
-static inline double BirthdayOptions_calc_lambda(const BirthdayOptions *opts,
-    const unsigned int nbits)
+static inline double BirthdayOptions_calc_lambda(const BirthdayOptions *opts)
 {
-    double lambda = pow((double) opts->n, 2.0) / pow(2.0, (double) nbits - (double) opts->e + 1.0);
-    return lambda;
+    const double nbits = (double) opts->nbits_per_value;
+    return pow((double) opts->n, 2.0) / pow(2.0, (double) nbits - (double) opts->e + 1.0);
 }
+
+
+static void BirthdayOptions_print(const BirthdayOptions *opts, const CallerAPI *intf)
+{
+    const unsigned long long nvalues_raw = (opts->n << opts->e);
+    const double lambda = BirthdayOptions_calc_lambda(opts);
+    intf->printf("  Sample size:      2^%.2f values (2^%.2f bytes)\n",
+        sr_log2((double) opts->n), sr_log2(8.0 * (double) opts->n));
+    intf->printf("  Shift:            %d bits\n",   (int) opts->e);
+    intf->printf("  Raw sample size:  2^%.2f values (2^%.2f bytes)\n",
+        sr_log2((double) nvalues_raw), sr_log2(8.0 * (double) nvalues_raw));
+    intf->printf("  lambda = %g\n", lambda);
+}
+
+
 
 ///////////////////////////////////////////////
 ///// 64-bit birthday test implementation /////
@@ -146,33 +161,25 @@ birthday_get_bytes_per_sec(GeneratorState *obj, const BirthdayOptions *opts, uin
  * 1. M.E. O'Neill. A Birthday Test: Quickly Failing Some Popular PRNGs
  *    https://www.pcg-random.org/posts/birthday-test.html
  */
-TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
+unsigned long long birthday_test_ndups(GeneratorState *obj, const BirthdayOptions *opts, uint64_t *buf)
 {
-    TestResults ans = TestResults_create("birthday");
     const unsigned long long nvalues_raw = (opts->n << opts->e);
-    const unsigned int nbits_per_value = birthday_get_nbits_per_value(obj->gi);
-    const double lambda = BirthdayOptions_calc_lambda(opts, nbits_per_value);
-    obj->intf->printf("  Sample size:      2^%.2f values (2^%.2f bytes)\n",
-        sr_log2((double) opts->n), sr_log2(8.0 * (double) opts->n));
+    //const double lambda = BirthdayOptions_calc_lambda(opts);
+    //obj->intf->printf("  Sample size:      2^%.2f values (2^%.2f bytes)\n",
+    //    sr_log2((double) opts->n), sr_log2(8.0 * (double) opts->n));
     if (opts->n < 8) {
         obj->intf->printf("  Sample size is too small");
-        return ans;
+        return 1000000;
     }
-    obj->intf->printf("  Shift:            %d bits\n",   (int) opts->e);
-    obj->intf->printf("  Raw sample size:  2^%.2f values (2^%.2f bytes)\n",
-        sr_log2((double) nvalues_raw), sr_log2(8.0 * (double) nvalues_raw));
-    obj->intf->printf("  lambda = %g\n", lambda);
+    //obj->intf->printf("  Shift:            %d bits\n",   (int) opts->e);
+    //obj->intf->printf("  Raw sample size:  2^%.2f values (2^%.2f bytes)\n",
+    //    sr_log2((double) nvalues_raw), sr_log2(8.0 * (double) nvalues_raw));
+    //obj->intf->printf("  lambda = %g\n", lambda);
     obj->intf->printf("  Filling the array with 'birthdays'\n");
     const uint64_t mask = (1ull << opts->e) - 1;
     time_t tic = time(NULL);
     uint64_t cpu_tic = cpuclock();
-    uint64_t *x = calloc((size_t) opts->n, sizeof(uint64_t));
-    if (x == NULL) {
-        obj->intf->printf("  Not enough memory (2^%.0f bytes is required)\n",
-            sr_log2((double) opts->n * 8.0));
-        return ans;
-    }
-
+    uint64_t *x = buf;
     const double bytes_per_sec = birthday_get_bytes_per_sec(obj, opts, mask);
     const double time_elapsed = 8.0 * (double) nvalues_raw / bytes_per_sec;
     unsigned long long chunk_size = opts->n / (unsigned long long) (time_elapsed * 5.0);
@@ -186,11 +193,13 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
         x[i] = birthday_gen_trvalue(obj, mask, &is_ok);
         if (!is_ok) {
             obj->intf->printf("  The generator is too flawed to return a truncated value\n");
+            return 1000000;
+            /*
             ans.x = 0;
             ans.p = sr_poisson_cdf(ans.x, lambda);
-            ans.alpha = sr_poisson_pvalue(ans.x, lambda);
-            free(x);
+              ans.alpha = sr_poisson_pvalue(ans.x, lambda);
             return ans;
+            */
         }
         if (i % chunk_size == 0) {
             unsigned long nseconds_total, nseconds_left;
@@ -219,8 +228,7 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
         }
     }
     // Frequencies analysis
-    obj->intf->printf("\n");
-    obj->intf->printf("\n  Sorting the array\n");
+    obj->intf->printf("\n  Sorting the array...");
     // qsort is used instead of radix sort to prevent "out of memory" error:
     // 2^30 of u64 is 8GiB of data
     tic = time(NULL);
@@ -228,18 +236,21 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
     obj->intf->printf("  Time elapsed: ");
     print_elapsed_time((unsigned long long) (time(NULL) - tic));
     obj->intf->printf("\n");    
-    obj->intf->printf("  Searching duplicates\n");
-    unsigned long ndups = 0;
+    obj->intf->printf("  Searching duplicates");
+    unsigned long long ndups = 0;
     for (size_t i = 0; i < opts->n - 1; i++) {
         if (x[i] == x[i + 1])
             ndups++;
     }
+    obj->intf->printf(";  x = %llu (ndups)\n", ndups);
+    return ndups;
+/*
     ans.x = (double) ndups;
     ans.p = sr_poisson_cdf(ans.x, lambda);
     ans.alpha = sr_poisson_pvalue(ans.x, lambda);
     obj->intf->printf("  x = %g (ndups); p = %g; 1-p=%g\n", ans.x, ans.p, ans.alpha);
-    free(x);
     return ans;
+*/
 }
 
 /**
@@ -271,6 +282,14 @@ static unsigned int birthday_get_log2_n(const CallerAPI *intf)
     }
 }
 
+void birthday_update_pvalue(TestResults *ans, double lambda, const CallerAPI *intf)
+{
+    ans->p = sr_poisson_cdf(ans->x, lambda);
+    ans->alpha = sr_poisson_pvalue(ans->x, lambda);
+    intf->printf("  Result for lambda = %g\n", lambda);
+    intf->printf("  x = %g (ndups); p = %g; 1-p=%g\n", ans->x, ans->p, ans->alpha);
+}
+
 /**
  * @brief An implementation of birthday paradox test for 64-bit PRNGS
  * with adaptive selection of lambda.
@@ -292,30 +311,56 @@ static unsigned int birthday_get_log2_n(const CallerAPI *intf)
 BatteryExitCode battery_birthday(const GeneratorInfo *gen, const CallerAPI *intf)
 {
     const unsigned int log2_n = birthday_get_log2_n(intf);
-    const unsigned int nbits_per_value = birthday_get_nbits_per_value(gen);
+    const int niters_max = 100;
     BirthdayOptions opts_small = BirthdayOptions_create(gen, log2_n, 2);
     BirthdayOptions opts_large = BirthdayOptions_create(gen, log2_n, 4);
     intf->printf("64-bit birthday paradox test\n");
     if (gen->nbits != 64) {
         intf->printf("  Output from 32-bit generator: concatenation will be used\n");
     }
+    uint64_t *buf = calloc((size_t) opts_large.n, sizeof(uint64_t));
+    if (buf == NULL) {
+        intf->printf("  Not enough memory (2^%.0f bytes is required)\n",
+            sr_log2((double) opts_large.n * 8.0));
+        return BATTERY_ERROR;
+    }
+
     GeneratorState obj = GeneratorState_create(gen, intf);
-    TestResults ans = birthday_test(&obj, &opts_small);
+    BirthdayOptions_print(&opts_small, intf);
+
+    TestResults ans = TestResults_create("birthday");
+    ans.x = (double) birthday_test_ndups(&obj, &opts_small, buf);
+    double lambda = BirthdayOptions_calc_lambda(&opts_small);
     if (ans.x == 0) {
-        double x_small = ans.x;
-        double lambda = BirthdayOptions_calc_lambda(&opts_small, nbits_per_value) +
-            BirthdayOptions_calc_lambda(&opts_large, nbits_per_value);
+        lambda += BirthdayOptions_calc_lambda(&opts_large);
         intf->printf("  No duplicates found: more sensitive test required\n");
         intf->printf("  Running the variant with larger lambda\n");
-        ans = birthday_test(&obj, &opts_large);
-        intf->printf("  p-value for x1 + x2 (lambda = %g):\n", lambda);
-        ans.x += x_small;
-        ans.p = sr_poisson_cdf(ans.x, lambda);
-        ans.alpha = sr_poisson_pvalue(ans.x, lambda);
-        intf->printf("  x = %g (ndups); p = %g; 1-p=%g\n", ans.x, ans.p, ans.alpha);
+        BirthdayOptions_print(&opts_large, intf);
+        ans.x += (double) birthday_test_ndups(&obj, &opts_large, buf);
+        birthday_update_pvalue(&ans, lambda, intf);
+        if (ans.x == 0) {
+            GeneratorState_destruct(&obj);
+            free(buf);
+            return BATTERY_FAILED; // No duplicates found
+        }
+    } else {
+        birthday_update_pvalue(&ans, lambda, intf);
+    }
+    intf->printf("Beginning extra iterations\n");
+    if (ans.x != 0 && (ans.p > 1e-10 || ans.p < 1.0 - 1e-10)) {
+        for (int i = 0; i < niters_max; i++) {
+            lambda += BirthdayOptions_calc_lambda(&opts_small);
+            intf->printf("--- Iter %d\n", i);
+            ans.x += (double) birthday_test_ndups(&obj, &opts_small, buf);
+            birthday_update_pvalue(&ans, lambda, intf);
+            if (ans.p < 1e-10 || ans.p > 1.0 - 1e-10) {
+                break;
+            }
+        }
     }
     GeneratorState_destruct(&obj);
-    if (ans.p < 1e-6 || ans.p > 1.0 - 1e-6) {
+    free(buf);
+    if (ans.p < 1e-10 || ans.p > 1.0 - 1e-10) {
         return BATTERY_FAILED;
     } else {
         return BATTERY_PASSED;
