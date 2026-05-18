@@ -163,18 +163,12 @@ birthday_get_bytes_per_sec(GeneratorState *obj, const BirthdayOptions *opts, uin
  */
 unsigned long long birthday_test_ndups(GeneratorState *obj, const BirthdayOptions *opts, uint64_t *buf)
 {
+    const unsigned long long ndups_failure = 10000000000ULL;
     const unsigned long long nvalues_raw = (opts->n << opts->e);
-    //const double lambda = BirthdayOptions_calc_lambda(opts);
-    //obj->intf->printf("  Sample size:      2^%.2f values (2^%.2f bytes)\n",
-    //    sr_log2((double) opts->n), sr_log2(8.0 * (double) opts->n));
     if (opts->n < 8) {
         obj->intf->printf("  Sample size is too small");
-        return 1000000;
+        return ndups_failure;
     }
-    //obj->intf->printf("  Shift:            %d bits\n",   (int) opts->e);
-    //obj->intf->printf("  Raw sample size:  2^%.2f values (2^%.2f bytes)\n",
-    //    sr_log2((double) nvalues_raw), sr_log2(8.0 * (double) nvalues_raw));
-    //obj->intf->printf("  lambda = %g\n", lambda);
     obj->intf->printf("  Filling the array with 'birthdays'\n");
     const uint64_t mask = (1ull << opts->e) - 1;
     time_t tic = time(NULL);
@@ -193,13 +187,7 @@ unsigned long long birthday_test_ndups(GeneratorState *obj, const BirthdayOption
         x[i] = birthday_gen_trvalue(obj, mask, &is_ok);
         if (!is_ok) {
             obj->intf->printf("  The generator is too flawed to return a truncated value\n");
-            return 1000000;
-            /*
-            ans.x = 0;
-            ans.p = sr_poisson_cdf(ans.x, lambda);
-              ans.alpha = sr_poisson_pvalue(ans.x, lambda);
-            return ans;
-            */
+            return ndups_failiure;
         }
         if (i % chunk_size == 0) {
             unsigned long nseconds_total, nseconds_left;
@@ -244,13 +232,6 @@ unsigned long long birthday_test_ndups(GeneratorState *obj, const BirthdayOption
     }
     obj->intf->printf(";  x = %llu (ndups)\n", ndups);
     return ndups;
-/*
-    ans.x = (double) ndups;
-    ans.p = sr_poisson_cdf(ans.x, lambda);
-    ans.alpha = sr_poisson_pvalue(ans.x, lambda);
-    obj->intf->printf("  x = %g (ndups); p = %g; 1-p=%g\n", ans.x, ans.p, ans.alpha);
-    return ans;
-*/
 }
 
 /**
