@@ -56,10 +56,17 @@ static inline BirthdayOptions BirthdayOptions_create(const GeneratorInfo *gi,
     return opts;
 }
 
+
 static inline double BirthdayOptions_calc_lambda(const BirthdayOptions *opts)
 {
     const double nbits = (double) opts->nbits_per_value;
     return pow((double) opts->n, 2.0) / pow(2.0, (double) nbits - (double) opts->e + 1.0);
+}
+
+
+static inline unsigned long long BirthdayOptions_calc_nvalues_raw(const BirthdayOptions *opts)
+{
+    return opts->n << opts->e;
 }
 
 
@@ -187,7 +194,7 @@ unsigned long long birthday_test_ndups(GeneratorState *obj, const BirthdayOption
         x[i] = birthday_gen_trvalue(obj, mask, &is_ok);
         if (!is_ok) {
             obj->intf->printf("  The generator is too flawed to return a truncated value\n");
-            return ndups_failiure;
+            return ndups_failure;
         }
         if (i % chunk_size == 0) {
             unsigned long nseconds_total, nseconds_left;
@@ -263,12 +270,20 @@ static unsigned int birthday_get_log2_n(const CallerAPI *intf)
     }
 }
 
-void birthday_update_pvalue(TestResults *ans, double lambda, const CallerAPI *intf)
+static void birthday_update_pvalue(TestResults *ans, double lambda,
+    unsigned long long n_total, const CallerAPI *intf)
 {
+    const double n_tib = ((double) n_total * 8.0) / (double) (1ULL << 40);
     ans->p = sr_poisson_cdf(ans->x, lambda);
     ans->alpha = sr_poisson_pvalue(ans->x, lambda);
-    intf->printf("  Result for lambda = %g\n", lambda);
-    intf->printf("  x = %g (ndups); p = %g; 1-p=%g\n", ans->x, ans->p, ans->alpha);
+    intf->printf("  Result for lambda = %g", lambda);
+    if (n_tib >= 1.0) {
+        intf->printf(" (%g TiB processed): ", n_tib);
+    } else {
+        intf->printf(" (%g GiB processed): ", n_tib * 1024.0);
+    }
+    intf->printf("ncoll = %g; p = %g; 1-p = %g\n",
+        ans->x, ans->p, ans->alpha);
 }
 
 /**
@@ -292,7 +307,7 @@ void birthday_update_pvalue(TestResults *ans, double lambda, const CallerAPI *in
 BatteryExitCode battery_birthday(const GeneratorInfo *gen, const CallerAPI *intf)
 {
     const unsigned int log2_n = birthday_get_log2_n(intf);
-    const int niters_max = 100;
+    const int niters_max = 10000;
     BirthdayOptions opts_small = BirthdayOptions_create(gen, log2_n, 2);
     BirthdayOptions opts_large = BirthdayOptions_create(gen, log2_n, 4);
     intf->printf("64-bit birthday paradox test\n");
@@ -312,28 +327,31 @@ BatteryExitCode battery_birthday(const GeneratorInfo *gen, const CallerAPI *intf
     TestResults ans = TestResults_create("birthday");
     ans.x = (double) birthday_test_ndups(&obj, &opts_small, buf);
     double lambda = BirthdayOptions_calc_lambda(&opts_small);
+    unsigned long long n_total = BirthdayOptions_calc_nvalues_raw(&opts_small);
     if (ans.x == 0) {
         lambda += BirthdayOptions_calc_lambda(&opts_large);
+        n_total += BirthdayOptions_calc_nvalues_raw(&opts_large);
         intf->printf("  No duplicates found: more sensitive test required\n");
         intf->printf("  Running the variant with larger lambda\n");
         BirthdayOptions_print(&opts_large, intf);
         ans.x += (double) birthday_test_ndups(&obj, &opts_large, buf);
-        birthday_update_pvalue(&ans, lambda, intf);
+        birthday_update_pvalue(&ans, lambda, n_total, intf);
         if (ans.x == 0) {
             GeneratorState_destruct(&obj);
             free(buf);
             return BATTERY_FAILED; // No duplicates found
         }
     } else {
-        birthday_update_pvalue(&ans, lambda, intf);
+        birthday_update_pvalue(&ans, lambda, n_total, intf);
     }
     intf->printf("Beginning extra iterations\n");
     if (ans.x != 0 && (ans.p > 1e-10 || ans.p < 1.0 - 1e-10)) {
         for (int i = 0; i < niters_max; i++) {
             lambda += BirthdayOptions_calc_lambda(&opts_small);
+            n_total += BirthdayOptions_calc_nvalues_raw(&opts_small);
             intf->printf("--- Iter %d\n", i);
             ans.x += (double) birthday_test_ndups(&obj, &opts_small, buf);
-            birthday_update_pvalue(&ans, lambda, intf);
+            birthday_update_pvalue(&ans, lambda, n_total, intf);
             if (ans.p < 1e-10 || ans.p > 1.0 - 1e-10) {
                 break;
             }
