@@ -22,6 +22,7 @@ typedef struct {
     unsigned long long n; ///< Number of values
     unsigned int e; ///< Leave only values with zeros in lower (e - 1) bits
     unsigned int nbits_per_value; ///< 32 or 64
+    uint64_t mvalue; ///< Required value in the lower (e - 1) bits
 } BirthdayOptions;
 
 

@@ -53,6 +53,7 @@ static inline BirthdayOptions BirthdayOptions_create(const GeneratorInfo *gi,
     opts.e = (a >= b) ? (a - b) : 0;
     opts.n = 1ull << log2_len;
     opts.nbits_per_value = nbits_per_value;
+    opts.mvalue = 0;
     return opts;
 }
 
@@ -67,6 +68,20 @@ static inline double BirthdayOptions_calc_lambda(const BirthdayOptions *opts)
 static inline unsigned long long BirthdayOptions_calc_nvalues_raw(const BirthdayOptions *opts)
 {
     return opts->n << opts->e;
+}
+
+
+static inline uint64_t BirthdayOptions_get_mask(const BirthdayOptions *opts)
+{
+    return (1ULL << opts->e) - 1;
+}
+
+
+static inline void BirthdayOptions_update_mvalue(BirthdayOptions *opts)
+{
+    const uint64_t mask = BirthdayOptions_get_mask(opts);
+    const uint64_t x = opts->mvalue;
+    opts->mvalue = (opts->e > 4) ? ((x + (x * x | 5)) & mask) : (x + 1);
 }
 
 
@@ -91,7 +106,8 @@ static void BirthdayOptions_print(const BirthdayOptions *opts, const CallerAPI *
 /**
  * @brief Generate truncated pseudorandom value
  */
-static inline uint64_t birthday_gen_trvalue(GeneratorState *obj, uint64_t mask, int *is_ok)
+static inline uint64_t birthday_gen_trvalue(GeneratorState *obj,
+    uint64_t mask, uint64_t mvalue, int *is_ok)
 {
     uint64_t u;
     long ctr = 0;
@@ -100,14 +116,14 @@ static inline uint64_t birthday_gen_trvalue(GeneratorState *obj, uint64_t mask, 
         do {            
             u = obj->gi->get_bits(obj->state);
             ctr++;
-        } while ((u & mask) != 0 && ctr < ctr_max);
+        } while ((u & mask) != mvalue && ctr < ctr_max);
     } else {
         do {
-            uint64_t lo = obj->gi->get_bits(obj->state);
-            uint64_t hi = obj->gi->get_bits(obj->state);
+            const uint64_t lo = obj->gi->get_bits(obj->state);
+            const uint64_t hi = obj->gi->get_bits(obj->state);
             u = (hi << 32) | lo;
             ctr++;
-        } while ((u & mask) != 0 && ctr < ctr_max);
+        } while ((u & mask) != mvalue && ctr < ctr_max);
     }
     *is_ok = ctr < ctr_max;
     return u;
@@ -130,8 +146,8 @@ birthday_get_bytes_per_sec(GeneratorState *obj, const BirthdayOptions *opts, uin
     clock_t cl_toc_init = cl_tic;
     do {
         int is_ok;
-        (void) birthday_gen_trvalue(obj, mask, &is_ok);
-        (void) birthday_gen_trvalue(obj, mask, &is_ok);
+        (void) birthday_gen_trvalue(obj, mask, 0, &is_ok);
+        (void) birthday_gen_trvalue(obj, mask, 0, &is_ok);
         if (!is_ok) {
             return 1.0;
         }
@@ -176,8 +192,9 @@ unsigned long long birthday_test_ndups(GeneratorState *obj, const BirthdayOption
         obj->intf->printf("  Sample size is too small");
         return ndups_failure;
     }
-    obj->intf->printf("  Filling the array with 'birthdays'\n");
-    const uint64_t mask = (1ull << opts->e) - 1;
+    obj->intf->printf("  Filling the array with values (the lowest bits are 0x%llX)\n",
+        (unsigned long long) opts->mvalue);
+    const uint64_t mask = BirthdayOptions_get_mask(opts);
     time_t tic = time(NULL);
     uint64_t cpu_tic = cpuclock();
     uint64_t *x = buf;
@@ -191,7 +208,7 @@ unsigned long long birthday_test_ndups(GeneratorState *obj, const BirthdayOption
     const unsigned long long bytes_per_trvalue = 1ull << (opts->e + 3);
     for (unsigned long long i = 0; i < opts->n; i++) {
         int is_ok;
-        x[i] = birthday_gen_trvalue(obj, mask, &is_ok);
+        x[i] = birthday_gen_trvalue(obj, mask, opts->mvalue, &is_ok);
         if (!is_ok) {
             obj->intf->printf("  The generator is too flawed to return a truncated value\n");
             return ndups_failure;
@@ -231,13 +248,13 @@ unsigned long long birthday_test_ndups(GeneratorState *obj, const BirthdayOption
     obj->intf->printf("  Time elapsed: ");
     print_elapsed_time((unsigned long long) (time(NULL) - tic));
     obj->intf->printf("\n");    
-    obj->intf->printf("  Searching duplicates");
+    obj->intf->printf("  Searching collisions");
     unsigned long long ndups = 0;
     for (size_t i = 0; i < opts->n - 1; i++) {
         if (x[i] == x[i + 1])
             ndups++;
     }
-    obj->intf->printf(";  x = %llu (ndups)\n", ndups);
+    obj->intf->printf(";  ncoll = %llu\n", ndups);
     return ndups;
 }
 
@@ -331,7 +348,7 @@ BatteryExitCode battery_birthday(const GeneratorInfo *gen, const CallerAPI *intf
     if (ans.x == 0) {
         lambda += BirthdayOptions_calc_lambda(&opts_large);
         n_total += BirthdayOptions_calc_nvalues_raw(&opts_large);
-        intf->printf("  No duplicates found: more sensitive test required\n");
+        intf->printf("  No collisions found: more sensitive test required\n");
         intf->printf("  Running the variant with larger lambda\n");
         BirthdayOptions_print(&opts_large, intf);
         ans.x += (double) birthday_test_ndups(&obj, &opts_large, buf);
@@ -349,7 +366,8 @@ BatteryExitCode battery_birthday(const GeneratorInfo *gen, const CallerAPI *intf
         for (int i = 0; i < niters_max; i++) {
             lambda += BirthdayOptions_calc_lambda(&opts_small);
             n_total += BirthdayOptions_calc_nvalues_raw(&opts_small);
-            intf->printf("--- Iter %d\n", i);
+            intf->printf("--- Iter %d: ", i + 1);
+            BirthdayOptions_update_mvalue(&opts_small);
             ans.x += (double) birthday_test_ndups(&obj, &opts_small, buf);
             birthday_update_pvalue(&ans, lambda, n_total, intf);
             if (ans.p < 1e-10 || ans.p > 1.0 - 1e-10) {
