@@ -375,7 +375,7 @@ grading algorithm was used:
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |+_lo/+_hi| >= 32 TiB
  wyrand_v41        | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |+H/+L/+IL| >= 32 TiB
  wyrand_v42        | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | >= 2 TiB
- wyrand_v43        | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | >= 2 TiB
+ wyrand_v43        | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | >= 16 TiB
  xabc8             | u32    | +       | 8     | 15      | 22   | 3.7  | -(>>10)| 0     | -       | 8 MiB
  xabc16            | u32    | +       | +     | 1       | 1    | 1.6  | +      | 2     | Small   | 64 GiB
  xabc32            | u32    | +       | +     | +       | +    | 0.82 | +      | 4(0)  | +       | 16 TiB
