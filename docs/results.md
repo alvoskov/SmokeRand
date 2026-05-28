@@ -384,9 +384,9 @@ the testing.
  wich2006          | u32    | +       | +     | +       | +    | 4.6  | +      | 4     | +       | >= 16 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |+_lo/+_hi| >= 32 TiB
- wyrand_v41        | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |+H/+L/+IL| >= 32 TiB
- wyrand_v42        | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | >= 2 TiB
- wyrand_v43        | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | >= 16 TiB
+ wyrand_v41        | u64    | +       | +     | +       | +    | ~0.1 | -(>)   | 3     |+H/+L/+IL| >= 32 TiB
+ wyrand_v42        | u64    | +       | +     | +       | +    | ~0.1 | -(>)   | 3     |         | >= 2 TiB
+ wyrand_v43        | u64    | +       | +     | +       | +    | ~0.1 | -(>)   | 3     |         | >= 16 TiB
  xabc8             | u32    | +       | 8     | 15      | 22   | 3.7  | -(>>>) | 0     | -       | 8 MiB
  xabc16            | u32    | +       | +     | 1       | 1    | 1.6  | +      | 2     | Small   | 64 GiB
  xabc32            | u32    | +       | +     | +       | +    | 0.82 | +      | 4(0)  | +       | 16 TiB
@@ -408,7 +408,7 @@ the testing.
  xorrot32          | u32    | 2       | 16    | 32      | 41   | 0.55 |        | 0     | -       | 32 KiB
  xorrot64          | u64    | 2       | 3     | 5/6     | 9    | 0.33 | -      | 0     | -       | 32 KiB
  xorrot64mrt       | u64    | +       | +     | +       | +    | 0.44 | -      | 3     |         | >= 8 TiB
- xorrot64mn        | u64    | +       | +     | +       | +    | 0.44 | +      | 4     |         | >= 4 TiB
+ xorrot64mn        | u64    | +       | +     | +       | +    | 0.44 | -(<)   | 3     |         | >= 4 TiB
  xorrot64w8sc      | u64    | +       | +     | +       | +    | 3.2  |        | 3.5   | +       | 64 GiB
  xorrot64w8arx     | u32    | +       | +     | +       | +    | 4.1  |        | 4     | +       | >= 16 TiB
  xorrot64w32       | u32    | 2       | 3/4   | 8/9     | 12/13| 0.35 | -      | 0     | -       | 32 KiB
@@ -467,6 +467,8 @@ Some results obtained during the bday64 test runs using 8 GiB of RAM:
  Algorithm         | Failed at  | Collisions 
 -------------------|------------|------------
  w1rand            | 11 TiB     | 97/44
+ wyrand:v42        | 10 TiB     | 86/40
+ xorrot64mn        | 12 TiB     | 10/48
 
 Performance estimation for some 64-bit generators
 
