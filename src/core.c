@@ -415,7 +415,15 @@ static void quicksort_range(uint64_t *v, ptrdiff_t begin, ptrdiff_t end)
 
 void quicksort64(uint64_t *x, size_t len)
 {
-    quicksort_range(x, 0, (ptrdiff_t) (len - 1));
+    //if (len > 32) {
+    if (len > 32) {
+        quicksort_range(x, 0, (ptrdiff_t) (len - 1));
+    } else {
+        insertsort(x, 0, (ptrdiff_t) (len - 1));
+    }
+    //} else {
+    //    insertsort(x, 0, (ptrdiff_t) (len - 1));
+    //}
 }
 
 
@@ -507,13 +515,91 @@ void radixsort32(uint32_t *x, size_t len)
 }
 
 
+typedef struct {
+    size_t lb[256];
+    size_t ub[256];
+} CountSort64Bounds;
+
+
 /**
- * @brief Fast sort for 64-bit integers that selects between radix sort
- * and quick sort. Selection depends on the available RAM estimation
- * and will use quicksort if we don't have enough memory for buffers.
+ * @brief An implementation of in-place radix sort for 64-bit integers.
+ * @details It uses the next algorithm:
+ *
+ * 1. For large arrays (>128 elements) it uses the American Flag Sort
+ *    algorithm (MSD radix in-place sort).
+ * 2. For small arrays or if recursion is too deep it uses quicksort
+ *    (with insertion sort fallback for small arrays)
+ * @param x    Pointer to the sorted array
+ * @param len  Number of elements (64-bit unsigned integers) in the sorted
+ *             array)
+ * @param level Current recursion level (begin from 0)
+ * @param bnd_array Preallocated buffer for buckets boundaries.
+ */
+static void countsort64_inplace(uint64_t *x, size_t len, unsigned int level, CountSort64Bounds *bnd_ary)
+{
+    const unsigned int shr = 56 - level * 8;
+    size_t *lb = bnd_ary[level].lb, *ub = bnd_ary[level].ub;
+    memset(lb, 0, 256 * sizeof(size_t));
+    memset(ub, 0, 256 * sizeof(size_t));
+    // Find buckets boundaries
+    for (size_t i = 0; i < len; i++) {
+        const unsigned int pos = ((x[i] >> shr) & 0xFF);
+        ub[pos]++;
+    }
+    for (size_t i = 1; i < 256; i++) {
+        ub[i] += ub[i - 1];
+        lb[i] = ub[i - 1];
+    }
+    // Radix sort
+    for (size_t i = 0; i < 256; i++) {
+        for (size_t j = lb[i]; j < ub[i]; ) {
+            const unsigned int pos = ((x[j] >> shr) & 0xFF);
+            const uint64_t tmp = x[lb[pos]];
+            x[lb[pos]++] = x[j];
+            x[j] = tmp;
+            if (pos == i) { j++; }
+        }
+    }
+    // Restore boundaries
+    lb[0] = 0;
+    for (int i = 1; i < 256; i++) {
+        lb[i] = ub[i - 1];
+    }
+    // Apply the sorting procedure recursively
+    for (int i = 0; i < 256; i++) {
+        if (ub[i] - lb[i] > 128 && level < 5) {
+            countsort64_inplace(x + lb[i], ub[i] - lb[i], level + 1, bnd_ary);
+        } else {
+            quicksort64(x + lb[i], ub[i] - lb[i]);
+        }
+    }
+}
+
+
+/**
+ * @brief In-place radix sort for 64-bit integers.
+ */
+void radixsort64_inplace(uint64_t *x, size_t len)
+{
+    CountSort64Bounds *bnd_ary = calloc(8, sizeof(CountSort64Bounds));
+    countsort64_inplace(x, len, 0, bnd_ary);
+    free(bnd_ary);
+}
+
+
+
+/**
+ * @brief Fast sort for 64-bit integers with automatic selection of the sorting
+ * algorithm. Now it always uses the in-place radix sort.
+ * @details Initially it used selection between radix sort and quick sort.
+ * Selection depends on the available RAM estimation and will use quicksort
+ * if we don't have enough memory for buffers.
  */
 void fastsort64(const RamInfo *info, uint64_t *x, size_t len)
 {
+    (void) info;
+    radixsort64_inplace(x, len);
+/*
     const long long bufsize = (long long) (len * sizeof(uint64_t)) + (1ll << 20);
     const long long ramsize = info->phys_avail_nbytes;
     if (ramsize != RAM_SIZE_UNKNOWN && bufsize > ramsize) {
@@ -521,6 +607,7 @@ void fastsort64(const RamInfo *info, uint64_t *x, size_t len)
     } else {
         quicksort64(x, len);
     }
+*/
 }
 
 

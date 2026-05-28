@@ -159,7 +159,7 @@ void quicksort64(uint64_t *x, size_t len);
 void radixsort32(uint32_t *x, size_t len);
 void radixsort64(uint64_t *x, size_t len);
 void fastsort64(const RamInfo *info, uint64_t *x, size_t len);
-
+void radixsort64_inplace(uint64_t *x, size_t len);
 
 typedef struct {
     void *original_state;
