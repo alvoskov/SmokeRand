@@ -81,8 +81,9 @@ int test_radixsort64()
     int is_ok = 1;
     const SortMethodInfo methods[] = {
         {"radixsort64", radixsort64},
+        {"radixsort64_inplace", radixsort64_inplace},
         {"quicksort64", quicksort64},
-        {"qsort64", qsort64_wrap},
+        {"qsort64", qsort64_wrap},        
         {NULL, NULL}
     };
 

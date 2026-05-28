@@ -244,7 +244,8 @@ unsigned long long birthday_test_ndups(GeneratorState *obj, const BirthdayOption
     // qsort is used instead of radix sort to prevent "out of memory" error:
     // 2^30 of u64 is 8GiB of data
     tic = time(NULL);
-    quicksort64(x, (size_t) opts->n); // Not radix: to prevent "out of memory"
+    //quicksort64(x, (size_t) opts->n); // Not radix: to prevent "out of memory"
+    radixsort64_inplace(x, (size_t) opts->n);
     obj->intf->printf("  Time elapsed: ");
     print_elapsed_time((unsigned long long) (time(NULL) - tic));
     obj->intf->printf("\n");    
