@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
+## [0.48]
+
+### Added
+
+- `konadare192` chaotic PRNG.
+
+### Changed
+
+- `birthday` battery is now generalized to the 64-bit collision test, this
+  upgrade was suggested by S.Vigna (https://github.com/alvoskov/SmokeRand/issues/24).
+- Improved sorting algorithms for 64-bit unsigned integers based on MSD
+  in-place radix sort (similar to American Flag Sort algorithm)
+
 ## [0.47] - 2026-04-15
 
 ### Added

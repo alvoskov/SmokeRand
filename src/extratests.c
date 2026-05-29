@@ -5,7 +5,7 @@
  * spacings!) test and 2D 16x16 Ising model tests.
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -241,11 +241,8 @@ unsigned long long birthday_test_ndups(GeneratorState *obj, const BirthdayOption
     }
     // Frequencies analysis
     obj->intf->printf("\n  Sorting the array...");
-    // qsort is used instead of radix sort to prevent "out of memory" error:
-    // 2^30 of u64 is 8GiB of data
     tic = time(NULL);
-    //quicksort64(x, (size_t) opts->n); // Not radix: to prevent "out of memory"
-    radixsort64_inplace(x, (size_t) opts->n);
+    radixsort64_inplace(x, (size_t) opts->n); // "In place": to prevent "out of memory"
     obj->intf->printf("  Time elapsed: ");
     print_elapsed_time((unsigned long long) (time(NULL) - tic));
     obj->intf->printf("\n");    
@@ -305,84 +302,69 @@ static void birthday_update_pvalue(TestResults *ans, double lambda,
 }
 
 /**
- * @brief An implementation of birthday paradox test for 64-bit PRNGS
- * with adaptive selection of lambda.
+ * @brief An implementation of the 64-bit collision test with decimation for
+ * 64-bit PRNGS with adaptive sampling.
  * @details It consumes a lot of RAM and sample size differs for
  * different platforms:
  *
  * - 64-bit platform: 2^30 (requires 8 GiB of RAM and ~30min)
  * - 32-bit platform: 2^27 (requires 1 GiB of RAM, very slow)
  *
- * The test consists of two stages:
+ * The test runs 10000 iterations of the 64-bit collision tests, each of
+ * them uses \lambda = 4\f$ and usually takes less than 10 minunes. If the
+ * obtained p-value is outside the \f$[10^{-10}; 1 - 10^{-10}]\f$ interval
+ * then the test is failed. Otherwise it is passed.
  *
- * - Small subtest: \f$ \lambda = 4\f$, usually takes less than 10 min.
- *   If no duplicates are found - the more sensitive "large" subtest
- *   is launched. If they are found - p-value is calculated.
- * - Large subtest: \f$ \lambda = 16\f$, usually takes less than 1 hour.
- *   Then p-value for sum of duplicates from "small" and "large" subtests
- *   is calculated.
+ * Use CTRL-C to interrupt the test.
  */
 BatteryExitCode battery_birthday(const GeneratorInfo *gen, const CallerAPI *intf)
 {
+    BatteryExitCode exitcode = BATTERY_PASSED;
     const unsigned int log2_n = birthday_get_log2_n(intf);
     const int niters_max = 10000;
-    BirthdayOptions opts_small = BirthdayOptions_create(gen, log2_n, 2);
-    BirthdayOptions opts_large = BirthdayOptions_create(gen, log2_n, 4);
-    intf->printf("64-bit birthday paradox test\n");
-    if (gen->nbits != 64) {
-        intf->printf("  Output from 32-bit generator: concatenation will be used\n");
-    }
-    uint64_t *buf = calloc((size_t) opts_large.n, sizeof(uint64_t));
+    BirthdayOptions opts = BirthdayOptions_create(gen, log2_n, 2);
+    uint64_t *buf = calloc((size_t) opts.n, sizeof(uint64_t));
     if (buf == NULL) {
+        intf->printf("64-bit collision test with decimation\n");
         intf->printf("  Not enough memory (2^%.0f bytes is required)\n",
-            sr_log2((double) opts_large.n * 8.0));
+            sr_log2((double) opts.n * 8.0));
         return BATTERY_ERROR;
     }
 
     GeneratorState obj = GeneratorState_create(gen, intf);
-    BirthdayOptions_print(&opts_small, intf);
+
+    intf->printf("64-bit collision test with decimation\n");
+    if (gen->nbits != 64) {
+        intf->printf("  Output from 32-bit generator: concatenation will be used\n");
+    }
+    char *seed_key_txt = get_entropy_base64_seed();
+    if (seed_key_txt != NULL) {
+        printf("  Used seed:        _01_%s\n", seed_key_txt);
+    } else {
+        printf("  Used seed:        none\n");
+    }
+    free(seed_key_txt);
+    BirthdayOptions_print(&opts, intf);
 
     TestResults ans = TestResults_create("birthday");
-    ans.x = (double) birthday_test_ndups(&obj, &opts_small, buf);
-    double lambda = BirthdayOptions_calc_lambda(&opts_small);
-    unsigned long long n_total = BirthdayOptions_calc_nvalues_raw(&opts_small);
-    if (ans.x == 0) {
-        lambda += BirthdayOptions_calc_lambda(&opts_large);
-        n_total += BirthdayOptions_calc_nvalues_raw(&opts_large);
-        intf->printf("  No collisions found: more sensitive test required\n");
-        intf->printf("  Running the variant with larger lambda\n");
-        BirthdayOptions_print(&opts_large, intf);
-        ans.x += (double) birthday_test_ndups(&obj, &opts_large, buf);
+    ans.x = 0.0;
+    double lambda = 0.0;
+    unsigned long long n_total = 0;
+    for (int i = 0; i < niters_max; i++) {
+        lambda += BirthdayOptions_calc_lambda(&opts);
+        n_total += BirthdayOptions_calc_nvalues_raw(&opts);
+        intf->printf("--- Iter %d of %d: ", i + 1, niters_max);
+        ans.x += (double) birthday_test_ndups(&obj, &opts, buf);
         birthday_update_pvalue(&ans, lambda, n_total, intf);
-        if (ans.x == 0) {
-            GeneratorState_destruct(&obj);
-            free(buf);
-            return BATTERY_FAILED; // No duplicates found
-        }
-    } else {
-        birthday_update_pvalue(&ans, lambda, n_total, intf);
-    }
-    intf->printf("Beginning extra iterations\n");
-    if (ans.x != 0 && (ans.p > 1e-10 || ans.p < 1.0 - 1e-10)) {
-        for (int i = 0; i < niters_max; i++) {
-            lambda += BirthdayOptions_calc_lambda(&opts_small);
-            n_total += BirthdayOptions_calc_nvalues_raw(&opts_small);
-            intf->printf("--- Iter %d: ", i + 1);
-            BirthdayOptions_update_mvalue(&opts_small);
-            ans.x += (double) birthday_test_ndups(&obj, &opts_small, buf);
-            birthday_update_pvalue(&ans, lambda, n_total, intf);
-            if (ans.p < 1e-10 || ans.p > 1.0 - 1e-10) {
-                break;
-            }
+        BirthdayOptions_update_mvalue(&opts);
+        if (ans.p < 1e-10 || ans.p > 1.0 - 1e-10) {
+            exitcode = BATTERY_FAILED;
+            break;
         }
     }
     GeneratorState_destruct(&obj);
     free(buf);
-    if (ans.p < 1e-10 || ans.p > 1.0 - 1e-10) {
-        return BATTERY_FAILED;
-    } else {
-        return BATTERY_PASSED;
-    }
+    return exitcode;
 }
 
 /////////////////////////////////

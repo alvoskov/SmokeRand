@@ -58,6 +58,10 @@ int set_entropy_base64_seed(const char *seed)
     return Entropy_init_from_base64_seed(&entropy, seed);
 }
 
+char *get_entropy_base64_seed(void)
+{
+    return Entropy_get_base64_key(&entropy);
+}
 
 ///////////////////////////////
 ///// Single-threaded API /////
@@ -415,43 +419,12 @@ static void quicksort_range(uint64_t *v, ptrdiff_t begin, ptrdiff_t end)
 
 void quicksort64(uint64_t *x, size_t len)
 {
-    //if (len > 32) {
     if (len > 32) {
         quicksort_range(x, 0, (ptrdiff_t) (len - 1));
     } else {
         insertsort(x, 0, (ptrdiff_t) (len - 1));
     }
-    //} else {
-    //    insertsort(x, 0, (ptrdiff_t) (len - 1));
-    //}
 }
-
-
-/**
- * @brief 16-bit counting sort for 64-bit arrays.
- */
-static void countsort64(uint64_t *out, const uint64_t *x, size_t len, unsigned int shr)
-{
-    size_t *offsets = (size_t *) calloc(65536, sizeof(size_t));
-    if (offsets == NULL) {
-        fprintf(stderr, "***** countsort64: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
-    for (size_t i = 0; i < len; i++) {
-        unsigned int pos = ((x[i] >> shr) & 0xFFFF);
-        offsets[pos]++;
-    }
-    for (size_t i = 1; i < 65536; i++) {
-        offsets[i] += offsets[i - 1];
-    }
-    for (size_t i = len; i-- != 0; ) {
-        unsigned int digit = ((x[i] >> shr) & 0xFFFF);
-        size_t offset = --offsets[digit];
-        out[offset] = x[i];
-    }
-    free(offsets);
-}
-
 
 /**
  * @brief 16-bit counting sort for 32-bit arrays.
@@ -480,26 +453,6 @@ static void countsort32(uint32_t *out, const uint32_t *x, size_t len, unsigned i
 
 
 /**
- * @brief Radix sort for 64-bit unsigned integers.
- */
-void radixsort64(uint64_t *x, size_t len)
-{
-    uint64_t *out = calloc(len, sizeof(uint64_t));
-    if (out == NULL) {
-        // Not enough memory for a buffer: use another algorithm.
-        // May be useful for platforms with low amounts of RAM and no virtual
-        // memory such as 32-bit DOS extenders.
-        quicksort64(x, len);
-        return;
-    }
-    countsort64(out, x,   len, 0);
-    countsort64(x,   out, len, 16);
-    countsort64(out, x,   len, 32);
-    countsort64(x,   out, len, 48);
-    free(out);
-}
-
-/**
  * @brief Radix sort for 32-bit unsigned integers.
  */
 void radixsort32(uint32_t *x, size_t len)
@@ -514,11 +467,13 @@ void radixsort32(uint32_t *x, size_t len)
     free(out);
 }
 
-
+/**
+ * @brief Buckets boundaries for the counting/radix sort.
+ */
 typedef struct {
-    size_t lb[256];
-    size_t ub[256];
-} CountSort64Bounds;
+    size_t lb[256]; ///< Lower boundaries
+    size_t ub[256]; ///< Upper boundaries
+} CountSortBounds;
 
 
 /**
@@ -535,7 +490,7 @@ typedef struct {
  * @param level Current recursion level (begin from 0)
  * @param bnd_array Preallocated buffer for buckets boundaries.
  */
-static void countsort64_inplace(uint64_t *x, size_t len, unsigned int level, CountSort64Bounds *bnd_ary)
+static void countsort64_inplace(uint64_t *x, size_t len, unsigned int level, CountSortBounds *bnd_ary)
 {
     const unsigned int shr = 56 - level * 8;
     size_t *lb = bnd_ary[level].lb, *ub = bnd_ary[level].ub;
@@ -581,7 +536,11 @@ static void countsort64_inplace(uint64_t *x, size_t len, unsigned int level, Cou
  */
 void radixsort64_inplace(uint64_t *x, size_t len)
 {
-    CountSort64Bounds *bnd_ary = calloc(8, sizeof(CountSort64Bounds));
+    CountSortBounds *bnd_ary = calloc(8, sizeof(CountSortBounds));
+    if (bnd_ary == NULL) {
+        fprintf(stderr, "***** radixsort64_inplace: not enough memory *****\n");
+        exit(EXIT_FAILURE);
+    }
     countsort64_inplace(x, len, 0, bnd_ary);
     free(bnd_ary);
 }
@@ -599,15 +558,6 @@ void fastsort64(const RamInfo *info, uint64_t *x, size_t len)
 {
     (void) info;
     radixsort64_inplace(x, len);
-/*
-    const long long bufsize = (long long) (len * sizeof(uint64_t)) + (1ll << 20);
-    const long long ramsize = info->phys_avail_nbytes;
-    if (ramsize != RAM_SIZE_UNKNOWN && bufsize > ramsize) {
-        radixsort64(x, len);
-    } else {
-        quicksort64(x, len);
-    }
-*/
 }
 
 
