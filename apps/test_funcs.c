@@ -74,13 +74,10 @@ typedef struct {
 
 int test_radixsort64()
 {
-    size_t len = 1 << 25;
+    const size_t len = 1U << 25;
     uint64_t *x = calloc(len, sizeof(uint64_t));
-    clock_t tic, toc;
-    double msec;
     int is_ok = 1;
     const SortMethodInfo methods[] = {
-        {"radixsort64", radixsort64},
         {"radixsort64_inplace", radixsort64_inplace},
         {"quicksort64", quicksort64},
         {"qsort64", qsort64_wrap},        
@@ -90,10 +87,10 @@ int test_radixsort64()
 
     for (const SortMethodInfo *ptr = methods; ptr->name != NULL; ptr++) {
         fill_rand64(x, len);
-        tic = clock();
+        clock_t tic = clock();
         ptr->run(x, len);
-        toc = clock();
-        msec = ((double) (toc - tic)) / CLOCKS_PER_SEC * 1000;
+        clock_t toc = clock();
+        double msec = ((double) (toc - tic)) / CLOCKS_PER_SEC * 1000;
         printf("%s --- time elapsed: %g ms\n", ptr->name, msec);
         if (is_array64_sorted(x, len)) {
             printf("%s: array is sorted\n", ptr->name);
@@ -111,6 +108,7 @@ int test_radixsort64()
         msec = ((double) (toc - tic)) / CLOCKS_PER_SEC * 1000;
         printf("%s|empty --- time elapsed: %g ms\n", ptr->name, msec);        
     }
+    free(x);
     return is_ok;
 }
 

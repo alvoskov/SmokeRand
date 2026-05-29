@@ -97,7 +97,7 @@ the testing.
  jkiss32           | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  jlkiss64          | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 16 TiB
  flea32x1          | u32    | +       | 1     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
- gjrand8           | u32    | +       | 4     | 11      | >=15 | 3.5  | -(>>10)| 0     | Small   | 128 MiB
+ gjrand8           | u32    | +       | 4     | 11      | >=15 | 3.5  | -(>>>) | 0     | Small   | 128 MiB
  gjrand16          | u32    | +       | +     | +       | +    | 2.6  | +      | 4(0)  | +       | 8 TiB
  gjrand32          | u32    | +       | +     | +       | +    | 0.69 | +      | 4(0)  | +       | >= 32 TiB
  gjrand64          | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |+il      | >= 32 TiB
@@ -405,7 +405,7 @@ the testing.
  xoroshiro64pp     | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 8 TiB
  xoroshiro64st     | u32    | 1       | 1     | 3       | 5    | 0.51 | -      | 1.75  | Small   | 1 MiB
  xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 32 TiB
- xorrot32          | u32    | 2       | 16    | 32      | 41   | 0.55 |        | 0     | -       | 32 KiB
+ xorrot32          | u32    | 2       | 16    | 32      | 41   | 0.55 | -(>>>) | 0     | -       | 32 KiB
  xorrot64          | u64    | 2       | 3     | 5/6     | 9    | 0.33 | -      | 0     | -       | 32 KiB
  xorrot64mrt       | u64    | +       | +     | +       | +    | 0.44 | -      | 3     |         | >= 8 TiB
  xorrot64mn        | u64    | +       | +     | +       | +    | 0.44 | -(<)   | 3     |         | >= 4 TiB
@@ -466,11 +466,14 @@ Some results obtained during the bday64 test runs using 8 GiB of RAM:
 
  Algorithm         | Failed at  | Collisions 
 -------------------|------------|------------
+ splitmix64        | 6 TiB      | 0/24
  w1rand            | 11 TiB     | 97/44
  wyrand:v42        | 10 TiB     | 86/40
  xorrot64mn        | 12 TiB     | 10/48
 
 Performance estimation for some 64-bit generators
+
+TODO: `bday64` and `default` numbers are now obsolete!
 
  Generator                | ising    | bday64   | usphere  | default
 --------------------------|----------|----------|----------|----------
