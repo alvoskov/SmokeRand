@@ -469,6 +469,7 @@ Some results obtained during the bday64 test runs using 8 GiB of RAM:
  splitmix64        | 6 TiB      | 0/24
  w1rand            | 11 TiB     | 97/44
  wyrand:v42        | 10 TiB     | 86/40
+ wyrand:v43        | 5 TiB      | 59/20
  xorrot64mn        | 12 TiB     | 10/48
 
 Performance estimation for some 64-bit generators
