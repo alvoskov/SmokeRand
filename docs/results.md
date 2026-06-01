@@ -469,6 +469,7 @@ Some results obtained during the bday64 test runs using 8 GiB of RAM:
  msws_ctr          | - (>80 TiB)| 305/320
  splitmix64        | 6 TiB      | 0/24
  sqxor             | 12 TiB     | 100/48
+ tf0_64            | - (>36 TiB)| 152/144 
  w1rand            | 11 TiB     | 97/44
  wyrand:v41        | 18 TiB     | 133/72
  wyrand:v42        | 10 TiB     | 86/40
