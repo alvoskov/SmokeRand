@@ -333,7 +333,7 @@ the testing.
  splitmix_g1       | u64    | +       | 1     | 1       | 2    | 0.12 | -      | 0.75  |sIL/>=CLH| 8 GiB
  splitmix32        | u32    | +       | 3     | 4       | 5/7  | 0.25 | -(>>>) | 0     | Small   | 1 GiB
  splitmix32cbc     | u32    | +       | +     | +       | +    | 2.1  | -      | 3     | +       | 8 TiB
- sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | 4     | +       | >= 16 TiB
+ sqxor             | u64    | +       | +     | +       | +    | 0.13 | -(>)   | 3     | +       | >= 16 TiB
  sqxor32           | u32    | +       | 2     | 3       | 5    | 0.20 | -(>>>) | 0     | Small   | 16 GiB
  stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | +      | 0     | +       | >= 32 TiB
  stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | +      | 3.5(0)| Small   | 1 MiB
@@ -466,11 +466,15 @@ Some results obtained during the bday64 test runs using 8 GiB of RAM:
 
  Algorithm         | Failed at  | Collisions 
 -------------------|------------|------------
+ msws_ctr          | - (>80 TiB)| 305/320
  splitmix64        | 6 TiB      | 0/24
+ sqxor             | 12 TiB     | 100/48
  w1rand            | 11 TiB     | 97/44
+ wyrand:v41        | 18 TiB     | 133/72
  wyrand:v42        | 10 TiB     | 86/40
  wyrand:v43        | 5 TiB      | 59/20
  xorrot64mn        | 12 TiB     | 10/48
+ xorrot64w32mn     | - (>35 TiB)| 126/140
 
 Performance estimation for some 64-bit generators
 
