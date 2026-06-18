@@ -301,7 +301,7 @@ the testing.
  romuduojr         | u64    | +       | +     | +       | +    | 0.11 | +      | 4(0)  |         | >= 2 TiB
  romuduojrw        | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 16 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
- rwc32sm           | u32    | +       | +     | +       | 1    | 0.83 | +      | 1     | Small   | >= 2 TiB
+ rwc32sm           | u32    | +       | +     | +       | 1    | 0.83 | +      | 1     | Small   | >= 16 TiB
  rwc32             | u32    | +       | +     | +       | +    | 0.55 | +      | 4     | +       | >= 8 TiB
  rwc32u48          | u32    | +       | +     | +       | +    | 0.47 | +      | 4     | +       | >= 32 TiB
  rwc64             | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +hi     | >= 8 TiB
@@ -868,7 +868,7 @@ with large lags that are detected by SmokeRand.
  lcg127prime    | >= 1 TiB
  LFIB-2281+     | >= 8 TiB(?)
  MWC64          | 32 GiB
- RWC32SM        | >= 8 TiB
+ RWC32SM        | >= 16 TiB
  RWC146641(lin) | >= 8 TiB
  RWC14664RRX    | >= 4 TiB
  sezgin63       | 32 GiB
