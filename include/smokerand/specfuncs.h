@@ -5,7 +5,7 @@
  * @details This file is designed for C89 (ANSI C)! Don't use features
  * from C99 and later!
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -36,6 +36,8 @@ double sr_chi2_pvalue(double x, unsigned long f);
 double sr_chi2_to_stdnorm_approx(double x, unsigned long f);
 double sr_linearcomp_Tcdf(double k);
 double sr_linearcomp_Tccdf(double k);
+double sr_geom_cdf(unsigned long t, double p);
+double sr_geom_ccdf(unsigned long t, double p);
 
 #ifndef M_PI
 #define M_PI (3.14159265358979323846)
