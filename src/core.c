@@ -214,12 +214,21 @@ TestResults TestResults_create(const char *name)
     return ans;
 }
 
+/**
+ * @brief Sets the p-value (`p` and `alpha` fields) obtained as a minimum
+ * from several statistical tests. It resembles Bonferroni correction but
+ * uses more advanced formula based on geometric distribution.
+ */
+void TestResults_set_pmin_ntests(TestResults *obj, unsigned long ntests, double pmin)
+{
+    obj->alpha = sr_geom_ccdf(ntests, pmin);
+    obj->p = sr_geom_cdf(ntests, pmin);
+}
+
 
 ///////////////////////////////////////
 ///// Some mathematical functions /////
 ///////////////////////////////////////
-
-
 
 PValueCategory get_pvalue_category(double pvalue)
 {

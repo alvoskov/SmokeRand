@@ -793,7 +793,7 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
     if (bad_or != 0) {
         obj->intf->printf("  Warning: generator output size exceeds its declared size\n");
     }
-    double zabs_max = -1.0;
+    ans.x = -1.0;
     obj->intf->printf("  Blocks analysis results\n");
     obj->intf->printf("    %8s | %8s %10s | %8s %10s\n",
         "bits", "z", "p", "z_xor", "p_xor");
@@ -801,15 +801,15 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
         HammingDistrHist_calc_stats(&h[i]);
         obj->intf->printf("    %8d | %8.3f %10.3g | %8.3f %10.3g\n",
             (int) ((1U << i) * nbits), h[i].z, h[i].p, h[i].z_xor, h[i].p_xor);
-        if (fabs(h[i].z) > zabs_max) {
-            zabs_max = fabs(h[i].z); ans.p = h[i].p; ans.x = h[i].z;
-        }
-        if (fabs(h[i].z_xor) > zabs_max) {
-            zabs_max = fabs(h[i].z_xor); ans.p = h[i].p_xor; ans.x = h[i].z_xor;
-        }
+        const double zabs = fabs(h[i].z), zabs_xor = fabs(h[i].z_xor);
+        if (zabs > ans.x)     { ans.x = zabs; }
+        if (zabs_xor > ans.x) { ans.x = zabs_xor; }
     }
     ans.penalty = PENALTY_HAMMING_DISTR;
-    ans.alpha = sr_stdnorm_cdf(ans.x);
+    TestResults_set_pmin_ntests(&ans,
+        (unsigned long) (2 * opts->nlevels),
+        sr_halfnormal_pvalue(ans.x)
+    );
     obj->intf->printf("  Final: z = %7.3f, p = %.3g\n", ans.x, ans.p);
     for (int i = 0; i < opts->nlevels; i++) {
         HammingDistrHist_destruct(&h[i]);
