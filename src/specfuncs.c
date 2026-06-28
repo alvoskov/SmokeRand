@@ -706,7 +706,13 @@ double sr_linearcomp_Tccdf(double k)
  */
 double sr_geom_cdf(unsigned long t, double p)
 {
-    return -sr_expm1(t * sr_log1p(-p));
+    if (p == 0.0 || p == 1.0 || p != p) {
+        return p;
+    } else if (p < 0.0 || p > 1.0) {
+        return NAN;
+    } else {
+        return -sr_expm1(t * sr_log1p(-p));
+    }
 }
 
 /**
@@ -718,5 +724,13 @@ double sr_geom_cdf(unsigned long t, double p)
  */
 double sr_geom_ccdf(unsigned long t, double p)
 {
-    return exp(t * sr_log1p(-p));
+    if (p == 0.0) {
+        return 1.0;
+    } else if (p == 1.0) {
+        return 0.0;
+    } else if (p < 0.0 || p > 1.0) {
+        return NAN;
+    } else {
+        return exp(t * sr_log1p(-p));
+    }
 }

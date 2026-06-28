@@ -85,6 +85,7 @@ typedef struct {
 
 
 TestResults TestResults_create(const char *name);
+void TestResults_set_pmin_ntests(TestResults *obj, unsigned long ntests, double pmin);
 
 typedef enum {
     REPORT_BRIEF = 0,
