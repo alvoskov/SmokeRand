@@ -415,7 +415,6 @@ static inline void BlockFrequency_count(BlockFrequency *obj,
 int BlockFrequency_calc(BlockFrequency *obj)
 {
     const double pcrit = 1.0e-10;
-    const double pcrit_bytes = pcrit / 256.0, pcrit_w16 = pcrit / 65536.0;
     double chi2_bytes = 0.0, chi2_w16 = 0.0;
     double zmax_bytes = 0.0, zmax_w16 = 0.0;
     int zmax_bytes_ind = -1;
@@ -431,32 +430,32 @@ int BlockFrequency_calc(BlockFrequency *obj)
         }
     }
     for (long i = 0; i < 65536; i++) {
-        long long Ei = (long long) obj->nw16 / 65536;
-        long long dE = (long long) obj->w16freq[i] - (long long) Ei;
+        const long long Ei = (long long) obj->nw16 / 65536;
+        const long long dE = (long long) obj->w16freq[i] - (long long) Ei;
         chi2_w16 += pow((double) dE, 2.0) / (double) Ei;
-        double z_w16 = fabs((double) dE) /
+        const double z_w16 = fabs((double) dE) /
             sqrt( (double) obj->nw16 * 65535.0 / 65536.0 / 65536.0);
         if (zmax_w16 < z_w16) {
             zmax_w16 = z_w16;
             zmax_w16_ind = i;
         }
     }
-    double p_bytes = sr_halfnormal_pvalue(zmax_bytes);
-    double p_w16 = sr_halfnormal_pvalue(zmax_w16);
+    const double p_bytes = sr_geom_cdf(256, sr_halfnormal_pvalue(zmax_bytes));
+    const double p_w16 = sr_geom_cdf(65536, sr_halfnormal_pvalue(zmax_w16));
     printf("2^%g bytes analyzed\n", sr_log2((double) obj->nbytes));
     printf("  %10s %10s %10s %10s %10s %10s %10s\n",
         "Chunk", "chi2emp", "p(chi2)", "zmax", "max_ind", "p(zmax)", "p(crit)");
     printf("  %10s %10g %10.2g %10.3g %10d %10.2g %10.2g\n",
         "8 bits", chi2_bytes, sr_chi2_pvalue(chi2_bytes, 255),
-        zmax_bytes, zmax_bytes_ind, p_bytes, pcrit_bytes);
+        zmax_bytes, zmax_bytes_ind, p_bytes, pcrit);
     printf("  %10s %10g %10.2g %10.3g %10ld %10.2g %10.2g\n",
         "16 bits", chi2_w16, sr_chi2_pvalue(chi2_w16, 65536),
-        zmax_w16, zmax_w16_ind, p_w16, pcrit_w16);
+        zmax_w16, zmax_w16_ind, p_w16, pcrit);
     // p-values interpretation
-    if (p_bytes < pcrit_bytes) {
+    if (p_bytes < pcrit) {
         printf("===== zmax_bytes test failed =====\n");
         return 0;
-    } else if (p_w16 < pcrit_w16) {
+    } else if (p_w16 < pcrit) {
         printf("===== zmax_w16 test failed =====\n");
         return 0;
     } else {
@@ -475,12 +474,12 @@ BatteryExitCode battery_blockfreq(const GeneratorInfo *gen, const CallerAPI *int
     while (is_ok) {
         if (gen->nbits == 64) {
             for (size_t i = 0; i < block_size; i++) {
-                uint64_t u = obj.gi->get_bits(obj.state);
+                const uint64_t u = obj.gi->get_bits(obj.state);
                 BlockFrequency_count(&freq, u, 8);
             }
         } else {
             for (size_t i = 0; i < block_size; i++) {
-                uint64_t u = obj.gi->get_bits(obj.state);
+                const uint64_t u = obj.gi->get_bits(obj.state);
                 BlockFrequency_count(&freq, u, 4);
             }
         }
@@ -748,8 +747,8 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
     }
     e_std = sqrt(e_std / (opts->nsamples - 1));
     cv_std = sqrt(cv_std / (opts->nsamples - 1));
-    double e_z = (e_mean - e_ref) / (e_std / sqrt(opts->nsamples));
-    double cv_z = (cv_mean - cv_ref) / (cv_std / sqrt(opts->nsamples));
+    const double e_z = (e_mean - e_ref) / (e_std / sqrt(opts->nsamples));
+    const double cv_z = (cv_mean - cv_ref) / (cv_std / sqrt(opts->nsamples));
     unsigned long df = opts->nsamples - 1;
     gs->intf->printf("e_mean  = %12.8g; e_std  = %12.8g; z = %12.8g; p = %.3g\n",
         e_mean, e_std, e_z, sr_t_pvalue(e_z, df));
@@ -784,7 +783,7 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
  */
 static double calc_usphere_volplus(unsigned int ndims)
 {
-    double n_half = (double) ndims / 2.0;
+    const double n_half = (double) ndims / 2.0;
     return exp(n_half * log(M_PI) - lgamma(1.0 + n_half) - ndims*log(2.0));
 }
 
