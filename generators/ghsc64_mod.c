@@ -2,10 +2,11 @@
  * @brief GhostScramble non-linear PRNG (modified by A.L. Voskov)
  * @details
  * express/brief/default/full
- * interleaved32: express/brief/default/?
+ * interleaved32: express/brief/default/full
  * >= 2 TiB PractRand 0.96
  *
  * 1. https://www.reddit.com/r/RNG/comments/1ul2fc7/ghostscramble_the_fastest_prng_in_the_universe/
+ * 2. https://github.com/wprsns/ghostscramble/blob/master/ghostscramble.c
  */
 #include "smokerand/cinterface.h"
 
