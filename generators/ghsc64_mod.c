@@ -3,7 +3,7 @@
  * @details
  * express/brief/default/full
  * interleaved32: express/brief/default/full
- * >= 2 TiB PractRand 0.96
+ * 8 TiB PractRand 0.96 (fails at 16 TiB, BCFN test)
  *
  * 1. https://www.reddit.com/r/RNG/comments/1ul2fc7/ghostscramble_the_fastest_prng_in_the_universe/
  * 2. https://github.com/wprsns/ghostscramble/blob/master/ghostscramble.c
