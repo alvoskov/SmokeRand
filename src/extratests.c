@@ -159,6 +159,43 @@ birthday_get_bytes_per_sec(GeneratorState *obj, const BirthdayOptions *opts, uin
 }
 
 /**
+ * @brief Calculate the number of duplicated in the generated array.
+ */
+static unsigned long long birthday_calc_ndups(const CallerAPI *intf,
+    uint64_t *x, size_t len)
+{
+    char buf[16];
+    intf->printf("\n  Sorting the array...");
+    const time_t tic = time(NULL);
+    radixsort64_inplace(x, len); // "In place": to prevent "out of memory"
+    snprintf_elapsed_time(buf, 15, (unsigned long long) (time(NULL) - tic));
+    intf->printf("  Time elapsed: %s\n", buf);
+    intf->printf("  Searching collisions");
+    unsigned long long ndups = 0;
+    for (size_t i = 0; i < len - 1; i++) {
+        if (x[i] == x[i + 1])
+            ndups++;
+    }
+    intf->printf(";  ncoll = %llu\n", ndups);
+    return ndups;
+}
+
+static unsigned long long BirthdayOptions_get_chunk_size(
+    const BirthdayOptions *opts,
+    GeneratorState *obj)
+{
+    const unsigned long long nvalues_raw = BirthdayOptions_calc_nvalues_raw(opts);
+    const uint64_t mask = BirthdayOptions_get_mask(opts);
+    const double bytes_per_sec = birthday_get_bytes_per_sec(obj, opts, mask);
+    const double time_elapsed = 8.0 * (double) nvalues_raw / bytes_per_sec;
+    unsigned long long chunk_size = opts->n / (unsigned long long) (time_elapsed * 5.0);
+    if (chunk_size < 1) {
+        chunk_size = 1;
+    }
+    return chunk_size;
+}
+
+/**
  * @brief Birthday paradox (not birthday spacings!) test for 64-bit pseudorandom
  * number generators. Detects 64-bit uniformly distributed PRNGS with 64-bit state.
  * @details This test for 64-bit PRNGs is suggested by M.E.O'Neill. It detects
@@ -187,7 +224,6 @@ birthday_get_bytes_per_sec(GeneratorState *obj, const BirthdayOptions *opts, uin
 unsigned long long birthday_test_ndups(GeneratorState *obj, const BirthdayOptions *opts, uint64_t *buf)
 {
     const unsigned long long ndups_failure = 10000000000ULL;
-    const unsigned long long nvalues_raw = (opts->n << opts->e);
     if (opts->n < 8) {
         obj->intf->printf("  Sample size is too small");
         return ndups_failure;
@@ -195,16 +231,10 @@ unsigned long long birthday_test_ndups(GeneratorState *obj, const BirthdayOption
     obj->intf->printf("  Filling the array with values (the lowest bits are 0x%llX)\n",
         (unsigned long long) opts->mvalue);
     const uint64_t mask = BirthdayOptions_get_mask(opts);
-    time_t tic = time(NULL);
+    const time_t tic = time(NULL);
     uint64_t cpu_tic = cpuclock();
+    unsigned long long chunk_size = BirthdayOptions_get_chunk_size(opts, obj);
     uint64_t *x = buf;
-    const double bytes_per_sec = birthday_get_bytes_per_sec(obj, opts, mask);
-    const double time_elapsed = 8.0 * (double) nvalues_raw / bytes_per_sec;
-    unsigned long long chunk_size = opts->n / (unsigned long long) (time_elapsed * 5.0);
-    if (chunk_size < 1) {
-        chunk_size = 1;
-    }
-
     const unsigned long long bytes_per_trvalue = 1ull << (opts->e + 3);
     for (unsigned long long i = 0; i < opts->n; i++) {
         int is_ok;
@@ -214,21 +244,23 @@ unsigned long long birthday_test_ndups(GeneratorState *obj, const BirthdayOption
             return ndups_failure;
         }
         if (i % chunk_size == 0) {
-            unsigned long nseconds_total, nseconds_left;
-            double mib_per_sec, cpb;
-            uint64_t cpu_toc = cpuclock();
+            const uint64_t cpu_toc = cpuclock();
             if (cpu_toc < cpu_tic) {
                 cpu_tic = cpu_toc;
             }
-            cpb = (double) (cpu_toc - cpu_tic) / (double) (i * bytes_per_trvalue);
-            nseconds_total = (unsigned long) (time(NULL) - tic);
-            nseconds_left = (unsigned long) ( ((unsigned long long) nseconds_total * (opts->n - i)) / (i + 1) );
-            mib_per_sec = (double) (i * bytes_per_trvalue) / (double) nseconds_total / (1ul << 20);
+            const double cpb = (double) (cpu_toc - cpu_tic) / (double) (i * bytes_per_trvalue);
+            const unsigned long long nseconds_total = (unsigned long long) (time(NULL) - tic);
+            const unsigned long long nseconds_left = (unsigned long long) (
+                ((unsigned long long) nseconds_total * (opts->n - i)) / (i + 1)
+            );
+            const double mib_per_sec = (double) (i * bytes_per_trvalue) /
+                                       (double) nseconds_total / (1ul << 20);
+            char buf_total[16], buf_left[16];
+            snprintf_elapsed_time(buf_total, 15, nseconds_total);
+            snprintf_elapsed_time(buf_left, 15, nseconds_left);
             obj->intf->printf("\r    %.1f %% completed; ",
                 100.0 * (double) i / (double) opts->n);
-            obj->intf->printf("time elapsed: "); print_elapsed_time(nseconds_total);
-            obj->intf->printf(", left: ");
-            print_elapsed_time(nseconds_left);
+            obj->intf->printf("time elapsed: %s, left: %s", buf_total, buf_left);
             if (mib_per_sec > 1024.0) {
                 obj->intf->printf("; %.2f GiB/s (%.3g cpb)",
                     mib_per_sec / 1024.0, cpb);
@@ -240,20 +272,7 @@ unsigned long long birthday_test_ndups(GeneratorState *obj, const BirthdayOption
         }
     }
     // Frequencies analysis
-    obj->intf->printf("\n  Sorting the array...");
-    tic = time(NULL);
-    radixsort64_inplace(x, (size_t) opts->n); // "In place": to prevent "out of memory"
-    obj->intf->printf("  Time elapsed: ");
-    print_elapsed_time((unsigned long long) (time(NULL) - tic));
-    obj->intf->printf("\n");    
-    obj->intf->printf("  Searching collisions");
-    unsigned long long ndups = 0;
-    for (size_t i = 0; i < opts->n - 1; i++) {
-        if (x[i] == x[i + 1])
-            ndups++;
-    }
-    obj->intf->printf(";  ncoll = %llu\n", ndups);
-    return ndups;
+    return birthday_calc_ndups(obj->intf, x, (size_t) opts->n);
 }
 
 /**
@@ -319,9 +338,10 @@ static void birthday_update_pvalue(TestResults *ans, double lambda,
  */
 BatteryExitCode battery_birthday(const GeneratorInfo *gen, const CallerAPI *intf)
 {
+    const int niters_max = 10000;
+    const double pvalue_fail_val = 1.0e-10;
     BatteryExitCode exitcode = BATTERY_PASSED;
     const unsigned int log2_n = birthday_get_log2_n(intf);
-    const int niters_max = 10000;
     BirthdayOptions opts = BirthdayOptions_create(gen, log2_n, 2);
     uint64_t *buf = calloc((size_t) opts.n, sizeof(uint64_t));
     if (buf == NULL) {
@@ -339,9 +359,9 @@ BatteryExitCode battery_birthday(const GeneratorInfo *gen, const CallerAPI *intf
     }
     char *seed_key_txt = get_entropy_base64_seed();
     if (seed_key_txt != NULL) {
-        printf("  Used seed:        _01_%s\n", seed_key_txt);
+        intf->printf("  Used seed:        _01_%s\n", seed_key_txt);
     } else {
-        printf("  Used seed:        none\n");
+        intf->printf("  Used seed:        none\n");
     }
     free(seed_key_txt);
     BirthdayOptions_print(&opts, intf);
@@ -350,14 +370,19 @@ BatteryExitCode battery_birthday(const GeneratorInfo *gen, const CallerAPI *intf
     ans.x = 0.0;
     double lambda = 0.0;
     unsigned long long n_total = 0;
+    const time_t tic = time(NULL);
     for (int i = 0; i < niters_max; i++) {
+        char strbuf[16];
         lambda += BirthdayOptions_calc_lambda(&opts);
         n_total += BirthdayOptions_calc_nvalues_raw(&opts);
         intf->printf("--- Iter %d of %d: ", i + 1, niters_max);
         ans.x += (double) birthday_test_ndups(&obj, &opts, buf);
         birthday_update_pvalue(&ans, lambda, n_total, intf);
+        snprintf_elapsed_time(strbuf, 15, (unsigned long long) (time(NULL) - tic));
+        intf->printf("  Time elapsed: %s\n", strbuf);
         BirthdayOptions_update_mvalue(&opts);
-        if (ans.p < 1e-10 || ans.p > 1.0 - 1e-10) {
+        if (ans.p < pvalue_fail_val || ans.alpha < pvalue_fail_val) {
+            intf->printf("The test has failed\n");
             exitcode = BATTERY_FAILED;
             break;
         }
@@ -420,10 +445,10 @@ int BlockFrequency_calc(BlockFrequency *obj)
     int zmax_bytes_ind = -1;
     long zmax_w16_ind = -1;
     for (int i = 0; i < 256; i++) {        
-        long long Ei = (long long) obj->nbytes / 256;
-        long long dE = (long long) obj->bytefreq[i] - (long long) Ei;
+        const long long Ei = (long long) obj->nbytes / 256;
+        const long long dE = (long long) obj->bytefreq[i] - (long long) Ei;
         chi2_bytes += pow((double) dE, 2.0) / (double) Ei;
-        double z_bytes = fabs((double) dE) / sqrt( (double) obj->nbytes * 255.0 / 65536.0);
+        const double z_bytes = fabs((double) dE) / sqrt( (double) obj->nbytes * 255.0 / 65536.0);
         if (zmax_bytes < z_bytes) {
             zmax_bytes = z_bytes;
             zmax_bytes_ind = i;

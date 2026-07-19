@@ -589,8 +589,20 @@ TimeHMS nseconds_to_hms(unsigned long long nseconds_total)
  */
 void print_elapsed_time(unsigned long long nseconds_total)
 {
-    TimeHMS hms = nseconds_to_hms(nseconds_total);
-    printf("%.2d:%.2d:%.2d", hms.h, hms.m, hms.s);
+    char buf[16];
+    snprintf_elapsed_time(buf, 15, nseconds_total);
+    printf("%s", buf);
+}
+
+
+/**
+ * @brief Prints elapsed time in hh:mm:ss format to stdout.
+ * @param nseconds_total  Number of seconds.
+ */
+void snprintf_elapsed_time(char *buf, size_t len, unsigned long long nseconds_total)
+{
+    const TimeHMS hms = nseconds_to_hms(nseconds_total);
+    snprintf(buf, len, "%.2d:%.2d:%.2d", hms.h, hms.m, hms.s);
 }
 
 
