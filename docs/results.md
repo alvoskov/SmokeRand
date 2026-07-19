@@ -1057,6 +1057,27 @@ flawed and barely usable LCGs with \f$ m = 2 ^ k \f$ modulo.
 
 # Other notes and TO-DO lists
 
+An example of RC4 failure in the `freq` battery:
+
+    2^38.8948 bytes analyzed
+           Chunk    chi2emp    p(chi2)       zmax    max_ind    p(zmax)    p(crit)
+          8 bits    263.593       0.34       3.31        208       0.21      1e-10
+         16 bits    65691.4       0.33       7.87      65535    2.2e-10      1e-10
+      Time elapsed: 00:29:57
+
+    2^38.9069 bytes analyzed
+           Chunk    chi2emp    p(chi2)       zmax    max_ind    p(zmax)    p(crit)
+          8 bits    264.196       0.33       3.38        208       0.17      1e-10
+         16 bits    65679.9       0.34       7.95      65535    1.2e-10      1e-10
+      Time elapsed: 00:30:12
+
+    2^38.9189 bytes analyzed
+           Chunk    chi2emp    p(chi2)       zmax    max_ind    p(zmax)    p(crit)
+          8 bits    267.593       0.28       3.39        208       0.17      1e-10
+         16 bits    65733.8       0.29       8.03      65535    6.2e-11      1e-10
+    ===== zmax_w16 test failed =====
+      Time elapsed: 00:30:27
+
 Examples of false failures in SmokeRand 0.42 in gap16_count0 test (fixed in 0.43):
 
 smokerand.exe brief generators/chacha.dll --seed=_01_UU3t9pAb3d5FYNSe6nbg3ew3LMZtRMkA4p84wYkBr60= --testname=gap16_count0
