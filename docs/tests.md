@@ -44,10 +44,11 @@ stream ciphers.
 
 Extra tests:
 
-1. 64-bit birthday paradox test. Requires 8 GiB of RAM and about 30 minutes.
-   Allows to detect perfectly uniform 64-bit generators with 64-bit state
-   such as SplitMix, 64-bit LCGs with full 64-bit outputs, some modifications
-   of PCG.
+1. 64-bit collision test with decimation (the former "birthday paradox test").
+   Requires 8 GiB of RAM and at least 30 minutes. Allows to detect perfectly
+   uniform 64-bit generators with 64-bit state such as SplitMix, 64-bit LCGs
+   with full 64-bit outputs, some modifications of PCG. Since SmokeRand 0.48
+   it also detects flaws in `wyrand`, `w1rand` due to excessive collisions.
 2. 2-dimensional Ising model test: modifications with Wolff and Metropolis
    algorithms. Rather slow and not very sensitive, but resemble real
    Monte-Carlo computations.
@@ -75,7 +76,7 @@ PRNG that pass BigCrush or PractRand:
 - SWBW: detected by PractRand but not by BigCrush.
 - Uniformly distributed 64-bit generators with 64-bit state such as
   SplitMix, PCG64/64, rrmxmx, DES-CTR, MAGMA-CTR: detected by an extra
-  "birthday paradox" battery.
+  `coll64dec` battery.
 - Additive and subtractive lagged Fibonacci generators with large lags, e.g.
   LFib(19937,9842+): the `gap16` (`rda16`) test is taken from gjrand.
 - RC4 obsolete CSPRNG: detected by PractRand but not by BigCrush. In SmokeRand
@@ -302,13 +303,13 @@ These tests are not included into the `brief`, `default` and `full` batteries
 because they are slow, may require a lot of RAM and are usually aimed on some
 very specific issues.
 
-## 64-bit birthday paradox test
+## 64-bit collision test
 
 This test detects uniform generators with 64-bit output and 64-bit state. Such
 generators never repeat themselves during the entire period and it can be
-easily detected by means of "birthday paradox": number of duplicates in the
-sample of n values that have m bits size each obeys Poisson distribution with
-the next mathematical expectance:
+easily detected by means of "birthday paradox": number of collisions
+(duplicates) in the sample of n values that have m bits size each obeys Poisson
+distribution with the next mathematical expectance:
 
 \f[
 \lambda = \frac{n^2}{2\cdot 2^m}
@@ -329,6 +330,11 @@ duplicates from both runs are summed and p-value is calculated.
 32-bit version of this test consumes less RAM, uses larger e and is much
 slower. However, it is made as a rarely used backup variant: ordinary x86 based
 workstations in 2024 usually 64-bit and have at least 16 GiB of RAM.
+
+
+- https://github.com/alvoskov/SmokeRand/issues/24
+- https://github.com/vigna/coll-birth-rs
+- https://homes.cs.washington.edu/~beame/papers/sorting.pdf
 
 ## Extended block frequency test
 
