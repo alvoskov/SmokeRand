@@ -6,7 +6,7 @@
  * frequency test for 8-bit and 16-bit blocks.
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -16,14 +16,15 @@
 #include "smokerand/core.h"
 
 /**
- * @brief Settings for the birthday paradox test.
+ * @brief Settings for the 64-bit collision test with decimtion
+ * (the former "birthday paradox test").
  */
 typedef struct {
     unsigned long long n; ///< Number of values
     unsigned int e; ///< Leave only values with zeros in lower (e - 1) bits
     unsigned int nbits_per_value; ///< 32 or 64
     uint64_t mvalue; ///< Required value in the lower (e - 1) bits
-} BirthdayOptions;
+} CollOver64DecimatedOptions;
 
 
 /**
@@ -54,7 +55,6 @@ typedef struct {
 } UnitSphereOptions;
 
 
-unsigned long long birthday_test_ndups(GeneratorState *obj, const BirthdayOptions *opts, uint64_t *buf);
 TestResults ising2d_test(GeneratorState *obj, const Ising2DOptions *opts);
 TestResults unit_sphere_volume_test(GeneratorState *gs, const UnitSphereOptions *opts);
 
@@ -62,7 +62,7 @@ TestResults ising2d_test_wrap(GeneratorState *obj, const void *udata);
 TestResults unit_sphere_volume_test_wrap(GeneratorState *gs, const void *udata);
 
 
-BatteryExitCode battery_birthday(const GeneratorInfo *gen, const CallerAPI *intf);
+BatteryExitCode battery_collover64_decimated(const GeneratorInfo *gen, const CallerAPI *intf);
 BatteryExitCode battery_ising(const GeneratorInfo *gen, const CallerAPI *intf,
     const BatteryOptions *opts);
 BatteryExitCode battery_blockfreq(const GeneratorInfo *gen, const CallerAPI *intf);

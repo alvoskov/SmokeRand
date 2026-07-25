@@ -18,20 +18,20 @@ typedef struct {
 } GhSc64State;
 
 
-static inline uint64_t get_bits_raw(GhSc64State *s)
+static inline uint64_t get_bits_raw(GhSc64State *obj)
 {
-    if (s->pos == 4) {
-        s->a = rotl64(s->a, 25) ^ s->b;
-        s->b += 11111111111111111;
-        s->c += s->a;
-        s->d = rotl64(s->d, 51) + s->a;
-        s->output[0] = s->a + s->b;
-        s->output[1] = rotl64(s->a, 47) ^ s->b;
-        s->output[2] = s->c;
-        s->output[3] = s->d;
-        s->pos = 0;
+    if (obj->pos == 4) {
+        obj->a = rotl64(obj->a, 25) ^ obj->b;
+        obj->b += 11111111111111111;
+        obj->c += obj->a;
+        obj->d = rotl64(obj->d, 51) + obj->a;
+        obj->output[0] = obj->a + obj->b;
+        obj->output[1] = rotl64(obj->a, 47) ^ obj->b;
+        obj->output[2] = obj->c;
+        obj->output[3] = obj->d;
+        obj->pos = 0;
     }
-    return s->output[s->pos++];
+    return obj->output[obj->pos++];
 }
 
 static void *create(const CallerAPI *intf)

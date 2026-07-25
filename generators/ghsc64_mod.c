@@ -22,23 +22,23 @@ typedef struct {
 } GhSc64State;
 
 
-static inline uint64_t get_bits_raw(GhSc64State *s)
+static inline uint64_t get_bits_raw(GhSc64State *obj)
 {
-    if (s->pos == 4) {
+    if (obj->pos == 4) {
         // Mixer
-        const uint64_t a = rotl64(s->a, 25) ^ s->b;
-        s->b += s->b * s->b | 0x40000005; // Klimov-Shamir T-function
-        s->c = rotl64(s->c, 19) ^ a;
-        s->a = rotl64(s->d, 51) + a;
-        s->d = a;
+        const uint64_t a = rotl64(obj->a, 25) ^ obj->b;
+        obj->b += obj->b * obj->b | 0x40000005; // Klimov-Shamir T-function
+        obj->c = rotl64(obj->c, 19) ^ a;
+        obj->a = rotl64(obj->d, 51) + a;
+        obj->d = a;
         // Output function
-        s->output[0] = s->a + s->b;
-        s->output[1] = rotl64(s->a, 47) + s->b;
-        s->output[2] = s->c + s->d;
-        s->output[3] = rotl64(s->c, 47) + s->d;
-        s->pos = 0;
+        obj->output[0] = obj->a + obj->b;
+        obj->output[1] = rotl64(obj->a, 47) + obj->b;
+        obj->output[2] = obj->c + obj->d;
+        obj->output[3] = rotl64(obj->c, 47) + obj->d;
+        obj->pos = 0;
     }
-    return s->output[s->pos++];
+    return obj->output[obj->pos++];
 }
 
 static void *create(const CallerAPI *intf)

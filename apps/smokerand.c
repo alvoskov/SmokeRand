@@ -31,7 +31,7 @@ void print_help(void)
     "  - default    Slower but more sensitive battery (128-256 GiB of data)\n"
     "  - full       The slowest battery (1-2 TiB of data)\n"
     "  Special batteries\n"
-    "  - birthday   64-bit birthday paradox based test.\n"
+    "  - coll64dec  64-bit collision test with decimation (former `birthday`).\n"
     "  - ising      Ising model based tests: Wolff and Metropolis algorithms.\n"
     "  - freq       8-bit and 16-bit words frequency adaptive tests.\n"  
     "  - f=filename Load a custom battery from the text config file.\n"
@@ -364,7 +364,7 @@ static BatteryExitCode battery_##battery_name##_env(const GeneratorInfo *gen, \
     return battery_##battery_name(gen, intf); \
 }
 
-DEFINE_SHORT_BATTERY_ENV(birthday)
+DEFINE_SHORT_BATTERY_ENV(collover64_decimated)
 DEFINE_SHORT_BATTERY_ENV(blockfreq)
 DEFINE_SHORT_BATTERY_ENV(self_test)
 DEFINE_SHORT_BATTERY_ENV(speed)
@@ -415,7 +415,8 @@ BatteryExitCode run_battery(const char *battery_name, GeneratorInfo *gi,
         {"selftest",   battery_self_test_env},
         {"speed",      battery_speed_env},
         {"freq",       battery_blockfreq_env},
-        {"birthday",   battery_birthday_env},
+        {"birthday",   battery_collover64_decimated_env},
+        {"coll64dec",  battery_collover64_decimated_env},
         {"ising",      battery_ising},
         {"unitsphere", battery_unit_sphere_volume},
         {"dummy",      battery_dummy},

@@ -1,3 +1,21 @@
+/**
+ * @file tf0duper64.c
+ * @brief Tf0Duper64 is a high-quality combined PRNG inspired by SuperDuper
+ * generators family developed by G.Marsaglia.
+ * @details Differences from SuperDuper:
+ *
+ * 1. Klimov-Shamir "crazy" T-function TF0 instead of LCG.
+ * 2. xorrot64 (custom LFSR developed by A.L.Voskov) instead of xorshift64.
+ * 3. More advanced output function that hides artefacts in lower bits.
+ *
+ * Its period is \f$ (2^{64} - 1) 2^{64} \f$.
+ *
+ * @copyright
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
@@ -6,8 +24,8 @@ PRNG_CMODULE_PROLOG
  * @brief Tf0Duper64 PRNG state
  */
 typedef struct {
-    uint64_t tf;
-    uint64_t xs;
+    uint64_t tf; ///< TF0 part
+    uint64_t xs; ///< xorrot64 (LFSR) part
 } Tf0Duper64State;
 
 

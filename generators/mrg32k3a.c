@@ -75,12 +75,7 @@ static inline int64_t component(uint32_t *s,
     const int64_t b, const size_t ind_b,
     const int64_t m)
 {
-    int64_t p = a * (int64_t) s[ind_a] - b * (int64_t) s[ind_b];
-    int64_t k = p / m;
-    p -= k * m;
-    if (p < 0) {
-        p += m;
-    }
+    const int64_t p = (a * (int64_t) s[ind_a] - b * (int64_t) s[ind_b] + b*m) % m;
     s[0] = s[1];
     s[1] = s[2];
     s[2] = (uint32_t) p;
@@ -108,15 +103,31 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-static inline uint64_t get_bits_raw(void *state)
+/**
+ * @brief Returns the 32-bit integer in the \f$ [1; m1] \f$ range.
+ * @details It will systematically fail the `FPF-14+6/16:cross` test
+ * from PractRand at 4 TiB sample. The failure is systematic and reproducible.
+ * Renormalization is recommended before its usage.
+ */
+static inline uint32_t Mrg32k3aState_get_u32_raw(Mrg32k3aState *obj)
 {
     static const int64_t a12  = 1403580ll, a13n = 810728ll;
     static const int64_t a21  = 527612ll,  a23n = 1370589ll;
-    Mrg32k3aState *obj = state;
-    int64_t p1 = component(obj->s1, a12, 1, a13n, 0, m1);
-    int64_t p2 = component(obj->s2, a21, 2, a23n, 0, m2);
-    int64_t u = (p1 <= p2) ? (p1 - p2 + m1) : (p1 - p2);
+    const int64_t p1 = component(obj->s1, a12, 1, a13n, 0, m1);
+    const int64_t p2 = component(obj->s2, a21, 2, a23n, 0, m2);
+    const int64_t u = (p1 <= p2) ? (p1 - p2 + m1) : (p1 - p2);
     return (uint32_t) u;
+}
+
+/**
+ * @brief Renormalizes the \f$ [1; m1] \f$ interval to the
+ * \f$ [0; 2^{32}-1]\f$ interval.
+ */
+static inline uint64_t get_bits_raw(Mrg32k3aState *obj)
+{
+    const double c = 1.00000004866160696615; // 2**32 / m1
+    const uint32_t r = Mrg32k3aState_get_u32_raw(obj) - 1;
+    return (uint32_t) (c * r);
 }
 
 /**
@@ -137,11 +148,11 @@ static int run_self_test(const CallerAPI *intf)
         obj.s2[i] = seed;
     }
     for (int i = 0; i < 10000; i++) {
-        get_bits_raw(&obj);
+        Mrg32k3aState_get_u32_raw(&obj);
     }
     intf->printf("%8s %s\n", "Output", "Reference");
     for (int i = 0; i < 8; i++) {
-        uint64_t u = get_bits_raw(&obj);
+        const uint64_t u = Mrg32k3aState_get_u32_raw(&obj);
         intf->printf("0x%.8lX 0x%.8lX\n",
             (unsigned long) u, (unsigned long) u_ref[i]);
         if (u != u_ref[i]) {

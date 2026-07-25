@@ -1,3 +1,21 @@
+/**
+ * @file tf0duper32.c
+ * @brief Tf0Duper32 is a high-quality combined PRNG inspired by SuperDuper
+ * generators family developed by G.Marsaglia.
+ * @details Differences from SuperDuper:
+ *
+ * 1. Klimov-Shamir "crazy" T-function TF0 instead of LCG.
+ * 2. xorrot32 (custom LFSR developed by A.L.Voskov) instead of xorshift32.
+ * 3. More advanced output function that hides artefacts in lower bits.
+ *
+ * Its period is \f$ (2^{32} - 1) 2^{32} \f$.
+ *
+ * @copyright
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
@@ -6,8 +24,8 @@ PRNG_CMODULE_PROLOG
  * @brief Tf0Duper32 PRNG state
  */
 typedef struct {
-    uint32_t tf;
-    uint32_t xs;
+    uint32_t tf; ///< TF0 part
+    uint32_t xs; ///< xorrot64 (LFSR) part
 } Tf0Duper32State;
 
 

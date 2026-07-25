@@ -5,8 +5,8 @@ obtained from SmokeRand, TestU01 and PractRand 0.94 test suites. The next
 grading algorithm was used:
 
 1. An initial grade was obtained from SmokeRand `full` battery.
-2. If PRNG failed `birthday` or `freq` battery - then 1 is subtracted for each
-   failure.
+2. If PRNG failed `coll64dec` (former `birthday`) or `freq` battery - then 1
+   is subtracted for each failure.
 3. If the grade is 4.0 and PRNG failed some tests in TestU01 or PractRand
    then 0.5 is subtracted.
 4. If PRNG is widely known cryptographic and has no known weakness then
@@ -16,7 +16,7 @@ grading algorithm was used:
    $2^{60}$ then the grade is 0 (written as `(0)` after empirically obtained
    grade).
 
-The next notation is ued for the bday64 test results:
+The next notation is ued for the `coll64dec` test results:
 
 1. `+` - passed.
 2. `-` - failed (no collisions at all)
@@ -27,7 +27,7 @@ The next notation is ued for the bday64 test results:
 The `-(>>>)` result is typical for cases when PRNG period is exausted during
 the testing.
 
- Algorithm         | Output | express | brief | default | full | cpb  | bday64 | Grade | TestU01 | PractRand 
+ Algorithm         | Output | express | brief | default | full | cpb  | coll64 | Grade | TestU01 | PractRand 
 -------------------|--------|---------|-------|---------|------|------|--------|-------|---------|-----------
  a5rand            | u64    | +       | +     | +       | +    | 0.37 | +      | 4(0)  |         | >= 16 TiB
  a5rand32          | u32    | +       | 1/2   | 9       | 11   | 1.0  | -(>>>) | 0     | Small   | 4 GiB
@@ -35,6 +35,7 @@ the testing.
  a5rand32w         | u32    | +       | 0/1   | 1       | 1    | 0.75 | -(~23) | 0     | +       | 256 GiB
  aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      | 5     | +il     | >= 32 TiB
  aes128(c99)       | u64    | +       | +     | +       | +    | 6.8  | +      | 5     |         | >= 32 TiB
+ aesdec2           | u64    | +       | +     | +       | +    | 0.14 | +      | 4     |         | >= 8 TiB
  alfib             | u64    | 2       | 5     | 6       | 8    | 0.23 | +      | 0     | Small   | 128 MiB
  alfib8x5          | u32    | +       | +     | +       | +    | 3.2  | +      | 4     | +       | >= 4 TiB
  alfib64x5         | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 8 TiB
@@ -97,9 +98,10 @@ the testing.
  jkiss32           | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  jlkiss64          | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 16 TiB
  flea32x1          | u32    | +       | 1     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
- ghsc64            | u64    | +       | +     | +       | +    |      |        |       |         | >= 16 TiB
- ghsc128           | u64    | +       | +     | +       | +    |      |        |       |         | >= 16 TiB
- ghsc256           | u64    | +       | +     | +       | +    |      |        |       |         | ?
+ ghsc64_old        | u64    | +       | 3     | 10      | 18   | ~0.1 |        | 0     |         | 256 KiB
+ ghsc64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 16 TiB
+ ghsc128           | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 16 TiB
+ ghsc256           | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | >= 16 TiB
  gjrand8           | u32    | +       | 4     | 11      | >=15 | 3.5  | -(>>>) | 0     | Small   | 128 MiB
  gjrand16          | u32    | +       | +     | +       | +    | 2.6  | +      | 4(0)  | +       | 8 TiB
  gjrand32          | u32    | +       | +     | +       | +    | 0.69 | +      | 4(0)  | +       | >= 32 TiB
@@ -123,7 +125,7 @@ the testing.
  kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     | +       | >= 16 TiB
  kiss11_64         | u64    | +       | +     | +       | +    | 0.60 | +      | 4     |         | >= 32 TiB
  kiss4691          | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 32 TiB
- komirand16        | u32    | 1-7     | 19-20 | 40      |      | 2.1  |        | 0     | -       | 64 KiB
+ komirand16        | u32    | 1-7     | 19-20 | 40      |      | 2.1  | -(>>>) | 0     | -       | 64 KiB
  komirand16w       | u32    | 1-4     | 20-21 | 39      |      | 2.1  |        | 0     | -       | 16 MiB
  komirand32        | u32    | +       | 1     | 2       | 10   | 0.63 | -(>>>) | 0     | Small   | 2-8 GiB
  komirand32w       | u32    | +       | +     | +       | +    | 1.0  | +      | 4(0)  | +       | >= 16 TiB
@@ -131,6 +133,7 @@ the testing.
  komirandw         | u64    | +       | +     | +       | +    | 0.52 | +      | 4     |         | >= 8 TiB
  konadare192       | u64    | +       | +     | +       | +    | 0.20 | +      | 4     |         | >= 16 TiB
  kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 5     | +       | >= 4 TiB
+ leptonflurry32x1  | u32    | +       | +     | +       | +    | 2.8  | +      | 4     |         | >= 4 TiB
  lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>>) | 0     | -       | 512 MiB
  lcg32sc           | u32    | +       | 1     | 2       | 8/9  | 0.62 | -(>>>) | 0     | Small   | 512 MiB
  lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     | -       | 16 KiB
@@ -199,6 +202,8 @@ the testing.
  mrc16             | u32    | +       | +     | +       | +    | 1.1  | +      | 3.5(0)| +       | 1 TiB
  mrc32             | u32    | +       | +     | +       | +    | 0.35 | +      | 4(0)  | +       | >= 8 TiB
  mrc64             | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 16 TiB
+ mrsf32            | u32    | +       | +     | +       | +    | 0.19 | +      | 4(0)  |         | ?
+ mrsf64            | u64    | +       | +     | +       | +    | <0.1 | +      | 4(0)  |         | ?
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.59 | +      | 3.25  | Small   | 128 GiB
  mt19937_64        | u64    | +       | 3     | 3       | 3    | 0.45 | +      | 3.25  | Small   | 256 GiB
  mt19937_64_full   | u64    | +       | 3     | 3       | 3    | 0.46 | +      | 3.25  | Small   | 256 GiB
@@ -207,7 +212,7 @@ the testing.
  mtc32             | u32    | +       | +     | +       | +    | 0.39 | +      | 4(0)  | +       | >= 4 TiB
  mtc64             | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 16 TiB
  mtc64hi           | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 2 TiB
- mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | +      | 3.5   | +       | 2 TiB
+ mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | +      | 4     | +       | >= 16 TiB
  msws              | u32    | +       | +     | +       | +    | 0.72 | +      | 4     | +       | >= 16 TiB
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     | +il     | >= 8 TiB
  msws64            | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 32 TiB
@@ -359,9 +364,9 @@ the testing.
  taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  | Small   | 32 KiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      | 3     |+_lo/+_hi| 32 GiB
- tf0_32            | u32    | 5       | 18    | 33      | 38   | 0.48 |        | 0     | -       | 2 KiB
+ tf0_32            | u32    | 5       | 18    | 33      | 38   | 0.48 | -(>>>) | 0     | -       | 2 KiB
  tf0_32sc2         | u32    | +       | 1     | 2       | 8    | 0.57 | -(>>>) | 0     | Small   | 512 MiB
- tf0_64            | u32    | +       | +     | 1       | 1    | 0.45 |        | 3     | +       | 2 GiB
+ tf0_64            | u32    | +       | +     | 1       | 1    | 0.45 | +      | 3     | +       | 2 GiB
  tf0_64sc          | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 16 TiB
  tf0_64sc2         | u64    | +       | +     | +       | +    | 0.40 | -      | 3     |         | >= 16 TiB
  tf0_128           | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |+lo      | >= 16 TiB
@@ -464,12 +469,18 @@ the testing.
  ziff98            | u32    | +       | 3     | 3       | 3    | 0.47 | +      | 3.25  | Small   | 32 GiB
 
 
-Some results obtained during the bday64 test runs using 8 GiB of RAM:
+Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
 
 
  Algorithm         | Failed at  | Collisions 
 -------------------|------------|------------
+ aesdec2           | - (>75 TiB)| 303/300
+ ghsc64            | - (>10 TiB)| 41/40
+ ghsc128           | - (>8 TiB) | 36/32
+ ghsc256           | - (>23 TiB)| 85/92
  msws_ctr          | - (>80 TiB)| 305/320
+ mrsf32            | - (>18 TiB)| 76/72
+ mrsf64            | - (>69 TiB)| 267/276
  splitmix64        | 6 TiB      | 0/24
  sqxor             | 12 TiB     | 100/48
  tf0_64            | - (>36 TiB)| 152/144 
@@ -482,7 +493,7 @@ Some results obtained during the bday64 test runs using 8 GiB of RAM:
 
 Performance estimation for some 64-bit generators
 
-TODO: `bday64` and `default` numbers are now obsolete!
+TODO: `coll64dec` and `default` numbers are now obsolete!
 
  Generator                | ising    | bday64   | usphere  | default
 --------------------------|----------|----------|----------|----------
@@ -579,8 +590,11 @@ testing is required.
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
 e.g. changing `-O2` to `-O3` speeds up `mt19937` but slows down `philox`; gcc 10.3.0 (tdm64-1).
 
-Note about `mrg32k3a`: it fails the `FPF-14+6/16:cross` test from PractRand at 4 TiB sample.
-The failure is systematic and reproducible.
+Note about `mrg32k3a`:
+
+- It fails the `FPF-14+6/16:cross` test from PractRand at 4 TiB sample if raw output
+  The failure is systematic and reproducible.
+- After renormalization: >= 4 TiB in PractRand 0.96 (`stdin64`)
 
 Note about `mtc16`: if its output is processed as `stdin16` by PractRand 0.94 then it
 fails after 256 GiB, not after 512 GiB.
