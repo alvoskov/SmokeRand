@@ -4,18 +4,36 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
-## [0.48]
+## [0.48] - 2026-07-26
 
 ### Added
 
+- `aesdec2` generator by camel-cdr (Olaf Bernstein), requires AES-NI
+   instructions support, the portable version is intentionally omitted.
+- `ghsc64`, `ghsc128`, `ghsc256`, `ghsc64_old`, `ghsc64_mod` - GhostScramble
+   PRNG family (`ghc64_mod` modification was suggested by A.L. Voskov).
+- `leptonflurry32x1` counter-based PRNG was added.
+- `mrsf32` and `mrsf64` chaotic PRNGs were added.
 - `konadare192` chaotic PRNG.
+
+### Bugfix
+
+- `mrg32k3a`: renormalization to the [0; 2^{32} - 1] interval was added to
+  make the testing more correct (suggested by [S.Vigna](https://github.com/vigna),
+  see [this issue](https://github.com/alvoskov/SmokeRand/issues/25)
+- `hamming_ot` test family and `hamming_distr` test: improved p-value
+  computation formula due to more accurate renormalizaton.
 
 ### Changed
 
-- `birthday` battery is now generalized to the 64-bit collision test, this
-  upgrade was suggested by S.Vigna (https://github.com/alvoskov/SmokeRand/issues/24).
+- `birthday` battery was renamed to the `coll64dec` battery. Now it is generalized
+  to the 64-bit collision test with decimation, this upgrade was suggested
+  by S.Vigna (see [this issue](https://github.com/alvoskov/SmokeRand/issues/24)).
 - Improved sorting algorithms for 64-bit unsigned integers based on MSD
   in-place radix sort (similar to American Flag Sort algorithm)
+- Improved p-values computation for `freq` battery and for the `bspace4_8d_dec`,
+  `gap16_count0`, `hamming_distr` tests (suggested by S.Vigna, see
+  [this issue](https://github.com/alvoskov/SmokeRand/issues/24)
 
 ## [0.47] - 2026-04-15
 

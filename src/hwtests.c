@@ -14,6 +14,10 @@
 #include <math.h>
 #include <float.h>
 
+//////////////////////////////////////////
+///// hamming_ot test implementation /////
+//////////////////////////////////////////
+
 typedef struct _ByteStreamGenerator {
     const GeneratorInfo *gen; ///< Used generator
     void *state; ///< PRNG state
@@ -193,6 +197,7 @@ size_t HammingWeightsTuple_reduce_table(HammingWeightsTuple *info, double Ei_min
  */
 TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
 {
+    static const double NORM_STD = 1.3; // Empirical standard deviation
     // Concatenate low-populated bins
     const size_t nbins_max = 250000;
     double Ei_min = 250.0;
@@ -209,14 +214,14 @@ TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
     TestResults ans = TestResults_create("hamming_ot");
     ans.x = 0;
     for (size_t i = 0; i < obj->len; i++) {
-        double Ei = (double) count_total * obj->tuples[i].p;
-        double Oi = (double) obj->tuples[i].count;
+        const double Ei = (double) count_total * obj->tuples[i].p;
+        const double Oi = (double) obj->tuples[i].count;
         if (Oi > DBL_EPSILON) {
             ans.x += 2.0 * Oi * log(Oi / Ei);
         }
     }
     ans.penalty = PENALTY_HAMMING_OT;
-    ans.x = sr_chi2_to_stdnorm_approx(ans.x, (unsigned long) (obj->len - 1));
+    ans.x = sr_chi2_to_stdnorm_approx(ans.x, (unsigned long) (obj->len - 1)) / NORM_STD;
     ans.p = sr_stdnorm_pvalue(ans.x);
     ans.alpha = sr_stdnorm_cdf(ans.x);
     return ans;
@@ -394,7 +399,7 @@ static const uint8_t *hamming_ot_fill_hw_tables(GeneratorState *obj,
  *    Monte-Carlo approach with CSPRNG (HC-256?) was used.
  * 8. p-value is calculated for the obtained zemp.
  *
- * WARNING! This description is reverse engineered from the PractrRand source
+ * WARNING! This description is reverse engineered from the PractRand source
  * code by A.L.Voskov and may be inaccurate. Some simplifications were made:
  *
  * 1. Codes reordering was excluded.
@@ -629,10 +634,12 @@ TestResults hamming_ot_long_test(GeneratorState *obj, const HammingOtLongOptions
     return res;
 }
 
+/////////////////////////////////////////////
+///// hamming_distr test implementation /////
+/////////////////////////////////////////////
 
 double hamming_distr_calc_zemp(const unsigned long long *o, size_t nbits)
 {
-    static const double NORM_STD = 1.3; // Empirical standard deviation
     double chi2emp = 0.0;
     unsigned long long npoints = 0;
     unsigned long df = 0;
@@ -642,14 +649,14 @@ double hamming_distr_calc_zemp(const unsigned long long *o, size_t nbits)
     double *p = calloc(nbits + 1, sizeof(double));
     sr_binomial_pdf_all(p, (unsigned long) nbits, 0.5);
     for (size_t i = 0; i < nbits; i++) {
-        double e_i = (double) npoints * p[i];
+        const double e_i = (double) npoints * p[i];
         if (e_i > 25.0) {
             chi2emp += calc_chi2emp_term(o[i], e_i);
             df++;
         }
     }
     free(p);
-    return sr_chi2_to_stdnorm_approx(chi2emp, df) / NORM_STD;
+    return sr_chi2_to_stdnorm_approx(chi2emp, df);
 }
 
 /**

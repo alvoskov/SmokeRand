@@ -844,6 +844,32 @@ static double gap16_count_test_calc_Ei_min(unsigned long long ngaps)
 }
 
 /**
+ * @brief Calculate the final p-value for the `gap16_count0` test
+ */
+static TestResults gap16_count0_test_calc_results(const GapFrequencyStats *gf,
+    const GapFrequencyStats *gf_rb, double z_sumsq_total)
+{
+    TestResults ans = TestResults_create("gap16_count0");
+    // Make total p-value using corrections based on the geometric distribution
+    const double p_max_w0 = sr_geom_cdf(65536, sr_halfnormal_pvalue(fabs(gf->z_max_w0)));
+    const double p_max_tot = sr_geom_cdf(65536, sr_halfnormal_pvalue(fabs(gf->z_max_tot)));
+    const double p_max_wrb = sr_geom_cdf(65536, sr_halfnormal_pvalue(fabs(gf_rb->z_max_w0)));
+    const double p_sumsq_total = sr_halfnormal_pvalue(fabs(z_sumsq_total));
+
+    double p_min = p_max_w0;
+    if (p_min > p_max_tot) p_min = p_max_tot;
+    if (p_min > p_max_wrb) p_min = p_max_wrb;
+    if (p_min > p_sumsq_total) p_min = p_sumsq_total;
+    TestResults_set_pmin_ntests(&ans, 4, p_min);
+    ans.x = -sr_stdnorm_inv(ans.p);
+    if (ans.x < -40.0) { ans.x = -40.0; }
+    else if (ans.x > 40.0) { ans.x = 40.0; }
+    ans.penalty = PENALTY_GAP16_COUNT0;
+    return ans;
+}
+
+
+/**
  * @brief Similar to rda16 ("repeat distance analysis") from gjrand, very sensitive
  * to additive and subtractive lagged Fibonacci generators.
  * @details Resembles classic gap test but analyses all possible (and equal length)
@@ -874,10 +900,10 @@ static double gap16_count_test_calc_Ei_min(unsigned long long ngaps)
 TestResults gap16_count0_test(GeneratorState *obj, unsigned long long ngaps)
 {
     const double p = 1.0 / 65536.0;
-    TestResults ans = TestResults_create("gap16_count0");
+    //TestResults ans = TestResults_create("gap16_count0");
     const double Ei_min = gap16_count_test_calc_Ei_min(ngaps);
     if (Ei_min == 0.0) {
-        return ans;
+        return TestResults_create("gap16_count0");
     }
     const size_t nbins = (size_t) (log(Ei_min / ((double) ngaps * p)) / log(1 - p));
     // Initialize frequency and position tables
@@ -920,20 +946,7 @@ TestResults gap16_count0_test(GeneratorState *obj, unsigned long long ngaps)
     obj->intf->printf("  Note: remember about Bonferroni correction!\n");
     obj->intf->printf("\n");
     // Make total p-value using corrections based on the geometric distribution
-    const double p_max_w0 = sr_geom_cdf(65536, sr_halfnormal_pvalue(fabs(gf.z_max_w0)));
-    const double p_max_tot = sr_geom_cdf(65536, sr_halfnormal_pvalue(fabs(gf.z_max_tot)));
-    const double p_max_wrb = sr_geom_cdf(65536, sr_halfnormal_pvalue(fabs(gf_rb.z_max_w0)));
-    const double p_sumsq_total = sr_halfnormal_pvalue(fabs(z_sumsq_total));
-
-    double p_min = p_max_w0;
-    if (p_min > p_max_tot) p_min = p_max_tot;
-    if (p_min > p_max_wrb) p_min = p_max_wrb;
-    if (p_min > p_sumsq_total) p_min = p_sumsq_total;
-    TestResults_set_pmin_ntests(&ans, 4, p_min);
-    ans.x = -sr_stdnorm_inv(ans.p);
-    if (ans.x < -40.0) { ans.x = -40.0; }
-    else if (ans.x > 40.0) { ans.x = 40.0; }
-    ans.penalty = PENALTY_GAP16_COUNT0;
+    const TestResults ans = gap16_count0_test_calc_results(&gf, &gf_rb, z_sumsq_total);
     // Output p-value
     obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
