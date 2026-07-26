@@ -155,9 +155,9 @@ set (GENERATORS
     taus88 tf0duper32 tf0duper64 tf0_128 tf0_32 tf0_32sc2 tf0_32sc3 
     tf0_64 tf0_64sc tf0_64sc2 threefish1024 threefry threefry2x64 
     tinymt32 tinymt64 tychei tychei64 tychei64w tylo64 ultra ultra64 
-    v3b w1rand well1024a weyl wich1982 wich2006 wob2m wyrand xabc16 
-    xabc32 xabc64 xabc8 xkiss16sh_awc xkiss16_awc xkiss32sh_awc xkiss32_awc 
-    xkiss32_awc_rot xkiss64_awc xkiss8_awc xorgens xoroshiro1024st 
+    v3b w1rand wanghash64 well1024a weyl wich1982 wich2006 wob2m 
+    wyrand xabc16 xabc32 xabc64 xabc8 xkiss16sh_awc xkiss16_awc xkiss32sh_awc 
+    xkiss32_awc xkiss32_awc_rot xkiss64_awc xkiss8_awc xorgens xoroshiro1024st 
     xoroshiro1024stst xoroshiro128 xoroshiro128aox xoroshiro128p 
     xoroshiro128pp xoroshiro128pp_vec xoroshiro32 xoroshiro32pp xoroshiro64aox 
     xoroshiro64pp xoroshiro64st xoroshiro64stst xorrot128 xorrot128mn 
@@ -167,7 +167,7 @@ set (GENERATORS
     xorshift128pp xorshift128rp xorshift64 xorshift64st xorwow xoshiro128aox 
     xoshiro128p xoshiro128pp xoshiro256p xoshiro256pp xoshiro256stst 
     xsadd xsh xtea xtea2 xtea2_64 xxtea zibri128 zibri128ex zibri192 
-    zibri192ex zibri64ex ziff98 
+    zibri192ex zibri64ex ziff98
 )
 
 # Examples of plugins, i.e. modules with PRNGs
