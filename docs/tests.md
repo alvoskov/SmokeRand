@@ -250,19 +250,21 @@ one-threaded mode. Linear complexity test is much faster in this case.
 
 ## Hamming weights histogram test
 
-This test divides an input stream into n-bit blocks and calculates Hamming
-weights for all blocks. These weights must obey the binomial distribution.
-The test is repeated for pairs of blocks: each pair is XORed and Hamming
-weights of that XORs are analysed, they also must obey binomial distribution.
+This test (named `hamming_distr` in the batteries) divides an input stream
+into n-bit blocks and calculates Hamming weights for all blocks. These weights
+must obey the binomial distribution. The test is repeated for pairs of blocks:
+each pair is XORed and Hamming weights of that XORs are analysed, they also must
+obey binomial distribution.
 
 This test is designed mainly as basic sanity check for counter-based generator,
 it may detect evident flaws in avalanche characteristics. Pairwise XOR may
-detect such PRNGs as SplitMix with gamma equal to 1.
+detect such PRNGs as SplitMix with gamma equal to 1, `ranhash` and
+`wanghash64`.
 
 The Hamming weights histogram test also catches 32-bit LCGs with modulo
 \f$ m={2^32}\f$, additive/subtractive lagged Fibonacci generators with small
-lags, ranrot32 with small lags, some small LFSR (shr3, xsh, xorshift128,
-lrnd64_255).
+lags, `ranrot32` with small lags, some small LFSR (`shr3`, `xsh`,
+`xorshift128`, `lrnd64_255`).
 
 ## Hamming weights tests based on overlapping tuples.
 
