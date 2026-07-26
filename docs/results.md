@@ -23,6 +23,7 @@ The next notation is ued for the `coll64dec` test results:
 3. `-(<)` - failed (number of collisions is less than expected)
 4. `-(>)` - failed (number of collisions is greated than expected)
 5. `-(>>>)` - failed (extremely large number of collisions)
+6. `*` - other, see the detailed report for the collision test results.
 
 The `-(>>>)` result is typical for cases when PRNG period is exausted during
 the testing.
@@ -32,7 +33,7 @@ the testing.
  a5rand            | u64    | +       | +     | +       | +    | 0.37 | +      | 4(0)  |         | >= 16 TiB
  a5rand32          | u32    | +       | 1/2   | 9       | 11   | 1.0  | -(>>>) | 0     | Small   | 4 GiB
  a5randw           | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 16 TiB
- a5rand32w         | u32    | +       | 0/1   | 1       | 1    | 0.75 | -(~23) | 0     | +       | 256 GiB
+ a5rand32w         | u32    | +       | 0/1   | 1       | 1    | 0.75 | *      | 0     | +       | 256 GiB
  aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      | 5     | +il     | >= 32 TiB
  aes128(c99)       | u64    | +       | +     | +       | +    | 6.8  | +      | 5     |         | >= 32 TiB
  aesdec2           | u64    | +       | +     | +       | +    | 0.14 | +      | 4     |         | >= 8 TiB
@@ -138,7 +139,7 @@ the testing.
  lcg32sc           | u32    | +       | 1     | 2       | 8/9  | 0.62 | -(>>>) | 0     | Small   | 512 MiB
  lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     | -       | 16 KiB
  lcg61prime        | u32    | +       | 3     | 5       | 5    | 2.0  | -      | 0     | Small   | >= 16 TiB
- lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | +      | 0     | Small   | 16 MiB
+ lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | *      | 0     | Small   | 16 MiB
  lcg64bd           | u32    | +       | +     | +       | +    | 0.60 | +      | 3.5   | +       | 32 GiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | 0     | +-      | >= 32 TiB
  lcg64sc           | u64    | +       | +     | +       | +    | 0.30 | -      | 3     |+HI/+LO  | >= 16 TiB
@@ -268,7 +269,7 @@ the testing.
  prvhash64c        | u64    | +       | +     | +       | +    | 0.51 | +      | 4(0)  |         | >= 16 TiB
  prvhash64cw       | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 16 TiB
  pqrng32           | u32    | 5       | 18    | 35      | 39   | 0.50 | -(>>>) | 0     | -       | 2 KiB
- pqrng64           | u32    | +       | +     | 1       | 1    | 0.64 | +      | 3     | +       | 16 GiB
+ pqrng64           | u32    | +       | +     | 1       | 1    | 0.64 | -(<)   | 2     | +       | 16 GiB
  pqrng128          | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | >= 8 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
  ranhash           | u64    | +       | +     | 1       | 1    | 0.25 | -      | 2     |+IL/+L/+H| 8 TiB
@@ -388,6 +389,7 @@ the testing.
  ultra64           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |+_lo/+_hi| >= 16 TiB
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     | +       | >= 32 TiB
  w1rand            | u64    | +       | +     | +       | +    | ~0.1 | -(>)   | 3     |         | 1 TiB
+ wanghash64        | u64    | +       | 1     | 1       | 1    | 0.15 | -      | 1     |         | 16 GiB
  wich1982          | u32    | +       | 5     | 11      | 13   | 2.3  | -      | 0     | -       | 256 GiB
  wich2006          | u32    | +       | +     | +       | +    | 4.6  | +      | 4     | +       | >= 16 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
@@ -469,8 +471,9 @@ the testing.
  ziff98            | u32    | +       | 3     | 3       | 3    | 0.47 | +      | 3.25  | Small   | 32 GiB
 
 
-Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
+# 64-bit collision test results
 
+Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
 
  Algorithm         | Failed at  | Collisions 
 -------------------|------------|------------
@@ -478,20 +481,35 @@ Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
  ghsc64            | - (>10 TiB)| 41/40
  ghsc128           | - (>8 TiB) | 36/32
  ghsc256           | - (>23 TiB)| 85/92
+ lcg64:marsaglia   | - (>8 TiB) | 32/32
+ lcg64:steele      | 14 TiB     | 15/56
  msws_ctr          | - (>80 TiB)| 305/320
  mrsf32            | - (>18 TiB)| 76/72
  mrsf64            | - (>69 TiB)| 267/276
+ pqrng64           | 11 TiB     | 8/44
  splitmix64        | 6 TiB      | 0/24
  sqxor             | 12 TiB     | 100/48
  tf0_64            | - (>36 TiB)| 152/144 
  w1rand            | 11 TiB     | 97/44
+ wanghash64        | 6 TiB      | 0/24
  wyrand:v41        | 18 TiB     | 133/72
  wyrand:v42        | 10 TiB     | 86/40
  wyrand:v43        | 5 TiB      | 59/20
  xorrot64mn        | 12 TiB     | 10/48
  xorrot64w32mn     | - (>35 TiB)| 126/140
 
-Performance estimation for some 64-bit generators
+Note about a5rand32w:
+
+- Fails if `--batparam=0` is used (at 2 TiB, 48/8)
+
+It is interesting that the results for truncated 64-bit LCGs are dependent on
+the multiplier spectral score: some multipliers with exceptional spectral
+scores can fail the `coll64dec` test. E.g. `lcg64:marsaglia` passes the test
+and the `lcg64:steele` fails it. An idea of such comparison was taken from
+the [coll-birth-rs](https://github.com/vigna/coll-birth-rs) documentation
+(developed by S.Vigna). 
+
+# Performance estimation for some 64-bit generators
 
 TODO: `coll64dec` and `default` numbers are now obsolete!
 
@@ -519,6 +537,7 @@ Performance estimation for some 32-bit generators
  chacha:c99               | 00:19:50 |          |          |
 
 
+# Notes about PractRand results
 
 PractRand 0.94 results for `arxfw16` experimental generator.
 

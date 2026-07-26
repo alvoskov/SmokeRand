@@ -1,6 +1,8 @@
 /**
  * @file hwtests.c
- * @brief Hamming weights bases tests implementation, mainly DC6.
+ * @brief Hamming weights bases tests implementation. They include two groups
+ * of tests: `hamming_ot` (similar to the DC6 test from Practrand) and
+ * `hamming_distr` (developed by A.L.Voskov).
  * @copyright
  * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com

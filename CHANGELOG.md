@@ -35,6 +35,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   `gap16_count0`, `hamming_distr` tests (suggested by S.Vigna, see
   [this issue](https://github.com/alvoskov/SmokeRand/issues/24)
 
+The author would like to acknowledge [S.Vigna](https://github.com/vigna) for
+[the productive discussion](https://github.com/alvoskov/SmokeRand/issues/24)
+that inspired these modifications.
+
 ## [0.47] - 2026-04-15
 
 ### Added

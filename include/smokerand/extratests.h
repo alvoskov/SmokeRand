@@ -1,8 +1,8 @@
 /**
  * @file extratests.h
  * @brief Implementation of some statistical tests not included in the `express`,
- * `brief`, `default` and `full` batteries. These are 64-bit birthday paradox
- * (not birthday spacings!) test, 2D 16x16 Ising model tests and adaptive
+ * `brief`, `default` and `full` batteries. These are 64-bit collision test
+ * (the former "birthday paradox test"), 2D 16x16 Ising model tests and adaptive
  * frequency test for 8-bit and 16-bit blocks.
  *
  * @copyright
@@ -24,6 +24,8 @@ typedef struct {
     unsigned int e; ///< Leave only values with zeros in lower (e - 1) bits
     unsigned int nbits_per_value; ///< 32 or 64
     uint64_t mvalue; ///< Required value in the lower (e - 1) bits
+    int is_dynamic_mvalue;
+    unsigned int niters_max; ///< Maximal number of iterations
 } CollOver64DecimatedOptions;
 
 
@@ -62,7 +64,8 @@ TestResults ising2d_test_wrap(GeneratorState *obj, const void *udata);
 TestResults unit_sphere_volume_test_wrap(GeneratorState *gs, const void *udata);
 
 
-BatteryExitCode battery_collover64_decimated(const GeneratorInfo *gen, const CallerAPI *intf);
+BatteryExitCode battery_collover64_decimated(const GeneratorInfo *gen, const CallerAPI *intf,
+    const BatteryOptions *bat_opts);
 BatteryExitCode battery_ising(const GeneratorInfo *gen, const CallerAPI *intf,
     const BatteryOptions *opts);
 BatteryExitCode battery_blockfreq(const GeneratorInfo *gen, const CallerAPI *intf);
