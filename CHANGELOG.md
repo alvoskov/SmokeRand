@@ -28,7 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 - `birthday` battery was renamed to the `coll64dec` battery. Now it is generalized
   to the 64-bit collision test with decimation, this upgrade was suggested
-  by S.Vigna (see [this issue](https://github.com/alvoskov/SmokeRand/issues/24)).
+  by S.Vigna, see [this issue](https://github.com/alvoskov/SmokeRand/issues/24).
 - Improved sorting algorithms for 64-bit unsigned integers based on MSD
   in-place radix sort (similar to American Flag Sort algorithm)
 - Improved p-values computation for `freq` battery and for the `bspace4_8d_dec`,

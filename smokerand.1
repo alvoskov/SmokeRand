@@ -62,8 +62,9 @@ generators.
 A state-of-art general purpose PRNG must be cryptographically secure, i.e. its
 quality should be analysed not only by empirical test but by cryptoanalytic
 techniques. Of course, it should be used correctly, i.e. having period at least
-2**64, not be prone to the birthday paradox, not be reseeded during the sample
-generation if reproducible simulation is desired etc.
+2**64, pass not only the common statistical tests but also the 64-bit collision
+test, not be reseeded during the sample generation if reproducible simulation
+is desired etc.
 .SS Automatic quality assessment
 .PP
 SmokeRand makes an automatic quality assessment in the form of numerical grade
@@ -111,7 +112,7 @@ strict. It is aimed on distinction between e.g. low linear complexity of some
 bits (important only in some specific cases) and failure of gap test (can
 easily distort a Monte-Carlo simulation results).
 .PP
-If failures for the \fBbirthday\fR or \fBfreq\fR extra batteries were observed
+If failures for the \fBcoll64dec\fR or \fBfreq\fR extra batteries were observed
 then the 1.0 penalty value should be subtracted from the final grade for each
 failure. E.g. SplitMix and RC4 will be graded as 3.0 instead of 4.0.
 .PP
@@ -179,7 +180,7 @@ Requires only one parameter, \fBngaps\fR, the number of gaps.
 This test calculates calculates Hamming weights of n-bit non-overlapping blocks
 and checks if they obey binomial distribution. It also repeats the same procedure
 for XOR of non-overlapping pairs of the blocks. It requires two parameters:
-\fBnvalues\fB, the number of processes values, and \fBnlevels\fB, number of
+\fBnvalues\fR, the number of processes values, and \fBnlevels\fR, number of
 blocks levels. The each next level doubles the size of block.
 .TP
 .B hamming_ot
@@ -250,7 +251,7 @@ in some cases even to its versions with lower "luxury levels".
 \fIbattery\fR is battery name that will be applied to the tested pseudorandom
 number generator. Batteries are either predefined sets of statistical tests or
 special operation modes. There are general purpose batteries (\fBexpress\fR,
-\fBbrief\fR, \fBdefault\fR, \fBfull\fR), specialized batteries (\fBbirthday\fR,
+\fBbrief\fR, \fBdefault\fR, \fBfull\fR), specialized batteries (\fBcoll64dec\fR,
 \fBising\fR, \fBfreq\fR), special operation modes (\fBselftest\fR, \fBspeed\fR,
 \fBstdout\fR), custom batteries from user-defined scripts (\fBf=\fIfilename\fR),
 custom batteries from user-defined shared libraries (\fBs=\fIfilename\fR).
@@ -306,20 +307,21 @@ ChaCha20) and sumcollector test.
 .SS Specialized batteries
 .PP
 Specialized batteries are designed either for search of some subtle flaws in
-PRNG output (\fBbirthday\fR, \fBfreq\fR) or for illustrative purposes
+PRNG output (\fBcoll64dec\fR, \fBfreq\fR) or for illustrative purposes
 (\fBising\fR). Although good general purpose PRNGs should pass them they
 are either too slow and/or require too much RAM to be included in general
 purpose batteries.
 .TP
-.B birthday
-A 64\-bit birthday test that processes PRNG output as a stream of 64\-bit words.
-It counts a number of duplicates in these 64\-bit words. Based on classical
-"birthday paradox", consumes up to 2 TiB of data and about 8 GiB of RAM, may
-take up to 1 hour even for fast PRNGs. A decimation method suggested
-by Melissa O'Neill is used to reduce memory consumption. The \fBbirthday\fR
-battery detects statistical flaws (absence of duplicates) for SplitMix and
-even arbitrary block ciphers with 64-bit block in the counter mode such as
-DES, XXTEA, GOST R 34.12\-2015 \"Magma\".
+.B coll64dec
+A 64\-bit collision test (the former "birthday paradox") test that processes
+PRNG output as a stream of 64\-bit words. It counts a number of collisions
+(duplicates) in these 64\-bit words. It required about 8 GiB of RAM, several
+TiB of data and may take up hours even for fast PRNGs. A decimation method
+suggested by Melissa O'Neill is used to reduce memory consumption to 8 GiB.
+The \fBcoll64dec\fR battery detects statistical flaws (absence of duplicates)
+for SplitMix and even arbitrary block ciphers with 64-bit block in the counter
+mode such as DES, XXTEA, GOST R 34.12\-2015 \"Magma\". The excessive collisons
+can be also detected for such PRNGs as wyrand or w1rand.
 .TP
 .B ising
 Statistical tests based on Monte-Carlo simulation for 2D Ising model that uses
@@ -406,6 +408,12 @@ supported:
 \fBinterleaved32\fR  Process 64\-bit generator output as interleaving 32\-bit words.
 .IP \[bu]
 \fBreverse\-bits\fR  Reverse bits in the generator output.
+.IP \[bu]
+\fBuint31\fR Autocomplete a 31-bit generator (the lowest bit is 0) to the 32-bit
+one using Murmur3 mixer and MWC64X PRNG for the lowest bit generation.
+.IP \[bu]
+\fBuint63\fR Autocomplete a 63-bit generator (the lowest bit is 0) to the 64-bit
+one using Murmur3 mixer and MWC64X PRNG for the lowest bit generation.
 .SH FILES
 .I /usr/local/etc/smokerand/*.cfg
 .RS
