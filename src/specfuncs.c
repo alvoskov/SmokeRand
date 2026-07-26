@@ -36,6 +36,28 @@ double sr_expm1(double x)
     }
 }
 
+
+double sr_log1p(double x)
+{
+    if (x != x) {
+        return x;
+    } else if (x < -0.5 || x > 0.5) {
+        return log(1.0 + x);    
+    } else {
+        const double q = x / (x + 2.0);
+        long double sum = 0.0, sum_old = 1.0, t = q;
+        long i = 1;
+        while (sum != sum_old && i < 100000) {
+            sum_old = sum;
+            sum += t / i;
+            t *= q * q;
+            i += 2;
+        }
+        return (double) (2.0 * sum);
+    }
+}
+
+
 double sr_log2(double x)
 {
     return log(x) / log(2.0);
@@ -672,5 +694,43 @@ double sr_linearcomp_Tccdf(double k)
         return pow(2.0, -2*k + 2.0) / 3.0;
     } else {
         return 1.0 - pow(2.0, 2*k + 1) / 3.0;
+    }
+}
+
+/**
+ * @brief Implementation of c.d.f. for the geometric distribution.
+ * @details The next formula is used:
+ * \f[
+ * F(x) = 1 - (1 - p)^t
+ * \f]
+ */
+double sr_geom_cdf(unsigned long t, double p)
+{
+    if (p == 0.0 || p == 1.0 || p != p) {
+        return p;
+    } else if (p < 0.0 || p > 1.0) {
+        return NAN;
+    } else {
+        return -sr_expm1((double) t * sr_log1p(-p));
+    }
+}
+
+/**
+ * @brief Implementation of c.c.d.f. for the geometric distribution.
+ * @details The next formula is used:
+ * \f[
+ * F(x) = (1 - p)^t
+ * \f]
+ */
+double sr_geom_ccdf(unsigned long t, double p)
+{
+    if (p == 0.0) {
+        return 1.0;
+    } else if (p == 1.0) {
+        return 0.0;
+    } else if (p < 0.0 || p > 1.0) {
+        return NAN;
+    } else {
+        return exp((double) t * sr_log1p(-p));
     }
 }

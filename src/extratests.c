@@ -1,11 +1,12 @@
 /**
  * @file extratests.c
  * @brief Implementation of some statistical tests not included in the `brief`,
- * `default` and `full` batteries. These are 64-bit birthday paradox (not birthday
- * spacings!) test and 2D 16x16 Ising model tests.
+ * `default` and `full` batteries. These are 64-bit collision test with
+ * decimation (the formt "birthday paradox" test) test and 2D 16x16 Ising
+ * model tests.
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -19,19 +20,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <errno.h>
 
-////////////////////////////////////////////////
-///// BirthdayOptions class implementation /////
-////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+///// CollOver64DecimatedOptions class implementation /////
+///////////////////////////////////////////////////////////
 
-static unsigned int birthday_get_nbits_per_value(const GeneratorInfo *gi)
+static unsigned int collover64dec_get_nbits_per_value(const GeneratorInfo *gi)
 {
     return (gi->nbits == 32) ? 64 : gi->nbits;
 }
 
 /**
- * @brief Fill birthday paradox test settings for the given
- * PRNG, sample length and lambda.
+ * @brief Fill the 64-bit collision test settings for the given PRNG, sample
+ * length and lambda.
  * @details The number of collisions obeys Poisson distribution with
  * the next mathematical expectation:
  *
@@ -43,33 +45,93 @@ static unsigned int birthday_get_nbits_per_value(const GeneratorInfo *gi)
  * in the PRNG output (usually 64), \f$ e \f$ is number of truncated (lower)
  * bits.
  */
-static inline BirthdayOptions BirthdayOptions_create(const GeneratorInfo *gi,
+static inline CollOver64DecimatedOptions
+CollOver64DecimatedOptions_create(const GeneratorInfo *gi,
     const unsigned int log2_len, const unsigned int log2_lambda)
 {
-    BirthdayOptions opts;
-    const unsigned int nbits_per_value = birthday_get_nbits_per_value(gi);
+    CollOver64DecimatedOptions opts;
+    const unsigned int nbits_per_value = collover64dec_get_nbits_per_value(gi);
     const unsigned int a = nbits_per_value + log2_lambda + 1;
     const unsigned int b = 2*log2_len;
     opts.e = (a >= b) ? (a - b) : 0;
     opts.n = 1ull << log2_len;
+    opts.nbits_per_value = nbits_per_value;
+    opts.mvalue = 0;
+    opts.is_dynamic_mvalue = 1;
+    opts.niters_max = 10000;
     return opts;
 }
 
-static inline double BirthdayOptions_calc_lambda(const BirthdayOptions *opts,
-    const unsigned int nbits)
+/**
+ * @brief Calculate \f$ \lambda \f$, an expected number of collisions per run.
+ */
+static inline double
+CollOver64DecimatedOptions_calc_lambda(const CollOver64DecimatedOptions *opts)
 {
-    double lambda = pow((double) opts->n, 2.0) / pow(2.0, (double) nbits - (double) opts->e + 1.0);
-    return lambda;
+    const double nbits = (double) opts->nbits_per_value;
+    return pow((double) opts->n, 2.0) / pow(2.0, (double) nbits - (double) opts->e + 1.0);
 }
 
-///////////////////////////////////////////////
-///// 64-bit birthday test implementation /////
-///////////////////////////////////////////////
+/**
+ * @brief Calculate the number of raw values (before decimation) that should
+ * be processed by the test.
+ */
+static inline unsigned long long
+CollOver64DecimatedOptions_calc_nvalues_raw(const CollOver64DecimatedOptions *opts)
+{
+    return opts->n << opts->e;
+}
+
+/**
+ * @brief Return the bit mask required for the decimation.
+ */
+static inline uint64_t
+CollOver64DecimatedOptions_get_mask(const CollOver64DecimatedOptions *opts)
+{
+    return (1ULL << opts->e) - 1;
+}
+
+/**
+ * @brief Update the value of bits used for decimation. Works only if
+ * `opts->is_dynamic_mvalue` is not zero, i.e. dynamic values are enabled.
+ */
+static inline void
+CollOver64DecimatedOptions_update_mvalue(CollOver64DecimatedOptions *opts)
+{
+    if (opts->is_dynamic_mvalue) {
+        const uint64_t mask = CollOver64DecimatedOptions_get_mask(opts);
+        const uint64_t x = opts->mvalue;
+        opts->mvalue = ( (opts->e > 4) ? (x + (x * x | 5)) : (x + 1) ) & mask;
+    }
+}
+
+
+static inline void
+CollOver64DecimatedOptions_set_static_mvalue(CollOver64DecimatedOptions *opts, uint64_t mvalue)
+{
+    opts->mvalue = mvalue & CollOver64DecimatedOptions_get_mask(opts);
+    opts->is_dynamic_mvalue = 0;
+}
+
+
+static void
+CollOver64DecimatedOptions_print(const CollOver64DecimatedOptions *opts, const CallerAPI *intf)
+{
+    const unsigned long long nvalues_raw = (opts->n << opts->e);
+    const double lambda = CollOver64DecimatedOptions_calc_lambda(opts);
+    intf->printf("  Sample size:      2^%.2f values (2^%.2f bytes)\n",
+        sr_log2((double) opts->n), sr_log2(8.0 * (double) opts->n));
+    intf->printf("  Shift:            %d bits\n",   (int) opts->e);
+    intf->printf("  Raw sample size:  2^%.2f values (2^%.2f bytes)\n",
+        sr_log2((double) nvalues_raw), sr_log2(8.0 * (double) nvalues_raw));
+    intf->printf("  lambda = %g\n", lambda);
+}
 
 /**
  * @brief Generate truncated pseudorandom value
  */
-static inline uint64_t birthday_gen_trvalue(GeneratorState *obj, uint64_t mask, int *is_ok)
+static inline uint64_t collover64dec_gen_trvalue(GeneratorState *obj,
+    uint64_t mask, uint64_t mvalue, int *is_ok)
 {
     uint64_t u;
     long ctr = 0;
@@ -78,14 +140,14 @@ static inline uint64_t birthday_gen_trvalue(GeneratorState *obj, uint64_t mask, 
         do {            
             u = obj->gi->get_bits(obj->state);
             ctr++;
-        } while ((u & mask) != 0 && ctr < ctr_max);
+        } while ((u & mask) != mvalue && ctr < ctr_max);
     } else {
         do {
-            uint64_t lo = obj->gi->get_bits(obj->state);
-            uint64_t hi = obj->gi->get_bits(obj->state);
+            const uint64_t lo = obj->gi->get_bits(obj->state);
+            const uint64_t hi = obj->gi->get_bits(obj->state);
             u = (hi << 32) | lo;
             ctr++;
-        } while ((u & mask) != 0 && ctr < ctr_max);
+        } while ((u & mask) != mvalue && ctr < ctr_max);
     }
     *is_ok = ctr < ctr_max;
     return u;
@@ -93,11 +155,12 @@ static inline uint64_t birthday_gen_trvalue(GeneratorState *obj, uint64_t mask, 
 
 
 /**
- * @brief Estimate the generator speed in the 64-bit birthday paradox test.
+ * @brief Estimate the generator speed in the 64-bit collision test.
  * It is needed for correct interactive progress information output.
  */
 static double
-birthday_get_bytes_per_sec(GeneratorState *obj, const BirthdayOptions *opts, uint64_t mask)
+collover64dec_get_bytes_per_sec(GeneratorState *obj,
+    const CollOver64DecimatedOptions *opts, uint64_t mask)
 {
     const clock_t cl_tic_init = clock();
     clock_t cl_tic, cl_toc;
@@ -108,8 +171,8 @@ birthday_get_bytes_per_sec(GeneratorState *obj, const BirthdayOptions *opts, uin
     clock_t cl_toc_init = cl_tic;
     do {
         int is_ok;
-        (void) birthday_gen_trvalue(obj, mask, &is_ok);
-        (void) birthday_gen_trvalue(obj, mask, &is_ok);
+        (void) collover64dec_gen_trvalue(obj, mask, 0, &is_ok);
+        (void) collover64dec_gen_trvalue(obj, mask, 0, &is_ok);
         if (!is_ok) {
             return 1.0;
         }
@@ -121,11 +184,49 @@ birthday_get_bytes_per_sec(GeneratorState *obj, const BirthdayOptions *opts, uin
 }
 
 /**
- * @brief Birthday paradox (not birthday spacings!) test for 64-bit pseudorandom
- * number generators. Detects 64-bit uniformly distributed PRNGS with 64-bit state.
- * @details This test for 64-bit PRNGs is suggested by M.E.O'Neill. It detects
- * the absence of duplicates in the output of 64-bit uniformly distributed generator
+ * @brief Calculate the number of duplicated in the generated array.
+ */
+static unsigned long long collover64dec_calc_ndups(const CallerAPI *intf,
+    uint64_t *x, size_t len)
+{
+    char buf[16];
+    intf->printf("\n  Sorting the array...");
+    const time_t tic = time(NULL);
+    radixsort64_inplace(x, len); // "In place": to prevent "out of memory"
+    snprintf_elapsed_time(buf, 15, (unsigned long long) (time(NULL) - tic));
+    intf->printf("  Time elapsed: %s\n", buf);
+    intf->printf("  Searching collisions");
+    unsigned long long ndups = 0;
+    for (size_t i = 0; i < len - 1; i++) {
+        if (x[i] == x[i + 1])
+            ndups++;
+    }
+    intf->printf(";  ncoll = %llu\n", ndups);
+    return ndups;
+}
+
+static unsigned long long CollOver64DecimatedOptions_get_chunk_size(
+    const CollOver64DecimatedOptions *opts,
+    GeneratorState *obj)
+{
+    const unsigned long long nvalues_raw = CollOver64DecimatedOptions_calc_nvalues_raw(opts);
+    const uint64_t mask = CollOver64DecimatedOptions_get_mask(opts);
+    const double bytes_per_sec = collover64dec_get_bytes_per_sec(obj, opts, mask);
+    const double time_elapsed = 8.0 * (double) nvalues_raw / bytes_per_sec;
+    unsigned long long chunk_size = opts->n / (unsigned long long) (time_elapsed * 5.0);
+    if (chunk_size < 1) {
+        chunk_size = 1;
+    }
+    return chunk_size;
+}
+
+/**
+ * @brief 64-bit collision test (the former birthday paradox test) for 64-bit
+ * pseudorandom number generators. Detects 64-bit uniformly distributed PRNGS
  * with 64-bit state.
+ * @details This test for 64-bit PRNGs is suggested by M.E.O'Neill. It detects
+ * the absence of duplicates in the output of 64-bit uniformly distributed
+ * generator with 64-bit state.
  *
  * The number of duplicates is approximately Poisson distributed with the next
  * \f$ \lambda \f$ value:
@@ -146,68 +247,48 @@ birthday_get_bytes_per_sec(GeneratorState *obj, const BirthdayOptions *opts, uin
  * 1. M.E. O'Neill. A Birthday Test: Quickly Failing Some Popular PRNGs
  *    https://www.pcg-random.org/posts/birthday-test.html
  */
-TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
+static unsigned long long
+collover64dec_test_ndups(GeneratorState *obj,
+    const CollOver64DecimatedOptions *opts, uint64_t *buf)
 {
-    TestResults ans = TestResults_create("birthday");
-    const unsigned long long nvalues_raw = (opts->n << opts->e);
-    const unsigned int nbits_per_value = birthday_get_nbits_per_value(obj->gi);
-    const double lambda = BirthdayOptions_calc_lambda(opts, nbits_per_value);
-    obj->intf->printf("  Sample size:      2^%.2f values (2^%.2f bytes)\n",
-        sr_log2((double) opts->n), sr_log2(8.0 * (double) opts->n));
+    const unsigned long long ndups_failure = 10000000000ULL;
     if (opts->n < 8) {
         obj->intf->printf("  Sample size is too small");
-        return ans;
+        return ndups_failure;
     }
-    obj->intf->printf("  Shift:            %d bits\n",   (int) opts->e);
-    obj->intf->printf("  Raw sample size:  2^%.2f values (2^%.2f bytes)\n",
-        sr_log2((double) nvalues_raw), sr_log2(8.0 * (double) nvalues_raw));
-    obj->intf->printf("  lambda = %g\n", lambda);
-    obj->intf->printf("  Filling the array with 'birthdays'\n");
-    const uint64_t mask = (1ull << opts->e) - 1;
-    time_t tic = time(NULL);
+    obj->intf->printf("  Filling the array with values (the lowest bits are 0x%llX)\n",
+        (unsigned long long) opts->mvalue);
+    const uint64_t mask = CollOver64DecimatedOptions_get_mask(opts);
+    const time_t tic = time(NULL);
     uint64_t cpu_tic = cpuclock();
-    uint64_t *x = calloc((size_t) opts->n, sizeof(uint64_t));
-    if (x == NULL) {
-        obj->intf->printf("  Not enough memory (2^%.0f bytes is required)\n",
-            sr_log2((double) opts->n * 8.0));
-        return ans;
-    }
-
-    const double bytes_per_sec = birthday_get_bytes_per_sec(obj, opts, mask);
-    const double time_elapsed = 8.0 * (double) nvalues_raw / bytes_per_sec;
-    unsigned long long chunk_size = opts->n / (unsigned long long) (time_elapsed * 5.0);
-    if (chunk_size < 1) {
-        chunk_size = 1;
-    }
-
+    unsigned long long chunk_size = CollOver64DecimatedOptions_get_chunk_size(opts, obj);
+    uint64_t *x = buf;
     const unsigned long long bytes_per_trvalue = 1ull << (opts->e + 3);
     for (unsigned long long i = 0; i < opts->n; i++) {
         int is_ok;
-        x[i] = birthday_gen_trvalue(obj, mask, &is_ok);
+        x[i] = collover64dec_gen_trvalue(obj, mask, opts->mvalue, &is_ok);
         if (!is_ok) {
             obj->intf->printf("  The generator is too flawed to return a truncated value\n");
-            ans.x = 0;
-            ans.p = sr_poisson_cdf(ans.x, lambda);
-            ans.alpha = sr_poisson_pvalue(ans.x, lambda);
-            free(x);
-            return ans;
+            return ndups_failure;
         }
         if (i % chunk_size == 0) {
-            unsigned long nseconds_total, nseconds_left;
-            double mib_per_sec, cpb;
-            uint64_t cpu_toc = cpuclock();
+            const uint64_t cpu_toc = cpuclock();
             if (cpu_toc < cpu_tic) {
                 cpu_tic = cpu_toc;
             }
-            cpb = (double) (cpu_toc - cpu_tic) / (double) (i * bytes_per_trvalue);
-            nseconds_total = (unsigned long) (time(NULL) - tic);
-            nseconds_left = (unsigned long) ( ((unsigned long long) nseconds_total * (opts->n - i)) / (i + 1) );
-            mib_per_sec = (double) (i * bytes_per_trvalue) / (double) nseconds_total / (1ul << 20);
+            const double cpb = (double) (cpu_toc - cpu_tic) / (double) (i * bytes_per_trvalue);
+            const unsigned long long nseconds_total = (unsigned long long) (time(NULL) - tic);
+            const unsigned long long nseconds_left = (unsigned long long) (
+                ((unsigned long long) nseconds_total * (opts->n - i)) / (i + 1)
+            );
+            const double mib_per_sec = (double) (i * bytes_per_trvalue) /
+                                       (double) nseconds_total / (1ul << 20);
+            char buf_total[16], buf_left[16];
+            snprintf_elapsed_time(buf_total, 15, nseconds_total);
+            snprintf_elapsed_time(buf_left, 15, nseconds_left);
             obj->intf->printf("\r    %.1f %% completed; ",
                 100.0 * (double) i / (double) opts->n);
-            obj->intf->printf("time elapsed: "); print_elapsed_time(nseconds_total);
-            obj->intf->printf(", left: ");
-            print_elapsed_time(nseconds_left);
+            obj->intf->printf("time elapsed: %s, left: %s", buf_total, buf_left);
             if (mib_per_sec > 1024.0) {
                 obj->intf->printf("; %.2f GiB/s (%.3g cpb)",
                     mib_per_sec / 1024.0, cpb);
@@ -219,31 +300,11 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
         }
     }
     // Frequencies analysis
-    obj->intf->printf("\n");
-    obj->intf->printf("\n  Sorting the array\n");
-    // qsort is used instead of radix sort to prevent "out of memory" error:
-    // 2^30 of u64 is 8GiB of data
-    tic = time(NULL);
-    quicksort64(x, (size_t) opts->n); // Not radix: to prevent "out of memory"
-    obj->intf->printf("  Time elapsed: ");
-    print_elapsed_time((unsigned long long) (time(NULL) - tic));
-    obj->intf->printf("\n");    
-    obj->intf->printf("  Searching duplicates\n");
-    unsigned long ndups = 0;
-    for (size_t i = 0; i < opts->n - 1; i++) {
-        if (x[i] == x[i + 1])
-            ndups++;
-    }
-    ans.x = (double) ndups;
-    ans.p = sr_poisson_cdf(ans.x, lambda);
-    ans.alpha = sr_poisson_pvalue(ans.x, lambda);
-    obj->intf->printf("  x = %g (ndups); p = %g; 1-p=%g\n", ans.x, ans.p, ans.alpha);
-    free(x);
-    return ans;
+    return collover64dec_calc_ndups(obj->intf, x, (size_t) opts->n);
 }
 
 /**
- * @brief Estimates an optimal sample size for the birthday paradox test.
+ * @brief Estimates an optimal sample size for the 64-bit collision test.
  * @details The optimal size is about half of available physical RAM,
  * the higher RAM consumption means higher performance of the test. If
  * an information about RAM volume is not available then the next default
@@ -253,10 +314,10 @@ TestResults birthday_test(GeneratorState *obj, const BirthdayOptions *opts)
  * - 32-bit platforms: 2^27 (requires 1 GiB of RAM, very slow)
  *
  */
-static unsigned int birthday_get_log2_n(const CallerAPI *intf)
+static unsigned int collover64dec_get_log2_n(const CallerAPI *intf)
 {
     RamInfo raminfo;
-    int ans = intf->get_ram_info(&raminfo);
+    const int ans = intf->get_ram_info(&raminfo);
     if (ans == 0 || raminfo.phys_total_nbytes == RAM_SIZE_UNKNOWN) {
         return (SIZE_MAX == UINT64_MAX) ? 30 : 27;
     } else {
@@ -271,55 +332,122 @@ static unsigned int birthday_get_log2_n(const CallerAPI *intf)
     }
 }
 
+static void collover64dec_update_pvalue(TestResults *ans, double lambda,
+    unsigned long long n_total, const CallerAPI *intf)
+{
+    const double n_tib = ((double) n_total * 8.0) / (double) (1ULL << 40);
+    ans->p = sr_poisson_cdf(ans->x, lambda);
+    ans->alpha = sr_poisson_pvalue(ans->x, lambda);
+    intf->printf("  Result for lambda = %g", lambda);
+    if (n_tib >= 1.0) {
+        intf->printf(" (%g TiB processed): ", n_tib);
+    } else {
+        intf->printf(" (%g GiB processed): ", n_tib * 1024.0);
+    }
+    intf->printf("ncoll = %g; p = %g; 1-p = %g\n",
+        ans->x, ans->p, ans->alpha);
+}
+
+
+static CollOver64DecimatedOptions
+battery_collover64_get_options(const GeneratorInfo *gen,
+    const CallerAPI *intf, const BatteryOptions *bat_opts, int *is_ok)
+{
+    const unsigned int log2_n = collover64dec_get_log2_n(intf);
+    CollOver64DecimatedOptions opts = CollOver64DecimatedOptions_create(gen, log2_n, 2);
+    if (strcmp(bat_opts->param, "")) {
+        errno = 0;
+        char *endptr;
+        unsigned long mvalue = strtoul(bat_opts->param, &endptr, 10);
+        if (*endptr != '\0') {
+            intf->printf("  Invalid battery parameter '%s'\n", bat_opts->param);
+            *is_ok = 0;
+        } else {
+            intf->printf("  The static value of the lowest bits will be used\n");
+            CollOver64DecimatedOptions_set_static_mvalue(&opts, mvalue);
+            *is_ok = 1;
+        }
+    } else {
+        intf->printf("  Dynamic values of the lowest bits will be used\n");
+        *is_ok = 1;
+    }
+    return opts;    
+}
+
 /**
- * @brief An implementation of birthday paradox test for 64-bit PRNGS
- * with adaptive selection of lambda.
+ * @brief An implementation of the 64-bit collision test with decimation for
+ * 64-bit PRNGS with adaptive sampling.
  * @details It consumes a lot of RAM and sample size differs for
  * different platforms:
  *
  * - 64-bit platform: 2^30 (requires 8 GiB of RAM and ~30min)
  * - 32-bit platform: 2^27 (requires 1 GiB of RAM, very slow)
  *
- * The test consists of two stages:
+ * The test runs 10000 iterations of the 64-bit collision tests, each of
+ * them uses \lambda = 4\f$ and usually takes less than 10 minunes. If the
+ * obtained p-value is outside the \f$[10^{-10}; 1 - 10^{-10}]\f$ interval
+ * then the test is failed. Otherwise it is passed.
  *
- * - Small subtest: \f$ \lambda = 4\f$, usually takes less than 10 min.
- *   If no duplicates are found - the more sensitive "large" subtest
- *   is launched. If they are found - p-value is calculated.
- * - Large subtest: \f$ \lambda = 16\f$, usually takes less than 1 hour.
- *   Then p-value for sum of duplicates from "small" and "large" subtests
- *   is calculated.
+ * Use CTRL-C to interrupt the test.
  */
-BatteryExitCode battery_birthday(const GeneratorInfo *gen, const CallerAPI *intf)
+BatteryExitCode battery_collover64_decimated(const GeneratorInfo *gen,
+    const CallerAPI *intf, const BatteryOptions *bat_opts)
 {
-    const unsigned int log2_n = birthday_get_log2_n(intf);
-    const unsigned int nbits_per_value = birthday_get_nbits_per_value(gen);
-    BirthdayOptions opts_small = BirthdayOptions_create(gen, log2_n, 2);
-    BirthdayOptions opts_large = BirthdayOptions_create(gen, log2_n, 4);
-    intf->printf("64-bit birthday paradox test\n");
+    const double pvalue_fail_val = 1.0e-10;
+    BatteryExitCode exitcode = BATTERY_PASSED;
+    GeneratorState obj = GeneratorState_create(gen, intf);
+    intf->printf("64-bit collision test with decimation\n");
+    int is_ok;
+    CollOver64DecimatedOptions opts = battery_collover64_get_options(gen, intf, bat_opts, &is_ok);
+    if (!is_ok) {
+        GeneratorState_destruct(&obj);
+        return BATTERY_ERROR;
+    }
+
+    uint64_t *buf = calloc((size_t) opts.n, sizeof(uint64_t));
+    if (buf == NULL) {
+        intf->printf("  Not enough memory (2^%.0f bytes is required)\n",
+            sr_log2((double) opts.n * 8.0));
+        GeneratorState_destruct(&obj);
+        return BATTERY_ERROR;
+    }
+
     if (gen->nbits != 64) {
         intf->printf("  Output from 32-bit generator: concatenation will be used\n");
     }
-    GeneratorState obj = GeneratorState_create(gen, intf);
-    TestResults ans = birthday_test(&obj, &opts_small);
-    if (ans.x == 0) {
-        double x_small = ans.x;
-        double lambda = BirthdayOptions_calc_lambda(&opts_small, nbits_per_value) +
-            BirthdayOptions_calc_lambda(&opts_large, nbits_per_value);
-        intf->printf("  No duplicates found: more sensitive test required\n");
-        intf->printf("  Running the variant with larger lambda\n");
-        ans = birthday_test(&obj, &opts_large);
-        intf->printf("  p-value for x1 + x2 (lambda = %g):\n", lambda);
-        ans.x += x_small;
-        ans.p = sr_poisson_cdf(ans.x, lambda);
-        ans.alpha = sr_poisson_pvalue(ans.x, lambda);
-        intf->printf("  x = %g (ndups); p = %g; 1-p=%g\n", ans.x, ans.p, ans.alpha);
+    char *seed_key_txt = get_entropy_base64_seed();
+    if (seed_key_txt != NULL) {
+        intf->printf("  Used seed:        _01_%s\n", seed_key_txt);
+    } else {
+        intf->printf("  Used seed:        none\n");
+    }
+    free(seed_key_txt);
+    CollOver64DecimatedOptions_print(&opts, intf);
+
+    TestResults ans = TestResults_create("collover64dec");
+    ans.x = 0.0;
+    double lambda = 0.0;
+    unsigned long long n_total = 0;
+    const time_t tic = time(NULL);
+    for (unsigned int i = 0; i < opts.niters_max; i++) {
+        char strbuf[16];
+        lambda += CollOver64DecimatedOptions_calc_lambda(&opts);
+        n_total += CollOver64DecimatedOptions_calc_nvalues_raw(&opts);
+        intf->printf("--- Iter %u of %u: ", i + 1, opts.niters_max);
+        ans.x += (double) collover64dec_test_ndups(&obj, &opts, buf);
+        collover64dec_update_pvalue(&ans, lambda, n_total, intf);
+        snprintf_elapsed_time(strbuf, 15, (unsigned long long) (time(NULL) - tic));
+        intf->printf("  Time elapsed: %s\n", strbuf);
+        CollOver64DecimatedOptions_update_mvalue(&opts);
+        if (ans.p < pvalue_fail_val || ans.alpha < pvalue_fail_val) {
+            intf->printf("The test has failed\n");
+            exitcode = BATTERY_FAILED;
+            break;
+        }
     }
     GeneratorState_destruct(&obj);
-    if (ans.p < 1e-6 || ans.p > 1.0 - 1e-6) {
-        return BATTERY_FAILED;
-    } else {
-        return BATTERY_PASSED;
-    }
+    free(buf);
+    return exitcode;
 }
 
 /////////////////////////////////
@@ -370,48 +498,47 @@ static inline void BlockFrequency_count(BlockFrequency *obj,
 int BlockFrequency_calc(BlockFrequency *obj)
 {
     const double pcrit = 1.0e-10;
-    const double pcrit_bytes = pcrit / 256.0, pcrit_w16 = pcrit / 65536.0;
     double chi2_bytes = 0.0, chi2_w16 = 0.0;
     double zmax_bytes = 0.0, zmax_w16 = 0.0;
     int zmax_bytes_ind = -1;
     long zmax_w16_ind = -1;
     for (int i = 0; i < 256; i++) {        
-        long long Ei = (long long) obj->nbytes / 256;
-        long long dE = (long long) obj->bytefreq[i] - (long long) Ei;
+        const long long Ei = (long long) obj->nbytes / 256;
+        const long long dE = (long long) obj->bytefreq[i] - (long long) Ei;
         chi2_bytes += pow((double) dE, 2.0) / (double) Ei;
-        double z_bytes = fabs((double) dE) / sqrt( (double) obj->nbytes * 255.0 / 65536.0);
+        const double z_bytes = fabs((double) dE) / sqrt( (double) obj->nbytes * 255.0 / 65536.0);
         if (zmax_bytes < z_bytes) {
             zmax_bytes = z_bytes;
             zmax_bytes_ind = i;
         }
     }
     for (long i = 0; i < 65536; i++) {
-        long long Ei = (long long) obj->nw16 / 65536;
-        long long dE = (long long) obj->w16freq[i] - (long long) Ei;
+        const long long Ei = (long long) obj->nw16 / 65536;
+        const long long dE = (long long) obj->w16freq[i] - (long long) Ei;
         chi2_w16 += pow((double) dE, 2.0) / (double) Ei;
-        double z_w16 = fabs((double) dE) /
+        const double z_w16 = fabs((double) dE) /
             sqrt( (double) obj->nw16 * 65535.0 / 65536.0 / 65536.0);
         if (zmax_w16 < z_w16) {
             zmax_w16 = z_w16;
             zmax_w16_ind = i;
         }
     }
-    double p_bytes = sr_halfnormal_pvalue(zmax_bytes);
-    double p_w16 = sr_halfnormal_pvalue(zmax_w16);
+    const double p_bytes = sr_geom_cdf(256, sr_halfnormal_pvalue(zmax_bytes));
+    const double p_w16 = sr_geom_cdf(65536, sr_halfnormal_pvalue(zmax_w16));
     printf("2^%g bytes analyzed\n", sr_log2((double) obj->nbytes));
     printf("  %10s %10s %10s %10s %10s %10s %10s\n",
         "Chunk", "chi2emp", "p(chi2)", "zmax", "max_ind", "p(zmax)", "p(crit)");
     printf("  %10s %10g %10.2g %10.3g %10d %10.2g %10.2g\n",
         "8 bits", chi2_bytes, sr_chi2_pvalue(chi2_bytes, 255),
-        zmax_bytes, zmax_bytes_ind, p_bytes, pcrit_bytes);
+        zmax_bytes, zmax_bytes_ind, p_bytes, pcrit);
     printf("  %10s %10g %10.2g %10.3g %10ld %10.2g %10.2g\n",
         "16 bits", chi2_w16, sr_chi2_pvalue(chi2_w16, 65536),
-        zmax_w16, zmax_w16_ind, p_w16, pcrit_w16);
+        zmax_w16, zmax_w16_ind, p_w16, pcrit);
     // p-values interpretation
-    if (p_bytes < pcrit_bytes) {
+    if (p_bytes < pcrit) {
         printf("===== zmax_bytes test failed =====\n");
         return 0;
-    } else if (p_w16 < pcrit_w16) {
+    } else if (p_w16 < pcrit) {
         printf("===== zmax_w16 test failed =====\n");
         return 0;
     } else {
@@ -430,12 +557,12 @@ BatteryExitCode battery_blockfreq(const GeneratorInfo *gen, const CallerAPI *int
     while (is_ok) {
         if (gen->nbits == 64) {
             for (size_t i = 0; i < block_size; i++) {
-                uint64_t u = obj.gi->get_bits(obj.state);
+                const uint64_t u = obj.gi->get_bits(obj.state);
                 BlockFrequency_count(&freq, u, 8);
             }
         } else {
             for (size_t i = 0; i < block_size; i++) {
-                uint64_t u = obj.gi->get_bits(obj.state);
+                const uint64_t u = obj.gi->get_bits(obj.state);
                 BlockFrequency_count(&freq, u, 4);
             }
         }
@@ -703,8 +830,8 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
     }
     e_std = sqrt(e_std / (opts->nsamples - 1));
     cv_std = sqrt(cv_std / (opts->nsamples - 1));
-    double e_z = (e_mean - e_ref) / (e_std / sqrt(opts->nsamples));
-    double cv_z = (cv_mean - cv_ref) / (cv_std / sqrt(opts->nsamples));
+    const double e_z = (e_mean - e_ref) / (e_std / sqrt(opts->nsamples));
+    const double cv_z = (cv_mean - cv_ref) / (cv_std / sqrt(opts->nsamples));
     unsigned long df = opts->nsamples - 1;
     gs->intf->printf("e_mean  = %12.8g; e_std  = %12.8g; z = %12.8g; p = %.3g\n",
         e_mean, e_std, e_z, sr_t_pvalue(e_z, df));
@@ -739,7 +866,7 @@ TestResults ising2d_test(GeneratorState *gs, const Ising2DOptions *opts)
  */
 static double calc_usphere_volplus(unsigned int ndims)
 {
-    double n_half = (double) ndims / 2.0;
+    const double n_half = (double) ndims / 2.0;
     return exp(n_half * log(M_PI) - lgamma(1.0 + n_half) - ndims*log(2.0));
 }
 

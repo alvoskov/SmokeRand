@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 
 void print_is_ok(int is_ok)
 {
@@ -74,25 +75,23 @@ typedef struct {
 
 int test_radixsort64()
 {
-    size_t len = 1 << 25;
+    const size_t len = 1U << 25;
     uint64_t *x = calloc(len, sizeof(uint64_t));
-    clock_t tic, toc;
-    double msec;
     int is_ok = 1;
     const SortMethodInfo methods[] = {
-        {"radixsort64", radixsort64},
+        {"radixsort64_inplace", radixsort64_inplace},
         {"quicksort64", quicksort64},
-        {"qsort64", qsort64_wrap},
+        {"qsort64", qsort64_wrap},        
         {NULL, NULL}
     };
 
 
     for (const SortMethodInfo *ptr = methods; ptr->name != NULL; ptr++) {
         fill_rand64(x, len);
-        tic = clock();
+        clock_t tic = clock();
         ptr->run(x, len);
-        toc = clock();
-        msec = ((double) (toc - tic)) / CLOCKS_PER_SEC * 1000;
+        clock_t toc = clock();
+        double msec = ((double) (toc - tic)) / CLOCKS_PER_SEC * 1000;
         printf("%s --- time elapsed: %g ms\n", ptr->name, msec);
         if (is_array64_sorted(x, len)) {
             printf("%s: array is sorted\n", ptr->name);
@@ -110,6 +109,7 @@ int test_radixsort64()
         msec = ((double) (toc - tic)) / CLOCKS_PER_SEC * 1000;
         printf("%s|empty --- time elapsed: %g ms\n", ptr->name, msec);        
     }
+    free(x);
     return is_ok;
 }
 
@@ -198,7 +198,7 @@ int test_chi2()
  */
 int test_ks()
 {
-    double k_data[] = {
+    const double k_data[] = {
         0.3,    0.9999906941986655,
         0.5,    0.9639452436648751,
         0.9,    0.3927307079406543,
@@ -222,6 +222,132 @@ int test_ks()
         }
         printf("%16g %16g %16g %16g\n",
             k, ccdf_ref, ccdf_calc, 100*relerr);
+    }
+    print_is_ok(is_ok);
+    return is_ok;
+}
+
+/**
+ * @brief Test the implementation of geometric distribution
+ * @details The next Python 3.x code can be used for test vectors generation:
+ *
+ *    from scipy.stats import geom
+ *    p_vec = [1e-50, 1e-10, 1e-4, 0.01, 0.25, 0.5, 0.75, 0.99, 0.9999, 1 - 1e-10]
+ *    x_vec = [1, 2, 5, 6, 10, 101, 10000, 1000000]
+ *    for p in p_vec:
+ *        for x in x_vec:
+ *            cdf, ccdf = geom.cdf(x, p), geom.sf(x, p)
+ *            print(f"        {p:15.15g}, {x:10g}, {cdf:20.15g}, {ccdf:20.15g},")
+ *
+ */
+static int test_geom()
+{
+    const double data[] = {
+            //     p           t                   cdf           ccdf/pvalue
+               1e-50,          1,                1e-50,                    1,
+               1e-50,          2,                2e-50,                    1,
+               1e-50,          5,                5e-50,                    1,
+               1e-50,          6,                6e-50,                    1,
+               1e-50,         10,                1e-49,                    1,
+               1e-50,        101,             1.01e-48,                    1,
+               1e-50,      10000,                1e-46,                    1,
+               1e-50,      1e+06,                1e-44,                    1,
+               1e-10,          1,                1e-10,         0.9999999999,
+               1e-10,          2,     1.9999999999e-10,         0.9999999998,
+               1e-10,          5,      4.999999999e-10,         0.9999999995,
+               1e-10,          6,     5.9999999985e-10,         0.9999999994,
+               1e-10,         10,     9.9999999955e-10,          0.999999999,
+               1e-10,        101,    1.00999999495e-08,         0.9999999899,
+               1e-10,      10000, 9.99999500050167e-07,      0.9999990000005,
+               1e-10,      1e+06,  9.9995000171662e-05,    0.999900004999828,
+              0.0001,          1,               0.0001,               0.9999,
+              0.0001,          2,           0.00019999,           0.99980001,
+              0.0001,          5,   0.0004999000099995,        0.99950009999,
+              0.0001,          6,   0.0005998500199985,    0.999400149980001,
+              0.0001,         10, 0.000999550119979003,    0.999000449880021,
+              0.0001,        101,   0.0100496662424983,    0.989950333757502,
+              0.0001,      10000,     0.63213895356707,     0.36786104643293,
+              0.0001,      1e+06,                    1,  3.7015207857526e-44,
+                0.01,          1,                 0.01,                 0.99,
+                0.01,          2,               0.0199,               0.9801,
+                0.01,          5,         0.0490099501,         0.9509900499,
+                0.01,          6,       0.058519850599,       0.941480149401,
+                0.01,         10,   0.0956179249911955,    0.904382075008805,
+                0.01,        101,    0.637627982139503,    0.362372017860497,
+                0.01,      10000,                    1, 2.24877484981648e-44,
+                0.01,      1e+06,                    1,                    0,
+                0.25,          1,                 0.25,                 0.75,
+                0.25,          2,               0.4375,               0.5625,
+                0.25,          5,         0.7626953125,         0.2373046875,
+                0.25,          6,       0.822021484375,       0.177978515625,
+                0.25,         10,    0.943686485290527,   0.0563135147094727,
+                0.25,        101,    0.999999999999759, 2.40540163903614e-13,
+                0.25,      10000,                    1,                    0,
+                0.25,      1e+06,                    1,                    0,
+                 0.5,          1,                  0.5,                  0.5,
+                 0.5,          2,                 0.75,                 0.25,
+                 0.5,          5,              0.96875,              0.03125,
+                 0.5,          6,             0.984375,             0.015625,
+                 0.5,         10,         0.9990234375,         0.0009765625,
+                 0.5,        101,                    1, 3.94430452610505e-31,
+                 0.5,      10000,                    1,                    0,
+                 0.5,      1e+06,                    1,                    0,
+                0.75,          1,                 0.75,                 0.25,
+                0.75,          2,               0.9375,               0.0625,
+                0.75,          5,         0.9990234375,         0.0009765625,
+                0.75,          6,       0.999755859375,       0.000244140625,
+                0.75,         10,    0.999999046325684,  9.5367431640625e-07,
+                0.75,        101,                    1, 1.55575381946527e-61,
+                0.75,      10000,                    1,                    0,
+                0.75,      1e+06,                    1,                    0,
+                0.99,          1,                 0.99,                 0.01,
+                0.99,          2,               0.9999,               0.0001,
+                0.99,          5,         0.9999999999,                1e-10,
+                0.99,          6,       0.999999999999,                1e-12,
+                0.99,         10,                    1, 1.00000000000001e-20,
+                0.99,        101,                    1, 1.00000000000005e-202,
+                0.99,      10000,                    1,                    0,
+                0.99,      1e+06,                    1,                    0,
+              0.9999,          1,               0.9999, 9.99999999999889e-05,
+              0.9999,          2,           0.99999999, 9.99999999999778e-09,
+              0.9999,          5,                    1, 9.99999999999445e-21,
+              0.9999,          6,                    1, 9.99999999999334e-25,
+              0.9999,         10,                    1,  9.9999999999889e-41,
+              0.9999,        101,                    1,                    0,
+              0.9999,      10000,                    1,                    0,
+              0.9999,      1e+06,                    1,                    0,
+        0.9999999999,          1,         0.9999999999, 1.00000008274037e-10,
+        0.9999999999,          2,                    1, 1.00000016548075e-20,
+        0.9999999999,          5,                    1, 1.00000041370192e-50,
+        0.9999999999,          6,                    1, 1.00000049644233e-60,
+        0.9999999999,         10,                    1, 1.00000082740401e-100,
+        0.9999999999,        101,                    1,                    0,
+        0.9999999999,      10000,                    1,                    0,
+        0.9999999999,      1e+06,                    1,                    0,
+                 0.0
+    };
+    int is_ok = 1;
+    printf("----- test_geom ----- \n");
+    printf("%16s %16s  %16s %16s %16s  %16s %16s %16s\n",
+        "p", "t",
+        "cdf_ref", "cdf_calc", "relerr,%",
+        "ccdf_ref", "ccdf_calc", "relerr,%");
+    for (int i = 0; data[i] != 0.0; i += 4) {
+        const double p = data[i];
+        const unsigned long t = (unsigned long) data[i + 1];        
+        const double cdf_ref = data[i + 2];
+        const double ccdf_ref = data[i + 3];
+        const double cdf_calc = sr_geom_cdf(t, p);
+        const double ccdf_calc = sr_geom_ccdf(t, p);
+        const double cdf_relerr = (cdf_calc - cdf_ref) / (cdf_ref + DBL_MIN);
+        const double ccdf_relerr = (ccdf_calc - ccdf_ref) / (ccdf_ref + DBL_MIN);
+        if (fabs(cdf_relerr) > 1e-12 || fabs(ccdf_relerr) > 1e-12) {
+            is_ok = 0;
+        }
+        printf("%14g %10lu  %20.14g %20.14g %8.2g  %20.14g %20.14g %8.2g\n",
+            p, t,
+            cdf_ref, cdf_calc, 100.0 * cdf_relerr,
+            ccdf_ref, ccdf_calc, 100.0 * ccdf_relerr);
     }
     print_is_ok(is_ok);
     return is_ok;
@@ -584,6 +710,7 @@ int main(int argc, char *argv[])
         is_ok = is_ok & test_binocdf();
         is_ok = is_ok & test_norminv();
         is_ok = is_ok & test_linearcomp_cdf();
+        is_ok = is_ok & test_geom();
     } else {
         fprintf(stderr, "Unknown test group '%s'\n", argv[1]);
         is_ok = 0;

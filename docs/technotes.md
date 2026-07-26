@@ -82,7 +82,7 @@ Recommended configuration:
 - Multithreading support: pthreads (POSIX threads) library or WinAPI threads.
 - CMake or Ninja + Lua 5.x for compilation by means of MSVC. Or Lua 5.x for
   compilation by means of Open Watcom C.
-- 16 GiB of RAM, especially for multithreaded mode and/or `birthday` battery.
+- 16 GiB of RAM, especially for multithreaded mode and/or `coll64dec` battery.
 
 The next compilers are supported: GCC (including MinGW and DJGPP), Clang (as
 zig cc), MSVC (Microsoft Visual C) and Open Watcom C. It allows to compile
@@ -273,8 +273,8 @@ can be used for checking correctness of its statistical tests. Examples:
 1. `chacha` (ChaCha12), `aes128`, `speck128` (Speck128/128) - all tests
    should pass, occasional `SUSPICIOUS` values are possible.
 2. `des`, `pcg64_64`, `splitmix64` - pass `full` battery but fail
-   `birthday` battery.
-3. `ara32`, `flea31x1`: fail the mod3 test even in the `brief` battery.
+   `coll64dec` (former `birthday`) battery.
+3. `ara32`, `flea32x1`: fail the mod3 test even in the `brief` battery.
 4. `biski64`: systematic `SUSPICIOUS` and/or `FAIL` values at `hamming_distr`
    test (XORing part) in the `full` battery.
 5. `chacha` with the `--param=avx-ctr32` parameter fails the `gap_inv1024`
@@ -295,6 +295,8 @@ can be used for checking correctness of its statistical tests. Examples:
     `gap_inv512` and `gap16_count0` tests from the `brief` battery.
 14. `lfib_par` with the `--param=19937+` parameter: fails the `gap16_count0`
     test in the `default` and `full` batteries.
+15. `ranhash` and `wanghash64` fail the `hamming_distr` tests in the
+    `default` battery.
 
 # About some compilers optimizations
 
