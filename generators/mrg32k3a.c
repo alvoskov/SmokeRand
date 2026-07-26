@@ -122,12 +122,49 @@ static inline uint32_t Mrg32k3aState_get_u32_raw(Mrg32k3aState *obj)
 /**
  * @brief Renormalizes the \f$ [1; m1] \f$ interval to the
  * \f$ [0; 2^{32}-1]\f$ interval.
+ * @details It uses the next formula for renormalization:
+ *
+ * \f[
+ * x = (u - 1) \frac{2^{32} - 1}{m_1 - 1} = (u - 1) + c \frac{u - 1}{2^{55}}
+ * \f]
+ *
+ * The `c` coefficient is an integer and bitwise shifts are used instead
+ * of division.
+ *
+ * The code to test the conversion formula:
+ *
+ *    #include <stdio.h>
+ *    #include <stdint.h>
+ *    static const int64_t m1 = 4294967087ll;
+ *    static inline uint32_t conv_int(uint32_t x) {
+ *        return x + ((1753219158U * (uint64_t) x) >> 55);
+ *    }
+ *    int main() {
+ *        for (uint32_t x = 0; x < (uint32_t) m1; x++) {
+ *            if (x < 20 || x > (uint32_t) (m1 - 20)) {
+ *                printf("%X %X\n",
+ *                    (unsigned int) x, (unsigned int) conv_int(x));
+ *            }
+ *        }
+ *    }
+ *
+ * Python 3.x code to find the coefficients:
+ *
+ *    from fractions import Fraction
+ *    m1 = 4294967087
+ *    coeff = Fraction(2**32 - 1, m1 - 1)
+ *    base = 2**55
+ *    ifr = int((coeff - 1) * base) + 1
+ *    coeff_approx = 1 + Fraction(ifr, base)
+ *    print(float(coeff_approx - coeff))
+ *    print(ifr)
+ *    print(ifr * 2**32 / 2**64)
  */
 static inline uint64_t get_bits_raw(Mrg32k3aState *obj)
 {
-    const double c = 1.00000004866160696615; // 2**32 / m1
     const uint32_t r = Mrg32k3aState_get_u32_raw(obj) - 1;
-    return (uint32_t) (c * r);
+    const uint32_t x = (uint32_t) (r + ((1753219158U * (uint64_t) r) >> 55));
+    return x;
 }
 
 /**
