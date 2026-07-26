@@ -46,7 +46,7 @@ double sr_log1p(double x)
     } else {
         const double q = x / (x + 2.0);
         long double sum = 0.0, sum_old = 1.0, t = q;
-        int i = 1;
+        long i = 1;
         while (sum != sum_old && i < 100000) {
             sum_old = sum;
             sum += t / i;

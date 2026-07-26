@@ -99,7 +99,7 @@ static void *create(const CallerAPI *intf)
     return obj;
 #else
     (void) intf;
-    return obj;
+    return NULL;
 #endif
 }
 
