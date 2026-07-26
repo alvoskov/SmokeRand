@@ -711,7 +711,7 @@ double sr_geom_cdf(unsigned long t, double p)
     } else if (p < 0.0 || p > 1.0) {
         return NAN;
     } else {
-        return -sr_expm1(t * sr_log1p(-p));
+        return -sr_expm1((double) t * sr_log1p(-p));
     }
 }
 
@@ -731,6 +731,6 @@ double sr_geom_ccdf(unsigned long t, double p)
     } else if (p < 0.0 || p > 1.0) {
         return NAN;
     } else {
-        return exp(t * sr_log1p(-p));
+        return exp((double) t * sr_log1p(-p));
     }
 }
