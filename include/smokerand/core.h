@@ -41,6 +41,7 @@ void CallerAPI_free(void);
 void set_cmd_param(const char *param);
 void set_entropy_textseed(const char *seed);
 int set_entropy_base64_seed(const char *seed);
+char *get_entropy_base64_seed(void);
 void set_use_stderr_for_printf(int val);
 
 /**
@@ -84,6 +85,7 @@ typedef struct {
 
 
 TestResults TestResults_create(const char *name);
+void TestResults_set_pmin_ntests(TestResults *obj, unsigned long ntests, double pmin);
 
 typedef enum {
     REPORT_BRIEF = 0,
@@ -157,9 +159,8 @@ const char *interpret_pvalue(double pvalue);
 PValueCategory get_pvalue_category(double pvalue);
 void quicksort64(uint64_t *x, size_t len);
 void radixsort32(uint32_t *x, size_t len);
-void radixsort64(uint64_t *x, size_t len);
+void radixsort64_inplace(uint64_t *x, size_t len);
 void fastsort64(const RamInfo *info, uint64_t *x, size_t len);
-
 
 typedef struct {
     void *original_state;
@@ -184,6 +185,7 @@ typedef struct {
 
 TimeHMS nseconds_to_hms(unsigned long long nseconds_total);
 void print_elapsed_time(unsigned long long nseconds_total);
+void snprintf_elapsed_time(char *buf, size_t len, unsigned long long nseconds_total);
 
 void set_bin_stdout(void);
 void set_bin_stdin(void);

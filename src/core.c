@@ -58,6 +58,10 @@ int set_entropy_base64_seed(const char *seed)
     return Entropy_init_from_base64_seed(&entropy, seed);
 }
 
+char *get_entropy_base64_seed(void)
+{
+    return Entropy_get_base64_key(&entropy);
+}
 
 ///////////////////////////////
 ///// Single-threaded API /////
@@ -210,12 +214,21 @@ TestResults TestResults_create(const char *name)
     return ans;
 }
 
+/**
+ * @brief Sets the p-value (`p` and `alpha` fields) obtained as a minimum
+ * from several statistical tests. It resembles Bonferroni correction but
+ * uses more advanced formula based on geometric distribution.
+ */
+void TestResults_set_pmin_ntests(TestResults *obj, unsigned long ntests, double pmin)
+{
+    obj->alpha = sr_geom_ccdf(ntests, pmin);
+    obj->p = sr_geom_cdf(ntests, pmin);
+}
+
 
 ///////////////////////////////////////
 ///// Some mathematical functions /////
 ///////////////////////////////////////
-
-
 
 PValueCategory get_pvalue_category(double pvalue)
 {
@@ -415,35 +428,12 @@ static void quicksort_range(uint64_t *v, ptrdiff_t begin, ptrdiff_t end)
 
 void quicksort64(uint64_t *x, size_t len)
 {
-    quicksort_range(x, 0, (ptrdiff_t) (len - 1));
+    if (len > 32) {
+        quicksort_range(x, 0, (ptrdiff_t) (len - 1));
+    } else {
+        insertsort(x, 0, (ptrdiff_t) (len - 1));
+    }
 }
-
-
-/**
- * @brief 16-bit counting sort for 64-bit arrays.
- */
-static void countsort64(uint64_t *out, const uint64_t *x, size_t len, unsigned int shr)
-{
-    size_t *offsets = (size_t *) calloc(65536, sizeof(size_t));
-    if (offsets == NULL) {
-        fprintf(stderr, "***** countsort64: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
-    for (size_t i = 0; i < len; i++) {
-        unsigned int pos = ((x[i] >> shr) & 0xFFFF);
-        offsets[pos]++;
-    }
-    for (size_t i = 1; i < 65536; i++) {
-        offsets[i] += offsets[i - 1];
-    }
-    for (size_t i = len; i-- != 0; ) {
-        unsigned int digit = ((x[i] >> shr) & 0xFFFF);
-        size_t offset = --offsets[digit];
-        out[offset] = x[i];
-    }
-    free(offsets);
-}
-
 
 /**
  * @brief 16-bit counting sort for 32-bit arrays.
@@ -472,26 +462,6 @@ static void countsort32(uint32_t *out, const uint32_t *x, size_t len, unsigned i
 
 
 /**
- * @brief Radix sort for 64-bit unsigned integers.
- */
-void radixsort64(uint64_t *x, size_t len)
-{
-    uint64_t *out = calloc(len, sizeof(uint64_t));
-    if (out == NULL) {
-        // Not enough memory for a buffer: use another algorithm.
-        // May be useful for platforms with low amounts of RAM and no virtual
-        // memory such as 32-bit DOS extenders.
-        quicksort64(x, len);
-        return;
-    }
-    countsort64(out, x,   len, 0);
-    countsort64(x,   out, len, 16);
-    countsort64(out, x,   len, 32);
-    countsort64(x,   out, len, 48);
-    free(out);
-}
-
-/**
  * @brief Radix sort for 32-bit unsigned integers.
  */
 void radixsort32(uint32_t *x, size_t len)
@@ -506,21 +476,97 @@ void radixsort32(uint32_t *x, size_t len)
     free(out);
 }
 
+/**
+ * @brief Buckets boundaries for the counting/radix sort.
+ */
+typedef struct {
+    size_t lb[256]; ///< Lower boundaries
+    size_t ub[256]; ///< Upper boundaries
+} CountSortBounds;
+
 
 /**
- * @brief Fast sort for 64-bit integers that selects between radix sort
- * and quick sort. Selection depends on the available RAM estimation
- * and will use quicksort if we don't have enough memory for buffers.
+ * @brief An implementation of in-place radix sort for 64-bit integers.
+ * @details It uses the next algorithm:
+ *
+ * 1. For large arrays (>128 elements) it uses the American Flag Sort
+ *    algorithm (MSD radix in-place sort).
+ * 2. For small arrays or if recursion is too deep it uses quicksort
+ *    (with insertion sort fallback for small arrays)
+ * @param x    Pointer to the sorted array
+ * @param len  Number of elements (64-bit unsigned integers) in the sorted
+ *             array)
+ * @param level Current recursion level (begin from 0)
+ * @param bnd_array Preallocated buffer for buckets boundaries.
+ */
+static void countsort64_inplace(uint64_t *x, size_t len, unsigned int level, CountSortBounds *bnd_ary)
+{
+    const unsigned int shr = 56 - level * 8;
+    size_t *lb = bnd_ary[level].lb, *ub = bnd_ary[level].ub;
+    memset(lb, 0, 256 * sizeof(size_t));
+    memset(ub, 0, 256 * sizeof(size_t));
+    // Find buckets boundaries
+    for (size_t i = 0; i < len; i++) {
+        const unsigned int pos = ((x[i] >> shr) & 0xFF);
+        ub[pos]++;
+    }
+    for (size_t i = 1; i < 256; i++) {
+        ub[i] += ub[i - 1];
+        lb[i] = ub[i - 1];
+    }
+    // Radix sort
+    for (size_t i = 0; i < 256; i++) {
+        for (size_t j = lb[i]; j < ub[i]; ) {
+            const unsigned int pos = ((x[j] >> shr) & 0xFF);
+            const uint64_t tmp = x[lb[pos]];
+            x[lb[pos]++] = x[j];
+            x[j] = tmp;
+            if (pos == i) { j++; }
+        }
+    }
+    // Restore boundaries
+    lb[0] = 0;
+    for (int i = 1; i < 256; i++) {
+        lb[i] = ub[i - 1];
+    }
+    // Apply the sorting procedure recursively
+    for (int i = 0; i < 256; i++) {
+        if (ub[i] - lb[i] > 128 && level < 5) {
+            countsort64_inplace(x + lb[i], ub[i] - lb[i], level + 1, bnd_ary);
+        } else {
+            quicksort64(x + lb[i], ub[i] - lb[i]);
+        }
+    }
+}
+
+
+/**
+ * @brief In-place radix sort for 64-bit integers.
+ */
+void radixsort64_inplace(uint64_t *x, size_t len)
+{
+    CountSortBounds *bnd_ary = calloc(8, sizeof(CountSortBounds));
+    if (bnd_ary == NULL) {
+        fprintf(stderr, "***** radixsort64_inplace: not enough memory *****\n");
+        exit(EXIT_FAILURE);
+    }
+    countsort64_inplace(x, len, 0, bnd_ary);
+    free(bnd_ary);
+}
+
+
+
+/**
+ * @brief Fast sort for 64-bit integers with automatic selection of the sorting
+ * algorithm. Now it always uses the in-place radix sort.
+ * @details Initially it used selection between radix sort and quick sort.
+ * Selection depends on the available RAM estimation and will use quicksort
+ * if we don't have enough memory for buffers.
  */
 void fastsort64(const RamInfo *info, uint64_t *x, size_t len)
 {
-    const long long bufsize = (long long) (len * sizeof(uint64_t)) + (1ll << 20);
-    const long long ramsize = info->phys_avail_nbytes;
-    if (ramsize != RAM_SIZE_UNKNOWN && bufsize > ramsize) {
-        radixsort64(x, len);
-    } else {
-        quicksort64(x, len);
-    }
+    (void) info;
+    radixsort64_inplace(x, len);
 }
 
 
@@ -543,8 +589,20 @@ TimeHMS nseconds_to_hms(unsigned long long nseconds_total)
  */
 void print_elapsed_time(unsigned long long nseconds_total)
 {
-    TimeHMS hms = nseconds_to_hms(nseconds_total);
-    printf("%.2d:%.2d:%.2d", hms.h, hms.m, hms.s);
+    char buf[16];
+    snprintf_elapsed_time(buf, 15, nseconds_total);
+    printf("%s", buf);
+}
+
+
+/**
+ * @brief Prints elapsed time in hh:mm:ss format to stdout.
+ * @param nseconds_total  Number of seconds.
+ */
+void snprintf_elapsed_time(char *buf, size_t len, unsigned long long nseconds_total)
+{
+    const TimeHMS hms = nseconds_to_hms(nseconds_total);
+    snprintf(buf, len, "%.2d:%.2d:%.2d", hms.h, hms.m, hms.s);
 }
 
 

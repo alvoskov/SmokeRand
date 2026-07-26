@@ -44,10 +44,11 @@ stream ciphers.
 
 Extra tests:
 
-1. 64-bit birthday paradox test. Requires 8 GiB of RAM and about 30 minutes.
-   Allows to detect perfectly uniform 64-bit generators with 64-bit state
-   such as SplitMix, 64-bit LCGs with full 64-bit outputs, some modifications
-   of PCG.
+1. 64-bit collision test with decimation (the former "birthday paradox test").
+   Requires 8 GiB of RAM and at least 30 minutes. Allows to detect perfectly
+   uniform 64-bit generators with 64-bit state such as SplitMix, 64-bit LCGs
+   with full 64-bit outputs, some modifications of PCG. Since SmokeRand 0.48
+   it also detects flaws in `wyrand`, `w1rand` due to excessive collisions.
 2. 2-dimensional Ising model test: modifications with Wolff and Metropolis
    algorithms. Rather slow and not very sensitive, but resemble real
    Monte-Carlo computations.
@@ -75,7 +76,7 @@ PRNG that pass BigCrush or PractRand:
 - SWBW: detected by PractRand but not by BigCrush.
 - Uniformly distributed 64-bit generators with 64-bit state such as
   SplitMix, PCG64/64, rrmxmx, DES-CTR, MAGMA-CTR: detected by an extra
-  "birthday paradox" battery.
+  `coll64dec` battery.
 - Additive and subtractive lagged Fibonacci generators with large lags, e.g.
   LFib(19937,9842+): the `gap16` (`rda16`) test is taken from gjrand.
 - RC4 obsolete CSPRNG: detected by PractRand but not by BigCrush. In SmokeRand
@@ -249,19 +250,21 @@ one-threaded mode. Linear complexity test is much faster in this case.
 
 ## Hamming weights histogram test
 
-This test divides an input stream into n-bit blocks and calculates Hamming
-weights for all blocks. These weights must obey the binomial distribution.
-The test is repeated for pairs of blocks: each pair is XORed and Hamming
-weights of that XORs are analysed, they also must obey binomial distribution.
+This test (named `hamming_distr` in the batteries) divides an input stream
+into n-bit blocks and calculates Hamming weights for all blocks. These weights
+must obey the binomial distribution. The test is repeated for pairs of blocks:
+each pair is XORed and Hamming weights of that XORs are analysed, they also must
+obey binomial distribution.
 
 This test is designed mainly as basic sanity check for counter-based generator,
 it may detect evident flaws in avalanche characteristics. Pairwise XOR may
-detect such PRNGs as SplitMix with gamma equal to 1.
+detect such PRNGs as SplitMix with gamma equal to 1, `ranhash` and
+`wanghash64`.
 
 The Hamming weights histogram test also catches 32-bit LCGs with modulo
 \f$ m={2^32}\f$, additive/subtractive lagged Fibonacci generators with small
-lags, ranrot32 with small lags, some small LFSR (shr3, xsh, xorshift128,
-lrnd64_255).
+lags, `ranrot32` with small lags, some small LFSR (`shr3`, `xsh`,
+`xorshift128`, `lrnd64_255`).
 
 ## Hamming weights tests based on overlapping tuples.
 
@@ -291,6 +294,10 @@ additive/subtractive lagged Fibonacci generators.
  256              | 10^8  / 100M  |    10'000 | 0.076 | 1.288 | +
  256              | 10^9  / 1000M |    35'000 | 0.067 | 1.274 | +
  256              | 10^10 / 10B   |     1'000 | 0.079 | 1.263 | +
+ 512              | 10^8  / 100M  |     1'000 | 0.070 | 1.259 | +
+ 512              | 10^9  / 1000M |     1'000 | 0.017 | 1.260 | +
+ 512              | 10^10 / 10B   |       100 |-0.121 | 1.314 | +
+
 
 # Extra tests description
 
@@ -298,13 +305,13 @@ These tests are not included into the `brief`, `default` and `full` batteries
 because they are slow, may require a lot of RAM and are usually aimed on some
 very specific issues.
 
-## 64-bit birthday paradox test
+## 64-bit collision test
 
 This test detects uniform generators with 64-bit output and 64-bit state. Such
 generators never repeat themselves during the entire period and it can be
-easily detected by means of "birthday paradox": number of duplicates in the
-sample of n values that have m bits size each obeys Poisson distribution with
-the next mathematical expectance:
+easily detected by means of "birthday paradox": number of collisions
+(duplicates) in the sample of n values that have m bits size each obeys Poisson
+distribution with the next mathematical expectance:
 
 \f[
 \lambda = \frac{n^2}{2\cdot 2^m}
@@ -314,17 +321,51 @@ For a 64-bit generator m=64; to achieve p-value less than 1e-10 for absence of
 duplicates we need n around 2^35 that correspond to 256 GiB of data; such
 sample is too large for RAM of most personal computers in 2024. SmokeRand uses
 the decimation strategy suggested by M.E. O'Neill, the author of PCG generators.
-In this case only outputs with lower \f$ e \f$ bits equal to 0 are used, all
-other values are thrown out. And \f$ e = 7 \f$ allows to use only 8 GiB of RAM
-for \f$\lambda = 4\f$. If no duplicates are found for this \f$e\f$ then another
-attempt with \f$e = 9\f$ and \f$\lambda = 16\f$ is made. Then number of
-duplicates from both runs are summed and p-value is calculated.
+In this case only outputs with lower \f$ e \f$ bits equal to some value
+\f$ m \f$ are used, all other values are thrown out. And \f$ e = 7 \f$ allows
+to use only 8 GiB of RAM for \f$\lambda = 4\f$. Because the single run is not
+enough to obtain statistically significant results it uses the same strategy
+as the `collisionover` test: sums up the number of collision of several runs.
+The test stops if any of these conditions are reached:
 
-- https://www.pcg-random.org/posts/birthday-test.html
+- The number of runs is larger than 10000.
+- The p-value is outside the \f$ [10^{-10}; 1 - 10^{-10}] \f$ region.
+
+Two methods of \f$ m \f$ value changing between iterations are supported:
+
+- Klimov-Shamir "crazy" T-function TF0, i.e. \f$ m_{i+1} = T(m_{i}) \f$
+  or `m = (m + (m*m | 5)) & mask`. Essentially it is a PRNG that has a
+  full period and allows to try all possible `m` in a semi-chaotic order.
+  *This mode is the default one*.
+- A fixed \f$ m \f$ value given by a user by means of the `batparam` key,
+  e.g. `--batparam=0`.
+
+The default mode resembles the [space-time tradeoffs](https://doi.org/10.1137/0220017)
+in the collision test but **has an important difference**: **it uses different
+parts of the output sequence for different m values**. It was done intentionally
+because SmokeRand API for PRNGs (especially that uses `stdin`/`stdout`) doesn't
+have an option for forward/backward jumps and/or PRNG sequence replaying.
 
 32-bit version of this test consumes less RAM, uses larger e and is much
 slower. However, it is made as a rarely used backup variant: ordinary x86 based
 workstations in 2024 usually 64-bit and have at least 16 GiB of RAM.
+
+This test was upgraded in SmokeRand 0.48 and the corresponding battery was
+renamed from `birthday` to `coll64dec`: now it uses more advanced approach
+(larger samples with incremental p-value computation) that allows to detect
+anomalies in the `wyrand` or `w1rand` output. The author would like to
+acknowledge [S.Vigna](https://github.com/vigna) for
+[the productive discussion](https://github.com/alvoskov/SmokeRand/issues/24).
+
+References:
+
+- https://www.pcg-random.org/posts/birthday-test.html
+- https://github.com/alvoskov/SmokeRand/issues/24
+- https://github.com/vigna/coll-birth-rs
+- Beame P. A general Sequential Time-Space Tradeoff for Finding Unique Elements
+  // SIAM Journal on Computing. 1991. V.20. N 2. P.270-277.
+  https://doi.org/10.1137/0220017
+
 
 ## Extended block frequency test
 

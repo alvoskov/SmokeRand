@@ -5,8 +5,8 @@ obtained from SmokeRand, TestU01 and PractRand 0.94 test suites. The next
 grading algorithm was used:
 
 1. An initial grade was obtained from SmokeRand `full` battery.
-2. If PRNG failed `birthday` or `freq` battery - then 1 is subtracted for each
-   failure.
+2. If PRNG failed `coll64dec` (former `birthday`) or `freq` battery - then 1
+   is subtracted for each failure.
 3. If the grade is 4.0 and PRNG failed some tests in TestU01 or PractRand
    then 0.5 is subtracted.
 4. If PRNG is widely known cryptographic and has no known weakness then
@@ -16,14 +16,27 @@ grading algorithm was used:
    $2^{60}$ then the grade is 0 (written as `(0)` after empirically obtained
    grade).
 
- Algorithm         | Output | express | brief | default | full | cpb  | bday64 | Grade | TestU01 | PractRand 
+The next notation is ued for the `coll64dec` test results:
+
+1. `+` - passed.
+2. `-` - failed (no collisions at all)
+3. `-(<)` - failed (number of collisions is less than expected)
+4. `-(>)` - failed (number of collisions is greated than expected)
+5. `-(>>>)` - failed (extremely large number of collisions)
+6. `*` - other, see the detailed report for the collision test results.
+
+The `-(>>>)` result is typical for cases when PRNG period is exausted during
+the testing.
+
+ Algorithm         | Output | express | brief | default | full | cpb  | coll64 | Grade | TestU01 | PractRand 
 -------------------|--------|---------|-------|---------|------|------|--------|-------|---------|-----------
  a5rand            | u64    | +       | +     | +       | +    | 0.37 | +      | 4(0)  |         | >= 16 TiB
- a5rand32          | u32    | +       | 1/2   | 9       | 11   | 1.0  | -(>>10)| 0     | Small   | 4 GiB
+ a5rand32          | u32    | +       | 1/2   | 9       | 11   | 1.0  | -(>>>) | 0     | Small   | 4 GiB
  a5randw           | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 16 TiB
- a5rand32w         | u32    | +       | 0/1   | 1       | 1    | 0.75 | -(~23) | 0     | +       | 256 GiB
+ a5rand32w         | u32    | +       | 0/1   | 1       | 1    | 0.75 | *      | 0     | +       | 256 GiB
  aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      | 5     | +il     | >= 32 TiB
  aes128(c99)       | u64    | +       | +     | +       | +    | 6.8  | +      | 5     |         | >= 32 TiB
+ aesdec2           | u64    | +       | +     | +       | +    | 0.14 | +      | 4     |         | >= 8 TiB
  alfib             | u64    | 2       | 5     | 6       | 8    | 0.23 | +      | 0     | Small   | 128 MiB
  alfib8x5          | u32    | +       | +     | +       | +    | 3.2  | +      | 4     | +       | >= 4 TiB
  alfib64x5         | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 8 TiB
@@ -33,8 +46,8 @@ grading algorithm was used:
  ara64             | u64    | +       | 1     | 1       | 1    | 0.50 | +      | 2(0)  |+H/+L/+il| 1 GiB
  arx32             | u32    | +       | +     | +       | +    | 1.0  | +      | 3.5(0)| +       | 1 TiB
  arx64             | u32    | +       | +     | +       | +    | 0.50 | +      | 4(0)  |         | >= 4 TiB
- arxfw8            | u32    | +       | 18    | 33      |      | 4.4  | -(>>10)| 0     | -       | 2 MiB
- arxfw8ex          | u32    | +       | 3/5   | 8       | 16   | 5.0  | -(>>10)| 0     | -/Small | 128 MiB
+ arxfw8            | u32    | +       | 18    | 33      |      | 4.4  | -(>>>) | 0     | -       | 2 MiB
+ arxfw8ex          | u32    | +       | 3/5   | 8       | 16   | 5.0  | -(>>>) | 0     | -/Small | 128 MiB
  arxfw8ex2         | u32    | +       | +     | +       | +    | 3.8  | +      | 3.5(0)| +       | 8 TiB
  arxfw8ex3         | u32    | +       | +     | +       | +    | 4.0  | +      | 4(0)  | +       | >= 16 TiB
  arxfw16           | u32    | +       | +     | +       | +    | 2.6  | +      | 3.5(0)| +       | 8 TiB
@@ -42,11 +55,11 @@ grading algorithm was used:
  arxfw32           | u32    | +       | +     | +       | +    | 0.74 | +      | 4(0)  | +       | >= 16 TiB
  arxfw64           | u32    | +       | +     | +       | +    | 0.38 | +      | 4     | +IL     | >= 8 TiB
  bbs64             | u64    | +       | +     | +       | +    | 2.0  |        | 3.5   | Small   | 256 GiB
- biski8_mul        | u32    | 1       | 19    | 33      | 41   | 2.2  | -(>>10)| 0     | -       | 512 KiB
+ biski8_mul        | u32    | 1       | 19    | 33      | 41   | 2.2  | -(>>>) | 0     | -       | 512 KiB
  biski16_mul       | u32    | +       | 2     | 3       | 6    | 1.6  | -      | 0     | -       | 16 GiB
  biski64_mul       | u64    | +       | +     | +       | +    | 0.18 | +      | 4     |         | >= 2 TiB
- biski8            | u32    | +       | 17    | 35      | 35   | 1.4  | -(>>10)| 0     | -       | 2 MiB
- biski8_alt        | u32    | +       | 17    | 31      | 31   | 1.4  | -(>>10)| 0     | -       | 2 MiB
+ biski8            | u32    | +       | 17    | 35      | 35   | 1.4  | -(>>>) | 0     | -       | 2 MiB
+ biski8_alt        | u32    | +       | 17    | 31      | 31   | 1.4  | -(>>>) | 0     | -       | 2 MiB
  biski16           | u32    | +       | +     | +       | 1    | 0.81 | +      | 2(0)  | +       | 1 TiB
  biski16_alt       | u32    | +       | +     | +       | +    | 1.1  | +      | 3.5(0)| +       | 1 TiB
  biski32_v2        | u32    | +       | +     | +       | +    | 0.31 | +      | 4(0)  | +       | >= 32 TiB
@@ -63,7 +76,7 @@ grading algorithm was used:
  chacha12          | u32    | +       | +     | +       | +    | 3.0  | +      | 5     | +       | >= 32 TiB
  chacha12_avx      | u32    | +       | +     | +       | +    | 2.0  | +      | 5     | +       | >= 32 TiB
  chacha12_avx2     | u32    | +       | +     | +       | +    | 0.78 | +      | 5     | +       | >= 16 TiB
- chacha12_ctr32    | u32    | +       | +     | +       | 1    | 2.0  | -(>>10)| 0     | +       | 256 GiB
+ chacha12_ctr32    | u32    | +       | +     | +       | 1    | 2.0  | -(>>>) | 0     | +       | 256 GiB
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | +      | 4     | +       | >= 32 TiB
  cmwc4827          | u32    | +       | 1     | 1       | 1    | 0.44 | +      | 2     | +       | 512 MiB
  combo             | u32    | +       | 4     | 6       | 8    | 0.75 | +      | 0     | Small   | 4 GiB
@@ -86,7 +99,11 @@ grading algorithm was used:
  jkiss32           | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  jlkiss64          | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 16 TiB
  flea32x1          | u32    | +       | 1     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
- gjrand8           | u32    | +       | 4     | 11      | >=15 | 3.5  | -(>>10)| 0     | Small   | 128 MiB
+ ghsc64_old        | u64    | +       | 3     | 10      | 18   | ~0.1 |        | 0     |         | 256 KiB
+ ghsc64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 16 TiB
+ ghsc128           | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 16 TiB
+ ghsc256           | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | >= 16 TiB
+ gjrand8           | u32    | +       | 4     | 11      | >=15 | 3.5  | -(>>>) | 0     | Small   | 128 MiB
  gjrand16          | u32    | +       | +     | +       | +    | 2.6  | +      | 4(0)  | +       | 8 TiB
  gjrand32          | u32    | +       | +     | +       | +    | 0.69 | +      | 4(0)  | +       | >= 32 TiB
  gjrand64          | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |+il      | >= 32 TiB
@@ -109,18 +126,20 @@ grading algorithm was used:
  kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     | +       | >= 16 TiB
  kiss11_64         | u64    | +       | +     | +       | +    | 0.60 | +      | 4     |         | >= 32 TiB
  kiss4691          | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 32 TiB
- komirand16        | u32    | 1-7     | 19-20 | 40      |      | 2.1  |        | 0     | -       | 64 KiB
+ komirand16        | u32    | 1-7     | 19-20 | 40      |      | 2.1  | -(>>>) | 0     | -       | 64 KiB
  komirand16w       | u32    | 1-4     | 20-21 | 39      |      | 2.1  |        | 0     | -       | 16 MiB
- komirand32        | u32    | +       | 1     | 2       | 10   | 0.63 | -(>>10)| 0     | Small   | 2-8 GiB
+ komirand32        | u32    | +       | 1     | 2       | 10   | 0.63 | -(>>>) | 0     | Small   | 2-8 GiB
  komirand32w       | u32    | +       | +     | +       | +    | 1.0  | +      | 4(0)  | +       | >= 16 TiB
  komirand          | u64    | +       | +     | +       | +    | 0.49 | +      | 4(0)  |+H/+L/+IL| >= 16 TiB
  komirandw         | u64    | +       | +     | +       | +    | 0.52 | +      | 4     |         | >= 8 TiB
+ konadare192       | u64    | +       | +     | +       | +    | 0.20 | +      | 4     |         | >= 16 TiB
  kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 5     | +       | >= 4 TiB
- lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>10)| 0     | -       | 512 MiB
- lcg32sc           | u32    | +       | 1     | 2       | 8/9  | 0.62 | -(>>10)| 0     | Small   | 512 MiB
+ leptonflurry32x1  | u32    | +       | +     | +       | +    | 2.8  | +      | 4     |         | >= 4 TiB
+ lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>>) | 0     | -       | 512 MiB
+ lcg32sc           | u32    | +       | 1     | 2       | 8/9  | 0.62 | -(>>>) | 0     | Small   | 512 MiB
  lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     | -       | 16 KiB
  lcg61prime        | u32    | +       | 3     | 5       | 5    | 2.0  | -      | 0     | Small   | >= 16 TiB
- lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | +      | 0     | Small   | 16 MiB
+ lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | *      | 0     | Small   | 16 MiB
  lcg64bd           | u32    | +       | +     | +       | +    | 0.60 | +      | 3.5   | +       | 32 GiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | 0     | +-      | >= 32 TiB
  lcg64sc           | u64    | +       | +     | +       | +    | 0.30 | -      | 3     |+HI/+LO  | >= 16 TiB
@@ -131,7 +150,7 @@ grading algorithm was used:
  lcg128prime       | u64    | +       | +     | +       | +    | 0.48 | +      | 4     | +IL     | >= 1 TiB
  lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | 3     | +       | 64 GiB
  lcg128_u32_full   | u32    | +       | +     | 1       | 1    | 0.75 | +      | 3     | +       | >= 32 TiB
- lcg69069          | u32    | 6       | 20    | 38/39   | 43/44| 0.38 | -(>>10)| 0     | -       | 2 KiB
+ lcg69069          | u32    | 6       | 20    | 38/39   | 43/44| 0.38 | -(>>>) | 0     | -       | 2 KiB
  lea128            | u32    | +       | +     | +       | +    | 5.7  | +      | 5     | +       | >= 32 TiB
  lea128_avx        | u32    | +       | +     | +       | +    | 1.2  | +      | 5     | >= Crush| >= 32 TiB
  lfib_par[31+]     | u32    | 1       | 6/7   | 8/0     | 11/12| 0.70 | +      | 0     | -       | 32 MiB
@@ -159,7 +178,7 @@ grading algorithm was used:
  lfib_par[19937-]  | u32    | +       | +     | 1       | 1    | 0.48 | +      | 2     | +       | >= 16 TiB
  lfib_par[44497+]  | u32    | +       | +     | 1       | 1    | 0.49 | +      | 2     | +       | >= 8 TiB
  lfib_par[44497-]  | u32    | +       | +     | 1       | 1    | 0.49 | +      | 2     | +       | >= 2 TiB
- lfib_par[110503+] | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 2 TiB
+ lfib_par[110503+] | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 16 TiB
  lfib_par[110503-] | u32    | +       | +     | +       | +    | 0.50 | +      | 4     | +       | >= 1 TiB
  lfib4             | u32    | 1       | 1     | 3       | 4    | 0.37 | +      | 3     | +       | 32 MiB
  lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | +      | 4     | +       | >= 32 TiB
@@ -168,7 +187,7 @@ grading algorithm was used:
  lrnd64_255        | u64    | 2       | 5     | 10      | 15   | 0.45 | +      | 0     | Small   | 512 KiB
  lrnd64_1023       | u64    | 2       | 3     | 5       | 7    | 0.44 | +      | 2.25  | Small   | 4 MiB
  lxm_64x128        | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 32 TiB
- macmarsa          | u32    | 2       | 12    | 18      | 19   | 0.67 | -(>>10)| 0     | -       | 128 KiB
+ macmarsa          | u32    | 2       | 12    | 18      | 19   | 0.67 | -(>>>) | 0     | -       | 128 KiB
  magma             | u64    | +       | +     | +       | +    | 25   |        |       | +       | >= 1 TiB
  magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      | 3     |         | >= 16 TiB
  magma_avx-cbc     | u64    | +       | +     | +       | +    | 7.1  | +      | 4     |         | >= 2 TiB
@@ -178,12 +197,14 @@ grading algorithm was used:
  melg607           | u64    | 2       | 3     | 5       | 7    | 0.73 | +      | 2.25  | Small   | 8 MiB
  melg19937         | u64    | +       | 3     | 3       | 3    | 0.73 | +      | 3.25  | Small   | 256 GiB
  melg44497         | u64    | +       | +     | 3       | 3    | 0.75 | +      | 3.25  | Small   | 2 TiB
- minstd            | u31    | 1       | 14    | 32      | 37   | 1.4  | -(>>10)| 0     | -       | 256 KiB
+ minstd            | u31    | 1       | 14    | 32      | 37   | 1.4  | -(>>>) | 0     | -       | 256 KiB
  mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 16 TiB
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | +      | 4     | +       | >= 32 TiB
  mrc16             | u32    | +       | +     | +       | +    | 1.1  | +      | 3.5(0)| +       | 1 TiB
  mrc32             | u32    | +       | +     | +       | +    | 0.35 | +      | 4(0)  | +       | >= 8 TiB
  mrc64             | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 16 TiB
+ mrsf32            | u32    | +       | +     | +       | +    | 0.19 | +      | 4(0)  |         | ?
+ mrsf64            | u64    | +       | +     | +       | +    | <0.1 | +      | 4(0)  |         | ?
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.59 | +      | 3.25  | Small   | 128 GiB
  mt19937_64        | u64    | +       | 3     | 3       | 3    | 0.45 | +      | 3.25  | Small   | 256 GiB
  mt19937_64_full   | u64    | +       | 3     | 3       | 3    | 0.46 | +      | 3.25  | Small   | 256 GiB
@@ -192,7 +213,7 @@ grading algorithm was used:
  mtc32             | u32    | +       | +     | +       | +    | 0.39 | +      | 4(0)  | +       | >= 4 TiB
  mtc64             | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 16 TiB
  mtc64hi           | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 2 TiB
- mrg32k3a          | u32    | +       | +     | +       | +    | 2.5  | +      | 3.5   | +       | 2 TiB
+ mrg32k3a          | u32    | +       | +     | +       | +    | 2.7  | +      | 4     | +       | >= 4 TiB
  msws              | u32    | +       | +     | +       | +    | 0.72 | +      | 4     | +       | >= 16 TiB
  msws_ctr          | u64    | +       | +     | +       | +    | 0.37 | +      | 4     | +il     | >= 8 TiB
  msws64            | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 32 TiB
@@ -203,10 +224,10 @@ grading algorithm was used:
  mularx128_u32     | u32    | +       | +     | +       | +    | 0.95 | +      | 4     |         | >= 32 TiB
  mularx128_str     | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 32 TiB
  mularx256         | u64    | +       | +     | +       | +    | 0.67 | +      | 4     |         | >= 32 TiB
- mulberry32        | u32    | +       | 1     | 2/3     | 5    | 0.51 | -(>>10)| 0     | Small   | 512 MiB
- mwc32x            | u32    | +       | 3     | 4       | 8    | 1.5  | -(>>10)| 0     | Small   | 128 MiB
- mwc32xxa8         | u32    | +       | 1     | 4       | 10   | 1.9  | -(>>10)| 0     | Small   | 256 MiB
- mwc40xxa8         | u32    | +       | +     | +       | 1    | 2.1  | -(>>10)| 0     | Crush   | 16 GiB
+ mulberry32        | u32    | +       | 1     | 2/3     | 5    | 0.51 | -(>>>) | 0     | Small   | 512 MiB
+ mwc32x            | u32    | +       | 3     | 4       | 8    | 1.5  | -(>>>) | 0     | Small   | 128 MiB
+ mwc32xxa8         | u32    | +       | 1     | 4       | 10   | 1.9  | -(>>>) | 0     | Small   | 256 MiB
+ mwc40xxa8         | u32    | +       | +     | +       | 1    | 2.1  | -(>>>) | 0     | Crush   | 16 GiB
  mwc48xxa16        | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | +       | 1 TiB
  mwc64             | u32    | +       | 1     | 2       | 4    | 0.37 | -      | 0     | Small   | 1 TiB
  mwc64x            | u32    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
@@ -237,25 +258,25 @@ grading algorithm was used:
  pcg64             | u64    | +       | +     | +       | +    | 0.28 | -      | 3     | +       | >= 32 TiB
  pcg64_dxsm        | u64    | +       | +     | +       | +    | 0.53 | +      | 4     |         | >= 16 TiB
  pcg64_xsl_rr      | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
- pcg128            | u64    | +       | +     | +       | +    | 0.59 | +      | 4     |+H/+L/+IL| >= 2 TiB
+ pcg128            | u64    | +       | +     | +       | +    | 0.59 | +      | 4     |+H/+L/+IL| >= 16 TiB
  philox            | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  philox2x32        | u32    | +       | +     | +       | +    | 1.6  | -      | 3     | +       | >= 32 TiB
  philox32          | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
- prvhash12c        | u32    | +       | 0/1   | 0/1     | 4    | 5.1  | -(>>10)| 0     | Crush   | 8 GiB
+ prvhash12c        | u32    | +       | 0/1   | 0/1     | 4    | 5.1  | -(>>>) | 0     | Crush   | 8 GiB
  prvhash12cw       | u32    | +       | +     | +       | +    | 5.1  | +      | 3.5(0)| +       | 2 TiB
  prvhash16c        | u32    | +       | +     | +       | +    | 2.4  | +      | 3.5(0)| +       | 256 GiB
  prvhash16cw       | u32    | +       | +     | +       | +    | 2.4  | +      | 3.5(0)| +       | 4 TiB
  prvhash64c        | u64    | +       | +     | +       | +    | 0.51 | +      | 4(0)  |         | >= 16 TiB
  prvhash64cw       | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 16 TiB
- pqrng32           | u32    | 5       | 18    | 35      | 39   | 0.50 | -(>>10)| 0     | -       | 2 KiB
- pqrng64           | u32    | +       | +     | 1       | 1    | 0.64 | +      | 3     | +       | 16 GiB
+ pqrng32           | u32    | 5       | 18    | 35      | 39   | 0.50 | -(>>>) | 0     | -       | 2 KiB
+ pqrng64           | u32    | +       | +     | 1       | 1    | 0.64 | -(<)   | 2     | +       | 16 GiB
  pqrng128          | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | >= 8 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
  ranhash           | u64    | +       | +     | 1       | 1    | 0.25 | -      | 2     |+IL/+L/+H| 8 TiB
  ran2              | u31    | +       | +     | +       | +    | 3.2  | N/A    | 4     | +       | 2 TiB
  ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      | 0     |S_lo/+_hi| 512 KiB
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      | 3.5   |+_lo/+_hi| 2 MiB
- randu             | u32    | 6       | 23    | 41      | 45   | 0.41 | -(>>10)| 0     | -       | 1 KiB
+ randu             | u32    | 6       | 23    | 41      | 45   | 0.41 | -(>>>) | 0     | -       | 1 KiB
  ranecu            | u31    | +       | +     | 1       | 1    | 3.1  | N/A    | 1     | Small   | 2 TiB
  ranlim32          | u32    | +       | +     | +       | +    | 1.3  | +      | 4     | +       | >= 16 TiB
  ranlux++          | u64    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 32 TiB
@@ -263,7 +284,7 @@ grading algorithm was used:
  ranrot32[7/3]     | u32    | +       | 3     | 5/6     | 6    | 0.58 | +      | 0     | Small   | 128 MiB
  ranrot32[17/9]    | u32    | +       | 1     | 2       | 4    | 0.68 | +      | 0     | +       | 1 GiB
  ranrot32[57/13]   | u32    | +       | +     | +       | 1    | 0.74 | +      | 2     | +       | 8 GiB
- ranrot8tiny       | u32    | +       | 8     | 24      | 27   | 2.0  | -(>>10)| 0     | -       | 4 MiB
+ ranrot8tiny       | u32    | +       | 8     | 24      | 27   | 2.0  | -(>>>) | 0     | -       | 4 MiB
  ranrot16tiny      | u32    | +       | +     | +       | 1    | 1.0  | -      | 2(0)  | Crush   | 8 GiB
  ranrot32tiny      | u32    | +       | +     | +       | +    | 0.41 | +      | 3(0)  | +       | 2 TiB
  ranrot64tiny      | u64    | +       | +     | +       | +    | 0.21 | +      | 4     | +il     | >= 16 TiB
@@ -289,7 +310,7 @@ grading algorithm was used:
  romuduojr         | u64    | +       | +     | +       | +    | 0.11 | +      | 4(0)  |         | >= 2 TiB
  romuduojrw        | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 16 TiB
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
- rwc32sm           | u32    | +       | +     | +       | 1    | 0.83 | +      | 1     | Small   | >= 2 TiB
+ rwc32sm           | u32    | +       | +     | +       | 1    | 0.83 | +      | 1     | Small   | >= 16 TiB
  rwc32             | u32    | +       | +     | +       | +    | 0.55 | +      | 4     | +       | >= 8 TiB
  rwc32u48          | u32    | +       | +     | +       | +    | 0.47 | +      | 4     | +       | >= 32 TiB
  rwc64             | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +hi     | >= 8 TiB
@@ -303,11 +324,11 @@ grading algorithm was used:
  seiran128         | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB
  sezgin63_u63      | u63    | +       | +     | +       | 1/2  | 1.6  | N/A    | 1     | Crush   | >= 1 TiB
- sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | -(>>10)| 0     | -       | 128 MiB
+ sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | -(>>>) | 0     | -       | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)| +       | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  | +       | >= 16 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
- shioi128          | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 1 TiB
+ shioi128          | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 16 TiB
  skiss32           | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 16 TiB
  skiss64           | u64    | +       | +     | +       | +    | 0.86 | +      | 4     |         | >= 8 TiB
  smwc16x8          | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | +       | >= 4 TiB
@@ -319,17 +340,17 @@ grading algorithm was used:
  speck128_avx(r16) | u64    | +       | +     | +       | +    | 0.46 | +      | 4     |         | >= 32 TiB
  splitmix          | u64    | +       | +     | +       | +    | 0.12 | -      | 3     | +       | >= 32 TiB
  splitmix_g1       | u64    | +       | 1     | 1       | 2    | 0.12 | -      | 0.75  |sIL/>=CLH| 8 GiB
- splitmix32        | u32    | +       | 3     | 4       | 5/7  | 0.25 | -(>>10)| 0     | Small   | 1 GiB
+ splitmix32        | u32    | +       | 3     | 4       | 5/7  | 0.25 | -(>>>) | 0     | Small   | 1 GiB
  splitmix32cbc     | u32    | +       | +     | +       | +    | 2.1  | -      | 3     | +       | 8 TiB
- sqxor             | u64    | +       | +     | +       | +    | 0.13 | +      | 4     | +       | >= 16 TiB
- sqxor32           | u32    | +       | 2     | 3       | 5    | 0.20 | -(>>10)| 0     | Small   | 16 GiB
+ sqxor             | u64    | +       | +     | +       | +    | 0.13 | -(>)   | 3     | +       | >= 16 TiB
+ sqxor32           | u32    | +       | 2     | 3       | 5    | 0.20 | -(>>>) | 0     | Small   | 16 GiB
  stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | +      | 0     | +       | >= 32 TiB
  stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | +      | 3.5(0)| Small   | 1 MiB
  superduper73      | u32    | 3       | 11    | 17      | 21   | 0.64 | +      | 0     | -       | 32 KiB
  superduper96      | u32    | 1       | 2     | 5/6     | 9/10 | 0.71 | +      | 0     | Small   | 128 KiB
  superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      | 2.75  | Small   | 512 KiB
  superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | +      | 4     | +       | >= 32 TiB
- shr3              | u32    | 2       | 17    | 33      | 37(?)| 0.76 | -(>>10)| 0     | -       | 32 KiB
+ shr3              | u32    | 2       | 17    | 33      | 37(?)| 0.76 | -(>>>) | 0     | -       | 32 KiB
  swb               | u32    | 1       | 6     | 7       | 9    | 3.2  | +      | 0     | Small   | 128 MiB
  swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | 2     | Crush   | 4 TiB
  swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 8 TiB
@@ -344,14 +365,14 @@ grading algorithm was used:
  taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  | Small   | 32 KiB
  tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
  tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      | 3     |+_lo/+_hi| 32 GiB
- tf0_32            | u32    | 5       | 18    | 33      | 38   | 0.48 |        | 0     | -       | 2 KiB
- tf0_32sc2         | u32    | +       | 1     | 2       | 8    | 0.57 | -(>>10)| 0     | Small   | 512 MiB
- tf0_64            | u32    | +       | +     | 1       | 1    | 0.45 |        | 3     | +       | 2 GiB
+ tf0_32            | u32    | 5       | 18    | 33      | 38   | 0.48 | -(>>>) | 0     | -       | 2 KiB
+ tf0_32sc2         | u32    | +       | 1     | 2       | 8    | 0.57 | -(>>>) | 0     | Small   | 512 MiB
+ tf0_64            | u32    | +       | +     | 1       | 1    | 0.45 | +      | 3     | +       | 2 GiB
  tf0_64sc          | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 16 TiB
- tf0_64sc2         | u64    | +       | +     | +       | +    | 0.40 | -      | 3     |         | >= 2 TiB
+ tf0_64sc2         | u64    | +       | +     | +       | +    | 0.40 | -      | 3     |         | >= 16 TiB
  tf0_128           | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |+lo      | >= 16 TiB
  tf0duper32        | u32    | +       | +     | +       | +    | 0.70 | +      | 4     | +       | >= 16 TiB(?)
- tf0duper64        | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 8 TiB(?)
+ tf0duper64        | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |+h/+l/+il| >= 16 TiB
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 8 TiB
  threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | >= 32 TiB
@@ -367,15 +388,16 @@ grading algorithm was used:
  ultra             | u32    | +       | +     | +       | 1    | 0.81 | +      | 2     | +       | 4 GiB
  ultra64           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |+_lo/+_hi| >= 16 TiB
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     | +       | >= 32 TiB
- w1rand            | u64    | +       | +     | +       | +    | ~0.1 | +      | 3.5   |         | 1 TiB
+ w1rand            | u64    | +       | +     | +       | +    | ~0.1 | -(>)   | 3     |         | 1 TiB
+ wanghash64        | u64    | +       | 1     | 1       | 1    | 0.15 | -      | 1     |         | 16 GiB
  wich1982          | u32    | +       | 5     | 11      | 13   | 2.3  | -      | 0     | -       | 256 GiB
  wich2006          | u32    | +       | +     | +       | +    | 4.6  | +      | 4     | +       | >= 16 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |+_lo/+_hi| >= 32 TiB
- wyrand_v41        | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |+H/+L/+IL| >= 32 TiB
- wyrand_v42        | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | >= 2 TiB
- wyrand_v43        | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | >= 2 TiB
- xabc8             | u32    | +       | 8     | 15      | 22   | 3.7  | -(>>10)| 0     | -       | 8 MiB
+ wyrand_v41        | u64    | +       | +     | +       | +    | ~0.1 | -(>)   | 3     |+H/+L/+IL| >= 32 TiB
+ wyrand_v42        | u64    | +       | +     | +       | +    | ~0.1 | -(>)   | 3     |         | >= 2 TiB
+ wyrand_v43        | u64    | +       | +     | +       | +    | ~0.1 | -(>)   | 3     |         | >= 16 TiB
+ xabc8             | u32    | +       | 8     | 15      | 22   | 3.7  | -(>>>) | 0     | -       | 8 MiB
  xabc16            | u32    | +       | +     | 1       | 1    | 1.6  | +      | 2     | Small   | 64 GiB
  xabc32            | u32    | +       | +     | +       | +    | 0.82 | +      | 4(0)  | +       | 16 TiB
  xabc64            | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |+IL/+H   | 4 TiB
@@ -387,20 +409,20 @@ grading algorithm was used:
  xkiss32sh_awc     | u32    | +       | +     | +       | +    | 0.99 | +      | 4     | +       | >= 16 TiB
  xkiss64_awc       | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
- xoroshiro32       | u32    | 2       | 14    | 28/29   | 37/39| 1.4  | -(>>10)| 0     | -       | 32 KiB
- xoroshiro32pp     | u32    | +       | 1     | 2       | 6/8  | 1.5  | -(>>10)| 0     | Small   | 256 MiB
+ xoroshiro32       | u32    | 2       | 14    | 28/29   | 37/39| 1.4  | -(>>>) | 0     | -       | 32 KiB
+ xoroshiro32pp     | u32    | +       | 1     | 2       | 6/8  | 1.5  | -(>>>) | 0     | Small   | 256 MiB
  xoroshiro64aox    | u32    | +       | +     | +       | +    | 0.52 | +      | 3.5   | +       | 512 GiB
  xoroshiro64pp     | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 8 TiB
  xoroshiro64st     | u32    | 1       | 1     | 3       | 5    | 0.51 | -      | 1.75  | Small   | 1 MiB
  xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 32 TiB
- xorrot32          | u32    | 2       | 16    | 32      | 41   | 0.55 |        | 0     | -       | 32 KiB
+ xorrot32          | u32    | 2       | 16    | 32      | 41   | 0.55 | -(>>>) | 0     | -       | 32 KiB
  xorrot64          | u64    | 2       | 3     | 5/6     | 9    | 0.33 | -      | 0     | -       | 32 KiB
  xorrot64mrt       | u64    | +       | +     | +       | +    | 0.44 | -      | 3     |         | >= 8 TiB
- xorrot64mn        | u64    | +       | +     | +       | +    | 0.44 | +      | 4     |         | >= 4 TiB
+ xorrot64mn        | u64    | +       | +     | +       | +    | 0.44 | -(<)   | 3     |         | >= 16 TiB
  xorrot64w8sc      | u64    | +       | +     | +       | +    | 3.2  |        | 3.5   | +       | 64 GiB
  xorrot64w8arx     | u32    | +       | +     | +       | +    | 4.1  |        | 4     | +       | >= 16 TiB
  xorrot64w32       | u32    | 2       | 3/4   | 8/9     | 12/13| 0.35 | -      | 0     | -       | 32 KiB
- xorrot64w32mn     | u32    | +       | +     | +       | +    | 0.44 | +      | 4     | +       | >= 1 TiB
+ xorrot64w32mn     | u32    | +       | +     | +       | +    | 0.44 | +      | 4     | +       | >= 16 TiB
  xorrot64w16       | u32    | 2       | 3     | 5       | 7    | 1.5  |        | 2.25  | -       | 32 KiB
  xorrot64w16nn     | u32    | +       | +     | +       | +    | 1.8  | +      | 4     | +       | >= 8 TiB
  xorrot128         | u64    | 2       | 3     | 5       | 7/8  | 0.30 | +      |       | Small   | 256 KiB
@@ -448,7 +470,48 @@ grading algorithm was used:
  zibri192ex        | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | >= 4 TiB
  ziff98            | u32    | +       | 3     | 3       | 3    | 0.47 | +      | 3.25  | Small   | 32 GiB
 
-Performance estimation for some 64-bit generators
+
+# 64-bit collision test results
+
+Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
+
+ Algorithm         | Failed at  | Collisions 
+-------------------|------------|------------
+ aesdec2           | - (>75 TiB)| 303/300
+ ghsc64            | - (>10 TiB)| 41/40
+ ghsc128           | - (>8 TiB) | 36/32
+ ghsc256           | - (>23 TiB)| 85/92
+ lcg64:marsaglia   | - (>8 TiB) | 32/32
+ lcg64:steele      | 14 TiB     | 15/56
+ msws_ctr          | - (>80 TiB)| 305/320
+ mrsf32            | - (>18 TiB)| 76/72
+ mrsf64            | - (>69 TiB)| 267/276
+ pqrng64           | 11 TiB     | 8/44
+ splitmix64        | 6 TiB      | 0/24
+ sqxor             | 12 TiB     | 100/48
+ tf0_64            | - (>36 TiB)| 152/144 
+ w1rand            | 11 TiB     | 97/44
+ wanghash64        | 6 TiB      | 0/24
+ wyrand:v41        | 18 TiB     | 133/72
+ wyrand:v42        | 10 TiB     | 86/40
+ wyrand:v43        | 5 TiB      | 59/20
+ xorrot64mn        | 12 TiB     | 10/48
+ xorrot64w32mn     | - (>35 TiB)| 126/140
+
+Note about a5rand32w:
+
+- Fails if `--batparam=0` is used (at 2 TiB, 48/8)
+
+It is interesting that the results for truncated 64-bit LCGs are dependent on
+the multiplier spectral score: some multipliers with exceptional spectral
+scores can fail the `coll64dec` test. E.g. `lcg64:marsaglia` passes the test
+and the `lcg64:steele` fails it. An idea of such comparison was taken from
+the [coll-birth-rs](https://github.com/vigna/coll-birth-rs) documentation
+(developed by S.Vigna). 
+
+# Performance estimation for some 64-bit generators
+
+TODO: `coll64dec` and `default` numbers are now obsolete!
 
  Generator                | ising    | bday64   | usphere  | default
 --------------------------|----------|----------|----------|----------
@@ -474,6 +537,7 @@ Performance estimation for some 32-bit generators
  chacha:c99               | 00:19:50 |          |          |
 
 
+# Notes about PractRand results
 
 PractRand 0.94 results for `arxfw16` experimental generator.
 
@@ -545,8 +609,11 @@ testing is required.
 Note about `mt19937` and `philox`: speed significantly depends on gcc optimization settings:
 e.g. changing `-O2` to `-O3` speeds up `mt19937` but slows down `philox`; gcc 10.3.0 (tdm64-1).
 
-Note about `mrg32k3a`: it fails the `FPF-14+6/16:cross` test from PractRand at 4 TiB sample.
-The failure is systematic and reproducible.
+Note about `mrg32k3a`:
+
+- It fails the `FPF-14+6/16:cross` test from PractRand at 4 TiB sample if raw output
+  The failure is systematic and reproducible.
+- After renormalization: >= 4 TiB in PractRand 0.96 (`stdin64`)
 
 Note about `mtc16`: if its output is processed as `stdin16` by PractRand 0.94 then it
 fails after 256 GiB, not after 512 GiB.
@@ -837,7 +904,7 @@ with large lags that are detected by SmokeRand.
  lcg127prime    | >= 1 TiB
  LFIB-2281+     | >= 8 TiB(?)
  MWC64          | 32 GiB
- RWC32SM        | >= 8 TiB
+ RWC32SM        | >= 16 TiB
  RWC146641(lin) | >= 8 TiB
  RWC14664RRX    | >= 4 TiB
  sezgin63       | 32 GiB
@@ -1022,6 +1089,27 @@ flawed and barely usable LCGs with \f$ m = 2 ^ k \f$ modulo.
 
 
 # Other notes and TO-DO lists
+
+An example of RC4 failure in the `freq` battery:
+
+    2^38.8948 bytes analyzed
+           Chunk    chi2emp    p(chi2)       zmax    max_ind    p(zmax)    p(crit)
+          8 bits    263.593       0.34       3.31        208       0.21      1e-10
+         16 bits    65691.4       0.33       7.87      65535    2.2e-10      1e-10
+      Time elapsed: 00:29:57
+
+    2^38.9069 bytes analyzed
+           Chunk    chi2emp    p(chi2)       zmax    max_ind    p(zmax)    p(crit)
+          8 bits    264.196       0.33       3.38        208       0.17      1e-10
+         16 bits    65679.9       0.34       7.95      65535    1.2e-10      1e-10
+      Time elapsed: 00:30:12
+
+    2^38.9189 bytes analyzed
+           Chunk    chi2emp    p(chi2)       zmax    max_ind    p(zmax)    p(crit)
+          8 bits    267.593       0.28       3.39        208       0.17      1e-10
+         16 bits    65733.8       0.29       8.03      65535    6.2e-11      1e-10
+    ===== zmax_w16 test failed =====
+      Time elapsed: 00:30:27
 
 Examples of false failures in SmokeRand 0.42 in gap16_count0 test (fixed in 0.43):
 

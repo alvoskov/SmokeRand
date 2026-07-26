@@ -1,9 +1,10 @@
 /**
  * @file hwtests.h
- * @brief Hamming weights bases tests implementation, mainly based
- * on overlapping tuples and similar to DC6 from PractRand.
+ * @brief Hamming weights bases tests implementation. They include two groups
+ * of tests: `hamming_ot` (similar to the DC6 test from Practrand) and
+ * `hamming_distr` (developed by A.L.Voskov).
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.

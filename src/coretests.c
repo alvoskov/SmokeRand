@@ -279,15 +279,19 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     return ans;
 }
 
-
+/**
+ * @brief Calculate p-value for the birthday spacings test with decimation
+ * and write it to the output buffer if it is smaller than the p-value
+ * that is already written in it.
+ */
 static void bspace4_8d_decimated_pvalue(TestResults *ans, const char *name,
     uint32_t *u, size_t len, double lambda, const CallerAPI *intf)
 {
-    double x = (double) bspace_get_ndups32(u, len);
-    double p = sr_poisson_pvalue(x, lambda);
-    double alpha = sr_poisson_cdf(x, lambda);
+    const double x = (double) bspace_get_ndups32(u, len);
+    const double p = sr_poisson_pvalue(x, lambda);
+    const double alpha = sr_poisson_cdf(x, lambda);
     intf->printf("  %-30s x = %6.0f; p = %g\n", name, x, p);
-    if (p < ans->p && (p < 1e-10 || ans->p > 1.0)) {
+    if (p < ans->p) {
         ans->p = p;
         ans->x = x;
         ans->alpha = alpha;
@@ -343,8 +347,8 @@ TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned long step)
 {
     TestResults ans = TestResults_create("bspace4_8d_dec");
     const unsigned int nbits_total = 32;
-    size_t len = bspace_calc_len(nbits_total);
-    double lambda = bspace_calc_lambda(len, nbits_total);
+    const size_t len = bspace_calc_len(nbits_total);
+    const double lambda = bspace_calc_lambda(len, nbits_total);
     // Show information about the test
     obj->intf->printf("Birthday spacings test with decimation\n");
     obj->intf->printf("  ndims = 8; nbits_per_dim = 4; step = %lu\n", step);
@@ -362,8 +366,8 @@ TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned long step)
 
     for (size_t i = 0; i < len; i++) {
         for (int j = 0; j < 8; j++) {
-            uint64_t x = obj->gi->get_bits(obj->state);
-            uint32_t x_hi4 = (uint32_t) (x >> (obj->gi->nbits - 4));
+            const uint64_t x = obj->gi->get_bits(obj->state);
+            const uint32_t x_hi4 = (uint32_t) (x >> (obj->gi->nbits - 4));
             // Take lower 4 bits
             u[i] <<= 4;
             u[i] |=  (uint32_t) (x & 0xF);
@@ -386,6 +390,7 @@ TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned long step)
         u_high_rev, len, lambda, obj->intf);
     bspace4_8d_decimated_pvalue(&ans, "Higher bits (no reverse):",
         u_high_norev, len, lambda, obj->intf);
+    TestResults_set_pmin_ntests(&ans, 3, ans.p);
     obj->intf->printf("  %-30s x = %6.0f; p = %g\n",
         "Final result:", ans.x, ans.p);
     obj->intf->printf("\n");
@@ -826,29 +831,43 @@ GapFrequencyArray_calc_maxfreq(GapFrequencyArray *gapfreq, unsigned long long ng
     return ans;
 }
 
-/**
- * @brief Bonferroni correction for normally distributed variable
- * in gap16 test.
- */
-static double gap16_z_bonferroni(double z, double p_gap)
+
+static double gap16_count_test_calc_Ei_min(unsigned long long ngaps)
 {
-    double z_corr;
-    if (z < 0) {
-        double p = sr_stdnorm_cdf(z) / p_gap;
-        z_corr = (p < 0.5) ? sr_stdnorm_inv(p) : 0.0;
+    if (ngaps < 10000000ULL) { // 1e7
+        return 0.0;
+    } else if (ngaps < 100000000ULL) { // 1e8
+        return 100.0;
     } else {
-        double p = sr_stdnorm_cdf(-z) / p_gap;
-        z_corr = (p < 0.5) ? -sr_stdnorm_inv(p) : 0.0;
-    }
-    // Filter out possible infinities
-    if (z_corr < -40.0) {
-        return 40.0;
-    } else if (z_corr > 40.0) {
-        return 40.0;
-    } else {
-        return z_corr;
+        return 1000.0;
     }
 }
+
+/**
+ * @brief Calculate the final p-value for the `gap16_count0` test
+ */
+static TestResults gap16_count0_test_calc_results(const GapFrequencyStats *gf,
+    const GapFrequencyStats *gf_rb, double z_sumsq_total)
+{
+    TestResults ans = TestResults_create("gap16_count0");
+    // Make total p-value using corrections based on the geometric distribution
+    const double p_max_w0 = sr_geom_cdf(65536, sr_halfnormal_pvalue(fabs(gf->z_max_w0)));
+    const double p_max_tot = sr_geom_cdf(65536, sr_halfnormal_pvalue(fabs(gf->z_max_tot)));
+    const double p_max_wrb = sr_geom_cdf(65536, sr_halfnormal_pvalue(fabs(gf_rb->z_max_w0)));
+    const double p_sumsq_total = sr_halfnormal_pvalue(fabs(z_sumsq_total));
+
+    double p_min = p_max_w0;
+    if (p_min > p_max_tot) p_min = p_max_tot;
+    if (p_min > p_max_wrb) p_min = p_max_wrb;
+    if (p_min > p_sumsq_total) p_min = p_sumsq_total;
+    TestResults_set_pmin_ntests(&ans, 4, p_min);
+    ans.x = -sr_stdnorm_inv(ans.p);
+    if (ans.x < -40.0) { ans.x = -40.0; }
+    else if (ans.x > 40.0) { ans.x = 40.0; }
+    ans.penalty = PENALTY_GAP16_COUNT0;
+    return ans;
+}
+
 
 /**
  * @brief Similar to rda16 ("repeat distance analysis") from gjrand, very sensitive
@@ -881,16 +900,12 @@ static double gap16_z_bonferroni(double z, double p_gap)
 TestResults gap16_count0_test(GeneratorState *obj, unsigned long long ngaps)
 {
     const double p = 1.0 / 65536.0;
-    TestResults ans = TestResults_create("gap16_count0");
-    double Ei_min;
-    if (ngaps < 10000000.0) { // 1e7
-        return ans;
-    } else if (ngaps < 100000000.0) { // 1e8
-        Ei_min = 100.0;
-    } else {
-        Ei_min = 1000.0;
+    //TestResults ans = TestResults_create("gap16_count0");
+    const double Ei_min = gap16_count_test_calc_Ei_min(ngaps);
+    if (Ei_min == 0.0) {
+        return TestResults_create("gap16_count0");
     }
-    size_t nbins = (size_t) (log(Ei_min / ((double) ngaps * p)) / log(1 - p));
+    const size_t nbins = (size_t) (log(Ei_min / ((double) ngaps * p)) / log(1 - p));
     // Initialize frequency and position tables
     GapFrequencyArray *gapfreq = GapFrequencyArray_create(nbins, p);
     GapFrequencyArray *gapfreq_rb = GapFrequencyArray_create(nbins, p);
@@ -930,24 +945,8 @@ TestResults gap16_count0_test(GeneratorState *obj, unsigned long long ngaps)
         gapfreq_rb->f[gf_rb.ind_w0].p_total, gapfreq_rb->f[gf_rb.ind_w0].p_with0);
     obj->intf->printf("  Note: remember about Bonferroni correction!\n");
     obj->intf->printf("\n");
-    // Make total p-value (with Bonferroni correction if required)
-    double z_bonferroni = -sr_stdnorm_inv(1e-4 * p);
-    double zabs_max_w0 = fabs(gf.z_max_w0);
-    double zabs_max_tot = fabs(gf.z_max_tot);
-    double zabs_max_wrb = fabs(gf_rb.z_max_w0);
-    ans.x = z_sumsq_total;
-    if (zabs_max_w0 > z_bonferroni && zabs_max_w0 > fabs(ans.x)) {
-        ans.x = gap16_z_bonferroni(gf.z_max_w0, p);
-    }
-    if (zabs_max_tot > z_bonferroni && zabs_max_tot > fabs(ans.x)) {
-        ans.x = gap16_z_bonferroni(gf.z_max_tot, p);
-    }
-    if (zabs_max_wrb > z_bonferroni && zabs_max_wrb > fabs(ans.x)) {
-        ans.x = gap16_z_bonferroni(gf_rb.z_max_w0, p);
-    }
-    ans.penalty = PENALTY_GAP16_COUNT0;
-    ans.p = sr_stdnorm_pvalue(ans.x);
-    ans.alpha = sr_stdnorm_cdf(ans.x);
+    // Make total p-value using corrections based on the geometric distribution
+    const TestResults ans = gap16_count0_test_calc_results(&gf, &gf_rb, z_sumsq_total);
     // Output p-value
     obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");

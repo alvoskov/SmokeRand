@@ -1,6 +1,8 @@
 /**
  * @file hwtests.c
- * @brief Hamming weights bases tests implementation, mainly DC6.
+ * @brief Hamming weights bases tests implementation. They include two groups
+ * of tests: `hamming_ot` (similar to the DC6 test from Practrand) and
+ * `hamming_distr` (developed by A.L.Voskov).
  * @copyright
  * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
@@ -13,6 +15,10 @@
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
+
+//////////////////////////////////////////
+///// hamming_ot test implementation /////
+//////////////////////////////////////////
 
 typedef struct _ByteStreamGenerator {
     const GeneratorInfo *gen; ///< Used generator
@@ -193,6 +199,7 @@ size_t HammingWeightsTuple_reduce_table(HammingWeightsTuple *info, double Ei_min
  */
 TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
 {
+    static const double NORM_STD = 1.3; // Empirical standard deviation
     // Concatenate low-populated bins
     const size_t nbins_max = 250000;
     double Ei_min = 250.0;
@@ -209,14 +216,14 @@ TestResults HammingTuplesTable_get_results(HammingTuplesTable *obj)
     TestResults ans = TestResults_create("hamming_ot");
     ans.x = 0;
     for (size_t i = 0; i < obj->len; i++) {
-        double Ei = (double) count_total * obj->tuples[i].p;
-        double Oi = (double) obj->tuples[i].count;
+        const double Ei = (double) count_total * obj->tuples[i].p;
+        const double Oi = (double) obj->tuples[i].count;
         if (Oi > DBL_EPSILON) {
             ans.x += 2.0 * Oi * log(Oi / Ei);
         }
     }
     ans.penalty = PENALTY_HAMMING_OT;
-    ans.x = sr_chi2_to_stdnorm_approx(ans.x, (unsigned long) (obj->len - 1));
+    ans.x = sr_chi2_to_stdnorm_approx(ans.x, (unsigned long) (obj->len - 1)) / NORM_STD;
     ans.p = sr_stdnorm_pvalue(ans.x);
     ans.alpha = sr_stdnorm_cdf(ans.x);
     return ans;
@@ -394,7 +401,7 @@ static const uint8_t *hamming_ot_fill_hw_tables(GeneratorState *obj,
  *    Monte-Carlo approach with CSPRNG (HC-256?) was used.
  * 8. p-value is calculated for the obtained zemp.
  *
- * WARNING! This description is reverse engineered from the PractrRand source
+ * WARNING! This description is reverse engineered from the PractRand source
  * code by A.L.Voskov and may be inaccurate. Some simplifications were made:
  *
  * 1. Codes reordering was excluded.
@@ -629,10 +636,12 @@ TestResults hamming_ot_long_test(GeneratorState *obj, const HammingOtLongOptions
     return res;
 }
 
+/////////////////////////////////////////////
+///// hamming_distr test implementation /////
+/////////////////////////////////////////////
 
 double hamming_distr_calc_zemp(const unsigned long long *o, size_t nbits)
 {
-    static const double NORM_STD = 1.3; // Empirical standard deviation
     double chi2emp = 0.0;
     unsigned long long npoints = 0;
     unsigned long df = 0;
@@ -642,14 +651,14 @@ double hamming_distr_calc_zemp(const unsigned long long *o, size_t nbits)
     double *p = calloc(nbits + 1, sizeof(double));
     sr_binomial_pdf_all(p, (unsigned long) nbits, 0.5);
     for (size_t i = 0; i < nbits; i++) {
-        double e_i = (double) npoints * p[i];
+        const double e_i = (double) npoints * p[i];
         if (e_i > 25.0) {
             chi2emp += calc_chi2emp_term(o[i], e_i);
             df++;
         }
     }
     free(p);
-    return sr_chi2_to_stdnorm_approx(chi2emp, df) / NORM_STD;
+    return sr_chi2_to_stdnorm_approx(chi2emp, df);
 }
 
 /**
@@ -793,7 +802,7 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
     if (bad_or != 0) {
         obj->intf->printf("  Warning: generator output size exceeds its declared size\n");
     }
-    double zabs_max = -1.0;
+    ans.x = -1.0;
     obj->intf->printf("  Blocks analysis results\n");
     obj->intf->printf("    %8s | %8s %10s | %8s %10s\n",
         "bits", "z", "p", "z_xor", "p_xor");
@@ -801,15 +810,15 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
         HammingDistrHist_calc_stats(&h[i]);
         obj->intf->printf("    %8d | %8.3f %10.3g | %8.3f %10.3g\n",
             (int) ((1U << i) * nbits), h[i].z, h[i].p, h[i].z_xor, h[i].p_xor);
-        if (fabs(h[i].z) > zabs_max) {
-            zabs_max = fabs(h[i].z); ans.p = h[i].p; ans.x = h[i].z;
-        }
-        if (fabs(h[i].z_xor) > zabs_max) {
-            zabs_max = fabs(h[i].z_xor); ans.p = h[i].p_xor; ans.x = h[i].z_xor;
-        }
+        const double zabs = fabs(h[i].z), zabs_xor = fabs(h[i].z_xor);
+        if (zabs > ans.x)     { ans.x = zabs; }
+        if (zabs_xor > ans.x) { ans.x = zabs_xor; }
     }
     ans.penalty = PENALTY_HAMMING_DISTR;
-    ans.alpha = sr_stdnorm_cdf(ans.x);
+    TestResults_set_pmin_ntests(&ans,
+        (unsigned long) (2 * opts->nlevels),
+        sr_halfnormal_pvalue(ans.x)
+    );
     obj->intf->printf("  Final: z = %7.3f, p = %.3g\n", ans.x, ans.p);
     for (int i = 0; i < opts->nlevels; i++) {
         HammingDistrHist_destruct(&h[i]);
