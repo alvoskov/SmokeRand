@@ -364,7 +364,7 @@ static BatteryExitCode battery_##battery_name##_env(const GeneratorInfo *gen, \
     return battery_##battery_name(gen, intf); \
 }
 
-DEFINE_SHORT_BATTERY_ENV(collover64_decimated)
+//DEFINE_SHORT_BATTERY_ENV(collover64_decimated)
 DEFINE_SHORT_BATTERY_ENV(blockfreq)
 DEFINE_SHORT_BATTERY_ENV(self_test)
 DEFINE_SHORT_BATTERY_ENV(speed)
@@ -415,8 +415,8 @@ BatteryExitCode run_battery(const char *battery_name, GeneratorInfo *gi,
         {"selftest",   battery_self_test_env},
         {"speed",      battery_speed_env},
         {"freq",       battery_blockfreq_env},
-        {"birthday",   battery_collover64_decimated_env},
-        {"coll64dec",  battery_collover64_decimated_env},
+        {"birthday",   battery_collover64_decimated},
+        {"coll64dec",  battery_collover64_decimated},
         {"ising",      battery_ising},
         {"unitsphere", battery_unit_sphere_volume},
         {"dummy",      battery_dummy},
