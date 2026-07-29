@@ -50,7 +50,7 @@ MAKE_GET_BITS_WRAPPERS(taocp)
 
 static inline uint64_t get_bits_steele_raw(Lcg64State *obj)
 {
-    obj->x = obj->x * 0xf1357aea2e62a9c5ULL + 1442695040888963407ULL;
+    obj->x = obj->x * 0xd1342543de82ef95ULL + 1442695040888963407ULL;
     return obj->x >> 32;
 }
 
@@ -82,7 +82,7 @@ static const char description[] =
 "The next param values are supported:\n"
 "  marsaglia - a = 6906969069 (default version)\n"
 "  taocp     - a = 6364136223846793005\n"
-"  steele    - a = 0xf1357aea2e62a9c5\n";
+"  steele    - a = 0xd1342543de82ef95\n";
 
 
 int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
