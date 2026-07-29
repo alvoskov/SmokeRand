@@ -143,8 +143,8 @@ set (GENERATORS
     pqrng64 prvhash12c prvhash12cw prvhash16c prvhash16cw prvhash64c 
     prvhash64cw r1279 r250 ran ran2 randu ranecu ranhash ranlim32 
     ranlux48 ranluxpp ranq1 ranq2 ranrot16tiny ranrot32 ranrot32tiny 
-    ranrot64tiny ranrot8tiny ranrot_bi ranshi ranval ranval64 rc4 
-    rc4ok rdrand rge256ex rge256exctr rge256lite rge512ex rge512exctr 
+    ranrot64tiny ranrot8tiny ranrot_bi ranshi ranval ranval64 rapidrand128 
+    rc4 rc4ok rdrand rge256ex rge256exctr rge256lite rge512ex rge512exctr 
     romuduojr romuduojrw romutrio rrmxmx rwc16446 rwc32 rwc32sm rwc32u48 
     rwc4157 rwc64 rwc64large sapparot sapparot2 sapparot2_64 seed 
     seiran128 sezgin63 sfc16 sfc32 sfc64 sfc8 shioi128 shr3 skiss32 
@@ -156,18 +156,18 @@ set (GENERATORS
     tf0_64 tf0_64sc tf0_64sc2 threefish1024 threefry threefry2x64 
     tinymt32 tinymt64 tychei tychei64 tychei64w tylo64 ultra ultra64 
     v3b w1rand wanghash64 well1024a weyl wich1982 wich2006 wob2m 
-    wyrand xabc16 xabc32 xabc64 xabc8 xkiss16sh_awc xkiss16_awc xkiss32sh_awc 
-    xkiss32_awc xkiss32_awc_rot xkiss64_awc xkiss8_awc xorgens xoroshiro1024st 
-    xoroshiro1024stst xoroshiro128 xoroshiro128aox xoroshiro128p 
-    xoroshiro128pp xoroshiro128pp_vec xoroshiro32 xoroshiro32pp xoroshiro64aox 
-    xoroshiro64pp xoroshiro64st xoroshiro64stst xorrot128 xorrot128mn 
-    xorrot128w32 xorrot128w32mrt xorrot256 xorrot256mrt xorrot32 
-    xorrot64 xorrot64mn xorrot64mrt xorrot64w16 xorrot64w16nn xorrot64w32 
-    xorrot64w32mn xorrot64w8arx xorrot64w8sc xorshift128 xorshift128p 
-    xorshift128pp xorshift128rp xorshift64 xorshift64st xorwow xoshiro128aox 
-    xoshiro128p xoshiro128pp xoshiro256p xoshiro256pp xoshiro256stst 
-    xsadd xsh xtea xtea2 xtea2_64 xxtea zibri128 zibri128ex zibri192 
-    zibri192ex zibri64ex ziff98
+    wyrand wyrand128 xabc16 xabc32 xabc64 xabc8 xkiss16sh_awc xkiss16_awc 
+    xkiss32sh_awc xkiss32_awc xkiss32_awc_rot xkiss64_awc xkiss8_awc 
+    xorgens xoroshiro1024st xoroshiro1024stst xoroshiro128 xoroshiro128aox 
+    xoroshiro128p xoroshiro128pp xoroshiro128pp_vec xoroshiro32 xoroshiro32pp 
+    xoroshiro64aox xoroshiro64pp xoroshiro64st xoroshiro64stst xorrot128 
+    xorrot128mn xorrot128w32 xorrot128w32mrt xorrot256 xorrot256mrt 
+    xorrot32 xorrot64 xorrot64mn xorrot64mrt xorrot64w16 xorrot64w16nn 
+    xorrot64w32 xorrot64w32mn xorrot64w8arx xorrot64w8sc xorshift128 
+    xorshift128p xorshift128pp xorshift128rp xorshift64 xorshift64st 
+    xorwow xoshiro128aox xoshiro128p xoshiro128pp xoshiro256p xoshiro256pp 
+    xoshiro256stst xsadd xsh xtea xtea2 xtea2_64 xxtea zibri128 zibri128ex 
+    zibri192 zibri192ex zibri64ex ziff98
 )
 
 # Examples of plugins, i.e. modules with PRNGs
