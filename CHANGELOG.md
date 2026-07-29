@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
+
+## [0.49]
+
+### Bugfix
+
+- `lcg64`: multiplier used `lcg64:steele` was designed for MCG not for LCG.
+  It was replaced to the multiplier by the same authors but designed for
+  LCGs (sligthly better spectral characteristics)
+
 ## [0.48] - 2026-07-26
 
 ### Added
