@@ -139,7 +139,7 @@ the testing.
  lcg32sc           | u32    | +       | 1     | 2       | 8/9  | 0.62 | -(>>>) | 0     | Small   | 512 MiB
  lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     | -       | 16 KiB
  lcg61prime        | u32    | +       | 3     | 5       | 5    | 2.0  | -      | 0     | Small   | >= 16 TiB
- lcg64             | u32    | 1       | 6     | 8       | 11   | 0.40 | *      | 0     | Small   | 16 MiB
+ lcg64             | u32    | 1       | 6/7   | 8/9     | 12/13| 0.40 | *      | 0     | Small   | 16 MiB
  lcg64bd           | u32    | +       | +     | +       | +    | 0.60 | +      | 3.5   | +       | 32 GiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | 0     | +-      | >= 32 TiB
  lcg64sc           | u64    | +       | +     | +       | +    | 0.30 | -      | 3     |+HI/+LO  | >= 16 TiB
@@ -298,6 +298,7 @@ the testing.
  ranlux[0]         | u32    | 1       | 6     | 9       | 12   | 6.8  | N/A    | 0     | -       | 4 MiB
  ranlux[1]         | u32    | +       | +     | 2       | 3    | 13   | N/A    | 0     | Small   | 4 GiB
  ranlux[2]         | u32    | +       | +     | +       | +    | 27   | N/A    |       |         | >= 2 TiB
+ rapidrand128      | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | ?
  rc4               | u32    | +       | +     | +       | +    | 6.0  | +      | 3     | +       | 512 GiB
  rc4ok             | u32    | +       | +     | +       | +    | 6.2  | +      | 4.5   | +       | >= 32 TiB
  rge256lite        | u32    | +       | +     | +       | +    | 5.2  | +      | 4(0)  | +       | >= 4 TiB
@@ -397,6 +398,8 @@ the testing.
  wyrand_v41        | u64    | +       | +     | +       | +    | ~0.1 | -(>)   | 3     |+H/+L/+IL| >= 32 TiB
  wyrand_v42        | u64    | +       | +     | +       | +    | ~0.1 | -(>)   | 3     |         | >= 2 TiB
  wyrand_v43        | u64    | +       | +     | +       | +    | ~0.1 | -(>)   | 3     |         | >= 16 TiB
+ wyranda_par       | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | ?
+ wyrand128         | u64    | +       | +     | +       | +    | 0.18 | +      | 4     |         | ?
  xabc8             | u32    | +       | 8     | 15      | 22   | 3.7  | -(>>>) | 0     | -       | 8 MiB
  xabc16            | u32    | +       | +     | 1       | 1    | 1.6  | +      | 2     | Small   | 64 GiB
  xabc32            | u32    | +       | +     | +       | +    | 0.82 | +      | 4(0)  | +       | 16 TiB
@@ -477,16 +480,19 @@ Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
 
  Algorithm         | Failed at  | Collisions 
 -------------------|------------|------------
+ aes128            | - (>53 TiB)| 222/212
  aesdec2           | - (>75 TiB)| 303/300
  ghsc64            | - (>10 TiB)| 41/40
  ghsc128           | - (>8 TiB) | 36/32
  ghsc256           | - (>23 TiB)| 85/92
- lcg64:marsaglia   | - (>8 TiB) | 32/32
- lcg64:steele      | 14 TiB     | 15/56
+ lcg64:marsaglia   | - (>94 TiB)| 305/376
+ lcg64:steele(mcg) | 14 TiB     | 15/56
+ lcg64:steele(lcg) | 6 TiB      | 0/24
  msws_ctr          | - (>80 TiB)| 305/320
  mrsf32            | - (>18 TiB)| 76/72
  mrsf64            | - (>69 TiB)| 267/276
  pqrng64           | 11 TiB     | 8/44
+ rapidrand128      | - (>30 TiB)| 107/120
  splitmix64        | 6 TiB      | 0/24
  sqxor             | 12 TiB     | 100/48
  tf0_64            | - (>36 TiB)| 152/144 
@@ -495,6 +501,8 @@ Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
  wyrand:v41        | 18 TiB     | 133/72
  wyrand:v42        | 10 TiB     | 86/40
  wyrand:v43        | 5 TiB      | 59/20
+ wyranda_par       | -(>213 TiB)| 780/852
+ wyrand128         | - (>25 TiB)| 107/100
  xorrot64mn        | 12 TiB     | 10/48
  xorrot64w32mn     | - (>35 TiB)| 126/140
 
