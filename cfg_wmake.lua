@@ -44,7 +44,7 @@
 -- definetly possible even without HX DOS Extender but may be a little bit
 -- tricky and require makefiles customization. Enjoy!
 --
--- (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University
+-- (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University
 -- alvoskov@gmail.com
 --
 -- This software is licensed under the MIT license.
@@ -60,9 +60,9 @@ local lib_sources = cfg.get_lib_sources()
 local bat_sources = cfg.get_bat_sources()
 local lib_headers = cfg.get_lib_headers()
 local gen_sources_raw = cfg.get_gen_sources()
-local gen_asm_sources = {'kiss03_nt32', 'mwc64x_nt32', 'mwc3232x_nt32',
-    'rwc32_nt32', 'tf0duper32_nt32', 'xkiss16_awc_nt32', 'xkiss32_awc_nt32',
-    'xkiss32_sh_awc_nt32', 'xoshiro128pp_nt32'}
+local gen_asm_sources = {'dandelion64_nt32', 'kiss03_nt32', 'mwc64x_nt32',
+    'mwc3232x_nt32', 'rwc32_nt32', 'tf0duper32_nt32', 'xkiss16_awc_nt32',
+    'xkiss32_awc_nt32', 'xkiss32_sh_awc_nt32', 'xoshiro128pp_nt32'}
 
 -- Filter out the floating point based generator: in WATCOM C
 -- it requires a runtime library.
