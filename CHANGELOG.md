@@ -7,6 +7,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ## [0.49]
 
+### Added
+
+- `dandelion128`, `dandelion64` and `dandelion32` generators: scrambled LFSRs.
+- `tf0_ctr64`, `thurst`, `nasam`, `pelican`, `wanghash64` generators based on
+  a scrambled 64-bit counter/"discrete Weyl sequence" and similar to SplitMix.
+- `wyranda_par`: a new modification of wyrand that passes the 64-bit
+  collision test.
+- `wyrand128` and `rapidrand128`: 128-bit versions of wyrand.
+
 ### Bugfix
 
 - `lcg64`: multiplier used `lcg64:steele` was designed for MCG not for LCG.
@@ -20,7 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `aesdec2` generator by camel-cdr (Olaf Bernstein), requires AES-NI
    instructions support, the portable version is intentionally omitted.
 - `ghsc64`, `ghsc128`, `ghsc256`, `ghsc64_old`, `ghsc64_mod` - GhostScramble
-   PRNG family (`ghc64_mod` modification was suggested by A.L. Voskov).
+   PRNG family (`ghsc64_mod` modification was suggested by A.L. Voskov).
 - `leptonflurry32x1` counter-based PRNG was added.
 - `mrsf32` and `mrsf64` chaotic PRNGs were added.
 - `konadare192` chaotic PRNG.
