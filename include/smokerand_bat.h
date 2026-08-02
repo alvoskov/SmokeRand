@@ -17,6 +17,7 @@ extern "C" {
 #include "smokerand/bat_file.h"
 #include "smokerand/bat_full.h"
 #include "smokerand/bat_special.h"
+#include "smokerand/lfsr_period.h"
 
 #ifdef __cplusplus
 } // extern "C"

@@ -131,13 +131,13 @@ endif
 CORE_LIB = $(LIBDIR)/libsmokerand_core.a
 LIB_SOURCES = $(addprefix $(SRCDIR)/, $(LIB_SOURCES_EXTRA) \
     base64.c core.c coretests.c cpuinfo.c \
-    blake2s.c entropy.c extratests.c fileio.c lineardep.c hwtests.c specfuncs.c \
-    threads_intf.c)
+    blake2s.c entropy.c extratests.c fileio.c lfsr_period.c lineardep.c \
+    hwtests.c specfuncs.c threads_intf.c)
 LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, $(LIB_HEADERS_EXTRA) \
     apidefs.h cinterface.h coredefs.h int128defs.h x86exts.h ../smokerand_core.h \
     base64.h core.h coretests.h cpuinfo.h \
-    blake2s.h entropy.h extratests.h fileio.h lineardep.h hwtests.h specfuncs.h \
-    threads_intf.h version.h)
+    blake2s.h entropy.h extratests.h fileio.h lfsr_period.h lineardep.h \
+    hwtests.h specfuncs.h threads_intf.h version.h)
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
 INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/coredefs.h \
     $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/int128defs.h \
