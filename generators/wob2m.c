@@ -33,9 +33,9 @@ typedef struct {
 
 static inline uint64_t get_bits_raw(Wob2MState *obj)
 {
-    uint64_t temp = obj->a + obj->count++;
+    const uint64_t temp = obj->a + obj->count++;
     obj->a = obj->b + rotl64(temp, 12);
-    obj->b = 0x0581af43eb71d8b3 * temp ^ rotl64(obj->a, 28);
+    obj->b = 0x0581af43eb71d8b3U * temp ^ rotl64(obj->a, 28);
     return obj->b;
 }
 
@@ -60,8 +60,8 @@ static void Wob2MState_init(Wob2MState *obj, uint64_t s0, uint64_t s1)
 static void *create(const CallerAPI *intf)
 {
     Wob2MState *obj = intf->malloc(sizeof(Wob2MState));
-    uint64_t s0 = intf->get_seed64();
-    uint64_t s1 = intf->get_seed64();
+    const uint64_t s0 = intf->get_seed64();
+    const uint64_t s1 = intf->get_seed64();
     Wob2MState_init(obj, s0, s1);
     return obj;
 }

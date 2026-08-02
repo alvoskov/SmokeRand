@@ -28,6 +28,13 @@ def make_shr_matrix(n):
         R[i][i + 1] = 1
     return galois.GF(2)(R)
 
+def make_ashr_matrix(n):
+    R = [[0] * n for _ in range(n)]
+    R[0][0] = 1
+    for i in range(n - 1):
+        R[i][i + 1] = 1    
+    return galois.GF(2)(R)
+
 def make_shl_matrix(n):
     L = [[0] * n for _ in range(n)]
     for i in range(n - 1):
@@ -55,6 +62,7 @@ class XorGenMaker:
         self.I = make_eye_matrix(n)
         self.L = make_shl_matrix(n)
         self.R = make_shr_matrix(n)
+        self.AR = make_ashr_matrix(n)
         self.ROL = make_rol_matrix(n)
 
     def make_xorshift_matrix(self, a, b, c):
@@ -107,6 +115,20 @@ class XorGenMaker:
             np.hstack((O, O, O, O,  I, O, O, O)),
             np.hstack((O, O, O, O,  O, I, O, O)),
             np.hstack((O, O, O, O,  O, O, I, B))
+        ))
+        return gf2mat_to_list(T)
+
+    def make_dandelion_matrix(self, sh1, sh2):
+        """
+        T(x, y) = (y ^ lsl(x, sh1), x ^ rsr(y, sh2))
+        
+        | A I |
+        | I B |
+        """
+        A, B = gfpow(self.L, sh1), gfpow(self.AR, sh2)
+        T = np.vstack((
+            np.hstack((A,      self.I)),
+            np.hstack((self.I, B)),
         ))
         return gf2mat_to_list(T)
 
@@ -245,6 +267,30 @@ class TestLfsrs(unittest.TestCase):
         ))
         T = gf2mat_to_list(T)
         self.assertTrue(is_full_period(T, False))
+
+    def test_dandelion64(self):
+        """
+        T(x, y) = (y ^ lsl(x, 10), x ^ asr(y, 7))
+        
+        | A I |
+        | I B |
+        """
+        T = self.gen32.make_dandelion_matrix(10, 7)
+        self.assertTrue(is_full_period(T, False))
+
+
+    def test_dandelion128(self):
+        """
+        T(x, y) = (y ^ lsl(x, 7), x ^ asr(y, 4))
+        
+        | A I |
+        | I B |
+        """
+        T = self.gen64.make_dandelion_matrix(7, 4)
+        self.assertTrue(is_full_period(T, False))
+        T = self.gen64.make_dandelion_matrix(37, 26)
+        self.assertTrue(is_full_period(T, False))
+
 
     def test_poly(self):
         coeffs = [0] * 608
