@@ -96,37 +96,25 @@ static inline void bspace_make_tuples32(const BSpaceNDOptions *opts,
     }
 }
 
-
-static unsigned int bspace_get_ndups64(RamInfo *ram, uint64_t *x, size_t len)
-{
-    unsigned int ndups = 0;
-    fastsort64(ram, x, len);
-    for (size_t i = 0; i < len - 1; i++) {
-        x[i] = x[i + 1] - x[i];
-    }
-    fastsort64(ram, x, len - 1);
-    for (size_t i = 0; i < len - 2; i++) {
-        if (x[i] == x[i + 1])
-            ndups++;
-    }
-    return ndups;
+#define BSPACE_GET_NDUPS_FUNC_TPL(suffix, type) \
+static unsigned int bspace_get_ndups##suffix(type *x, size_t len) \
+{ \
+    unsigned int ndups = 0; \
+    fastsort##suffix(x, len); \
+    for (size_t i = 0; i < len - 1; i++) { \
+        x[i] = x[i + 1] - x[i]; \
+    } \
+    fastsort##suffix(x, len - 1); \
+    for (size_t i = 0; i < len - 2; i++) { \
+        if (x[i] == x[i + 1]) \
+            ndups++; \
+    } \
+    return ndups; \
 }
 
+BSPACE_GET_NDUPS_FUNC_TPL(32, uint32_t)
+BSPACE_GET_NDUPS_FUNC_TPL(64, uint64_t)
 
-static unsigned int bspace_get_ndups32(uint32_t *x, size_t len)
-{
-    unsigned int ndups = 0;
-    radixsort32(x, len);
-    for (size_t i = 0; i < len - 1; i++) {
-        x[i] = x[i + 1] - x[i];
-    }
-    radixsort32(x, len - 1);
-    for (size_t i = 0; i < len - 2; i++) {
-        if (x[i] == x[i + 1])
-            ndups++;
-    }
-    return ndups;
-}
 
 static unsigned long bspace_calc_len(unsigned int nbits_total)
 {
@@ -144,8 +132,8 @@ static double bspace_calc_lambda(size_t len, unsigned int nbits_total)
  */
 static unsigned long bspace32_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
-    unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
-    size_t len = bspace_calc_len(nbits_total);
+    const unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
+    const size_t len = bspace_calc_len(nbits_total);
     uint32_t *u = calloc(len, sizeof(uint32_t));
     if (u == NULL) {
         fprintf(stderr, "***** bspace32_nd_test: not enough memory *****\n");
@@ -175,8 +163,8 @@ static unsigned long bspace32_nd_test(GeneratorState *obj, const BSpaceNDOptions
  */
 static unsigned long bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
-    unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
-    size_t len = bspace_calc_len(nbits_total);
+    const unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
+    const size_t len = bspace_calc_len(nbits_total);
     uint64_t *u = calloc(len, sizeof(uint64_t));
     if (u == NULL) {
         fprintf(stderr, "***** bspace64_nd_test: not enough memory *****\n");
@@ -187,11 +175,9 @@ static unsigned long bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions
         fprintf(stderr, "***** bspace64_nd_test: not enough memory *****\n");
         exit(EXIT_FAILURE);
     }
-    RamInfo raminfo;
-    obj->intf->get_ram_info(&raminfo);
     for (size_t i = 0; i < opts->nsamples; i++) {
         bspace_make_tuples64(opts, obj->gi, obj->state, u, len);
-            ndups[i] = bspace_get_ndups64(&raminfo, u, len);
+            ndups[i] = bspace_get_ndups64(u, len);
     }
     unsigned long ndups_total = 0;
     for (size_t i = 0; i < opts->nsamples; i++) {
@@ -474,18 +460,18 @@ static inline void collisionover_make_tuples(const CollOverNDOptions *opts,
  */
 TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opts)
 {
-    size_t n = opts->n;
+    const size_t n = opts->n;
     uint64_t *u = calloc(n, sizeof(uint64_t));
     if (u == NULL) {
         fprintf(stderr, "***** collisionover_test: not enough memory *****\n");
         exit(EXIT_FAILURE);
     }
-    uint64_t nstates_u64 = 1ull << opts->ndims * opts->nbits_per_dim;
+    const uint64_t nstates_u64 = 1ull << opts->ndims * opts->nbits_per_dim;
     uint64_t Oi[4] = {0, 0, 0, 0};
     Oi[0] = nstates_u64;
-    double nstates = (double) nstates_u64;
-    double lambda = ((double) n - (double) opts->ndims + 1.0) / nstates;
-    double mu = nstates * (lambda - 1 + exp(-lambda));
+    const double nstates = (double) nstates_u64;
+    const double lambda = ((double) n - (double) opts->ndims + 1.0) / nstates;
+    const double mu = nstates * (lambda - 1 + exp(-lambda));
     TestResults ans;
     ans.name = "CollisionOver";
     obj->intf->printf("CollisionOver test\n");
@@ -494,14 +480,12 @@ TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opt
     obj->intf->printf("  nsamples = %lu; len = %lu, mu = %g * %d\n",
         opts->nsamples, n, mu, (int) opts->nsamples);
 
-    RamInfo raminfo;
-    obj->intf->get_ram_info(&raminfo);
     ans.penalty = PENALTY_COLLOVER;
     ans.x = 0;
     for (unsigned long i = 0; i < opts->nsamples; i++) {
         collisionover_make_tuples(opts, obj->gi, obj->state, u, n);
         // Find collisions by sorting the array
-        fastsort64(&raminfo, u, n);
+        fastsort64(u, n);
         size_t ncopies = 0;
         for (size_t j = 0; j < n - 1; j++) {
             if (u[j] == u[j + 1]) {

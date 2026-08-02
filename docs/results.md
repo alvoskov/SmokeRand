@@ -86,6 +86,9 @@ the testing.
  cswb4288          | u32    | +       | 1     | 1       | 4/5  | 0.90 | +      | 0     | Crush   | >= 32 TiB
  cswb4288_64       | u64    | +       | 1     | 2       | 4/5  | 0.52 | +      | 0     | +lo/+hi | >= 32 TiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +lo/+hi | >= 16 TiB
+ dandelion32       | u32    | +       | 1     | 1/2     | 7/8  | 1.1  |        | 0     | Small   | 512 MiB
+ dandelion64       | u32    | +       | +     | +       | +    | 0.38 | +      | 4     |         | ?
+ dandelion128      | u64    | +       | +     | +       | +    | 0.18 | +      | 4     |         | >= 8 TiB
  des-ctr           | u64    | +       | +     | +       | +    | 24   | -      | 3     | +IL     | >= 4 TiB
  drand48           | u32    | 3       | 13    | 21      | 23/24| 0.72 | -      | 0     | -       | 1 MiB
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     | +IL     | >= 16 TiB
@@ -135,6 +138,7 @@ the testing.
  konadare192       | u64    | +       | +     | +       | +    | 0.20 | +      | 4     |         | >= 16 TiB
  kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 5     | +       | >= 4 TiB
  leptonflurry32x1  | u32    | +       | +     | +       | +    | 2.8  | +      | 4     |         | >= 4 TiB
+ leptonflurry32x1_2| u32    | +       | +     | +       | +    | 2.0  |        |       |         |
  lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>>) | 0     | -       | 512 MiB
  lcg32sc           | u32    | +       | 1     | 2       | 8/9  | 0.62 | -(>>>) | 0     | Small   | 512 MiB
  lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     | -       | 16 KiB
@@ -251,7 +255,9 @@ the testing.
  mwc_kiss96        | u32    | 2       | 14    | 28      | 35   | 0.47 |        | 0     | -       | 32 KiB
  mwcsc_kiss96      | u32    | +       | +     | +       | +    | 0.62 | -      | 3     | +       | >= 2 TiB
  mzran13           | u32    | 1       | 4     | 8/9     | 11   | 1.2  | +      | 0     | Small   | 64 KiB
+ nasam             | u64    | +       | +     | +       | +    | 0.13 |        |       |         | ?
  ncombo            | u32    | 2       | 5     | 8/9     | 11   | 1.4  | +      | 0     | Small   | 64 KiB
+ pelican           | u64    | +       | +     | +       | +    | 0.20 | -      | 3     |         | ?
  pcg32             | u32    | +       | +     | +       | +    | 0.44 | +      | 3.5   | +       | 32 TiB
  pcg32_dxsm        | u32    | +       | +     | +       | +    | 0.48 | +      | 4     | +       | >= 32 TiB
  pcg32_xsl_rr      | u32    | +       | +     | +       | +    | 0.58 | +      | 4     | +       | 256 GiB
@@ -364,14 +370,13 @@ the testing.
  swbmwc64          | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |+_lo/+_hi| >= 32 TiB
  swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | +      | 2     | +       | 4 GiB
  taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  | Small   | 32 KiB
- tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
- tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      | 3     |+_lo/+_hi| 32 GiB
  tf0_32            | u32    | 5       | 18    | 33      | 38   | 0.48 | -(>>>) | 0     | -       | 2 KiB
  tf0_32sc2         | u32    | +       | 1     | 2       | 8    | 0.57 | -(>>>) | 0     | Small   | 512 MiB
  tf0_64            | u32    | +       | +     | 1       | 1    | 0.45 | +      | 3     | +       | 2 GiB
  tf0_64sc          | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 16 TiB
  tf0_64sc2         | u64    | +       | +     | +       | +    | 0.40 | -      | 3     |         | >= 16 TiB
  tf0_128           | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |+lo      | >= 16 TiB
+ tf0_ctr64         | u64    | +       | +     | +       | +    | 0.13 | -      | 3     |         | ?
  tf0duper32        | u32    | +       | +     | +       | +    | 0.70 | +      | 4     | +       | >= 16 TiB(?)
  tf0duper64        | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |+h/+l/+il| >= 16 TiB
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
@@ -382,6 +387,10 @@ the testing.
  threefish1024_avx | u64    | +       | +     | +       | +    | 1.3  | +      | 5     | +(il)   | >= 2 TiB
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
+ thurst:v1         | u64    | +       | 1     | 1       | 1    | <0.1 | +      | 2     |         | ?
+ thurst:v2         | u64    | +       | +     | +       | +    | <0.1 | +      | 3.5   |         | 1 TiB
+ tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
+ tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      | 3     |+_lo/+_hi| 32 GiB 
  tychei            | u32    | +       | +     | +       | +    | 0.76 | +      | 4(0)  | +       | >= 8 TiB
  tychei64          | u64    | +       | +     | +       | +    | 0.38 | +      | 4(0)  |         | >= 16 TiB
  tychei64w         | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 8 TiB
@@ -482,6 +491,8 @@ Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
 -------------------|------------|------------
  aes128            | - (>53 TiB)| 222/212
  aesdec2           | - (>75 TiB)| 303/300
+ dandelion64       | - (>11 TiB)| 34/44
+ dandelion128      | - (>4 TiB) | 19/16
  ghsc64            | - (>10 TiB)| 41/40
  ghsc128           | - (>8 TiB) | 36/32
  ghsc256           | - (>23 TiB)| 85/92
@@ -496,6 +507,7 @@ Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
  splitmix64        | 6 TiB      | 0/24
  sqxor             | 12 TiB     | 100/48
  tf0_64            | - (>36 TiB)| 152/144 
+ thurst            | - (>10 TiB)| 43/40
  w1rand            | 11 TiB     | 97/44
  wanghash64        | 6 TiB      | 0/24
  wyrand:v41        | 18 TiB     | 133/72
