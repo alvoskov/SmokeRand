@@ -109,6 +109,7 @@ io.write("lib_headers = " .. lib_headers_str .. "\n")
 -- Make "all" section
 io.write("all: $(bindir)/smokerand.exe $(bindir)/sr_speed.exe $(bindir)/sr_dos32.exe " ..
     "$(bindir)/test_funcs.exe $(bindir)/test_syscrypto.exe $(bindir)/srtiny16.exe " ..
+    "$(bindir)/find_xorshift_params.exe " ..
     "$(bindir)/setvesa.com &\n")
 local gen_all_sources = {}
 for _, e in pairs(gen_sources) do table.insert(gen_all_sources, e) end
