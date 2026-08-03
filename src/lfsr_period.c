@@ -374,6 +374,9 @@ inline uint8_t LfsrMatrix_getbit(const LfsrMatrix *obj, size_t i, size_t j)
 
 /**
  * @brief Matrix multiplication in the GF(2) field.
+ * @details It uses rows and columns packing to 64-bit words, bitwise operations
+ * and Hamming weights compuation to optimize the multiplication (important for
+ * matrices with n >= 128).
  * @param a The first matrix.
  * @param b The second matrix.
  * @return The matrix product, must be destructed by the caller.
@@ -475,6 +478,14 @@ void LfsrMatrix_destruct(LfsrMatrix *obj)
 
 /**
  * @brief Calculate the matrix power.
+ * @details It uses the classic "high-to-low" fast exponentation algorithm
+ * described in [1], see Table 10.5, Chapter 10.
+ *
+ * References:
+ *
+ * 1. J.-P. Aumasson. Serious Cryptography. A practical introduction to modern
+ *    encryption. No Starch Press. 2018. ISBN 978-1-59327-826-7.
+ *
  * @param x  Matrix (base)
  * @param e  Exponent
  * @return The matrix power, must be destructed by the caller.
@@ -551,9 +562,15 @@ GeneratorStateExt GeneratorStateExt_create(const GeneratorInfo *gen, const Calle
     return ext;
 }
 
-
-
-
+/**
+ * @brief Restores the LFSR transition matrix using only its transition function
+ * (that returns pseudorandom values) and initialization with states like
+ * `[100000]`, `[010000]`, `[001000]` etc.
+ * @param obj The generator to be analyzed.
+ * @param niters Number of iterations before the matrix recovery:
+ *               niters=1 will restore A^1, niters=2 - A^2 etc.
+ * @return The LFSR transition matrix over the GF(2) field.
+ */
 LfsrMatrix GeneratorStateExt_get_matrix(GeneratorStateExt *obj, unsigned long long niters)
 {
     const size_t nbits = obj->nbytes * 8;

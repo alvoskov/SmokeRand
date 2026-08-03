@@ -1,3 +1,20 @@
+/**
+ * @file find_xorshift_params.c
+ * @brief Finds the `[a b c]` shifts triples for the xorshift64 PRNG.
+ * @details It uses the `lfsr_test_period` engine that checks if the LFSR
+ * period is maximal or not.
+ *
+ * References:
+ *
+ * - Marsaglia G. Xorshift RNGs // Journal of Statistical Software. 2003.
+ *   V. 8. N. 14. P.1-6. https://doi.org/10.18637/jss.v008.i14
+ *
+ * @copyright
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand_core.h"
 #include "smokerand_bat.h"
 #include <stdio.h>
@@ -60,6 +77,13 @@ int main()
 
     CallerAPI intf = CallerAPI_init();
     intf.printf = printf_null;
+
+    if (lfsr_period_test(&gen, &intf, &opts) == LFSR_PERIOD_ERROR) {
+        printf("The xorshift implementation is damaged\n");
+        CallerAPI_free();
+        return 1;
+    }
+
     unsigned int ntriples = 0;
     for (unsigned int ai = 1; ai < 64; ai++) {
         for (unsigned int bi = 1; bi < 64; bi++) {
@@ -67,6 +91,7 @@ int main()
                 a = ai; b = bi; c = ci;
                 if (a <= c && lfsr_period_test(&gen, &intf, &opts) == LFSR_PERIOD_MAX) {
                     printf("[%2u %2u %2u] ", a, b, c);
+                    fflush(stdout);
                     if (++ntriples % 9 == 0) {
                         printf("\n");
                     }
