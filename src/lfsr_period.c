@@ -19,19 +19,27 @@
 
 #define LARGEINT_SIZE 16
 
+/**
+ * @brief Wide integers required for the exponents.
+ */
 typedef struct {
     uint64_t x[LARGEINT_SIZE];
 } LargeInt;
 
-
+/**
+ * @brief Square matrix over the GF(2) field that represents the LFSR
+ * transition function.
+ */
 typedef struct {
-    uint8_t *x;
-    size_t n;
+    uint8_t *x; ///< Pointer to the data
+    size_t n;   ///< Matrix size (n x n)
 } LfsrMatrix;
 
 
-// 2**32 - 1 =  [3, 5, 17, 257, 65537]
-static const LargeInt lfsr32_divs[] = {
+/**
+ * @brief `2**32 - 1 =  [3, 5, 17, 257, 65537]`
+ */
+static const LargeInt lfsr32_exps[] = {
     {{0x0000000055555555}}, // 0x55555555
     {{0x0000000033333333}}, // 0x33333333
     {{0x000000000F0F0F0F}}, // 0xF0F0F0F
@@ -40,8 +48,10 @@ static const LargeInt lfsr32_divs[] = {
     {{0x0}}
 };
 
-// 2**64 - 1 =  [3, 5, 17, 257, 641, 65537, 6700417]
-static const LargeInt lfsr64_divs[] = {
+/**
+ * @brief `2**64 - 1 =  [3, 5, 17, 257, 641, 65537, 6700417]`
+ */
+static const LargeInt lfsr64_exps[] = {
     {{0x5555555555555555}}, // 0x5555555555555555
     {{0x3333333333333333}}, // 0x3333333333333333
     {{0x0F0F0F0F0F0F0F0F}}, // 0xF0F0F0F0F0F0F0F
@@ -52,8 +62,10 @@ static const LargeInt lfsr64_divs[] = {
     {{0x0}}
 };
 
-// 2**96 - 1 =  [3, 5, 7, 13, 17, 97, 193, 241, 257, 673, 65537, 22253377]
-static const LargeInt lfsr96_divs[] = {
+/**
+ * @brief `2**96 - 1 =  [3, 5, 7, 13, 17, 97, 193, 241, 257, 673, 65537, 22253377]`
+ */
+static const LargeInt lfsr96_exps[] = {
     {{0x5555555555555555, 0x0000000055555555}}, // 0x555555555555555555555555
     {{0x3333333333333333, 0x0000000033333333}}, // 0x333333333333333333333333
     {{0x9249249249249249, 0x0000000024924924}}, // 0x249249249249249249249249
@@ -69,8 +81,10 @@ static const LargeInt lfsr96_divs[] = {
     {{0x0}}
 };
 
-// 2**128 - 1 =  [3, 5, 17, 257, 641, 65537, 274177, 6700417, 67280421310721]
-static const LargeInt lfsr128_divs[] = {
+/**
+ * @brief `2**128 - 1 =  [3, 5, 17, 257, 641, 65537, 274177, 6700417, 67280421310721]`
+ */
+static const LargeInt lfsr128_exps[] = {
     {{0x5555555555555555, 0x5555555555555555}}, // 0x55555555555555555555555555555555
     {{0x3333333333333333, 0x3333333333333333}}, // 0x33333333333333333333333333333333
     {{0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F}}, // 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F
@@ -83,8 +97,10 @@ static const LargeInt lfsr128_divs[] = {
     {{0x0}}
 };
 
-// 2**160 - 1 =  [3, 5, 11, 17, 31, 41, 257, 61681, 65537, 414721, 4278255361, 44479210368001]
-static const LargeInt lfsr160_divs[] = {
+/**
+ * @brief `2**160 - 1 =  [3, 5, 11, 17, 31, 41, 257, 61681, 65537, 414721, 4278255361, 44479210368001]`
+ */
+static const LargeInt lfsr160_exps[] = {
     {{0x5555555555555555, 0x5555555555555555, 0x0000000055555555}}, // 0x5555555555555555555555555555555555555555
     {{0x3333333333333333, 0x3333333333333333, 0x0000000033333333}}, // 0x3333333333333333333333333333333333333333
     {{0xD1745D1745D1745D, 0x5D1745D1745D1745, 0x000000001745D174}}, // 0x1745D1745D1745D1745D1745D1745D1745D1745D
@@ -100,8 +116,10 @@ static const LargeInt lfsr160_divs[] = {
     {{0x0}}
 };
 
-// 2**192 - 1 =  [3, 5, 7, 13, 17, 97, 193, 241, 257, 641, 673, 65537, 6700417, 22253377, 18446744069414584321]
-static const LargeInt lfsr192_divs[] = {
+/**
+ * @brief `2**192 - 1 =  [3, 5, 7, 13, 17, 97, 193, 241, 257, 641, 673, 65537, 6700417, 22253377, 18446744069414584321]`
+ */
+static const LargeInt lfsr192_exps[] = {
     {{0x5555555555555555, 0x5555555555555555, 0x5555555555555555}}, // 0x555555555555555555555555555555555555555555555555
     {{0x3333333333333333, 0x3333333333333333, 0x3333333333333333}}, // 0x333333333333333333333333333333333333333333333333
     {{0x9249249249249249, 0x4924924924924924, 0x2492492492492492}}, // 0x249249249249249249249249249249249249249249249249
@@ -120,9 +138,10 @@ static const LargeInt lfsr192_divs[] = {
     {{0x0}}
 };
 
-
-// 2**256 - 1 =  [3, 5, 17, 257, 641, 65537, 274177, 6700417, 67280421310721, 59649589127497217, 5704689200685129054721]
-static const LargeInt lfsr256_divs[] = {
+/**
+ * @brief `2**256 - 1 =  [3, 5, 17, 257, 641, 65537, 274177, 6700417, 67280421310721, 59649589127497217, 5704689200685129054721]`
+ */
+static const LargeInt lfsr256_exps[] = {
     {{0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555}}, // 0x5555555555555555555555555555555555555555555555555555555555555555
     {{0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333}}, // 0x3333333333333333333333333333333333333333333333333333333333333333
     {{0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F}}, // 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F
@@ -137,9 +156,10 @@ static const LargeInt lfsr256_divs[] = {
     {{0x0}}
 };
 
-
-// 2**512 - 1 =  [3, 5, 17, 257, 641, 65537, 274177, 6700417, 67280421310721, 1238926361552897, 59649589127497217, 5704689200685129054721, 93461639715357977769163558199606896584051237541638188580280321]
-static const LargeInt lfsr512_divs[] = {
+/**
+ * @brief `2**512 - 1 =  [3, 5, 17, 257, 641, 65537, 274177, 6700417, 67280421310721, 1238926361552897, 59649589127497217, 5704689200685129054721, 93461639715357977769163558199606896584051237541638188580280321]`
+ */
+static const LargeInt lfsr512_exps[] = {
     {{0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555}}, // 0x55555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555
     {{0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333}}, // 0x33333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333
     {{0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F}}, // 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F
@@ -156,8 +176,10 @@ static const LargeInt lfsr512_divs[] = {
     {{0x0}}
 };
 
-// 2**1024 - 1 =  [3, 5, 17, 257, 641, 65537, 274177, 2424833, 6700417, 67280421310721, 1238926361552897, 59649589127497217, 5704689200685129054721, 7455602825647884208337395736200454918783366342657, 93461639715357977769163558199606896584051237541638188580280321, 741640062627530801524787141901937474059940781097519023905821316144415759504705008092818711693940737]
-static const LargeInt lfsr1024_divs[] = {
+/**
+ * @brief `2**1024 - 1 =  [3, 5, 17, 257, 641, 65537, 274177, 2424833, 6700417, 67280421310721, 1238926361552897, 59649589127497217, 5704689200685129054721, 7455602825647884208337395736200454918783366342657, 93461639715357977769163558199606896584051237541638188580280321, 741640062627530801524787141901937474059940781097519023905821316144415759504705008092818711693940737]`
+ */
+static const LargeInt lfsr1024_exps[] = {
     {{0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555, 0x5555555555555555}}, // 0x5555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555
     {{0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333, 0x3333333333333333}}, // 0x3333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333
     {{0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F, 0x0F0F0F0F0F0F0F0F}}, // 0xF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F
@@ -177,26 +199,31 @@ static const LargeInt lfsr1024_divs[] = {
     {{0x0}}
 };
 
-static const LargeInt *get_lfsr_divs(size_t n)
+/**
+ * @brief Returns the pointer to the 0-terminated array of exponents
+ * for the LFSR maximal period verification.
+ * @param n LFSR state size, bits.
+ */
+static const LargeInt *get_lfsr_exps(size_t n)
 {
     if (n == 32) {
-        return lfsr32_divs;
+        return lfsr32_exps;
     } else if (n == 64) {
-        return lfsr64_divs;
+        return lfsr64_exps;
     } else if (n == 96) {
-        return lfsr96_divs;
+        return lfsr96_exps;
     } else if (n == 128) {
-        return lfsr128_divs;
+        return lfsr128_exps;
     } else if (n == 160) {
-        return lfsr160_divs;
+        return lfsr160_exps;
     } else if (n == 192) {
-        return lfsr192_divs;
+        return lfsr192_exps;
     } else if (n == 256) {
-        return lfsr256_divs;
+        return lfsr256_exps;
     } else if (n == 512) {
-        return lfsr512_divs;
+        return lfsr512_exps;
     } else if (n == 1024) {
-        return lfsr1024_divs;
+        return lfsr1024_exps;
     } else {
         return NULL;
     }
@@ -279,6 +306,9 @@ void LargeInt_div_2(LargeInt *obj)
     }
 }
 
+/**
+ * @brief Get the number of significant bits, i.e. without leading 0s.
+ */
 unsigned int LargeInt_get_nbits(const LargeInt *obj)
 {
     unsigned int nbits = LARGEINT_SIZE * 64;
@@ -301,15 +331,15 @@ unsigned int LargeInt_get_nbits(const LargeInt *obj)
 }
 
 
-void LargeInt_print_hex(const LargeInt *obj)
+void LargeInt_print_hex(const LargeInt *obj, const CallerAPI *intf)
 {
     int is_inside = 0;
     for (size_t i = LARGEINT_SIZE; i-- != 0; ) {
         if (!is_inside && obj->x[i] != 0) {
             is_inside = 1;
-            printf("%16.16llX", (unsigned long long) obj->x[i]);
+            intf->printf("%16.16llX", (unsigned long long) obj->x[i]);
         } else if (is_inside) {
-            printf(".%16.16llX", (unsigned long long) obj->x[i]);
+            intf->printf(".%16.16llX", (unsigned long long) obj->x[i]);
         }
     }
 }
@@ -342,7 +372,12 @@ inline uint8_t LfsrMatrix_getbit(const LfsrMatrix *obj, size_t i, size_t j)
     return obj->x[i*obj->n + j];
 }
 
-
+/**
+ * @brief Matrix multiplication in the GF(2) field.
+ * @param a The first matrix.
+ * @param b The second matrix.
+ * @return The matrix product, must be destructed by the caller.
+ */
 LfsrMatrix LfsrMatrix_create_prod(const LfsrMatrix *a, const LfsrMatrix *b)
 {
     // Check the matrices size
@@ -388,6 +423,9 @@ LfsrMatrix LfsrMatrix_create_prod(const LfsrMatrix *a, const LfsrMatrix *b)
     return c;
 }
 
+/**
+ * @brief Check if the two matrices are equal.
+ */
 int LfsrMatrix_are_equal(const LfsrMatrix *a, const LfsrMatrix *b)
 {
     if (a->n != b->n) {
@@ -426,13 +464,21 @@ LfsrMatrix LfsrMatrix_clone(const LfsrMatrix *obj)
     return cpy;
 }
 
-
+/**
+ * @brief Destructor: deallocates all internal buffers but
+ * not the structure itself.
+ */
 void LfsrMatrix_destruct(LfsrMatrix *obj)
 {
     free(obj->x);
 }
 
-
+/**
+ * @brief Calculate the matrix power.
+ * @param x  Matrix (base)
+ * @param e  Exponent
+ * @return The matrix power, must be destructed by the caller.
+ */
 LfsrMatrix LfsrMatrix_create_pow(const LfsrMatrix *x, const LargeInt *e)
 {
     if (LargeInt_is_u64(e, 1)) {
@@ -547,6 +593,71 @@ int GeneratorStateExt_is_lfsr(GeneratorStateExt *obj)
     return is_lfsr;
 }
 
+/**
+ * @brief Check if PRNG has counters and/or constants. It is important
+ * to prevent memory corruption and segmentation fault during the 
+ * period deduction attempts.
+ */
+int GeneratorStateExt_has_counters(GeneratorStateExt *obj)
+{
+    const unsigned long niters = 10000000;
+    const size_t nbytes = obj->nbytes;
+    const uint8_t *cur = obj->state.state;
+    uint8_t *prev = malloc(nbytes);
+    uint8_t *is_byte_ctr = malloc(nbytes);
+    memset(is_byte_ctr, 1, nbytes);
+    // Save an initial PRNG state
+    memcpy(prev, obj->state.state, nbytes);
+    // Check if any bytes behave like a counter
+    for (unsigned long i = 0; i < niters; i++) {
+        // Iterate the PRNG state
+        (void) obj->state.gi->get_bits(obj->state.state);
+        // Check if some bytes are not counters
+        for (size_t j = 0; j < nbytes; j++) {
+            const uint8_t delta = cur[j] - prev[j];
+            if (delta != 0 && delta != 1) {
+                is_byte_ctr[j] = 0;
+            }
+        }
+    }
+    // Get the final result, free buffers and finish
+    int has_ctr = 0;
+    for (size_t i = 0; i < nbytes; i++) {
+        if (is_byte_ctr[i]) {
+            has_ctr = 1;
+            break;
+        }
+    }
+    free(prev);
+    free(is_byte_ctr);
+    return has_ctr;
+}
+
+/**
+ * @brief Check if the generator is valid, i.e. is LFSR and has no counters or
+ * constants inside its state.
+ */
+int GeneratorStateExt_is_valid(GeneratorStateExt *obj, const CallerAPI *intf)
+{
+    // Check if the PRNG has counters (by empirical testing)
+    if (GeneratorStateExt_has_counters(obj)) {
+        intf->printf("  The PRNG has constants and/or counters inside its state. Automated\n");
+        intf->printf("  period deduction is impossible and may cause memory corruption\n");
+        intf->printf("  and/or segmentation fault.\n");
+        return 0;
+    }
+
+    // Check if the PRNG is LFSR (by empirical testing)
+    if (GeneratorStateExt_is_lfsr(obj)) {
+        intf->printf("  The PRNG is probably a LFSR\n");
+    } else {
+        intf->printf("  The PRNG is not a LFSR\n");
+        return 0;
+    }
+    // The generator is valid
+    return 1;
+}
+
 
 void GeneratorStateExt_destruct(GeneratorStateExt *obj)
 {
@@ -557,78 +668,102 @@ void GeneratorStateExt_destruct(GeneratorStateExt *obj)
 ///// Battery implemenentation /////
 ////////////////////////////////////
 
-BatteryExitCode battery_lfsr_period(const GeneratorInfo *gen, const CallerAPI *intf,
-    const BatteryOptions *opts)
+void LfsrPeriodResult_print(const CallerAPI *intf, LfsrPeriodResult res)
 {
+    switch (res) {
+    case LFSR_PERIOD_MAX:
+        intf->printf("The LFSR has a maximal period\n");
+        break;
+    case LFSR_PERIOD_NOT_MAX:
+        intf->printf("The LFSR period is not maximal\n");
+        break;
+    default:
+        intf->printf("The verification cannot be applied to this PNG\n");
+    }
+}
 
-    intf->printf("LFSR period checker\n");
+
+LfsrPeriodResult lfsr_period_test(const GeneratorInfo *gen, const CallerAPI *intf,
+    const LfsrPeriodOptions *opts)
+{
     if (gen->parent != NULL) {
-        intf->printf("  Error: cannot analyze an enveloped generator");
-        return BATTERY_ERROR;
+        intf->printf("  LFSR period checker error: cannot analyze an enveloped generator");
+        return LFSR_PERIOD_ERROR;
     }
 
     GeneratorStateExt ext = GeneratorStateExt_create(gen, intf);
 
+    intf->printf("LFSR period checker\n");
     intf->printf("  malloc: nbytes = %llu; ptr = 0x%llu\n",
         (unsigned long long) ext.nbytes,
         (unsigned long long) ext.state.state);
     (void) opts;
-
-    // Check if the PRNG is LFSR (by empirical testing)
-    if (GeneratorStateExt_is_lfsr(&ext)) {
-        intf->printf("  The PRNG is probably a LFSR\n");
-    } else {
-        intf->printf("  The PRNG is not a LFSR\n");
+    // Check the generator validity
+    if (opts->check_validity && !GeneratorStateExt_is_valid(&ext, intf)) {
         GeneratorStateExt_destruct(&ext);
-        return BATTERY_FAILED;
+        LfsrPeriodResult_print(intf, LFSR_PERIOD_ERROR);
+        return LFSR_PERIOD_ERROR;
     }
-
     // Calculate the maximal period
-    LargeInt period = LargeInt_from_pow2((unsigned int) (ext.nbytes * 8));
-    LargeInt_print_hex(&period); intf->printf("\n");    
+    const unsigned int nbits = (unsigned int) (ext.nbytes * 8);
+    LargeInt period = LargeInt_from_pow2(nbits);
     LargeInt_subtract_u64(&period, 1U);
-    LargeInt_print_hex(&period); intf->printf("\n");
-
+    intf->printf("  The maximal period to be verified: 2**%u - 1\n", nbits);
     // Check if the maximal period is possible
-    intf->printf("Beginning the period proof\n");
+    intf->printf("Beginning the period verification\n");
     LfsrMatrix mat = GeneratorStateExt_get_matrix(&ext, 1);
     LfsrMatrix matp = LfsrMatrix_create_pow(&mat, &period);
+    LfsrPeriodResult result = LFSR_PERIOD_MAX;
     if (LfsrMatrix_is_eye(&matp)) {
-        intf->printf("  LFSR period can be maximal\n");
+        intf->printf("  A^period = I: passed\n");
     } else {
-        intf->printf("  LFSR period cannot be maximal\n");
-        LfsrMatrix_destruct(&mat);
-        LfsrMatrix_destruct(&matp);
-        GeneratorStateExt_destruct(&ext);
-        return BATTERY_FAILED;
+        intf->printf("  A^period = I: failed\n");
+        result = LFSR_PERIOD_NOT_MAX;
+        goto finished;
     }
-    const LargeInt *lfsr_divs = get_lfsr_divs(ext.nbytes * 8);
-    if (lfsr_divs == NULL) {
+    const LargeInt *lfsr_exps = get_lfsr_exps(ext.nbytes * 8);
+    if (lfsr_exps == NULL) {
         intf->printf("  The tables are absent for this LFSR size\n");
+        result = LFSR_PERIOD_ERROR;
     } else {
-        int is_full = 1;
-        for (const LargeInt *d = lfsr_divs; !LargeInt_is_u64(d, 0); d++) {
-            intf->printf("  Divisor (%4u bits): ", LargeInt_get_nbits(d));
-            LargeInt_print_hex(d);
+        intf->printf("  Verifying the A^(period/prime) = A^e <> I exponents\n");
+        for (const LargeInt *d = lfsr_exps; !LargeInt_is_u64(d, 0); d++) {
+            intf->printf("  Exponent (%4u bits): ", LargeInt_get_nbits(d));
+            LargeInt_print_hex(d, intf);
             LfsrMatrix matd = LfsrMatrix_create_pow(&mat, d);
             if (LfsrMatrix_is_eye(&matd)) {
-                intf->printf("<<< FAIL\n");
-                is_full = 0;
+                intf->printf(" <<< FAIL\n");
+                result = LFSR_PERIOD_ERROR;
             } else {
                 intf->printf(" OK\n");
             }
             LfsrMatrix_destruct(&matd);
         }
-        if (is_full) {
-            intf->printf("The period is full\n");
-        } else {
-            intf->printf("The period is not full\n");
-        }
     }
 
+finished:
+    LfsrPeriodResult_print(intf, result);
     LfsrMatrix_destruct(&mat);
     LfsrMatrix_destruct(&matp);
     GeneratorStateExt_destruct(&ext);
-    return BATTERY_PASSED;
+    return result;
+}
 
+
+BatteryExitCode battery_lfsr_period(const GeneratorInfo *gen, const CallerAPI *intf,
+    const BatteryOptions *opts)
+{
+    (void) opts;
+    const LfsrPeriodOptions test_opts = {.check_validity = 1};
+    const LfsrPeriodResult res = lfsr_period_test(gen, intf, &test_opts);
+    switch (res) {
+    case LFSR_PERIOD_MAX:
+        return BATTERY_PASSED;
+    case LFSR_PERIOD_NOT_MAX:
+        return BATTERY_FAILED;
+    case LFSR_PERIOD_ERROR:
+        return BATTERY_ERROR;
+    default:
+        return BATTERY_ERROR;
+    }
 }
