@@ -150,6 +150,10 @@ local objstr_speed = "$(objdir)/sr_speed.obj " .. objstr_genexec;
 io.write("$(bindir)/sr_speed.exe: " .. objstr_speed .. "\n")
 io.write("\twcl386 -4s -fe=$(bindir)/sr_speed.exe " .. objstr_speed .. "\n")
 
+local objstr_xorshift = "$(objdir)/find_xorshift_params.obj " .. objstr_genexec;
+io.write("$(bindir)/find_xorshift_params.exe: " .. objstr_xorshift .. "\n")
+io.write("\twcl386 -4s -fe=$(bindir)/find_xorshift_params.exe " .. objstr_xorshift .. "\n")
+
 local objstr_syscrypto = "$(objdir)/test_syscrypto.obj " .. objstr_genexec;
 io.write("$(bindir)/test_syscrypto.exe: " .. objstr_syscrypto .. "\n")
 io.write("\twcl386 -4s -fe=$(bindir)/test_syscrypto.exe " .. objstr_syscrypto .. "\n")
@@ -174,6 +178,9 @@ io.write("\twcc386 $(cflags) -fo=$(objdir)/smokerand.obj $(appsrcdir)/smokerand.
 
 io.write("$(objdir)/sr_speed.obj: $(appsrcdir)/sr_speed.c $(lib_headers)\n")
 io.write("\twcc386 $(cflags) -fo=$(objdir)/sr_speed.obj $(appsrcdir)/sr_speed.c\n")
+
+io.write("$(objdir)/find_xorshift_params.obj: $(appsrcdir)/find_xorshift_params.c $(lib_headers)\n")
+io.write("\twcc386 $(cflags) -fo=$(objdir)/find_xorshift_params.obj $(appsrcdir)/find_xorshift_params.c\n")
 
 io.write("$(objdir)/test_syscrypto.obj: $(appsrcdir)/test_syscrypto.c $(lib_headers)\n")
 io.write("\twcc386 $(cflags) -fo=$(objdir)/test_syscrypto.obj $(appsrcdir)/test_syscrypto.c\n")

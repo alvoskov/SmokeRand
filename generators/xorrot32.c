@@ -106,8 +106,8 @@ static int run_self_test(const CallerAPI *intf)
 static const GeneratorParamVariant gen_list[] = {
     {"",          "xorrot32", 32, default_create, get_bits_good, get_sum_good},
     {"default",   "xorrot32", 32, default_create, get_bits_good, get_sum_good},
-    {"bad1",      "xorrot32", 32, default_create, get_bits_bad1, get_sum_bad1},
-    {"bad2",      "xorrot32", 32, default_create, get_bits_bad2, get_sum_bad2},
+    {"bad1",      "xorrot32:bad1", 32, default_create, get_bits_bad1, get_sum_bad1},
+    {"bad2",      "xorrot32:bad2", 32, default_create, get_bits_bad2, get_sum_bad2},
     GENERATOR_PARAM_VARIANT_EMPTY
 };
 

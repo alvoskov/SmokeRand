@@ -323,6 +323,7 @@ add_exefile("test_syscrypto", {batlib_name, lib_name}, "cc")
 add_exefile("test_cpp11", {batlib_name, lib_name}, "cpp")
 add_exefile("calibrate_dc6", {lib_name}, "cc")
 add_exefile("calibrate_linearcomp", {lib_name}, "cc")
+add_exefile("find_xorshift_params", {lib_name}, "cc")
 -- Build extra executables: PE32 hack
 io.write("build $objdir/pe32loader.o: cc $srcdir/pe32loader.c\n")
 io.write("build $objdir/peparse.o: cc $appsrcdir/peparse.c\n")

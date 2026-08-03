@@ -26,5 +26,7 @@ for i in range(1, 64, 2):
         print(i, j)
         for k in range(33, 64):
             T = make_xorrot256(i, j, k)
-            if len(T) > 0 and lfsr.is_full_period(T, False):
-                print("=====>", i, j, k)
+            if len(T) > 0:
+                print("?????>", i, j, k)
+                if lfsr.is_full_period(T, False):
+                    print("=====>", i, j, k)

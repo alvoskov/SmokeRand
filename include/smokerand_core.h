@@ -20,6 +20,7 @@ extern "C" {
 #include "smokerand/extratests.h"
 #include "smokerand/hwtests.h"
 #include "smokerand/lineardep.h"
+#include "smokerand/lfsr_period.h"
 #include "smokerand/specfuncs.h"
 #include "smokerand/version.h"
 
