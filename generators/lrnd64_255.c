@@ -139,9 +139,9 @@ void *create(const CallerAPI *intf)
  */
 static inline uint64_t get_bits_raw(LRnd64x255State *obj)
 {
-    int8_t ind = obj->w_pos;
-    int8_t ind_next = (ind + 1) & 0x3;
-    uint64_t w0 = obj->w[ind], w1 = obj->w[ind_next];
+    const int8_t ind = obj->w_pos;
+    const int8_t ind_next = (ind + 1) & 0x3;
+    const uint64_t w0 = obj->w[ind], w1 = obj->w[ind_next];
     uint64_t w4 = (w0 >> 1) | (w1 << 63);
     w4 ^= (w0 >> 4) | (w1 << 60);
     w4 ^= (w0 >> 8) | (w1 << 56);
