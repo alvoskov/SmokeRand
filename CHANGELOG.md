@@ -9,12 +9,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ### Added
 
+- `lfsr` battery: a tool for automatic proof of full period for xorshift-like
+  generators. Works directly with its compiled implementations, no symbolic
+  representation of tested LFSR is needed! Currently the 32, 64, 96, 128, 160,
+  192 and 256 bits of state are supported.
 - `dandelion128`, `dandelion64` and `dandelion32` generators: scrambled LFSRs.
 - `tf0_ctr64`, `thurst`, `nasam`, `pelican`, `wanghash64` generators based on
   a scrambled 64-bit counter/"discrete Weyl sequence" and similar to SplitMix.
 - `wyranda_par`: a new modification of wyrand that passes the 64-bit
   collision test.
 - `wyrand128` and `rapidrand128`: 128-bit versions of wyrand.
+- `xorrot32`: two extra (and bad) versions with reduced periods, needed as
+  test cases for the `lfsr` battery.
+- `xorshift96`, `xorshift160`, `xorshift192` and `xorshift256`: very well
+  known classical PRNGs (with triples selected by A.L. Voskov by means of
+  SmokeRand tests).
 
 ### Bugfix
 
