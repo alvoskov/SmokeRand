@@ -9,7 +9,6 @@
  *   V. 8. N. 14. P.1-6. https://doi.org/10.18637/jss.v008.i14
  *
  * @copyright The xorshift128 algorithm was suggested by G. Marsaglia.
- *
  * Adaptation for SmokeRand:
  *
  * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
