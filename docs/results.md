@@ -138,7 +138,7 @@ the testing.
  konadare192       | u64    | +       | +     | +       | +    | 0.20 | +      | 4     |         | >= 16 TiB
  kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 5     | +       | >= 4 TiB
  leptonflurry32x1  | u32    | +       | +     | +       | +    | 2.8  | +      | 4     |         | >= 4 TiB
- leptonflurry32x1_2| u32    | +       | +     | +       | +    | 2.0  |        |       |         | ?
+ leptonflurry32x1_2| u32    | +       | +     | +       | +    | 2.0  |        |       |         | >= 4 TiB
  lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>>) | 0     | -       | 512 MiB
  lcg32sc           | u32    | +       | 1     | 2       | 8/9  | 0.62 | -(>>>) | 0     | Small   | 512 MiB
  lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     | -       | 16 KiB
@@ -255,9 +255,9 @@ the testing.
  mwc_kiss96        | u32    | 2       | 14    | 28      | 35   | 0.47 |        | 0     | -       | 32 KiB
  mwcsc_kiss96      | u32    | +       | +     | +       | +    | 0.62 | -      | 3     | +       | >= 2 TiB
  mzran13           | u32    | 1       | 4     | 8/9     | 11   | 1.2  | +      | 0     | Small   | 64 KiB
- nasam             | u64    | +       | +     | +       | +    | 0.13 |        |       |         | ?
+ nasam             | u64    | +       | +     | +       | +    | 0.13 | -      | 3     |         | ?
  ncombo            | u32    | 2       | 5     | 8/9     | 11   | 1.4  | +      | 0     | Small   | 64 KiB
- pelican           | u64    | +       | +     | +       | +    | 0.20 | -      | 3     |         | >= 8 TiB
+ pelican           | u64    | +       | +     | +       | +    | 0.20 | -      | 3     |         | >= 16 TiB
  pcg32             | u32    | +       | +     | +       | +    | 0.44 | +      | 3.5   | +       | 32 TiB
  pcg32_dxsm        | u32    | +       | +     | +       | +    | 0.48 | +      | 4     | +       | >= 32 TiB
  pcg32_xsl_rr      | u32    | +       | +     | +       | +    | 0.58 | +      | 4     | +       | 256 GiB
@@ -421,9 +421,9 @@ the testing.
  xkiss32sh_awc     | u32    | +       | +     | +       | +    | 0.99 | +      | 4     | +       | >= 16 TiB
  xkiss64_awc       | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
- xorgens256        | u64    | 2       | 3     | 5       | 7/8  |      |        | 2.25? |         | ?
- xorgens512        | u64    | 2       | 3     | 5       |      |      |        |       |         | ?
- xorgens1024       | u64    | 2       | 3     | 5       |      |      |        |       |         | ?
+ xorgens256        | u64    | 2       | 3     | 5       | 7/8  | 0.21 |        | 2.25? |         | 1 MiB
+ xorgens512        | u64    | 2       | 3     | 5       | 7    | 0.38 |        | 2.25  |         | 8 MiB
+ xorgens1024       | u64    | 2       | 3     | 5       | 7    | 1.1  |        | 2.25  |         | 32 MiB
  xoroshiro32       | u32    | 2       | 14    | 28/29   | 37/39| 1.4  | -(>>>) | 0     | -       | 32 KiB
  xoroshiro32pp     | u32    | +       | 1     | 2       | 6/8  | 1.5  | -(>>>) | 0     | Small   | 256 MiB
  xoroshiro64aox    | u32    | +       | +     | +       | +    | 0.52 | +      | 3.5   | +       | 512 GiB
@@ -448,15 +448,15 @@ the testing.
  xorrot256mrt      | u64    | +       | +     | +       | +    | 0.34 | +      | 4     |         | >= 16 TiB
  xorshift64        | u64    | 2       | 6     | 12      | 15/16| 0.49 | -      | 0     | -       | 32 KiB
  xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |S_lo/+_hi| 512 KiB
- xorshift96        | u32    | 2       | 5     | 8       |      | 0.39 |        | 0     | -       | 64 KiB
+ xorshift96        | u32    | 2       | 5     | 8       | 12/13| 0.39 |        | 0     | -       | 64 KiB
  xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      | 0     |+lo/+hi  | 32 GiB
  xorshift128pp     | u64    | +       | +     | +       | +    | 0.29 | +      | 4     |         | >= 16 TiB
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 1 TiB
  xorshift128rp     | u64    | +       | +     | 1       | 3/5  | 0.21 | +      | 0     | Small   | 4 GiB
  xorshift160       | u32    | 2       | 4     | 7       | 12/13| 0.44 |        | 0     | -       | 256 KiB
- xorshift192       | u64    | 2       | 3     | 5       |      | 0.19 |        |       |         | 256 KiB
- xorshift256       | u64    | 2       | 3     | 5       | 7/8  | 0.21 |        | 2.25? |         | 1 MiB
+ xorshift192       | u64    | 2       | 3     | 5       | 9    | 0.19 |        | 0     | Small   | 256 KiB
+ xorshift256       | u64    | 2       | 3     | 5       | 7/8  | 0.21 | +      | 2.25? | Small   | 1 MiB
  xoroshiro128      | u64    | 2       | 3     | 5       | 7    | 0.27 | +      | 2.25  | Small   | 256 KiB
  xoroshiro128aox   | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |+lo/+hi  | >= 32 TiB
  xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      | 3.25  |+lo/+hi  | 16 MiB
@@ -524,6 +524,7 @@ Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
  wyrand128         | - (>25 TiB)| 107/100
  xorrot64mn        | 12 TiB     | 10/48
  xorrot64w32mn     | - (>35 TiB)| 126/140
+ xorshift256       | - (>20 TiB)| 74/80
 
 Note about a5rand32w:
 

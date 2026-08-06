@@ -24,8 +24,18 @@ typedef enum {
     LFSR_PERIOD_ERROR   = 2
 } LfsrPeriodResult;
 
+typedef struct {
+    GeneratorState state;
+    size_t nbytes; ///< State size in bytes
+}  GeneratorStateExt;
+
+GeneratorStateExt
+GeneratorStateExt_create(const GeneratorInfo *gen, const CallerAPI *intf);
+int GeneratorStateExt_is_valid(GeneratorStateExt *obj, const CallerAPI *intf);
+void GeneratorStateExt_destruct(GeneratorStateExt *obj);
+
 void LfsrPeriodResult_print(const CallerAPI *intf, LfsrPeriodResult res);
-LfsrPeriodResult lfsr_period_test(const GeneratorInfo *gen, const CallerAPI *intf,
+LfsrPeriodResult lfsr_period_test(GeneratorStateExt *ext, const CallerAPI *intf,
     const LfsrPeriodOptions *opts);
 BatteryExitCode battery_lfsr_period(const GeneratorInfo *gen, const CallerAPI *intf,
     const BatteryOptions *opts);

@@ -8,10 +8,21 @@
  * - Marsaglia G. Xorshift RNGs // Journal of Statistical Software. 2003.
  *   V. 8. N. 14. P.1-6. https://doi.org/10.18637/jss.v008.i14
  *
- * Notes about shifts triples:
+ * Notes about shifts triples from Marsaglia article:
  *
  * - [7,13,6] - fairly good
  * - [2,1,4] and [1,1,20] - bad, bspace/gap tests failures at brief.
+ *
+ * Some triples found by A.L. Voskov:
+ *
+ * Acceptable: [19 3 11]
+ * - brief(3/4), default(6/7), full(9/10)
+ * - passes smallcrush, crush:only mrank/lincomp failures
+ *
+ * Bad: [1 3 4], [5 1 1], [5 3 27], [5 3 29], [2,3,7],
+ * [21,7,3], [7,23,2].
+ *
+ * Medicore: [13 9 3] (smallcrush/crush failures, maxoft)
  *
  * @copyright The xorshift160 algorithm was suggested by G. Marsaglia.
  *
@@ -39,15 +50,17 @@ typedef struct {
 } Xorshift160State;
 
 
+// good: [13 9 3](at brief(3/4), default(6/7), full(9/10), maxoft/smallcrush-????, crush - also bad! )
+//       [19 3 11](at brief(3/4), default(6/7), full(9/10) ) : passes smallcrush!, crush:only mrank/lincomp
 static inline uint64_t get_bits_raw(Xorshift160State *obj)
 {
-    uint32_t t = obj->x ^ (obj->x << 7); // a
-    t ^= t >> 13; // b
+    uint32_t t = obj->x ^ (obj->x << 19); // a
+    t ^= t >> 3; // b
     obj->x = obj->y;
     obj->y = obj->z;
     obj->z = obj->w;
     obj->w = obj->v;
-    obj->v = (obj->v ^ (obj->v >> 6)) ^ t; // c
+    obj->v = (obj->v ^ (obj->v >> 11)) ^ t; // c
     return obj->z;
 }
 

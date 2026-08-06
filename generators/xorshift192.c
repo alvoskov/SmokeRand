@@ -47,7 +47,7 @@ typedef struct {
 
 static inline uint64_t get_bits_raw(Xorshift192State *obj)
 {
-    uint64_t t = obj->x ^ (obj->x << 29); // a
+    uint64_t t = obj->x ^ (obj->x << 39); // a
     t ^= t >> 23; // b
     obj->x = obj->y;
     obj->y = obj->z;
