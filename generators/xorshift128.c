@@ -30,14 +30,15 @@ typedef struct {
     uint32_t w;
 } Xorshift128State;
 
-
+// [11 8 19] marsaglia; another good tuple: [11 16 1]
 static inline uint64_t get_bits_raw(Xorshift128State *obj)
 {
-    const uint32_t t = (obj->x ^ (obj->x << 11));
+    uint32_t t = (obj->x ^ (obj->x << 11));
+    t ^= (t >> 8);
     obj->x = obj->y;
     obj->y = obj->z;
     obj->z = obj->w;
-    obj->w = (obj->w ^ (obj->w >> 19)) ^ ( t ^ (t >> 8) );
+    obj->w = (obj->w ^ (obj->w >> 19)) ^ t;
     return obj->w;
 }
 

@@ -92,6 +92,11 @@ MAKE_GET_BITS_WRAPPERS(bad1)
 /**
  * @brief Its period is not \f$ 2^{256} - 1 \f$ but A^{2**256} = I.
  * So it is a good non-trivial test case for the `lfsr` battery.
+ * @details Some bad triples:
+ * a) Smaller period (better): `[3,3,45]`, `[5 13 33]`, `[7,13,53]`,
+ *    `[7,14,33]`, `[7,23,47]`
+ * b) Larger period: `[1,1,35]`,  `[3,17,46]`, `[5,3,47]`,
+ *    `[5,18,41]`, `[7,12,37]`, `[7,21,58]`, `[9,7,41]`
  */
 static inline uint64_t get_bits_bad2_raw(Xorrot256State *obj)
 {
@@ -99,7 +104,7 @@ static inline uint64_t get_bits_bad2_raw(Xorrot256State *obj)
     obj->x = x0 ^ obj->y;
     obj->y = obj->z;
     obj->z = x0 ^ w0;
-    obj->w = (x0 << 1) ^ obj->z ^ rotl64(w0, 1) ^ rotl64(w0, 35);
+    obj->w = (x0 << 7) ^ obj->z ^ rotl64(w0, 23) ^ rotl64(w0, 47);
     return x0;
     return obj->x;
 }
