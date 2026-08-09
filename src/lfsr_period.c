@@ -620,6 +620,17 @@ void LfsrMatrix_print(const LfsrMatrix *obj, const CallerAPI *intf)
     }
 }
 
+
+
+int LfsrMatrix_is_period_possible(const LfsrMatrix *mat, const LargeInt *period)
+{
+    LfsrMatrix matp = LfsrMatrix_create_pow(mat, period);
+    const int is_possible = LfsrMatrix_is_eye(&matp);
+    LfsrMatrix_destruct(&matp);
+    return is_possible;
+}
+
+
 //////////////////////////////////////////////////
 ///// GeneratorStateExt class implementation /////
 //////////////////////////////////////////////////
@@ -658,6 +669,20 @@ GeneratorStateExt_create(const GeneratorInfo *gen, const CallerAPI *intf)
     return ext;
 }
 
+
+GeneratorStateExt
+GeneratorStateExt_create_sized(const GeneratorInfo *gen, const CallerAPI *intf, size_t nbytes)
+{
+    if (nbytes == LFSR_NBYTES_DEFAULT) {
+        return GeneratorStateExt_create(gen, intf);
+    } else {
+        GeneratorStateExt ext;
+        ext.state = GeneratorState_create(gen, intf);
+        ext.nbytes = nbytes;
+        return ext;
+    }
+}
+
 /**
  * @brief Restores the LFSR transition matrix using only its transition function
  * (that returns pseudorandom values) and initialization with states like
@@ -692,6 +717,106 @@ GeneratorStateExt_get_matrix(GeneratorStateExt *obj, unsigned long long niters)
         }
     }
     return mat;
+}
+
+/**
+ * @brief Restores the primitive characteristic polynomial of the LFSR.
+ */
+void GeneratorStateExt_get_poly(GeneratorStateExt *obj)
+{
+    const size_t nbits = obj->nbytes * 8;
+    LfsrMatrix mat = LfsrMatrix_create(nbits + 1);
+    uint8_t *buf = obj->state.state;
+    // Set an initial state of the generator
+    for (size_t i = 0; i < obj->nbytes; i++) {
+        buf[i] = (uint8_t) ((i % 2) ? 0x55 : 0xAA);
+    }
+//    buf[0] = 
+    // Generate the system of equation (based on Krylov space)
+    // Use the row vectors here
+    for (size_t i = 0; i < nbits + 1; i++) {
+        for (size_t j = 0; j < nbits; j++) {
+            const uint8_t b = buf[j >> 3] & (1U << (j & 0x7U));
+            LfsrMatrix_setbit(&mat, i, j, b);
+        }
+        (void) obj->state.gi->get_bits(obj->state.state);
+    }
+
+    // Gaussian elimination. Note: each equation is a column!
+    // a) Initialize the columns indexex for its swapping
+    size_t *cinds = calloc(nbits + 1, sizeof(size_t));
+    for (size_t i = 0; i < nbits + 1; i++) {
+        cinds[i] = i;
+    }
+    // b) The method itself
+    for (size_t j = 0; j < nbits; j++) {
+        // b1) pivot
+        size_t i_pivot;
+        for (i_pivot = j;
+             LfsrMatrix_getbit(&mat, j, cinds[i_pivot]) == 0 && i_pivot < nbits;
+             i_pivot++) {
+            
+        }
+        if (i_pivot < nbits) {
+            const size_t ind = cinds[i_pivot];
+            cinds[i_pivot] = cinds[j];
+            cinds[j] = ind;
+        } else {
+            printf("----- internal error ----- %u\n", (unsigned int) j);
+            exit(1);
+        }
+        // b2) Elimination
+        // Note: LfsrMatrix_getbit(&mat, j, cinds[j])) is always 1
+        for (size_t i = 0; i < nbits; i++) {
+            if (i != j && LfsrMatrix_getbit(&mat, j, cinds[i]) != 0) {
+                // Add column cinds[j] to cinds[i]
+                for (size_t k = 0; k < nbits + 1; k++) {
+                    const uint8_t a = (uint8_t) (LfsrMatrix_getbit(&mat, k, cinds[i]));
+                    const uint8_t b = (uint8_t) (LfsrMatrix_getbit(&mat, k, cinds[j]));
+                    LfsrMatrix_setbit(&mat, k, cinds[i], (uint8_t) (a ^ b));
+                }
+            }
+        }
+    }
+
+    printf("vvv elim vvv\n");
+    for (size_t ii = 0; ii < nbits + 1; ii++) {
+        for (size_t jj = 0; jj < nbits + 1; jj++) {
+            printf("%u", (int) LfsrMatrix_getbit(&mat, ii, cinds[jj]));
+        }
+        printf("\n");
+    }
+    fflush(stdout);
+
+    // c) Restore the polynomial
+    uint8_t *poly = calloc(nbits + 1, sizeof(uint8_t));
+    for (size_t i = 0; i < nbits; i++) {
+        poly[i] = LfsrMatrix_getbit(&mat, nbits, cinds[i]);
+    }
+    poly[nbits] = 1;
+    size_t nterms = 0;
+    for (size_t i = nbits + 1; i-- != 0; ) {
+        if (poly[i] != 0) {
+            if (i > 0) {
+                printf("x^%u + ", (int) i);
+            } else {
+                printf("1");
+            }
+            nterms++;
+        }
+    }
+    printf("nterms: %u\n", (unsigned int) nterms);
+    // xorshift64: 0.13-17-43	x^64 + x^49 + x^48 + x^45 + x^44 + x^42 + x^41 + x^38 + x^37 + x^28 + x^27 + x^26 + x^25 + x^17 + x^16 + x^11 + x^6 + x^5 + 1	19
+    // xorshift256: 256 + x^242 + x^241 + x^240 + x^239 + x^234 + x^233 + x^232 + x^231 + x^226 + x^225 + x^224 + x^223 + x^220 + x^218 + x^217 + x^215 + x^212 + x^210 + x^206 + x^205 + x^203 + x^200 + x^199 + x^198 + x^195 + x^194 + x^191 + x^190 + x^189 + x^188 + x^185 + x^184 + x^180 + x^178 + x^177 + x^170 + x^169 + x^167 + x^165 + x^162 + x^159 + x^156 + x^153 + x^151 + x^150 + x^148 + x^147 + x^145 + x^143 + x^137 + x^136 + x^135 + x^133 + x^132 + x^127 + x^126 + x^125 + x^124 + x^121 + x^120 + x^119 + x^117 + x^116 + x^115 + x^114 + x^113 + x^112 + x^107 + x^106 + x^105 + x^100 + x^99 + x^97 + x^96 + x^94 + x^92 + x^89 + x^88 + x^87 + x^85 + x^83 + x^76 + x^75 + x^73 + x^72 + x^70 + x^69 + x^66 + x^65 + x^62 + x^59 + x^55 + x^51 + x^50 + x^49 + x^48 + x^47 + x^45 + x^43 + x^42 + x^40 + x^39 + x^38 + x^37 + x^35 + x^34 + x^33 + x^31 + x^30 + x^29 + x^20 + x^18 + x^17 + x^16 + x^14 + x^8 + x^7 + x^4 + x^3 + 1
+    // https://github.com/funny-falcon/xorshift256and192/blob/master/full/256shift64/prim.txt
+    // https://github.com/jj1bdx/xorshiftplus/blob/master/full/xorshift64poly.txt
+    // https://prng.di.unimi.it/xorshift.php
+    printf("\n");
+    free(poly);
+
+
+    free(cinds);
+    LfsrMatrix_destruct(&mat);
 }
 
 /**
@@ -858,13 +983,12 @@ LfsrPeriodResult lfsr_period_test(GeneratorStateExt *ext, const CallerAPI *intf,
     LfsrMatrix mat = GeneratorStateExt_get_matrix(ext, 1);
     intf->printf("  LFSR transition matrix layout:\n");
     LfsrMatrix_print(&mat, intf);
-    LfsrMatrix matp = LfsrMatrix_create_pow(&mat, &period);
-    LfsrPeriodResult result = LFSR_PERIOD_MAX;
-    if (LfsrMatrix_is_eye(&matp)) {
+    LfsrPeriodResult result = LfsrMatrix_is_period_possible(&mat, &period) ?
+                              LFSR_PERIOD_MAX : LFSR_PERIOD_NOT_MAX;
+    if (result == LFSR_PERIOD_MAX) {
         intf->printf("  A^period = I: passed\n");
     } else {
         intf->printf("  A^period = I: failed\n");
-        result = LFSR_PERIOD_NOT_MAX;
         goto finished;
     }
     const LargeInt *lfsr_exps = get_lfsr_exps(nbits);
@@ -890,7 +1014,6 @@ LfsrPeriodResult lfsr_period_test(GeneratorStateExt *ext, const CallerAPI *intf,
 finished:
     LfsrPeriodResult_print(intf, result);
     LfsrMatrix_destruct(&mat);
-    LfsrMatrix_destruct(&matp);
     return result;
 }
 
@@ -913,6 +1036,9 @@ BatteryExitCode battery_lfsr_period(const GeneratorInfo *gen, const CallerAPI *i
     }
     GeneratorStateExt ext = GeneratorStateExt_create(gen, intf);
     const LfsrPeriodResult res = lfsr_period_test(&ext, intf, &test_opts);
+    if (res == LFSR_PERIOD_MAX) {
+        GeneratorStateExt_get_poly(&ext);
+    }
     GeneratorStateExt_destruct(&ext);
     // Results interpretation
     switch (res) {
