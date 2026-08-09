@@ -13,6 +13,10 @@
 #define __SMOKERAND_LFSR_PERIOD_H
 #include "smokerand/core.h"
 
+enum {
+    LFSR_NBYTES_DEFAULT = 0
+};
+
 typedef struct {
     int check_validity;
 } LfsrPeriodOptions;
@@ -31,6 +35,8 @@ typedef struct {
 
 GeneratorStateExt
 GeneratorStateExt_create(const GeneratorInfo *gen, const CallerAPI *intf);
+GeneratorStateExt
+GeneratorStateExt_create_sized(const GeneratorInfo *gen, const CallerAPI *intf, size_t nbytes);
 int GeneratorStateExt_is_valid(GeneratorStateExt *obj, const CallerAPI *intf);
 void GeneratorStateExt_destruct(GeneratorStateExt *obj);
 

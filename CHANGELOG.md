@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `find_xorshift_params` executable that searches the `[a,b,c]` triples for
   the xorshift64 generators that give the full 2^64 - 1 period. Essentially
   it reproduces the classical results obtained by G. Marsaglia for xorshift
-  PRNGs.
+  PRNGs. It also searches triples for `xorshift32`, `xorshift128`
 - `dandelion128`, `dandelion64` and `dandelion32` generators: scrambled LFSRs.
 - `tf0_ctr64`, `thurst`, `nasam`, `pelican`, `wanghash64` generators based on
   a scrambled 64-bit counter/"discrete Weyl sequence" and similar to SplitMix.
@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   periods, needed as test cases for the `lfsr` battery.
 - `xorgens256`, `xorgens512`, `xorgens1024` were added: without discrete
   Weyl sequence and ring buffers, mainly for the `lfsr` battery testing.
+- `xorrot160` and `xorrot320` generators (designed by A.L. Voskov)
 - `xorshift96`, `xorshift160`, `xorshift192` and `xorshift256`: very well
   known classical PRNGs (with triples selected by A.L. Voskov by means of
   SmokeRand tests).
