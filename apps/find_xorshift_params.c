@@ -138,7 +138,7 @@ int run_triples_search(const GeneratorInfo *gen, const XorshiftProps *props)
     opts.check_validity = 1;
 
     const unsigned int nthreads = 16;
-    CallerAPI intf = CallerAPI_init();
+    CallerAPI intf = CallerAPI_init_mthr();
     intf.printf = printf_null;
 
     GeneratorStateExt ext = GeneratorStateExt_create_sized(gen, &intf, props->nbytes);
@@ -336,6 +336,111 @@ int test_xorshift64(void)
 
     return run_triples_search(&gen, &props);
 }
+
+
+
+////////////////////////////////
+///// xoshiro64w16 testing /////
+////////////////////////////////
+
+typedef struct {
+    uint16_t s[4];
+    int a;
+    int b;
+    int c;
+} Xoshiro64w16State;
+
+static uint16_t get_bits16_xo64w16(Xoshiro64w16State *obj)
+{
+    const uint16_t s0 = obj->s[0];
+    const uint16_t s0x3 = (uint16_t) (s0 ^ obj->s[3]);
+    obj->s[0] = obj->s[1];
+    obj->s[1] = obj->s[2];
+    obj->s[2] = (uint16_t) (rotl16(s0, obj->a) ^ s0x3 ^ (s0x3 << obj->b));
+    obj->s[3] = rotl16(s0x3, obj->c);
+    return obj->s[3];
+
+/*
+    const uint64_t s0 = obj->s[0];
+    uint64_t s1 = obj->s[1];
+    s1 ^= s0;
+    obj->s[0] = rotl64(s0, 24) ^ s1 ^ (s1 << 16); // a, b
+    obj->s[1] = rotl64(s1, 37); // c
+    return s0;
+*/
+
+/*
+    const uint64_t t = (uint16_t) (obj->s[1] << obj->a);
+    obj->s[2] = (uint16_t) (obj->s[2] ^ obj->s[0]);
+    obj->s[3] = (uint16_t) (obj->s[3] ^ obj->s[1]);
+    obj->s[1] = (uint16_t) (obj->s[1] ^ obj->s[2]);
+    obj->s[0] = (uint16_t) (obj->s[0] ^ obj->s[3]);
+    obj->s[2] = (uint16_t) (obj->s[2] ^ t);
+    obj->s[3] = rotl16(obj->s[3], obj->b);
+    return obj->s[3];
+*/
+}
+
+
+static uint64_t get_bits_xo64w16(void *obj)
+{
+    const uint32_t hi = get_bits16_xo64w16(obj);
+    const uint32_t lo = get_bits16_xo64w16(obj);
+    return (hi << 16) | lo;
+}
+
+static void *gen_create_xo64w16(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+    Xoshiro64w16State *obj = intf->malloc(sizeof(Xoshiro64w16State));
+    obj->s[0] = (uint16_t) intf->get_seed64();
+    obj->s[1] = (uint16_t) intf->get_seed64();
+    obj->s[2] = (uint16_t) intf->get_seed64();
+    obj->s[3] = (uint16_t) intf->get_seed64();
+    obj->a = 5;
+    obj->b = 10;
+    return obj;
+}
+
+
+static int is_triple_valid_xo64w16(unsigned int ai, unsigned int bi, unsigned int ci)
+{
+    (void) ai; (void) bi; (void) ci;
+    return 1;
+}
+
+
+
+static void set_triple_xo64w16(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
+{
+    Xoshiro64w16State *obj = state;
+    obj->a = (int) ai; obj->b = (int) bi; obj->c = (int) ci;
+}
+
+int test_xoshiro64w16(void)
+{
+    static const GeneratorInfo gen = {
+        .name = "xoshiro64w16:dynshifts",
+        .description = "xoshiro64w16 with dynamic shifts",
+        .nbits = 32,
+        .create = gen_create_xo64w16,
+        .free = gen_free,
+        .get_bits = get_bits_xo64w16,
+        .self_test = NULL,
+        .get_sum = NULL,
+        .parent = NULL
+    };
+
+    static const XorshiftProps props = {
+        .max_value = 16,
+        .nbytes = 8,
+        .is_triple_valid = is_triple_valid_xo64w16,
+        .set_triple = set_triple_xo64w16
+    };
+
+    return run_triples_search(&gen, &props);
+}
+
 
 
 
@@ -743,7 +848,8 @@ int test_xorrot320(void)
 
 int main()
 {
-    test_xorshift32();
+    test_xoshiro64w16();
+//    test_xorshift32();
 //    test_xorshift64();
 //    test_xorshift128();
 //    test_xorrot160();

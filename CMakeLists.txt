@@ -94,7 +94,8 @@ target_include_directories(peparse PRIVATE include)
 target_link_libraries(peparse smokerand_core ${COMMON_LIBS})
 
 # d) Some tests
-set(TESTS calibrate_dc6 calibrate_linearcomp find_xorshift_params test_base64 test_funcs test_rdseed)
+set(TESTS calibrate_dc6 calibrate_linearcomp find_xorshift_params
+    test_base64 test_funcs test_lfsr_period test_rdseed)
 foreach(testname ${TESTS})
     add_executable(${testname} apps/${testname}.c)
     target_include_directories(${testname} PRIVATE include)
