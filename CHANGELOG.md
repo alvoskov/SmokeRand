@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   periods, needed as test cases for the `lfsr` battery.
 - `xorgens256`, `xorgens512`, `xorgens1024` were added: without discrete
   Weyl sequence and ring buffers, mainly for the `lfsr` battery testing.
+- `xoshiro512` was added.
 - `xorrot160` and `xorrot320` generators (designed by A.L. Voskov)
 - `xorshift96`, `xorshift160`, `xorshift192` and `xorshift256`: very well
   known classical PRNGs (with triples selected by A.L. Voskov by means of
