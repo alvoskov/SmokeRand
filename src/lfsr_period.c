@@ -7,6 +7,9 @@
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
+ * Some polynomial GF(2) arithmetics is based on the public domain code
+ * by S.Vigna (https://prng.di.unimi.it/f2x.c).
+ *
  * This software is licensed under the MIT license.
  */
 #include "smokerand/lfsr_period.h"
@@ -34,6 +37,18 @@ typedef struct {
     uint8_t *x; ///< Pointer to the data
     size_t n;   ///< Matrix size (n x n)
 } LfsrMatrix;
+
+
+/**
+ * @brief LFSR related polynomials over the GF(2) field: e.g. characteristic
+ * polynomials, jump polynomials etc.
+ * @details It is packed in 64-bit words, the highest bit is omitted.
+ */
+typedef struct {
+    uint64_t *w64; ///< Polynomial packed in 64-bit words
+    size_t degree; ///< Polynomial degree
+    size_t nwords; ///< Number of 64-bit words used for storage
+} LfsrPoly;
 
 
 /**
@@ -374,6 +389,132 @@ void LargeInt_print_hex(const LargeInt *obj, const CallerAPI *intf)
     }
 }
 
+/////////////////////////////////////////
+///// LfsrPoly class implementation /////
+/////////////////////////////////////////
+
+LfsrPoly LfsrPoly_create(size_t degree)
+{
+    LfsrPoly obj;
+    size_t nwords = degree >> 6;
+    if ((degree & 0x3F) != 0 || degree == 0) {
+        nwords++;
+    }
+    obj.w64 = calloc(nwords, sizeof(uint64_t));
+    obj.degree = degree;
+    obj.nwords = nwords;
+    return obj;
+}
+
+static inline void LfsrPoly_setbit(LfsrPoly *obj, size_t ind)
+{
+    obj->w64[ind >> 6] |= (1ULL << (ind & 0x3FU));
+}
+
+
+static inline int LfsrPoly_getbit(const LfsrPoly *obj, size_t ind)
+{
+    return (obj->w64[ind >> 6] & (1ULL << (ind & 0x3FU))) ? 1 : 0;
+}
+
+
+void LfsrPoly_print(const LfsrPoly *obj, const CallerAPI *intf)
+{
+    unsigned int nterms = 1;
+    intf->printf("x^%u + ", (unsigned int) obj->degree);
+    for (size_t i = obj->degree; i-- != 0; ) {
+        if (LfsrPoly_getbit(obj, i) != 0) {
+            if (i > 0) {
+                intf->printf("x^%u + ", (unsigned int) i);
+            } else {
+                intf->printf("1");
+            }
+            nterms++;
+        }
+    }
+    intf->printf(" | nterms = %u", nterms);
+}
+
+void LfsrPoly_print_hex(const LfsrPoly *obj, const CallerAPI *intf)
+{
+    for (size_t i = obj->nwords; i-- != 0; ) {
+        if (i != 0) {
+            intf->printf("%16.16llX.", (unsigned long long) obj->w64[i]);
+        } else {
+            intf->printf("%16.16llX", (unsigned long long) obj->w64[i]);
+        }
+    }
+}
+
+void LfsrPoly_destruct(LfsrPoly *obj)
+{
+    free(obj->w64);
+}
+
+
+// a <- a * x mod charpoly
+void LfsrPoly_mulx(LfsrPoly *a, const LfsrPoly *charpoly)
+{
+    const size_t degree = charpoly->degree;
+    uint64_t carry = 0;
+    if (a->nwords != charpoly->nwords) {
+        return;
+    }
+    for (size_t i = 0; i < a->nwords; i++) {
+        const uint64_t next_carry = a->w64[i] >> 63;
+        a->w64[i] = (a->w64[i] << 1) | carry;
+        carry = next_carry;
+    }
+    // Coefficient of x^POLY_DEG after the shift.
+    int top;
+    if (degree % 64 == 0) {
+    	top = (int) carry;
+    } else {
+        top = (a->w64[degree >> 6] >> (degree & 63)) & 1;
+        a->w64[degree >> 6] &= ~(UINT64_C(1) << (degree & 63));
+    }
+	if (top) {
+        for (size_t i = 0; i < charpoly->nwords; i++) {
+            a->w64[i] ^= charpoly->w64[i];
+        }
+    }
+
+}
+
+// a <- a * b mod charpoly (Horner over the bits of a, from the top)
+void LfsrPoly_mulmod(LfsrPoly *a, const LfsrPoly *b, const LfsrPoly *charpoly)
+{
+    if (a->nwords != b->nwords || a->nwords != charpoly->nwords) {
+        return;
+    }
+    LfsrPoly r = LfsrPoly_create(charpoly->degree);
+    for (size_t k = charpoly->degree; k-- != 0; ) {
+        LfsrPoly_mulx(&r, charpoly);
+		if ((a->w64[k >> 6] >> (k & 63)) & 1) {
+            for (size_t i = 0; i < a->nwords; i++) {
+                r.w64[i] ^= b->w64[i];
+            }
+        }
+	}
+    memcpy(a->w64, r.w64, a->nwords*sizeof(uint64_t));
+    LfsrPoly_destruct(&r);
+}
+
+// out <- x^(c * 2^e) mod charpoly
+LfsrPoly LfsrPoly_jumppoly_ce(const LfsrPoly *charpoly, uint64_t c, uint32_t e)
+{
+    LfsrPoly out = LfsrPoly_create(charpoly->degree);
+    out.w64[0] = 1; // out = 1
+    for (int k = 63; k >= 0; k--) { // out = x^c
+        LfsrPoly_mulmod(&out, &out, charpoly);
+        if ((c >> k) & 1)
+            LfsrPoly_mulx(&out, charpoly);
+    }
+    while (e--) {
+        LfsrPoly_mulmod(&out, &out, charpoly); // out = (x^c)^(2^e) = x^(c * 2^e)
+    }
+    return out;
+}
 
 
 ///////////////////////////////////////////
@@ -720,9 +861,10 @@ GeneratorStateExt_get_matrix(GeneratorStateExt *obj, unsigned long long niters)
 }
 
 /**
- * @brief Restores the primitive characteristic polynomial of the LFSR.
+ * @brief Restores Krylov matrix required for computation of the primitive
+ * polynomial that corresponds to the LFSR.
  */
-void GeneratorStateExt_get_poly(GeneratorStateExt *obj)
+LfsrMatrix GeneratorStateExt_get_krylov_matrix(GeneratorStateExt *obj)
 {
     const size_t nbits = obj->nbytes * 8;
     LfsrMatrix mat = LfsrMatrix_create(nbits + 1);
@@ -731,7 +873,6 @@ void GeneratorStateExt_get_poly(GeneratorStateExt *obj)
     for (size_t i = 0; i < obj->nbytes; i++) {
         buf[i] = (uint8_t) ((i % 2) ? 0x55 : 0xAA);
     }
-//    buf[0] = 
     // Generate the system of equation (based on Krylov space)
     // Use the row vectors here
     for (size_t i = 0; i < nbits + 1; i++) {
@@ -741,7 +882,35 @@ void GeneratorStateExt_get_poly(GeneratorStateExt *obj)
         }
         (void) obj->state.gi->get_bits(obj->state.state);
     }
+    return mat;
+}
 
+/**
+ * @brief Converts LFSR transition matrix to Krylov matrix.
+ */
+LfsrMatrix LfsrMatrix_get_krylov_matrix(const LfsrMatrix *mat)
+{
+    const size_t nbits = mat->n;
+    LfsrMatrix kmat = LfsrMatrix_create(nbits + 1);
+    LfsrMatrix_setbit(&kmat, 0, 0, 1);
+    for (size_t i = 0; i < nbits; i++) {
+        for (size_t j = 0; j < nbits; j++) {
+            uint8_t b = 0;
+            for (size_t k = 0; k < nbits; k++) {
+                const uint8_t u = LfsrMatrix_getbit(mat, k, j);
+                const uint8_t v = LfsrMatrix_getbit(&kmat, i, k);
+                b = (uint8_t) (b ^ (u & v));
+            }
+            LfsrMatrix_setbit(&kmat, i + 1, j, b);
+        }
+    }
+    return kmat;
+}
+
+
+LfsrPoly LfsrMatrix_krylov_to_charpoly(LfsrMatrix *mat)
+{
+    const size_t nbits = mat->n - 1;
     // Gaussian elimination. Note: each equation is a column!
     // a) Initialize the columns indexex for its swapping
     size_t *cinds = calloc(nbits + 1, sizeof(size_t));
@@ -753,7 +922,7 @@ void GeneratorStateExt_get_poly(GeneratorStateExt *obj)
         // b1) pivot
         size_t i_pivot;
         for (i_pivot = j;
-             LfsrMatrix_getbit(&mat, j, cinds[i_pivot]) == 0 && i_pivot < nbits;
+             LfsrMatrix_getbit(mat, j, cinds[i_pivot]) == 0 && i_pivot < nbits;
              i_pivot++) {
             
         }
@@ -768,56 +937,60 @@ void GeneratorStateExt_get_poly(GeneratorStateExt *obj)
         // b2) Elimination
         // Note: LfsrMatrix_getbit(&mat, j, cinds[j])) is always 1
         for (size_t i = 0; i < nbits; i++) {
-            if (i != j && LfsrMatrix_getbit(&mat, j, cinds[i]) != 0) {
+            if (i != j && LfsrMatrix_getbit(mat, j, cinds[i]) != 0) {
                 // Add column cinds[j] to cinds[i]
                 for (size_t k = 0; k < nbits + 1; k++) {
-                    const uint8_t a = (uint8_t) (LfsrMatrix_getbit(&mat, k, cinds[i]));
-                    const uint8_t b = (uint8_t) (LfsrMatrix_getbit(&mat, k, cinds[j]));
-                    LfsrMatrix_setbit(&mat, k, cinds[i], (uint8_t) (a ^ b));
+                    const uint8_t a = (uint8_t) (LfsrMatrix_getbit(mat, k, cinds[i]));
+                    const uint8_t b = (uint8_t) (LfsrMatrix_getbit(mat, k, cinds[j]));
+                    LfsrMatrix_setbit(mat, k, cinds[i], (uint8_t) (a ^ b));
                 }
             }
         }
     }
-
-    printf("vvv elim vvv\n");
-    for (size_t ii = 0; ii < nbits + 1; ii++) {
-        for (size_t jj = 0; jj < nbits + 1; jj++) {
-            printf("%u", (int) LfsrMatrix_getbit(&mat, ii, cinds[jj]));
-        }
-        printf("\n");
-    }
-    fflush(stdout);
-
     // c) Restore the polynomial
-    uint8_t *poly = calloc(nbits + 1, sizeof(uint8_t));
+    LfsrPoly poly = LfsrPoly_create(nbits);
+    //uint8_t *poly = calloc(nbits + 1, sizeof(uint8_t));
     for (size_t i = 0; i < nbits; i++) {
-        poly[i] = LfsrMatrix_getbit(&mat, nbits, cinds[i]);
-    }
-    poly[nbits] = 1;
-    size_t nterms = 0;
-    for (size_t i = nbits + 1; i-- != 0; ) {
-        if (poly[i] != 0) {
-            if (i > 0) {
-                printf("x^%u + ", (int) i);
-            } else {
-                printf("1");
-            }
-            nterms++;
+        if (LfsrMatrix_getbit(mat, nbits, cinds[i])) {
+            LfsrPoly_setbit(&poly, i);
         }
     }
-    printf("nterms: %u\n", (unsigned int) nterms);
     // xorshift64: 0.13-17-43	x^64 + x^49 + x^48 + x^45 + x^44 + x^42 + x^41 + x^38 + x^37 + x^28 + x^27 + x^26 + x^25 + x^17 + x^16 + x^11 + x^6 + x^5 + 1	19
     // xorshift256: 256 + x^242 + x^241 + x^240 + x^239 + x^234 + x^233 + x^232 + x^231 + x^226 + x^225 + x^224 + x^223 + x^220 + x^218 + x^217 + x^215 + x^212 + x^210 + x^206 + x^205 + x^203 + x^200 + x^199 + x^198 + x^195 + x^194 + x^191 + x^190 + x^189 + x^188 + x^185 + x^184 + x^180 + x^178 + x^177 + x^170 + x^169 + x^167 + x^165 + x^162 + x^159 + x^156 + x^153 + x^151 + x^150 + x^148 + x^147 + x^145 + x^143 + x^137 + x^136 + x^135 + x^133 + x^132 + x^127 + x^126 + x^125 + x^124 + x^121 + x^120 + x^119 + x^117 + x^116 + x^115 + x^114 + x^113 + x^112 + x^107 + x^106 + x^105 + x^100 + x^99 + x^97 + x^96 + x^94 + x^92 + x^89 + x^88 + x^87 + x^85 + x^83 + x^76 + x^75 + x^73 + x^72 + x^70 + x^69 + x^66 + x^65 + x^62 + x^59 + x^55 + x^51 + x^50 + x^49 + x^48 + x^47 + x^45 + x^43 + x^42 + x^40 + x^39 + x^38 + x^37 + x^35 + x^34 + x^33 + x^31 + x^30 + x^29 + x^20 + x^18 + x^17 + x^16 + x^14 + x^8 + x^7 + x^4 + x^3 + 1
     // https://github.com/funny-falcon/xorshift256and192/blob/master/full/256shift64/prim.txt
     // https://github.com/jj1bdx/xorshiftplus/blob/master/full/xorshift64poly.txt
     // https://prng.di.unimi.it/xorshift.php
-    printf("\n");
-    free(poly);
-
-
     free(cinds);
-    LfsrMatrix_destruct(&mat);
+    return poly;
 }
+
+
+/**
+ * @brief Restores the primitive characteristic polynomial of the LFSR.
+ */
+LfsrPoly GeneratorStateExt_get_poly(GeneratorStateExt *obj)
+{
+    LfsrMatrix mat = GeneratorStateExt_get_krylov_matrix(obj);
+    LfsrPoly poly = LfsrMatrix_krylov_to_charpoly(&mat);
+    LfsrMatrix_destruct(&mat);
+    return poly;
+}
+
+
+
+
+/**
+ * @brief Restores the charateristic polynomial that corresponds to the jump
+ * matrix of the LFSR.
+ */
+LfsrPoly GeneratorStateExt_get_jump_poly_pow2(GeneratorStateExt *obj, unsigned int p)
+{
+    LfsrPoly char_poly = GeneratorStateExt_get_poly(obj);
+    LfsrPoly jump_poly = LfsrPoly_jumppoly_ce(&char_poly, 1, p);
+    LfsrPoly_destruct(&char_poly);
+    return jump_poly;
+}
+
 
 /**
  * @brief Check if the PRNG is LFSR or not.
@@ -848,15 +1021,14 @@ static int GeneratorStateExt_has_counters(GeneratorStateExt *obj)
 {
     const unsigned long niters = 10000000;
     const size_t nbytes = obj->nbytes;
-    const uint8_t *cur = obj->state.state;
     uint8_t *prev = malloc(nbytes);
     uint8_t *is_byte_ctr = malloc(nbytes);
     memset(is_byte_ctr, 1, nbytes);
-    // Save an initial PRNG state
-    memcpy(prev, obj->state.state, nbytes);
     // Check if any bytes behave like a counter
     for (unsigned long i = 0; i < niters; i++) {
         // Iterate the PRNG state
+        const uint8_t *cur = obj->state.state;
+        memcpy(prev, obj->state.state, nbytes);
         (void) obj->state.gi->get_bits(obj->state.state);
         // Check if some bytes are not counters
         for (size_t j = 0; j < nbytes; j++) {
@@ -1037,7 +1209,23 @@ BatteryExitCode battery_lfsr_period(const GeneratorInfo *gen, const CallerAPI *i
     GeneratorStateExt ext = GeneratorStateExt_create(gen, intf);
     const LfsrPeriodResult res = lfsr_period_test(&ext, intf, &test_opts);
     if (res == LFSR_PERIOD_MAX) {
-        GeneratorStateExt_get_poly(&ext);
+        {
+            LfsrPoly poly = GeneratorStateExt_get_poly(&ext);
+            intf->printf("Characteristic polynomial:\n");
+            LfsrPoly_print(&poly, intf); intf->printf("\n");
+            intf->printf("  ");
+            LfsrPoly_print_hex(&poly, intf); intf->printf("\n");
+            LfsrPoly_destruct(&poly);
+        }
+        {
+            const unsigned int jump_pow2 = (unsigned int) (ext.nbytes * 4);
+            LfsrPoly jump_poly = GeneratorStateExt_get_jump_poly_pow2(&ext, jump_pow2);
+            intf->printf("Jump polynomial for the 2^%u jump:\n", jump_pow2);
+            intf->printf("  ");
+            LfsrPoly_print_hex(&jump_poly, intf); intf->printf("\n");
+            LfsrPoly_destruct(&jump_poly);
+        }
+
     }
     GeneratorStateExt_destruct(&ext);
     // Results interpretation
