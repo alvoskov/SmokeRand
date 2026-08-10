@@ -152,8 +152,8 @@ BATLIB_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_express.h bat_brief.h bat_defau
 BATLIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(BATLIB_SOURCES)))
 # Executables
 EXEC_NAMES = smokerand sr_speed sr_tiny calibrate_linearcomp calibrate_dc6 \
-    find_xorshift_params \
-    test_base64 test_crand test_funcs test_rdseed test_syscrypto
+    find_xorshift_params test_base64 \
+    test_crand test_funcs test_lfsr_period test_rdseed test_syscrypto
 EXEC_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXEC_NAMES)))
 EXECXX_NAMES = test_cpp11 test_chacha
 EXECXX_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXECXX_NAMES)))
@@ -212,6 +212,9 @@ $(BINDIR)/test_funcs$(EXE): $(OBJDIR)/test_funcs.o $(CORE_LIB) $(BAT_LIB)
 	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
 $(BINDIR)/test_rdseed$(EXE): $(OBJDIR)/test_rdseed.o $(CORE_LIB) $(BAT_LIB)
+	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
+
+$(BINDIR)/test_lfsr_period$(EXE): $(OBJDIR)/test_lfsr_period.o $(CORE_LIB) $(BAT_LIB)
 	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
 $(BINDIR)/test_syscrypto$(EXE): $(OBJDIR)/test_syscrypto.o $(CORE_LIB) $(BAT_LIB)

@@ -20,37 +20,6 @@
 #include <time.h>
 #include <math.h>
 
-#define LARGEINT_SIZE 16
-
-/**
- * @brief Wide integers required for the exponents.
- */
-typedef struct {
-    uint64_t x[LARGEINT_SIZE];
-} LargeInt;
-
-/**
- * @brief Square matrix over the GF(2) field that represents the LFSR
- * transition function.
- */
-typedef struct {
-    uint8_t *x; ///< Pointer to the data
-    size_t n;   ///< Matrix size (n x n)
-} LfsrMatrix;
-
-
-/**
- * @brief LFSR related polynomials over the GF(2) field: e.g. characteristic
- * polynomials, jump polynomials etc.
- * @details It is packed in 64-bit words, the highest bit is omitted.
- */
-typedef struct {
-    uint64_t *w64; ///< Polynomial packed in 64-bit words
-    size_t degree; ///< Polynomial degree
-    size_t nwords; ///< Number of 64-bit words used for storage
-} LfsrPoly;
-
-
 /**
  * @brief `2**32 - 1 =  [3, 5, 17, 257, 65537]`
  */
@@ -302,11 +271,6 @@ LargeInt LargeInt_from_pow2(unsigned int p)
     return obj;
 }
 
-int LargeInt_getbit(const LargeInt *obj, unsigned int ind)
-{
-    return (obj->x[ind >> 6] & (1ULL << (ind & 0x3FU))) ? 1 : 0;
-}
-
 /**
  * @brief Subtract the unsigned 64-bit integer from the large integer.
  */
@@ -321,12 +285,6 @@ void LargeInt_subtract_u64(LargeInt *obj, uint64_t val)
             val = 1;
         }
     }
-}
-
-
-int LargeInt_is_odd(const LargeInt *obj)
-{
-    return (obj->x[0] & 1) == 1;
 }
 
 
@@ -404,17 +362,6 @@ LfsrPoly LfsrPoly_create(size_t degree)
     obj.degree = degree;
     obj.nwords = nwords;
     return obj;
-}
-
-static inline void LfsrPoly_setbit(LfsrPoly *obj, size_t ind)
-{
-    obj->w64[ind >> 6] |= (1ULL << (ind & 0x3FU));
-}
-
-
-static inline int LfsrPoly_getbit(const LfsrPoly *obj, size_t ind)
-{
-    return (obj->w64[ind >> 6] & (1ULL << (ind & 0x3FU))) ? 1 : 0;
 }
 
 
@@ -521,7 +468,7 @@ LfsrPoly LfsrPoly_jumppoly_ce(const LfsrPoly *charpoly, uint64_t c, uint32_t e)
 ///// LfsrMatrix class implementation /////
 ///////////////////////////////////////////
 
-static LfsrMatrix LfsrMatrix_create(size_t n)
+LfsrMatrix LfsrMatrix_create(size_t n)
 {
     LfsrMatrix obj;
     if (n > 0) {
@@ -533,16 +480,6 @@ static LfsrMatrix LfsrMatrix_create(size_t n)
     return obj;
 }
 
-static inline void LfsrMatrix_setbit(LfsrMatrix *obj, size_t i, size_t j, uint8_t val)
-{
-    obj->x[i*obj->n + j] = (val == 0) ? 0 : 1;
-}
-
-static inline uint8_t LfsrMatrix_getbit(const LfsrMatrix *obj, size_t i, size_t j)
-{
-    return obj->x[i*obj->n + j];
-}
-
 /**
  * @brief Matrix multiplication in the GF(2) field.
  * @details It uses rows and columns packing to 64-bit words, bitwise operations
@@ -552,7 +489,7 @@ static inline uint8_t LfsrMatrix_getbit(const LfsrMatrix *obj, size_t i, size_t 
  * @param b The second matrix.
  * @return The matrix product, must be destructed by the caller.
  */
-static LfsrMatrix LfsrMatrix_create_prod(const LfsrMatrix *a, const LfsrMatrix *b)
+LfsrMatrix LfsrMatrix_create_prod(const LfsrMatrix *a, const LfsrMatrix *b)
 {
     // Check the matrices size
     const size_t n = a->n;
@@ -600,7 +537,7 @@ static LfsrMatrix LfsrMatrix_create_prod(const LfsrMatrix *a, const LfsrMatrix *
 /**
  * @brief Check if the two matrices are equal.
  */
-static int LfsrMatrix_are_equal(const LfsrMatrix *a, const LfsrMatrix *b)
+int LfsrMatrix_are_equal(const LfsrMatrix *a, const LfsrMatrix *b)
 {
     if (a->n != b->n) {
         return 0;
@@ -618,7 +555,7 @@ static int LfsrMatrix_are_equal(const LfsrMatrix *a, const LfsrMatrix *b)
 /**
  * @brief Check if the matrix is the eye matrix.
  */
-static int LfsrMatrix_is_eye(const LfsrMatrix *a)
+int LfsrMatrix_is_eye(const LfsrMatrix *a)
 {
     for (size_t i = 0; i < a->n; i++) {
         for (size_t j = 0; j < a->n; j++) {
@@ -634,7 +571,7 @@ static int LfsrMatrix_is_eye(const LfsrMatrix *a)
 /**
  * @brief Make a copy of the matrix.
  */
-static LfsrMatrix LfsrMatrix_clone(const LfsrMatrix *obj)
+LfsrMatrix LfsrMatrix_clone(const LfsrMatrix *obj)
 {
     const size_t n = obj->n;
     LfsrMatrix cpy = LfsrMatrix_create(n);
@@ -646,7 +583,7 @@ static LfsrMatrix LfsrMatrix_clone(const LfsrMatrix *obj)
  * @brief Destructor: deallocates all internal buffers but
  * not the structure itself.
  */
-static void LfsrMatrix_destruct(LfsrMatrix *obj)
+void LfsrMatrix_destruct(LfsrMatrix *obj)
 {
     free(obj->x);
 }
@@ -665,7 +602,7 @@ static void LfsrMatrix_destruct(LfsrMatrix *obj)
  * @param e  Exponent
  * @return The matrix power, must be destructed by the caller.
  */
-static LfsrMatrix LfsrMatrix_create_pow(const LfsrMatrix *x, const LargeInt *e)
+LfsrMatrix LfsrMatrix_create_pow(const LfsrMatrix *x, const LargeInt *e)
 {
     if (LargeInt_is_u64(e, 1)) {
         return LfsrMatrix_clone(x);
@@ -698,7 +635,7 @@ typedef enum {
 } LfsrMatrixTileType;
 
 
-LfsrMatrixTileType
+static LfsrMatrixTileType
 LfsrMatrix_get_tile_type(const LfsrMatrix *obj, size_t i, size_t j, size_t width)
 {
     // Check if there are 1s outside the main diagonal
@@ -769,120 +706,6 @@ int LfsrMatrix_is_period_possible(const LfsrMatrix *mat, const LargeInt *period)
     const int is_possible = LfsrMatrix_is_eye(&matp);
     LfsrMatrix_destruct(&matp);
     return is_possible;
-}
-
-
-//////////////////////////////////////////////////
-///// GeneratorStateExt class implementation /////
-//////////////////////////////////////////////////
-
-static unsigned int malloc_ncalls = 0;
-static size_t malloc_nbytes = 0;
-static CallerAPI intf_hooked;
-static void *(*malloc_original)(size_t len);
-
-
-static void *malloc_loghook(size_t len)
-{
-    malloc_ncalls++;
-    malloc_nbytes += len;
-    return malloc_original(len);
-}
-
-/**
- * @brief Creates the PRNG example with measurement of its state size.
- * The `intf->malloc` hook is used. WARNING: this function is not
- * thread safe!
- * @details WARNING: this function is not reentrant (not thread safe) because
- * it uses `intf->malloc` hooks to measure the PRNG state size.
- */
-GeneratorStateExt
-GeneratorStateExt_create(const GeneratorInfo *gen, const CallerAPI *intf)
-{
-    malloc_ncalls = 0;
-    malloc_nbytes = 0;
-    malloc_original = intf->malloc;
-    intf_hooked = *intf;
-    intf_hooked.malloc = malloc_loghook;
-    GeneratorStateExt ext;
-    ext.state = GeneratorState_create(gen, &intf_hooked);
-    ext.nbytes = (malloc_ncalls == 1) ? malloc_nbytes : 0;
-    return ext;
-}
-
-
-GeneratorStateExt
-GeneratorStateExt_create_sized(const GeneratorInfo *gen, const CallerAPI *intf, size_t nbytes)
-{
-    if (nbytes == LFSR_NBYTES_DEFAULT) {
-        return GeneratorStateExt_create(gen, intf);
-    } else {
-        GeneratorStateExt ext;
-        ext.state = GeneratorState_create(gen, intf);
-        ext.nbytes = nbytes;
-        return ext;
-    }
-}
-
-/**
- * @brief Restores the LFSR transition matrix using only its transition function
- * (that returns pseudorandom values) and initialization with states like
- * `[100000]`, `[010000]`, `[001000]` etc.
- * @details This matrix uses slightly unusual conventions taken from [1]: it
- * is applied as \f$ x_{n+1} = x_{n} A \f$ where \f$x_{n}\f$ is a *row* bit
- * vector representing the generator state.
- *
- * 1. Marsaglia G. Xorshift RNGs // Journal of Statistical Software. 2003.
- *   V. 8. N. 14. P.1-6. https://doi.org/10.18637/jss.v008.i14
- *
- * @param obj The generator to be analyzed.
- * @param niters Number of iterations before the matrix recovery:
- *               niters=1 will restore A^1, niters=2 - A^2 etc.
- * @return The LFSR transition matrix over the GF(2) field.
- */
-static LfsrMatrix
-GeneratorStateExt_get_matrix(GeneratorStateExt *obj, unsigned long long niters)
-{
-    const size_t nbits = obj->nbytes * 8;
-    LfsrMatrix mat = LfsrMatrix_create(nbits);
-    uint8_t *buf = obj->state.state;
-    for (size_t i = 0; i < nbits; i++) {
-        memset(buf, 0, obj->nbytes);
-        buf[i >> 3] = 1U << (i & 0x7U);
-        for (unsigned long long j = 0; j < niters; j++) {
-            (void) obj->state.gi->get_bits(obj->state.state);
-        }
-        for (size_t j = 0; j < nbits; j++) {
-            const uint8_t b = buf[j >> 3] & (1U << (j & 0x7U));
-            LfsrMatrix_setbit(&mat, i, j, b);
-        }
-    }
-    return mat;
-}
-
-/**
- * @brief Restores Krylov matrix required for computation of the primitive
- * polynomial that corresponds to the LFSR.
- */
-LfsrMatrix GeneratorStateExt_get_krylov_matrix(GeneratorStateExt *obj)
-{
-    const size_t nbits = obj->nbytes * 8;
-    LfsrMatrix mat = LfsrMatrix_create(nbits + 1);
-    uint8_t *buf = obj->state.state;
-    // Set an initial state of the generator
-    for (size_t i = 0; i < obj->nbytes; i++) {
-        buf[i] = (uint8_t) ((i % 2) ? 0x55 : 0xAA);
-    }
-    // Generate the system of equation (based on Krylov space)
-    // Use the row vectors here
-    for (size_t i = 0; i < nbits + 1; i++) {
-        for (size_t j = 0; j < nbits; j++) {
-            const uint8_t b = buf[j >> 3] & (1U << (j & 0x7U));
-            LfsrMatrix_setbit(&mat, i, j, b);
-        }
-        (void) obj->state.gi->get_bits(obj->state.state);
-    }
-    return mat;
 }
 
 /**
@@ -965,6 +788,120 @@ LfsrPoly LfsrMatrix_krylov_to_charpoly(LfsrMatrix *mat)
 }
 
 
+//////////////////////////////////////////////////
+///// GeneratorStateExt class implementation /////
+//////////////////////////////////////////////////
+
+static unsigned int malloc_ncalls = 0;
+static size_t malloc_nbytes = 0;
+static CallerAPI intf_hooked;
+static void *(*malloc_original)(size_t len);
+
+
+static void *malloc_loghook(size_t len)
+{
+    malloc_ncalls++;
+    malloc_nbytes += len;
+    return malloc_original(len);
+}
+
+/**
+ * @brief Creates the PRNG example with measurement of its state size.
+ * The `intf->malloc` hook is used. WARNING: this function is not
+ * thread safe!
+ * @details WARNING: this function is not reentrant (not thread safe) because
+ * it uses `intf->malloc` hooks to measure the PRNG state size.
+ */
+GeneratorStateExt
+GeneratorStateExt_create(const GeneratorInfo *gen, const CallerAPI *intf)
+{
+    malloc_ncalls = 0;
+    malloc_nbytes = 0;
+    malloc_original = intf->malloc;
+    intf_hooked = *intf;
+    intf_hooked.malloc = malloc_loghook;
+    GeneratorStateExt ext;
+    ext.state = GeneratorState_create(gen, &intf_hooked);
+    ext.nbytes = (malloc_ncalls == 1) ? malloc_nbytes : 0;
+    return ext;
+}
+
+
+GeneratorStateExt
+GeneratorStateExt_create_sized(const GeneratorInfo *gen, const CallerAPI *intf, size_t nbytes)
+{
+    if (nbytes == LFSR_NBYTES_DEFAULT) {
+        return GeneratorStateExt_create(gen, intf);
+    } else {
+        GeneratorStateExt ext;
+        ext.state = GeneratorState_create(gen, intf);
+        ext.nbytes = nbytes;
+        return ext;
+    }
+}
+
+/**
+ * @brief Restores the LFSR transition matrix using only its transition function
+ * (that returns pseudorandom values) and initialization with states like
+ * `[100000]`, `[010000]`, `[001000]` etc.
+ * @details This matrix uses slightly unusual conventions taken from [1]: it
+ * is applied as \f$ x_{n+1} = x_{n} A \f$ where \f$x_{n}\f$ is a *row* bit
+ * vector representing the generator state.
+ *
+ * 1. Marsaglia G. Xorshift RNGs // Journal of Statistical Software. 2003.
+ *   V. 8. N. 14. P.1-6. https://doi.org/10.18637/jss.v008.i14
+ *
+ * @param obj The generator to be analyzed.
+ * @param niters Number of iterations before the matrix recovery:
+ *               niters=1 will restore A^1, niters=2 - A^2 etc.
+ * @return The LFSR transition matrix over the GF(2) field.
+ */
+LfsrMatrix
+GeneratorStateExt_get_matrix(GeneratorStateExt *obj, unsigned long long niters)
+{
+    const size_t nbits = obj->nbytes * 8;
+    LfsrMatrix mat = LfsrMatrix_create(nbits);
+    uint8_t *buf = obj->state.state;
+    for (size_t i = 0; i < nbits; i++) {
+        memset(buf, 0, obj->nbytes);
+        buf[i >> 3] = 1U << (i & 0x7U);
+        for (unsigned long long j = 0; j < niters; j++) {
+            (void) obj->state.gi->get_bits(obj->state.state);
+        }
+        for (size_t j = 0; j < nbits; j++) {
+            const uint8_t b = buf[j >> 3] & (1U << (j & 0x7U));
+            LfsrMatrix_setbit(&mat, i, j, b);
+        }
+    }
+    return mat;
+}
+
+/**
+ * @brief Restores Krylov matrix required for computation of the primitive
+ * polynomial that corresponds to the LFSR.
+ */
+LfsrMatrix GeneratorStateExt_get_krylov_matrix(GeneratorStateExt *obj)
+{
+    const size_t nbits = obj->nbytes * 8;
+    LfsrMatrix mat = LfsrMatrix_create(nbits + 1);
+    uint8_t *buf = obj->state.state;
+    // Set an initial state of the generator
+    for (size_t i = 0; i < obj->nbytes; i++) {
+        buf[i] = (uint8_t) ((i % 2) ? 0x55 : 0xAA);
+    }
+    // Generate the system of equation (based on Krylov space)
+    // Use the row vectors here
+    for (size_t i = 0; i < nbits + 1; i++) {
+        for (size_t j = 0; j < nbits; j++) {
+            const uint8_t b = buf[j >> 3] & (1U << (j & 0x7U));
+            LfsrMatrix_setbit(&mat, i, j, b);
+        }
+        (void) obj->state.gi->get_bits(obj->state.state);
+    }
+    return mat;
+}
+
+
 /**
  * @brief Restores the primitive characteristic polynomial of the LFSR.
  */
@@ -980,8 +917,8 @@ LfsrPoly GeneratorStateExt_get_poly(GeneratorStateExt *obj)
 
 
 /**
- * @brief Restores the charateristic polynomial that corresponds to the jump
- * matrix of the LFSR.
+ * @brief Restores the jump polynomial that corresponds to the jump matrix
+ * of the LFSR.
  */
 LfsrPoly GeneratorStateExt_get_jump_poly_pow2(GeneratorStateExt *obj, unsigned int p)
 {
@@ -991,11 +928,46 @@ LfsrPoly GeneratorStateExt_get_jump_poly_pow2(GeneratorStateExt *obj, unsigned i
     return jump_poly;
 }
 
+/**
+ * @brief Makes a jump in an assumption that PRNG is an LFSR using a supplied
+ * jump polynomial.
+ */
+void GeneratorStateExt_apply_jump_poly(GeneratorStateExt *obj, const LfsrPoly *jump_poly)
+{
+    uint8_t *new_state = calloc(obj->nbytes, sizeof(uint8_t));
+    uint8_t *cur_state = obj->state.state;
+    for (size_t i = 0; i < jump_poly->degree; i++) {
+        if (LfsrPoly_getbit(jump_poly, i)) {
+            for (size_t j = 0; j < obj->nbytes; j++) {
+                new_state[j] ^= cur_state[j];
+            }
+        }
+        (void) obj->state.gi->get_bits(obj->state.state);
+    }
+    memcpy(cur_state, new_state, obj->nbytes);
+    free(new_state);
+}
+
+/**
+ * @brief Makes a jump in an assumption that PRNG is an LFSR using a supplied
+ * jump polynomial.
+ */
+void GeneratorStateExt_make_jump_pow2(GeneratorStateExt *obj, unsigned int p)
+{
+    uint8_t *old_state = malloc(obj->nbytes);
+    memcpy(old_state, obj->state.state, obj->nbytes);
+    LfsrPoly jump_poly = GeneratorStateExt_get_jump_poly_pow2(obj, p);
+    memcpy(obj->state.state, old_state, obj->nbytes);
+    free(old_state);
+    GeneratorStateExt_apply_jump_poly(obj, &jump_poly);
+    LfsrPoly_destruct(&jump_poly);
+}
+
 
 /**
  * @brief Check if the PRNG is LFSR or not.
  */
-static int GeneratorStateExt_is_lfsr(GeneratorStateExt *obj)
+int GeneratorStateExt_is_lfsr(GeneratorStateExt *obj)
 {
     const unsigned long niters = 65537;
     const LargeInt niters_lint = LargeInt_from_u64(niters);
@@ -1017,7 +989,7 @@ static int GeneratorStateExt_is_lfsr(GeneratorStateExt *obj)
  * to prevent memory corruption and segmentation fault during the 
  * period deduction attempts.
  */
-static int GeneratorStateExt_has_counters(GeneratorStateExt *obj)
+int GeneratorStateExt_has_counters(GeneratorStateExt *obj)
 {
     const unsigned long niters = 10000000;
     const size_t nbytes = obj->nbytes;
