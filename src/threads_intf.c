@@ -57,7 +57,7 @@ ThreadObj ThreadObj_create(ThreadFuncPtr thr_func, void *udata, unsigned int ord
     thr_func(udata);
 #endif
 
-    MUTEX_LOCK(thread_ord_mutex);
+    MUTEX_LOCK(thread_ord_mutex, "ThreadObj_create");
     if (nthreads < NTHREADS_MAX) {
         threads[nthreads++] = obj;
     }
