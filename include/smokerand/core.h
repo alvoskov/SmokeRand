@@ -328,8 +328,14 @@ static inline unsigned int countl_zero_u64(uint64_t x)
     y = x >>  4; if (y != 0) { n = n -  4; x = y; }
     y = x >>  2; if (y != 0) { n = n -  2; x = y; }
     y = x >>  1; if (y != 0) return n - 2;
-    return n - x;
+    return (unsigned int) (n - x);
 #endif
+}
+
+#define ASSERT_MALLOC_PTR(ptr, msg) \
+if (ptr == NULL) { \
+    fprintf(stderr, "***** %s: not enough memory *****\n", msg); \
+    exit(EXIT_FAILURE); \
 }
 
 #endif // __SMOKERAND_CORE_H

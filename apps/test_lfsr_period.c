@@ -320,7 +320,7 @@ static int test_xoroshiro128(const CallerAPI *intf)
         Xoroshiro128PPState *obj = ext.state.state;
         // a) reference value
         obj->s[0] = 0xDEADBEEF; obj->s[1] = 0xCAFEBABE;
-        for (size_t i = 0; i < 1UL << jmp_pow; i++) {
+        for (size_t i = 0; i < (size_t) (1ULL << jmp_pow); i++) {
             (void) ext.state.gi->get_bits(ext.state.state);
         }
         const uint64_t u_ref = ext.state.gi->get_bits(ext.state.state);
