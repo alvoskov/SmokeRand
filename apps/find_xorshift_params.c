@@ -20,6 +20,7 @@
 #include "smokerand/threads_intf.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 static void gen_free(void *state, const GeneratorInfo *info, const CallerAPI *intf)
@@ -208,11 +209,11 @@ typedef struct {
     unsigned int a;
     unsigned int b;
     unsigned int c;
-} Xorshift32State;
+} Xorshift32VarShiftsState;
 
 static uint64_t get_bits_xs32(void *state)
 {
-    Xorshift32State *obj = state;
+    Xorshift32VarShiftsState *obj = state;
     obj->x ^= obj->x >> obj->a;
     obj->x ^= obj->x << obj->b;
     obj->x ^= obj->x >> obj->c;
@@ -222,7 +223,7 @@ static uint64_t get_bits_xs32(void *state)
 static void *gen_create_xs32(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     (void) gi;
-    Xorshift32State *obj = intf->malloc(sizeof(Xorshift32State));
+    Xorshift32VarShiftsState *obj = intf->malloc(sizeof(Xorshift32VarShiftsState));
     obj->x = intf->get_seed32();
     obj->a = 13;
     obj->b = 17;
@@ -239,7 +240,7 @@ static int is_triple_valid_xs32(unsigned int ai, unsigned int bi, unsigned int c
 
 static void set_triple_xs32(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
 {
-    Xorshift32State *obj = state;
+    Xorshift32VarShiftsState *obj = state;
     obj->a = ai; obj->b = bi; obj->c = ci;
 }
 
@@ -278,11 +279,11 @@ typedef struct {
     unsigned int a;
     unsigned int b;
     unsigned int c;
-} Xorshift64State;
+} Xorshift64VarShiftsState;
 
 static uint64_t get_bits_xs64(void *state)
 {
-    Xorshift64State *obj = state;
+    Xorshift64VarShiftsState *obj = state;
     obj->x ^= obj->x >> obj->a;
     obj->x ^= obj->x << obj->b;
     obj->x ^= obj->x >> obj->c;
@@ -292,7 +293,7 @@ static uint64_t get_bits_xs64(void *state)
 static void *gen_create_xs64(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     (void) gi;
-    Xorshift64State *obj = intf->malloc(sizeof(Xorshift64State));
+    Xorshift64VarShiftsState *obj = intf->malloc(sizeof(Xorshift64VarShiftsState));
     obj->x = intf->get_seed64();
     obj->a = 12;
     obj->b = 25;
@@ -309,7 +310,7 @@ static int is_triple_valid_xs64(unsigned int ai, unsigned int bi, unsigned int c
 
 static void set_triple_xs64(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
 {
-    Xorshift64State *obj = state;
+    Xorshift64VarShiftsState *obj = state;
     obj->a = ai; obj->b = bi; obj->c = ci;
 }
 
@@ -348,9 +349,10 @@ typedef struct {
     int a;
     int b;
     int c;
-} Xoshiro64w16State;
+} Xoroshiro64w16VarShiftsState;
 
-static uint16_t get_bits16_xo64w16(Xoshiro64w16State *obj)
+
+static uint16_t get_bits16_xo64w16(Xoroshiro64w16VarShiftsState *obj)
 {
     const uint16_t s0 = obj->s[0];
     const uint16_t s0x3 = (uint16_t) (s0 ^ obj->s[3]);
@@ -359,26 +361,6 @@ static uint16_t get_bits16_xo64w16(Xoshiro64w16State *obj)
     obj->s[2] = (uint16_t) (rotl16(s0, obj->a) ^ s0x3 ^ (s0x3 << obj->b));
     obj->s[3] = rotl16(s0x3, obj->c);
     return obj->s[3];
-
-/*
-    const uint64_t s0 = obj->s[0];
-    uint64_t s1 = obj->s[1];
-    s1 ^= s0;
-    obj->s[0] = rotl64(s0, 24) ^ s1 ^ (s1 << 16); // a, b
-    obj->s[1] = rotl64(s1, 37); // c
-    return s0;
-*/
-
-/*
-    const uint64_t t = (uint16_t) (obj->s[1] << obj->a);
-    obj->s[2] = (uint16_t) (obj->s[2] ^ obj->s[0]);
-    obj->s[3] = (uint16_t) (obj->s[3] ^ obj->s[1]);
-    obj->s[1] = (uint16_t) (obj->s[1] ^ obj->s[2]);
-    obj->s[0] = (uint16_t) (obj->s[0] ^ obj->s[3]);
-    obj->s[2] = (uint16_t) (obj->s[2] ^ t);
-    obj->s[3] = rotl16(obj->s[3], obj->b);
-    return obj->s[3];
-*/
 }
 
 
@@ -392,36 +374,30 @@ static uint64_t get_bits_xo64w16(void *obj)
 static void *gen_create_xo64w16(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     (void) gi;
-    Xoshiro64w16State *obj = intf->malloc(sizeof(Xoshiro64w16State));
+    Xoroshiro64w16VarShiftsState *obj = intf->malloc(sizeof(Xoroshiro64w16VarShiftsState));
     obj->s[0] = (uint16_t) intf->get_seed64();
     obj->s[1] = (uint16_t) intf->get_seed64();
     obj->s[2] = (uint16_t) intf->get_seed64();
     obj->s[3] = (uint16_t) intf->get_seed64();
     obj->a = 5;
     obj->b = 10;
+    obj->c = 5;
     return obj;
 }
 
 
-static int is_triple_valid_xo64w16(unsigned int ai, unsigned int bi, unsigned int ci)
-{
-    (void) ai; (void) bi; (void) ci;
-    return 1;
-}
-
-
-
 static void set_triple_xo64w16(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
 {
-    Xoshiro64w16State *obj = state;
+    Xoroshiro64w16VarShiftsState *obj = state;
     obj->a = (int) ai; obj->b = (int) bi; obj->c = (int) ci;
 }
+
 
 int test_xoshiro64w16(void)
 {
     static const GeneratorInfo gen = {
-        .name = "xoshiro64w16:dynshifts",
-        .description = "xoshiro64w16 with dynamic shifts",
+        .name = "xoroshiro64w16:dynshifts",
+        .description = "xoroshiro64w16 with dynamic shifts",
         .nbits = 32,
         .create = gen_create_xo64w16,
         .free = gen_free,
@@ -434,7 +410,7 @@ int test_xoshiro64w16(void)
     static const XorshiftProps props = {
         .max_value = 16,
         .nbytes = 8,
-        .is_triple_valid = is_triple_valid_xo64w16,
+        .is_triple_valid = is_triple_valid_generic,
         .set_triple = set_triple_xo64w16
     };
 
@@ -442,7 +418,80 @@ int test_xoshiro64w16(void)
 }
 
 
+////////////////////////////////
+///// xoshiro48w16 testing /////
+////////////////////////////////
 
+typedef struct {
+    uint16_t s[3];
+    int a;
+    int b;
+    int c;
+} Xoroshiro48w16VarShiftsState;
+
+
+static uint16_t get_bits16_xo48w16(Xoroshiro64w16VarShiftsState *obj)
+{
+    const uint16_t s0 = obj->s[0];
+    const uint16_t s0x2 = (uint16_t) (s0 ^ obj->s[2]);
+    obj->s[0] = obj->s[1];
+    obj->s[1] = (uint16_t) (rotl16(s0, obj->a) ^ s0x2 ^ (s0x2 << obj->b));
+    obj->s[2] = rotl16(s0x2, obj->c);
+    return obj->s[2];
+}
+
+
+static uint64_t get_bits_xo48w16(void *obj)
+{
+    const uint32_t hi = get_bits16_xo48w16(obj);
+    const uint32_t lo = get_bits16_xo48w16(obj);
+    return (hi << 16) | lo;
+}
+
+static void *gen_create_xo48w16(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+    Xoroshiro48w16VarShiftsState *obj = intf->malloc(sizeof(Xoroshiro48w16VarShiftsState));
+    obj->s[0] = (uint16_t) intf->get_seed64();
+    obj->s[1] = (uint16_t) intf->get_seed64();
+    obj->s[2] = (uint16_t) intf->get_seed64();
+    obj->a = 5;
+    obj->b = 10;
+    obj->c = 5;
+    return obj;
+}
+
+
+static void set_triple_xo48w16(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
+{
+    Xoroshiro48w16VarShiftsState *obj = state;
+    obj->a = (int) ai; obj->b = (int) bi; obj->c = (int) ci;
+}
+
+
+int test_xoshiro48w16(void)
+{
+    static const GeneratorInfo gen = {
+        .name = "xoroshiro48w16:dynshifts",
+        .description = "xoroshiro48w16 with dynamic shifts",
+        .nbits = 32,
+        .create = gen_create_xo48w16,
+        .free = gen_free,
+        .get_bits = get_bits_xo48w16,
+        .self_test = NULL,
+        .get_sum = NULL,
+        .parent = NULL
+    };
+
+    static const XorshiftProps props = {
+        .max_value = 16,
+        .nbytes = 6,
+        .is_triple_valid = is_triple_valid_generic,
+        .set_triple = set_triple_xo48w16
+    };
+
+    return run_triples_search(&gen, &props);
+}
 
 
 
@@ -458,12 +507,12 @@ typedef struct {
     unsigned int a;
     unsigned int b;
     unsigned int c;
-} Xorshift128State;
+} Xorshift128VarShiftsState;
 
 
 static uint64_t get_bits_xs128(void *state)
 {
-    Xorshift128State *obj = state;
+    Xorshift128VarShiftsState *obj = state;
     uint32_t t = obj->x ^ (obj->x << obj->a);
     t ^= t >> obj->b;
     obj->x = obj->y;
@@ -477,7 +526,7 @@ static uint64_t get_bits_xs128(void *state)
 static void *gen_create_xs128(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     (void) gi;
-    Xorshift128State *obj = intf->malloc(sizeof(Xorshift128State));
+    Xorshift128VarShiftsState *obj = intf->malloc(sizeof(Xorshift128VarShiftsState));
     obj->x = intf->get_seed32();
     obj->y = intf->get_seed32();
     obj->z = intf->get_seed32();
@@ -491,7 +540,7 @@ static void *gen_create_xs128(const GeneratorInfo *gi, const CallerAPI *intf)
 
 static void set_triple_xs128(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
 {
-    Xorshift128State *obj = state;
+    Xorshift128VarShiftsState *obj = state;
     obj->a = ai; obj->b = bi; obj->c = ci;
 }
 
@@ -535,12 +584,12 @@ typedef struct {
     unsigned int a;
     unsigned int b;
     unsigned int c;
-} Xorshift160State;
+} Xorshift160VarShiftsState;
 
 
 static uint64_t get_bits_xs160(void *state)
 {
-    Xorshift160State *obj = state;
+    Xorshift160VarShiftsState *obj = state;
     uint32_t t = obj->x ^ (obj->x << obj->a);
     t ^= t >> obj->b;
     obj->x = obj->y;
@@ -555,7 +604,7 @@ static uint64_t get_bits_xs160(void *state)
 static void *gen_create_xs160(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     (void) gi;
-    Xorshift160State *obj = intf->malloc(sizeof(Xorshift160State));
+    Xorshift160VarShiftsState *obj = intf->malloc(sizeof(Xorshift160VarShiftsState));
     obj->x = intf->get_seed32();
     obj->y = intf->get_seed32();
     obj->z = intf->get_seed32();
@@ -570,7 +619,7 @@ static void *gen_create_xs160(const GeneratorInfo *gi, const CallerAPI *intf)
 
 static void set_triple_xs160(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
 {
-    Xorshift160State *obj = state;
+    Xorshift160VarShiftsState *obj = state;
     obj->a = ai; obj->b = bi; obj->c = ci;
 }
 
@@ -612,12 +661,12 @@ typedef struct {
     unsigned int a;
     unsigned int b;
     unsigned int c;
-} Xorrot256State;
+} Xorrot256VarShiftsState;
 
 
 static uint64_t get_bits_xr256(void *state)
 {
-    Xorrot256State *obj = state;
+    Xorrot256VarShiftsState *obj = state;
     const uint64_t x0 = obj->x, w0 = obj->w;
     obj->x = x0 ^ obj->y;
     obj->y = obj->z;
@@ -637,7 +686,7 @@ static int is_triple_valid_xr256(unsigned int ai, unsigned int bi, unsigned int 
 static void *gen_create_xr256(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     (void) gi;
-    Xorrot256State *obj = intf->malloc(sizeof(Xorrot256State));
+    Xorrot256VarShiftsState *obj = intf->malloc(sizeof(Xorrot256VarShiftsState));
     obj->x = intf->get_seed64();
     obj->y = intf->get_seed64();
     obj->z = intf->get_seed64();
@@ -648,7 +697,7 @@ static void *gen_create_xr256(const GeneratorInfo *gi, const CallerAPI *intf)
 
 static void set_triple_xr256(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
 {
-    Xorrot256State *obj = state;
+    Xorrot256VarShiftsState *obj = state;
     obj->a = ai; obj->b = bi; obj->c = ci;
 }
 
@@ -775,12 +824,12 @@ typedef struct {
     unsigned int a;
     unsigned int b;
     unsigned int c;
-} Xorrot320State;
+} Xorrot320VarShiftsState;
 
 
 static uint64_t get_bits_xr320(void *state)
 {
-    Xorrot320State *obj = state;
+    Xorrot320VarShiftsState *obj = state;
     const uint64_t x0 = obj->x, v0 = obj->v;
     obj->x = x0 ^ obj->y;
     obj->y = obj->z;
@@ -801,7 +850,7 @@ static int is_triple_valid_xr320(unsigned int ai, unsigned int bi, unsigned int 
 static void *gen_create_xr320(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     (void) gi;
-    Xorrot320State *obj = intf->malloc(sizeof(Xorrot256State));
+    Xorrot320VarShiftsState *obj = intf->malloc(sizeof(Xorrot320VarShiftsState));
     obj->x = intf->get_seed64();
     obj->y = intf->get_seed64();
     obj->z = intf->get_seed64();
@@ -813,7 +862,7 @@ static void *gen_create_xr320(const GeneratorInfo *gi, const CallerAPI *intf)
 
 static void set_triple_xr320(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
 {
-    Xorrot320State *obj = state;
+    Xorrot320VarShiftsState *obj = state;
     obj->a = ai; obj->b = bi; obj->c = ci;
 }
 
@@ -844,16 +893,39 @@ int test_xorrot320(void)
 }
 
 
+typedef struct {
+    const char *testname;
+    int (*testfunc)(void);
+} TestEntry;
 
 
-int main()
+int main(int argc, char *argv[])
 {
-    test_xoshiro64w16();
-//    test_xorshift32();
-//    test_xorshift64();
-//    test_xorshift128();
-//    test_xorrot160();
-//    test_xorrot256();
-//    test_xorrot320();
+    static const TestEntry tests[] = {
+        {"xoroshiro48w16", test_xoshiro48w16},
+        {"xoroshiro64w16", test_xoshiro64w16},
+        {"xorshift32",     test_xorshift32},
+        {"xorshift64",     test_xorshift64},
+        {"xorshift128",    test_xorshift128},
+        {"xorrot160",      test_xorrot160},
+        {"xorrot320",      test_xorrot320},
+        {NULL, NULL}
+    };
 
+    if (argc != 2) {
+        printf("Usage: find_xorshift_params [name]\n");
+        printf("Available names:\n");
+        for (const TestEntry *t = tests; t->testname != NULL; t++) {
+            printf("  %s\n", t->testname);
+        }
+        return 1;
+    } else {
+        for (const TestEntry *t = tests; t->testname != NULL; t++) {
+            if (!strcmp(t->testname, argv[1])) {
+                return t->testfunc();
+            }
+        }
+        printf("name %s not found\n", argv[1]);
+        return 1;
+    }
 }

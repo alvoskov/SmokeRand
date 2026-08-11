@@ -8,8 +8,9 @@
  * - 64-bit Klimov-Shamir T-function (must give an error)
  * - xorrot64 xorshift-like LFSR with three shifts sets: a good one
  *   and two bad ones (in slightly different ways)
- * - xoroshiro128++: charateristic polynomials are compared to the 
- *   reference ones given by S. Vigna.
+ * - xoroshiro128++: charateristic and jump polynomials are compared to the
+ *   reference ones given by D. Blackman and S. Vigna. Jump polynomials
+ *   generation is also tested here.
  *
  * References:
  *

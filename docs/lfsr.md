@@ -1,12 +1,70 @@
 # LFSR period analyzer
 
+The LFSR period analyzer allows to check if the LFSR period is maximal (i.e.
+`2**n - 1`) or not. It also can deduce characteristic and jump polynomials
+of the generator. It works directly with a compiled PRNG version and restores
+its transition matrix by manipulating its internal state.
+
+The key features of the analyzer:
+
+- The PRNG must be compiled as a SmokeRand plugin or directly passed to
+  SmokeRand functions, i.e. no `stdin`/`stdout` pipes are supported.
+  A transtion matrix reconstruction requires a direct manipulation with
+  PRNGs states anyway.
+- The analyzer mathematically proves that the LFSR period is `2**n - 1`,
+  not empirically checks it.
+- Automatic deduction of the transition matrix, i.e. compiled PNG code
+  is essentially used as a mathematical formula. So it allows to overcome
+  problems with errors of conversion from "clever formula" to the program
+  code.
+- The deduction subroutine is fairly "foolproof" and contains some checks
+  to prevent segfaults in the case of PRNGs with constants, pointers,
+  file descriptors etc. in their states.
+- 32, 48, 64, 96, 128, 160, 192, 256, 320, 512 and 1024 bits of state are
+  supported.
+
+The analyzer consists of the next files:
+
+- `src/lfsr_period.c` and `src_lfsr_period.h`: the analyzer core.
+- `apps/test_lfsr_period.c`: some tests, basic sanity checks.
+- `apps/find_xorshifts_param.c`: a multithreaded program for LFSR shifts
+  search and preliminary selection. Reproduces shifts triples for `xorshift32`
+  and `xorshift64` obtained [by G. Marsaglia]((https://doi.org/10.18637/jss.v008.i14).
 
 
-## Results for xorshift
+## Some sources of reference data:
 
-The program in the `app/find_xorshift_param.c` successfully reproduces all 275
-`[a b c]` shift triples for xorshift64 from the [classical work](https://doi.org/10.18637/jss.v008.i14)
-by G.Marsaglia about xorshift. The program output is given below:
+Characteristic polynomials [for xorshift+](https://github.com/jj1bdx/xorshiftplus/blob/master/full/xorshift64poly.txt)
+
+    xorshift64: 0.13-17-43 x^64 + x^49 + x^48 + x^45 + x^44 + x^42 + x^41 + x^38 + x^37 + x^28 + x^27 + x^26 + x^25 + x^17 + x^16 + x^11 + x^6 + x^5 + 1   19
+
+Characteristic polynomials [for xorshift192/256](https://github.com/funny-falcon/xorshift256and192/blob/master/full/256shift64/prim.txt)
+
+    xorshift256: 256 + x^242 + x^241 + x^240 + x^239 + x^234 + x^233 + x^232 + x^231 + x^226 + x^225 + x^224 + x^223 + x^220 + x^218 + x^217 + x^215 + x^212 + x^210 + x^206 + x^205 + x^203 + x^200 + x^199 + x^198 + x^195 + x^194 + x^191 + x^190 + x^189 + x^188 + x^185 + x^184 + x^180 + x^178 + x^177 + x^170 + x^169 + x^167 + x^165 + x^162 + x^159 + x^156 + x^153 + x^151 + x^150 + x^148 + x^147 + x^145 + x^143 + x^137 + x^136 + x^135 + x^133 + x^132 + x^127 + x^126 + x^125 + x^124 + x^121 + x^120 + x^119 + x^117 + x^116 + x^115 + x^114 + x^113 + x^112 + x^107 + x^106 + x^105 + x^100 + x^99 + x^97 + x^96 + x^94 + x^92 + x^89 + x^88 + x^87 + x^85 + x^83 + x^76 + x^75 + x^73 + x^72 + x^70 + x^69 + x^66 + x^65 + x^62 + x^59 + x^55 + x^51 + x^50 + x^49 + x^48 + x^47 + x^45 + x^43 + x^42 + x^40 + x^39 + x^38 + x^37 + x^35 + x^34 + x^33 + x^31 + x^30 + x^29 + x^20 + x^18 + x^17 + x^16 + x^14 + x^8 + x^7 + x^4 + x^3 + 1
+
+Sebastiano Vigna site with some charateristic and jump polynomials for
+xorshift/xoroshiro/xoroshiro PRNG family:
+
+- https://prng.di.unimi.it/
+- https://prng.di.unimi.it/xorshift.php
+
+
+## Reproduced results
+
+The `apps/find_xorshift_params.c` program was used for an exaustive search of
+shifts triples for `xorshift32`, `xorshift64` and `xorshift128` that provide
+the maximal PRNGs periods, i.e. `2**32 - 1`, `2**64 - 1` and `2**128 - 1`
+respectively.
+
+For `xorshift32` and `xorshift64` all existing triples were already found and
+published in the [classical work](https://doi.org/10.18637/jss.v008.i14) by
+G. Marsaglia about xorshift generators. For `xorshift128` Marsaglia published
+only some triples. So this paper can be used as a test data set.
+
+### xorshift64
+
+All 275 `[a b c]` shifts triples for `xorshift64` obtained by G. Marsaglia were
+successfully reproduced. The program output is given below:
 
     [ 1  1 54] [ 1  1 55] [ 1  3 45] [ 1  7  9] [ 1  7 44] [ 1  7 46] [ 1  9 50] [ 1 11 35] [ 1 11 50]
     [ 1 13 45] [ 1 15  4] [ 1 15 63] [ 1 19  6] [ 1 19 16] [ 1 23 14] [ 1 23 29] [ 1 29 34] [ 1 35  5]
@@ -41,7 +99,10 @@ by G.Marsaglia about xorshift. The program output is given below:
     [33 31 43] [33 31 55] [43 21 46] [49 15 61] [55  9 56]
     Total number of triples: 275
 
-Triples for xorshift32:
+### xorshift32
+
+All 81 `[a b c]` shifts triples for `xorshift32` obtained by G. Marsaglia were
+successfully reproduced. The program output is given below:
 
     [ 1  3 10] [ 1  5 16] [ 1  5 19] [ 1  9 29] [ 1 11  6] [ 1 11 16] [ 1 19  3] [ 1 21 20] [ 1 27 27]
     [ 2  5 15] [ 2  5 21] [ 2  7  7] [ 2  7  9] [ 2  7 25] [ 2  9 15] [ 2 15 17] [ 2 15 25] [ 2 21  9]
@@ -53,6 +114,8 @@ Triples for xorshift32:
     [ 9 21 16] [10  9 21] [10  9 25] [11  7 12] [11  7 16] [11 17 13] [11 21 13] [12  9 23] [13  3 17]
     [13  3 27] [13  5 19] [13 17 15] [14  1 15] [14 13 15] [15  1 29] [17 15 20] [17 15 23] [17 15 26]
     Total number of triples: 81
+
+### xorshift128
 
 Triples for xorshift128 (32-bit version):
 
@@ -67,7 +130,9 @@ Triples for xorshift128 (32-bit version):
 The `[5, 14, 1]`, `[15, 4, 21]`, `[23, 24, 3]`, `[5, 12, 29]` and `[11, 8, 19]`
 triples were mentioned in the Marsaglia's article about xorshift PRNG family.
 
-## Results for xorrot
+## New results
+
+### xorrot
 
 xorrot PRNG family was developed by A.L. Voskov, it resembles xorshift and
 xoroshiro but uses more 
@@ -100,13 +165,37 @@ Triples for xorrot320 (64-bit version):
 
     Total number of triples: 56
 
-## Results for xoroshiro64w16
+### xoroshiro-w16
 
-    [ 1  2 10]:0.00426 [ 1  6 14]:1.45e-19 [ 2 12  9]:3.53e-88 [ 3  4  8]:0.000453
-    [ 3  8  8]:4.25e-43 [ 3 14  8]:1.66e-119 [ 4  5 13]:1.3e-14 [ 4  7  7]:5.77e-20
+xoroshiro48w16 and xoroshiro64w16 are 16-bit xoroshiro modifications developed
+by A.L. Voskov for retrocomputing and microcontrollers. The main intention was
+to make 16-bit friendly but fairly robust generators.
+
+The next settings for the `hamming_distr` test were used for triples screening:
+
+    static const HammingDistrOptions
+        hw_distr_sm = {.nvalues = 1ull << 28, .nlevels = 10};
+
+Triples for xoroshiro48w16:
+
+    [ 2  3  7]:0         [ 2  7  7]:1.66e-128 [ 2  9  9]:0 [ 2 11  7]:0
+    [ 3  6  1]:1.26e-97  [ 3  8  9]:5.2e-169  [ 5  5  7]:0 [ 5 11  3]:8.58e-307
+    [ 6  3  9]:0         [ 7  6  2]:2.06e-112 [ 7  7  5]:0 [ 9  3 10]:0
+    [ 9  5 13]:6.55e-103 [ 9  9  9]:0         [10 13  1]:0 [11 10 12]:5.41e-251
+    [11 11  2]:0         [13  1  8]:0         [13  1 13]:0 [13  6  7]:3.37e-123
+    [13  8  7]:7.49e-194 [13 10  7]:3.41e-256 [15  1 14]:0 [15  5 13]:4.19e-108
+    [15  7  4]:2.13e-137 [15 11  5]:2.08e-298 [15 11  7]:0
+
+    Total number of triples: 27
+
+Triples for xoroshiro64w16:
+
+    [ 1  2 10]:0.00426  [ 1  6 14]:1.45e-19  [ 2 12  9]:3.53e-88 [ 3  4  8]:0.000453
+    [ 3  8  8]:4.25e-43 [ 3 14  8]:1.66e-119 [ 4  5 13]:1.3e-14  [ 4  7  7]:5.77e-20
     [ 4 11 11]:1.93e-67 [ 4 15 13]:3.18e-131 [ 6  3  9]:8.35e-10 [ 7  7  2]:0
-    [ 7 11  8]:3.87e-66 [ 7 15  8]:1.5e-131 [ 8 11  7]:0 [ 9  7  2]:1.61e-28
-    [ 9 11 12]:3.29e-79 [10  1  7]:0.00119 [10  1 11]:0.311 [10  4  5]:5.95e-08
-    [10  7 15]:2.68e-35 [11  3 10]:9.41e-25 [11 14  8]:1.5e-126 [13  8  8]:2.05e-40
+    [ 7 11  8]:3.87e-66 [ 7 15  8]:1.5e-131  [ 8 11  7]:0        [ 9  7  2]:1.61e-28
+    [ 9 11 12]:3.29e-79 [10  1  7]:0.00119   [10  1 11]:0.311    [10  4  5]:5.95e-08
+    [10  7 15]:2.68e-35 [11  3 10]:9.41e-25  [11 14  8]:1.5e-126 [13  8  8]:2.05e-40
     [14 11 11]:1.29e-80 [15  6  6]:2.38e-22
+
     Total number of triples: 26

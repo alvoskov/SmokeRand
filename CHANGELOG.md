@@ -11,8 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 - `lfsr` battery: a tool for automatic proof of full period for xorshift-like
   generators. Works directly with its compiled implementations, no symbolic
-  representation of tested LFSR is needed! Currently the 32, 64, 96, 128, 160,
-  192, 256, 320, 512 and 1024 bits of state are supported.
+  representation of tested LFSR is needed! Currently the 32, 48, 64, 96, 128,
+  160, 192, 256, 320, 512 and 1024 bits of state are supported.
 - `find_xorshift_params` executable that searches the `[a,b,c]` triples for
   the xorshift64 generators that give the full 2^64 - 1 period. Essentially
   it reproduces the classical results obtained by G. Marsaglia for xorshift
