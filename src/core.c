@@ -128,7 +128,7 @@ static void destroy_mutexes()
 
 static uint64_t get_seed64_mt(void)
 {
-    MUTEX_LOCK(get_seed64_mt_mutex);
+    MUTEX_LOCK(get_seed64_mt_mutex, "get_seed64_mt");
     unsigned int ord = seed64_mt_current_thread_ord;
     if (ord < THREAD_ORD_OFFSET) {
         ThreadObj thr = ThreadObj_current();
@@ -148,7 +148,7 @@ static int printf_mt(const char *format, ...)
 {
     int ans;
     ThreadObj thr = ThreadObj_current();
-    MUTEX_LOCK(printf_mt_mutex);
+    MUTEX_LOCK(printf_mt_mutex, "printf_mt");
     va_list args;
     va_start(args, format);    
     if (use_stderr_for_printf) {

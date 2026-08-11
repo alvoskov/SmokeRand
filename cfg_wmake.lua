@@ -63,6 +63,8 @@ local gen_sources_raw = cfg.get_gen_sources()
 local gen_asm_sources = {'dandelion64_nt32', 'kiss03_nt32', 'mwc64x_nt32',
     'mwc3232x_nt32', 'rwc32_nt32', 'tf0duper32_nt32', 'xkiss16_awc_nt32',
     'xkiss32_awc_nt32', 'xkiss32_sh_awc_nt32', 'xoshiro128pp_nt32'}
+local exefiles = {'smokerand', 'sr_speed', 'find_xorshift_params',
+    'test_funcs', 'test_lfsr_period', 'test_rdseed', 'test_syscrypto'}
 
 -- Filter out the floating point based generator: in WATCOM C
 -- it requires a runtime library.
@@ -107,10 +109,17 @@ end
 io.write("lib_headers = " .. lib_headers_str .. "\n")
 
 -- Make "all" section
+local all_section = "all: $(bindir)/sr_dos32.exe $(bindir)/srtiny16.exe $(bindir)/setvesa.com "
+for _, fname in pairs(exefiles) do
+    all_section = all_section .. "$(bindir)/" .. fname .. ".exe "
+end
+io.write(all_section .. "\n")
+--[[
 io.write("all: $(bindir)/smokerand.exe $(bindir)/sr_speed.exe $(bindir)/sr_dos32.exe " ..
     "$(bindir)/test_funcs.exe $(bindir)/test_syscrypto.exe $(bindir)/srtiny16.exe " ..
     "$(bindir)/find_xorshift_params.exe " ..
     "$(bindir)/setvesa.com &\n")
+--]]
 local gen_all_sources = {}
 for _, e in pairs(gen_sources) do table.insert(gen_all_sources, e) end
 for _, e in pairs(gen_asm_sources) do table.insert(gen_all_sources, e) end
@@ -144,6 +153,14 @@ for _, v in pairs(sources) do
 end
 objstr_dos32 = objstr_dos32 .. " $(objdir_dos32)/pe32loader.obj"
 -- b) Line with commands
+
+for _, fname in pairs(exefiles) do
+    local objstr_fname = "$(objdir)/" .. fname .. ".obj " .. objstr_genexec;
+    io.write("$(bindir)/" .. fname .. ".exe: " .. objstr_fname .. "\n")
+    io.write("\twcl386 -4s -fe=$(bindir)/" .. fname .. ".exe " .. objstr_fname .. "\n")
+end
+
+--[[
 io.write("$(bindir)/smokerand.exe:" .. objstr .. "\n")
 io.write("\twcl386 -4s -fe=$(bindir)/smokerand.exe " .. objstr .. "\n")
 
@@ -159,21 +176,29 @@ local objstr_syscrypto = "$(objdir)/test_syscrypto.obj " .. objstr_genexec;
 io.write("$(bindir)/test_syscrypto.exe: " .. objstr_syscrypto .. "\n")
 io.write("\twcl386 -4s -fe=$(bindir)/test_syscrypto.exe " .. objstr_syscrypto .. "\n")
 
-
 io.write("$(bindir)/test_funcs.exe: $(objdir)/test_funcs.obj \n")
 io.write("\twcl386 -4s -fe=$(bindir)/test_funcs.exe $(objdir)/base64.obj $(objdir)/blake2s.obj $(objdir)/cpuinfo.obj " ..
     "$(objdir)/core.obj " ..
     "$(objdir)/specfuncs.obj $(objdir)/test_funcs.obj $(objdir)/entropy.obj " ..
     "$(objdir)/threads_intf.obj\n")
+--]]
 
-io.write("$(objdir)/test_funcs.obj: $(appsrcdir)/test_funcs.c $(lib_headers)\n")
-io.write("\twcc386 $(cflags) -fo=$(objdir)/test_funcs.obj $(appsrcdir)/test_funcs.c\n")
+--io.write("$(objdir)/test_funcs.obj: $(appsrcdir)/test_funcs.c $(lib_headers)\n")
+--io.write("\twcc386 $(cflags) -fo=$(objdir)/test_funcs.obj $(appsrcdir)/test_funcs.c\n")
+
+-- b1) Special cases
 
 io.write("$(bindir)/sr_dos32.exe:" .. objstr_dos32 .. "\n")
 io.write("\twcl386 -4s -fe=$(bindir)/sr_dos32.exe -bcl=" .. dosextender ..
     " $(dos32_runtime) " .. objstr_dos32 .. "\n")
 
 ---------- Object file with the main() function ----------
+for _, fname in pairs(exefiles) do
+    io.write("$(objdir)/" .. fname .. ".obj: $(appsrcdir)/" .. fname .. ".c $(lib_headers)\n")
+    io.write("\twcc386 $(cflags) -fo=$(objdir)/" .. fname .. ".obj $(appsrcdir)/" .. fname .. ".c\n")
+end
+
+--[[
 io.write("$(objdir)/smokerand.obj: $(appsrcdir)/smokerand.c $(lib_headers)\n")
 io.write("\twcc386 $(cflags) -fo=$(objdir)/smokerand.obj $(appsrcdir)/smokerand.c\n")
 
@@ -185,6 +210,9 @@ io.write("\twcc386 $(cflags) -fo=$(objdir)/find_xorshift_params.obj $(appsrcdir)
 
 io.write("$(objdir)/test_syscrypto.obj: $(appsrcdir)/test_syscrypto.c $(lib_headers)\n")
 io.write("\twcc386 $(cflags) -fo=$(objdir)/test_syscrypto.obj $(appsrcdir)/test_syscrypto.c\n")
+--]]
+
+-- Some special cases
 
 io.write("$(objdir_dos32)/smokerand.obj: $(appsrcdir)/smokerand.c $(lib_headers)\n")
 io.write("\twcc386 $(cflags_dos32) -fo=$(objdir_dos32)/smokerand.obj $(appsrcdir)/smokerand.c\n")

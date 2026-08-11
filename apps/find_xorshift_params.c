@@ -22,6 +22,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+static unsigned int get_default_nthreads(void)
+{
+    unsigned int nthreads = get_cpu_numcores();
+    if (sizeof(size_t) == 4 * sizeof(char) && nthreads > 2) {
+        nthreads = 2;
+    }
+    if (nthreads > 4)
+        nthreads--;
+    return nthreads;
+}
+
 
 static void gen_free(void *state, const GeneratorInfo *info, const CallerAPI *intf)
 {
@@ -112,6 +123,7 @@ ThreadRetVal THREADFUNC_SPEC xorshift_thread(void *data)
                 printf("_%u", t->a);
             } else {
                 printf(".");
+                fflush(stdout);
             }
             obj->gen_props->set_triple(ext.state.state, t->a, t->b, t->c);
             if (lfsr_period_test(&ext, obj->intf, &opts) == LFSR_PERIOD_MAX) {
@@ -138,9 +150,10 @@ int run_triples_search(const GeneratorInfo *gen, const XorshiftProps *props)
     LfsrPeriodOptions opts;
     opts.check_validity = 1;
 
-    const unsigned int nthreads = 16;
+    const unsigned int nthreads = get_default_nthreads();
     CallerAPI intf = CallerAPI_init_mthr();
     intf.printf = printf_null;
+    printf("Number of threads: %u\n", nthreads);
 
     GeneratorStateExt ext = GeneratorStateExt_create_sized(gen, &intf, props->nbytes);
 
@@ -922,6 +935,7 @@ int main(int argc, char *argv[])
     } else {
         for (const TestEntry *t = tests; t->testname != NULL; t++) {
             if (!strcmp(t->testname, argv[1])) {
+                init_thread_dispatcher();
                 return t->testfunc();
             }
         }
