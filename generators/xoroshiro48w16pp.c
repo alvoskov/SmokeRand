@@ -3,7 +3,24 @@
  * @brief xoroshiro48w16++ is a modification of xoroshiro++ with a 48-bit state
  * that operates 16-bit words and is suitable for 16-bit CPUs such as retro
  * platforms and microcontrollers. Its period is \f$ 2^{48} - 1 \f$.
- * @details 
+ * @details The period of this PRNG is too small for any serious application,
+ * so it is more a toy/hack for constrained conditions. However, it is still
+ * fairly robust and passes SmokeRand `full` and TestU01 BigCrush batteries
+ * but fails PractRand 0.96 at 1 TiB sample.
+ *
+ * The recommended shifts are `[7 6 2]`.
+ *
+ * Some intermediate results for not scrambled version:
+ *
+ * - `[3 6 1]`: brief 8/9 (including 5 collover/bspace)
+ * - `[7 6 2]`: brief 6/1 (including 2/3 collover/bspace)
+ * - `[9 5 13]`: brief 6/8 (includng 3/4 collover/bspace)
+ * - `[15 5 3]`: brief 7/8 (include 3/4 collover/bspace)
+ * - `[15 7 4]`: brief 6/9 (include 3/5 collover/bspace)
+ *
+ * The xoroshiro++ PRNG family was suggested by D. Blackman and S. Vigna,
+ * see the https://doi.org/10.48550/arXiv.1805.01407 reference. The shifts
+ * for this 16-bit versions were optimized by A.L. Voskov.
  *
  * @copyright
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
@@ -20,11 +37,6 @@ typedef struct {
 } Xoroshiro48w16PPState;
 
 
-// 3 6 1: brief 8/9 (including 5 collover/bspace)
-// 7 6 2: brief 6/1 (including 2/3 collover/bspace)
-// 9 5 13: brief 6/8 (includng 3/4 collover/bspace)
-// 15 5 3: brief 7/8 (include 3/4 collover/bspace)
-// 15 7 4: brief 6/9 (include 3/5 collover/bspace)
 static inline uint16_t Xoroshiro48w16PPState_get_bits(Xoroshiro48w16PPState *obj)
 {
     const uint16_t s0 = obj->s[0];

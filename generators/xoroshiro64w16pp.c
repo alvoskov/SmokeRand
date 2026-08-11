@@ -22,6 +22,10 @@
  * - Passes `express`, `brief`, `default` and `full` SmokeRand batteries.
  * - Passes SmallCrush, Crush
  *
+ * The xoroshiro++ PRNG family was suggested by D. Blackman and S. Vigna,
+ * see the https://doi.org/10.48550/arXiv.1805.01407 reference. The shifts
+ * for this 16-bit versions were optimized by A.L. Voskov.
+ *
  * @copyright
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
