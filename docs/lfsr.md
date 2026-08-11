@@ -27,10 +27,21 @@ The analyzer consists of the next files:
 
 - `src/lfsr_period.c` and `src_lfsr_period.h`: the analyzer core.
 - `apps/test_lfsr_period.c`: some tests, basic sanity checks.
-- `apps/find_xorshifts_param.c`: a multithreaded program for LFSR shifts
+- `apps/find_xorshifts_params.c`: a multithreaded program for LFSR shifts
   search and preliminary selection. Reproduces shifts triples for `xorshift32`
   and `xorshift64` obtained [by G. Marsaglia]((https://doi.org/10.18637/jss.v008.i14).
 
+## Usage
+
+There are two ways of the LFSR analysis usage: call a specialized `lfsr`
+battery from the command line or use SmokeRand as a library.
+
+An example of `lfsr` battery usage:
+
+    $ ./smokerand lfsr generators/shr3.so
+
+Examples of direct calls of SmokeRand functions can be found in the
+`apps/test_lfsr_period.c` and `apps/find_xorshift_params.c`.
 
 ## Some sources of reference data:
 
