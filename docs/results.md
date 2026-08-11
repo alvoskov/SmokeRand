@@ -430,7 +430,7 @@ the testing.
  xoroshiro64pp     | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 8 TiB
  xoroshiro64st     | u32    | 1       | 1     | 3       | 5    | 0.51 | -      | 1.75  | Small   | 1 MiB
  xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 32 TiB
- xoroshiro48w16pp  | u32    | +       | +     | +       | +    |      |        |       |>=Crush  | ?
+ xoroshiro48w16pp  | u32    | +       | +     | +       | +    |      | +      | 4(0)  |>=Crush  | ?
  xoroshiro64w16pp  | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 8 TiB
  xoroshiro128      | u64    | 2       | 3     | 5       | 7    | 0.27 | +      | 2.25  | Small   | 256 KiB
  xoroshiro128aox   | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |+lo/+hi  | >= 32 TiB
@@ -527,6 +527,7 @@ Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
  wyrand:v43        | 5 TiB      | 59/20
  wyranda_par       | -(>213 TiB)| 780/852
  wyrand128         | - (>25 TiB)| 107/100
+ xoroshiro48w16    | - (>20 TiB)| 90/80
  xoroshiro64w16    | - (>3 TiB) | 14/12
  xorrot64mn        | 12 TiB     | 10/48
  xorrot64w32mn     | - (>35 TiB)| 126/140
