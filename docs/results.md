@@ -430,7 +430,8 @@ the testing.
  xoroshiro64pp     | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 8 TiB
  xoroshiro64st     | u32    | 1       | 1     | 3       | 5    | 0.51 | -      | 1.75  | Small   | 1 MiB
  xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 32 TiB
- xoroshiro64w16    | u32    | +       | +     | +       | +    | 1.0  | +      | 4     |>=Crush  | ?
+ xoroshiro48w16pp  | u32    | +       | +     | +       | +    |      |        |       |>=Crush  | ?
+ xoroshiro64w16pp  | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 8 TiB
  xoroshiro128      | u64    | 2       | 3     | 5       | 7    | 0.27 | +      | 2.25  | Small   | 256 KiB
  xoroshiro128aox   | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |+lo/+hi  | >= 32 TiB
  xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      | 3.25  |+lo/+hi  | 16 MiB
@@ -452,10 +453,10 @@ the testing.
  xorrot128mn       | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 8 TiB
  xorrot128w32      | u32    | 2       | 3     | 5       | 7    | 0.48 | +      | 2.25  | Small   | 256 KiB
  xorrot128w32mrt   | u32    | +       | +     | +       | +    | 0.62 | +      | 4     | +       | >= 16 TiB
- xorrot160         | u32    | 2       | 3     | 5       | 7    | 0.41 |        | 2.25  |         | ?
+ xorrot160         | u32    | 2       | 3     | 5       | 7    | 0.41 |        | 2.25  | Small   | 256 JiB
  xorrot256         | u64    | 2       | 3     | 5       | 7    | 0.30 | +      | 2.25  | Small   | 1 MiB
  xorrot256mrt      | u64    | +       | +     | +       | +    | 0.34 | +      | 4     |         | >= 16 TiB
- xorrot320         | u64    | 2       | 3     | 5       | 7    | 0.23 |        | 2.25  |         | ?
+ xorrot320         | u64    | 2       | 3     | 5       | 7    | 0.23 |        | 2.25  |         | 1 MiB
  xorshift64        | u64    | 2       | 6     | 12      | 15/16| 0.49 | -      | 0     | -       | 32 KiB
  xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |S_lo/+_hi| 512 KiB
  xorshift96        | u32    | 2       | 5     | 8       | 12/13| 0.39 |        | 0     | -       | 64 KiB
@@ -465,7 +466,7 @@ the testing.
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 1 TiB
  xorshift128rp     | u64    | +       | +     | 1       | 3/5  | 0.21 | +      | 0     | Small   | 4 GiB
  xorshift160       | u32    | 2       | 4     | 7       | 12/13| 0.44 |        | 0     | -       | 256 KiB
- xorshift192       | u64    | 2       | 3     | 5       | 9    | 0.19 |        | 0     | Small   | 256 KiB
+ xorshift192       | u64    | 2       | 3     | 5       | 9    | 0.19 | +      | 0     | Small   | 256 KiB
  xorshift256       | u64    | 2       | 3     | 5       | 7/8  | 0.21 | +      | 2.25? | Small   | 1 MiB
  xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | +      | 0     | Small   | 128 KiB
  xoshiro128aox     | u32    | +       | +     | +       | +    | 0.61 | +      | 4     | +       | >= 8 TiB

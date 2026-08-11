@@ -33,6 +33,21 @@ static const LargeInt lfsr32_exps[] = {
 };
 
 /**
+ * @brief `2**48 - 1 =  [3, 3, 5, 7, 13, 17, 97, 241, 257, 673]`
+ */
+static const LargeInt lfsr48_exps[] = {
+    {{0x0000555555555555}}, // 0x555555555555
+    {{0x0000333333333333}}, // 0x333333333333
+    {{0x0000249249249249}}, // 0x249249249249
+    {{0x000013B13B13B13B}}, // 0x13B13B13B13B
+    {{0x00000F0F0F0F0F0F}}, // 0xF0F0F0F0F0F
+    {{0x000002A3A0FD5C5F}}, // 0x2A3A0FD5C5F
+    {{0x0000010FEF010FEF}}, // 0x10FEF010FEF
+    {{0x000000FF00FF00FF}}, // 0xFF00FF00FF
+    {{0x0000006160FF9E9F}}, // 0x6160FF9E9F
+};
+
+/**
  * @brief `2**64 - 1 =  [3, 5, 17, 257, 641, 65537, 6700417]`
  */
 static const LargeInt lfsr64_exps[] = {
@@ -214,6 +229,8 @@ static const LargeInt *get_lfsr_exps(size_t n)
 {
     if (n == 32) {
         return lfsr32_exps;
+    } else if (n == 48) {
+        return lfsr48_exps;
     } else if (n == 64) {
         return lfsr64_exps;
     } else if (n == 96) {
@@ -399,7 +416,9 @@ void LfsrPoly_destruct(LfsrPoly *obj)
 }
 
 
-// a <- a * x mod charpoly
+/**
+ * @brief `a <- a * x mod charpoly`
+ */
 void LfsrPoly_mulx(LfsrPoly *a, const LfsrPoly *charpoly)
 {
     const size_t degree = charpoly->degree;
@@ -428,7 +447,9 @@ void LfsrPoly_mulx(LfsrPoly *a, const LfsrPoly *charpoly)
 
 }
 
-// a <- a * b mod charpoly (Horner over the bits of a, from the top)
+/**
+ * @brief `a <- a * b mod charpoly` (Horner over the bits of a, from the top)
+ */
 void LfsrPoly_mulmod(LfsrPoly *a, const LfsrPoly *b, const LfsrPoly *charpoly)
 {
     if (a->nwords != b->nwords || a->nwords != charpoly->nwords) {
@@ -447,7 +468,9 @@ void LfsrPoly_mulmod(LfsrPoly *a, const LfsrPoly *b, const LfsrPoly *charpoly)
     LfsrPoly_destruct(&r);
 }
 
-// out <- x^(c * 2^e) mod charpoly
+/**
+ * @brief `out <- x^(c * 2^e) mod charpoly`
+ */
 LfsrPoly LfsrPoly_jumppoly_ce(const LfsrPoly *charpoly, uint64_t c, uint32_t e)
 {
     LfsrPoly out = LfsrPoly_create(charpoly->degree);
@@ -730,7 +753,39 @@ LfsrMatrix LfsrMatrix_get_krylov_matrix(const LfsrMatrix *mat)
     return kmat;
 }
 
-
+/**
+ * @brief Convert LFSR Krylov matrix to its characteristic polynomial.
+ * The converted matrix will be altered by Gaussian elimination.
+ * @details Krylov matrix has the \f$ (n+1)\times (n+1) \f$ size (where
+ * n is the number of bits in the LFSR state) and should have the next
+ * layout:
+ *
+ *    | -----  x  ----- 0 |
+ *    | ----- xA  ----- 0 |
+ *    | ----- xA^2 ---- 0 |
+ *    |    ..........     |
+ *    | ----- xA^n ---- 0 |
+ *
+ * where A is the LFSR transition matrix and x is the initial LFSR state.
+ * Note that x is the row vector (just as in papers by Marsaglia, Blackman
+ * and Vigna).
+ *
+ * The code solves the next system of linear equations in the GF(2) field:
+ *
+ *
+ *                       | -----  x  ----- |
+ *                       | ----- xA  ----- |
+ *     |c0 c1 ... cn| =  | ----- xA^2 ---- | = | ----- xA^n ----- |
+ *                       |    ..........   |
+ *                       | ----- xA^n ---- |
+ *
+ * Characteristic polynomial can be interpreted as the next recurrent formula
+ * for some bit of the xorshift-like LFSR output:
+ *
+ * \f[
+ * c_0 b_0 \oplus c_1 b_1 \oplus \ldots \oplus c_n b_n = 0
+ * \f]
+ */
 LfsrPoly LfsrMatrix_krylov_to_charpoly(LfsrMatrix *mat)
 {
     const size_t nbits = mat->n - 1;
@@ -772,7 +827,6 @@ LfsrPoly LfsrMatrix_krylov_to_charpoly(LfsrMatrix *mat)
     }
     // c) Restore the polynomial
     LfsrPoly poly = LfsrPoly_create(nbits);
-    //uint8_t *poly = calloc(nbits + 1, sizeof(uint8_t));
     for (size_t i = 0; i < nbits; i++) {
         if (LfsrMatrix_getbit(mat, nbits, cinds[i])) {
             LfsrPoly_setbit(&poly, i);
