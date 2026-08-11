@@ -41,6 +41,8 @@ ifeq ($(PLATFORM_NAME), GCC)
     GEN_CFLAGS += -fno-tree-slp-vectorize -ffreestanding -nostdlib
     GEN_LFLAGS = -lgcc
     PLATFORM_FLAGS = -march=native
+    # May be useful for valgrind
+    #PLATFORM_FLAGS = -march=x86-64-v3
 else ifeq ($(PLATFORM_NAME), GCC32)
     CC = gcc
     CXX = g++

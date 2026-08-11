@@ -199,6 +199,7 @@ int run_triples_search(const GeneratorInfo *gen, const XorshiftProps *props)
 
 
     free(triples);
+    free(thrd);
     GeneratorStateExt_destruct(&ext);
     CallerAPI_free();
     return 0;
