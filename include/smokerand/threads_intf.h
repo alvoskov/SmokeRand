@@ -83,7 +83,7 @@ typedef struct {
     int exists;
 } ThreadObj;
 
-typedef DWORD ThreadRetVal;
+typedef unsigned int ThreadRetVal;
 #define THREADFUNC_SPEC WINAPI
 
 //---------------------------------------------------------------------------------

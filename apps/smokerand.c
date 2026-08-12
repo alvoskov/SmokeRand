@@ -118,7 +118,7 @@ typedef struct {
  * @details General principles:
  *
  * 1) Maximal number of threads is the number of CPU cores.
- * 2) For 32-bit systems - not more than 2 threads.
+ * 2) For 32-bit systems - not more than 3 threads.
  * 3) If number of cores is more than 4 then leave one unloaded core.
  */
 static unsigned int get_default_nthreads(unsigned int *ncores)
@@ -127,11 +127,14 @@ static unsigned int get_default_nthreads(unsigned int *ncores)
     if (ncores != NULL) {
         *ncores = nthreads;
     }
-    if (sizeof(size_t) == 4 * sizeof(char) && nthreads > 2) {
-        nthreads = 2;
+    if (sizeof(size_t) == 4 * sizeof(char) && nthreads > 3) {
+        // CollisionOver test may use up to 400 MiB for buffers.
+        // So we limit the default number of threads for 32-bit platforms.
+        nthreads = 3;
     }
-    if (nthreads > 4)
+    if (nthreads > 4) {
         nthreads--;
+    }
     return nthreads;
 }
 

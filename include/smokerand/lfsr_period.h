@@ -93,7 +93,6 @@ void LargeInt_div_2(LargeInt *obj);
 unsigned int LargeInt_get_nbits(const LargeInt *obj);
 void LargeInt_print_hex(const LargeInt *obj, const CallerAPI *intf);
 
-
 static inline int LargeInt_is_odd(const LargeInt *obj)
 {
     return (obj->x[0] & 1) == 1;
@@ -108,6 +107,7 @@ static inline int LargeInt_getbit(const LargeInt *obj, unsigned int ind)
 LfsrPoly LfsrPoly_create(size_t degree);
 void LfsrPoly_print(const LfsrPoly *obj, const CallerAPI *intf);
 void LfsrPoly_print_hex(const LfsrPoly *obj, const CallerAPI *intf);
+void LfsrPoly_print_carray(const LfsrPoly *obj, const CallerAPI *intf);
 void LfsrPoly_destruct(LfsrPoly *obj);
 void LfsrPoly_mulx(LfsrPoly *a, const LfsrPoly *charpoly);
 void LfsrPoly_mulmod(LfsrPoly *a, const LfsrPoly *b, const LfsrPoly *charpoly);

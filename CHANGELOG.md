@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
+## [0.50]
+
+### Added
+
+- `lfsr` battery: characteristic and jump polynomials are now also printed
+  as C99 source code with 64-bit hexadecimal words.
+
+### Bugfix
+
+- `threads_intf.c`: `CreateThread` is replaced to `_beginthreadex` in Windows
+  builds, prevents crashes in Open Watcom V2 and formally required for MSVC.
+
+### Changed
+
+- Default number of threads for 32-bit platforms are increased from 2 to 3
+  due to usage of in-place radix sort for 64-bit buffers (was already added
+  in previous releases).
 
 ## [0.49] 2026-08-12
 

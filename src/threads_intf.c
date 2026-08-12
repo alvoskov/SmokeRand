@@ -3,7 +3,8 @@
  * @brief Cross-platform multithreading interface. Supports POSIX threads
  * and WinAPI threads.
  *
- * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -19,6 +20,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+
+#ifdef USE_WINTHREADS
+#include <process.h>
+#endif
 
 #define NTHREADS_MAX 256
 
@@ -51,7 +56,9 @@ ThreadObj ThreadObj_create(ThreadFuncPtr thr_func, void *udata, unsigned int ord
     pthread_create(&obj.id, NULL, thr_func, udata);
     // Get data from threads
 #elif defined(USE_WINTHREADS)
-    obj.handle = CreateThread(NULL, 0, thr_func, udata, 0, &obj.id);
+    // Don't use CreateThread because it may cause problem with C standard
+    // libraries in MSVC and Open Watcom
+    obj.handle = (HANDLE) _beginthreadex(NULL, 0, thr_func, udata, 0, (unsigned int *) &obj.id);
 #else
     obj.id = ord;
     thr_func(udata);
