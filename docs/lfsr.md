@@ -303,3 +303,52 @@ Triples for `xoroshiro64w16`:
     [14 11 11]:1.29e-80 [15  6  6]:2.38e-22
 
     Total number of triples: 26
+
+## Interesting notes by G. Jones
+
+G. Jones (also known as D. Blackman), one of the developers of the
+`xoroshiro`/`xoshiro` PRNG families, made the next post that is very useful
+for understanding of the LFSR underlying mathematical principles:
+
+    Re: characteristic polynomials for F2 linear prngs.
+
+    The characteristic polynomial corresponds to a linear feadback shift register
+    prng which xors together some previous bits at fixed lags to make
+    a new bit.
+
+    Take (almost any?) F2 linear prng and look at one bit per result
+    always at the same position. The bitstream is the one you would get from the lfsr.
+    Look at the stream from another bit position, and it's the same characteristic
+    polynomial, but with a different starting state.
+
+    From the obvious counting argument, many different F2 linear prngs share the
+    same characteristic polynomial. If the polynomial is a good one, some of these
+    prngs will be good, and some will be bad. THe polynomial can tell you some things
+    about the prng, but not everything, because the prng has more things in it
+    than just the polynomial.
+
+    Working with the polynomial can be faster than working with the matrix for
+    stuff like checking that the prng is full cycle, or calculating the table of
+    mysterious constants for a jumpahead function. For something as big as mt19936
+    characteristic polynomial is really the only way to do these things. For
+    256 bits you could do it all with matrixes if you hate characteristic
+    polynomials enough, or just can't get them to work.
+
+    If you want a rough heuristic on whether F2 linear prng will be any good,
+    the matrix offers better guidance than the characteristic polynomial.
+    Check the number of 1 bits in each row and column. If the least is
+    is at least 9 or so, that's kind of ok, but if you can achieve better
+    without hurting performance too much, go for it. The ideal is close
+    to 50% in each row, and in each column. For large matrixes, you could probably
+    get away with a lot less. Also generate the inverse matrix and run
+    the same check.
+
+    BTW the practice of calling the shift registers ""polynomials"" comes from
+    algebra of finite fields. You can add and multiply them according to those
+    rules. And yes, you can use the polynomial as a function. The input is
+    just one bit, and so is the rather boring output. This is part of the
+    definition, but rarely something you would want to do.
+
+The original post can be found
+[here](https://sourceforge.net/p/pracrand/discussion/366935/thread/416f25e937/)
+
