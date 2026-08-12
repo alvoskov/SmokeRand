@@ -8,7 +8,7 @@
  * alvoskov@gmail.com
  *
  * Some polynomial GF(2) arithmetics is based on the public domain code
- * by S.Vigna (https://prng.di.unimi.it/f2x.c).
+ * by S. Vigna (https://prng.di.unimi.it/f2x.c).
  *
  * This software is licensed under the MIT license.
  */
@@ -227,6 +227,18 @@ static const LargeInt lfsr1024_exps[] = {
 /**
  * @brief Returns the pointer to the 0-terminated array of exponents
  * for the LFSR maximal period verification.
+ * @details It returns an array of the \f$ period / p_i \f$ where \f$ p_i \f$
+ * are prime divisors of the period. Factorizations of large Fermat numbers
+ * \f$ F_k = 2^{2^k} + 1 \f$ used during the \f$ 2^n - 1 \f$ factorization can
+ * be found in the next papers:
+ *
+ * - R.P. Brent. Factorization of the tenth Fermat number // Mathematics of
+ *   computation. 1999. V. 68. N 225. P. 429–451
+ *   https://doi.org/10.1090/S0025-5718-99-00992-8
+ *
+ * In 2026 the largest fully factored Fermat number is \f$ F_{11} \f$ so
+ * xorshift-like LFSR size is limited to 4096 bits.
+ *
  * @param n LFSR state size, bits.
  */
 static const LargeInt *get_lfsr_exps(size_t n)

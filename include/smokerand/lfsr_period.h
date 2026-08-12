@@ -2,10 +2,13 @@
  * @file lfsr_period.h
  * @brief Simple tools for proving the LFSR period using the theoretical
  * (algebraic) methods. Allow to check small xorshift-style generators with
- * states up to 256 bits.
+ * states up to 1024 bits.
  * @copyright
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
+ *
+ * Some polynomial GF(2) arithmetics is based on the public domain code
+ * by S. Vigna (https://prng.di.unimi.it/f2x.c).
  *
  * This software is licensed under the MIT license.
  */
