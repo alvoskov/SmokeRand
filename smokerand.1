@@ -333,6 +333,14 @@ historical meaning as an example of
 An adaptive frequency test for 8-bit and 16-bit words that can be applied to the
 arbitrary amount of data. Not very sensitive but allows to detect statistical
 flaws in RC4 obsolete CSPRNG.
+.TP
+.B lfsr
+This battery checks if a LFSR generator has a full period by restoring its GF(2)
+transition matrix \fBA\fR, checking the \fBA**period = I\fR and
+\fBA**(period/primediv\_i) != I\fR conditions. It also deduces a characteristic
+polynomial \fBp(x)\fR using Krylov matrix and Gaussian elimiation. It also
+converts it to a jump polynomial using the \fBx^n mod p(x)\fR formula. Useful
+for generators similar to \fBxorshift\fR or \fBxoroshiro\fR.
 .SS Special operation modes
 .PP
 Special operation modes are pseudo-batteries that don't make any

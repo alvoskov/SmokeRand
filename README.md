@@ -206,7 +206,7 @@ The more detailed information about SmokeRand tests, supplied generators,
 batteries and other technical details can be found at:
 
 - [Generators](docs/generators.md): a short reviews of supplied PRNGs.
-- [LSFR analyzer](docs/lfsr.d): description of a tool (specialized battery)
+- [LSFR analyzer](docs/lfsr.md): description of a tool (specialized battery)
   for LFSR maximal period verification. Doesn't require any explicit
   analytical representation of LFSR.
 - [Plugins](docs/plugins.md): description of C API for plugins with PRNGs.

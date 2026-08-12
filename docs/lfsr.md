@@ -25,11 +25,85 @@ The key features of the analyzer:
 
 The analyzer consists of the next files:
 
-- `src/lfsr_period.c` and `src_lfsr_period.h`: the analyzer core.
+- `src/lfsr_period.c` and `src/lfsr_period.h`: the analyzer core.
 - `apps/test_lfsr_period.c`: some tests, basic sanity checks.
-- `apps/find_xorshifts_params.c`: a multithreaded program for LFSR shifts
+- `apps/find_xorshift_params.c`: a multithreaded program for LFSR shifts
   search and preliminary selection. Reproduces shifts triples for `xorshift32`
   and `xorshift64` obtained [by G. Marsaglia]((https://doi.org/10.18637/jss.v008.i14).
+
+## About jump polynomials
+
+Characteristic polynomials are converted to jump polynomials using
+the next formula:
+
+\f[
+j(x) = x^n \mod p(x)
+\f]
+
+where \f$ n \f$ is the jump length. They are applied the next way:
+
+\f[
+x_{n} = b_0 x_0 + b_1 x_1 + \ldots b_{n-1} x_{n-1}
+\f]
+
+where \f$x_0\f$ are PRNG states and `+` is the bitwise XOR. That formula
+may look a little bit mysterous but they are fairly easy to understand
+if remember that characteristic polynomials can be interpreted as
+a recurrent formula for any particular bit of LFSR (e.g. xorshift) state:
+
+\f[
+c_0 b_0 \oplus c_1 b_1 \oplus \ldots \oplus c_n b_n = 0
+\f]
+
+Let's consider a simple example with \f$n = 5\f$ and the next characteristic
+polynomial \f$ p(x) \f$:
+
+\f[
+p(x) = x^2 + x + 1 = 0 \Rightarrow x^2 = x + 1
+\f]
+
+Note that in the GF(2) field `+` and `-` are `^` (XOR), multiplication is
+`&` (AND). 
+
+\f[
+\begin{array}{l}
+x^3 = x \cdot x^2 = x(x + 1) = x^2 + x = x + x + 1 = 1 \\
+x^4 = x \cdot x^3 = x \\
+x^5 = x \cdot x^4 = x^2 = x + 1
+\end{array}
+\f]
+
+Let's show a connection with the modular division:
+
+    x3 | x2 + x + 1
+       |--------------
+       | x + 1
+    x3 + x2 + x
+    -----------
+         x2 + x
+         x2 + x + 1
+         ----------
+                  1 <-- result
+
+
+    x5 | x2 + x + 1
+       |--------------
+       | x3 + x2 + 1
+    x5 + x4 + x3
+    -----------
+         x4 + x3
+         x4 + x3 + x2
+         ------------
+                   x2
+                   x2 + x + 1
+                   ----------
+                        x + 1 <-- result
+
+Also remember about the next property used for a fast exponentiation:
+
+\f[
+ab \mod m = \left(\left(a \mod m\right)\left(b \mod m\right)\right) \mod m
+\f]
 
 ## Usage
 
@@ -42,6 +116,25 @@ An example of `lfsr` battery usage:
 
 Examples of direct calls of SmokeRand functions can be found in the
 `apps/test_lfsr_period.c` and `apps/find_xorshift_params.c`.
+
+## Testing
+
+There are several methods of the LFSR analyzer testing implemented in SmokeRand.
+
+- `apps/test_lfsr_period.c` - basic sanity checks (periods of some generators,
+  comparison of characteristic and jump polynomials for `xoroshiro128++` with
+  reference values).
+- `apps/find_xorshift_params.c` - reproduction of `xorshift32`, `xorshift64`
+  and `xorshift128` shifts triples obtained by G. Marsaglia.
+- Apply the `lfsr` battery to `shr3`, `xorshift48w16pp`, `xsh`, `dandelion64`,
+  `xorshift96`, `dandelion128`, `xoroshiro128pp`, `xorshift160`, `xorshift256`,
+  `xoshiro256pp`, `xorrot320`, `xorshiro512pp`, `xorgens512`, `xorgens1024`:
+  all of them should have a full period of `2**n - 1`.
+- Apply the `lfsr` to three different variants of `xorrot32`: the default one
+  (has a full period). The `--param=bad1` and `--param=bad2` don't have full
+  period.
+- Apply the `lfsr` battery to `splitmix` and `sfc64`: it should return an
+  error.
 
 ## Some sources of reference data:
 
@@ -128,7 +221,7 @@ successfully reproduced. The program output is given below:
 
 ### xorshift128
 
-Triples for xorshift128 (32-bit version):
+Triples for `xorshift128` (32-bit version):
 
     [ 1  3 12] [ 1  3 15] [ 2  1 21] [ 2 21  6] [ 2 25  2] [ 3  2 21] [ 4  1  5] [ 5 12 29] [ 5 14  1]
     [ 6  5 17] [ 6 11 21] [ 6 11 25] [ 7 10  7] [ 7 11 19] [ 7 11 20] [ 7 12 11] [ 8 11 14] [ 9 11  6]
@@ -145,10 +238,10 @@ triples were mentioned in the Marsaglia's article about xorshift PRNG family.
 
 ### xorrot
 
-xorrot PRNG family was developed by A.L. Voskov, it resembles xorshift and
-xoroshiro but uses more 
+`xorrot` PRNG family was developed by A.L. Voskov, it resembles `xorshift` and
+`xoroshiro`.
 
-Triples for xorrot160 (32-bit version):
+Triples for `xorrot160` (32-bit version):
 
     [ 3 19 31] [ 5  5 15] [ 7 24 27] [13  4 11]
     [13 11 23] [15  3 25] [17 17 27] [17 19 31]
@@ -157,7 +250,7 @@ Triples for xorrot160 (32-bit version):
     Total number of triples: 13
 
 
-Triples for xorrot320 (64-bit version):
+Triples for `xorrot320` (64-bit version):
 
     [ 1 25 55] [ 1 41 63] [ 3 13 19] [ 3 15 30]
     [ 5 37 45] [ 7  9 60] [ 7 35 60] [ 9  2 25]
@@ -178,16 +271,16 @@ Triples for xorrot320 (64-bit version):
 
 ### xoroshiro-w16
 
-xoroshiro48w16 and xoroshiro64w16 are 16-bit xoroshiro modifications developed
-by A.L. Voskov for retrocomputing and microcontrollers. The main intention was
-to make 16-bit friendly but fairly robust generators.
+`xoroshiro48w16` and `xoroshiro64w16` are 16-bit xoroshiro modifications
+developed by A.L. Voskov for retrocomputing and microcontrollers. The main
+intention was to make 16-bit friendly but fairly robust generators.
 
 The next settings for the `hamming_distr` test were used for triples screening:
 
     static const HammingDistrOptions
         hw_distr_sm = {.nvalues = 1ull << 28, .nlevels = 10};
 
-Triples for xoroshiro48w16:
+Triples for `xoroshiro48w16`:
 
     [ 2  3  7]:0         [ 2  7  7]:1.66e-128 [ 2  9  9]:0 [ 2 11  7]:0
     [ 3  6  1]:1.26e-97  [ 3  8  9]:5.2e-169  [ 5  5  7]:0 [ 5 11  3]:8.58e-307
@@ -199,7 +292,7 @@ Triples for xoroshiro48w16:
 
     Total number of triples: 27
 
-Triples for xoroshiro64w16:
+Triples for `xoroshiro64w16`:
 
     [ 1  2 10]:0.00426  [ 1  6 14]:1.45e-19  [ 2 12  9]:3.53e-88 [ 3  4  8]:0.000453
     [ 3  8  8]:4.25e-43 [ 3 14  8]:1.66e-119 [ 4  5 13]:1.3e-14  [ 4  7  7]:5.77e-20
