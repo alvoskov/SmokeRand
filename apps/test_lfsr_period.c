@@ -11,6 +11,9 @@
  * - xoroshiro128++: charateristic and jump polynomials are compared to the
  *   reference ones given by D. Blackman and S. Vigna. Jump polynomials
  *   generation is also tested here.
+ * - xorshift160: checks the period and the jump polynomial (important for
+ *   checking subroutines for modular arithmetics taken from the `f2x.c`
+ *   code by S. Vigna.
  *
  * References:
  *
@@ -342,6 +345,121 @@ static int test_xoroshiro128(const CallerAPI *intf)
 }
 
 
+///////////////////////////////////
+///// xorshift160 based tests /////
+///////////////////////////////////
+
+/**
+ * @brief xorshift160 PRNG state. Mustn't be initialized as (0, 0).
+ */
+typedef struct {
+    uint32_t x;
+    uint32_t y;
+    uint32_t z;
+    uint32_t w;
+    uint32_t v;
+} Xorshift160State;
+
+/**
+ * @brief xorshift160 with shifts taken from xorwow. Not the best
+ * variant, we use it because G.Marsaglia published it (so its full
+ * period has been proven independently).
+ */
+static uint64_t get_bits_xs160(void *state)
+{
+    Xorshift160State *obj = state;
+    uint32_t t = obj->x ^ (obj->x << 2); // a
+    t ^= t >> 1; // b
+    obj->x = obj->y;
+    obj->y = obj->z;
+    obj->z = obj->w;
+    obj->w = obj->v;
+    obj->v = (obj->v ^ (obj->v >> 4)) ^ t; // c
+    return obj->v;
+}
+
+
+static void *gen_create_xs160(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+    Xorshift160State *obj = intf->malloc(sizeof(Xorshift160State));
+    obj->x = intf->get_seed32();
+    obj->y = intf->get_seed32();
+    obj->z = intf->get_seed32();
+    obj->w = intf->get_seed32();
+    obj->v = intf->get_seed32() | 0x1;
+    return obj;
+}
+
+static void Xorshift160State_reset(Xorshift160State *obj)
+{
+    obj->x = 0xDEADBEEF;
+    obj->y = 0xCAFEBABE;
+    obj->z = 0x12345678;
+    obj->w = 0x87654321;
+    obj->v = 0xABCDEF;
+}
+
+/**
+ * @brief Tests that are based on the xorshift160 generator.
+ * @details It contains the next subtests
+ *
+ * - Checks if the period is `2**160 - 1`
+ * - Tests the jump polynomial usage (and compares with the direct
+ *   calls of the PRNG)
+ *
+ * References:
+ *
+ * 1. https://doi.org/10.18637/jss.v008.i14
+ */
+static int test_xorshift160(const CallerAPI *intf)
+{
+    static const GeneratorInfo gen = {
+        .name = "xoroshiro160",
+        .description = "",
+        .nbits = 32,
+        .create = gen_create_xs160,
+        .free = gen_free,
+        .get_bits = get_bits_xs160,
+        .self_test = NULL,
+        .get_sum = NULL,
+        .parent = NULL
+    };
+    static const LfsrPeriodOptions opts = {.check_validity = 1};
+    int is_ok = 1;
+
+    intf->printf("----- xorshift160 based test-----\n");
+    GeneratorStateExt ext = GeneratorStateExt_create(&gen, intf);
+    if (lfsr_period_test(&ext, intf, &opts) != LFSR_PERIOD_MAX) {
+        is_ok = 0;
+    } else {
+        // Check if jump polynomials are working
+        const unsigned int jmp_pow = 20;
+        intf->printf("2**%u jump\n", jmp_pow);
+        // a) reference value
+        Xorshift160State_reset(ext.state.state);
+        for (size_t i = 0; i < (size_t) (1ULL << jmp_pow); i++) {
+            (void) ext.state.gi->get_bits(ext.state.state);
+        }
+        const uint64_t u_ref = ext.state.gi->get_bits(ext.state.state);
+        intf->printf("  u_ref = %llX\n", (unsigned long long) u_ref);
+        // b) jump matrix value
+        Xorshift160State_reset(ext.state.state);
+        GeneratorStateExt_make_jump_pow2(&ext, jmp_pow);
+        const uint64_t u_jmp = ext.state.gi->get_bits(ext.state.state);
+        intf->printf("  u_jmp = %llX\n", (unsigned long long) u_jmp);
+        if (u_jmp != u_ref) {
+            is_ok = 0;
+        }
+    }
+
+    GeneratorStateExt_destruct(&ext);
+    return is_ok;
+}
+
+/**
+ * @brief Program entry point, runs all tests.
+ */
 int main()
 {
     CallerAPI intf = CallerAPI_init();
@@ -349,12 +467,14 @@ int main()
     const int is_tf0_64_ok = test_tf0_64(&intf);
     const int is_xr32_ok   = test_xorrot32(&intf);
     const int is_xs128_ok  = test_xoroshiro128(&intf);
+    const int is_xs160_ok  = test_xorshift160(&intf);
     CallerAPI_free();
 
     printf("ctr:            [%s]\n", is_ctr_ok    ? "PASSED" : "FAILED");
     printf("tf0_64:         [%s]\n", is_tf0_64_ok ? "PASSED" : "FAILED");
     printf("xorrot32:       [%s]\n", is_xr32_ok   ? "PASSED" : "FAILED");
     printf("xoroshiro128++: [%s]\n", is_xs128_ok  ? "PASSED" : "FAILED");
-    const int is_ok = is_ctr_ok && is_tf0_64_ok && is_xr32_ok && is_xs128_ok;
+    printf("xorshift160:    [%s]\n", is_xs160_ok  ? "PASSED" : "FAILED");
+    const int is_ok = is_ctr_ok && is_tf0_64_ok && is_xr32_ok && is_xs128_ok && is_xs160_ok;
     return is_ok ? 0 : 1;
 }
