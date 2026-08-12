@@ -221,7 +221,7 @@ static int run_self_test(const CallerAPI *intf)
 
     int is_ok = 1;
     Swb64State *obj = create_lux(intf, 0);
-    for (unsigned int i = 0; i < SWB_A; i++) {
+    for (size_t i = 0; i < SWB_A; i++) {
         obj->x[i] = 1000U + i;
     }
     obj->c = 1;

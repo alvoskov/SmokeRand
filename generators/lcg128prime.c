@@ -86,6 +86,7 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
+/*
 static inline uint64_t sub64b(uint64_t *a, uint64_t b)
 {
     const uint64_t t = *a - b;
@@ -93,6 +94,7 @@ static inline uint64_t sub64b(uint64_t *a, uint64_t b)
     *a = t;
     return c;
 }
+*/
 
 static inline uint64_t get_bits_generic_raw(Lcg128PrimeState *obj, uint64_t a)
 {

@@ -160,32 +160,6 @@ for _, fname in pairs(exefiles) do
     io.write("\twcl386 -4s -fe=$(bindir)/" .. fname .. ".exe " .. objstr_fname .. "\n")
 end
 
---[[
-io.write("$(bindir)/smokerand.exe:" .. objstr .. "\n")
-io.write("\twcl386 -4s -fe=$(bindir)/smokerand.exe " .. objstr .. "\n")
-
-local objstr_speed = "$(objdir)/sr_speed.obj " .. objstr_genexec;
-io.write("$(bindir)/sr_speed.exe: " .. objstr_speed .. "\n")
-io.write("\twcl386 -4s -fe=$(bindir)/sr_speed.exe " .. objstr_speed .. "\n")
-
-local objstr_xorshift = "$(objdir)/find_xorshift_params.obj " .. objstr_genexec;
-io.write("$(bindir)/find_xorshift_params.exe: " .. objstr_xorshift .. "\n")
-io.write("\twcl386 -4s -fe=$(bindir)/find_xorshift_params.exe " .. objstr_xorshift .. "\n")
-
-local objstr_syscrypto = "$(objdir)/test_syscrypto.obj " .. objstr_genexec;
-io.write("$(bindir)/test_syscrypto.exe: " .. objstr_syscrypto .. "\n")
-io.write("\twcl386 -4s -fe=$(bindir)/test_syscrypto.exe " .. objstr_syscrypto .. "\n")
-
-io.write("$(bindir)/test_funcs.exe: $(objdir)/test_funcs.obj \n")
-io.write("\twcl386 -4s -fe=$(bindir)/test_funcs.exe $(objdir)/base64.obj $(objdir)/blake2s.obj $(objdir)/cpuinfo.obj " ..
-    "$(objdir)/core.obj " ..
-    "$(objdir)/specfuncs.obj $(objdir)/test_funcs.obj $(objdir)/entropy.obj " ..
-    "$(objdir)/threads_intf.obj\n")
---]]
-
---io.write("$(objdir)/test_funcs.obj: $(appsrcdir)/test_funcs.c $(lib_headers)\n")
---io.write("\twcc386 $(cflags) -fo=$(objdir)/test_funcs.obj $(appsrcdir)/test_funcs.c\n")
-
 -- b1) Special cases
 
 io.write("$(bindir)/sr_dos32.exe:" .. objstr_dos32 .. "\n")
@@ -198,22 +172,7 @@ for _, fname in pairs(exefiles) do
     io.write("\twcc386 $(cflags) -fo=$(objdir)/" .. fname .. ".obj $(appsrcdir)/" .. fname .. ".c\n")
 end
 
---[[
-io.write("$(objdir)/smokerand.obj: $(appsrcdir)/smokerand.c $(lib_headers)\n")
-io.write("\twcc386 $(cflags) -fo=$(objdir)/smokerand.obj $(appsrcdir)/smokerand.c\n")
-
-io.write("$(objdir)/sr_speed.obj: $(appsrcdir)/sr_speed.c $(lib_headers)\n")
-io.write("\twcc386 $(cflags) -fo=$(objdir)/sr_speed.obj $(appsrcdir)/sr_speed.c\n")
-
-io.write("$(objdir)/find_xorshift_params.obj: $(appsrcdir)/find_xorshift_params.c $(lib_headers)\n")
-io.write("\twcc386 $(cflags) -fo=$(objdir)/find_xorshift_params.obj $(appsrcdir)/find_xorshift_params.c\n")
-
-io.write("$(objdir)/test_syscrypto.obj: $(appsrcdir)/test_syscrypto.c $(lib_headers)\n")
-io.write("\twcc386 $(cflags) -fo=$(objdir)/test_syscrypto.obj $(appsrcdir)/test_syscrypto.c\n")
---]]
-
 -- Some special cases
-
 io.write("$(objdir_dos32)/smokerand.obj: $(appsrcdir)/smokerand.c $(lib_headers)\n")
 io.write("\twcc386 $(cflags_dos32) -fo=$(objdir_dos32)/smokerand.obj $(appsrcdir)/smokerand.c\n")
 

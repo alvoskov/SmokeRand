@@ -942,12 +942,12 @@ GeneratorStateExt_get_matrix(GeneratorStateExt *obj, unsigned long long niters)
     uint8_t *buf = obj->state.state;
     for (size_t i = 0; i < nbits; i++) {
         memset(buf, 0, obj->nbytes);
-        buf[i >> 3] = 1U << (i & 0x7U);
+        buf[i >> 3] = (uint8_t) (1U << (i & 0x7U));
         for (unsigned long long j = 0; j < niters; j++) {
             (void) obj->state.gi->get_bits(obj->state.state);
         }
         for (size_t j = 0; j < nbits; j++) {
-            const uint8_t b = buf[j >> 3] & (1U << (j & 0x7U));
+            const uint8_t b = (uint8_t) (buf[j >> 3] & (1U << (j & 0x7U)));
             LfsrMatrix_setbit(&mat, i, j, b);
         }
     }
@@ -971,7 +971,7 @@ LfsrMatrix GeneratorStateExt_get_krylov_matrix(GeneratorStateExt *obj)
     // Use the row vectors here
     for (size_t i = 0; i < nbits + 1; i++) {
         for (size_t j = 0; j < nbits; j++) {
-            const uint8_t b = buf[j >> 3] & (1U << (j & 0x7U));
+            const uint8_t b = (uint8_t) (buf[j >> 3] & (1U << (j & 0x7U)));
             LfsrMatrix_setbit(&mat, i, j, b);
         }
         (void) obj->state.gi->get_bits(obj->state.state);
@@ -1098,7 +1098,7 @@ int GeneratorStateExt_has_counters(GeneratorStateExt *obj)
         (void) obj->state.gi->get_bits(obj->state.state);
         // Check if some bytes are not counters
         for (size_t j = 0; j < nbytes; j++) {
-            const uint8_t delta = cur[j] - prev[j];
+            const uint8_t delta = (uint8_t) (cur[j] - prev[j]);
             if (delta != 0 && delta != 1) {
                 is_byte_ctr[j] = 0;
             }
@@ -1205,7 +1205,7 @@ LfsrPeriodResult lfsr_period_test(GeneratorStateExt *ext, const CallerAPI *intf,
     intf->printf("LFSR period checker\n");
     intf->printf("  malloc: nbytes = %llu; ptr = 0x%llu\n",
         (unsigned long long) ext->nbytes,
-        (unsigned long long) ext->state.state);
+        (unsigned long long) (size_t) ext->state.state);
     // Check the generator validity
     if (opts->check_validity && !GeneratorStateExt_is_valid(ext, intf)) {
         LfsrPeriodResult_print(intf, LFSR_PERIOD_ERROR);
