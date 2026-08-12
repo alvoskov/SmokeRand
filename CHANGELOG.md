@@ -5,7 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 
-## [0.49]
+## [0.49] 2026-08-12
+
+### Added
+
+- `lfsr` battery: a tool for automatic proof of full period for xorshift-like
+  generators. Works directly with its compiled implementations, no symbolic
+  representation of tested LFSR is needed! Currently the 32, 48, 64, 96, 128,
+  160, 192, 256, 320, 512 and 1024 bits of state are supported.
+- `find_xorshift_params` executable that searches the `[a,b,c]` triples for
+  the xorshift64 generators that give the full 2^64 - 1 period. Essentially
+  it reproduces the classical results obtained by G. Marsaglia for xorshift
+  PRNGs. It also searches triples for `xorshift32`, `xorshift128`
+- `dandelion128`, `dandelion64` and `dandelion32` generators: scrambled LFSRs.
+- `tf0_ctr64`, `thurst`, `nasam`, `pelican`, `wanghash64` generators based on
+  a scrambled 64-bit counter/"discrete Weyl sequence" and similar to SplitMix.
+- `wyranda_par`: a new modification of wyrand that passes the 64-bit
+  collision test.
+- `wyrand128` and `rapidrand128`: 128-bit versions of wyrand.
+- `xorrot32` and `xorrot256`: two extra (and bad) versions with reduced
+  periods, needed as test cases for the `lfsr` battery.
+- `xorgens256`, `xorgens512`, `xorgens1024` were added: without discrete
+  Weyl sequence and ring buffers, mainly for the `lfsr` battery testing.
+- `xoshiro512pp` and `xoroshiro64w16++` was added. The `xoroshiro64w16++`
+  was designed by A.L. Voskov (shifts tuning).
+- `xorrot160` and `xorrot320` generators (designed by A.L. Voskov)
+- `xorshift96`, `xorshift160`, `xorshift192` and `xorshift256`: very well
+  known classical PRNGs (with triples selected by A.L. Voskov by means of
+  SmokeRand tests).
 
 ### Bugfix
 
@@ -20,7 +47,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `aesdec2` generator by camel-cdr (Olaf Bernstein), requires AES-NI
    instructions support, the portable version is intentionally omitted.
 - `ghsc64`, `ghsc128`, `ghsc256`, `ghsc64_old`, `ghsc64_mod` - GhostScramble
-   PRNG family (`ghc64_mod` modification was suggested by A.L. Voskov).
+   PRNG family (`ghsc64_mod` modification was suggested by A.L. Voskov).
 - `leptonflurry32x1` counter-based PRNG was added.
 - `mrsf32` and `mrsf64` chaotic PRNGs were added.
 - `konadare192` chaotic PRNG.

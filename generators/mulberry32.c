@@ -11,9 +11,7 @@
  * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
- * All rights reserved.
- *
- * This software is provided under the Apache 2 License.
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 

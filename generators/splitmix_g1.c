@@ -10,7 +10,7 @@
  * References:
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -40,7 +40,7 @@ static void *create(const CallerAPI *intf)
 {
     SplitMixState *obj = intf->malloc(sizeof(SplitMixState));
     obj->x = intf->get_seed64();
-    return (void *) obj;
+    return obj;
 }
 
 MAKE_UINT64_PRNG("SplitMix_g1", NULL)

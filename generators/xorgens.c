@@ -8,6 +8,10 @@
  * References:
  *
  * - https://maths-people.anu.edu.au/~brent/random.html
+ * - Brent R.P. Some long-period random number generators using shifts and xors
+ *   // ANZIAM J. 2007. V.48. P. C188--C202. https://doi.org/10.21914/anziamj.v48i0.40
+ *   Proceedings of the 13th Biennial Computational Techniques and Applications
+ *   Conference, CTAC-2006. Editors: Wayne Read  and A. J. Roberts
  *
  * @copyright The original algorithm and its original implementations were
  * suggested by R.P. Brent. It was adapted to SmokeRand, C99 and multithreaded

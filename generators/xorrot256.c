@@ -14,6 +14,8 @@
  *                (except BRank test for binary matrices ranks)
  * - (5, 12, 35) - passes `hamming.cfg`.
  *
+ * - (1, 1, 35) - doesn't give a full period but A^period = A
+ *
  * The algorithm is designed by A.L. Voskov.
  *
  * References:
@@ -43,7 +45,14 @@ typedef struct {
 } Xorrot256State;
 
 
-static inline uint64_t get_bits_raw(Xorrot256State *obj)
+///////////////////////////
+///// Default version /////
+///////////////////////////
+
+/**
+ * @brief Its period is \f$ 2^{256} - 1 \f$.
+ */
+static inline uint64_t get_bits_good_raw(Xorrot256State *obj)
 {
     const uint64_t x0 = obj->x, w0 = obj->w;
     obj->x = x0 ^ obj->y;
@@ -52,6 +61,55 @@ static inline uint64_t get_bits_raw(Xorrot256State *obj)
     obj->w = (x0 << 3) ^ obj->z ^ rotl64(w0, 8) ^ rotl64(w0, 37);
     return x0;
 }
+
+MAKE_GET_BITS_WRAPPERS(good)
+
+///////////////////////
+///// Test case 1 /////
+///////////////////////
+
+/**
+ * @brief Its period is not \f$ 2^{256} - 1 \f$. Introduced as
+ * a test case for the `lfsr` battery.
+ */
+static inline uint64_t get_bits_bad1_raw(Xorrot256State *obj)
+{
+    const uint64_t x0 = obj->x, w0 = obj->w;
+    obj->x = x0 ^ obj->y;
+    obj->y = obj->z;
+    obj->z = x0 ^ w0;
+    obj->w = (x0 << 3) ^ obj->z ^ rotl64(w0, 8) ^ rotl64(w0, 39);
+    return x0;
+}
+
+MAKE_GET_BITS_WRAPPERS(bad1)
+
+
+///////////////////////
+///// Test case 2 /////
+///////////////////////
+
+/**
+ * @brief Its period is not \f$ 2^{256} - 1 \f$ but A^{2**256} = I.
+ * So it is a good non-trivial test case for the `lfsr` battery.
+ * @details Some bad triples:
+ * a) Smaller period (better): `[3,3,45]`, `[5 13 33]`, `[7,13,53]`,
+ *    `[7,14,33]`, `[7,23,47]`
+ * b) Larger period: `[1,1,35]`,  `[3,17,46]`, `[5,3,47]`,
+ *    `[5,18,41]`, `[7,12,37]`, `[7,21,58]`, `[9,7,41]`
+ */
+static inline uint64_t get_bits_bad2_raw(Xorrot256State *obj)
+{
+    const uint64_t x0 = obj->x, w0 = obj->w;
+    obj->x = x0 ^ obj->y;
+    obj->y = obj->z;
+    obj->z = x0 ^ w0;
+    obj->w = (x0 << 7) ^ obj->z ^ rotl64(w0, 23) ^ rotl64(w0, 47);
+    return x0;
+    return obj->x;
+}
+
+MAKE_GET_BITS_WRAPPERS(bad2)
 
 
 static void *create(const CallerAPI *intf)
@@ -82,7 +140,7 @@ static int run_self_test(const CallerAPI *intf)
         .z = 0xDEADBEEF,        .w = 0xBADF00D
     };
     for (long i = 0; i < 10000000; i++) {
-        (void) get_bits_raw(&obj);
+        (void) get_bits_good_raw(&obj);
     }
     intf->printf("x_out = %llX; x_ref = %llX\n",
         (unsigned long long) obj.x, (unsigned long long) x_ref);
@@ -96,6 +154,28 @@ static int run_self_test(const CallerAPI *intf)
             obj.z == z_ref && obj.w == w_ref);
 }
 
-MAKE_UINT64_PRNG("xorrot256", run_self_test)
+
+static const GeneratorParamVariant gen_list[] = {
+    {"",          "xorrot256", 64, default_create, get_bits_good, get_sum_good},
+    {"default",   "xorrot256", 64, default_create, get_bits_good, get_sum_good},
+    {"bad1",      "xorrot256:bad1", 64, default_create, get_bits_bad1, get_sum_bad1},
+    {"bad2",      "xorrot256:bad2", 64, default_create, get_bits_bad2, get_sum_bad2},
+    GENERATOR_PARAM_VARIANT_EMPTY
+};
 
 
+static const char description[] =
+"The xorrot256 PRNG is a xorshift-style LFSR with a maximal period.\n"
+"The next param values are supported:\n"
+"  default   - good version\n"
+"  bad1      - a version with a reduced period (test case 1)\n"
+"  bad2      - a version with a reduced period (test case 2)\n";
+
+
+int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
+{
+    const char *param = intf->get_param();
+    gi->description = description;
+    gi->self_test = run_self_test;
+    return GeneratorParamVariant_find(gen_list, intf, param, gi);
+}

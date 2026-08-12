@@ -6,7 +6,7 @@
  * 1. https://github.com/umireon/my-random-stuff/blob/master/xorshift/splitmix32.c
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -24,9 +24,8 @@ typedef struct {
 } SplitMix32State;
 
 
-static inline uint64_t get_bits_raw(void *state)
+static inline uint64_t get_bits_raw(SplitMix32State *obj)
 {
-    SplitMix32State *obj = state;
     const uint32_t c = 0x9E3779B9;
     uint32_t s = (obj->w += c) ^ obj->s_prev;
     s ^= s >> 16;
@@ -44,7 +43,7 @@ static void *create(const CallerAPI *intf)
     SplitMix32State *obj = intf->malloc(sizeof(SplitMix32State));
     obj->w = intf->get_seed32();
     obj->s_prev = intf->get_seed32();
-    return (void *) obj;
+    return obj;
 }
 
 

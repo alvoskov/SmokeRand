@@ -126,12 +126,9 @@ void HammingTuplesTable_init(HammingTuplesTable *obj,
     const double *code_to_prob)
 {
     const uint64_t code_mask = (1ull << code_nbits) - 1;
-    obj->len = 1UL << code_nbits * tuple_size;
+    obj->len = (size_t) (1ULL << code_nbits * tuple_size);
     obj->tuples = calloc(obj->len, sizeof(HammingWeightsTuple));
-    if (obj->tuples == NULL) {
-        fprintf(stderr, "***** HammingTuplesTable_init: not enough memory *****\n");
-        exit(1);
-    }
+    ASSERT_MALLOC_PTR(obj->tuples, "HammingTuplesTable_init");
     // Calculate probabilities of tuples
     // (idea is taken from PractRand)
     for (size_t i = 0; i < obj->len; i++) {
@@ -584,10 +581,7 @@ TestResults hamming_ot_long_test(GeneratorState *obj, const HammingOtLongOptions
     const unsigned int bits_per_word = opts->wordsize;
     double code_to_prob[4];
     unsigned short *hw_to_code = calloc(bits_per_word + 1, sizeof(unsigned short));
-    if (hw_to_code == NULL) {
-        fprintf(stderr, "***** hamming_ot_long_test: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(hw_to_code, "hamming_ot_long_test")
     hamming_ot_long_fill_hw_tables(hw_to_code, code_to_prob, bits_per_word);
     // Parameters for 18-bit tuple with 2-bit digits
     static const unsigned int code_nbits = 2, tuple_size = 9;
@@ -649,6 +643,7 @@ double hamming_distr_calc_zemp(const unsigned long long *o, size_t nbits)
         npoints += o[i];
     }
     double *p = calloc(nbits + 1, sizeof(double));
+    ASSERT_MALLOC_PTR(p, "hamming_distr_calc_zemp")
     sr_binomial_pdf_all(p, (unsigned long) nbits, 0.5);
     for (size_t i = 0; i < nbits; i++) {
         const double e_i = (double) npoints * p[i];
@@ -771,8 +766,11 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
     }
     unsigned long block_len = 1UL << opts->nlevels;
     HammingDistrHist *h = calloc((size_t) opts->nlevels, sizeof(HammingDistrHist));
+    ASSERT_MALLOC_PTR(h, "hamming_distr_test")
     uint64_t *x = calloc(block_len, sizeof(uint64_t));
+    ASSERT_MALLOC_PTR(x, "hamming_distr_test")
     int *hw = calloc(block_len, sizeof(int));
+    ASSERT_MALLOC_PTR(hw, "hamming_distr_test")
     for (int i = 0; i < opts->nlevels; i++) {
         HammingDistrHist_init(&h[i], nbits << i);
     }
@@ -809,7 +807,7 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
     for (int i = 0; i < opts->nlevels; i++) {
         HammingDistrHist_calc_stats(&h[i]);
         obj->intf->printf("    %8d | %8.3f %10.3g | %8.3f %10.3g\n",
-            (int) ((1U << i) * nbits), h[i].z, h[i].p, h[i].z_xor, h[i].p_xor);
+            (int) ((1ULL << i) * nbits), h[i].z, h[i].p, h[i].z_xor, h[i].p_xor);
         const double zabs = fabs(h[i].z), zabs_xor = fabs(h[i].z_xor);
         if (zabs > ans.x)     { ans.x = zabs; }
         if (zabs_xor > ans.x) { ans.x = zabs_xor; }

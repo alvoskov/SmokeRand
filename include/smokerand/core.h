@@ -158,9 +158,12 @@ typedef enum {
 const char *interpret_pvalue(double pvalue);
 PValueCategory get_pvalue_category(double pvalue);
 void quicksort64(uint64_t *x, size_t len);
+void quicksort32(uint32_t *x, size_t len);
 void radixsort32(uint32_t *x, size_t len);
+void radixsort32_inplace(uint32_t *x, size_t len);
 void radixsort64_inplace(uint64_t *x, size_t len);
-void fastsort64(const RamInfo *info, uint64_t *x, size_t len);
+void fastsort32(uint32_t *x, size_t len);
+void fastsort64(uint64_t *x, size_t len);
 
 typedef struct {
     void *original_state;
@@ -325,8 +328,14 @@ static inline unsigned int countl_zero_u64(uint64_t x)
     y = x >>  4; if (y != 0) { n = n -  4; x = y; }
     y = x >>  2; if (y != 0) { n = n -  2; x = y; }
     y = x >>  1; if (y != 0) return n - 2;
-    return n - x;
+    return (unsigned int) (n - x);
 #endif
+}
+
+#define ASSERT_MALLOC_PTR(ptr, msg) \
+if (ptr == NULL) { \
+    fprintf(stderr, "***** %s: not enough memory *****\n", msg); \
+    exit(EXIT_FAILURE); \
 }
 
 #endif // __SMOKERAND_CORE_H

@@ -128,7 +128,7 @@ static void destroy_mutexes()
 
 static uint64_t get_seed64_mt(void)
 {
-    MUTEX_LOCK(get_seed64_mt_mutex);
+    MUTEX_LOCK(get_seed64_mt_mutex, "get_seed64_mt");
     unsigned int ord = seed64_mt_current_thread_ord;
     if (ord < THREAD_ORD_OFFSET) {
         ThreadObj thr = ThreadObj_current();
@@ -148,7 +148,7 @@ static int printf_mt(const char *format, ...)
 {
     int ans;
     ThreadObj thr = ThreadObj_current();
-    MUTEX_LOCK(printf_mt_mutex);
+    MUTEX_LOCK(printf_mt_mutex, "printf_mt");
     va_list args;
     va_start(args, format);    
     if (use_stderr_for_printf) {
@@ -379,61 +379,79 @@ void GeneratorModule_unload(GeneratorModule *mod)
 ///// Sorting subroutines /////
 ///////////////////////////////
 
-
-static void insertsort(uint64_t *x, ptrdiff_t begin, ptrdiff_t end)
-{
-    ptrdiff_t i;
-    for (i = begin + 1; i <= end; i++) {
-        uint64_t xi = x[i];
-        ptrdiff_t j = i;
-        while (j > begin && x[j - 1] > xi) {
-            x[j] = x[j - 1];
-            j--;
-        }
-        x[j] = xi;
-    }
+#define INSERTSORT_FUNC_TPL(suffix, type) \
+static void insertsort##suffix(type *x, ptrdiff_t begin, ptrdiff_t end) \
+{ \
+    ptrdiff_t i; \
+    for (i = begin + 1; i <= end; i++) { \
+        type xi = x[i]; \
+        ptrdiff_t j = i; \
+        while (j > begin && x[j - 1] > xi) { \
+            x[j] = x[j - 1]; \
+            j--; \
+        } \
+        x[j] = xi; \
+    } \
 }
 
-static void quicksort_range(uint64_t *v, ptrdiff_t begin, ptrdiff_t end)
-{
-    ptrdiff_t i = begin, j = end, med = (begin + end) / 2;
-    uint64_t pivot = v[med];
-    while (i <= j) {
-        if (v[i] < pivot) {
-            i++;
-        } else if (v[j] > pivot) {
-            j--;
-        } else {
-            uint64_t tmp = v[i];
-            v[i++] = v[j];
-            v[j--] = tmp;
-        }
-    }
-    if (begin < j) {
-        if (j - begin > 12) {
-            quicksort_range(v, begin, j);
-        } else {
-            insertsort(v, begin, j);
-        }
-    }
-    if (end > i) {
-        if (end - i > 12) {
-            quicksort_range(v, i, end);
-        } else {
-            insertsort(v, i, end);
-        }
-    }
+#define QUICKSORT_RANGE_FUNC_TPL(suffix, type) \
+static void quicksort##suffix##_range(type *v, ptrdiff_t begin, ptrdiff_t end) \
+{ \
+    ptrdiff_t i = begin, j = end, med = (begin + end) / 2; \
+    type pivot = v[med]; \
+    while (i <= j) { \
+        if (v[i] < pivot) { \
+            i++; \
+        } else if (v[j] > pivot) { \
+            j--; \
+        } else { \
+            type tmp = v[i]; \
+            v[i++] = v[j]; \
+            v[j--] = tmp; \
+        } \
+    } \
+    if (begin < j) { \
+        if (j - begin > 12) { \
+            quicksort##suffix##_range(v, begin, j); \
+        } else { \
+            insertsort##suffix(v, begin, j); \
+        } \
+    } \
+    if (end > i) { \
+        if (end - i > 12) { \
+            quicksort##suffix##_range(v, i, end); \
+        } else { \
+            insertsort##suffix(v, i, end); \
+        } \
+    } \
 }
+
+INSERTSORT_FUNC_TPL(64, uint64_t)
+QUICKSORT_RANGE_FUNC_TPL(64, uint64_t)
+
+INSERTSORT_FUNC_TPL(32, uint32_t)
+QUICKSORT_RANGE_FUNC_TPL(32, uint32_t)
 
 
 void quicksort64(uint64_t *x, size_t len)
 {
     if (len > 32) {
-        quicksort_range(x, 0, (ptrdiff_t) (len - 1));
+        quicksort64_range(x, 0, (ptrdiff_t) (len - 1));
     } else {
-        insertsort(x, 0, (ptrdiff_t) (len - 1));
+        insertsort64(x, 0, (ptrdiff_t) (len - 1));
     }
 }
+
+
+void quicksort32(uint32_t *x, size_t len)
+{
+    if (len > 32) {
+        quicksort32_range(x, 0, (ptrdiff_t) (len - 1));
+    } else {
+        insertsort32(x, 0, (ptrdiff_t) (len - 1));
+    }
+}
+
 
 /**
  * @brief 16-bit counting sort for 32-bit arrays.
@@ -499,45 +517,49 @@ typedef struct {
  * @param level Current recursion level (begin from 0)
  * @param bnd_array Preallocated buffer for buckets boundaries.
  */
-static void countsort64_inplace(uint64_t *x, size_t len, unsigned int level, CountSortBounds *bnd_ary)
-{
-    const unsigned int shr = 56 - level * 8;
-    size_t *lb = bnd_ary[level].lb, *ub = bnd_ary[level].ub;
-    memset(lb, 0, 256 * sizeof(size_t));
-    memset(ub, 0, 256 * sizeof(size_t));
-    // Find buckets boundaries
-    for (size_t i = 0; i < len; i++) {
-        const unsigned int pos = ((x[i] >> shr) & 0xFF);
-        ub[pos]++;
-    }
-    for (size_t i = 1; i < 256; i++) {
-        ub[i] += ub[i - 1];
-        lb[i] = ub[i - 1];
-    }
-    // Radix sort
-    for (size_t i = 0; i < 256; i++) {
-        for (size_t j = lb[i]; j < ub[i]; ) {
-            const unsigned int pos = ((x[j] >> shr) & 0xFF);
-            const uint64_t tmp = x[lb[pos]];
-            x[lb[pos]++] = x[j];
-            x[j] = tmp;
-            if (pos == i) { j++; }
-        }
-    }
-    // Restore boundaries
-    lb[0] = 0;
-    for (int i = 1; i < 256; i++) {
-        lb[i] = ub[i - 1];
-    }
-    // Apply the sorting procedure recursively
-    for (int i = 0; i < 256; i++) {
-        if (ub[i] - lb[i] > 128 && level < 5) {
-            countsort64_inplace(x + lb[i], ub[i] - lb[i], level + 1, bnd_ary);
-        } else {
-            quicksort64(x + lb[i], ub[i] - lb[i]);
-        }
-    }
+#define COUNTSORT_INPLACE_FUNC_TPL(suffix, type) \
+static void countsort##suffix##_inplace(type *x, size_t len, unsigned int level, CountSortBounds *bnd_ary) \
+{ \
+    const unsigned int shr = (unsigned int) (8*sizeof(type) - (level + 1) * 8); \
+    size_t *lb = bnd_ary[level].lb, *ub = bnd_ary[level].ub; \
+    memset(lb, 0, 256 * sizeof(size_t)); \
+    memset(ub, 0, 256 * sizeof(size_t)); \
+    /* Find buckets boundaries */ \
+    for (size_t i = 0; i < len; i++) { \
+        const unsigned int pos = ((x[i] >> shr) & 0xFF); \
+        ub[pos]++; \
+    } \
+    for (size_t i = 1; i < 256; i++) { \
+        ub[i] += ub[i - 1]; \
+        lb[i] = ub[i - 1]; \
+    } \
+    /* Radix sort */ \
+    for (size_t i = 0; i < 256; i++) { \
+        for (size_t j = lb[i]; j < ub[i]; ) { \
+            const unsigned int pos = ((x[j] >> shr) & 0xFF); \
+            const type tmp = x[lb[pos]]; \
+            x[lb[pos]++] = x[j]; \
+            x[j] = tmp; \
+            if (pos == i) { j++; } \
+        } \
+    } \
+    /* Restore boundaries */ \
+    lb[0] = 0; \
+    for (int i = 1; i < 256; i++) { \
+        lb[i] = ub[i - 1]; \
+    } \
+    /* Apply the sorting procedure recursively */ \
+    for (int i = 0; i < 256; i++) { \
+        if (ub[i] - lb[i] > 128 && level < 5) { \
+            countsort##suffix##_inplace(x + lb[i], ub[i] - lb[i], level + 1, bnd_ary); \
+        } else { \
+            quicksort##suffix(x + lb[i], ub[i] - lb[i]); \
+        } \
+    } \
 }
+
+COUNTSORT_INPLACE_FUNC_TPL(64, uint64_t)
+COUNTSORT_INPLACE_FUNC_TPL(32, uint32_t)
 
 
 /**
@@ -545,14 +567,38 @@ static void countsort64_inplace(uint64_t *x, size_t len, unsigned int level, Cou
  */
 void radixsort64_inplace(uint64_t *x, size_t len)
 {
-    CountSortBounds *bnd_ary = calloc(8, sizeof(CountSortBounds));
-    if (bnd_ary == NULL) {
-        fprintf(stderr, "***** radixsort64_inplace: not enough memory *****\n");
-        exit(EXIT_FAILURE);
+    if (len < 128) {
+        quicksort64(x, len);
+    } else {
+        CountSortBounds *bnd_ary = calloc(8, sizeof(CountSortBounds));
+        if (bnd_ary == NULL) {
+            fprintf(stderr, "***** radixsort64_inplace: not enough memory *****\n");
+            exit(EXIT_FAILURE);
+        }
+        countsort64_inplace(x, len, 0, bnd_ary);
+        free(bnd_ary);
     }
-    countsort64_inplace(x, len, 0, bnd_ary);
-    free(bnd_ary);
 }
+
+
+/**
+ * @brief In-place radix sort for 32-bit integers.
+ */
+void radixsort32_inplace(uint32_t *x, size_t len)
+{
+    if (len < 128) {
+        quicksort32(x, len);
+    } else {
+        CountSortBounds *bnd_ary = calloc(8, sizeof(CountSortBounds));
+        if (bnd_ary == NULL) {
+            fprintf(stderr, "***** radixsort32_inplace: not enough memory *****\n");
+            exit(EXIT_FAILURE);
+        }
+        countsort32_inplace(x, len, 0, bnd_ary);
+        free(bnd_ary);
+    }
+}
+
 
 
 
@@ -563,11 +609,21 @@ void radixsort64_inplace(uint64_t *x, size_t len)
  * Selection depends on the available RAM estimation and will use quicksort
  * if we don't have enough memory for buffers.
  */
-void fastsort64(const RamInfo *info, uint64_t *x, size_t len)
+void fastsort64(uint64_t *x, size_t len)
 {
-    (void) info;
     radixsort64_inplace(x, len);
 }
+
+
+void fastsort32(uint32_t *x, size_t len)
+{
+    if (len < 65536) {
+        radixsort32(x, len);
+    } else {
+        radixsort32_inplace(x, len);
+    }
+}
+
 
 
 /**

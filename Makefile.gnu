@@ -41,6 +41,8 @@ ifeq ($(PLATFORM_NAME), GCC)
     GEN_CFLAGS += -fno-tree-slp-vectorize -ffreestanding -nostdlib
     GEN_LFLAGS = -lgcc
     PLATFORM_FLAGS = -march=native
+    # May be useful for valgrind
+    #PLATFORM_FLAGS = -march=x86-64-v3
 else ifeq ($(PLATFORM_NAME), GCC32)
     CC = gcc
     CXX = g++
@@ -131,13 +133,13 @@ endif
 CORE_LIB = $(LIBDIR)/libsmokerand_core.a
 LIB_SOURCES = $(addprefix $(SRCDIR)/, $(LIB_SOURCES_EXTRA) \
     base64.c core.c coretests.c cpuinfo.c \
-    blake2s.c entropy.c extratests.c fileio.c lineardep.c hwtests.c specfuncs.c \
-    threads_intf.c)
+    blake2s.c entropy.c extratests.c fileio.c lfsr_period.c lineardep.c \
+    hwtests.c specfuncs.c threads_intf.c)
 LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, $(LIB_HEADERS_EXTRA) \
     apidefs.h cinterface.h coredefs.h int128defs.h x86exts.h ../smokerand_core.h \
     base64.h core.h coretests.h cpuinfo.h \
-    blake2s.h entropy.h extratests.h fileio.h lineardep.h hwtests.h specfuncs.h \
-    threads_intf.h version.h)
+    blake2s.h entropy.h extratests.h fileio.h lfsr_period.h lineardep.h \
+    hwtests.h specfuncs.h threads_intf.h version.h)
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
 INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/coredefs.h \
     $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/int128defs.h \
@@ -152,7 +154,8 @@ BATLIB_HEADERS = $(addprefix $(INCLUDEDIR)/, bat_express.h bat_brief.h bat_defau
 BATLIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(BATLIB_SOURCES)))
 # Executables
 EXEC_NAMES = smokerand sr_speed sr_tiny calibrate_linearcomp calibrate_dc6 \
-    test_base64 test_crand test_funcs test_rdseed test_syscrypto
+    find_xorshift_params test_base64 \
+    test_crand test_funcs test_lfsr_period test_rdseed test_syscrypto
 EXEC_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXEC_NAMES)))
 EXECXX_NAMES = test_cpp11 test_chacha
 EXECXX_OBJFILES = $(addprefix $(OBJDIR)/, $(addsuffix .o,$(EXECXX_NAMES)))
@@ -192,6 +195,9 @@ $(BINDIR)/calibrate_dc6$(EXE): $(OBJDIR)/calibrate_dc6.o $(CORE_LIB) $(BAT_LIB)
 $(BINDIR)/calibrate_linearcomp$(EXE): $(OBJDIR)/calibrate_linearcomp.o $(CORE_LIB)
 	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
+$(BINDIR)/find_xorshift_params$(EXE): $(OBJDIR)/find_xorshift_params.o $(CORE_LIB)
+	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
+
 $(BINDIR)/test_base64$(EXE): $(OBJDIR)/test_base64.o $(CORE_LIB) $(BAT_LIB)
 	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
@@ -208,6 +214,9 @@ $(BINDIR)/test_funcs$(EXE): $(OBJDIR)/test_funcs.o $(CORE_LIB) $(BAT_LIB)
 	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
 $(BINDIR)/test_rdseed$(EXE): $(OBJDIR)/test_rdseed.o $(CORE_LIB) $(BAT_LIB)
+	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
+
+$(BINDIR)/test_lfsr_period$(EXE): $(OBJDIR)/test_lfsr_period.o $(CORE_LIB) $(BAT_LIB)
 	$(CC) $(LINKFLAGS) $< -o $@ $(LFLAGS) $(INCLUDE)
 
 $(BINDIR)/test_syscrypto$(EXE): $(OBJDIR)/test_syscrypto.o $(CORE_LIB) $(BAT_LIB)
