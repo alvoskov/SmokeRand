@@ -422,13 +422,26 @@ void LfsrPoly_print(const LfsrPoly *obj, const CallerAPI *intf)
 void LfsrPoly_print_hex(const LfsrPoly *obj, const CallerAPI *intf)
 {
     for (size_t i = obj->nwords; i-- != 0; ) {
-        if (i != 0) {
-            intf->printf("%16.16llX.", (unsigned long long) obj->w64[i]);
-        } else {
-            intf->printf("%16.16llX", (unsigned long long) obj->w64[i]);
-        }
+        intf->printf("%16.16llX%s",
+            (unsigned long long) obj->w64[i],
+            (i > 0) ? "." : ""
+        );
     }
 }
+
+
+void LfsrPoly_print_carray(const LfsrPoly *obj, const CallerAPI *intf)
+{
+    for (size_t i = 0; i < obj->nwords; i++) {
+        intf->printf("%s0x%16.16llX%s",
+            (i == 0) ? "{" : "",
+            (unsigned long long) obj->w64[i],
+            (i < obj->nwords - 1) ? ", " : "}"
+        );
+    }
+}
+
+
 
 void LfsrPoly_destruct(LfsrPoly *obj)
 {
@@ -792,11 +805,11 @@ LfsrMatrix LfsrMatrix_get_krylov_matrix(const LfsrMatrix *mat)
  * n is the number of bits in the LFSR state) and should have the next
  * layout:
  *
- *    | -----  x  ----- 0 |
- *    | ----- xA  ----- 0 |
- *    | ----- xA^2 ---- 0 |
- *    |    ..........     |
- *    | ----- xA^n ---- 0 |
+ *     | -----  x  ----- 0 |
+ *     | ----- xA  ----- 0 |
+ *     | ----- xA^2 ---- 0 |
+ *     |    ..........     |
+ *     | ----- xA^n ---- 0 |
  *
  * where A is the LFSR transition matrix and x is the initial LFSR state.
  * Note that x is the row vector (just as in papers by Marsaglia, Blackman
@@ -1171,9 +1184,9 @@ void LfsrPeriodResult_print(const CallerAPI *intf, LfsrPeriodResult res)
         intf->printf("The LFSR has a maximal period\n");
         break;
     case LFSR_PERIOD_NOT_MAX:
-        intf->printf("The LFSR period is not maximal\n");
-      
-  break;
+        intf->printf("The LFSR period is not maximal\n");      
+        break;
+    case LFSR_PERIOD_ERROR:
     default:
         intf->printf("The verification cannot be applied to this PNG\n");
     }
@@ -1293,6 +1306,8 @@ BatteryExitCode battery_lfsr_period(const GeneratorInfo *gen, const CallerAPI *i
             LfsrPoly_print(&poly, intf); intf->printf("\n");
             intf->printf("  ");
             LfsrPoly_print_hex(&poly, intf); intf->printf("\n");
+            intf->printf("  uint64_t char_poly[] = ");
+            LfsrPoly_print_carray(&poly, intf); intf->printf(";\n");
             LfsrPoly_destruct(&poly);
         }
         {
@@ -1301,6 +1316,8 @@ BatteryExitCode battery_lfsr_period(const GeneratorInfo *gen, const CallerAPI *i
             intf->printf("Jump polynomial for the 2^%u jump:\n", jump_pow2);
             intf->printf("  ");
             LfsrPoly_print_hex(&jump_poly, intf); intf->printf("\n");
+            intf->printf("  uint64_t jump_poly[] = ");
+            LfsrPoly_print_carray(&jump_poly, intf); intf->printf(";\n");
             LfsrPoly_destruct(&jump_poly);
         }
 

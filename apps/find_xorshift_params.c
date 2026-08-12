@@ -25,9 +25,9 @@
 static unsigned int get_default_nthreads(void)
 {
     unsigned int nthreads = get_cpu_numcores();
-    if (sizeof(size_t) == 4 * sizeof(char) && nthreads > 2) {
-        nthreads = 2;
-    }
+//    if (sizeof(size_t) == 4 * sizeof(char) && nthreads > 2) {
+  //      nthreads = 2;
+    //}
     if (nthreads > 4)
         nthreads--;
     return nthreads;
