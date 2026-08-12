@@ -323,21 +323,16 @@ static inline void Speck128VecState_inc_counter(Speck128VecState *obj)
 }
 
 
+#ifdef SPECK_VEC_ENABLED
 static void *create_vector(const CallerAPI *intf, int nrounds)
 {
-#ifdef SPECK_VEC_ENABLED
     Speck128VecState *obj = intf->malloc(sizeof(Speck128VecState));
     uint64_t key[2];
     key[0] = intf->get_seed64();
     key[1] = intf->get_seed64();
     Speck128VecState_init(obj, key, nrounds);
     return obj;
-#else
-    (void) intf; (void) nrounds;
-    return NULL;
-#endif
 }
-
 
 static void *create_vector_full(const GeneratorInfo *gi, const CallerAPI *intf)
 {
@@ -350,7 +345,6 @@ static void *create_vector_reduced(const GeneratorInfo *gi, const CallerAPI *int
     (void) gi;
     return create_vector(intf, NROUNDS_R16);
 }
-
 
 /**
  * @brief Get 64-bit value from Speck128/128.
@@ -377,7 +371,6 @@ static inline uint64_t get_bits_vector_raw(void *state)
 MAKE_GET_BITS_WRAPPERS(vector)
 
 
-#ifdef SPECK_VEC_ENABLED
 static int run_self_test_vector_nrounds(const CallerAPI *intf, int nrounds)
 {
     const uint64_t key[] = {0x0706050403020100, 0x0f0e0d0c0b0a0908};

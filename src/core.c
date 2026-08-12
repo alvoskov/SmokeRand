@@ -520,7 +520,7 @@ typedef struct {
 #define COUNTSORT_INPLACE_FUNC_TPL(suffix, type) \
 static void countsort##suffix##_inplace(type *x, size_t len, unsigned int level, CountSortBounds *bnd_ary) \
 { \
-    const unsigned int shr = 8*sizeof(type) - (level + 1) * 8; \
+    const unsigned int shr = (unsigned int) (8*sizeof(type) - (level + 1) * 8); \
     size_t *lb = bnd_ary[level].lb, *ub = bnd_ary[level].ub; \
     memset(lb, 0, 256 * sizeof(size_t)); \
     memset(ub, 0, 256 * sizeof(size_t)); \

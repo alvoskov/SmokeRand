@@ -224,6 +224,7 @@ void long_jump(uint64_t *s0_out, uint64_t *s1_out, uint64_t s0_in, uint64_t s1_i
 }
 
 
+#ifdef XS128PP_VEC_ENABLED
 static void Xoroshiro128PPVecState_init(Xoroshiro128PPVecState *obj, uint64_t s0, uint64_t s1)
 {
     if (s0 == 0 && s1 == 0) {
@@ -235,6 +236,7 @@ static void Xoroshiro128PPVecState_init(Xoroshiro128PPVecState *obj, uint64_t s0
     }
     obj->pos = 4;
 }
+#endif
 
 static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
 {
@@ -252,7 +254,7 @@ static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
 #endif
 }
 
-
+#ifdef XS128PP_VEC_ENABLED
 int run_self_test_vector(const CallerAPI *intf)
 {
     // Reference values obtained from the original implementation of
@@ -312,6 +314,7 @@ int run_self_test_vector(const CallerAPI *intf)
     }
     return is_ok;
 }
+#endif
 
 //////////////////////
 ///// Interfaces /////
