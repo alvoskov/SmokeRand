@@ -29,7 +29,7 @@ int sr_base64_selftest(void)
             printf("Base64: %s\n", str);
             printf("Words:  ");
             for (size_t j = 0; j < u32_len; j++) {
-                printf("%.8X ", u32[j]);
+                printf("%.8lX ", (unsigned long) u32[j]);
             }
             printf("\n");
         }
