@@ -32,8 +32,9 @@ void print_help(void)
     "  - full       The slowest battery (1-2 TiB of data)\n"
     "  Special batteries\n"
     "  - coll64dec  64-bit collision test with decimation (former `birthday`).\n"
-    "  - ising      Ising model based tests: Wolff and Metropolis algorithms.\n"
     "  - freq       8-bit and 16-bit words frequency adaptive tests.\n"  
+    "  - ising      Ising model based tests: Wolff and Metropolis algorithms.\n"
+    "  - lfsr       LFSR generators maximal period automatic verifier.\n"
     "  - f=filename Load a custom battery from the text config file.\n"
     "  - s=filename Load a custom battery implemented as a shared library.\n"
     "  Special modes\n"
@@ -412,6 +413,7 @@ BatteryExitCode run_battery(const char *battery_name, GeneratorInfo *gi,
         {"full",       battery_full},
         {"express",    battery_express},
         {"help",       battery_help},
+        {"lfsr",       battery_lfsr_period},
         {"selftest",   battery_self_test_env},
         {"speed",      battery_speed_env},
         {"freq",       battery_blockfreq_env},

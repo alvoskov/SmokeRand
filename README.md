@@ -19,6 +19,8 @@ The current version of SmokeRand can be found [here](https://github.com/alvoskov
 - Cross-platform multithreading support (only for PRNGs implemented as
   shared libraries).
 - Easy integration with TestU01 and PractRand.
+- A specialized tool for xorshift-like LFSR periods algebraic (analytical)
+  verification. It works directly with precompiled generators.
 
 ## Quick start
 
@@ -204,6 +206,9 @@ The more detailed information about SmokeRand tests, supplied generators,
 batteries and other technical details can be found at:
 
 - [Generators](docs/generators.md): a short reviews of supplied PRNGs.
+- [LSFR analyzer](docs/lfsr.md): description of a tool (specialized battery)
+  for LFSR maximal period verification. Doesn't require any explicit
+  analytical representation of LFSR.
 - [Plugins](docs/plugins.md): description of C API for plugins with PRNGs.
 - [Results](docs/results.md): statistical tests results.
 - [Technical notes](docs/technotes.md): details about compilation, heuristic

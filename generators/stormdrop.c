@@ -14,6 +14,7 @@
  * 1. Wil Parsons. StormDrop is a New 32-Bit PRNG That Passes Statistical Tests
  *    With Efficient Resource Usage
  *    https://medium.com/@wilparsons/stormdrop-is-a-new-32-bit-prng-that-passes-statistical-tests-with-efficient-resource-usage-59b6d6d9c1a8
+ *
  * @copyright
  * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
@@ -107,27 +108,4 @@ int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
     gi->description = description;
     gi->self_test = NULL;
     return GeneratorParamVariant_find(gen_list, intf, param, gi);
-/*
-    const char *param = intf->get_param();
-    gi->description = NULL;
-    gi->create = default_create;
-    gi->free = default_free;
-    gi->nbits = 32;
-    gi->self_test = NULL;
-    gi->parent = NULL;
-    if (!intf->strcmp(param, "new") || !intf->strcmp(param, "")) {
-        gi->name = "StormDrop:new";
-        gi->get_bits = get_bits_new;
-        gi->get_sum = get_sum_new;
-    } else if (!intf->strcmp(param, "old")) {
-        gi->name = "StormDrop:old";
-        gi->get_bits = get_bits_old;
-        gi->get_sum = get_sum_old;
-    } else {
-        gi->name = "SuperDuper:unknown";
-        gi->get_bits = NULL;
-        gi->get_sum = NULL;
-    }
-    return 1;
-*/
 }

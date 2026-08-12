@@ -96,37 +96,25 @@ static inline void bspace_make_tuples32(const BSpaceNDOptions *opts,
     }
 }
 
-
-static unsigned int bspace_get_ndups64(RamInfo *ram, uint64_t *x, size_t len)
-{
-    unsigned int ndups = 0;
-    fastsort64(ram, x, len);
-    for (size_t i = 0; i < len - 1; i++) {
-        x[i] = x[i + 1] - x[i];
-    }
-    fastsort64(ram, x, len - 1);
-    for (size_t i = 0; i < len - 2; i++) {
-        if (x[i] == x[i + 1])
-            ndups++;
-    }
-    return ndups;
+#define BSPACE_GET_NDUPS_FUNC_TPL(suffix, type) \
+static unsigned int bspace_get_ndups##suffix(type *x, size_t len) \
+{ \
+    unsigned int ndups = 0; \
+    fastsort##suffix(x, len); \
+    for (size_t i = 0; i < len - 1; i++) { \
+        x[i] = x[i + 1] - x[i]; \
+    } \
+    fastsort##suffix(x, len - 1); \
+    for (size_t i = 0; i < len - 2; i++) { \
+        if (x[i] == x[i + 1]) \
+            ndups++; \
+    } \
+    return ndups; \
 }
 
+BSPACE_GET_NDUPS_FUNC_TPL(32, uint32_t)
+BSPACE_GET_NDUPS_FUNC_TPL(64, uint64_t)
 
-static unsigned int bspace_get_ndups32(uint32_t *x, size_t len)
-{
-    unsigned int ndups = 0;
-    radixsort32(x, len);
-    for (size_t i = 0; i < len - 1; i++) {
-        x[i] = x[i + 1] - x[i];
-    }
-    radixsort32(x, len - 1);
-    for (size_t i = 0; i < len - 2; i++) {
-        if (x[i] == x[i + 1])
-            ndups++;
-    }
-    return ndups;
-}
 
 static unsigned long bspace_calc_len(unsigned int nbits_total)
 {
@@ -144,18 +132,12 @@ static double bspace_calc_lambda(size_t len, unsigned int nbits_total)
  */
 static unsigned long bspace32_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
-    unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
-    size_t len = bspace_calc_len(nbits_total);
+    const unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
+    const size_t len = bspace_calc_len(nbits_total);
     uint32_t *u = calloc(len, sizeof(uint32_t));
-    if (u == NULL) {
-        fprintf(stderr, "***** bspace32_nd_test: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(u, "bspace32_nd_test")
     unsigned long *ndups = calloc(opts->nsamples, sizeof(unsigned long));
-    if (ndups == NULL) {
-        fprintf(stderr, "***** bspace32_nd_test: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(ndups, "bspace32_nd_test")
     for (size_t i = 0; i < opts->nsamples; i++) {
         bspace_make_tuples32(opts, obj->gi, obj->state, u, len);
             ndups[i] = bspace_get_ndups32(u, len);
@@ -175,23 +157,15 @@ static unsigned long bspace32_nd_test(GeneratorState *obj, const BSpaceNDOptions
  */
 static unsigned long bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
-    unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
-    size_t len = bspace_calc_len(nbits_total);
+    const unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
+    const size_t len = bspace_calc_len(nbits_total);
     uint64_t *u = calloc(len, sizeof(uint64_t));
-    if (u == NULL) {
-        fprintf(stderr, "***** bspace64_nd_test: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(u, "bspace64_nd_test")
     unsigned long *ndups = calloc(opts->nsamples, sizeof(unsigned long));
-    if (ndups == NULL) {
-        fprintf(stderr, "***** bspace64_nd_test: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
-    RamInfo raminfo;
-    obj->intf->get_ram_info(&raminfo);
+    ASSERT_MALLOC_PTR(ndups, "bspace64_nd_test")
     for (size_t i = 0; i < opts->nsamples; i++) {
         bspace_make_tuples64(opts, obj->gi, obj->state, u, len);
-            ndups[i] = bspace_get_ndups64(&raminfo, u, len);
+            ndups[i] = bspace_get_ndups64(u, len);
     }
     unsigned long ndups_total = 0;
     for (size_t i = 0; i < opts->nsamples; i++) {
@@ -474,18 +448,15 @@ static inline void collisionover_make_tuples(const CollOverNDOptions *opts,
  */
 TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opts)
 {
-    size_t n = opts->n;
+    const size_t n = opts->n;
     uint64_t *u = calloc(n, sizeof(uint64_t));
-    if (u == NULL) {
-        fprintf(stderr, "***** collisionover_test: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
-    uint64_t nstates_u64 = 1ull << opts->ndims * opts->nbits_per_dim;
+    ASSERT_MALLOC_PTR(u, "collisionover_test")
+    const uint64_t nstates_u64 = 1ull << opts->ndims * opts->nbits_per_dim;
     uint64_t Oi[4] = {0, 0, 0, 0};
     Oi[0] = nstates_u64;
-    double nstates = (double) nstates_u64;
-    double lambda = ((double) n - (double) opts->ndims + 1.0) / nstates;
-    double mu = nstates * (lambda - 1 + exp(-lambda));
+    const double nstates = (double) nstates_u64;
+    const double lambda = ((double) n - (double) opts->ndims + 1.0) / nstates;
+    const double mu = nstates * (lambda - 1 + exp(-lambda));
     TestResults ans;
     ans.name = "CollisionOver";
     obj->intf->printf("CollisionOver test\n");
@@ -494,14 +465,12 @@ TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opt
     obj->intf->printf("  nsamples = %lu; len = %lu, mu = %g * %d\n",
         opts->nsamples, n, mu, (int) opts->nsamples);
 
-    RamInfo raminfo;
-    obj->intf->get_ram_info(&raminfo);
     ans.penalty = PENALTY_COLLOVER;
     ans.x = 0;
     for (unsigned long i = 0; i < opts->nsamples; i++) {
         collisionover_make_tuples(opts, obj->gi, obj->state, u, n);
         // Find collisions by sorting the array
-        fastsort64(&raminfo, u, n);
+        fastsort64(u, n);
         size_t ncopies = 0;
         for (size_t j = 0; j < n - 1; j++) {
             if (u[j] == u[j + 1]) {
@@ -522,7 +491,7 @@ TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opt
     obj->intf->printf(" -----------------------------------------\n");
     obj->intf->printf("  %5s %16s %16s\n", "Freq", "Oi", "Ei");
     for (int i = 0; i < 4; i++) {
-        uint64_t Oi_normed = (i == 0) ? Oi[i] : Oi[i] / opts->nsamples;
+        const uint64_t Oi_normed = (i == 0) ? Oi[i] : Oi[i] / opts->nsamples;
         obj->intf->printf("  %5d %16lld %16.1f\n", i, Oi_normed, Ei);
         Ei *= lambda / (i + 1.0);
     }
@@ -566,10 +535,7 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     const unsigned long long ngaps = opts->ngaps;
     const size_t nbins = (size_t) (log(Ei_min / ((double) ngaps * p)) / log(1 - p));
     size_t *Oi = calloc(nbins + 1, sizeof(size_t));
-    if (Oi == NULL) {
-        fprintf(stderr, "***** gap_test: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(Oi, "gap_test")
     unsigned long long nvalues = 0;
     const unsigned long long max_gap_len = GapOptions_max_gaplen(opts, pgap_fail);
     TestResults ans = TestResults_create("Gap");
@@ -643,10 +609,7 @@ typedef struct {
 static GapFrequencyArray *GapFrequencyArray_create(size_t nbins, double p)
 {
     GapFrequencyArray *gapfreq = calloc(1, sizeof(GapFrequencyArray));
-    if (gapfreq == NULL) {
-        fprintf(stderr, "***** gap16_count0: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(gapfreq, "gap16_count0")
     gapfreq->f = calloc(nbins + 1, sizeof(GapFrequency));
     if (gapfreq->f == NULL) {
         fprintf(stderr, "***** gap16_count0: not enough memory (nbins = %llu) *****\n",
@@ -748,10 +711,7 @@ void gap16_count0_mainloop(GapFrequencyArray *gapfreq, GapFrequencyArray *gapfre
     unsigned long long last0_pos = ULLONG_MAX;
     uint64_t u = 0;
     unsigned long long *lastw16_pos = calloc(65536, sizeof(unsigned long long));
-    if (lastw16_pos == NULL) {
-        fprintf(stderr, "***** gap16_count0: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(lastw16_pos, "gap16_count0")
     for (size_t i = 0; i < 65536; i++) {
         lastw16_pos[i] = ULLONG_MAX;
     }
@@ -963,12 +923,9 @@ TestResults gap16_count0_test(GeneratorState *obj, unsigned long long ngaps)
 
 static void sumcollector_calc_p(double *p, unsigned int g, unsigned int nmax)
 {
-    size_t nlevels = (size_t) ( (g + 1) * (nmax + 1) );
+    const size_t nlevels = (size_t) ( (g + 1) * (nmax + 1) );
     long double *g_mat = calloc(nlevels, sizeof(long double));
-    if (g_mat == NULL) {
-        fprintf(stderr, "***** sumcollector_calc_p: not enough memory *****");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(g_mat, "sumcollector_calc_p")
     // g0(n) = d_{0n}
     g_mat[0] = 1.0;
     for (unsigned int i = 1; i <= nmax; i++) {
@@ -1014,11 +971,9 @@ TestResults sumcollector_test(GeneratorState *obj, const SumCollectorOptions *op
     uint64_t sum = 0, sum_max = (1ull << 32) * g;
     unsigned int shr = (obj->gi->nbits == 32) ? 0 : 32;
     unsigned long long *Oi_vec = calloc(nmax + 1, sizeof(unsigned long long));
+    ASSERT_MALLOC_PTR(Oi_vec, "sumcollector_test")
     double *p_vec = calloc(nmax + 1, sizeof(double));
-    if (Oi_vec == NULL || p_vec == NULL) {
-        fprintf(stderr, "***** sumcollector_test: not enough memory *****");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(p_vec, "sumcollector_test")
     obj->intf->printf("SumCollector test\n");
     obj->intf->printf("  Number of values: %llu (2^%g)\n",
         opts->nvalues, sr_log2((double) opts->nvalues));
@@ -1090,10 +1045,7 @@ TestResults mod3_test(GeneratorState *obj, const Mod3Options *opts)
     TestResults ans = TestResults_create("mod3");
     const unsigned int ntuples = 19683; // 3^9
     unsigned long long *Oi = calloc(ntuples, sizeof(unsigned long long));
-    if (Oi == NULL) {
-        fprintf(stderr, "***** mod3_test: not enough memory *****\n");
-        exit(EXIT_SUCCESS);
-    }
+    ASSERT_MALLOC_PTR(Oi, "mod3_test")
     uint32_t tuple = 0;
     obj->intf->printf("mod3 test\n");
     obj->intf->printf("  Sample size: %llu (2^%.2f) values\n",
@@ -1183,7 +1135,7 @@ static int cmp_doubles(const void *aptr, const void *bptr)
 TestResults nbit_words_freq_test(GeneratorState *obj,
     const NBitWordsFreqOptions *opts)
 {
-    const size_t nbins = 1ul << opts->bits_per_word;
+    const size_t nbins = (size_t) (1ULL << opts->bits_per_word);
     const unsigned int nwords_per_num = obj->gi->nbits / opts->bits_per_word;
     const unsigned long long block_len = nbins * opts->average_freq / nwords_per_num;
     const unsigned long long nwords = nwords_per_num * block_len;

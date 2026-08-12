@@ -32,46 +32,105 @@ void print_is_ok(int is_ok)
     }
 }
 
-
-int is_array64_sorted(const uint64_t *x, size_t len)
-{
-    int is_sorted = 1;
-    for (size_t i = 0; i < len - 1; i++) {
-        if (x[i] > x[i + 1]) {
-            is_sorted = 0;
-            break;
-        }
-    }
-    return is_sorted;
+#define IS_ARRAY_SORTED_FUNC_TPL(suffix, type) \
+int is_array##suffix##_sorted(const type *x, size_t len) \
+{ \
+    int is_sorted = 1; \
+    for (size_t i = 0; i < len - 1; i++) { \
+        if (x[i] > x[i + 1]) { \
+            is_sorted = 0; \
+            break; \
+        } \
+    } \
+    return is_sorted; \
 }
 
-static void fill_rand64(uint64_t *x, size_t len)
-{
-    uint64_t seed = (uint64_t) time(NULL);
-    for (size_t i = 0; i < len; i++) {
-        x[i] = pcg_bits64(&seed);
-    }
+IS_ARRAY_SORTED_FUNC_TPL(64, uint64_t)
+IS_ARRAY_SORTED_FUNC_TPL(32, uint32_t)
+
+#define FILL_RAND_FUNC_TPL(suffix, type) \
+void fill_rand##suffix(type *x, size_t len) \
+{ \
+    uint64_t seed = (uint64_t) time(NULL); \
+    for (size_t i = 0; i < len; i++) { \
+        x[i] = (type) pcg_bits64(&seed); \
+    } \
 }
 
+FILL_RAND_FUNC_TPL(64, uint64_t)
+FILL_RAND_FUNC_TPL(32, uint32_t)
 
-static int cmp_int64(const void *aptr, const void *bptr)
-{
-    uint64_t aval = *((uint64_t *) aptr), bval = *((uint64_t *) bptr);
-    if (aval < bval) { return -1; }
-    else if (aval == bval) { return 0; }
-    else { return 1; }
+#define QSORT_WRAP_FUNC_TPL(suffix, type) \
+static int cmp_int##suffix(const void *aptr, const void *bptr) \
+{ \
+    const type aval = *((const type *) aptr); \
+    const type bval = *((const type *) bptr); \
+    if (aval < bval) { return -1; } \
+    else if (aval == bval) { return 0; } \
+    else { return 1; } \
+} \
+static void qsort##suffix##_wrap(type *x, size_t len) \
+{ \
+    qsort(x, len, sizeof(type), cmp_int##suffix); \
 }
 
-static void qsort64_wrap(uint64_t *x, size_t len)
-{
-    qsort(x, len, sizeof(uint64_t), cmp_int64);
-}
+QSORT_WRAP_FUNC_TPL(64, uint64_t)
+QSORT_WRAP_FUNC_TPL(32, uint32_t)
 
 
 typedef struct {
     const char *name;
     void (*run)(uint64_t *, size_t);
 } SortMethodInfo;
+
+
+typedef struct {
+    const char *name;
+    void (*run)(uint32_t *, size_t);
+} SortMethod32Info;
+
+
+int test_radixsort32()
+{
+    const size_t len = 1U << 25;
+    uint32_t *x = calloc(len, sizeof(uint32_t));
+    int is_ok = 1;
+    const SortMethod32Info methods[] = {
+        {"radixsort32_inplace", radixsort32_inplace},
+        {"quicksort32", quicksort32},
+        {"radixsort32", radixsort32},
+        {"qsort32", qsort32_wrap},
+        {NULL, NULL}
+    };
+
+
+    for (const SortMethod32Info *ptr = methods; ptr->name != NULL; ptr++) {
+        fill_rand32(x, len);
+        clock_t tic = clock();
+        ptr->run(x, len);
+        clock_t toc = clock();
+        double msec = ((double) (toc - tic)) / CLOCKS_PER_SEC * 1000;
+        printf("%s --- time elapsed: %g ms\n", ptr->name, msec);
+        if (is_array32_sorted(x, len)) {
+            printf("%s: array is sorted\n", ptr->name);
+        } else {
+            printf("%s: array is not sorted\n", ptr->name);
+            is_ok = 0;
+        }
+
+        for (size_t i = 0; i < len; i++) {
+            x[i] = 0;
+        }
+        tic = clock();
+        ptr->run(x, len);
+        toc = clock();
+        msec = ((double) (toc - tic)) / CLOCKS_PER_SEC * 1000;
+        printf("%s|empty --- time elapsed: %g ms\n", ptr->name, msec);        
+    }
+    free(x);
+    return is_ok;
+}
+
 
 int test_radixsort64()
 {
@@ -112,6 +171,7 @@ int test_radixsort64()
     free(x);
     return is_ok;
 }
+
 
 int test_chi2()
 {
@@ -694,6 +754,7 @@ int main(int argc, char *argv[])
     }
     int is_ok = 1;
     if (!strcmp(argv[1], "sort")) {
+        is_ok = is_ok & test_radixsort32();
         is_ok = is_ok & test_radixsort64();
     } else if (!strcmp(argv[1], "specfuncs")) {
         is_ok = is_ok & test_expm1();

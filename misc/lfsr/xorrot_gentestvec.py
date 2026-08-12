@@ -87,7 +87,12 @@ def genvec_xorrot64w8():
     T = gen8.make_xorrot8w_matrix(5, 2, 3);
     gen_test_vectors(T, [1, 2, 3, 4, 5, 6, 7, 8], wordsize=8, period=2**64-1)
 
+def genvec_dandelion64():
+    print("----- dandelion64 -----")
+    T = gen32.make_dandelion_matrix(10, 7)
+    gen_test_vectors(T, [1, 0], wordsize=32, period=2**64-1)
 
+genvec_dandelion64()
 genvec_xorrot256()
 genvec_xorrot128()
 genvec_xorrot64w32()
