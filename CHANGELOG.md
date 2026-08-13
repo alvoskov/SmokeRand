@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 - `threads_intf.c`: `CreateThread` is replaced to `_beginthreadex` in Windows
   builds, prevents crashes in Open Watcom V2 and formally required for MSVC.
+- `apps/test_base64.c`: `printf` argument type fixed to make some 32-bit
+  compilers (e.g. DJGPP) happy.
 
 ### Changed
 
