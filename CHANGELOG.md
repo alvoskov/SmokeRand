@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   builds, prevents crashes in Open Watcom V2 and formally required for MSVC.
 - `apps/test_base64.c`: `printf` argument type fixed to make some 32-bit
   compilers (e.g. DJGPP) happy.
+- Some fixes in `Makefile.gnu` for improvement of DJGPP support.
 
 ### Changed
 

@@ -58,13 +58,15 @@ else ifeq ($(PLATFORM_NAME), GCC_AARCH64_CROSS)
     GEN_LFLAGS = -lgcc
     PLATFORM_FLAGS =
 else ifeq ($(PLATFORM_NAME), DJGPP)
+    # Note: some DJGPP distributions use g++ for GCC C++ compiler,
+    # some use gpp. Please tune it manually.
     CC = gcc
-    CXX = gpp
+    #CXX = gpp
+    CXX = g++
     AR = ar
     GEN_CFLAGS += -ffreestanding -nostdlib
-    #GEN_LFLAGS = -lgcc
+    DXE3_LIBGCC := $(shell gcc -print-libgcc-file-name)
     THREADLIB =
-    GEN_DISABLED = icg64 mrg32k3a sezgin63 wich1982 wich2006
     PLATFORM_FLAGS = -m32 -march=i586 -DNOTHREADS -U__STRICT_ANSI__
     LIB_SOURCES_EXTRA = pe32loader.c
     LIB_HEADERS_EXTRA = pe32loader.h
@@ -108,16 +110,17 @@ BINDIR = bin
 LIBDIR = lib
 INCLUDEDIR = include/smokerand
 LFLAGS =  -L$(LIBDIR) -lsmokerand_bat -lsmokerand_core -lm $(THREADLIB)
-ifeq ($(OS), Windows_NT)
+ifeq ($(PLATFORM_NAME), DJGPP)
+    # DJGPP specific extensions: DXE3 modules and .exe for executables.
+    # It should be first in the if-else branches because of cross-compilation.
+    EXE = .exe
+    SO = .dxe
+else ifeq ($(OS), Windows_NT)
     #GEN_LFLAGS = 
     #-Wl,--exclude-all-symbols
     EXE = .exe
     SO = .dll
     PLATFORM_FLAGS += -D__USE_MINGW_ANSI_STDIO=1 -D_WIN32_WINNT=0x502
-else ifeq ($(PLATFORM_NAME), DJGPP)
-    # DJGPP specific extensions: DXE3 modules and .exe for executables
-    EXE = .exe
-    SO = .dxe
 else
     # UNIX-like systems
     EXE =
@@ -169,10 +172,15 @@ GEN_OBJFILES = $(patsubst %.c,%.o,$(subst generators/,$(BINDIR)/generators/obj/,
 GEN_SHARED = $(patsubst %.c,%$(SO),$(subst generators/,$(BINDIR)/generators/, $(GEN_ALL_SOURCES)))
 GEN_BINDIR = $(BINDIR)/generators
 
+ifeq ($(PLATFORM_NAME), DJGPP)
+BAT_EXAMPLE_TARGET =
+else
+BAT_EXAMPLE_TARGET = $(BINDIR)/bat_example$(SO)
+endif
 #-----------------------------------------------------------------------------
 all: $(CORE_LIB) $(BAT_LIB) $(addprefix $(BINDIR)/, $(addsuffix $(EXE),$(EXEC_NAMES))) \
     $(addprefix $(BINDIR)/, $(addsuffix $(EXE),$(EXECXX_NAMES))) generators \
-    $(BINDIR)/bat_example$(SO)
+    $(BAT_EXAMPLE_TARGET)
 
 $(CORE_LIB): $(LIB_OBJFILES)
 	$(AR) rcu $@ $^
@@ -237,7 +245,6 @@ $(EXEC_OBJFILES): $(OBJDIR)/%.o : $(APPSRCDIR)/%.c $(LIB_HEADERS)
 $(EXECXX_OBJFILES): $(OBJDIR)/%.o : $(APPSRCDIR)/%.cpp $(APPSRCDIR)/chacha.h $(LIB_HEADERS)
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -o $@
 
-
 .PHONY: clean generators install uninstall
 
 generators: $(GEN_SHARED)
@@ -245,7 +252,7 @@ generators: $(GEN_SHARED)
 # Generic rules for linking PRNG plugins
 ifeq ($(PLATFORM_NAME), DJGPP)
 $(GEN_BINDIR)/%$(SO): $(GEN_BINDIR)/obj/%.o
-	dxe3gen $< -o $@
+	dxe3gen $< -o $@ $(DXE3_LIBGCC)
 else
 $(GEN_BINDIR)/%$(SO): $(GEN_BINDIR)/obj/%.o
 	$(CC) $(LINKFLAGS) -shared $(GEN_CFLAGS) $< -s $(GEN_LFLAGS) -o $@

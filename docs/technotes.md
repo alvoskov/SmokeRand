@@ -103,8 +103,8 @@ with limited amount of RAM, e.g. under 32-bit DOS extenders on old hardware:
 - `gap16_count0` may consume several MiB for gaps and frequencies tables.
   Probably RAM consumption may be significantly reduces but it may slow down
   and complicate a program for 64-bit environments.
-- `bspace` uses more than 64 MiB of memory for 64-bit values. Its 32-bit
-  variant needs less than 256 KiB of RAM.
+- `bspace` uses around 50 MiB of memory for 64-bit values. Its 32-bit variant
+  needs less than 256 KiB of RAM.
 - `collover` may use about 0.5 GiB of memory in most batteries. It may be
   significantly reduced but the test will be slower and less sensitive
   for 64-bit systems.
@@ -131,6 +131,12 @@ the next commands:
 
     $ groff -mandoc -Tascii -P-cBoU smokerand.1 > smokerand.dos
     $ less smokerand.dos
+
+There are DJGPP cross compilers that can be used for fast compilation of DOS
+binaries under Windows, GNU/Linux and other OSes:
+
+- https://github.com/andrewwutw/build-djgpp (has pre-built binaries)
+- https://github.com/jwt27/build-gcc (just scripts to build them)
 
 ## Loading DLL under DOS
 
