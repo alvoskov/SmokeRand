@@ -354,9 +354,9 @@ int test_xorshift64(void)
 
 
 
-////////////////////////////////
-///// xoshiro64w16 testing /////
-////////////////////////////////
+//////////////////////////////////
+///// xoroshiro64w16 testing /////
+//////////////////////////////////
 
 typedef struct {
     uint16_t s[4];
@@ -432,9 +432,92 @@ int test_xoshiro64w16(void)
 }
 
 
-////////////////////////////////
-///// xoshiro48w16 testing /////
-////////////////////////////////
+/////////////////////////////////
+///// xoroshiro48w8 testing /////
+/////////////////////////////////
+
+typedef struct {
+    uint8_t s[6];
+    int a;
+    int b;
+    int c;
+} Xoroshiro48w8VarShiftsState;
+
+
+static uint8_t get_bits8_xo48w8(Xoroshiro48w8VarShiftsState *obj)
+{
+    const uint8_t s0 = obj->s[0];
+    const uint8_t s0x5 = (uint8_t) (s0 ^ obj->s[5]);
+    obj->s[0] = obj->s[1];
+    obj->s[1] = obj->s[2];
+    obj->s[2] = obj->s[3];
+    obj->s[3] = obj->s[4];
+    obj->s[4] = (uint8_t) (rotl8(s0, obj->a) ^ s0x5 ^ (s0x5 << obj->b));
+    obj->s[5] = rotl8(s0x5, obj->c);
+    return obj->s[5];
+}
+
+
+static uint64_t get_bits_xo48w8(void *obj)
+{
+    uint32_t x = 0;
+    for (int i = 0; i < 4; i++) {
+        x <<= 8;
+        x |= get_bits8_xo48w8(obj);
+    }
+    return x;
+}
+
+static void *gen_create_xo48w8(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+    Xoroshiro48w8VarShiftsState *obj = intf->malloc(sizeof(Xoroshiro48w8VarShiftsState));
+    for (int i = 0; i < 6; i++) {
+        obj->s[i] = (uint8_t) intf->get_seed64();
+    }
+    obj->a = 1;
+    obj->b = 2;
+    obj->c = 3;
+    return obj;
+}
+
+
+static void set_triple_xo48w8(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
+{
+    Xoroshiro48w8VarShiftsState *obj = state;
+    obj->a = (int) ai; obj->b = (int) bi; obj->c = (int) ci;
+}
+
+
+int test_xoshiro48w8(void)
+{
+    static const GeneratorInfo gen = {
+        .name = "xoroshiro48w8:dynshifts",
+        .description = "xoroshiro48w8 with dynamic shifts",
+        .nbits = 32,
+        .create = gen_create_xo48w8,
+        .free = gen_free,
+        .get_bits = get_bits_xo48w8,
+        .self_test = NULL,
+        .get_sum = NULL,
+        .parent = NULL
+    };
+
+    static const XorshiftProps props = {
+        .max_value = 8,
+        .nbytes = 6,
+        .is_triple_valid = is_triple_valid_generic,
+        .set_triple = set_triple_xo48w8
+    };
+
+    return run_triples_search(&gen, &props);
+}
+
+
+
+//////////////////////////////////
+///// xoroshiro48w16 testing /////
+//////////////////////////////////
 
 typedef struct {
     uint16_t s[3];
@@ -916,6 +999,7 @@ typedef struct {
 int main(int argc, char *argv[])
 {
     static const TestEntry tests[] = {
+        {"xoroshiro48w8", test_xoshiro48w8},
         {"xoroshiro48w16", test_xoshiro48w16},
         {"xoroshiro64w16", test_xoshiro64w16},
         {"xorshift32",     test_xorshift32},
