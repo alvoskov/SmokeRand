@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 - `lfsr` battery: characteristic and jump polynomials are now also printed
   as C99 source code with 64-bit hexadecimal words.
+- `sirius64` generator was added (https://github.com/matteo65/Sirius64).
+- `xoroshiro48w8ppp` and `xoroshiro48w16ppp` generators (developed by
+  A.L.Voskov, modifications of `xoroshiro` family)
 
 ### Bugfix
 

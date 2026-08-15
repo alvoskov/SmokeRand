@@ -40,7 +40,7 @@ typedef struct {
 static inline uint16_t Xoroshiro48w16PPState_get_bits(Xoroshiro48w16PPState *obj)
 {
     const uint16_t s0 = obj->s[0];
-    const uint16_t res = (uint16_t) (rotl16((uint16_t) (s0 + obj->s[2]), 5) + s0);
+    const uint16_t res = (uint16_t) (rotl16((uint16_t) (s0 + obj->s[2]), 5) + s0 + obj->s[1]);
     const uint16_t s0x2 = (uint16_t) (s0 ^ obj->s[2]);
     obj->s[0] = obj->s[1];
     obj->s[1] = (uint16_t) (rotl16(s0, 7) ^ s0x2 ^ (s0x2 << 6));

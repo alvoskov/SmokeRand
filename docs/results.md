@@ -304,7 +304,7 @@ the testing.
  ranlux[0]         | u32    | 1       | 6     | 9       | 12   | 6.8  | N/A    | 0     | -       | 4 MiB
  ranlux[1]         | u32    | +       | +     | 2       | 3    | 13   | N/A    | 0     | Small   | 4 GiB
  ranlux[2]         | u32    | +       | +     | +       | +    | 27   | N/A    |       |         | >= 2 TiB
- rapidrand128      | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | ?
+ rapidrand128      | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | >= 1 TiB
  rc4               | u32    | +       | +     | +       | +    | 6.0  | +      | 3     | +       | 512 GiB
  rc4ok             | u32    | +       | +     | +       | +    | 6.2  | +      | 4.5   | +       | >= 32 TiB
  rge256lite        | u32    | +       | +     | +       | +    | 5.2  | +      | 4(0)  | +       | >= 4 TiB
@@ -316,6 +316,7 @@ the testing.
  romutrio          | u64    | +       | +     | +       | +    | 0.16 | +      | 4(0)  |         | >= 32 TiB
  romuduojr         | u64    | +       | +     | +       | +    | 0.11 | +      | 4(0)  |         | >= 2 TiB
  romuduojrw        | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 16 TiB
+ romumono          | u64    | +       | 1     | 1       | 1    | 0.35 |        |       | >= Crush| ?
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
  rwc32sm           | u32    | +       | +     | +       | 1    | 0.83 | +      | 1     | Small   | >= 16 TiB
  rwc32             | u32    | +       | +     | +       | +    | 0.55 | +      | 4     | +       | >= 8 TiB
@@ -331,6 +332,7 @@ the testing.
  seiran128         | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB
  sezgin63_u63      | u63    | +       | +     | +       | 1/2  | 1.6  | N/A    | 1     | Crush   | >= 1 TiB
+ sirius64          | u64    | +       | +     | +       |      | ~0.1 | +      |       |         | ?
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | -(>>>) | 0     | -       | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)| +       | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  | +       | >= 16 TiB
@@ -430,7 +432,9 @@ the testing.
  xoroshiro64pp     | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 8 TiB
  xoroshiro64st     | u32    | 1       | 1     | 3       | 5    | 0.51 | -      | 1.75  | Small   | 1 MiB
  xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 32 TiB
+ xoroshiro48w8ppp  | u32    | +       | +     | +       | +    | 2.9  |        | 3.5   |         | 4 TiB
  xoroshiro48w16pp  | u32    | +       | +     | +       | +    | 1.1  | +      | 3.5(0)| +       | 512 GiB
+ xoroshiro48w16ppp | u32    | +       | +     | +       | +    | 1.2  |        | 3.5(0)|         | 32 TiB
  xoroshiro64w16pp  | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 8 TiB
  xoroshiro128      | u64    | 2       | 3     | 5       | 7    | 0.27 | +      | 2.25  | Small   | 256 KiB
  xoroshiro128aox   | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |+lo/+hi  | >= 32 TiB
@@ -516,6 +520,7 @@ Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
  mrsf64            | - (>69 TiB)| 267/276
  pqrng64           | 11 TiB     | 8/44
  rapidrand128      | - (>30 TiB)| 107/120
+ sirius64          | - (>16 TiB)| 70/64
  splitmix64        | 6 TiB      | 0/24
  sqxor             | 12 TiB     | 100/48
  tf0_64            | - (>36 TiB)| 152/144 
@@ -527,8 +532,8 @@ Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
  wyrand:v43        | 5 TiB      | 59/20
  wyranda_par       | -(>213 TiB)| 780/852
  wyrand128         | - (>25 TiB)| 107/100
- xoroshiro48w16    | - (>20 TiB)| 90/80
- xoroshiro64w16    | - (>3 TiB) | 14/12
+ xoroshiro48w16pp  | - (>20 TiB)| 90/80
+ xoroshiro64w16pp  | - (>3 TiB) | 14/12
  xorrot64mn        | 12 TiB     | 10/48
  xorrot64w32mn     | - (>35 TiB)| 126/140
  xorshift256       | - (>20 TiB)| 74/80
@@ -908,6 +913,30 @@ Note about `w1rand`:
       [Low4/64]FPF-14+6/16:(2,14-0)     R=  +7.6  p =  1.3e-6   unusual
       [Low4/64]FPF-14+6/16:all          R= +16.9  p =  2.3e-15    FAIL !
       ...and 405 test result(s) without anomalies
+
+Notes about `xoroshiro48w16+++`:
+
+    rng=RNG_stdin32, seed=unknown
+    length= 4 terabytes (2^42 bytes), time= 13105 seconds
+      no anomalies in 285 test result(s)
+
+    rng=RNG_stdin32, seed=unknown
+    length= 8 terabytes (2^43 bytes), time= 25370 seconds
+      no anomalies in 292 test result(s)
+
+    rng=RNG_stdin32, seed=unknown
+    length= 16 terabytes (2^44 bytes), time= 52621 seconds
+      no anomalies in 298 test result(s)
+
+    rng=RNG_stdin32, seed=unknown
+    length= 32 terabytes (2^45 bytes), time= 106745 seconds
+      Test Name                         Raw       Processed     Evaluation
+      DC6-9x1Bytes-1                    R=  +7.3  p =  1.3e-4   mildly suspicious
+      FPF/16:(0,14-0)                   R=  -9.9  p =1-8.5e-9   very suspicious
+      FPF/16:(1,14-0)                   R=  -6.8  p =1-6.1e-6   unusual
+      FPF/16:(2,14-0)                   R=  -6.4  p =1-1.4e-5   unusual
+      FPF/16:all                        R=  -9.8  p =1-3.2e-9    VERY SUSPICIOUS
+      ...and 299 test result(s) without anomalies
 
 Sensitivity of dieharder is lower than TestU01 and PractRand:
 
