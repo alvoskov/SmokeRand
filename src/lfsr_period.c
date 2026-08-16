@@ -593,7 +593,6 @@ LfsrMatrix LfsrMatrix_create_prod(const LfsrMatrix *a, const LfsrMatrix *b)
                 cij = (uint8_t) (cij + get_uint64_hamming_weight(prods));
             }
             LfsrMatrix_setbit(&c, i, j, cij & 1);
-
         }
     }
     // Free buffers and return the resulting matrix
@@ -1297,6 +1296,8 @@ BatteryExitCode battery_lfsr_period(const GeneratorInfo *gen, const CallerAPI *i
         intf->printf("  LFSR period checker error: cannot analyze an enveloped generator");
         return BATTERY_ERROR;
     }
+    const time_t tic = time(NULL);
+
     GeneratorStateExt ext = GeneratorStateExt_create(gen, intf);
     const LfsrPeriodResult res = lfsr_period_test(&ext, intf, &test_opts);
     if (res == LFSR_PERIOD_MAX) {
@@ -1323,6 +1324,10 @@ BatteryExitCode battery_lfsr_period(const GeneratorInfo *gen, const CallerAPI *i
 
     }
     GeneratorStateExt_destruct(&ext);
+    // Estimate the elapsed time
+    char elapsed_time_txt[16];    
+    snprintf_elapsed_time(elapsed_time_txt, 15, (unsigned long long) (time(NULL) - tic));
+    intf->printf("Time elapsed: %s\n", elapsed_time_txt);
     // Results interpretation
     switch (res) {
     case LFSR_PERIOD_MAX:

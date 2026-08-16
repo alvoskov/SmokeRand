@@ -31,6 +31,26 @@ The analyzer consists of the next files:
   search and preliminary selection. Reproduces shifts triples for `xorshift32`
   and `xorshift64` obtained [by G. Marsaglia]((https://doi.org/10.18637/jss.v008.i14).
 
+## Period verification algorithm
+
+As it was mentioned above the verification of the period is based on
+a mathematical proof, not on an empirical test. The verifier assumes that
+the PRNG state is just a bit vector without any circle buffers, pointer
+etc. The key steps are:
+
+1. Check if the PNG has counters and/or constants (probable pointers or file
+   descriptors). If it does have such constants then the automatic verification
+   is impossible.
+2. Restore the LFSR transition matrix over GF(2) field by setting its state
+   to the `[10000...00]`, `[01000...00]`, `[00100...00]` etc. basis vectors
+   with subsequent calls of the pseudorandom number generation subroutine.
+3. Check if the PRNG is a really LFSR by calculating the \f$ A^{65537} \f$
+   matrix and its comparison to the same matrix restored directly from the
+   decimated PRNG output.
+4. Check the \f$ A^{m} = I \f$ condition when \f$ m \f$ is the PRNG period.
+5. Check the \f$ A^{\frac{m}{p_i}} \neq I \f$ conditions where \f$ p_i \f$
+   are prime divisors of \f$ m \f$.
+
 ## About jump polynomials
 
 Characteristic polynomials are converted to jump polynomials using
