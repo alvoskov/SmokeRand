@@ -77,6 +77,8 @@ the testing.
  chacha12_avx      | u32    | +       | +     | +       | +    | 2.0  | +      | 5     | +       | >= 32 TiB
  chacha12_avx2     | u32    | +       | +     | +       | +    | 0.78 | +      | 5     | +       | >= 16 TiB
  chacha12_ctr32    | u32    | +       | +     | +       | 1    | 2.0  | -(>>>) | 0     | +       | 256 GiB
+ chip32            | u32    | +       | +     | +       | +    | 0.27 | +      | 4(0)  | +       | ?
+ chip64            | u64    | +       | +     | +       | +    | 0.16 | +      | 4     |         | ?
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | +      | 4     | +       | >= 32 TiB
  cmwc4827          | u32    | +       | 1     | 1       | 1    | 0.44 | +      | 2     | +       | 512 MiB
  combo             | u32    | +       | 4     | 6       | 8    | 0.75 | +      | 0     | Small   | 4 GiB
@@ -130,7 +132,7 @@ the testing.
  kiss11_64         | u64    | +       | +     | +       | +    | 0.60 | +      | 4     |         | >= 32 TiB
  kiss4691          | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 32 TiB
  komirand16        | u32    | 1-7     | 19-20 | 40      |      | 2.1  | -(>>>) | 0     | -       | 64 KiB
- komirand16w       | u32    | 1-4     | 20-21 | 39      |      | 2.1  |        | 0     | -       | 16 MiB
+ komirand16w       | u32    | 1-4     | 20-21 | 39      |      | 2.1  | -(>>>) | 0     | -       | 16 MiB
  komirand32        | u32    | +       | 1     | 2       | 10   | 0.63 | -(>>>) | 0     | Small   | 2-8 GiB
  komirand32w       | u32    | +       | +     | +       | +    | 1.0  | +      | 4(0)  | +       | >= 16 TiB
  komirand          | u64    | +       | +     | +       | +    | 0.49 | +      | 4(0)  |+H/+L/+IL| >= 16 TiB
@@ -316,7 +318,7 @@ the testing.
  romutrio          | u64    | +       | +     | +       | +    | 0.16 | +      | 4(0)  |         | >= 32 TiB
  romuduojr         | u64    | +       | +     | +       | +    | 0.11 | +      | 4(0)  |         | >= 2 TiB
  romuduojrw        | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 16 TiB
- romumono          | u64    | +       | 1     | 1       | 1    | 0.35 |        |       | >= Crush| ?
+ romumono          | u32    | +       | 1     | 1       | 1    | 0.35 | -      | 1     | Crush   | ?
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
  rwc32sm           | u32    | +       | +     | +       | 1    | 0.83 | +      | 1     | Small   | >= 16 TiB
  rwc32             | u32    | +       | +     | +       | +    | 0.55 | +      | 4     | +       | >= 8 TiB
@@ -332,7 +334,7 @@ the testing.
  seiran128         | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB
  sezgin63_u63      | u63    | +       | +     | +       | 1/2  | 1.6  | N/A    | 1     | Crush   | >= 1 TiB
- sirius64          | u64    | +       | +     | +       |      | ~0.1 | +      |       |         | ?
+ sirius64          | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | ?
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | -(>>>) | 0     | -       | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)| +       | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  | +       | >= 16 TiB
@@ -423,8 +425,8 @@ the testing.
  xkiss32sh_awc     | u32    | +       | +     | +       | +    | 0.99 | +      | 4     | +       | >= 16 TiB
  xkiss64_awc       | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
- xorgens256        | u64    | 2       | 3     | 5       | 7/8  | 0.21 |        | 2.25? |         | 1 MiB
- xorgens512        | u64    | 2       | 3     | 5       | 7    | 0.38 |        | 2.25  |         | 8 MiB
+ xorgens256        | u64    | 2       | 3     | 5       | 7/8  | 0.21 | +      | 2.25? |         | 1 MiB
+ xorgens512        | u64    | 2       | 3     | 5       | 7    | 0.38 | +      | 2.25  |         | 8 MiB
  xorgens1024       | u64    | 2       | 3     | 5       | 7    | 1.1  |        | 2.25  |         | 32 MiB
  xoroshiro32       | u32    | 2       | 14    | 28/29   | 37/39| 1.4  | -(>>>) | 0     | -       | 32 KiB
  xoroshiro32pp     | u32    | +       | 1     | 2       | 6/8  | 1.5  | -(>>>) | 0     | Small   | 256 MiB
@@ -432,9 +434,9 @@ the testing.
  xoroshiro64pp     | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 8 TiB
  xoroshiro64st     | u32    | 1       | 1     | 3       | 5    | 0.51 | -      | 1.75  | Small   | 1 MiB
  xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 32 TiB
- xoroshiro48w8ppp  | u32    | +       | +     | +       | +    | 2.9  |        | 3.5   |         | 4 TiB
+ xoroshiro48w8ppp  | u32    | +       | +     | +       | +    | 2.9  | +      | 3.5   | +       | 4 TiB
  xoroshiro48w16pp  | u32    | +       | +     | +       | +    | 1.1  | +      | 3.5(0)| +       | 512 GiB
- xoroshiro48w16ppp | u32    | +       | +     | +       | +    | 1.2  |        | 3.5(0)|         | 32 TiB
+ xoroshiro48w16ppp | u32    | +       | +     | +       | +    | 1.2  | +      | 3.5(0)| +       | 32 TiB
  xoroshiro64w16pp  | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 8 TiB
  xoroshiro128      | u64    | 2       | 3     | 5       | 7    | 0.27 | +      | 2.25  | Small   | 256 KiB
  xoroshiro128aox   | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |+lo/+hi  | >= 32 TiB
@@ -460,7 +462,7 @@ the testing.
  xorrot160         | u32    | 2       | 3     | 5       | 7    | 0.41 |        | 2.25  | Small   | 256 JiB
  xorrot256         | u64    | 2       | 3     | 5       | 7    | 0.30 | +      | 2.25  | Small   | 1 MiB
  xorrot256mrt      | u64    | +       | +     | +       | +    | 0.34 | +      | 4     |         | >= 16 TiB
- xorrot320         | u64    | 2       | 3     | 5       | 7    | 0.23 |        | 2.25  |         | 1 MiB
+ xorrot320         | u64    | 2       | 3     | 5       | 7    | 0.23 | +      | 2.25  |         | 1 MiB
  xorshift64        | u64    | 2       | 6     | 12      | 15/16| 0.49 | -      | 0     | -       | 32 KiB
  xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |S_lo/+_hi| 512 KiB
  xorshift96        | u32    | 2       | 5     | 8       | 12/13| 0.39 |        | 0     | -       | 64 KiB
@@ -479,7 +481,7 @@ the testing.
  xoshiro256p       | u64    | 1       | 1     | 2       | 3    | 0.20 | +      | 3.25  |+l/+h/+il| 64 MiB
  xoshiro256pp      | u64    | +       | +     | +       | +    | 0.22 | +      | 4     |         | >= 16 TiB
  xoshiro256stst    | u64    | +       | +     | +       | +    | 0.22 | +      | 4     |         | >= 4 TiB
- xoshiro512pp      | u64    | +       | +     | +       | +    | 0.36 |        |       |         | >= 8 TiB
+ xoshiro512pp      | u64    | +       | +     | +       | +    | 0.36 | +      | 4     |         | >= 8 TiB
  xsadd             | u32    | 1       | 1/2   | 4       | 9    | 1.3  | +      | 0     | +       | 8 MiB
  xsh               | u64    | 2       | 9     | 14      | 18   | 0.43 | -      | 0     | -       | 32 KiB
  xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     | +IL     | >= 4 TiB
@@ -532,11 +534,14 @@ Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
  wyrand:v43        | 5 TiB      | 59/20
  wyranda_par       | -(>213 TiB)| 780/852
  wyrand128         | - (>25 TiB)| 107/100
+ xoroshiro48w8ppp  | - (>23 TiB)| 89/92
  xoroshiro48w16pp  | - (>20 TiB)| 90/80
+ xoroshiro48w16ppp | - (>12 TiB)| 50/48
  xoroshiro64w16pp  | - (>3 TiB) | 14/12
  xorrot64mn        | 12 TiB     | 10/48
  xorrot64w32mn     | - (>35 TiB)| 126/140
  xorshift256       | - (>20 TiB)| 74/80
+ xoshiro512pp      | - (>9 TiB) | 43/36
 
 Note about a5rand32w:
 

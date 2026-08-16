@@ -308,7 +308,7 @@ can be used for checking correctness of its statistical tests. Examples:
 
 It seems that GCC 15.2 at `-O3` optimization level tries to vectorize the code
 to agressively and slows down some generators (KISS, Biski, Mother-of-All),
-especiall if they are called as small functions (`get_bits`). An example for
+especially if they are called as small functions (`get_bits`). An example for
 `mall32` PRNG is given below. The `-fno-tree-slp-vectorize` in GCC should be
 used for PRNG plugins compilation.
 

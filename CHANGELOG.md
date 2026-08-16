@@ -12,8 +12,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   as C99 source code with 64-bit hexadecimal words.
 - `romumono` generator was added (https://arxiv.org/abs/2002.11331).
 - `sirius64` generator was added (https://github.com/matteo65/Sirius64).
-- `xoroshiro48w8ppp` and `xoroshiro48w16ppp` generators (developed by
-  A.L.Voskov, modifications of `xoroshiro` family)
+- `xoroshiro48w8ppp` was added, `xoroshiro48w16pp` was upgraded to
+  `xoroshiro48w16ppp`. These algorithms were developed A.L.Voskov
+  as modifications of `xoroshiro` generators family.
 
 ### Bugfix
 

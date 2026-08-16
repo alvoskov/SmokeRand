@@ -1,12 +1,12 @@
 /**
- * @file xoroshiro48w16pp.c
- * @brief xoroshiro48w16++ is a modification of xoroshiro++ with a 48-bit state
+ * @file xoroshiro48w16ppp.c
+ * @brief xoroshiro48w16+++ is a modification of xoroshiro++ with a 48-bit state
  * that operates 16-bit words and is suitable for 16-bit CPUs such as retro
  * platforms and microcontrollers. Its period is \f$ 2^{48} - 1 \f$.
  * @details The period of this PRNG is too small for any serious application,
  * so it is more a toy/hack for constrained conditions. However, it is still
  * fairly robust and passes SmokeRand `full` and TestU01 BigCrush batteries
- * but fails PractRand 0.96 at 1 TiB sample.
+ * but fails PractRand 0.96 at 64 TiB sample.
  *
  * The recommended shifts are `[7 6 2]`.
  *
@@ -20,7 +20,7 @@
  *
  * The xoroshiro++ PRNG family was suggested by D. Blackman and S. Vigna,
  * see the https://doi.org/10.48550/arXiv.1805.01407 reference. The shifts
- * for this 16-bit versions were optimized by A.L. Voskov.
+ * and the mixer for this 16-bit versions were optimized by A.L. Voskov.
  *
  * @copyright
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
@@ -34,10 +34,14 @@ PRNG_CMODULE_PROLOG
 
 typedef struct {
     uint16_t s[3];
-} Xoroshiro48w16PPState;
+} Xoroshiro48w16PPPState;
 
-
-static inline uint16_t Xoroshiro48w16PPState_get_bits(Xoroshiro48w16PPState *obj)
+/**
+ * @brief Generates the next 16 bits.
+ * @details The `++` variant (without the `+ obj->s[1]` in the output function)
+ * fails PractRand at 1 TiB.
+ */
+static inline uint16_t Xoroshiro48w16PPPState_get_bits(Xoroshiro48w16PPPState *obj)
 {
     const uint16_t s0 = obj->s[0];
     const uint16_t res = (uint16_t) (rotl16((uint16_t) (s0 + obj->s[2]), 5) + s0 + obj->s[1]);
@@ -50,15 +54,15 @@ static inline uint16_t Xoroshiro48w16PPState_get_bits(Xoroshiro48w16PPState *obj
 
 static inline uint64_t get_bits_raw(void *state)
 {
-    const uint32_t hi = Xoroshiro48w16PPState_get_bits(state);
-    const uint32_t lo = Xoroshiro48w16PPState_get_bits(state);
+    const uint32_t hi = Xoroshiro48w16PPPState_get_bits(state);
+    const uint32_t lo = Xoroshiro48w16PPPState_get_bits(state);
     return (hi << 16) | lo;
 }
 
 
 static void *create(const CallerAPI *intf)
 {
-    Xoroshiro48w16PPState *obj = intf->malloc(sizeof(Xoroshiro48w16PPState));
+    Xoroshiro48w16PPPState *obj = intf->malloc(sizeof(Xoroshiro48w16PPPState));
     const uint64_t seed = intf->get_seed64();
     obj->s[0] = (uint16_t) (seed >> 32);
     obj->s[1] = (uint16_t) (seed >> 16);
@@ -70,4 +74,4 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-MAKE_UINT32_PRNG("xoroshiro48w16++", NULL)
+MAKE_UINT32_PRNG("xoroshiro48w16+++", NULL)
