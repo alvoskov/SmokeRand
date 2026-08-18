@@ -1,6 +1,26 @@
-// https://github.com/tommyettinger/juniper/blob/main/src/main/java/com/github/tommyettinger/random/Chip32Random.java
-
-
+/**
+ * @file chip32.c
+ * @brief Chip32 is a 32-bit chaotic PRNG resembling SFC32.
+ * @details The Chip32 was developed by Tommy Ettinger, it is a very
+ * fast chaotic generator.
+ *
+ * WARNING! The minimial guaranteed period is only 2^{32}! It is not enough for
+ * reliable practical usage, bad seeds are possible. The average period is
+ * likely close to \f$ 2^{127} \f$.
+ *
+ * References:
+ *
+ * - https://github.com/tommyettinger/juniper/blob/main/src/main/java/com/github/tommyettinger/random/Chip32Random.java
+ *
+ * @copyright The Chip32 algorithm was suggested by Tommy Ettinger.
+ * 
+ * Reentrant C99 implementation for SmokeRand:
+ *
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
@@ -31,6 +51,9 @@ static void *create(const CallerAPI *intf)
     obj->b = intf->get_seed32();
     obj->c = intf->get_seed32();
     obj->d = intf->get_seed32();
+    for (int i = 0; i < 32; i++) {
+        (void) get_bits_raw(obj);
+    }
     return obj;
 }
 

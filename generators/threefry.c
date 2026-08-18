@@ -30,6 +30,9 @@
  *    https://github.com/girving/random123/blob/main/tests/kat_vectors
  * 3. https://www.schneier.com/academic/skein/threefish/
  * 4. https://pdebuyl.be/blog/2016/threefry-rng.html
+ * 3. Alich J., Eisenbarth T., Hadipour H. et al. Attacks and Remedies for
+ *    Randomness in AI: Cryptanalysis of PHILOX and THREEFRY // Cryptology
+ *    ePrint Archive, 2025. Paper 2025/2161. https://ia.cr/2025/2161
  *
  * @copyright Threefish block cipher was developed by Bruce Schneier et al.
  * Threefry algorithm was proposed by J. K. Salmon, M. A. Moraes, R. O. Dror

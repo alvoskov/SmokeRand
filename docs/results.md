@@ -77,8 +77,10 @@ the testing.
  chacha12_avx      | u32    | +       | +     | +       | +    | 2.0  | +      | 5     | +       | >= 32 TiB
  chacha12_avx2     | u32    | +       | +     | +       | +    | 0.78 | +      | 5     | +       | >= 16 TiB
  chacha12_ctr32    | u32    | +       | +     | +       | 1    | 2.0  | -(>>>) | 0     | +       | 256 GiB
- chip32            | u32    | +       | +     | +       | +    | 0.27 | +      | 4(0)  | +       | ?
- chip64            | u64    | +       | +     | +       | +    | 0.16 | +      | 4     |         | ?
+ chip8             | u32    | +       | 2/3   | 7/8     | 14/20| 1.9  |        | 0     | Small   | 64 MiB
+ chip16            | u32    | +       | +     | +       | +    | 0.78 | +      | 4(0)  | +       | >= 1 TiB
+ chip32            | u32    | +       | +     | +       | +    | 0.27 | +      | 4(0)  | +       | >= 1 TiB
+ chip64            | u64    | +       | +     | +       | +    | 0.16 | +      | 4     | +IL     | >= 32 TiB
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | +      | 4     | +       | >= 32 TiB
  cmwc4827          | u32    | +       | 1     | 1       | 1    | 0.44 | +      | 2     | +       | 512 MiB
  combo             | u32    | +       | 4     | 6       | 8    | 0.75 | +      | 0     | Small   | 4 GiB
@@ -459,19 +461,19 @@ the testing.
  xorrot128mn       | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 8 TiB
  xorrot128w32      | u32    | 2       | 3     | 5       | 7    | 0.48 | +      | 2.25  | Small   | 256 KiB
  xorrot128w32mrt   | u32    | +       | +     | +       | +    | 0.62 | +      | 4     | +       | >= 16 TiB
- xorrot160         | u32    | 2       | 3     | 5       | 7    | 0.41 |        | 2.25  | Small   | 256 JiB
+ xorrot160         | u32    | 2       | 3     | 5       | 7    | 0.41 | +      | 2.25  | Small   | 256 JiB
  xorrot256         | u64    | 2       | 3     | 5       | 7    | 0.30 | +      | 2.25  | Small   | 1 MiB
  xorrot256mrt      | u64    | +       | +     | +       | +    | 0.34 | +      | 4     |         | >= 16 TiB
  xorrot320         | u64    | 2       | 3     | 5       | 7    | 0.23 | +      | 2.25  |         | 1 MiB
  xorshift64        | u64    | 2       | 6     | 12      | 15/16| 0.49 | -      | 0     | -       | 32 KiB
  xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |S_lo/+_hi| 512 KiB
- xorshift96        | u32    | 2       | 5     | 8       | 12/13| 0.39 |        | 0     | -       | 64 KiB
+ xorshift96        | u32    | 2       | 5     | 8       | 12/13| 0.39 | +      | 0     | -       | 64 KiB
  xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      | 0     |+lo/+hi  | 32 GiB
  xorshift128pp     | u64    | +       | +     | +       | +    | 0.29 | +      | 4     |         | >= 16 TiB
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 1 TiB
  xorshift128rp     | u64    | +       | +     | 1       | 3/5  | 0.21 | +      | 0     | Small   | 4 GiB
- xorshift160       | u32    | 2       | 4     | 7       | 12/13| 0.44 |        | 0     | -       | 256 KiB
+ xorshift160       | u32    | 2       | 4     | 7       | 12/13| 0.44 | +      | 0     | -       | 256 KiB
  xorshift192       | u64    | 2       | 3     | 5       | 9    | 0.19 | +      | 0     | Small   | 256 KiB
  xorshift256       | u64    | 2       | 3     | 5       | 7/8  | 0.21 | +      | 2.25? | Small   | 1 MiB
  xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | +      | 0     | Small   | 128 KiB
@@ -509,6 +511,8 @@ Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
 -------------------|------------|------------
  aes128            | - (>53 TiB)| 222/212
  aesdec2           | - (>75 TiB)| 303/300
+ chip16            | - (>4 TiB) | 15/16
+ chip64            | - (>8 TiB) | 31/32
  dandelion64       | - (>11 TiB)| 34/44
  dandelion128      | - (>4 TiB) | 19/16
  ghsc64            | - (>10 TiB)| 41/40
