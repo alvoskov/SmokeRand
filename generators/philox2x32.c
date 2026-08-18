@@ -14,6 +14,9 @@
  *    https://doi.org/10.1145/2063384.2063405.
  * 2. Random123: a Library of Counter-Based Random Number Generators
  *    https://github.com/girving/random123/blob/main/tests/kat_vectors
+ * 3. Alich J., Eisenbarth T., Hadipour H. et al. Attacks and Remedies for
+ *    Randomness in AI: Cryptanalysis of PHILOX and THREEFRY // Cryptology
+ *    ePrint Archive, 2025. Paper 2025/2161. https://ia.cr/2025/2161
  *
  * @copyright Philox algorithm is proposed by J. K. Salmon, M. A. Moraes,
  * R. O. Dror and D. E. Shaw.

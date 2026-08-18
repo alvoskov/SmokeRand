@@ -10,11 +10,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 - `lfsr` battery: characteristic and jump polynomials are now also printed
   as C99 source code with 64-bit hexadecimal words.
+- `chip32` chaotic generator by Tommy Ettinger. Also its `chip8`, `chip16` and
+  `chip64` modifications made by A.L. Voskov.
 - `romumono` generator was added (https://arxiv.org/abs/2002.11331).
 - `sirius64` generator was added (https://github.com/matteo65/Sirius64).
 - `xoroshiro48w8ppp` was added, `xoroshiro48w16pp` was upgraded to
-  `xoroshiro48w16ppp`. These algorithms were developed A.L.Voskov
+  `xoroshiro48w16ppp`. These algorithms were developed A.L. Voskov
   as modifications of `xoroshiro` generators family.
+- New reference was added to the documentation of Philox and ThreeFry
+  generators (https://ia.cr/2025/2161). It is devoted to their cryptanalysis.
 
 ### Bugfix
 
