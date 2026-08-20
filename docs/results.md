@@ -78,8 +78,8 @@ the testing.
  chacha12_avx2     | u32    | +       | +     | +       | +    | 0.78 | +      | 5     | +       | >= 16 TiB
  chacha12_ctr32    | u32    | +       | +     | +       | 1    | 2.0  | -(>>>) | 0     | +       | 256 GiB
  chip8             | u32    | +       | 2/3   | 7/8     | 14/20| 1.9  |        | 0     | Small   | 64 MiB
- chip16            | u32    | +       | +     | +       | +    | 0.78 | +      | 4(0)  | +       | >= 1 TiB
- chip32            | u32    | +       | +     | +       | +    | 0.27 | +      | 4(0)  | +       | >= 1 TiB
+ chip16            | u32    | +       | +     | +       | +    | 0.78 | +      | 4(0)  | +       | >= 8 TiB
+ chip32            | u32    | +       | +     | +       | +    | 0.27 | +      | 4(0)  | +       | 16 TiB
  chip64            | u64    | +       | +     | +       | +    | 0.16 | +      | 4     | +IL     | >= 32 TiB
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | +      | 4     | +       | >= 32 TiB
  cmwc4827          | u32    | +       | 1     | 1       | 1    | 0.44 | +      | 2     | +       | 512 MiB
@@ -336,7 +336,7 @@ the testing.
  seiran128         | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB
  sezgin63_u63      | u63    | +       | +     | +       | 1/2  | 1.6  | N/A    | 1     | Crush   | >= 1 TiB
- sirius64          | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | ?
+ sirius64          | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | >= 8 TiB
  sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | -(>>>) | 0     | -       | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)| +       | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  | +       | >= 16 TiB
@@ -405,7 +405,7 @@ the testing.
  ultra64           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |+_lo/+_hi| >= 16 TiB
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     | +       | >= 32 TiB
  w1rand            | u64    | +       | +     | +       | +    | ~0.1 | -(>)   | 3     |         | 1 TiB
- wanghash64        | u64    | +       | 1     | 1       | 1    | 0.15 | -      | 1     |         | 16 GiB
+ wanghash64        | u64    | +       | 1     | 1       | 1    | 0.15 | -      | 1     |>=CHL/sIL| 16 GiB
  wich1982          | u32    | +       | 5     | 11      | 13   | 2.3  | -      | 0     | -       | 256 GiB
  wich2006          | u32    | +       | +     | +       | +    | 4.6  | +      | 4     | +       | >= 16 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
@@ -427,7 +427,7 @@ the testing.
  xkiss32sh_awc     | u32    | +       | +     | +       | +    | 0.99 | +      | 4     | +       | >= 16 TiB
  xkiss64_awc       | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
  xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
- xorgens256        | u64    | 2       | 3     | 5       | 7/8  | 0.21 | +      | 2.25? |         | 1 MiB
+ xorgens256        | u64    | 2       | 3     | 5       | 7/8  | 0.21 | +      | 2.25? | Small   | 1 MiB
  xorgens512        | u64    | 2       | 3     | 5       | 7    | 0.38 | +      | 2.25  |         | 8 MiB
  xorgens1024       | u64    | 2       | 3     | 5       | 7    | 1.1  |        | 2.25  |         | 32 MiB
  xoroshiro32       | u32    | 2       | 14    | 28/29   | 37/39| 1.4  | -(>>>) | 0     | -       | 32 KiB
@@ -623,6 +623,27 @@ Version with Weyl sequence:
        FPF-14+6/16:all                   R= -17.5  p =1-8.3e-17    FAIL !
        ...and 337 test result(s) without anomalies
 
+PractRand 0.96 results for `chip16` experimental generator:
+
+    rng=RNG_stdin32, seed=unknown
+    length= 4 terabytes (2^42 bytes), time= 12624 seconds
+      no anomalies in 285 test result(s)
+
+    rng=RNG_stdin32, seed=unknown
+    length= 8 terabytes (2^43 bytes), time= 25627 seconds
+      no anomalies in 292 test result(s)
+
+    rng=RNG_stdin32, seed=unknown
+    length= 16 terabytes (2^44 bytes), time= 51514 seconds
+      Test Name                         Raw       Processed     Evaluation
+      DC6-9x1Bytes-1                    R= +10.2  p =  1.8e-6   very suspicious
+      ...and 297 test result(s) without anomalies
+
+    rng=RNG_stdin32, seed=unknown
+    length= 32 terabytes (2^45 bytes), time= 104598 seconds
+      Test Name                         Raw       Processed     Evaluation
+      DC6-9x1Bytes-1                    R= +21.4  p =  1.6e-13    FAIL
+      ...and 303 test result(s) without anomalies
 
 
 Note about `xorshift128+`: an initial rating was 3.25, manually corrected to 0
