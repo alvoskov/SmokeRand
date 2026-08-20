@@ -4,6 +4,11 @@
  * developed by Thomas Wang. It fails the `hamming_distr` test (its part that
  * uses XORed pairs).
  *
+ * If it is processed through the `interleaved32` filter (i.e. 64-bit output
+ * is processed as two 32-bit integers) - then it fails gap test, birthday
+ * spacings test and collision tests in the `brief`/`default` batteries
+ * of SmokeRand and Crush battery of TestU01.
+ *
  * References:
  * 1. https://github.com/love2d/love/blob/main/src/modules/math/RandomGenerator.cpp
  * 2. https://web.archive.org/web/20110807030012/http://www.cris.com/%7ETtwang/tech/inthash.htm
