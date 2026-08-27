@@ -1,7 +1,45 @@
-// 
-// Hars, L., Petruska, G. Pseudorandom recursions II. J Embedded Systems 2012, 1 (2012). https://doi.org/10.1186/1687-3963-2012-1
-// Hars, L., Petruska, G. Pseudorandom Recursions: Small and Fast Pseudorandom Number Generators for Embedded Applications. J Embedded Systems 2007, 098417 (2007). https://doi.org/10.1155/2007/98417
-// Hars L. Hardware Bit-Mixers. Cryptology {ePrint} Archive, Paper 2017/084. https://eprint.iacr.org/2017/084}
+/**
+ * @file xormix128ctr.c
+ * @brief xormix128ctr is a fast counter-based PRNG for 32-bit processors,
+ * 128-bit seed/key and with 128-bit output block.
+ * @details Its designed is based on an experimental ARX cipher suggested by
+ * L. Hars and G. Petruska. The next modifications were made by A.L. Voskov
+ * during the xormix128 design, they are intended to turn it into a fast
+ * non-cryptographic 32-bit Counter-Based PRNG (CBPRNG):
+ *
+ * 1. Two different rotatations instead of one, dynamic indexing inside
+ *    the key schedule was excluded.
+ * 2. The key schedule is based on just scrambling the key with a combination
+ *    of xorrot LFSR and a non-linear output function.
+ * 3. Number of rounds were reduced, also xormix128ctr round corresponds to
+ *    TWO rounds of the original cipher.
+ *
+ * Notes about rotations tuning:
+ *
+ * 1. They were manually tuned by means of hamming_distr test from default and
+ *    full batteries of SmokeRand.
+ * 2. 2 rounds: hamming_distr from full is ok (even without key addition)
+ * 3. ctr[0] increment passes the entire "full" SmokeRand and >= 1 TiB
+ *    in PractRand 0.96.
+ *
+ * WARNING! NOT FOR CRYPTOGRAPHY! Use only as a general purpose CBPRNG!
+ *
+ * References:
+ *
+ * 1. Hars L., Petruska G. Pseudorandom recursions II. // J Embedded Systems.
+ *    2012, 1 (2012). https://doi.org/10.1186/1687-3963-2012-1
+ * 2. Hars L., Petruska G. Pseudorandom Recursions: Small and Fast Pseudorandom
+ *    Number Generators for Embedded Applications // J Embedded Systems 2007,
+ *    098417 (2007). https://doi.org/10.1155/2007/98417
+ * 3. Hars L. Hardware Bit-Mixers. Cryptology {ePrint} Archive, Paper 2017/084.
+ *    https://eprint.iacr.org/2017/084
+ *
+ * @copyright
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
@@ -14,8 +52,7 @@ typedef struct {
     int pos;
 } Xormix128CtrState;
 
-// 4 rounds (i < 2, no key sch.) - express, brief, default, full
-// >= 1 TiB in PractRand
+
 static inline uint64_t get_bits_raw(Xormix128CtrState *obj)
 {
     const int sh1 = 19, sh2 = 5;
