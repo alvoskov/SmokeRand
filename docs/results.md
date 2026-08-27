@@ -431,7 +431,7 @@ the testing.
  xorgens512        | u64    | 2       | 3     | 5       | 7    | 0.38 | +      | 2.25  |         | 8 MiB
  xorgens1024       | u64    | 2       | 3     | 5       | 7    | 1.1  |        | 2.25  |         | 32 MiB
  xormix128ctr      | u32    | +       | +     | +       | +    | 2.0  |        |       |         | ?
- xormix256ctr(avx2)| u64    | +       | +     | +       | +    | 0.47 |        |       |         | ?
+ xormix256ctr(avx2)| u64    | +       | +     | +       | +    | 0.47 | +      | 4     |         | >= 8 TiB
  xoroshiro32       | u32    | 2       | 14    | 28/29   | 37/39| 1.4  | -(>>>) | 0     | -       | 32 KiB
  xoroshiro32pp     | u32    | +       | 1     | 2       | 6/8  | 1.5  | -(>>>) | 0     | Small   | 256 MiB
  xoroshiro64aox    | u32    | +       | +     | +       | +    | 0.52 | +      | 3.5   | +       | 512 GiB
