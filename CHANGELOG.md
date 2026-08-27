@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   `chip64` modifications made by A.L. Voskov.
 - `romumono` generator was added (https://arxiv.org/abs/2002.11331).
 - `sirius64` generator was added (https://github.com/matteo65/Sirius64).
+- `xormix128ctr` and `xormix256ctr` CBPRNG based on an experimental ARX cipher
+  by L. Hars and G. Petruska. Parameters were tuned by A.L. Voskov.
 - `xoroshiro48w8ppp` was added, `xoroshiro48w16pp` was upgraded to
   `xoroshiro48w16ppp`. These algorithms were developed A.L. Voskov
   as modifications of `xoroshiro` generators family.
