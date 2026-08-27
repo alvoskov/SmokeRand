@@ -1,7 +1,47 @@
-// 
-// Hars, L., Petruska, G. Pseudorandom recursions II. J Embedded Systems 2012, 1 (2012). https://doi.org/10.1186/1687-3963-2012-1
-// Hars, L., Petruska, G. Pseudorandom Recursions: Small and Fast Pseudorandom Number Generators for Embedded Applications. J Embedded Systems 2007, 098417 (2007). https://doi.org/10.1155/2007/98417
-// Hars L. Hardware Bit-Mixers. Cryptology {ePrint} Archive, Paper 2017/084. https://eprint.iacr.org/2017/084}
+/**
+ * @file xormix256ctr.c
+ * @brief xormix256ctr is a fast counter-based PRNG for 64-bit processors,
+ * 256-bit seed/key and with 256-bit output block.
+ * @details Its designed is based on an experimental ARX cipher suggested by
+ * L. Hars and G. Petruska. The next modifications were made by A.L. Voskov
+ * during the xormix256 design, they are intended to turn it into a fast
+ * non-cryptographic 64-bit Counter-Based PRNG (CBPRNG):
+ *
+ * 1. The word size was extended from 32 to 64 bits.
+ * 2. Two different rotatations instead of one, dynamic indexing inside
+ *    the key schedule was excluded.
+ * 3. The key schedule is based on just scrambling the key with a combination
+ *    of xorrot LFSR and a non-linear output function.
+ * 4. Number of rounds were reduced, also xormix256ctr round corresponds to
+ *    TWO rounds of the original cipher.
+ *
+ * Notes about rotations tuning:
+ *
+ * 1. They were manually tuned by means of hamming_distr test from default and
+ *    full batteries of SmokeRand.
+ * 2. 2 rounds: hamming_distr from full is ok (even without key addition)
+ *    for ctr increment in 0, 1, 2, 3.
+ * 3. ctr[0] increment passes the entire "full" SmokeRand and >= 1 TiB
+ *    in PractRand 0.96.
+ *
+ * WARNING! NOT FOR CRYPTOGRAPHY! Use only as a general purpose CBPRNG!
+ *
+ * References:
+ *
+ * 1. Hars L., Petruska G. Pseudorandom recursions II. // J Embedded Systems.
+ *    2012, 1 (2012). https://doi.org/10.1186/1687-3963-2012-1
+ * 2. Hars L., Petruska G. Pseudorandom Recursions: Small and Fast Pseudorandom
+ *    Number Generators for Embedded Applications // J Embedded Systems 2007,
+ *    098417 (2007). https://doi.org/10.1155/2007/98417
+ * 3. Hars L. Hardware Bit-Mixers. Cryptology {ePrint} Archive, Paper 2017/084.
+ *    https://eprint.iacr.org/2017/084
+ *
+ * @copyright
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 #ifdef __AVX2__
@@ -11,6 +51,32 @@
 PRNG_CMODULE_PROLOG
 
 
+/////////////////////////////////
+///// Some helper functions /////
+/////////////////////////////////
+
+
+void xormix256_mix_key(uint64_t *mixed_key, const uint64_t *key)
+{
+    uint64_t x = key[0], y = key[1], z = key[2], w = key[3];
+    for (int i = 0; i < 64 + 4; i++) {
+        const uint64_t x0 = x, w0 = w;
+        x = x0 ^ y;
+        y = z;
+        z = x0 ^ w0;
+        w = (x0 << 3) ^ z ^ rotl64(w0, 8) ^ rotl64(w0, 37);
+        if (i >= 64) {
+            uint64_t out = rotl64(6906969069U * x0, 11);
+            out += (out * out | 0x40000005);
+            mixed_key[i - 64] = out;
+        }
+    }
+}
+
+////////////////////////////////////////////////////
+///// Scalar (portable) version implementation /////
+////////////////////////////////////////////////////
+
 typedef struct {
     uint64_t key[4];
     uint64_t ctr[4];
@@ -18,10 +84,7 @@ typedef struct {
     int pos;
 } Xormix256CtrState;
 
-// 4 rounds: i < 2: hamming_distr from full is ok (even without key schedule)
-// for ctr 0, 1, 2, 3(!);
-// ctr[0] passes the entire "full" SmokeRand
-// and >= 1 TiB in PractRand 0.96
+
 static inline void Xormix256CtrState_block(Xormix256CtrState *obj)
 {
     const int sh1 = 35, sh2 = 11;
@@ -54,23 +117,6 @@ static inline uint64_t get_bits_scalar_raw(Xormix256CtrState *obj)
 }
 
 
-void xormix256_mix_key(uint64_t *mixed_key, const uint64_t *key)
-{
-    uint64_t x = key[0], y = key[1], z = key[2], w = key[3];
-    for (int i = 0; i < 64 + 4; i++) {
-        const uint64_t x0 = x, w0 = w;
-        x = x0 ^ y;
-        y = z;
-        z = x0 ^ w0;
-        w = (x0 << 3) ^ z ^ rotl64(w0, 8) ^ rotl64(w0, 37);
-        if (i >= 64) {
-            uint64_t out = rotl64(6906969069U * x0, 11);
-            out += (out * out | 0x40000005);
-            mixed_key[i - 64] = out;
-        }
-    }
-}
-
 void Xormix256CtrState_init(Xormix256CtrState *obj, const uint64_t *key)
 {
     // Key mixer    
@@ -95,11 +141,11 @@ static void *create_scalar(const GeneratorInfo *gi, const CallerAPI *intf)
 
 MAKE_GET_BITS_WRAPPERS(scalar)
 
-////////////////////////////////////////
-///// AVX2 (vector) implementation /////
-////////////////////////////////////////
+////////////////////////////////////////////////
+///// AVX2 (vector) version implementation /////
+////////////////////////////////////////////////
 
-#define XORMIX256CTR_NCOPIES 4
+#define XORMIX256CTR_NCOPIES 8
 
 typedef union {
     uint64_t u64[XORMIX256CTR_NCOPIES];
@@ -114,6 +160,7 @@ typedef struct {
 } Xormix256CtrVecState;
 
 
+#ifdef __AVX2__
 static inline void xormix256ctr_vec_round(__m256i *s, __m256i *k)
 {
     const int sh1 = 35, sh2 = 11;
@@ -149,9 +196,9 @@ static inline void xormix256ctr_vec_round(__m256i *s, __m256i *k)
     }
 }
 
-
 static inline void Xormix256CtrVecState_block(Xormix256CtrVecState *obj)
 {
+#if XORMIX256CTR_NCOPIES == 4
     __m256i out[4], key[4];
     for (size_t i = 0; i < 4; i++) {
         out[i] = _mm256_loadu_si256((__m256i *) (void *) &obj->ctr[i].u64[0]);
@@ -165,10 +212,29 @@ static inline void Xormix256CtrVecState_block(Xormix256CtrVecState *obj)
     for (size_t i = 0; i < 4; i++) {
         _mm256_storeu_si256((__m256i *) (void *) &obj->out[i].u64[0], out[i]);
     }
+#elif XORMIX256CTR_NCOPIES == 8
+    __m256i out[8], key[4];
+    for (size_t i = 0; i < 4; i++) {
+        out[i]     = _mm256_loadu_si256((__m256i *) (void *) &obj->ctr[i].u64[0]);
+        out[4 + i] = _mm256_loadu_si256((__m256i *) (void *) &obj->ctr[i].u64[4]);
+        key[i] = _mm256_set1_epi64x((long long) obj->key[i]);
+    }
 
-    (void) obj;
+    xormix256ctr_vec_round(out, key);
+    xormix256ctr_vec_round(out + 4, key);
+    xormix256ctr_vec_round(out, key);
+    xormix256ctr_vec_round(out + 4, key);
+    xormix256ctr_vec_round(out, key);
+    xormix256ctr_vec_round(out + 4, key);
+
+    for (size_t i = 0; i < 4; i++) {
+        _mm256_storeu_si256((__m256i *) (void *) &obj->out[i].u64[0], out[i]);
+        _mm256_storeu_si256((__m256i *) (void *) &obj->out[i].u64[4], out[4 + i]);
+    }
+#else
+    #error "This number of copies is not supported"
+#endif
 }
-
 
 void Xormix256CtrVecState_init(Xormix256CtrVecState *obj, const uint64_t *key)
 {
@@ -214,7 +280,7 @@ static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
 MAKE_GET_BITS_WRAPPERS(vector)
 
 
-
+#endif
 
 //////////////////////
 ///// Interfaces /////
@@ -229,21 +295,50 @@ static void *create(const CallerAPI *intf)
 static const GeneratorParamVariant gen_list[] = {
     {"",     "xormix256ctr:c99",  64, create_scalar, get_bits_scalar, get_sum_scalar},
     {"c99",  "xormix256ctr:c99",  64, create_scalar, get_bits_scalar, get_sum_scalar},
+#ifdef __AVX2__
     {"avx2", "xormix256ctr:avx2", 64, create_vector, get_bits_vector, get_sum_vector},
+#endif
     GENERATOR_PARAM_VARIANT_EMPTY
 };
 
-
+/**
+ * @brief An internal self-test that contains two subtests:
+ *
+ * 1. Compares the scalar version output with reference values.
+ * 2. Compares outputs of the vector version with the output of
+ *    the scalar version.
+ */
 static int run_self_test(const CallerAPI *intf)
 {
-    const uint64_t k[4] = {0x123456789ABCDEF, 0xFEDCBA987654321, 3, 4};
+    static const uint64_t k[4] = {
+        0x243F6A8885A308D3, 0x13198A2E03707344,
+        0xA4093822299F31D0, 0x082EFA98EC4E6C89
+    };
+    static const uint64_t u_ref[16] = {
+        0xBF6D9F040BB0B616, 0x25886D866545E424,
+        0x72053BE8A5CEE68C, 0xBFEDAB2CAA52FB06,
+        0x6ED2A21E68A7D996, 0xDCC38069AC5BA507,
+        0x23571484E3386A44, 0x90826208856B7635,
+        0x47540D923DEE0BAD, 0xEE6DAE54BA496EFD,
+        0x0F8371960E128DA7, 0x7D886ED0156B850B,
+        0x1B9FA676707B3A4C, 0xC8955F6749011CF4,
+        0xEB9F38757A11C286, 0x04C4897C6C6CC481
+    };
     int is_ok = 1;
     Xormix256CtrState *obj = intf->malloc(sizeof(Xormix256CtrState));
     Xormix256CtrState_init(obj, k);
     for (int i = 0; i < 16; i++) {
-        intf->printf("%llX\n", get_bits_scalar_raw(obj));
+        const uint64_t u = get_bits_scalar_raw(obj);
+        intf->printf("0x%16.16llX 0x%16.16llX\n",
+            (unsigned long long) u,
+            (unsigned long long) u_ref[i]
+        );
+        if (u_ref[i] != u) {
+            is_ok = 0;
+        }
     }
 
+#ifdef __AVX2__
     Xormix256CtrVecState *obj_vec = intf->malloc(sizeof(Xormix256CtrVecState));
     Xormix256CtrVecState_init(obj_vec, k);
     for (int i = 0; i < 16; i++) {
@@ -256,12 +351,9 @@ static int run_self_test(const CallerAPI *intf)
         }
     }
     intf->free(obj_vec);
+#endif
     intf->free(obj);
-
-
-
-    return is_ok;
-    
+    return is_ok;    
 }
 
 

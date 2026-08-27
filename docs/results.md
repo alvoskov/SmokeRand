@@ -430,6 +430,8 @@ the testing.
  xorgens256        | u64    | 2       | 3     | 5       | 7/8  | 0.21 | +      | 2.25? | Small   | 1 MiB
  xorgens512        | u64    | 2       | 3     | 5       | 7    | 0.38 | +      | 2.25  |         | 8 MiB
  xorgens1024       | u64    | 2       | 3     | 5       | 7    | 1.1  |        | 2.25  |         | 32 MiB
+ xormix128ctr      | u32    | +       | +     | +       | +    | 2.0  |        |       |         | ?
+ xormix256ctr(avx2)| u64    | +       | +     | +       | +    | 0.47 |        |       |         | ?
  xoroshiro32       | u32    | 2       | 14    | 28/29   | 37/39| 1.4  | -(>>>) | 0     | -       | 32 KiB
  xoroshiro32pp     | u32    | +       | 1     | 2       | 6/8  | 1.5  | -(>>>) | 0     | Small   | 256 MiB
  xoroshiro64aox    | u32    | +       | +     | +       | +    | 0.52 | +      | 3.5   | +       | 512 GiB
@@ -538,6 +540,7 @@ Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
  wyrand:v43        | 5 TiB      | 59/20
  wyranda_par       | -(>213 TiB)| 780/852
  wyrand128         | - (>25 TiB)| 107/100
+ xormix256ctr      | - (>10 TiB)| 41/40
  xoroshiro48w8ppp  | - (>23 TiB)| 89/92
  xoroshiro48w16pp  | - (>20 TiB)| 90/80
  xoroshiro48w16ppp | - (>12 TiB)| 50/48
