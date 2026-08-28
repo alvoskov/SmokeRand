@@ -20,3 +20,6 @@ Existing solutions:
 6. [DIEHARD](https://web.archive.org/web/20160125103112/http://stat.fsu.edu/pub/diehard/).
    A classical test suite by G. Marsaglia. TestU01 and PractRand are much more
    sensitive, but its source code contains some intesting combined PRNGs.
+7. [CoolTest](https://doi.org/10.1016/j.cose.2026.104986) by Jiří Gavenda, Marek Sýs,
+   designed for automatic search of correlations bewteen different bits using booleal
+   functions.

@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `chip32` chaotic generator by Tommy Ettinger. Also its `chip8`, `chip16` and
   `chip64` modifications made by A.L. Voskov.
 - `fwfarx128ctr` and `fwfarx256ctr` CBPRNG based on an experimental ARX cipher
+- `icg128_p2` (inverse congruential generator with `m=2**128`), returns the
+  upper 64 bits.
 - `romumono` generator was added (https://arxiv.org/abs/2002.11331).
 - `sirius64` generator was added (https://github.com/matteo65/Sirius64).
   by L. Hars and G. Petruska. Parameters were tuned by A.L. Voskov.
