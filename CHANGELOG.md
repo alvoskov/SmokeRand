@@ -12,9 +12,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   as C99 source code with 64-bit hexadecimal words.
 - `chip32` chaotic generator by Tommy Ettinger. Also its `chip8`, `chip16` and
   `chip64` modifications made by A.L. Voskov.
+- `fwfarx128ctr` and `fwfarx256ctr` CBPRNG based on an experimental ARX cipher
 - `romumono` generator was added (https://arxiv.org/abs/2002.11331).
 - `sirius64` generator was added (https://github.com/matteo65/Sirius64).
-- `xormix128ctr` and `xormix256ctr` CBPRNG based on an experimental ARX cipher
   by L. Hars and G. Petruska. Parameters were tuned by A.L. Voskov.
 - `xoroshiro48w8ppp` was added, `xoroshiro48w16pp` was upgraded to
   `xoroshiro48w16ppp`. These algorithms were developed A.L. Voskov
