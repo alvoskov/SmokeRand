@@ -1,17 +1,17 @@
 /**
- * @file xormix128ctr.c
- * @brief xormix128ctr is a fast counter-based PRNG for 32-bit processors,
+ * @file fwfarx128ctr.c
+ * @brief fwfarx128ctr is a fast counter-based PRNG for 32-bit processors,
  * 128-bit seed/key and with 128-bit output block.
  * @details Its designed is based on an experimental ARX cipher suggested by
  * L. Hars and G. Petruska. The next modifications were made by A.L. Voskov
- * during the xormix128 design, they are intended to turn it into a fast
+ * during the fwfarx128 design, they are intended to turn it into a fast
  * non-cryptographic 32-bit Counter-Based PRNG (CBPRNG):
  *
  * 1. Two different rotatations instead of one, dynamic indexing inside
  *    the key schedule was excluded.
  * 2. The key schedule is based on just scrambling the key with a combination
  *    of xorrot LFSR and a non-linear output function.
- * 3. Number of rounds were reduced, also xormix128ctr round corresponds to
+ * 3. Number of rounds were reduced, also fwfarx128ctr round corresponds to
  *    TWO rounds of the original cipher.
  *
  * Notes about rotations tuning:
@@ -54,7 +54,7 @@ PRNG_CMODULE_PROLOG
 /////////////////////////////////
 
 
-void xormix128_mix_key(uint32_t *mixed_key, const uint32_t *key)
+void fwfarx128_mix_key(uint32_t *mixed_key, const uint32_t *key)
 {
     uint32_t x = key[0], y = key[1], z = key[2], w = key[3];
     for (int i = 0; i < 64 + 4; i++) {
@@ -80,10 +80,10 @@ typedef struct {
     uint32_t ctr[4];
     uint32_t out[4];
     int pos;
-} Xormix128CtrState;
+} Fwfarx128CtrState;
 
 
-static inline uint64_t get_bits_scalar_raw(Xormix128CtrState *obj)
+static inline uint64_t get_bits_scalar_raw(Fwfarx128CtrState *obj)
 {
     const int sh1 = 19, sh2 = 5;
     if (obj->pos == 4) {
@@ -109,10 +109,10 @@ static inline uint64_t get_bits_scalar_raw(Xormix128CtrState *obj)
 }
 
 
-void Xormix128CtrState_init(Xormix128CtrState *obj, const uint32_t *key)
+void Fwfarx128CtrState_init(Fwfarx128CtrState *obj, const uint32_t *key)
 {
     // Key mixer
-    xormix128_mix_key(obj->key, key);
+    fwfarx128_mix_key(obj->key, key);
     // Reset counter
     obj->ctr[0] = 0; obj->ctr[1] = 0;
     obj->ctr[2] = 0; obj->ctr[3] = 0;
@@ -125,9 +125,9 @@ static void *create_scalar(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     (void) gi;
     uint32_t k[4];
-    Xormix128CtrState *obj = intf->malloc(sizeof(Xormix128CtrState));
+    Fwfarx128CtrState *obj = intf->malloc(sizeof(Fwfarx128CtrState));
     seeds_to_array_u32(intf, k, 4);
-    Xormix128CtrState_init(obj, k);
+    Fwfarx128CtrState_init(obj, k);
     return obj;
 }
 
@@ -143,15 +143,15 @@ MAKE_GET_BITS_WRAPPERS(scalar)
 
 typedef union {
     uint32_t u32[XORMIX128CTR_NCOPIES];
-} Xormix128CtrElement;
+} Fwfarx128CtrElement;
 
 
 typedef struct {
     uint32_t key[4];
-    Xormix128CtrElement ctr[4]; ///< Counter
-    Xormix128CtrElement out[4]; ///< Output state
+    Fwfarx128CtrElement ctr[4]; ///< Counter
+    Fwfarx128CtrElement out[4]; ///< Output state
     size_t pos;
-} Xormix128CtrVecState;
+} Fwfarx128CtrVecState;
 
 
 #ifdef __AVX2__
@@ -163,7 +163,7 @@ static inline __m256i mm256_rotl_epi32_def(__m256i in, int r)
 }
 
 
-static inline void xormix128ctr_vec_round(__m256i *s, __m256i *k)
+static inline void fwfarx128ctr_vec_round(__m256i *s, __m256i *k)
 {
     const int sh1 = 19, sh2 = 5;
     // --- Half-round 1 ---
@@ -198,7 +198,7 @@ static inline void xormix128ctr_vec_round(__m256i *s, __m256i *k)
     }
 }
 
-static inline void Xormix128CtrVecState_block(Xormix128CtrVecState *obj)
+static inline void Fwfarx128CtrVecState_block(Fwfarx128CtrVecState *obj)
 {
     __m256i out[4], key[4];
     for (size_t i = 0; i < 4; i++) {
@@ -207,7 +207,7 @@ static inline void Xormix128CtrVecState_block(Xormix128CtrVecState *obj)
     }
 
     for (int i = 0; i < 3; i++) {
-        xormix128ctr_vec_round(out, key);
+        fwfarx128ctr_vec_round(out, key);
     }
 
     for (size_t i = 0; i < 4; i++) {
@@ -215,21 +215,21 @@ static inline void Xormix128CtrVecState_block(Xormix128CtrVecState *obj)
     }
 }
 
-void Xormix128CtrVecState_init(Xormix128CtrVecState *obj, const uint32_t *key)
+void Fwfarx128CtrVecState_init(Fwfarx128CtrVecState *obj, const uint32_t *key)
 {
     // Key mixer    
-    xormix128_mix_key(obj->key, key);
+    fwfarx128_mix_key(obj->key, key);
     // Reset counter
     for (size_t i = 0; i < XORMIX128CTR_NCOPIES; i++) {
         obj->ctr[0].u32[i] = (uint32_t) i; obj->ctr[1].u32[i] = 0;
         obj->ctr[2].u32[i] = 0;            obj->ctr[3].u32[i] = 0;
     }
-    Xormix128CtrVecState_block(obj);
+    Fwfarx128CtrVecState_block(obj);
     obj->pos = 0;
 }
 
 
-static inline uint64_t get_bits_vector_raw(Xormix128CtrVecState *obj)
+static inline uint64_t get_bits_vector_raw(Fwfarx128CtrVecState *obj)
 {
     const size_t i = (obj->pos & 0x3), j = (obj->pos >> 2);
     const uint32_t x = obj->out[i].u32[j];
@@ -241,7 +241,7 @@ static inline uint64_t get_bits_vector_raw(Xormix128CtrVecState *obj)
             obj->ctr[0].u32[k] = (uint32_t) ctr;
             obj->ctr[1].u32[k] = (uint32_t) (ctr >> 32);
         }
-        Xormix128CtrVecState_block(obj);
+        Fwfarx128CtrVecState_block(obj);
         obj->pos = 0;
     }
     return x;
@@ -253,9 +253,9 @@ static void *create_vector(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     (void) gi;
     uint32_t k[4];
-    Xormix128CtrVecState *obj = intf->malloc(sizeof(Xormix128CtrVecState));
+    Fwfarx128CtrVecState *obj = intf->malloc(sizeof(Fwfarx128CtrVecState));
     seeds_to_array_u32(intf, k, 4);
-    Xormix128CtrVecState_init(obj, k);
+    Fwfarx128CtrVecState_init(obj, k);
     return obj;
 }
 
@@ -275,10 +275,10 @@ static void *create(const CallerAPI *intf)
 }
 
 static const GeneratorParamVariant gen_list[] = {
-    {"",     "xormix128ctr:c99",  32, create_scalar, get_bits_scalar, get_sum_scalar},
-    {"c99",  "xormix128ctr:c99",  32, create_scalar, get_bits_scalar, get_sum_scalar},
+    {"",     "fwfarx128ctr:c99",  32, create_scalar, get_bits_scalar, get_sum_scalar},
+    {"c99",  "fwfarx128ctr:c99",  32, create_scalar, get_bits_scalar, get_sum_scalar},
 #ifdef __AVX2__
-    {"avx2", "xormix128ctr:avx2", 32, create_vector, get_bits_vector, get_sum_vector},
+    {"avx2", "fwfarx128ctr:avx2", 32, create_vector, get_bits_vector, get_sum_vector},
 #endif
     GENERATOR_PARAM_VARIANT_EMPTY
 };
@@ -302,8 +302,8 @@ static int run_self_test(const CallerAPI *intf)
         0x5FB0D676, 0x9C5C2EB3, 0x728063D4, 0xE160B7E5
     };
     int is_ok = 1;
-    Xormix128CtrState *obj = intf->malloc(sizeof(Xormix128CtrState));
-    Xormix128CtrState_init(obj, k);
+    Fwfarx128CtrState *obj = intf->malloc(sizeof(Fwfarx128CtrState));
+    Fwfarx128CtrState_init(obj, k);
     for (int i = 0; i < 16; i++) {
         const uint32_t u = (uint32_t) get_bits_scalar_raw(obj);
         intf->printf("0x%8.8lX 0x%8.8lX\n",
@@ -316,8 +316,8 @@ static int run_self_test(const CallerAPI *intf)
     }
 
 #ifdef __AVX2__
-    Xormix128CtrVecState *obj_vec = intf->malloc(sizeof(Xormix128CtrVecState));
-    Xormix128CtrVecState_init(obj_vec, k);
+    Fwfarx128CtrVecState *obj_vec = intf->malloc(sizeof(Fwfarx128CtrVecState));
+    Fwfarx128CtrVecState_init(obj_vec, k);
     for (int i = 0; i < 16; i++) {
         (void) get_bits_vector_raw(obj_vec);
     }
@@ -336,7 +336,7 @@ static int run_self_test(const CallerAPI *intf)
 
 
 static const char description[] =
-"xormix128ctr is the counter-based PRNG with 128-bit block.\n"
+"fwfarx128ctr is the counter-based PRNG with 128-bit block.\n"
 "The next param values are supported:\n"
 "  c99  - portable version (default version)\n"
 "  avx2 - AVX2 vectorized version\n";
