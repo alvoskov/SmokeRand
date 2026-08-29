@@ -20,8 +20,8 @@ The key features of the analyzer:
 - The deduction subroutine is fairly "foolproof" and contains some checks
   to prevent segfaults in the case of PRNGs with constants, pointers,
   file descriptors etc. in their states.
-- 32, 48, 64, 96, 128, 160, 192, 256, 320, 512 and 1024 bits of state are
-  supported.
+- 32, 48, 64, 96, 128, 160, 192, 256, 320, 512, 800 and 1024 bits of state
+  are supported.
 
 The analyzer consists of the next files:
 
