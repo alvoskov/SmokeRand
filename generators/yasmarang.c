@@ -1,3 +1,24 @@
+/**
+ * @file yasmarang.c
+ * @brief yasmarang is a chaotic PRNG with a short period.
+ * @details This implementation was tested by means of reference vectors
+ * supplied by Ilya Levin, the algorithm author. It fails a lot of tests
+ * in SmokeRand, the 64-bit collision test results show that its period
+ * is very short.
+ *
+ * References:
+ *
+ * 1. http://www.literatecode.com/yasmarang
+ *
+ * @copyright The yasmarang PRNG was developed by Ilya Levin.
+ *
+ * Reentrant C99 implementation for SmokeRand:
+ *
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
@@ -47,9 +68,11 @@ static int run_self_test(const CallerAPI *intf)
     YasmarangState obj;
     YasmarangState_init(&obj, 0xeda4baba);
     int is_ok = 1;
+    intf->printf("%8s %8s\n", "Out", "Ref");
     for (int i = 0; i < 20; i++) {
         const uint32_t x = (uint32_t) get_bits_raw(&obj);
-        intf->printf("%lX %lX\n", (unsigned long) x, (unsigned long) x_ref[i]);
+        intf->printf("%8.8lX %8.8lX\n",
+            (unsigned long) x, (unsigned long) x_ref[i]);
         if (x != x_ref[i]) {
             is_ok = 0;
         }
