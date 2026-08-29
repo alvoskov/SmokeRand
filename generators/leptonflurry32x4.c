@@ -35,12 +35,17 @@ typedef struct {
 } LeptonFlurry32x4State;
 
 
+static inline uint32_t sc(uint32_t x)
+{
+    return x ^ rotl32(x, 11) ^ rotl32(x, 27);
+}
+
 static void LeptonFlurry32x4State_block(LeptonFlurry32x4State *obj)
 {
     uint32_t a = obj->ctr[0] + obj->ctr[1] + obj->key[0] + 111111111U;
     uint32_t b = obj->ctr[2] + obj->ctr[3] + obj->key[1];
 
-    a += (a << 9) ^ obj->ctr[2] ^ (a >> 5) ^ obj->ctr[3] ^ obj->key[1];
+    a += (a << 9)  ^ obj->ctr[2] ^ (a >> 5) ^ obj->ctr[3] ^ obj->key[1];
     b += (b << 13) ^ obj->ctr[0] ^ (b >> 9) ^ obj->ctr[1] ^ obj->key[0] ^ a;
     a += (b + (b << 7)) ^ (b >> 5);
     b += (a + (a << 9)) ^ (a >> 7);
