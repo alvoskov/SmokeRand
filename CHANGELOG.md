@@ -10,14 +10,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 - `lfsr` battery: characteristic and jump polynomials are now also printed
   as C99 source code with 64-bit hexadecimal words.
+- `lfsr` battery: now 800-bit and 1600-bit generators (e.g. `NOBUF` version
+  of TT800 and TT1600) are supported, the factorizations of `2**800 - 1`
+  and `2**1600 - 1` were added.
 - `chip32` chaotic generator by Tommy Ettinger. Also its `chip8`, `chip16` and
   `chip64` modifications made by A.L. Voskov.
 - `fwfarx128ctr` and `fwfarx256ctr` CBPRNG based on an experimental ARX cipher
 - `icg128_p2` (inverse congruential generator with `m=2**128`), returns the
   upper 64 bits.
+- New versions of `leptonflurry`.
 - `romumono` generator was added (https://arxiv.org/abs/2002.11331).
 - `sirius64` generator was added (https://github.com/matteo65/Sirius64).
   by L. Hars and G. Petruska. Parameters were tuned by A.L. Voskov.
+- `tt800` classical LFSR generator. Also `tt1600mrt`, a scrambled version
+  of `t1600`, another 64-bit classical LFSR.
 - `xoroshiro48w8ppp` was added, `xoroshiro48w16pp` was upgraded to
   `xoroshiro48w16ppp`. These algorithms were developed A.L. Voskov
   as modifications of `xoroshiro` generators family.

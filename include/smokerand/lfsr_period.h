@@ -36,7 +36,7 @@ typedef struct {
     size_t nbytes; ///< State size in bytes
 }  GeneratorStateExt;
 
-#define LARGEINT_SIZE 16
+#define LARGEINT_SIZE 25
 
 /**
  * @brief Wide integers required for the exponents.
