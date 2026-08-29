@@ -97,7 +97,7 @@ the testing.
  drand48           | u32    | 3       | 13    | 21      | 23/24| 0.72 | -      | 0     | -       | 1 MiB
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     | +IL     | >= 16 TiB
  flea32x1          | u32    | +       | 1     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
- fwfarx128ctr(avx2)| u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | ?
+ fwfarx128ctr(avx2)| u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 16 TiB
  fwfarx256ctr(avx2)| u64    | +       | +     | +       | +    | 0.47 | +      | 4     | +IL     | >= 32 TiB
  ghsc64_old        | u64    | +       | 3     | 10      | 18   | ~0.1 |        | 0     |         | 256 KiB
  ghsc64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 16 TiB
@@ -113,7 +113,7 @@ the testing.
  icg31x2           | u32    | +       | +     | +       | 1    | 87   |        | 2     | Crush   | 8 GiB
  icg64             | u32    | +       | +     | +       | +    | 113  |        |       | +       | >= 1 TiB
  icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  | +      | 0     | Small   | 32 MiB
- icg128_p2         | u32    | +       | 1     | 1       | 1    |      | +      | 3     | +lo     | 64 GiB
+ icg128_p2         | u32    | +       | 1     | 1       | 1    | 2.6  | +      | 3     | +lo     | 64 GiB
  isaac             | u32    | +       | +     | +       | +    | 1.6  | +      | 4.5   | +       | >= 16 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 4.5   | +       | >= 32 TiB
  jctr32            | u32    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 16 TiB
@@ -146,6 +146,8 @@ the testing.
  kuzn              | u64    | +       | +     | +       | +    | 17   | +      | 5     | +       | >= 4 TiB
  leptonflurry32x1  | u32    | +       | +     | +       | +    | 2.8  | +      | 4     |         | >= 4 TiB
  leptonflurry32x1_2| u32    | +       | +     | +       | +    | 2.0  |        |       |         | >= 4 TiB
+ leptonflurry32x2  | u32    | +       | +     | +       | 2    |      |        | 0     |         | 32 GiB
+ leptonflurry32x4  | u32    | +       | +     | 1       |      |      |        |       |         | 64 GiB
  lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>>) | 0     | -       | 512 MiB
  lcg32sc           | u32    | +       | 1     | 2       | 8/9  | 0.62 | -(>>>) | 0     | Small   | 512 MiB
  lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     | -       | 16 KiB
@@ -498,6 +500,7 @@ the testing.
  xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   | >= Crush| >= 32 TiB
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   | >= Crush| >= 1 TiB
  xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   | >= Crush| >= 32 TiB
+ yasmarang         | u32    | +       | 1/2   | 3/5     | 13/20| 1.2  | -(>>>) | 0     | Small   | 8 GiB
  zibri64ex         | u32    | +       | +     | +       | +    | 0.43 | +      | 3.5(0)| +       | 4 TiB
  zibri128          | u64    | +       | 7     | 13      | 15/16| 0.14 | +      | 0     | -       | 32 KiB
  zibri128ex        | u64    | +       | +     | +       | +    | 0.14 | +      | 4     | +HI     | >= 16 TiB
