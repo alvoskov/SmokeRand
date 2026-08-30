@@ -51,6 +51,12 @@ etc. The key steps are:
 5. Check the \f$ A^{\frac{m}{p_i}} \neq I \f$ conditions where \f$ p_i \f$
    are prime divisors of \f$ m \f$.
 
+
+Note: since SmokeRand 0.50 steps 4-5 use an optimization based on
+characteristic and jump polynomials instead of an explicit matrix
+multiplication. It greatly improves performance for large PRNGs, i.e. that
+have state sizes larger than 256 bits.
+
 ## About jump polynomials
 
 Characteristic polynomials are converted to jump polynomials using

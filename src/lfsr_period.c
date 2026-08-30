@@ -601,6 +601,53 @@ LfsrPoly LfsrPoly_jumppoly_ce(const LfsrPoly *charpoly, uint64_t c, uint32_t e)
 }
 
 
+/**
+ * @brief `out <- x^n mod charpoly`, where `n = x[0] + x[1] * 2^64 + ...` is the
+ * little-endian integer held in the len words of jump (square-and-multiply
+ * over the bits of n, from the most significant down).
+ */
+LfsrPoly LfsrPoly_jumppoly_n(const LfsrPoly *charpoly, const LargeInt *n)
+{
+    LfsrPoly out = LfsrPoly_create(charpoly->degree);
+    out.w64[0] = 1; // out = 1
+
+    const int nbits = (int) LargeInt_get_nbits(n);
+    for (int k = nbits - 1; k >= 0; k--) { // out = x^n
+        LfsrPoly_mulmod(&out, &out, charpoly);
+        if ((n->x[k >> 6] >> (k & 63)) & 1)
+            LfsrPoly_mulx(&out, charpoly);
+
+    }
+    return out;
+}
+
+
+int LfsrPoly_is_one(const LfsrPoly *obj)
+{
+    if (obj->nwords == 0 || obj->w64[0] != 1) {
+        return 0;
+    } else {
+        for (size_t i = 1; i < obj->nwords; i++) {
+            if (obj->w64[i] != 0) {
+                return 0;
+            }
+        }
+        return 1;
+    }
+}
+
+
+int LfsrPoly_is_period_possible(const LfsrPoly *charpoly, const LargeInt *period)
+{
+    LfsrPoly jumppoly = LfsrPoly_jumppoly_n(charpoly, period);
+    const int is_possible = LfsrPoly_is_one(&jumppoly);
+    LfsrPoly_destruct(&jumppoly);
+    return is_possible;
+}
+
+
+
+
 ///////////////////////////////////////////
 ///// LfsrMatrix class implementation /////
 ///////////////////////////////////////////
@@ -938,8 +985,8 @@ LfsrPoly LfsrMatrix_krylov_to_charpoly(LfsrMatrix *mat)
             cinds[i_pivot] = cinds[j];
             cinds[j] = ind;
         } else {
-            printf("----- internal error ----- %u\n", (unsigned int) j);
-            exit(1);
+            free(cinds);
+            return LfsrPoly_create_invalid();
         }
         // b2) Elimination
         // Note: LfsrMatrix_getbit(&mat, j, cinds[j])) is always 1
@@ -961,11 +1008,6 @@ LfsrPoly LfsrMatrix_krylov_to_charpoly(LfsrMatrix *mat)
             LfsrPoly_setbit(&poly, i);
         }
     }
-    // xorshift64: 0.13-17-43	x^64 + x^49 + x^48 + x^45 + x^44 + x^42 + x^41 + x^38 + x^37 + x^28 + x^27 + x^26 + x^25 + x^17 + x^16 + x^11 + x^6 + x^5 + 1	19
-    // xorshift256: 256 + x^242 + x^241 + x^240 + x^239 + x^234 + x^233 + x^232 + x^231 + x^226 + x^225 + x^224 + x^223 + x^220 + x^218 + x^217 + x^215 + x^212 + x^210 + x^206 + x^205 + x^203 + x^200 + x^199 + x^198 + x^195 + x^194 + x^191 + x^190 + x^189 + x^188 + x^185 + x^184 + x^180 + x^178 + x^177 + x^170 + x^169 + x^167 + x^165 + x^162 + x^159 + x^156 + x^153 + x^151 + x^150 + x^148 + x^147 + x^145 + x^143 + x^137 + x^136 + x^135 + x^133 + x^132 + x^127 + x^126 + x^125 + x^124 + x^121 + x^120 + x^119 + x^117 + x^116 + x^115 + x^114 + x^113 + x^112 + x^107 + x^106 + x^105 + x^100 + x^99 + x^97 + x^96 + x^94 + x^92 + x^89 + x^88 + x^87 + x^85 + x^83 + x^76 + x^75 + x^73 + x^72 + x^70 + x^69 + x^66 + x^65 + x^62 + x^59 + x^55 + x^51 + x^50 + x^49 + x^48 + x^47 + x^45 + x^43 + x^42 + x^40 + x^39 + x^38 + x^37 + x^35 + x^34 + x^33 + x^31 + x^30 + x^29 + x^20 + x^18 + x^17 + x^16 + x^14 + x^8 + x^7 + x^4 + x^3 + 1
-    // https://github.com/funny-falcon/xorshift256and192/blob/master/full/256shift64/prim.txt
-    // https://github.com/jj1bdx/xorshiftplus/blob/master/full/xorshift64poly.txt
-    // https://prng.di.unimi.it/xorshift.php
     free(cinds);
     return poly;
 }
@@ -1326,8 +1368,15 @@ LfsrPeriodResult lfsr_period_test(GeneratorStateExt *ext, const CallerAPI *intf,
     LfsrMatrix mat = GeneratorStateExt_get_matrix(ext, 1);
     intf->printf("  LFSR transition matrix layout:\n");
     LfsrMatrix_print(&mat, intf);
-    LfsrPeriodResult result = LfsrMatrix_is_period_possible(&mat, &period) ?
-                              LFSR_PERIOD_MAX : LFSR_PERIOD_NOT_MAX;
+    LfsrPoly charpoly = GeneratorStateExt_get_poly(ext);
+    LfsrPeriodResult result = LFSR_PERIOD_ERROR;
+    if (!LfsrPoly_is_valid(&charpoly)) {
+        intf->printf("  Characteristic polynomial degree is lower than expected\n");
+        result = LFSR_PERIOD_NOT_MAX;
+        goto finished;
+    }
+    result = LfsrPoly_is_period_possible(&charpoly, &period) ?
+             LFSR_PERIOD_MAX : LFSR_PERIOD_NOT_MAX;
     if (result == LFSR_PERIOD_MAX) {
         intf->printf("  A^period = I: passed\n");
     } else {
@@ -1335,6 +1384,7 @@ LfsrPeriodResult lfsr_period_test(GeneratorStateExt *ext, const CallerAPI *intf,
         goto finished;
     }
     const LargeInt *lfsr_exps = get_lfsr_exps(nbits);
+
     if (lfsr_exps == NULL) {
         intf->printf("  The tables are absent for this LFSR size\n");
         result = LFSR_PERIOD_ERROR;
@@ -1343,20 +1393,20 @@ LfsrPeriodResult lfsr_period_test(GeneratorStateExt *ext, const CallerAPI *intf,
         for (const LargeInt *d = lfsr_exps; !LargeInt_is_u64(d, 0); d++) {
             intf->printf("  Exponent (%4u bits): ", LargeInt_get_nbits(d));
             LargeInt_print_hex(d, intf);
-            LfsrMatrix matd = LfsrMatrix_create_pow(&mat, d);
-            if (LfsrMatrix_is_eye(&matd)) {
+            // Use LfsrMatrix_is_period_possible if old method is desired
+            if (LfsrPoly_is_period_possible(&charpoly, d)) {
                 intf->printf(" <<< FAIL\n");
                 result = LFSR_PERIOD_NOT_MAX;
             } else {
                 intf->printf(" OK\n");
             }
-            LfsrMatrix_destruct(&matd);
         }
     }
 
 finished:
     LfsrPeriodResult_print(intf, result);
     LfsrMatrix_destruct(&mat);
+    LfsrPoly_destruct(&charpoly);
     return result;
 }
 

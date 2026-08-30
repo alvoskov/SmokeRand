@@ -21,7 +21,8 @@
  *
  * Note: if you want to verify the period of TT800 then undefine the
  * `TT800_USE_BUF` macro: it will enable the slower `NOBUF` version that
- * doesn't use `pos` variable.
+ * doesn't use `pos` variable. The verification by means of the `lfsr`
+ * battery was successful.
  *
  * References:
  *
@@ -72,9 +73,12 @@ static inline uint32_t tt800_mat(uint32_t x)
 }
 
 /**
- * @brief Expands a 64-bit seed using the scrambled upper 32 bits of
+ * @brief Initialize the TT800 example using a 64-bit seed.
+ * @details Expands a 64-bit seed using the scrambled upper 32 bits of
  * 64-bit Klimov-Shamir "crazy" T-function TF0. It allows to avoid zeroland
- * and low quality output at the beginning of the output sequence.
+ * and low quality output at the beginning of the output sequence. The entire
+ * procedure resembles an initialization of MT19937 but uses a nonlinear
+ * transformation that has a proven full period.
  */
 static void TT800State_init(TT800State *obj, uint64_t seed)
 {

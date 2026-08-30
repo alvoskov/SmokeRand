@@ -43,6 +43,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - Default number of threads for 32-bit platforms are increased from 2 to 3
   due to usage of in-place radix sort for 64-bit buffers (was already added
   in previous releases).
+- `lfsr` battery now uses jump polynomials to make the period verifier faster.
 
 ## [0.49] 2026-08-12
 
