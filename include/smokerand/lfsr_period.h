@@ -112,6 +112,20 @@ void LfsrPoly_destruct(LfsrPoly *obj);
 void LfsrPoly_mulx(LfsrPoly *a, const LfsrPoly *charpoly);
 void LfsrPoly_mulmod(LfsrPoly *a, const LfsrPoly *b, const LfsrPoly *charpoly);
 LfsrPoly LfsrPoly_jumppoly_ce(const LfsrPoly *charpoly, uint64_t c, uint32_t e);
+LfsrPoly LfsrPoly_jumppoly_n(const LfsrPoly *charpoly, const LargeInt *n);
+int LfsrPoly_is_one(const LfsrPoly *obj);
+int LfsrPoly_is_period_possible(const LfsrPoly *charpoly, const LargeInt *period);
+
+static inline int LfsrPoly_is_valid(LfsrPoly *obj)
+{
+    return (obj->w64 != NULL);
+}
+
+static inline LfsrPoly LfsrPoly_create_invalid(void)
+{
+    const LfsrPoly poly = {NULL, 0, 0};
+    return poly;
+}
 
 static inline void LfsrPoly_setbit(LfsrPoly *obj, size_t ind)
 {

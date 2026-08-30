@@ -16,9 +16,10 @@
  * is bitwise XOR. The entire structure strongly resembles xorshift128
  * or xorshift160.
  *
- * Note: if you want to verify the period of TT800 then undefine the
+ * Note: if you want to verify the period of TT1600mrt then undefine the
  * `TT1600_USE_BUF` macro: it will enable the slower `NOBUF` version that
- * doesn't use `pos` variable.
+ * doesn't use `pos` variable. The verification by means of the `lfsr`
+ * battery was successful.
  *
  * References:
  *
@@ -69,9 +70,12 @@ static inline uint64_t tt1600_mat(uint64_t x)
 }
 
 /**
- * @brief Expands a 64-bit seed using the scrambled upper 32 bits of
+ * @brief Initialize the TT1600 example using a 64-bit seed.
+ * @details Expands a 64-bit seed using the scrambled upper 32 bits of
  * 64-bit Klimov-Shamir "crazy" T-function TF0. It allows to avoid zeroland
- * and low quality output at the beginning of the output sequence.
+ * and low quality output at the beginning of the output sequence. The entire
+ * procedure resembles an initialization of MT19937 but uses a nonlinear
+ * transformation that has a proven full period.
  */
 static void TT1600State_init(TT1600State *obj, uint64_t seed)
 {
@@ -130,9 +134,8 @@ static void *create(const CallerAPI *intf)
 }
 
 /**
- * @brief The internal self-test that uses the seeds from the original
- * work with TT1600 description and reference outputs - from the reference
- * program. Note that linear complexity of the output sequence is 800.
+ * @brief The internal self-test that is required for comparison between
+ * two different modifications of TT800 (with and without bufferization)
  */
 static int run_self_test(const CallerAPI *intf)
 {
