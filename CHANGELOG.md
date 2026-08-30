@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `romumono` generator was added (https://arxiv.org/abs/2002.11331).
 - `sirius64` generator was added (https://github.com/matteo65/Sirius64).
   by L. Hars and G. Petruska. Parameters were tuned by A.L. Voskov.
+- `poly96` generator was added.
 - `tt800` classical LFSR generator. Also `tt1600mrt`, a scrambled version
   of `t1600`, another 64-bit classical LFSR.
 - `xoroshiro48w8ppp` was added, `xoroshiro48w16pp` was upgraded to
