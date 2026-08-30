@@ -3,7 +3,7 @@
  * @brief TT1600mrt is scrambled version of T1600, a twisted GFSR generator
  * (essentially LFSR), its period is \f$ 2^{1600} - 1 \f$.
  * @details It has a maximal period for LFSR, but the original articles [1,2]
- * don't suggest any tampering. So some custom non-linear bijective tampering
+ * don't suggest any tempering. So some custom non-linear bijective tampering
  * was added.
  *
  * The LFSR core of TT1600mrt can be represented as the next recurrent formula:
@@ -34,8 +34,7 @@
  * @copyright
  * T1600 PRNG was designed by Matsumoto M. and Kurita Y.
  *
- * Reentrant C99 implementation for SmokeRand and addition of tampering
- * from MT19937-64:
+ * Reentrant C99 implementation for SmokeRand and addition of scrambler:
  * 
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
@@ -80,7 +79,7 @@ static void TT1600State_init(TT1600State *obj, uint64_t seed)
     for (int i = 0; i < TT1600_N; i++) {
         u += u * u | 0x40000005;
         const uint64_t y = 6906969069U * (u ^ (u >> 32));
-        obj->x[i] = y ^ rotl64(y, 17) ^ rotl64(y, 53);;
+        obj->x[i] = y ^ rotl64(y, 17) ^ rotl64(y, 53);
     }
 #ifdef TT1600_USE_BUF
     obj->pos = TT1600_N;
@@ -110,7 +109,7 @@ static inline uint64_t TT1600State_next(TT1600State *obj)
     }
     obj->x[TT1600_N - 1] = u;
 #endif
-    // Tampering
+    // Tempering/scrambler/output function
     u = rotl64(6906969069U * u, 11);
     u += (u * u | 0x40000005);
     return u;

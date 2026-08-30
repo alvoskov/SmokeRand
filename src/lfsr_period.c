@@ -1274,8 +1274,8 @@ void LfsrPeriodResult_print(const CallerAPI *intf, LfsrPeriodResult res)
 
 /**
  * @brief This test verifies if a PRNG is a LFSR with the maximal period. It
- * supports LFSRs with 32, 64, 96, 128, 160, 192, 256, 320, 512, 800 and
- * 1024 bits of state. Works only with PRNG plugins, not with stdin/stdout.
+ * supports LFSRs with 32, 64, 96, 128, 160, 192, 256, 320, 512, 800, 1024 and
+ * 1600 bits of state. Works only with PRNG plugins, not with stdin/stdout.
  * @details The PRNG period verification is algebraic (analytical) and
  * actively modifies the generator internal state. It uses the next algorithm:
  *

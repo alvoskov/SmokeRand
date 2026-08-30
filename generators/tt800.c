@@ -3,7 +3,7 @@
  * @brief TT800 is a twisted GFSR generator (essentially LFSR), its period
  * is \f$ 2^{800} - 1 \f$.
  * @details It has a maximal period for LFSR, also there are two versions
- * of TT800: from 1994 and from 1996 (with the improved tampering). The
+ * of TT800: from 1994 and from 1996 (with the improved tempering). The
  * original 1994 version fails some statistical tests such as `hamming_distr`
  * and `gap16_count0`. This program implements the later version that
  * fails only the linear complexity/matrix rank tests from SmokeRand `full`
@@ -112,10 +112,10 @@ static inline uint32_t TT800State_next(TT800State *obj)
     }
     obj->x[TT800_N - 1] = u;
 #endif
-    // Tampering
+    // Tempering
     u ^= (u << 7)  & 0x2b5b2500; // s, b
     u ^= (u << 15) & 0xdb8b0000; // t, c
-    u ^= u >> 16; // Added in 1996 version
+    u ^= u >> 16; // Added in the 1996 version
     return u;
 }
 
