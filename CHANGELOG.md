@@ -15,7 +15,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   and `2**1600 - 1` were added.
 - `chip32` chaotic generator by Tommy Ettinger. Also its `chip8`, `chip16` and
   `chip64` modifications made by A.L. Voskov.
-- `fwfarx128ctr` and `fwfarx256ctr` CBPRNG based on an experimental ARX cipher
+- `fwfarx128ctr` and `fwfarx256ctr` CBPRNG based on an experimental ARX cipher.
+- `grube73_mrg3`: a very old (1973) MRG by A. Grube that passes BigCrush. It is
+  probably the oldest high-quality non-cryptographic PRNG.
 - `icg128_p2` (inverse congruential generator with `m=2**128`), returns the
   upper 64 bits.
 - New versions of `leptonflurry`.

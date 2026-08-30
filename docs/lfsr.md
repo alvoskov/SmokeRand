@@ -59,22 +59,28 @@ have state sizes larger than 256 bits.
 
 ## About jump polynomials
 
+The jump polynomials for LFSRs were described in the next research paper:
+
+- Haramoto H., Matsumoto M., Nishimura T., Panneton F., L'Ecuyer P. Efficient
+  Jump Ahead for F2-Linear Random Number Generators // INFORMS J. on Computing.
+  2008. V. 20. N 3. P. 385–390. https://doi.org/10.1287/ijoc.1070.0251
+
 Characteristic polynomials are converted to jump polynomials using
-the next formula:
+the following formula:
 
 \f[
 j(x) = x^n \mod p(x)
 \f]
 
-where \f$ n \f$ is the jump length. They are applied the next way:
+where \f$ n \f$ is the jump length. They are applied as follows:
 
 \f[
 x_{n} = b_0 x_0 + b_1 x_1 + \ldots b_{n-1} x_{n-1}
 \f]
 
-where \f$x_0\f$ are PRNG states and `+` is the bitwise XOR. That formula
+where \f$x_i\f$ are PRNG states and `+` is the bitwise XOR. That formula
 may look a little bit mysterous but they are fairly easy to understand
-if remember that characteristic polynomials can be interpreted as
+if you remember that characteristic polynomials can be interpreted as
 a recurrent formula for any particular bit of LFSR (e.g. xorshift) state:
 
 \f[

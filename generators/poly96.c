@@ -1,7 +1,12 @@
 /**
  * @file poly96.c
  * @brief poly96 is a LFSR, its period is \f$2^{96} - 1\f$
- * @details
+ * @details It behaves reasonably well: passes collision/birthday/gap tests
+ * but still fails tests based on Hamming weights (even after tempering).
+ *
+ * It has the next characteristic polynomial (was given in [1]):
+ *
+ *    DC7348D7.18975F66.2C2BA527
  *
  * References:
  *
