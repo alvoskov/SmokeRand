@@ -135,7 +135,7 @@ static void *create(const CallerAPI *intf)
 
 /**
  * @brief The internal self-test that is required for comparison between
- * two different modifications of TT800 (with and without bufferization)
+ * two different modifications of TT1600 (with and without bufferization)
  */
 static int run_self_test(const CallerAPI *intf)
 {
