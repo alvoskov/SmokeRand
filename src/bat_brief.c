@@ -73,6 +73,12 @@ BatteryExitCode battery_brief(const GeneratorInfo *gen, const CallerAPI *intf,
         linearcomp_mid  = {.nbits = 50000, .bitpos = LINEARCOMP_BITPOS_MID},
         linearcomp_high = {.nbits = 50000, .bitpos = LINEARCOMP_BITPOS_HIGH};
 
+    // maxoft test
+    static const MaxOfTOptions
+        maxoft_4d  = {.t = 4,  .ntuples = 10000000, .nbins = 100000},
+        maxoft_8d  = {.t = 8,  .ntuples = 10000000, .nbins = 100000},
+        maxoft_16d = {.t = 16, .ntuples = 10000000, .nbins = 100000};
+
     // mod3 test
     static const Mod3Options mod3 = {.nvalues = 1ull << 26};
 
@@ -101,6 +107,9 @@ BatteryExitCode battery_brief(const GeneratorInfo *gen, const CallerAPI *intf,
         {"linearcomp_high",   linearcomp_test_wrap, &linearcomp_high},
         {"linearcomp_mid",    linearcomp_test_wrap, &linearcomp_mid},
         {"linearcomp_low",    linearcomp_test_wrap, &linearcomp_low},
+        {"maxoft_4d",         maxoft_test_wrap,     &maxoft_4d},
+        {"maxoft_8d",         maxoft_test_wrap,     &maxoft_8d},
+        {"maxoft_16d",        maxoft_test_wrap,     &maxoft_16d},
         {"mod3",              mod3_test_wrap,       &mod3},
         {NULL, NULL, NULL}
     };

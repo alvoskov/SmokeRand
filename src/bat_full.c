@@ -103,6 +103,13 @@ BatteryExitCode battery_full(const GeneratorInfo *gen, const CallerAPI *intf,
         matrixrank_8192      = {.n = 8192, .max_nbits = 64},
         matrixrank_8192_low8 = {.n = 8192, .max_nbits = 8};
 
+    // maxoft test
+    static const MaxOfTOptions
+        maxoft_4d  = {.t = 4,  .ntuples = 50000000, .nbins = 100000},
+        maxoft_8d  = {.t = 8,  .ntuples = 50000000, .nbins = 100000},
+        maxoft_16d = {.t = 16, .ntuples = 50000000, .nbins = 100000},
+        maxoft_32d = {.t = 32, .ntuples = 50000000, .nbins = 100000};
+
     // mod3 test
     static const Mod3Options mod3 = {.nvalues = 1ull << 30};
 
@@ -158,7 +165,11 @@ BatteryExitCode battery_full(const GeneratorInfo *gen, const CallerAPI *intf,
         {"matrixrank_4096_low8", matrixrank_test_wrap, &matrixrank_4096_low8},
         {"matrixrank_8192",      matrixrank_test_wrap, &matrixrank_8192},
         {"matrixrank_8192_low8", matrixrank_test_wrap, &matrixrank_8192_low8},
-        {"mod3",                 mod3_test_wrap, &mod3},
+        {"maxoft_4d",            maxoft_test_wrap,     &maxoft_4d},
+        {"maxoft_8d",            maxoft_test_wrap,     &maxoft_8d},
+        {"maxoft_16d",           maxoft_test_wrap,     &maxoft_16d},
+        {"maxoft_32d",           maxoft_test_wrap,     &maxoft_32d},
+        {"mod3",                 mod3_test_wrap,       &mod3},
         {"sumcollector",         sumcollector_test_wrap, &sumcoll},
         {NULL, NULL, NULL}
     };

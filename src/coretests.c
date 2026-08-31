@@ -917,6 +917,66 @@ TestResults gap16_count0_test(GeneratorState *obj, unsigned long long ngaps)
 }
 
 ///////////////////////
+///// MaxOfT test /////
+///////////////////////
+
+/**
+ * @brief MaxOfT test from Knuth's TAOCP vol. 2 (3rd edition),
+ * Chapter 3.3.2, section H. The chi2emp computation method is taken
+ * from TestU01 documentation / source code (just the idea, not the code
+ * itself).
+ * @details It is usually less sensitive than birthday spacings, collision
+ * or gap test but sometimes catches flaws ignored by them: see e.g.
+ * `mrg_denglin_4` or `xorshift128`.
+ */
+TestResults maxoft_test(GeneratorState *obj, const MaxOfTOptions *opts)
+{
+    const double nbins_dbl = (double) opts->nbins;
+    const double Ei = (double) opts->ntuples / nbins_dbl;
+    const double norm = 1.0 / pow(2.0, (double) obj->gi->nbits);
+    obj->intf->printf("MaxOfT test\n");
+    obj->intf->printf("  t = %u; ntuples = %llu; nbins = %lu; norm = %g\n",
+        opts->t, opts->ntuples, opts->nbins, norm);
+    // Check options validity
+    if (opts->t < 2 || opts->t > 256) {
+        obj->intf->printf("  Invalid t value\n");
+        return TestResults_create("MaxOfT");
+    }
+    if (opts->ntuples < 10 || opts->t > 256 || opts->nbins < 16 || Ei < 20.0) {
+        obj->intf->printf("  Invalid ntuples and/or nbins values\n");
+        return TestResults_create("MaxOfT");
+    }
+    // Accumulate empirical frequencies
+    unsigned long long *Oi = calloc(opts->nbins + 1, sizeof(unsigned long long));
+    ASSERT_MALLOC_PTR(Oi, "maxoft")
+
+    for (unsigned long long i = 0; i < opts->ntuples; i++) {
+        uint64_t u_max = obj->gi->get_bits(obj->state);
+        for (unsigned int j = 1; j < opts->t; j++) {
+            const uint64_t u = obj->gi->get_bits(obj->state);
+            if (u > u_max) {
+                u_max = u;
+            }
+        }
+        size_t ind = (size_t) (pow((double) u_max * norm, opts->t) * nbins_dbl);
+        Oi[ind]++;
+    }
+    // Calculate statistics
+    TestResults ans = TestResults_create("maxoft");
+    ans.penalty = PENALTY_MAXOFT;
+    ans.x = 0.0; // chi2emp
+    for (unsigned long i = 0; i < opts->nbins; i++) {
+        ans.x += calc_chi2emp_term(Oi[i], Ei);
+    }
+    ans.p = sr_chi2_pvalue(ans.x, opts->nbins - 1);
+    ans.alpha = sr_chi2_cdf(ans.x, opts->nbins - 1);
+    obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
+    obj->intf->printf("\n");
+    free(Oi);
+    return ans;
+}
+
+///////////////////////
 ///// Other tests /////
 ///////////////////////
 
@@ -1271,6 +1331,12 @@ TestResults gap16_count0_test_wrap(GeneratorState *obj, const void *udata)
 {
     const Gap16Count0Options *opts = udata;
     return gap16_count0_test(obj, opts->ngaps);
+}
+
+TestResults maxoft_test_wrap(GeneratorState *obj, const void *udata)
+{
+    const MaxOfTOptions *opts = udata;
+    return maxoft_test(obj, opts);
 }
 
 TestResults mod3_test_wrap(GeneratorState *obj, const void *udata)

@@ -2,7 +2,8 @@
  * @file bat_file.c
  * @brief A custom battery that is loaded from human-readable text file.
  *
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -630,6 +631,28 @@ static int parse_matrixrank(TestDescription *out, const TestInfo *obj, char *err
     return 1;
 }
 
+static int parse_maxoft(TestDescription *out, const TestInfo *obj, char *errmsg)
+{
+    GET_LIMITED_INTVALUE(t, 2, 256)
+    GET_LIMITED_INTVALUE(ntuples, 1000, 1ull << 50)
+    GET_LIMITED_INTVALUE(nbins,   16,   1ul  << 24)
+    const double Ei = (double) ntuples / (double) nbins;
+    if (Ei < 20.0) {
+        snprintf(errmsg, ERRMSG_BUF_SIZE, "ntuples/nbins must at least 20.0");
+        return 0;
+    }
+    MaxOfTOptions *opts = calloc(1, sizeof(MaxOfTOptions));
+    ASSERT_MALLOC_PTR(opts, "parse_maxoft")
+    opts->t = (unsigned int) t;
+    opts->ntuples = (unsigned long long) ntuples;
+    opts->nbins = (unsigned long) nbins;
+    out->name = obj->testname;
+    out->run = maxoft_test_wrap;
+    out->udata = opts;
+    return 1;
+}
+
+
 static int parse_mod3(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
     GET_LIMITED_INTVALUE(nvalues, 100000, 1ll << 50ll)
@@ -734,6 +757,7 @@ BatteryExitCode battery_file(const char *filename, const GeneratorInfo *gen,
         {"ising2d", parse_ising2d},
         {"linearcomp", parse_linearcomp},
         {"matrixrank", parse_matrixrank},
+        {"maxoft", parse_maxoft},
         {"mod3", parse_mod3},
         {"monobit_freq", parse_monobit_freq},
         {"nbit_words_freq", parse_nbit_words_freq},

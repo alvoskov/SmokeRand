@@ -18,6 +18,7 @@
 #define PENALTY_FREQ           4.0
 #define PENALTY_GAP            4.0
 #define PENALTY_ISING2D        4.0
+#define PENALTY_MAXOFT         4.0
 #define PENALTY_BSPACE         3.0
 #define PENALTY_COLLOVER       3.0
 #define PENALTY_MOD3           2.0
