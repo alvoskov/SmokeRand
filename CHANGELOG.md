@@ -22,7 +22,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `icg128_p2` (inverse congruential generator with `m=2**128`), returns the
   upper 64 bits.
 - New versions of `leptonflurry`.
-- `mrg_1597_2` MRG was added.
+- `mrg_1597_2`, `mrg_denglin_2` and `mrg_denglin_4` MRG were added. The
+  `mrg_denglin_4` is interesting because it fails only MaxOft test in Crush but
+  passes `full` SmokeRand battery.
 - `romumono` generator was added (https://arxiv.org/abs/2002.11331).
 - `sirius64` generator was added (https://github.com/matteo65/Sirius64).
   by L. Hars and G. Petruska. Parameters were tuned by A.L. Voskov.
@@ -32,6 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `xoroshiro48w8ppp` was added, `xoroshiro48w16pp` was upgraded to
   `xoroshiro48w16ppp`. These algorithms were developed A.L. Voskov
   as modifications of `xoroshiro` generators family.
+- `xorshift7` xorshift-like PRNG (period is `2**256 - 1`) was addded.
 - New reference was added to the documentation of Philox and ThreeFry
   generators (https://ia.cr/2025/2161). It is devoted to their cryptanalysis.
 - `include/utils.h` with the `expand_seed64_to_u32` and `expand_seed64_to_u64`
