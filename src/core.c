@@ -1372,6 +1372,59 @@ GeneratorInfo define_uint31_generator(const GeneratorInfo *gi)
 
 
 ////////////////////////////////////////////////////////////
+///// Implementation of generator that returns 31 bits /////
+////////////////////////////////////////////////////////////
+
+static uint64_t get_bits64_uint31_low(void *state)
+{
+    EnvelopedGeneratorState *obj = state;
+    const uint32_t u = (uint32_t) obj->parent_gi->get_bits(obj->parent_state) >> 1;
+    // Create a filler for the lowest bit with MWC64X
+    const uint64_t mwc = obj->i32buf.val.u64;
+    const uint32_t x = (uint32_t) mwc, c = (uint32_t)(mwc >> 32);
+    obj->i32buf.val.u64 = 0xff676488U*(uint64_t)x + (uint64_t)c;
+    // Add the lowest bit
+    return u | (murmur3_mixer(u ^ x ^ c) << 31);
+}
+
+/**
+ * @brief Create an envelope generator for the 31 bit PRNG that always has
+ * 0 in the lowest bit (such format is required by TestU01). To prevent failures
+ * of some SmokeRand batteries this filter shifts the output bits to make the
+ * highest bit always 0 and adds an extra pseudorandom highest bit
+ * to the PRNG output. It is generated as murmur3mix(x ^ MWC64X) << 31.
+ *
+ * May be a stream cipher would be better for such autocompletion but it is a
+ * bithack anyway, so this experimental procedure probably will be ok.
+ */
+void *create_enveloped_uint31_low(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    EnvelopedGeneratorState *obj = intf->malloc(sizeof(EnvelopedGeneratorState));
+    obj->parent_gi = gi->parent;
+    obj->parent_state = gi->parent->create(gi->parent, intf);
+    const uint64_t x = obj->parent_gi->get_bits(obj->parent_state) & 0xFFFFFFFFU;
+    const uint64_t c = obj->parent_gi->get_bits(obj->parent_state) & 0x7FFFFFFFU;
+    obj->i32buf.val.u64 = ((c | 0x1U) << 32) | x;
+    return obj;
+}
+
+
+GeneratorInfo define_uint31_low_generator(const GeneratorInfo *gi)
+{
+    GeneratorInfo gi_env = *gi;
+    gi_env.name = "Uint31_low";
+    gi_env.parent = gi;
+    gi_env.nbits = 32;
+    gi_env.create = create_enveloped_uint31_low;
+    gi_env.free = free_enveloped;
+    gi_env.get_bits = get_bits64_uint31_low;
+    gi_env.get_sum = NULL;
+    return gi_env;
+}
+
+
+
+////////////////////////////////////////////////////////////
 ///// Implementation of generator that returns 63 bits /////
 ////////////////////////////////////////////////////////////
 

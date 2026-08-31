@@ -17,7 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   `chip64` modifications made by A.L. Voskov.
 - `fwfarx128ctr` and `fwfarx256ctr` CBPRNG based on an experimental ARX cipher.
 - `grube73_mrg3`: a very old (1973) MRG by A. Grube that passes BigCrush. It is
-  probably the oldest high-quality non-cryptographic PRNG.
+  probably the oldest high-quality non-cryptographic PRNG. Also `grube_mrg2`
+  generator that fails 4D birthday spacings test from TestU01 Crush.
 - `icg128_p2` (inverse congruential generator with `m=2**128`), returns the
   upper 64 bits.
 - New versions of `leptonflurry`.
