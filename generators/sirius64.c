@@ -44,4 +44,4 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-MAKE_UINT64_PRNG("Sirius64State", NULL)
+MAKE_UINT64_PRNG("Sirius64", NULL)

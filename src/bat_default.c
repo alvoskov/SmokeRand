@@ -90,6 +90,13 @@ BatteryExitCode battery_default(const GeneratorInfo *gen, const CallerAPI *intf,
         matrixrank_4096      = {.n = 4096, .max_nbits = 64},
         matrixrank_4096_low8 = {.n = 4096, .max_nbits = 8};
 
+    // maxoft test
+    static const MaxOfTOptions
+        maxoft_4d  = {.t = 4,  .ntuples = 20000000, .nbins = 100000},
+        maxoft_8d  = {.t = 8,  .ntuples = 20000000, .nbins = 100000},
+        maxoft_16d = {.t = 16, .ntuples = 20000000, .nbins = 100000},
+        maxoft_32d = {.t = 32, .ntuples = 20000000, .nbins = 100000};
+
     // mod3 test
     static const Mod3Options mod3 = {.nvalues = 1ull << 28};
 
@@ -137,6 +144,10 @@ BatteryExitCode battery_default(const GeneratorInfo *gen, const CallerAPI *intf,
         {"linearcomp_low",       linearcomp_test_wrap, &linearcomp_low},
         {"matrixrank_4096",      matrixrank_test_wrap, &matrixrank_4096},
         {"matrixrank_4096_low8", matrixrank_test_wrap, &matrixrank_4096_low8},
+        {"maxoft_4d",            maxoft_test_wrap,     &maxoft_4d},
+        {"maxoft_8d",            maxoft_test_wrap,     &maxoft_8d},
+        {"maxoft_16d",           maxoft_test_wrap,     &maxoft_16d},
+        {"maxoft_32d",           maxoft_test_wrap,     &maxoft_32d},
         {"mod3", mod3_test_wrap, &mod3},
         {NULL, NULL, NULL}
     };

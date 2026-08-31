@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ### Added
 
+- MaxOfT test, it was added to `brief`, `default` and `full` batteries. It is
+  fast and catches artefacts in `mrg_denglin_4` and `xorshift128` ignored by
+  e.g. birthday spacings test.
 - `lfsr` battery: characteristic and jump polynomials are now also printed
   as C99 source code with 64-bit hexadecimal words.
 - `lfsr` battery: now 800-bit and 1600-bit generators (e.g. `NOBUF` version

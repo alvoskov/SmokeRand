@@ -104,12 +104,22 @@ typedef struct {
     unsigned long long nvalues; ///< Number of pseudorandom values in the sample.
 } SumCollectorOptions;
 
+/**
+ * @brief MaxOfT test options.
+ */
+typedef struct {
+    unsigned int t;
+    unsigned long long ntuples;
+    unsigned long nbins;
+} MaxOfTOptions;
+
 
 TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts);
 TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned long step);
 TestResults collisionover_test(GeneratorState *obj, const CollOverNDOptions *opts);
 TestResults gap_test(GeneratorState *obj, const GapOptions *opts);
 TestResults gap16_count0_test(GeneratorState *obj, unsigned long long ngaps);
+TestResults maxoft_test(GeneratorState *obj, const MaxOfTOptions *opts);
 TestResults sumcollector_test(GeneratorState *obj, const SumCollectorOptions *opts);
 TestResults mod3_test(GeneratorState *obj, const Mod3Options *opts);
 TestResults monobit_freq_test(GeneratorState *obj, const MonobitFreqOptions *opts);
@@ -129,6 +139,7 @@ TestResults bspace4_8d_decimated_test_wrap(GeneratorState *obj, const void *udat
 TestResults collisionover_test_wrap(GeneratorState *obj, const void *udata);
 TestResults gap_test_wrap(GeneratorState *obj, const void *udata);
 TestResults gap16_count0_test_wrap(GeneratorState *obj, const void *udata);
+TestResults maxoft_test_wrap(GeneratorState *obj, const void *udata);
 TestResults mod3_test_wrap(GeneratorState *obj, const void *udata);
 TestResults sumcollector_test_wrap(GeneratorState *obj, const void *udata);
 #endif // __SMOKERAND_CORETESTS_H

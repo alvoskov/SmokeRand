@@ -150,7 +150,7 @@ the testing.
  leptonflurry32x1_2| u32    | +       | +     | +       | +    | 2.0  |        |       |         | >= 4 TiB
  leptonflurry32x2  | u32    | +       | +     | +       | 2    |      |        | 0     |         | 32 GiB
  leptonflurry32x4  | u32    | +       | +     | 1       |      |      |        |       |         | 64 GiB
- lcg32prime        | u32    | 1       | 13    | 24      | 26/27| 2.2  | -(>>>) | 0     | -       | 512 MiB
+ lcg32prime        | u32    | 1       | 13/14 | 28      |      | 2.2  | -(>>>) | 0     | -       | 512 MiB
  lcg32sc           | u32    | +       | 1     | 2       | 8/9  | 0.62 | -(>>>) | 0     | Small   | 512 MiB
  lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     | -       | 16 KiB
  lcg61prime        | u32    | +       | 3     | 5       | 5    | 2.0  | -      | 0     | Small   | >= 16 TiB
@@ -220,8 +220,8 @@ the testing.
  mrc64             | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 16 TiB
  mrg32k3a          | u32    | +       | +     | +       | +    | 2.7  | +      | 4     | +       | >= 4 TiB
  mrg_1592_7        | u31    | +       | +     | +       | +    | 1.7  | N/A    |       | >=Crush | ?
- mrg_denglin_2     | u31    | +       | 1/2   | 4/5     | 6/8  | 1.0  | N/A    | 0     | -       | 128 GiB
- mrg_denglin_4     | u31    | +       | +     | +       | +    | 1.3  | N/A    | 1     | -       | ?
+ mrg_denglin_2     | u31    | +       | 3     | 7/8     |      | 1.1  | N/A    | 0     | -       | 128 GiB
+ mrg_denglin_4     | u31    | +       | 2     | 2       |      | 1.2  | N/A    | 0     | -       | ?
  mrsf32            | u32    | +       | +     | +       | +    | 0.19 | +      | 4(0)  |         | ?
  mrsf64            | u64    | +       | +     | +       | +    | <0.1 | +      | 4(0)  |         | ?
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.59 | +      | 3.25  | Small   | 128 GiB
@@ -478,11 +478,11 @@ the testing.
  xorrot256         | u64    | 2       | 3     | 5       | 7    | 0.30 | +      | 2.25  | Small   | 1 MiB
  xorrot256mrt      | u64    | +       | +     | +       | +    | 0.34 | +      | 4     |         | >= 16 TiB
  xorrot320         | u64    | 2       | 3     | 5       | 7    | 0.23 | +      | 2.25  |         | 1 MiB
- xorshift7         | u32    | 2       | 3     | 5       |      |      |        |       | Small   | 1 MiB
+ xorshift7         | u32    | 2       | 3     | 5       |      | 1.2  |        |       | Small   | 1 MiB
  xorshift64        | u64    | 2       | 6     | 12      | 15/16| 0.49 | -      | 0     | -       | 32 KiB
  xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |S_lo/+_hi| 512 KiB
  xorshift96        | u32    | 2       | 5     | 8       | 12/13| 0.39 | +      | 0     | -       | 64 KiB
- xorshift128       | u32    | 2       | 5     | 7/8     | 9    | 0.41 | +      | 0     | -       | 128 KiB
+ xorshift128       | u32    | 2       | 7     | 9/10    |      | 0.41 | +      | 0     | -       | 128 KiB
  xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      | 0     |+lo/+hi  | 32 GiB
  xorshift128pp     | u64    | +       | +     | +       | +    | 0.29 | +      | 4     |         | >= 16 TiB
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 1 TiB

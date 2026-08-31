@@ -15,8 +15,9 @@ The next tests are implemented in the SmokeRand core:
     pairwise XORs.
 11. Hamming weights tests based on overlapping tuples (similar to DC6 test
     from PractRand 0.94).
-12. Simplified `mod3` test from gjrand.
-13. SumCollector test.
+12. MaxOfT test.
+13. Simplified `mod3` test from gjrand.
+14. SumCollector test.
 
 Systematic failure of even one test means that PRNG is not suitable as a general
 purpose PRNG. However different tests have different impact on the PRNG quality:
@@ -24,7 +25,7 @@ purpose PRNG. However different tests have different impact on the PRNG quality:
 1. Frequency tests failure: the PRNG is either broken or seriously flawed.
 2. Hamming weights based tests: short-term correlations in bits distribution.
    Local deviations from the uniform distribution are possible.
-3. Gap test failure: the PRNG output has regularities that may disrupt
+3. Gap or MaxOfT tests failure: the PRNG output has regularities that may disrupt
    Monte-Carlo simulations (similar to Ising 2D model case).
 4. Birthday spacings, CollisionOver and SumCollector test failure: the PRNG
    output shows a regular structure (often similar to lattice) that can break

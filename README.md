@@ -136,9 +136,9 @@ Four batteries are implemented in SmokeRand:
  Battery | Number of tests | Bytes (32-bit PRNG) | Bytes (64-bit PRNG)
 ---------|-----------------|---------------------|---------------------
  express | 7               | 2^26                | 2^27
- brief   | 25              | 2^35                | 2^36
- default | 44              | 2^37                | 2^38
- full    | 50              | 2^40                | 2^41
+ brief   | 28              | 2^35                | 2^36
+ default | 48              | 2^37                | 2^38
+ full    | 54              | 2^40                | 2^41
 
 Custom batteries of tests also can be created as both scripts and dynamic
 libraries.
