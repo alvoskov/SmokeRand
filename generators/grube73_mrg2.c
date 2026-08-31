@@ -25,6 +25,15 @@
  *
  *     bspace16_4d_high test=bspace_nd nbits_per_dim=16 ndims=4 nsamples=200  get_lower=0 end
  *
+ * BigCrush results (3D suspicious values are systematic):
+ *
+ *          Test                          p-value
+ *    ----------------------------------------------
+ *    14  BirthdaySpacings, t = 3         1.4e-4
+ *    15  BirthdaySpacings, t = 4        1.7e-30
+ *    ----------------------------------------------
+ *    All other tests were passed
+ *
  * References:
  *
  * 1. Grube A. Mehrfach rekursiv-erzeugte Pseudo-Zufallszahlen // Z. angew.
