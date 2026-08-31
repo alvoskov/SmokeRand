@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `icg128_p2` (inverse congruential generator with `m=2**128`), returns the
   upper 64 bits.
 - New versions of `leptonflurry`.
+- `mrg_1597_2` MRG was added.
 - `romumono` generator was added (https://arxiv.org/abs/2002.11331).
 - `sirius64` generator was added (https://github.com/matteo65/Sirius64).
   by L. Hars and G. Petruska. Parameters were tuned by A.L. Voskov.
@@ -33,6 +34,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   as modifications of `xoroshiro` generators family.
 - New reference was added to the documentation of Philox and ThreeFry
   generators (https://ia.cr/2025/2161). It is devoted to their cryptanalysis.
+- `include/utils.h` with the `expand_seed64_to_u32` and `expand_seed64_to_u64`
+  functions for 64-bit seeds expansion to arrays of 32-bit or 64-bit unsigned
+  integers.
 
 ### Bugfix
 

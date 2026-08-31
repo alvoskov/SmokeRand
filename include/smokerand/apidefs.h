@@ -11,6 +11,7 @@
 #ifndef __SMOKERAND_APIDEFS_H
 #define __SMOKERAND_APIDEFS_H
 #include "smokerand/coredefs.h"
+#include "smokerand/utils.h"
 
 ////////////////////////////////////////////////////
 ///// Custom DLL entry point for GCC and clang /////
@@ -138,18 +139,6 @@ seeds_to_array_u64(const CallerAPI *intf, uint64_t *out, size_t len)
     for (size_t i = 0; i < len; i++) {
         out[i] = intf->get_seed64();
     }
-}
-
-/**
- * @brief pcg_rxs_m_xs64 PRNG that has a good quality and can be used
- * for initialization for other PRNGs such as lagged Fibonacci.
- */
-static inline uint64_t pcg_bits64(uint64_t *state)
-{
-    uint64_t word = ((*state >> ((*state >> 59) + 5)) ^ *state) *
-        12605985483714917081ull;
-    *state = *state * 6364136223846793005ull + 1442695040888963407ull;
-    return (word >> 43) ^ word;
 }
 
 #endif // __SMOKERAND_APIDEFS_H

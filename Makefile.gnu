@@ -142,11 +142,12 @@ LIB_HEADERS = $(addprefix $(INCLUDEDIR)/, $(LIB_HEADERS_EXTRA) \
     apidefs.h cinterface.h coredefs.h int128defs.h x86exts.h ../smokerand_core.h \
     base64.h core.h coretests.h cpuinfo.h \
     blake2s.h entropy.h extratests.h fileio.h lfsr_period.h lineardep.h \
-    hwtests.h specfuncs.h threads_intf.h version.h)
+    hwtests.h specfuncs.h threads_intf.h utils.h version.h)
 LIB_OBJFILES = $(subst $(SRCDIR),$(OBJDIR),$(patsubst %.c,%.o,$(LIB_SOURCES)))
 INTERFACE_HEADERS = $(INCLUDEDIR)/apidefs.h $(INCLUDEDIR)/coredefs.h \
     $(INCLUDEDIR)/cinterface.h $(INCLUDEDIR)/int128defs.h \
-    $(INCLUDEDIR)/plugindefs.h $(INCLUDEDIR)/x86exts.h
+    $(INCLUDEDIR)/plugindefs.h $(INCLUDEDIR)/utils.h \
+    $(INCLUDEDIR)/x86exts.h
 # Battery
 BAT_LIB = $(LIBDIR)/libsmokerand_bat.a
 BATLIB_SOURCES = $(addprefix $(SRCDIR)/, bat_express.c bat_brief.c bat_default.c \

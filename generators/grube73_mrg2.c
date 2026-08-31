@@ -11,7 +11,9 @@
  * \f$a_1 = 337190270\f$, \f$a_2 = 268152554\f$.
  * Its period is \f$ m^2 - 1 f\f$ or approximately \f$2^{62}\f$.
  *
- * Crush results (the failure is reproducible and systematic):
+ * Crush results give occasional suspicious values, but it is not
+ * fully reproducible, in some cases even non-suspicious p-values may be
+ * returned.
  *
  *          Test                          p-value
  *    ----------------------------------------------
@@ -23,7 +25,7 @@
  * `bspace16_4d_high` test is used with larger number of samples it returns
  * suspicious values:
  *
- *     bspace16_4d_high test=bspace_nd nbits_per_dim=16 ndims=4 nsamples=200  get_lower=0 end
+ *     bspace16_4d_high test=bspace_nd nbits_per_dim=16 ndims=4 nsamples=400  get_lower=0 end
  *
  * BigCrush results (3D suspicious values are systematic):
  *
@@ -33,6 +35,9 @@
  *    15  BirthdaySpacings, t = 4        1.7e-30
  *    ----------------------------------------------
  *    All other tests were passed
+ *
+ * It seems more sensitive than SmokeRand because it takes bits from the
+ * middle part of the number and uses other values of \f$\lambda\f$.
  *
  * References:
  *

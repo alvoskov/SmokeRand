@@ -85,16 +85,7 @@ static inline uint32_t tt800_mat(uint32_t x)
  */
 static void TT800State_init(TT800State *obj, uint64_t seed)
 {
-    uint64_t u = seed;
-    for (int i = 0; i < 8; i++) {
-        u ^= u << 5;
-        u ^= rotl64(u, 13) ^ rotl64(u, 47);
-    }
-    for (int i = 0; i < TT800_N; i++) {
-        u += u * u | 0x40000005;
-        const uint64_t y = 6906969069U * (u ^ (u >> 32));
-        obj->x[i] = (uint32_t) ((y ^ rotl64(y, 17) ^ rotl64(y, 53)) >> 32);
-    }
+    expand_seed64_to_u32(obj->x, TT800_N, seed);
 #ifdef TT800_USE_BUF
     obj->pos = TT800_N;
 #endif
