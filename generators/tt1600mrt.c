@@ -82,16 +82,7 @@ static inline uint64_t tt1600_mat(uint64_t x)
  */
 static void TT1600State_init(TT1600State *obj, uint64_t seed)
 {
-    uint64_t u = seed;
-    for (int i = 0; i < 8; i++) {
-        u ^= u << 5;
-        u ^= rotl64(u, 13) ^ rotl64(u, 47);
-    }
-    for (int i = 0; i < TT1600_N; i++) {
-        u += u * u | 0x40000005;
-        const uint64_t y = 6906969069U * (u ^ (u >> 32));
-        obj->x[i] = y ^ rotl64(y, 17) ^ rotl64(y, 53);
-    }
+    expand_seed64_to_u64(obj->x, TT1600_N, seed);
 #ifdef TT1600_USE_BUF
     obj->pos = TT1600_N;
 #endif

@@ -58,6 +58,7 @@ add_library(smokerand_core
     include/smokerand/cinterface.h
     include/smokerand/int128defs.h
     include/smokerand/plugindefs.h
+    include/smokerand/utils.h
     include/smokerand/version.h
     include/smokerand/x86exts.h    
     include/smokerand_core.h
