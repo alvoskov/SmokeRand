@@ -13,7 +13,8 @@
  * Its period is \f$ m^3 - 1 f\f$ or approximately \f$2^{93}\f$.
  *
  * It seems that this algorithm is one of the oldest PRNGs that passes TestU01
- * batteries (SmallCrush, Crush and BigCrush), older than DES.
+ * batteries (SmallCrush, Crush and BigCrush), older than DES. Also it passes
+ * (with `uint31` filter) at least 2 TiB in PractRand 0.96.
  *
  * References:
  *

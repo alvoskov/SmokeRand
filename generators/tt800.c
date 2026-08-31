@@ -79,14 +79,21 @@ static inline uint32_t tt800_mat(uint32_t x)
  * and low quality output at the beginning of the output sequence. The entire
  * procedure resembles an initialization of MT19937 but uses a nonlinear
  * transformation that has a proven full period.
+ *
+ * It also uses a simple 64-bit LFSR (xorrot64) to decorrelate seeds with
+ * differences only in higher bits (remember about T-function)
  */
 static void TT800State_init(TT800State *obj, uint64_t seed)
 {
     uint64_t u = seed;
+    for (int i = 0; i < 8; i++) {
+        u ^= u << 5;
+        u ^= rotl64(u, 13) ^ rotl64(u, 47);
+    }
     for (int i = 0; i < TT800_N; i++) {
         u += u * u | 0x40000005;
-        const uint32_t u32 = (uint32_t) (u >> 32);
-        obj->x[i] = u32 ^ rotl32(u32, 7) ^ rotl32(u32, 23);
+        const uint64_t y = 6906969069U * (u ^ (u >> 32));
+        obj->x[i] = (uint32_t) ((y ^ rotl64(y, 17) ^ rotl64(y, 53)) >> 32);
     }
 #ifdef TT800_USE_BUF
     obj->pos = TT800_N;

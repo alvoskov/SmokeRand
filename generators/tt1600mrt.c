@@ -76,10 +76,17 @@ static inline uint64_t tt1600_mat(uint64_t x)
  * and low quality output at the beginning of the output sequence. The entire
  * procedure resembles an initialization of MT19937 but uses a nonlinear
  * transformation that has a proven full period.
+ *
+ * It also uses a simple 64-bit LFSR (xorrot64) to decorrelate seeds with
+ * differences only in higher bits (remember about T-function)
  */
 static void TT1600State_init(TT1600State *obj, uint64_t seed)
 {
     uint64_t u = seed;
+    for (int i = 0; i < 8; i++) {
+        u ^= u << 5;
+        u ^= rotl64(u, 13) ^ rotl64(u, 47);
+    }
     for (int i = 0; i < TT1600_N; i++) {
         u += u * u | 0x40000005;
         const uint64_t y = 6906969069U * (u ^ (u >> 32));

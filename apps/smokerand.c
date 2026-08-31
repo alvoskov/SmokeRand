@@ -77,6 +77,7 @@ typedef enum {
     FILTER_HIGH32,
     FILTER_LOW32,
     FILTER_UINT31,
+    FILTER_UINT31_LOW,
     FILTER_UINT63,
     FILTER_UNKNOWN
 } GeneratorFilter;
@@ -94,6 +95,8 @@ GeneratorFilter GeneratorFilter_from_name(const char *name)
         return FILTER_LOW32;
     } else if (!strcmp("uint31", name)) {
         return FILTER_UINT31;
+    } else if (!strcmp("uint31_low", name)) {
+        return FILTER_UINT31_LOW;
     } else if (!strcmp("uint63", name)) {
         return FILTER_UINT63;
     } else {
@@ -535,6 +538,12 @@ static void apply_filter(GeneratorInfo **gi, GeneratorFilter filter, GeneratorIn
         *filter_gen = define_uint31_generator(*gi);
         *gi = filter_gen;
         fprintf(stderr, "The lower bit will be added automatically\n");
+        break;
+
+    case FILTER_UINT31_LOW:
+        *filter_gen = define_uint31_low_generator(*gi);
+        *gi = filter_gen;
+        fprintf(stderr, "The higher bit will be added automatically\n");
         break;
 
     case FILTER_UINT63:

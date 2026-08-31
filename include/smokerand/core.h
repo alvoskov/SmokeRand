@@ -177,6 +177,7 @@ GeneratorInfo define_high32_generator(const GeneratorInfo *gi);
 GeneratorInfo define_low32_generator(const GeneratorInfo *gi);
 GeneratorInfo define_uint31_generator(const GeneratorInfo *gi);
 GeneratorInfo define_uint63_generator(const GeneratorInfo *gi);
+GeneratorInfo define_uint31_low_generator(const GeneratorInfo *gi);
 
 
 typedef struct {
