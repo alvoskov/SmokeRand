@@ -87,6 +87,7 @@ static uint64_t estimate_cpu_freq()
         const clock_t toc = clock();
         time_elapsed = (double) (toc - tic) / (double) CLOCKS_PER_SEC;
     } while (time_elapsed < 0.5 && time_elapsed >= 0);
+    (void) sum; // Needed just for delays
     if (time_elapsed <= 0.001) {
         return default_freq;
     }

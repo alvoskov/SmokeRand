@@ -51,6 +51,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `apps/test_base64.c`: `printf` argument type fixed to make some 32-bit
   compilers (e.g. DJGPP) happy.
 - Some fixes in `Makefile.gnu` for improvement of DJGPP support.
+- `src/cpuinfo.c`, `estimate_cpu_freq` function: fixed a warning in GCC 16.2.0,
+  [reported by atoponce](https://github.com/alvoskov/SmokeRand/issues/30).
 
 ### Changed
 
