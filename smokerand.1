@@ -1,4 +1,4 @@
-.TH smokerand 1  "August 12, 2026" "version 0.49" "USER COMMANDS"
+.TH smokerand 1  "September 01, 2026" "version 0.50" "USER COMMANDS"
 .SH NAME
 smokerand \- a test suite for pseudorandom numbers generators
 .SH SYNOPSIS
@@ -222,6 +222,13 @@ Binary matrix rank test that is sensitive to LFSR generators.
 Two parameters are required: \fBn\fR, the square matrix size (must be
 divisible by 256), and \fBmax_nbits\fR, the maximal number of lower bits
 that are taken from each number (8 or 64 are currently supported).
+.TP
+.B maxoft
+This test was described by Knuth in TAOCP volume 2, separates an input sequence
+into non-overlapping tuples and finds a maximal value for every tuple. Their
+distribution is compared to the theoretical one by means of Pearson chi2 test.
+Catches some LCGs (lcg32prime), LFSRs (xorshift32, xorshift128) and MRGs
+(mrg_denglin_2, mrg_denglin_4).
 .TP
 .B mod3
 This test is a simplified version of \fBmod3\fR tests  from gjrand

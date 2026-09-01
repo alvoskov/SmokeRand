@@ -541,7 +541,7 @@ Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
  mrsf64            | - (>69 TiB)| 267/276
  pqrng64           | 11 TiB     | 8/44
  rapidrand128      | - (>30 TiB)| 107/120
- sirius64          | - (>16 TiB)| 70/64
+ sirius64          | -(>173 TiB)| 690/692
  splitmix64        | 6 TiB      | 0/24
  sqxor             | 12 TiB     | 100/48
  tf0_64            | - (>36 TiB)| 152/144 
@@ -573,6 +573,8 @@ scores can fail the `coll64dec` test. E.g. `lcg64:marsaglia` passes the test
 and the `lcg64:steele` fails it. An idea of such comparison was taken from
 the [coll-birth-rs](https://github.com/vigna/coll-birth-rs) documentation
 (developed by S.Vigna). 
+
+Note about Sirius64: `--seed=abcdef`, 8 GiB RAM buffer.
 
 # Performance estimation for some 64-bit generators
 

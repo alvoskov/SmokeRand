@@ -249,6 +249,29 @@ one-threaded mode. Linear complexity test is much faster in this case.
  matrixrank_8192      | 8192   | 32/64
  matrixrank_8192_low8 | 8192   | 8
 
+## MaxOfT test
+
+This test was described by Knuth in TAOCP volume 2 (3rd edition, Chapter 3.3.2,
+section H). It separates an input sequence into non-overlapping tuples and finds
+a maximal value for every tuple. Their distribution is compared to the
+theoretical one by means of Pearson chi2 test. The theoretical distribution has
+the following c.d.f. (cumulative distribution function) for \f$x\in [0;1]\f$:
+
+\f[
+F(x) = x^t
+\f]
+
+In the chi2 test bins have different widths to provide the same expected
+(theoretical) frequencies \f$ E_i \f$, the technique is taken from TestU01 and
+is usually much more sensitive and faster than Kolmogorov-Smirnov or
+Anderson-Darling tests.
+
+MaxOfT test catches some LCGs (`lcg32prime`), LFSRs (`xorshift32`, `xorshift128`)
+and MRGs (`mrg_denglin_2`, `mrg_denglin_4`). It seems that it is the only test
+failed by `mrg_denglin_4`, so it was included in `brief`, `default` and `full`
+batteries since SmokeRand 0.50.
+
+
 ## Hamming weights histogram test
 
 This test (named `hamming_distr` in the batteries) divides an input stream
@@ -271,7 +294,7 @@ lags, `ranrot32` with small lags, some small LFSR (`shr3`, `xsh`,
 
 This test is a modification of `DC6-9x1Bytes-1` test from PractRand by Chris
 Doty-Humphrey. Actually it is a family of algorithms that can analyse bytes,
-16-bit, 32-bit and 64-bit chunks. The DC6-9x1Bytes-1 modification works with
+16-bit, 32-bit and 64-bit chunks. The `DC6-9x1Bytes-1` modification works with
 bytes. SmokeRand `hamming_ot` tests also can process longer 128-bit, 256-bit
 and 512-bit chunks that are especially useful for detection of RANROT and
 additive/subtractive lagged Fibonacci generators.
