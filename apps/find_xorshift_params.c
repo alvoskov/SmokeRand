@@ -990,6 +990,91 @@ int test_xorrot320(void)
 }
 
 
+
+/////////////////////////////
+///// xorrot512 testing /////
+/////////////////////////////
+
+typedef struct {
+    uint64_t x[8];
+    unsigned int a;
+    unsigned int b;
+    unsigned int c;
+} Xorrot512VarShiftsState;
+
+
+static uint64_t get_bits_xr512(void *state)
+{
+    Xorrot512VarShiftsState *obj = state;
+    const uint64_t x0 = obj->x[0], x7 = obj->x[7];
+    obj->x[0] = x0 ^ obj->x[1];
+    obj->x[1] = obj->x[2];
+    obj->x[2] = obj->x[3];
+    obj->x[3] = obj->x[4];
+    obj->x[4] = obj->x[5];
+    obj->x[5] = obj->x[6];
+    obj->x[6] = x0 ^ x7;
+    obj->x[7] = (x0 << (int) obj->a) ^ obj->x[6] ^ rotl64(x7, (int) obj->b) ^ rotl64(x7, (int) obj->c);
+    return x0;
+}
+
+
+static int is_triple_valid_xr512(unsigned int ai, unsigned int bi, unsigned int ci)
+{
+    (void) ai;
+    return bi < ci;
+}
+
+
+static void *gen_create_xr512(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+    Xorrot512VarShiftsState *obj = intf->malloc(sizeof(Xorrot512VarShiftsState));
+    for (int i = 0; i < 8; i++) {
+        obj->x[i] = intf->get_seed64();
+    }
+    obj->x[7] = obj->x[7] | 0x1; // State mustn't be all zeros
+    obj->a = 11;
+    obj->b = 17;
+    obj->c = 53;
+    return obj;
+}
+
+
+static void set_triple_xr512(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
+{
+    Xorrot512VarShiftsState *obj = state;
+    obj->a = ai; obj->b = bi; obj->c = ci;
+}
+
+
+int test_xorrot512(void)
+{
+    static const GeneratorInfo gen = {
+        .name = "xorrot512:dynshifts",
+        .description = "xorrot512 with dynamic shifts",
+        .nbits = 64,
+        .create = gen_create_xr512,
+        .free = gen_free,
+        .get_bits = get_bits_xr512,
+        .self_test = NULL,
+        .get_sum = NULL,
+        .parent = NULL
+    };
+
+    static const XorshiftProps props = {
+        .max_value = 64,
+        .nbytes = 64,
+        .is_triple_valid = is_triple_valid_xr512,
+        .set_triple = set_triple_xr512
+    };
+
+
+    return run_triples_search(&gen, &props);
+}
+
+
+
 typedef struct {
     const char *testname;
     int (*testfunc)(void);
@@ -1007,6 +1092,7 @@ int main(int argc, char *argv[])
         {"xorshift128",    test_xorshift128},
         {"xorrot160",      test_xorrot160},
         {"xorrot320",      test_xorrot320},
+        {"xorrot512",      test_xorrot512},
         {NULL, NULL}
     };
 
