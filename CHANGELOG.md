@@ -18,7 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   and `2**1600 - 1` were added.
 - `chip32` chaotic generator by Tommy Ettinger. Also its `chip8`, `chip16` and
   `chip64` modifications made by A.L. Voskov.
-- `fwfarx128ctr` and `fwfarx256ctr` CBPRNG based on an experimental ARX cipher.
+- `fwfarx128ctr` and `fwfarx256ctr` CBPRNG based on an experimental ARX cipher
+  by L. Hars and G. Petruska. Parameters were tuned by A.L. Voskov.
 - `grube73_mrg3`: a very old (1973) MRG by A. Grube that passes BigCrush. It is
   probably the oldest high-quality non-cryptographic PRNG. Also `grube_mrg2`
   generator that fails 4D birthday spacings test from TestU01 Crush.
@@ -30,7 +31,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   passes `full` SmokeRand battery.
 - `romumono` generator was added (https://arxiv.org/abs/2002.11331).
 - `sirius64` generator was added (https://github.com/matteo65/Sirius64).
-  by L. Hars and G. Petruska. Parameters were tuned by A.L. Voskov.
 - `poly96` generator was added.
 - `tt800` classical LFSR generator. Also `tt1600mrt`, a scrambled version
   of `t1600`, another 64-bit classical LFSR.
