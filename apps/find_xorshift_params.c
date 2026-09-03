@@ -775,8 +775,8 @@ static uint64_t get_bits_xr256(void *state)
 
 static int is_triple_valid_xr256(unsigned int ai, unsigned int bi, unsigned int ci)
 {
-    (void) bi;
-    return ai < ci;
+    (void) ai;
+    return bi < ci;
 }
 
 
@@ -1091,6 +1091,7 @@ int main(int argc, char *argv[])
         {"xorshift64",     test_xorshift64},
         {"xorshift128",    test_xorshift128},
         {"xorrot160",      test_xorrot160},
+        {"xorrot256",      test_xorrot256},
         {"xorrot320",      test_xorrot320},
         {"xorrot512",      test_xorrot512},
         {NULL, NULL}

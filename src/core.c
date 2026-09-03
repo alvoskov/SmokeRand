@@ -459,10 +459,7 @@ void quicksort32(uint32_t *x, size_t len)
 static void countsort32(uint32_t *out, const uint32_t *x, size_t len, unsigned int shr)
 {
     size_t *offsets = calloc(65536, sizeof(size_t));
-    if (offsets == NULL) {
-        fprintf(stderr, "***** countsort32: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(offsets, "countsort32")
     for (size_t i = 0; i < len; i++) {
         unsigned int pos = ((x[i] >> shr) & 0xFFFF);
         offsets[pos]++;
@@ -485,10 +482,7 @@ static void countsort32(uint32_t *out, const uint32_t *x, size_t len, unsigned i
 void radixsort32(uint32_t *x, size_t len)
 {
     uint32_t *out = calloc(len, sizeof(uint32_t));
-    if (out == NULL) {
-        fprintf(stderr, "***** radixsort32: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(out, "radixsort32")
     countsort32(out, x,   len, 0);
     countsort32(x,   out, len, 16);
     free(out);
@@ -571,10 +565,7 @@ void radixsort64_inplace(uint64_t *x, size_t len)
         quicksort64(x, len);
     } else {
         CountSortBounds *bnd_ary = calloc(8, sizeof(CountSortBounds));
-        if (bnd_ary == NULL) {
-            fprintf(stderr, "***** radixsort64_inplace: not enough memory *****\n");
-            exit(EXIT_FAILURE);
-        }
+        ASSERT_MALLOC_PTR(bnd_ary, "radixsort64_inplace")
         countsort64_inplace(x, len, 0, bnd_ary);
         free(bnd_ary);
     }
@@ -590,10 +581,7 @@ void radixsort32_inplace(uint32_t *x, size_t len)
         quicksort32(x, len);
     } else {
         CountSortBounds *bnd_ary = calloc(8, sizeof(CountSortBounds));
-        if (bnd_ary == NULL) {
-            fprintf(stderr, "***** radixsort32_inplace: not enough memory *****\n");
-            exit(EXIT_FAILURE);
-        }
+        ASSERT_MALLOC_PTR(bnd_ary, "radixsort32_inplace")
         countsort32_inplace(x, len, 0, bnd_ary);
         free(bnd_ary);
     }
@@ -1073,10 +1061,7 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
         results = calloc(1, sizeof(TestResults));
         nresults = 1;
     }
-    if (results == NULL) {
-        fprintf(stderr, "***** TestsBattery_run: not enough memory *****\n");
-        return BATTERY_ERROR;
-    }
+    ASSERT_MALLOC_PTR(results, "TestsBattery_run")
     // Create a PRNG example: either for one-threaded version or for basic
     // sanity check for multithreaded version.
     GeneratorState obj = GeneratorState_create(gen, intf);
