@@ -457,6 +457,145 @@ static int test_xorshift160(const CallerAPI *intf)
     return is_ok;
 }
 
+
+////////////////////////////////////
+///// xoshiro512++ based tests /////
+////////////////////////////////////
+
+
+typedef struct {
+    uint64_t s[8];
+} Xoshiro512PPState;
+
+
+static uint64_t get_bits_xs512(void *state)
+{
+    Xoshiro512PPState *obj = state;
+    uint64_t *s = obj->s;
+    const uint64_t result = rotl64(s[0] + s[2], 17) + s[2];
+    const uint64_t t = s[1] << 11;
+    s[2] ^= s[0];
+    s[5] ^= s[1];
+    s[1] ^= s[2];
+    s[7] ^= s[3];
+    s[3] ^= s[4];
+    s[4] ^= s[5];
+    s[0] ^= s[6];
+    s[6] ^= s[7];
+    s[6] ^= t;
+    s[7] = rotl64(s[7], 21);
+    return result;
+}
+
+
+static void *gen_create_xs512(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+    Xoshiro512PPState *obj = intf->malloc(sizeof(Xoshiro512PPState));
+    seeds_to_array_u64(intf, obj->s, 8);
+    if (obj->s[7] == 0) {
+        obj->s[7] = 0x123456789ABCDEF;
+    }
+    return obj;
+}
+
+/**
+ * @brief Tests that are based on the xoshiro512++ generator.
+ * @details It contains the next subtests
+ *
+ * - Checks if the period is 2**512 - 1
+ * - Compares the characteristic and jump polynomials with reference
+ *   ones obtained by Blackman and Vigna
+ * - Tests the jump polynomial usage (and compares with the direct
+ *   calls of the PRNG)
+ *
+ * References:
+ *
+ * 1. https://prng.di.unimi.it/xoroshiro128plusplus.c
+ */
+static int test_xoshiro512(const CallerAPI *intf)
+{
+    static const GeneratorInfo gen = {
+        .name = "xoroshiro512pp",
+        .description = "",
+        .nbits = 64,
+        .create = gen_create_xs512,
+        .free = gen_free,
+        .get_bits = get_bits_xs512,
+        .self_test = NULL,
+        .get_sum = NULL,
+        .parent = NULL
+    };
+    static const LfsrPeriodOptions opts = {.check_validity = 1};
+    static const uint64_t char_poly_ref[] = {
+        0xcf3cff0c00000001, 0x7fdc78d886f00c63, 0xf05e63fca6d7b781, 0x7a67058e7bbab6f0,
+        0xf11eef832e32518f, 0x51ba7c47edc758ad, 0x8f2d27268ce4b20b, 0x0000500055d8b77f
+    };
+    static const uint64_t jump_poly_ref[] = {
+        0x11467fef8f921d28, 0xa2a819f2e79c8ea8, 0xa8299fc284b3959a, 0xb4d347340ca63ee1,
+        0x1cb0940bedbff6ce, 0xd956c5c4fa1f8e17, 0x915e38fd4eda93bc, 0x5b3ccdfa5d7daca5
+    };
+    int is_ok = 1;
+
+    intf->printf("----- xoroshiro512++ based test-----\n");
+    GeneratorStateExt ext = GeneratorStateExt_create(&gen, intf);
+    if (lfsr_period_test(&ext, intf, &opts) != LFSR_PERIOD_MAX) {
+        is_ok = 0;
+    } else {
+        // Compare jump poly to the reference one
+        LfsrPoly char_poly = GeneratorStateExt_get_poly(&ext);
+        LfsrPoly jump_poly = GeneratorStateExt_get_jump_poly_pow2(&ext, 384);
+        intf->printf("Char.poly.:          ");
+        LfsrPoly_print_hex(&char_poly, intf);
+        intf->printf("\n");
+        intf->printf("Jump poly.(j=2^384): ");
+        LfsrPoly_print_hex(&jump_poly, intf);
+        intf->printf("\n");
+        if (char_poly.nwords != 8 || jump_poly.nwords != 8) {
+            is_ok = 0;
+        }
+        for (size_t i = 0; i < 8; i++) {
+            if (char_poly.w64[i] != char_poly_ref[i] ||
+                jump_poly.w64[i] != jump_poly_ref[i]) {
+                is_ok = 0;
+            }
+        }
+        LfsrPoly_destruct(&char_poly);
+        LfsrPoly_destruct(&jump_poly);
+        // Check if jump polynomials are working
+        const unsigned int jmp_pow = 20;
+        intf->printf("2**%u jump\n", jmp_pow);
+        Xoshiro512PPState *obj = ext.state.state;
+        // a) reference value
+        obj->s[0] = 0xDEADBEEF; obj->s[1] = 0xCAFEBABE;
+        for (size_t i = 2; i < 8; i++) {
+            obj->s[i] = 0;
+        }
+        for (size_t i = 0; i < (size_t) (1ULL << jmp_pow); i++) {
+            (void) ext.state.gi->get_bits(ext.state.state);
+        }
+        const uint64_t u_ref = ext.state.gi->get_bits(ext.state.state);
+        intf->printf("  u_ref = %llX\n", (unsigned long long) u_ref);
+
+        // b) jump matrix value
+        obj->s[0] = 0xDEADBEEF; obj->s[1] = 0xCAFEBABE;
+        for (size_t i = 2; i < 8; i++) {
+            obj->s[i] = 0;
+        }
+        GeneratorStateExt_make_jump_pow2(&ext, jmp_pow);
+        const uint64_t u_jmp = ext.state.gi->get_bits(ext.state.state);
+        intf->printf("  u_jmp = %llX\n", (unsigned long long) u_jmp);
+
+        if (u_jmp != u_ref) {
+            is_ok = 0;
+        }
+    }
+
+    GeneratorStateExt_destruct(&ext);
+    return is_ok;
+}
+
+
 /**
  * @brief Program entry point, runs all tests.
  */
@@ -468,6 +607,7 @@ int main()
     const int is_xr32_ok   = test_xorrot32(&intf);
     const int is_xs128_ok  = test_xoroshiro128(&intf);
     const int is_xs160_ok  = test_xorshift160(&intf);
+    const int is_xs512_ok  = test_xoshiro512(&intf);
     CallerAPI_free();
 
     printf("ctr:            [%s]\n", is_ctr_ok    ? "PASSED" : "FAILED");
@@ -475,6 +615,8 @@ int main()
     printf("xorrot32:       [%s]\n", is_xr32_ok   ? "PASSED" : "FAILED");
     printf("xoroshiro128++: [%s]\n", is_xs128_ok  ? "PASSED" : "FAILED");
     printf("xorshift160:    [%s]\n", is_xs160_ok  ? "PASSED" : "FAILED");
-    const int is_ok = is_ctr_ok && is_tf0_64_ok && is_xr32_ok && is_xs128_ok && is_xs160_ok;
+    printf("xoshiro512++:   [%s]\n", is_xs512_ok  ? "PASSED" : "FAILED");
+    const int is_ok = is_ctr_ok && is_tf0_64_ok && is_xr32_ok &&
+                      is_xs128_ok && is_xs160_ok && is_xs512_ok;
     return is_ok ? 0 : 1;
 }

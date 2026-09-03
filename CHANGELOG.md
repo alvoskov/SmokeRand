@@ -6,13 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ## [0.51]
 
-### Addeed
+### Added
 
-- `xorrot512` and `xorrot512mrt` experimental PRNGs by A.L. Voskov.
 - `lfsr_bm` battery that uses Berlekamp-Massey algorithm to restore the
   characteristic polynomial. Can work with PRNGs with circle buffers/pointers
   etc. (e.g. `lrnd64_255`, `tt800`, `well1024a` etc), can use `stdin`/`stdout`
-  interface. Cannot work if nonlinear scramblers are present.
+  interface. Cannot work if nonlinear scramblers are present. This battery
+  also supports PRNGs based on Mersenne primes.
+- `melg4253` generator was added.
+- `xorrot512` and `xorrot512mrt` experimental PRNGs by A.L. Voskov.
+- `test_lfsr_period.c`: `xoshiro512++` was added as a test example.
 
 ### Bugfix
 

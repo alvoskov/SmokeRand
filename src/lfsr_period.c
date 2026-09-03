@@ -364,10 +364,22 @@ static const LargeInt lfsr1600_exps[] = {
  * In 2026 the largest fully factored Fermat number is \f$ F_{11} \f$ so
  * xorshift-like LFSR size is limited to 4096 bits.
  *
+ * Some LFSR have state size that corresponds to Mersenne primes, so empty
+ * array of divisors is returned in this case:
+ *
+ * - https://oeis.org/A000043
+ *
  * @param n LFSR state size, bits.
  */
 static const LargeInt *get_lfsr_exps(size_t n)
 {
+    static const size_t mersenne_e[] = {
+        31,       61,    89,   107,   127,    521,    607,   1279,
+        2203,   2281,  3217,  4253,  4423,   9689,   9941,  11213,
+        19937, 21701, 23209, 44497, 86243, 110503, 132049, 216091,
+        0
+    };
+
     if (n == 32) {
         return lfsr32_exps;
     } else if (n == 48) {
@@ -398,9 +410,12 @@ static const LargeInt *get_lfsr_exps(size_t n)
         return lfsr1024_exps;
     } else if (n == 1600) {
         return lfsr1600_exps;
-    } else if (n == 607) {
-        return lfsr_noexps;
     } else {
+        for (size_t i = 0; mersenne_e[i] != 0; i++) {
+            if (mersenne_e[i] == n) {
+                return lfsr_noexps;
+            }
+        }
         return NULL;
     }
 }
@@ -574,6 +589,13 @@ void LfsrPoly_print_carray(const LfsrPoly *obj, const CallerAPI *intf)
 }
 
 
+LfsrPoly LfsrPoly_clone(const LfsrPoly *obj)
+{
+    LfsrPoly out = LfsrPoly_create(obj->degree);
+    memcpy(out.w64, obj->w64, obj->nwords * sizeof(uint64_t));
+    return out;
+}
+
 
 void LfsrPoly_destruct(LfsrPoly *obj)
 {
@@ -651,6 +673,26 @@ LfsrPoly LfsrPoly_jumppoly_ce(const LfsrPoly *charpoly, uint64_t c, uint32_t e)
     return out;
 }
 
+/**
+ * @brief `out <- x^(2^e - 1) mod charpoly`
+ */
+LfsrPoly LfsrPoly_jumppoly_mersenne(const LfsrPoly *charpoly, uint32_t e)
+{
+    // out = x
+    LfsrPoly out = LfsrPoly_create(charpoly->degree); out.w64[0] = 1;
+    LfsrPoly_mulx(&out, charpoly);
+    // sq = x^2 mod charpoly
+    LfsrPoly sq  = LfsrPoly_clone(&out);
+    LfsrPoly_mulmod(&sq, &sq, charpoly);
+
+    for (uint32_t i = 1; i < e; i++) {
+        LfsrPoly_mulmod(&out, &sq, charpoly);
+        LfsrPoly_mulmod(&sq,  &sq, charpoly);
+    }
+    LfsrPoly_destruct(&sq);
+    return out;
+}
+
 
 /**
  * @brief `out <- x^n mod charpoly`, where `n = x[0] + x[1] * 2^64 + ...` is the
@@ -697,6 +739,13 @@ int LfsrPoly_is_period_possible(const LfsrPoly *charpoly, const LargeInt *period
 }
 
 
+int LfsrPoly_is_mersenne_period_possible(const LfsrPoly *charpoly, uint32_t e)
+{
+    LfsrPoly jumppoly = LfsrPoly_jumppoly_mersenne(charpoly, e);
+    const int is_possible = LfsrPoly_is_one(&jumppoly);
+    LfsrPoly_destruct(&jumppoly);
+    return is_possible;
+}
 
 
 ///////////////////////////////////////////
@@ -1349,11 +1398,8 @@ void LfsrPeriodResult_print(const CallerAPI *intf, LfsrPeriodResult res)
 static LfsrPeriodResult lfsr_period_test_core(const LfsrPoly *charpoly,
     unsigned int nbits, const CallerAPI *intf)
 {
-    // Calculate the maximal period to be verified
-    LargeInt period = LargeInt_from_pow2(nbits);
-    LargeInt_subtract_u64(&period, 1U);
-    // Begin verification
-    LfsrPeriodResult result = LfsrPoly_is_period_possible(charpoly, &period) ?
+    // Check the A^period = I condition
+    LfsrPeriodResult result = LfsrPoly_is_mersenne_period_possible(charpoly, nbits) ?
                               LFSR_PERIOD_MAX : LFSR_PERIOD_NOT_MAX;
     if (result == LFSR_PERIOD_MAX) {
         intf->printf("  A^period = I: passed\n");
@@ -1361,8 +1407,8 @@ static LfsrPeriodResult lfsr_period_test_core(const LfsrPoly *charpoly,
         intf->printf("  A^period = I: failed\n");
         return LFSR_PERIOD_NOT_MAX;
     }
+    // Check the A^(period/pi) <> I condition
     const LargeInt *lfsr_exps = get_lfsr_exps(nbits);
-
     if (lfsr_exps == NULL) {
         intf->printf("  The tables are absent for this LFSR size\n");
         result = LFSR_PERIOD_ERROR;
@@ -1490,11 +1536,6 @@ LfsrPeriodResult lfsr_period_bm_test(GeneratorState *obj, const CallerAPI *intf)
     LfsrPoly_print_hex(&charpoly, intf); intf->printf("\n");
     intf->printf("  uint64_t char_poly[] = ");
     LfsrPoly_print_carray(&charpoly, intf); intf->printf(";\n");
-    if (degree >= LARGEINT_SIZE * 64) {
-        LfsrPoly_destruct(&charpoly);
-        intf->printf("  The state is too large for checking\n");
-        return LFSR_PERIOD_ERROR;        
-    }
     // Calculate the maximal period
     const unsigned int nbits = (unsigned int) (degree);
     intf->printf("  The maximal period to be verified: 2**%u - 1\n", nbits);
