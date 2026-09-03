@@ -304,10 +304,7 @@ TestResults linearcomp_test(GeneratorState *obj, const LinearCompOptions *opts)
     TestResults ans = TestResults_create("linearcomp");
     unsigned int bitpos = linearcomp_get_bitpos(obj, opts);
     uint8_t *s = calloc(opts->nbits, sizeof(uint8_t));
-    if (s == NULL) {
-        fprintf(stderr, "***** linearcomp_test: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(s, "linearcomp_test")
     obj->intf->printf("Linear complexity test\n");
     obj->intf->printf("  nbits: %lld; bitpos: %d\n",
         (long long) opts->nbits, (int) bitpos);

@@ -1225,9 +1225,9 @@ An example of RC4 failure in the `freq` battery:
 
 Examples of false failures in SmokeRand 0.42 in gap16_count0 test (fixed in 0.43):
 
-smokerand.exe brief generators/chacha.dll --seed=_01_UU3t9pAb3d5FYNSe6nbg3ew3LMZtRMkA4p84wYkBr60= --testname=gap16_count0
-smokerand.exe brief generators/aes128.dll --seed=_01_9FvOZLUeS9/Pl7c9rZBvJlLmKK85Oo8qGfpwgl4GGvA= --testname=gap16_count0
-smokerand.exe brief generators/speck128.dll --testname=gap16_count0 --seed=_01_iQNhejvPDb2ImAIwDMyWe+ZnqFFX3riJn0aorb3XvWc=
+    smokerand.exe brief generators/chacha.dll --seed=_01_UU3t9pAb3d5FYNSe6nbg3ew3LMZtRMkA4p84wYkBr60= --testname=gap16_count0
+    smokerand.exe brief generators/aes128.dll --seed=_01_9FvOZLUeS9/Pl7c9rZBvJlLmKK85Oo8qGfpwgl4GGvA= --testname=gap16_count0
+    smokerand.exe brief generators/speck128.dll --testname=gap16_count0 --seed=_01_iQNhejvPDb2ImAIwDMyWe+ZnqFFX3riJn0aorb3XvWc=
 
 
 Strange behaviour (suspicious and badly reproducible value of hamming_ot_u128) for
@@ -1238,4 +1238,4 @@ xorrot64w16 in the `full` battery. Seed:
 
 Note: mwcfp suspicious values:
 
-smokerand full generators/mwcfp.dll --param=128u32 --seed=_05_6pi7r+mVZ+TatK5oc0N7os4guFJPy5HHikYblTacQYM=
+    smokerand full generators/mwcfp.dll --param=128u32 --seed=_05_6pi7r+mVZ+TatK5oc0N7os4guFJPy5HHikYblTacQYM=

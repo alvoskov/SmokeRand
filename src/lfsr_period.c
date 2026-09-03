@@ -473,10 +473,7 @@ LfsrPoly LfsrPoly_create(size_t degree)
         nwords++;
     }
     obj.w64 = calloc(nwords, sizeof(uint64_t));
-    if (obj.w64 == NULL) {
-        fprintf(stderr, "***** LfsrPoly_create: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(obj.w64, "LfsrPoly_create")
     obj.degree = degree;
     obj.nwords = nwords;
     return obj;
@@ -660,10 +657,7 @@ LfsrMatrix LfsrMatrix_create(size_t n)
     } else {
         obj.x = calloc(1, sizeof(uint8_t));
     }
-    if (obj.x == NULL) {
-        fprintf(stderr, "***** LfsrMatrix_create: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(obj.x, "LfsrMatrix_create")
     obj.n = n;
     return obj;
 }
@@ -692,15 +686,9 @@ LfsrMatrix LfsrMatrix_create_prod(const LfsrMatrix *a, const LfsrMatrix *b)
         nwords++;
     }
     uint64_t *arows = calloc(nwords * n, sizeof(uint64_t));
-    if (arows == NULL) {
-        fprintf(stderr, "***** LfsrMatrix_create_prod: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(arows, "LfsrMatrix_create_prod")
     uint64_t *bcols = calloc(nwords * n, sizeof(uint64_t));
-    if (bcols == NULL) {
-        fprintf(stderr, "***** LfsrMatrix_create_prod: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(bcols, "LfsrMatrix_create_prod")
     for (size_t i = 0; i < n; i++) {
         for (size_t j = 0; j < n; j++) {
             const uint64_t aij = LfsrMatrix_getbit(a, i, j);
@@ -872,24 +860,28 @@ void LfsrMatrix_print(const LfsrMatrix *obj, const CallerAPI *intf)
         }
     } else {
         const size_t ntiles = obj->n / tile_width;
+        char *strbuf = calloc(ntiles + 8, sizeof(char));
+        ASSERT_MALLOC_PTR(strbuf, "LfsrMatrix_print")
         for (size_t i = 0; i < ntiles; i++) {
-            intf->printf("    |");
+            strcpy(strbuf, "    |");
             for (size_t j = 0; j < ntiles; j++) {
                 const LfsrMatrixTileType t = LfsrMatrix_get_tile_type(obj, i, j, tile_width);
                 switch(t) {
                 case LFSR_TILE_ZERO:
-                    intf->printf(".");
+                    strcat(strbuf, ".");
                     break;
                 case LFSR_TILE_EYE:
-                    intf->printf("I");
+                    strcat(strbuf, "I");
                     break;
                 case LFSR_TILE_OTHER:
                 default:
-                    intf->printf("?");
+                    strcat(strbuf, "?");
                 }
             }
-            intf->printf("|\n");
+            strcat(strbuf, "|\n");
+            intf->printf(strbuf);
         }
+        free(strbuf);
     }
 }
 
@@ -964,10 +956,7 @@ LfsrPoly LfsrMatrix_krylov_to_charpoly(LfsrMatrix *mat)
     // Gaussian elimination. Note: each equation is a column!
     // a) Initialize the columns indexex for its swapping
     size_t *cinds = calloc(nbits + 1, sizeof(size_t));
-    if (cinds == NULL) {
-        fprintf(stderr, "***** LfsrMatrix_krylov_to_charpoly: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(cinds, "LfsrMatrix_krylov_to_charpoly")
     for (size_t i = 0; i < nbits + 1; i++) {
         cinds[i] = i;
     }
@@ -1160,10 +1149,7 @@ LfsrPoly GeneratorStateExt_get_jump_poly_pow2(GeneratorStateExt *obj, unsigned i
 void GeneratorStateExt_apply_jump_poly(GeneratorStateExt *obj, const LfsrPoly *jump_poly)
 {
     uint8_t *new_state = calloc(obj->nbytes, sizeof(uint8_t));
-    if (new_state == NULL) {
-        fprintf(stderr, "***** GeneratorStateExt_apply_jump_poly: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(new_state, "GeneratorStateExt_apply_jump_poly")
     uint8_t *cur_state = obj->state.state;
     for (size_t i = 0; i < jump_poly->degree; i++) {
         if (LfsrPoly_getbit(jump_poly, i)) {
@@ -1184,10 +1170,7 @@ void GeneratorStateExt_apply_jump_poly(GeneratorStateExt *obj, const LfsrPoly *j
 void GeneratorStateExt_make_jump_pow2(GeneratorStateExt *obj, unsigned int p)
 {
     uint8_t *old_state = malloc(obj->nbytes);
-    if (old_state == NULL) {
-        fprintf(stderr, "***** GeneratorStateExt_make_jump_pow2: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(old_state, "GeneratorStateExt_make_jump_pow2")
     memcpy(old_state, obj->state.state, obj->nbytes);
     LfsrPoly jump_poly = GeneratorStateExt_get_jump_poly_pow2(obj, p);
     memcpy(obj->state.state, old_state, obj->nbytes);
@@ -1227,15 +1210,9 @@ int GeneratorStateExt_has_counters(GeneratorStateExt *obj)
     const unsigned long niters = 10000000;
     const size_t nbytes = obj->nbytes;
     uint8_t *prev = malloc(nbytes);
-    if (prev == NULL) {
-        fprintf(stderr, "***** GeneratorStateExt_has_counters: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(prev, "GeneratorStateExt_has_counters")
     uint8_t *is_byte_ctr = malloc(nbytes);
-    if (is_byte_ctr == NULL) {
-        fprintf(stderr, "***** GeneratorStateExt_has_counters: not enough memory *****\n");
-        exit(EXIT_FAILURE);
-    }
+    ASSERT_MALLOC_PTR(is_byte_ctr, "GeneratorStateExt_has_counters")
     memset(is_byte_ctr, 1, nbytes);
     // Check if any bytes behave like a counter
     for (unsigned long i = 0; i < niters; i++) {
