@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
+## [0.51]
+
+### Addeed
+
+- `xorrot512` PRNG by A.L. Voskov.
+
+### Bugfix
+
+- `hamming_distr_calc_zemp`: now it takes into account the number of tuples
+  with the maximal Hamming weight. May be detectable only for 32-bit tuples.
+
+### Changes
+
+- Refactoring: more compact assertions for malloc in some places.
+
 ## [0.50] 2026-09-01
 
 ### Added
