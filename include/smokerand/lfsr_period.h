@@ -108,11 +108,13 @@ LfsrPoly LfsrPoly_create(size_t degree);
 void LfsrPoly_print(const LfsrPoly *obj, const CallerAPI *intf);
 void LfsrPoly_print_hex(const LfsrPoly *obj, const CallerAPI *intf);
 void LfsrPoly_print_carray(const LfsrPoly *obj, const CallerAPI *intf);
+LfsrPoly LfsrPoly_clone(const LfsrPoly *obj);
 void LfsrPoly_destruct(LfsrPoly *obj);
 void LfsrPoly_mulx(LfsrPoly *a, const LfsrPoly *charpoly);
 void LfsrPoly_mulmod(LfsrPoly *a, const LfsrPoly *b, const LfsrPoly *charpoly);
 LfsrPoly LfsrPoly_jumppoly_ce(const LfsrPoly *charpoly, uint64_t c, uint32_t e);
 LfsrPoly LfsrPoly_jumppoly_n(const LfsrPoly *charpoly, const LargeInt *n);
+LfsrPoly LfsrPoly_jumppoly_mersenne(const LfsrPoly *charpoly, uint32_t e);
 int LfsrPoly_is_one(const LfsrPoly *obj);
 int LfsrPoly_is_period_possible(const LfsrPoly *charpoly, const LargeInt *period);
 
