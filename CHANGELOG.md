@@ -8,10 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ### Addeed
 
-- `xorrot512` PRNG by A.L. Voskov.
+- `xorrot512` and `xorrot512mrt` experimental PRNGs by A.L. Voskov.
+- `lfsr_bm` battery that uses Berlekamp-Massey algorithm to restore the
+  characteristic polynomial. Can work with PRNGs with circle buffers/pointers
+  etc. (e.g. `lrnd64_255`, `tt800`, `well1024a` etc), can use `stdin`/`stdout`
+  interface. Cannot work if nonlinear scramblers are present.
 
 ### Bugfix
 
+- Some tables of prime factors in `lfsr_period.c` didn't have `LFSR_EXPS_END`
+  terminator (undefined behaviour!)
 - `hamming_distr_calc_zemp`: now it takes into account the number of tuples
   with the maximal Hamming weight. May be detectable only for 32-bit tuples.
 

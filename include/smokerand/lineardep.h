@@ -2,7 +2,7 @@
  * @file lineardep.h
  * @brief Implementation of linear complexity and matrix rank tests.
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -30,6 +30,10 @@ enum {
     LINEARCOMP_BITPOS_HIGH = -1, ///< Analyze the middle bit.
     LINEARCOMP_BITPOS_MID  = -2  ///< Analyze the highest bit.
 };
+
+uint8_t *extract_bits_from_pos(GeneratorState *obj, size_t nbits, unsigned int bitpos);
+size_t berlekamp_massey(const uint8_t *s, size_t n, uint8_t **out_poly);
+long long linearcomp_L_to_T(size_t L, size_t nbits);
 
 /**
  * @brief Linear complexity test options.
