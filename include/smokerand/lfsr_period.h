@@ -168,7 +168,11 @@ void LfsrPeriodResult_print(const CallerAPI *intf, LfsrPeriodResult res);
 // Tests and batteries
 LfsrPeriodResult lfsr_period_test(GeneratorStateExt *ext, const CallerAPI *intf,
     const LfsrPeriodOptions *opts);
+LfsrPeriodResult lfsr_period_bm_test(GeneratorState *obj, const CallerAPI *intf);
 BatteryExitCode battery_lfsr_period(const GeneratorInfo *gen, const CallerAPI *intf,
     const BatteryOptions *opts);
+BatteryExitCode battery_lfsr_bm_period(const GeneratorInfo *gen, const CallerAPI *intf,
+    const BatteryOptions *opts);
+
 
 #endif // __SMOKERAND_LFSR_PERIOD_H

@@ -2,7 +2,7 @@
  * @file lineardep.c
  * @brief Implementation of linear complexity and matrix rank tests.
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -190,13 +190,29 @@ static inline void xorbytes(uint8_t *a, const uint8_t *b, size_t len)
 }
 
 /**
+ * @brief Extract the required number of bits bits from the given position
+ * of PRNG outputs. It is required for the linear complexity test.
+ */
+uint8_t *extract_bits_from_pos(GeneratorState *obj, size_t nbits, unsigned int bitpos)
+{
+    uint8_t *s = calloc(nbits, sizeof(uint8_t));
+    ASSERT_MALLOC_PTR(s, "extract_bits_from_pos")
+    const uint64_t mask = (uint64_t) (1ull << bitpos);
+    for (size_t i = 0; i < nbits; i++) {
+        if (obj->gi->get_bits(obj->state) & mask)
+            s[i] = 1;
+    }
+    return s;
+}
+
+/**
  * @brief Berlekamp-Massey algorithm for computation of linear complexity
  * of bit sequence.
  * @param s Bit sequence, each byte corresponds to ONE bit.
  * @param n Number of bits (length of s array).
  * @return Linear complexity.
  */
-size_t berlekamp_massey(const uint8_t *s, size_t n)
+size_t berlekamp_massey(const uint8_t *s, size_t n, uint8_t **out_poly)
 {
     size_t L = 0; // Complexity
     size_t N = 0; // Current position
@@ -226,6 +242,15 @@ size_t berlekamp_massey(const uint8_t *s, size_t n)
         }
         N++;
     }
+    // Return the obtained polynomial if requested. It reverse the coefficients
+    // order because they are written "upside down" inside the algorithm
+    if (out_poly != NULL) {
+        uint8_t *out = calloc(L + 1, sizeof(uint8_t));
+        for (size_t i = 0; i < L + 1; i++) {
+            out[L - i] = C[i];
+        }
+        *out_poly = out;
+    }
     free(C);
     free(B);
     free(T);
@@ -248,6 +273,17 @@ static unsigned int linearcomp_get_bitpos(const GeneratorState *obj, const Linea
         return (unsigned int) opts->bitpos;
     }
 }
+
+/**
+ * @brief Converts the obtained linear complexity to T value that is used by
+ * `sr_linearcomp_Tcdf(T)` and `sr_linearcomp_Tccdf(T)` to compute p-values.
+ */
+long long linearcomp_L_to_T(size_t L, size_t nbits)
+{
+    const long long L_s = (long long) L, nbits_s = (long long) nbits;
+    return (nbits & 1) ? (-L_s + (nbits_s + 1) / 2) : (L_s - nbits_s / 2);
+}
+
 
 /**
  * @brief Linear complexity test based on Berlekamp-Massey algorithm.
@@ -303,23 +339,13 @@ TestResults linearcomp_test(GeneratorState *obj, const LinearCompOptions *opts)
 {
     TestResults ans = TestResults_create("linearcomp");
     unsigned int bitpos = linearcomp_get_bitpos(obj, opts);
-    uint8_t *s = calloc(opts->nbits, sizeof(uint8_t));
-    ASSERT_MALLOC_PTR(s, "linearcomp_test")
+    uint8_t *s = extract_bits_from_pos(obj, opts->nbits, bitpos);
     obj->intf->printf("Linear complexity test\n");
     obj->intf->printf("  nbits: %lld; bitpos: %d\n",
         (long long) opts->nbits, (int) bitpos);
-    uint64_t mask = 1ull << bitpos;
-    for (size_t i = 0; i < opts->nbits; i++) {
-        if (obj->gi->get_bits(obj->state) & mask)
-            s[i] = 1;
-    }
-    ans.x = (double) berlekamp_massey(s, opts->nbits);
-    double T;
-    if (opts->nbits & 1) {
-        T = -ans.x + (double) (opts->nbits + 1) / 2.0;
-    } else {
-        T = ans.x - (double) opts->nbits / 2.0;
-    }
+    const size_t L = berlekamp_massey(s, opts->nbits, NULL);
+    const double T = (double) linearcomp_L_to_T(L, opts->nbits);
+    ans.x = (double) L;
     ans.penalty = PENALTY_LINEARCOMP;
     ans.p = sr_linearcomp_Tcdf(T);
     ans.alpha = sr_linearcomp_Tccdf(T);
