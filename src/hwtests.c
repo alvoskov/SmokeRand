@@ -645,7 +645,7 @@ double hamming_distr_calc_zemp(const unsigned long long *o, size_t nbits)
     double *p = calloc(nbits + 1, sizeof(double));
     ASSERT_MALLOC_PTR(p, "hamming_distr_calc_zemp")
     sr_binomial_pdf_all(p, (unsigned long) nbits, 0.5);
-    for (size_t i = 0; i < nbits; i++) {
+    for (size_t i = 0; i <= nbits; i++) {
         const double e_i = (double) npoints * p[i];
         if (e_i > 25.0) {
             chi2emp += calc_chi2emp_term(o[i], e_i);
