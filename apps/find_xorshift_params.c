@@ -119,7 +119,7 @@ ThreadRetVal THREADFUNC_SPEC xorshift_thread(void *data)
     GeneratorStateExt ext = GeneratorStateExt_create_sized(obj->gi, obj->intf, obj->gen_props->nbytes);
     for (ShiftsTriple *t = obj->triples; t->a != 0; t++) {
         if (t->thrd_ord == thrd.ord) {
-            if (t->b == 1 && t->c == 1) {
+            if (t->b == 1 && (t->c == 1 || t->c == 2)) {
                 printf("_%u", t->a);
             } else {
                 printf(".");
@@ -747,6 +747,83 @@ int test_xorshift160(void)
 
 
 /////////////////////////////
+///// xorrot128 testing /////
+/////////////////////////////
+
+typedef struct {
+    uint64_t x;
+    uint64_t y; 
+    unsigned int a;
+    unsigned int b;
+    unsigned int c;
+} Xorrot128VarShiftsState;
+
+
+static uint64_t get_bits_xr128(void *state)
+{
+    Xorrot128VarShiftsState *obj = state;
+    const uint64_t x0 = obj->x, y0 = obj->y;
+    obj->x = x0 ^ y0;
+    obj->y = (x0 << (int) obj->a) ^ obj->x ^ rotl64(y0, (int) obj->b) ^ rotl64(y0, (int) obj->c);
+    return x0;
+}
+
+
+static int is_triple_valid_xr128(unsigned int ai, unsigned int bi, unsigned int ci)
+{
+    (void) ai;
+    return bi < ci;
+}
+
+
+static void *gen_create_xr128(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+    Xorrot128VarShiftsState *obj = intf->malloc(sizeof(Xorrot128VarShiftsState));
+    obj->x = intf->get_seed64();
+    obj->y = intf->get_seed64() | 0x1; // State mustn't be all zeros
+    obj->a = 3;
+    obj->b = 17;
+    obj->c = 52;
+    return obj;
+}
+
+
+static void set_triple_xr128(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
+{
+    Xorrot128VarShiftsState *obj = state;
+    obj->a = ai; obj->b = bi; obj->c = ci;
+    obj->a = 3;// obj->b = 17; obj->c = 52;
+}
+
+
+int test_xorrot128(void)
+{
+    static const GeneratorInfo gen = {
+        .name = "xorrot128:dynshifts",
+        .description = "xorrot128 with dynamic shifts",
+        .nbits = 64,
+        .create = gen_create_xr128,
+        .free = gen_free,
+        .get_bits = get_bits_xr128,
+        .self_test = NULL,
+        .get_sum = NULL,
+        .parent = NULL
+    };
+
+    static const XorshiftProps props = {
+        .max_value = 64,
+        .nbytes = 16,
+        .is_triple_valid = is_triple_valid_xr128,
+        .set_triple = set_triple_xr128
+    };
+
+
+    return run_triples_search(&gen, &props);
+}
+
+
+/////////////////////////////
 ///// xorrot256 testing /////
 /////////////////////////////
 
@@ -1090,6 +1167,7 @@ int main(int argc, char *argv[])
         {"xorshift32",     test_xorshift32},
         {"xorshift64",     test_xorshift64},
         {"xorshift128",    test_xorshift128},
+        {"xorrot128",      test_xorrot128},
         {"xorrot160",      test_xorrot160},
         {"xorrot256",      test_xorrot256},
         {"xorrot320",      test_xorrot320},
