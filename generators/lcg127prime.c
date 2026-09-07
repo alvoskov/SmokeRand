@@ -98,6 +98,7 @@ static inline uint64_t get_bits_generic_raw(Lcg128State *obj, uint64_t a)
     // be excluded anyway during the `m_buf[1] &= mask` step.
     if (m_buf[1] >> 63 != 0) {
         unsigned_add128(&m_buf[1], &m_buf[0], 1U);
+        m_buf[1] &= mask;
     }
     // Update the state
     obj->x_low = m_buf[0];
@@ -143,8 +144,8 @@ MAKE_GET_BITS_WRAPPERS(mul3)
  */
 static int run_self_test(const CallerAPI *intf)
 {
-    Lcg128State obj = {.x_low = 1, .x_high = 0};
-    uint64_t u, u_ref = 0xe490c2a6c3e38bcd ;
+    Lcg128State obj = {.x_low = 0x9cddbc9e15c3164e, .x_high = 0x305ee910ea806dd5};
+    uint64_t u, u_ref = 0x6a7df768cf4b7d68;
     for (size_t i = 0; i < 1000000; i++) {
         u = get_bits_mul1_raw(&obj);
     }
