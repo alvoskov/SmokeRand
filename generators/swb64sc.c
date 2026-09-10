@@ -7,23 +7,38 @@ PRNG_CMODULE_PROLOG
 
 typedef struct {    
     uint64_t x[SWB_R];
-    unsigned int c;
+    uint64_t c;
     size_t pos;
 } Swb64State;
 
+
+static inline uint64_t u64_swb(uint64_t x, uint64_t y, uint64_t b_in, uint64_t *b_out)
+{
+//    return __builtin_subcll(x, y, b_in, b_out);
+/*
+    uint64_t diff1 = x - y;
+    uint8_t borrow1 = (x < y) ? 1 : 0;
+    
+    uint64_t diff2 = diff1 - b_in;
+    uint8_t borrow2 = (diff1 < b_in) ? 1 : 0;
+    
+    *b_out = borrow1 | borrow2;
+    return diff2;
+*/
+
+    uint64_t ans = x - y - b_in;
+    *b_out = (ans > x) ? 1 : 0;
+    return ans;
+}
 
 static inline uint64_t get_bits_raw(Swb64State *obj)
 {
     if (obj->pos == SWB_R) {
         for (int i = 0; i < SWB_S; i++) {
-            const uint64_t xr = obj->x[i], xs = obj->x[i + (SWB_R - SWB_S)];
-            obj->x[i] = xs - xr - obj->c;
-            obj->c = (xs < obj->x[i]) ? 1 : 0;
+            obj->x[i] = u64_swb(obj->x[i + (SWB_R - SWB_S)], obj->x[i], obj->c, &obj->c);
         }
         for (int i = SWB_S; i < SWB_R; i++) {
-            const uint64_t xr = obj->x[i], xs = obj->x[i - SWB_S];
-            obj->x[i] = xs - xr - obj->c;
-            obj->c = (xs < obj->x[i]) ? 1 : 0;
+            obj->x[i] = u64_swb(obj->x[i - SWB_S], obj->x[i], obj->c, &obj->c);
         }
         obj->pos = 0;
     }
