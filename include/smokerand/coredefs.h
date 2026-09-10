@@ -82,4 +82,39 @@ static inline uint64_t rotr64(uint64_t x, int r)
     return (x << ((-r) & 63)) | (x >> r);
 }
 
+/////////////////////////////////////////////////
+///// Some functions for SWB/AWC generators /////
+/////////////////////////////////////////////////
+
+/**
+ * @brief A portable implementation of subtract with borrow operator
+ * for 64-bit unsigned integers.
+ * @details It is defined the next way:
+ *
+ *     d = x - y - b_in
+ *     res, b_out = d % 2**64, 1 if d < 0 else 0
+ */
+static inline uint64_t
+swb_u64(uint64_t x, uint64_t y, uint64_t b_in, uint64_t *b_out)
+{
+#if defined(__has_builtin) && __has_builtin(__builtin_subcll)
+    unsigned long long b_out_buf;
+    const uint64_t ans = __builtin_subcll(x, y, b_in, &b_out_buf);
+    *b_out = (uint64_t) b_out_buf & 0x1;
+    return ans;
+#elif defined(__GNUC__) && (__GNUC__ >= 5)
+    uint64_t d1, d2;
+    const int of1 = __builtin_sub_overflow(x, y, &d1);
+    const int of2 = __builtin_sub_overflow(d1, b_in, &d2);
+    *b_out = of1 || of2;
+    return d2;
+#else
+    const uint64_t d1 = x - y;
+    const uint64_t d2 = d1 - b_in;
+    *b_out = (x < y) || (d1 < b_in);
+    return d2;
+#endif
+}
+
+
 #endif // __SMOKERAND_COREDEFS_H
