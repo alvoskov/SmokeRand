@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ### Bugfix
 
+- Typo in `kiss93` was fixed.
 - Some tables of prime factors in `lfsr_period.c` didn't have `LFSR_EXPS_END`
   terminator (undefined behaviour!)
 - `hamming_distr_calc_zemp`: now it takes into account the number of tuples

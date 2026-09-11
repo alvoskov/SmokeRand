@@ -657,6 +657,33 @@ double hamming_distr_calc_zemp(const unsigned long long *o, size_t nbits)
 }
 
 /**
+ * @brief Buffer for accumulation of pseudorandom values and their
+ * Hamming weights.
+ */
+typedef struct {
+    uint64_t *x; ///< Pointer to the array of values
+    int *hw; ///< Pointer to the array of Hamming weights
+    size_t len;
+} HammingDistrBuffer;
+
+
+void HammingDistrBuffer_init(HammingDistrBuffer *obj, size_t len)
+{
+    obj->x = calloc(len, sizeof(uint64_t));
+    ASSERT_MALLOC_PTR(obj->x, "HammingDistrBuffer_init")
+    obj->hw = calloc(len, sizeof(int));
+    ASSERT_MALLOC_PTR(obj->hw, "HammingDistrBuffer_init")
+    obj->len = len;
+}
+
+void HammingDistrBuffer_destruct(HammingDistrBuffer *obj)
+{
+    free(obj->x);
+    free(obj->hw);
+}
+
+
+/**
  * @brief Keeps empirical frequencies (histograms), empirical random values
  * obtained from the chi2 criterion and the corresponding p-values for the
  * `hamming_distr` statistical test.
@@ -732,6 +759,41 @@ static inline void calc_block_hw_xorsums(unsigned long long *hw_freq,
     }
 }
 
+
+static inline void
+HammingDistrHistArray_process_block(HammingDistrHist *h, size_t nlevels,
+    const HammingDistrBuffer *buf)
+{
+    // 1-value blocks
+    for (size_t j = 0; j < buf->len; j += 2) {
+        h[0].o[buf->hw[j]]++; h[0].o[buf->hw[j + 1]]++;
+        h[0].o_xor[get_uint64_hamming_weight(buf->x[j] ^ buf->x[j + 1])]++;
+    }
+    // 2, 4, 8, 16 - value blocks
+    for (size_t j = 1; j < nlevels; j++) {
+        calc_block_hw_sums(h[j].o,        buf->hw, 1 << j, (int) buf->len);
+        calc_block_hw_xorsums(h[j].o_xor, buf->x,  1 << j, (int) buf->len);
+    }
+}
+
+
+static double
+HammingDistrHistArray_calc_stats(HammingDistrHist *h, int nlevels, size_t nbits, const CallerAPI *intf)
+{
+    double zabs_max = -1.0;
+    intf->printf("    %8s | %8s %10s | %8s %10s\n",
+        "bits", "z", "p", "z_xor", "p_xor");
+    for (int i = 0; i < nlevels; i++) {
+        HammingDistrHist_calc_stats(&h[i]);
+        intf->printf("    %8d | %8.3f %10.3g | %8.3f %10.3g\n",
+            (int) ((1ULL << i) * nbits), h[i].z, h[i].p, h[i].z_xor, h[i].p_xor);
+        const double zabs = fabs(h[i].z), zabs_xor = fabs(h[i].z_xor);
+        if (zabs > zabs_max)     { zabs_max = zabs; }
+        if (zabs_xor > zabs_max) { zabs_max = zabs_xor; }
+    }
+    return zabs_max;
+}
+
 /**
  * @brief This test computes Hamming weight for bit blocks of a pseudorandom
  * sequence and compares histograms (empirical distributions) with theoretical
@@ -767,63 +829,83 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
     unsigned long block_len = 1UL << opts->nlevels;
     HammingDistrHist *h = calloc((size_t) opts->nlevels, sizeof(HammingDistrHist));
     ASSERT_MALLOC_PTR(h, "hamming_distr_test")
-    uint64_t *x = calloc(block_len, sizeof(uint64_t));
-    ASSERT_MALLOC_PTR(x, "hamming_distr_test")
-    int *hw = calloc(block_len, sizeof(int));
-    ASSERT_MALLOC_PTR(hw, "hamming_distr_test")
+    HammingDistrHist *h_low1 = calloc((size_t) opts->nlevels, sizeof(HammingDistrHist));
+    ASSERT_MALLOC_PTR(h_low1, "hamming_distr_test")
+    HammingDistrBuffer buf;
+    HammingDistrBuffer_init(&buf, (size_t) block_len);
+    HammingDistrBuffer buf_low1;
+    HammingDistrBuffer_init(&buf_low1, (size_t) block_len);
     for (int i = 0; i < opts->nlevels; i++) {
         HammingDistrHist_init(&h[i], nbits << i);
+        HammingDistrHist_init(&h_low1[i], nbits << i);
     }
     obj->intf->printf("  Sample size, values:     %llu (2^%.2f or 10^%.2f)\n",
         opts->nvalues, sr_log2((double) opts->nvalues), log10((double) opts->nvalues));
     uint64_t mask = (nbits == 64) ? 0xFFFFFFFFFFFFFFFF : ((1ull << nbits) - 1);
     uint64_t not_mask = ~mask;
     uint64_t bad_or = 0;
-    for (unsigned long long i = 0; i < opts->nvalues; i += block_len) {
-        for (unsigned int j = 0; j < block_len; j++) {
-            uint64_t u = obj->gi->get_bits(obj->state);
-            x[j] = u & mask;
+
+    {
+        unsigned long block_pos = 0;
+        unsigned long block_low1_pos = 0;
+        unsigned long u_low1_pos = 0;
+        uint64_t u_low1 = 0;
+        for (unsigned long long i = 0; i < opts->nvalues; i++) {
+            // Generate and process the value
+            const uint64_t u = obj->gi->get_bits(obj->state);
+            buf.x[block_pos] = u & mask;
             bad_or |= u & not_mask;
-            hw[j] = get_uint64_hamming_weight(x[j]);
-        }
-        // 1-value blocks
-        for (unsigned long j = 0; j < block_len; j += 2) {
-            h[0].o[hw[j]]++; h[0].o[hw[j + 1]]++;
-            h[0].o_xor[get_uint64_hamming_weight(x[j] ^ x[j + 1])]++;
-        }
-        // 2, 4, 8, 16 - value blocks
-        for (int j = 1; j < opts->nlevels; j++) {
-            calc_block_hw_sums(h[j].o,        hw, 1 << j, (int) block_len);
-            calc_block_hw_xorsums(h[j].o_xor, x,  1 << j, (int) block_len);
+            buf.hw[block_pos] = get_uint64_hamming_weight(buf.x[block_pos]);
+            block_pos++;
+            // Collect the lowest bits
+            u_low1 = (u_low1 << 1) | (u & 0x1);
+            if (++u_low1_pos == nbits) {
+                buf_low1.x[block_low1_pos] = u_low1;
+                buf_low1.hw[block_low1_pos] = get_uint64_hamming_weight(u_low1);
+                block_low1_pos++;
+                u_low1 = 0;
+                u_low1_pos = 0;
+            }
+            // Accumulate statistics            
+            if (block_pos == block_len) {
+                HammingDistrHistArray_process_block(h, (size_t) opts->nlevels, &buf);
+                block_pos = 0;
+            }
+            if (block_low1_pos == block_len) {
+                HammingDistrHistArray_process_block(h_low1, (size_t) opts->nlevels, &buf_low1);
+                block_low1_pos = 0;
+            }
         }
     }
+
     if (bad_or != 0) {
         obj->intf->printf("  Warning: generator output size exceeds its declared size\n");
     }
-    ans.x = -1.0;
-    obj->intf->printf("  Blocks analysis results\n");
-    obj->intf->printf("    %8s | %8s %10s | %8s %10s\n",
-        "bits", "z", "p", "z_xor", "p_xor");
-    for (int i = 0; i < opts->nlevels; i++) {
-        HammingDistrHist_calc_stats(&h[i]);
-        obj->intf->printf("    %8d | %8.3f %10.3g | %8.3f %10.3g\n",
-            (int) ((1ULL << i) * nbits), h[i].z, h[i].p, h[i].z_xor, h[i].p_xor);
-        const double zabs = fabs(h[i].z), zabs_xor = fabs(h[i].z_xor);
-        if (zabs > ans.x)     { ans.x = zabs; }
-        if (zabs_xor > ans.x) { ans.x = zabs_xor; }
+    obj->intf->printf("  Blocks analysis results (all bits)\n");
+    const double zabs_all = HammingDistrHistArray_calc_stats(h, opts->nlevels, nbits, obj->intf);
+    obj->intf->printf("  Blocks analysis results (the lowest bits only)\n");
+    const double zabs_low1 = HammingDistrHistArray_calc_stats(h_low1, opts->nlevels, nbits, obj->intf);
+
+    if (zabs_all > zabs_low1) {
+        ans.x = zabs_all;
+    } else {
+        ans.x = zabs_low1;
     }
+
     ans.penalty = PENALTY_HAMMING_DISTR;
     TestResults_set_pmin_ntests(&ans,
-        (unsigned long) (2 * opts->nlevels),
+        (unsigned long) (4 * opts->nlevels),
         sr_halfnormal_pvalue(ans.x)
     );
     obj->intf->printf("  Final: z = %7.3f, p = %.3g\n", ans.x, ans.p);
     for (int i = 0; i < opts->nlevels; i++) {
         HammingDistrHist_destruct(&h[i]);
+        HammingDistrHist_destruct(&h_low1[i]);
     }   
     free(h);
-    free(x);
-    free(hw);
+    free(h_low1);
+    HammingDistrBuffer_destruct(&buf);
+    HammingDistrBuffer_destruct(&buf_low1);
     return ans;
 }
 
