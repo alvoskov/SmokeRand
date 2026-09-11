@@ -37,7 +37,7 @@ static inline uint64_t get_bits_raw(KISS93State *obj)
     // Some LFSRs
     // a) LFSR 1: b = b*(I + L**17)*(I + R**15) for 32-bit words
     obj->xs1 ^= obj->xs1 << 17;
-    obj->xs1 ^= obj->xs2 >> 15;
+    obj->xs1 ^= obj->xs1 >> 15;
     // b) LFSR 2: b = b*(I + L**18)*(I + R**13) for 31-bit words
     obj->xs2 = ((obj->xs2 << 18) ^ obj->xs2) & 0x7fffffffU;
     obj->xs2 ^= obj->xs2 >> 13;
