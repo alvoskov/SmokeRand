@@ -1,4 +1,5 @@
 /*
+(9,8)>=2 TiB; smokerand full
 def rotl64(x, r):
     return ((x << r) | (x >> (64 - r))) % 2**64
 
