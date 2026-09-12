@@ -521,21 +521,86 @@ static unsigned long long GapOptions_max_gaplen(const GapOptions *opts, double p
     return (unsigned long long) ((log(pgap_fail) - log(p)) / log(1.0 - p));
 }
 
+
+typedef struct {
+    // Frequency table
+    size_t *Oi;
+    size_t nbins;
+    // Test settings
+    uint64_t mask;
+    double beta;
+    // Current state
+    size_t gap_len; ///< Length of the current gap
+    unsigned long long ngaps; ///< Number of processed gaps
+} GapFreqTable;
+
+
+void GapFreqTable_init(GapFreqTable *obj, uint64_t mask, size_t nbins, double beta)
+{
+    obj->Oi = calloc(nbins + 1, sizeof(size_t));
+    obj->nbins = nbins;
+    obj->mask = mask;
+    obj->beta = beta;
+    obj->gap_len = 0;
+    obj->ngaps = 0;
+    ASSERT_MALLOC_PTR(obj->Oi, "GapFreqTable_init")
+}
+
+static inline void GapFreqTable_add_value(GapFreqTable *obj, uint64_t u)
+{
+    if ((u & obj->mask) == 0) {
+        obj->Oi[(obj->gap_len < obj->nbins) ? obj->gap_len : obj->nbins]++;
+        obj->gap_len = 0;
+        obj->ngaps++;
+    } else {
+        obj->gap_len++;
+    }
+}
+
+double GapFreqTable_calc_chi2emp(GapFreqTable *obj)
+{
+    const double p = obj->beta, ngaps = (double) obj->ngaps;
+    double chi2emp = 0.0;
+    for (size_t i = 0; i < obj->nbins; i++) {
+        const double Ei = p * pow(1.0 - p, (double) i) * ngaps;
+        chi2emp += calc_chi2emp_term(obj->Oi[i], Ei);
+    }
+    return chi2emp;
+}
+
+
+double GapFreqTable_calc_zabs_emp(GapFreqTable *obj)
+{
+    const double chi2emp = GapFreqTable_calc_chi2emp(obj);
+    const unsigned long f = (unsigned long) (obj->nbins - 1);
+    return fabs(sr_chi2_to_stdnorm_approx(chi2emp, f));
+}
+
+
+void GapFreqTable_destruct(GapFreqTable *obj)
+{
+    free(obj->Oi);
+    obj->Oi = NULL;
+}
+
+
 /**
  * @brief Knuth's gap test for detecting lagged Fibonacci generators.
  * @details Gap is \f$ [0;\beta) \f$ where \f$\beta = 1 / (2^{shl}) \f$.
+ * It contains two subtests: (1) for the raw values; (2) for the reverse
+ * bits order.
  */
 TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
 {
-    const double pgap_fail = 1.0e-15;
-    const double Ei_min = 10.0;
+    const double pgap_fail = 1.0e-15, Ei_min = 10.0;
     const double p = 1.0 / (double) (1ull << opts->shl); // beta in the floating point format
-    const uint64_t beta = 1ull << (obj->gi->nbits - opts->shl);
-    uint64_t u;
+    const uint64_t beta_mask_lo = (1ULL << opts->shl) - 1;
+    const uint64_t beta_mask_hi = beta_mask_lo << (obj->gi->nbits - opts->shl);
     const unsigned long long ngaps = opts->ngaps;
     const size_t nbins = (size_t) (log(Ei_min / ((double) ngaps * p)) / log(1 - p));
-    size_t *Oi = calloc(nbins + 1, sizeof(size_t));
-    ASSERT_MALLOC_PTR(Oi, "gap_test")
+    GapFreqTable gaps_hi, gaps_lo;
+    GapFreqTable_init(&gaps_hi, beta_mask_hi, nbins, p);
+    GapFreqTable_init(&gaps_lo, beta_mask_lo, nbins, p);
     unsigned long long nvalues = 0;
     const unsigned long long max_gap_len = GapOptions_max_gaplen(opts, pgap_fail);
     TestResults ans = TestResults_create("Gap");
@@ -546,36 +611,36 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
         (unsigned long long) nbins);
     obj->intf->printf("  max_gap_len = %llu\n", max_gap_len);
 
-    for (unsigned long long i = 0; i < ngaps; i++) {
-        size_t gap_len = 0;
-        u = obj->gi->get_bits(obj->state);
-        nvalues++;
-        while (u > beta) {
-            gap_len++;
-            u = obj->gi->get_bits(obj->state);
-            nvalues++;
-            if (gap_len >= max_gap_len) {
-                obj->intf->printf("  Generator output doesn't hit the gap! p <= %g\n", pgap_fail);
-                ans.p = pgap_fail;
-                ans.alpha = 1.0 - ans.p;
-                ans.x = NAN;
-                free(Oi);
-                return ans;
-            }
+    do {
+        uint64_t u = obj->gi->get_bits(obj->state); nvalues++;
+        GapFreqTable_add_value(&gaps_hi, u);
+        GapFreqTable_add_value(&gaps_lo, u);
+        if (gaps_hi.gap_len >= max_gap_len || gaps_lo.gap_len >= max_gap_len) {
+            obj->intf->printf("  Generator output doesn't hit the gap! p <= %g\n", pgap_fail);
+            ans.p = pgap_fail;
+            ans.alpha = 1.0 - ans.p;
+            ans.x = NAN;
+            GapFreqTable_destruct(&gaps_hi);
+            GapFreqTable_destruct(&gaps_lo);            
+            return ans;
         }
-        Oi[(gap_len < nbins) ? gap_len : nbins]++;
-    }
+    } while (gaps_hi.ngaps < ngaps || gaps_lo.ngaps < ngaps);
+
+    const double zabs_emp_hi = GapFreqTable_calc_zabs_emp(&gaps_hi);
+    const double zabs_emp_lo = GapFreqTable_calc_zabs_emp(&gaps_lo);
+    const double p_hi = sr_halfnormal_pvalue(zabs_emp_hi);
+    const double p_lo = sr_halfnormal_pvalue(zabs_emp_lo);
+
     ans.penalty = PENALTY_GAP;
-    ans.x = 0.0; // chi2emp
-    for (size_t i = 0; i < nbins; i++) {
-        const double Ei = p * pow(1.0 - p, (double) i) * (double) ngaps;
-        ans.x += calc_chi2emp_term(Oi[i], Ei);
-    }
-    free(Oi);
-    ans.p = sr_chi2_pvalue(ans.x, (unsigned long) (nbins - 1));
-    ans.alpha = sr_chi2_cdf(ans.x, (unsigned long) (nbins - 1));
+    ans.x = zabs_emp_hi;
+    TestResults_set_pmin_ntests(&ans, 2, (p_hi < p_lo) ? p_hi : p_lo);
+    GapFreqTable_destruct(&gaps_hi);
+    GapFreqTable_destruct(&gaps_lo);
     obj->intf->printf("  Values processed: %llu (2^%.1f)\n",
         nvalues, sr_log2((double) nvalues));
+    
+    obj->intf->printf("  High: x = %g; p = %g\n", zabs_emp_hi, p_hi);
+    obj->intf->printf("  Low:  x = %g; p = %g\n", zabs_emp_lo, p_lo);
     obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
     return ans;
@@ -584,7 +649,6 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
 ///////////////////////////////////////////////
 ///// Gap16 ('rda16') test implementation /////
 ///////////////////////////////////////////////
-
 
 
 typedef struct {

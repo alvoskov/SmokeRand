@@ -13,6 +13,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   etc. (e.g. `lrnd64_255`, `tt800`, `well1024a` etc), can use `stdin`/`stdout`
   interface. Cannot work if nonlinear scramblers are present. This battery
   also supports PRNGs based on Mersenne primes.
+- gap test: now it simultaneously applied to the lowest and highest bits,
+  it is equivalent to the subtests: for raw values and for values with reversed
+  bits order. Useful for `gap_inv8` test for a simplified version of Sirius64.
+- `hamming_distr` test now contains subtests for the lowest bit. Useful for
+  catching flaws in `tf0_64`, `swbw`, `sirius64_bad`.
 - `melg4253` generator was added.
 - `xorrot512` and `xorrot512mrt` experimental PRNGs by A.L. Voskov.
 - `test_lfsr_period.c`: `xoshiro512++` was added as a test example.
