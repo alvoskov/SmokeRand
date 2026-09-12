@@ -778,7 +778,8 @@ HammingDistrHistArray_process_block(HammingDistrHist *h, size_t nlevels,
 
 
 static double
-HammingDistrHistArray_calc_stats(HammingDistrHist *h, int nlevels, size_t nbits, const CallerAPI *intf)
+HammingDistrHistArray_calc_stats(HammingDistrHist *h,
+    int nlevels, size_t nbits, const CallerAPI *intf)
 {
     double zabs_max = -1.0;
     intf->printf("    %8s | %8s %10s | %8s %10s\n",
@@ -792,6 +793,44 @@ HammingDistrHistArray_calc_stats(HammingDistrHist *h, int nlevels, size_t nbits,
         if (zabs_xor > zabs_max) { zabs_max = zabs_xor; }
     }
     return zabs_max;
+}
+
+static TestResults
+hamming_distr_test_calc_stats(GeneratorState *obj, const HammingDistrOptions *opts,
+    HammingDistrHist *h, HammingDistrHist *h_low1)
+{
+    const size_t nbits = obj->gi->nbits;
+    // Statistics for all bits
+    obj->intf->printf("  Blocks analysis results (all bits)\n");
+    const double zabs_all = HammingDistrHistArray_calc_stats(h, opts->nlevels, nbits, obj->intf);
+    const double p_all = sr_geom_cdf(
+        (unsigned long) (2 * opts->nlevels),
+        sr_halfnormal_pvalue(zabs_all)
+    );
+    obj->intf->printf("  All bits: z = %7.3f, p = %.3g\n", zabs_all, p_all);
+    // Statistics for the lowest bits
+    obj->intf->printf("  Blocks analysis results (the lowest bits only)\n");
+    const double zabs_low1 = HammingDistrHistArray_calc_stats(h_low1, opts->nlevels, nbits, obj->intf);
+    const double p_low1 = sr_geom_cdf(
+        (unsigned long) (2 * opts->nlevels),
+        sr_halfnormal_pvalue(zabs_low1)
+    );
+    obj->intf->printf("  The lowest bits: z = %7.3f, p = %.3g\n", zabs_low1, p_low1);
+    // The final statistics
+    TestResults ans = TestResults_create("hamming_distr");
+    if (zabs_all > zabs_low1) {
+        ans.x = zabs_all;
+    } else {
+        ans.x = zabs_low1;
+    }
+
+    ans.penalty = PENALTY_HAMMING_DISTR;
+    TestResults_set_pmin_ntests(&ans,
+        (unsigned long) (4 * opts->nlevels),
+        sr_halfnormal_pvalue(ans.x)
+    );
+    obj->intf->printf("  Final: z = %7.3f, p = %.3g\n", ans.x, ans.p);
+    return ans;
 }
 
 /**
@@ -819,10 +858,10 @@ HammingDistrHistArray_calc_stats(HammingDistrHist *h, int nlevels, size_t nbits,
  */
 TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *opts)
 {
-    TestResults ans = TestResults_create("hamming_distr");
     size_t nbits = obj->gi->nbits;
     obj->intf->printf("Hamming weights distribution test (histogram)\n");
     if (opts->nlevels < 1) {
+        const TestResults ans = TestResults_create("hamming_distr");
         obj->intf->printf("  Invalid nlevels value\n");
         return ans;
     }
@@ -881,23 +920,7 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
     if (bad_or != 0) {
         obj->intf->printf("  Warning: generator output size exceeds its declared size\n");
     }
-    obj->intf->printf("  Blocks analysis results (all bits)\n");
-    const double zabs_all = HammingDistrHistArray_calc_stats(h, opts->nlevels, nbits, obj->intf);
-    obj->intf->printf("  Blocks analysis results (the lowest bits only)\n");
-    const double zabs_low1 = HammingDistrHistArray_calc_stats(h_low1, opts->nlevels, nbits, obj->intf);
-
-    if (zabs_all > zabs_low1) {
-        ans.x = zabs_all;
-    } else {
-        ans.x = zabs_low1;
-    }
-
-    ans.penalty = PENALTY_HAMMING_DISTR;
-    TestResults_set_pmin_ntests(&ans,
-        (unsigned long) (4 * opts->nlevels),
-        sr_halfnormal_pvalue(ans.x)
-    );
-    obj->intf->printf("  Final: z = %7.3f, p = %.3g\n", ans.x, ans.p);
+    const TestResults ans = hamming_distr_test_calc_stats(obj, opts, h, h_low1);
     for (int i = 0; i < opts->nlevels; i++) {
         HammingDistrHist_destruct(&h[i]);
         HammingDistrHist_destruct(&h_low1[i]);
