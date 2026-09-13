@@ -4,7 +4,7 @@
  * of SmokeRand test suite.
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -17,6 +17,10 @@
 #include <stddef.h>
 #ifdef __WATCOMC__
 #include <stdlib.h>
+#endif
+
+#if defined(_MSC_VER) && !defined(__clang__)
+#include <intrin.h>
 #endif
 
 //////////////////////////////////////////
@@ -86,6 +90,12 @@ static inline uint64_t rotr64(uint64_t x, int r)
 ///// Some functions for SWB/AWC generators /////
 /////////////////////////////////////////////////
 
+#ifdef __has_builtin
+    #if __has_builtin(__builtin_subcll)
+        #define HAS_BUILTIN_SUBCLL 1
+    #endif
+#endif
+
 /**
  * @brief A portable implementation of subtract with borrow operator
  * for 64-bit unsigned integers.
@@ -97,7 +107,7 @@ static inline uint64_t rotr64(uint64_t x, int r)
 static inline uint64_t
 swb_u64(uint64_t x, uint64_t y, uint64_t b_in, uint64_t *b_out)
 {
-#if defined(__has_builtin) && __has_builtin(__builtin_subcll)
+#if defined(HAS_BUILTIN_SUBCLL)
     unsigned long long b_out_buf;
     const uint64_t ans = __builtin_subcll(x, y, b_in, &b_out_buf);
     *b_out = (uint64_t) b_out_buf & 0x1;
@@ -108,6 +118,11 @@ swb_u64(uint64_t x, uint64_t y, uint64_t b_in, uint64_t *b_out)
     const int of2 = __builtin_sub_overflow(d1, b_in, &d2);
     *b_out = of1 || of2;
     return d2;
+#elif defined(_MSC_VER)
+    unsigned char b_out_buf;
+    const uint64_t ans = _subborrow_u64(x, y, b_in, &b_out_buf);
+    *b_out = b_out_buf;
+    return ans;
 #else
     const uint64_t d1 = x - y;
     const uint64_t d2 = d1 - b_in;
