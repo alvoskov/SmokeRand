@@ -64,7 +64,7 @@ typedef void* ThreadRetVal;
 #include <stdio.h>
 #include <stdlib.h>
 #define DECLARE_MUTEX(mutex) static HANDLE mutex = NULL;
-#define INIT_MUTEX(mutex) if (mutex == NULL) { mutex = CreateMutex(NULL, FALSE, "\""#mutex"\""); }
+#define INIT_MUTEX(mutex) if (mutex == NULL) { mutex = CreateMutex(NULL, FALSE, NULL); }
 #define MUTEX_LOCK(mutex, infostr) { \
     DWORD dwResult = WaitForSingleObject(mutex, INFINITE); \
     if (dwResult != WAIT_OBJECT_0) { \
