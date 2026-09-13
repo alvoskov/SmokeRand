@@ -71,7 +71,7 @@ local exefiles = {'smokerand', 'sr_speed', 'find_xorshift_params',
 local gen_sources = {}
 for i=1,#gen_sources_raw do
     local gen = gen_sources_raw[i]
-    if gen ~= "lfib_ranmar" then
+    if gen ~= "lfib_ranmar" and gen ~= "swb53dec" then
         table.insert(gen_sources, gen)
     end
 end
@@ -113,13 +113,7 @@ local all_section = "all: $(bindir)/sr_dos32.exe $(bindir)/srtiny16.exe $(bindir
 for _, fname in pairs(exefiles) do
     all_section = all_section .. "$(bindir)/" .. fname .. ".exe "
 end
-io.write(all_section .. "\n")
---[[
-io.write("all: $(bindir)/smokerand.exe $(bindir)/sr_speed.exe $(bindir)/sr_dos32.exe " ..
-    "$(bindir)/test_funcs.exe $(bindir)/test_syscrypto.exe $(bindir)/srtiny16.exe " ..
-    "$(bindir)/find_xorshift_params.exe " ..
-    "$(bindir)/setvesa.com &\n")
---]]
+io.write(all_section .. "&\n")
 local gen_all_sources = {}
 for _, e in pairs(gen_sources) do table.insert(gen_all_sources, e) end
 for _, e in pairs(gen_asm_sources) do table.insert(gen_all_sources, e) end
