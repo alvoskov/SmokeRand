@@ -118,10 +118,9 @@ swb_u64(uint64_t x, uint64_t y, uint64_t b_in, uint64_t *b_out)
     const int of2 = __builtin_sub_overflow(d1, b_in, &d2);
     *b_out = of1 || of2;
     return d2;
-#elif defined(_MSC_VER)
-    unsigned char b_out_buf;
-    const uint64_t ans = _subborrow_u64(x, y, b_in, &b_out_buf);
-    *b_out = b_out_buf;
+#elif defined(_MSC_VER) && defined(_WIN64)
+    uint64_t ans;
+    *b_out = _subborrow_u64((unsigned char) b_in, x, y, &ans);
     return ans;
 #else
     const uint64_t d1 = x - y;

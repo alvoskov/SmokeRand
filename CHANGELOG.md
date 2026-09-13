@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
-## [0.51]
+## [0.51] 2026-09-14
 
 ### Added
 
@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `full` battery: new modifications of the birthday spacings test with expected
   number collison of 256. They are rather fast but allow to catch `grube_mrg2`
   generator.
-- birthday spacings test: lambda (expected number of collisions) can be now
+- birthday spacings test: `lambda` (expected number of collisions) can be now
   set by a user.
 - gap test: now it simultaneously applied to the lowest and highest bits,
   it is equivalent to the subtests: for raw values and for values with reversed
@@ -46,6 +46,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `hamming_distr_calc_zemp`: now it takes into account the number of tuples
   with the maximal Hamming weight. May be detectable only for 32-bit tuples.
 - `swbmwc64`, `swblux64`: now uses `swb_u64` to prevent rare and subtle errors.
+- Build fixes for MSVC and Open Watcom.
 
 ### Changes
 

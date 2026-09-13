@@ -35,9 +35,11 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 # It is a workaround for different behaviour of GCC and MSVC
 # GCC in GNU/Linux cannot work without -lm key, MSVC
 # cannot work WITH it, MinGW tolerates both variants
-find_library(M_LIB m)
-if (M_LIB)
-    set(COMMON_LIBS m)
+if (NOT MSVC)
+    find_library(M_LIB m)
+    if (M_LIB)
+        set(COMMON_LIBS m)
+    endif()
 endif()
 
 add_library(smokerand_core
