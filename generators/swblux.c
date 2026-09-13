@@ -96,12 +96,8 @@ static void *create(const CallerAPI *intf)
     }
     intf->printf("SWB(43,22,2^32-5)[luxury=%d]\n", luxury);
     SwbLuxState *obj = intf->malloc(sizeof(SwbLuxState));
-    for (int i = 1; i <= SWB_A; i++) {
-        obj->x[i] = intf->get_seed32();
-    }
-    obj->c = 1;
-    obj->x[1] |= 1;
-    obj->x[2] = (obj->x[2] >> 1) << 1;
+    expand_seed64_to_u32(obj->x + 1, SWB_A, intf->get_seed64());
+    obj->c = (obj->x[1] == 0) ? 1 : 0;
     obj->i = SWB_A; obj->j = SWB_B;
     obj->luxury = luxury;
     obj->pos = 0;

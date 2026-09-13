@@ -28,6 +28,8 @@ The next notation is ued for the `coll64dec` test results:
 The `-(>>>)` result is typical for cases when PRNG period is exausted during
 the testing.
 
+Note: some of `full` results are for SmokeRand < 0.51.
+
  Algorithm         | Output | express | brief | default | full | cpb  | coll64 | Grade | TestU01 | PractRand 
 -------------------|--------|---------|-------|---------|------|------|--------|-------|---------|-----------
  a5rand            | u64    | +       | +     | +       | +    | 0.37 | +      | 4(0)  |         | >= 16 TiB
@@ -108,7 +110,7 @@ the testing.
  gjrand32          | u32    | +       | +     | +       | +    | 0.69 | +      | 4(0)  | +       | >= 32 TiB
  gjrand64          | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |+il      | >= 32 TiB
  gmwc128           | u64    | +       | +     | +       | +    | 0.72 | +      | 4     |         | >= 32 TiB
- grube73_mrg2      | u31    | +       | +     | +       | +    | 1.4  | N/A    | 1     | Crush   | ?
+ grube73_mrg2      | u31    | +       | +     | +       | 1    | 1.4  | N/A    | 1     | Crush   | ?
  grube73_mrg3      | u31    | +       | +     | +       | +    | 1.9  | N/A    | 4     | +       | >= 2 TiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 5     | +       | >= 32 TiB
  hicg64_u32        | u32    | 1       | 2     | 3       | 3    | 5.4  | +      | 0     | Small   | 32 MiB
@@ -386,7 +388,7 @@ the testing.
  swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | +      | 0     | Crush   | 512 GiB
  swbmwc32          | u32    | +       | 1     | 1       | 1    | 0.87 | +      | 0     | Small   | 128 GiB
  swbmwc64          | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |+_lo/+_hi| >= 32 TiB
- swbw              | u32    | +       | 1     | 1       | 1    | 2.8  | +      | 2     | +       | 4 GiB
+ swbw              | u32    | +       | 2     | 2       | 2    | 2.8  | +      | 2     | +       | 4 GiB
  taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  | Small   | 32 KiB
  tf0_32            | u32    | 5       | 18    | 33      | 38   | 0.48 | -(>>>) | 0     | -       | 2 KiB
  tf0_32sc2         | u32    | +       | 1     | 2       | 8    | 0.57 | -(>>>) | 0     | Small   | 512 MiB
@@ -1001,6 +1003,17 @@ are less sensitive, e.g. entropy test catches only randu.
 - Failed ENT: randu, lcg69069, drand48, shr3
 - Passes ENT: lcg32prime, lcg64, lfib31, swb
 
+# Birthday spacings test and different number of collisions
+
+`lcg64prime` passes `bspace64_1d_c256` (`lambda=4`, 250 samples) but fails
+`bspace64_1d` (`lambda=256`, 12 samples) from the `full` battery.
+
+`grube73_mrg2` passes all birthday spacings test with `lambda=4` but fails
+the `bspace16_4d_c256_high` test with `lambda=256`.
+
+`sezgin63` passes all `c256` birthday spacings (with `lambda=256`) but fails
+some tests with `lambda=4`.
+
 # Notes about birthday spacings tests in PractRand 0.96
 
 A new statistical test, "birthday spacings systematic" was introduced in
@@ -1012,6 +1025,7 @@ with large lags that are detected by SmokeRand.
   Generator     | PractRand 0.96
 ----------------|----------------
  CSWB4228/64:   | >= 8 TiB(?)
+ grube73_mrg2   | 128 GiB
  lcg61prime     | 4 GiB
  lcg64prime     | 32 GiB
  lcg127prime    | >= 1 TiB

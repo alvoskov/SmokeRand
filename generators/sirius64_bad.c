@@ -30,17 +30,12 @@ typedef struct {
 
 static inline uint64_t get_bits_raw(Sirius64State *obj)
 {
-//    uint64_t out = 0;
-//    for (int i = 0; i < 64; i++) {
-        const uint64_t gamma = 0x9E3779B97F4A7C15U;
-        uint64_t z = (obj->x += gamma);
-        z = gamma * (z ^ (z >> 17));
-        z = rotl64(z, 32);
-        z = gamma * (obj->x ^ z);
-//        out = (out << 1) | (z & 0x1);
-        return gamma * (obj->x ^ z);
-//    }
-//    return out;
+    const uint64_t gamma = 0x9E3779B97F4A7C15U;
+    uint64_t z = (obj->x += gamma);
+    z = gamma * (z ^ (z >> 17));
+    z = rotl64(z, 32);
+    z = gamma * (obj->x ^ z); // Addition of the second round causes `gap_inv8` failure
+    return z;
 }
 
 static void *create(const CallerAPI *intf)
@@ -50,4 +45,4 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-MAKE_UINT64_PRNG("Sirius64", NULL)
+MAKE_UINT64_PRNG("Sirius64_bad", NULL)

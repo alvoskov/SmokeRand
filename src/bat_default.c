@@ -26,19 +26,19 @@ BatteryExitCode battery_default(const GeneratorInfo *gen, const CallerAPI *intf,
     static const MonobitFreqOptions monobit = {.nvalues = 1ull << 28};
     // Birthday spacings tests options
     static const BSpaceNDOptions
-        bspace64_1d      = {.nbits_per_dim = 64, .ndims = 1,  .nsamples = 100,  .get_lower = 1},
-        bspace32_1d      = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, .get_lower = 1},
-        bspace32_1d_high = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, .get_lower = 0},
-        bspace32_2d      = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 10,   .get_lower = 1},
-        bspace32_2d_high = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 10,   .get_lower = 0},
-        bspace21_3d      = {.nbits_per_dim = 21, .ndims = 3,  .nsamples = 10,   .get_lower = 1},
-        bspace21_3d_high = {.nbits_per_dim = 21, .ndims = 3,  .nsamples = 10,   .get_lower = 0},
-        bspace16_4d      = {.nbits_per_dim = 16, .ndims = 4,  .nsamples = 10,   .get_lower = 1},
-        bspace16_4d_high = {.nbits_per_dim = 16, .ndims = 4,  .nsamples = 10,   .get_lower = 0},
-        bspace8_8d       = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 10,   .get_lower = 1},
-        bspace8_8d_high  = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 10,   .get_lower = 0},
-        bspace4_16d      = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 10,   .get_lower = 1},
-        bspace4_16d_high = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 10,   .get_lower = 0};
+        bspace64_1d      = {.nbits_per_dim = 64, .ndims = 1,  .nsamples = 100,  .get_lower = 1, .lambda = 4},
+        bspace32_1d      = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, .get_lower = 1, .lambda = 4},
+        bspace32_1d_high = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, .get_lower = 0, .lambda = 4},
+        bspace32_2d      = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 10,   .get_lower = 1, .lambda = 4},
+        bspace32_2d_high = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 10,   .get_lower = 0, .lambda = 4},
+        bspace21_3d      = {.nbits_per_dim = 21, .ndims = 3,  .nsamples = 10,   .get_lower = 1, .lambda = 4},
+        bspace21_3d_high = {.nbits_per_dim = 21, .ndims = 3,  .nsamples = 10,   .get_lower = 0, .lambda = 4},
+        bspace16_4d      = {.nbits_per_dim = 16, .ndims = 4,  .nsamples = 10,   .get_lower = 1, .lambda = 4},
+        bspace16_4d_high = {.nbits_per_dim = 16, .ndims = 4,  .nsamples = 10,   .get_lower = 0, .lambda = 4},
+        bspace8_8d       = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 10,   .get_lower = 1, .lambda = 4},
+        bspace8_8d_high  = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 10,   .get_lower = 0, .lambda = 4},
+        bspace4_16d      = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 10,   .get_lower = 1, .lambda = 4},
+        bspace4_16d_high = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 10,   .get_lower = 0, .lambda = 4};
 
     // Birthday spacings test with decimation
     static const BSpace4x8dDecimatedOptions bs_dec = {.step = 1 << 18};

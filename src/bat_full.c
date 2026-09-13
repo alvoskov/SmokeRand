@@ -15,7 +15,8 @@
 
 #define COLLOVER_LO_PROPS .nsamples = 50, .n = COLLOVER_DEFAULT_N, .get_lower = 1
 #define COLLOVER_HI_PROPS .nsamples = 50, .n = COLLOVER_DEFAULT_N, .get_lower = 0
-
+#define BSPACE_C256_LO_PROPS .nsamples = 12, .get_lower = 1, .lambda = 256
+#define BSPACE_C256_HI_PROPS .nsamples = 12, .get_lower = 0, .lambda = 256
 
 /**
  * @brief SmokeRand `full` battery.
@@ -34,19 +35,34 @@ BatteryExitCode battery_full(const GeneratorInfo *gen, const CallerAPI *intf,
     static const MonobitFreqOptions monobit = {.nvalues = 1ull << 28};
     // Birthday spacings tests options
     static const BSpaceNDOptions
-        bspace64_1d      = {.nbits_per_dim = 64, .ndims = 1,  .nsamples = 250,  .get_lower = 1},
-        bspace32_1d      = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, .get_lower = 1},
-        bspace32_1d_high = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, .get_lower = 0},
-        bspace32_2d      = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 250,  .get_lower = 1},
-        bspace32_2d_high = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 250,  .get_lower = 0},
-        bspace21_3d      = {.nbits_per_dim = 21, .ndims = 3,  .nsamples = 200,  .get_lower = 1},
-        bspace21_3d_high = {.nbits_per_dim = 21, .ndims = 3,  .nsamples = 200,  .get_lower = 0},
-        bspace16_4d      = {.nbits_per_dim = 16, .ndims = 4,  .nsamples = 200,  .get_lower = 1},
-        bspace16_4d_high = {.nbits_per_dim = 16, .ndims = 4,  .nsamples = 200,  .get_lower = 0},
-        bspace8_8d       = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 200,  .get_lower = 1},
-        bspace8_8d_high  = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 200,  .get_lower = 0},
-        bspace4_16d      = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 200,  .get_lower = 1},
-        bspace4_16d_high = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 200,  .get_lower = 0};
+        bspace64_1d      = {.nbits_per_dim = 64, .ndims = 1,  .nsamples = 250,  .get_lower = 1, .lambda = 4},
+        bspace32_1d      = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, .get_lower = 1, .lambda = 4},
+        bspace32_1d_high = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, .get_lower = 0, .lambda = 4},
+        bspace32_2d      = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 250,  .get_lower = 1, .lambda = 4},
+        bspace32_2d_high = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 250,  .get_lower = 0, .lambda = 4},
+        bspace21_3d      = {.nbits_per_dim = 21, .ndims = 3,  .nsamples = 200,  .get_lower = 1, .lambda = 4},
+        bspace21_3d_high = {.nbits_per_dim = 21, .ndims = 3,  .nsamples = 200,  .get_lower = 0, .lambda = 4},
+        bspace16_4d      = {.nbits_per_dim = 16, .ndims = 4,  .nsamples = 200,  .get_lower = 1, .lambda = 4},
+        bspace16_4d_high = {.nbits_per_dim = 16, .ndims = 4,  .nsamples = 200,  .get_lower = 0, .lambda = 4},
+        bspace8_8d       = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 200,  .get_lower = 1, .lambda = 4},
+        bspace8_8d_high  = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 200,  .get_lower = 0, .lambda = 4},
+        bspace4_16d      = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 200,  .get_lower = 1, .lambda = 4},
+        bspace4_16d_high = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 200,  .get_lower = 0, .lambda = 4};
+
+    // Birthday spacings tests (lambda = 256)
+    // That variants may be more sensitive to some PRNGs artefacts, e.g. grube73_mrg2
+    static const BSpaceNDOptions
+        bspace64_1d_c256      = {.nbits_per_dim = 64, .ndims = 1,  BSPACE_C256_LO_PROPS},
+        bspace32_2d_c256      = {.nbits_per_dim = 32, .ndims = 2,  BSPACE_C256_LO_PROPS},
+        bspace32_2d_c256_high = {.nbits_per_dim = 32, .ndims = 2,  BSPACE_C256_HI_PROPS},
+        bspace21_3d_c256      = {.nbits_per_dim = 21, .ndims = 3,  BSPACE_C256_LO_PROPS},
+        bspace21_3d_c256_high = {.nbits_per_dim = 21, .ndims = 3,  BSPACE_C256_HI_PROPS},
+        bspace16_4d_c256      = {.nbits_per_dim = 16, .ndims = 4,  BSPACE_C256_LO_PROPS},
+        bspace16_4d_c256_high = {.nbits_per_dim = 16, .ndims = 4,  BSPACE_C256_HI_PROPS},
+        bspace8_8d_c256       = {.nbits_per_dim = 8,  .ndims = 8,  BSPACE_C256_LO_PROPS},
+        bspace8_8d_c256_high  = {.nbits_per_dim = 8,  .ndims = 8,  BSPACE_C256_HI_PROPS},
+        bspace4_16d_c256      = {.nbits_per_dim = 4,  .ndims = 16, BSPACE_C256_LO_PROPS},
+        bspace4_16d_c256_high = {.nbits_per_dim = 4,  .ndims = 16, BSPACE_C256_HI_PROPS};
 
     // Birthday spacings test with decimation
     static const BSpace4x8dDecimatedOptions bs_dec = {.step = 1 << 18};
@@ -68,9 +84,9 @@ BatteryExitCode battery_full(const GeneratorInfo *gen, const CallerAPI *intf,
 
     // Gap test
     static const GapOptions
-        gap_inv8   = {.shl = 3,  .ngaps = 1000000000},
-        gap_inv512 = {.shl = 9,  .ngaps = 10000000};
-    static const GapOptions gap_inv1024 = {.shl = 10, .ngaps = 100000000};
+        gap_inv8    = {.shl = 3,  .ngaps = 4000000000},
+        gap_inv512  = {.shl = 9,  .ngaps =   50000000},
+        gap_inv1024 = {.shl = 10, .ngaps =  100000000};
     static const Gap16Count0Options gap16_count0 = {.ngaps = 1000000000};
 
     // Hamming weights distribution (histogram) test
@@ -117,60 +133,79 @@ BatteryExitCode battery_full(const GeneratorInfo *gen, const CallerAPI *intf,
     static const SumCollectorOptions sumcoll = {.nvalues = 20000000000};
 
     static const TestDescription tests[] = {
-        {"monobit_freq",         monobit_freq_test_wrap, &monobit},
-        {"byte_freq",            byte_freq_test_wrap, NULL},
-        {"word16_freq",          word16_freq_test_wrap, NULL},
-        {"bspace64_1d",          bspace_nd_test_wrap, &bspace64_1d},
-        {"bspace32_1d",          bspace_nd_test_wrap, &bspace32_1d},
-        {"bspace32_1d_high",     bspace_nd_test_wrap, &bspace32_1d_high},
-        {"bspace32_2d",          bspace_nd_test_wrap, &bspace32_2d},
-        {"bspace32_2d_high",     bspace_nd_test_wrap, &bspace32_2d_high},
-        {"bspace21_3d",          bspace_nd_test_wrap, &bspace21_3d},
-        {"bspace21_3d_high",     bspace_nd_test_wrap, &bspace21_3d_high},
-        {"bspace16_4d",          bspace_nd_test_wrap, &bspace16_4d},
-        {"bspace16_4d_high",     bspace_nd_test_wrap, &bspace16_4d_high},
-        {"bspace8_8d",           bspace_nd_test_wrap, &bspace8_8d},
-        {"bspace8_8d_high",      bspace_nd_test_wrap, &bspace8_8d_high},
-        {"bspace4_8d_dec",       bspace4_8d_decimated_test_wrap, &bs_dec},
-        {"bspace4_16d",          bspace_nd_test_wrap, &bspace4_16d},
-        {"bspace4_16d_high",     bspace_nd_test_wrap, &bspace4_16d_high},
-        {"collover20_2d",        collisionover_test_wrap, &collover20_2d},
-        {"collover20_2d_high",   collisionover_test_wrap, &collover20_2d_high},
-        {"collover13_3d",        collisionover_test_wrap, &collover13_3d},
-        {"collover13_3d_high",   collisionover_test_wrap, &collover13_3d_high},
-        {"collover8_5d",         collisionover_test_wrap, &collover8_5d},
-        {"collover8_5d_high",    collisionover_test_wrap, &collover8_5d_high},
-        {"collover5_8d",         collisionover_test_wrap, &collover5_8d},
-        {"collover5_8d_high",    collisionover_test_wrap, &collover5_8d_high},
-        {"collover3_13d",        collisionover_test_wrap, &collover3_13d},
-        {"collover3_13d_high",   collisionover_test_wrap, &collover3_13d_high},
-        {"collover2_20d",        collisionover_test_wrap, &collover2_20d},
-        {"collover2_20d_high",   collisionover_test_wrap, &collover2_20d_high},
-        {"gap_inv8",             gap_test_wrap, &gap_inv8},
-        {"gap_inv512",           gap_test_wrap, &gap_inv512},
-        {"gap_inv1024",          gap_test_wrap, &gap_inv1024},
-        {"gap16_count0",         gap16_count0_test_wrap, &gap16_count0},
-        {"hamming_distr",        hamming_distr_test_wrap, &hw_distr},
-        {"hamming_ot",           hamming_ot_test_wrap, &hw_ot_all},
-        {"hamming_ot_low1",      hamming_ot_test_wrap, &hw_ot_low1},
-        {"hamming_ot_low8",      hamming_ot_test_wrap, &hw_ot_low8},
-        {"hamming_ot_values",    hamming_ot_test_wrap, &hw_ot_values},
-        {"hamming_ot_u128",      hamming_ot_long_test_wrap, &hw_ot_long128},
-        {"hamming_ot_u256",      hamming_ot_long_test_wrap, &hw_ot_long256},
-        {"hamming_ot_u512",      hamming_ot_long_test_wrap, &hw_ot_long512},
-        {"linearcomp_high",      linearcomp_test_wrap, &linearcomp_high},
-        {"linearcomp_mid",       linearcomp_test_wrap, &linearcomp_mid},
-        {"linearcomp_low",       linearcomp_test_wrap, &linearcomp_low},
-        {"matrixrank_4096",      matrixrank_test_wrap, &matrixrank_4096},
-        {"matrixrank_4096_low8", matrixrank_test_wrap, &matrixrank_4096_low8},
-        {"matrixrank_8192",      matrixrank_test_wrap, &matrixrank_8192},
-        {"matrixrank_8192_low8", matrixrank_test_wrap, &matrixrank_8192_low8},
-        {"maxoft_4d",            maxoft_test_wrap,     &maxoft_4d},
-        {"maxoft_8d",            maxoft_test_wrap,     &maxoft_8d},
-        {"maxoft_16d",           maxoft_test_wrap,     &maxoft_16d},
-        {"maxoft_32d",           maxoft_test_wrap,     &maxoft_32d},
-        {"mod3",                 mod3_test_wrap,       &mod3},
-        {"sumcollector",         sumcollector_test_wrap, &sumcoll},
+        {"monobit_freq",          monobit_freq_test_wrap, &monobit},
+        {"byte_freq",             byte_freq_test_wrap, NULL},
+        {"word16_freq",           word16_freq_test_wrap, NULL},
+        // Birthday spacings test (lambda = 4)
+        {"bspace64_1d",           bspace_nd_test_wrap, &bspace64_1d},
+        {"bspace32_1d",           bspace_nd_test_wrap, &bspace32_1d},
+        {"bspace32_1d_high",      bspace_nd_test_wrap, &bspace32_1d_high},
+        {"bspace32_2d",           bspace_nd_test_wrap, &bspace32_2d},
+        {"bspace32_2d_high",      bspace_nd_test_wrap, &bspace32_2d_high},
+        {"bspace21_3d",           bspace_nd_test_wrap, &bspace21_3d},
+        {"bspace21_3d_high",      bspace_nd_test_wrap, &bspace21_3d_high},
+        {"bspace16_4d",           bspace_nd_test_wrap, &bspace16_4d},
+        {"bspace16_4d_high",      bspace_nd_test_wrap, &bspace16_4d_high},
+        {"bspace8_8d",            bspace_nd_test_wrap, &bspace8_8d},
+        {"bspace8_8d_high",       bspace_nd_test_wrap, &bspace8_8d_high},
+        {"bspace4_8d_dec",        bspace4_8d_decimated_test_wrap, &bs_dec},
+        {"bspace4_16d",           bspace_nd_test_wrap, &bspace4_16d},
+        {"bspace4_16d_high",      bspace_nd_test_wrap, &bspace4_16d_high},
+        // Birthday spacings test (lambda = 256)
+        {"bspace64_1d_c256",      bspace_nd_test_wrap, &bspace64_1d_c256},
+        {"bspace32_2d_c256",      bspace_nd_test_wrap, &bspace32_2d_c256},
+        {"bspace32_2d_c256_high", bspace_nd_test_wrap, &bspace32_2d_c256_high},
+        {"bspace21_3d_c256",      bspace_nd_test_wrap, &bspace21_3d_c256},
+        {"bspace21_3d_c256_high", bspace_nd_test_wrap, &bspace21_3d_c256_high},
+        {"bspace16_4d_c256",      bspace_nd_test_wrap, &bspace16_4d_c256},
+        {"bspace16_4d_c256_high", bspace_nd_test_wrap, &bspace16_4d_c256_high},
+        {"bspace8_8d_c256",       bspace_nd_test_wrap, &bspace8_8d_c256},
+        {"bspace8_8d_c256_high",  bspace_nd_test_wrap, &bspace8_8d_c256_high},
+        {"bspace4_16d_c256",      bspace_nd_test_wrap, &bspace4_16d_c256},
+        {"bspace4_16d_c256_high", bspace_nd_test_wrap, &bspace4_16d_c256_high},
+        // Collision tests
+        {"collover20_2d",         collisionover_test_wrap, &collover20_2d},
+        {"collover20_2d_high",    collisionover_test_wrap, &collover20_2d_high},
+        {"collover13_3d",         collisionover_test_wrap, &collover13_3d},
+        {"collover13_3d_high",    collisionover_test_wrap, &collover13_3d_high},
+        {"collover8_5d",          collisionover_test_wrap, &collover8_5d},
+        {"collover8_5d_high",     collisionover_test_wrap, &collover8_5d_high},
+        {"collover5_8d",          collisionover_test_wrap, &collover5_8d},
+        {"collover5_8d_high",     collisionover_test_wrap, &collover5_8d_high},
+        {"collover3_13d",         collisionover_test_wrap, &collover3_13d},
+        {"collover3_13d_high",    collisionover_test_wrap, &collover3_13d_high},
+        {"collover2_20d",         collisionover_test_wrap, &collover2_20d},
+        {"collover2_20d_high",    collisionover_test_wrap, &collover2_20d_high},
+        // Gap tests
+        {"gap_inv8",              gap_test_wrap, &gap_inv8},
+        {"gap_inv512",            gap_test_wrap, &gap_inv512},
+        {"gap_inv1024",           gap_test_wrap, &gap_inv1024},
+        {"gap16_count0",          gap16_count0_test_wrap, &gap16_count0},
+        // Hamming weights based tests
+        {"hamming_distr",         hamming_distr_test_wrap, &hw_distr},
+        {"hamming_ot",            hamming_ot_test_wrap, &hw_ot_all},
+        {"hamming_ot_low1",       hamming_ot_test_wrap, &hw_ot_low1},
+        {"hamming_ot_low8",       hamming_ot_test_wrap, &hw_ot_low8},
+        {"hamming_ot_values",     hamming_ot_test_wrap, &hw_ot_values},
+        {"hamming_ot_u128",       hamming_ot_long_test_wrap, &hw_ot_long128},
+        {"hamming_ot_u256",       hamming_ot_long_test_wrap, &hw_ot_long256},
+        {"hamming_ot_u512",       hamming_ot_long_test_wrap, &hw_ot_long512},
+        // Linear complexity/matrix rank tests
+        {"linearcomp_high",       linearcomp_test_wrap, &linearcomp_high},
+        {"linearcomp_mid",        linearcomp_test_wrap, &linearcomp_mid},
+        {"linearcomp_low",        linearcomp_test_wrap, &linearcomp_low},
+        {"matrixrank_4096",       matrixrank_test_wrap, &matrixrank_4096},
+        {"matrixrank_4096_low8",  matrixrank_test_wrap, &matrixrank_4096_low8},
+        {"matrixrank_8192",       matrixrank_test_wrap, &matrixrank_8192},
+        {"matrixrank_8192_low8",  matrixrank_test_wrap, &matrixrank_8192_low8},
+        // Max-of-t tests
+        {"maxoft_4d",             maxoft_test_wrap,     &maxoft_4d},
+        {"maxoft_8d",             maxoft_test_wrap,     &maxoft_8d},
+        {"maxoft_16d",            maxoft_test_wrap,     &maxoft_16d},
+        {"maxoft_32d",            maxoft_test_wrap,     &maxoft_32d},
+        // Other tests
+        {"mod3",                  mod3_test_wrap,       &mod3},
+        {"sumcollector",          sumcollector_test_wrap, &sumcoll},
         {NULL, NULL, NULL}
     };
 
@@ -188,3 +223,5 @@ BatteryExitCode battery_full(const GeneratorInfo *gen, const CallerAPI *intf,
 // For unity builds
 #undef COLLOVER_LO_PROPS
 #undef COLLOVER_HI_PROPS
+#undef BSPACE_C256_LO_PROPS
+#undef BSPACE_C256_HI_PROPS

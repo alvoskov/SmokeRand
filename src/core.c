@@ -979,7 +979,7 @@ static TestResultsSummary TestResults_print_report(const TestResults *results,
             "----- All tests have been passed successfully -----\n"
             "---------------------------------------------------\n\n");
     } else {
-        printf("  %3s %-20s %12s %14s %-15s %4s\n",
+        printf("  %3s %-22s %12s %14s %-15s %4s\n",
             "#", "Test name", "xemp", "p", "Interpretation", "Thr#");
         print_bar();
         for (size_t i = 0; i < ntests; i++) {
@@ -987,7 +987,7 @@ static TestResultsSummary TestResults_print_report(const TestResults *results,
             PValueCategory pvalue_cat = get_pvalue_category(results[i].p);
             if (rtype == REPORT_FULL || pvalue_cat != PVALUE_PASSED) {
                 snprintf_pvalue(pvalue_txt, 32, results[i].p, results[i].alpha);
-                printf("  %3u %-20s %12g %14s %-15s %4llu\n",
+                printf("  %3u %-22s %12g %14s %-15s %4llu\n",
                     results[i].id, results[i].name, results[i].x, pvalue_txt,
                     interpret_pvalue(results[i].p),
                     (unsigned long long) results[i].thread_id);

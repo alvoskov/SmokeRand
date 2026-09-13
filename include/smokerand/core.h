@@ -26,6 +26,7 @@
 #define PENALTY_GAP16_COUNT0   2.0
 #define PENALTY_HAMMING_DISTR  2.0
 #define PENALTY_HAMMING_OT     2.0
+#define PENALTY_HAMMING_LOW1   1.0
 #define PENALTY_BSPACE_DEC     1.0
 #define PENALTY_MATRIXRANK     0.25
 #define PENALTY_MATRIXRANK_LOW 0.25
@@ -212,7 +213,7 @@ void GeneratorInfo_accurate_floats_to_file(GeneratorInfo *gen,
  */
 static inline double calc_chi2emp_term(unsigned long long Oi, double Ei)
 {
-    double delta = (double) Oi - Ei;
+    const double delta = (double) Oi - Ei;
     return delta * delta / Ei;
 }
 

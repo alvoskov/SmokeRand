@@ -1,38 +1,45 @@
-/*
-(9,8)>=2 TiB; smokerand full
-def rotl64(x, r):
-    return ((x << r) | (x >> (64 - r))) % 2**64
-
-class Swb64:
-    def __init__(self):
-        self.r, self.s = 13, 7
-        self.x = [x + 1000 for x in range(0, self.r)]
-        self.x[0] = 2**64 - 1
-        self.x[self.r - self.s] = 0
-        self.c = 1
-
-    @staticmethod
-    def scramble(x):
-        t = (x + (x * x | 0x40000005)) % 2**64
-        return t ^ rotl64(t, 13) ^ rotl64(t, 47)
-        
-    def next(self):
-        xj, xi = self.x[self.r - self.s], self.x[0]
-        d = xj - xi - self.c
-        xn = d % 2**64
-        self.c = 1 if d < 0 else 0
-        self.x = self.x[1:] + [xn]
-        return self.scramble(xn)
-
-swb = Swb64()
-
-for i in range(1_000_000):
-    swb.next()
-
-for i in range(16):
-    print(hex(swb.next()))
-*/
-
+/**
+ * @file swb64sc.c
+ * @brief 64-bit SWB (subtract-with-borrow) generator with an output function
+ * (scrambler) that hides its artefacts.
+ * @details
+ *
+ * (9,8)>=2 TiB; smokerand full
+ *
+ * Python code for verification:
+ *
+ *    def rotl64(x, r):
+ *        return ((x << r) | (x >> (64 - r))) % 2**64
+ *
+ *    class Swb64:
+ *        def __init__(self):
+ *            self.r, self.s = 13, 7
+ *            self.x = [x + 1000 for x in range(0, self.r)]
+ *            self.x[0] = 2**64 - 1
+ *            self.x[self.r - self.s] = 0
+ *            self.c = 1
+ *
+ *        @staticmethod
+ *        def scramble(x):
+ *            t = (x + (x * x | 0x40000005)) % 2**64
+ *            return t ^ rotl64(t, 13) ^ rotl64(t, 47)
+ *        
+ *        def next(self):
+ *            xj, xi = self.x[self.r - self.s], self.x[0]
+ *            d = xj - xi - self.c
+ *            xn = d % 2**64
+ *            self.c = 1 if d < 0 else 0
+ *            self.x = self.x[1:] + [xn]
+ *            return self.scramble(xn)
+ *
+ *    swb = Swb64()
+ *
+ *    for i in range(1_000_000):
+ *        swb.next()
+ *
+ *    for i in range(16):
+ *        print(hex(swb.next()))
+ */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
