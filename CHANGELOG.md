@@ -20,14 +20,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   set by a user.
 - gap test: now it simultaneously applied to the lowest and highest bits,
   it is equivalent to the subtests: for raw values and for values with reversed
-  bits order. Useful for `gap_inv8` test for a simplified version of Sirius64.
+  bits order. Useful for `gap_inv8` test for a simplified version of Sirius64
+  (with an extra round without shift).
 - `hamming_distr` test now contains subtests for the lowest bit. Useful for
   catching flaws in `tf0_64`, `swbw`, `sirius64_bad`.
 - `melg4253` generator was added.
 - `swbmwc32`, `swbmwc64`, `swblux64`: simplification of the initialization
   procedure, now it is based on the `expand_seed64_to_u64` function and requires
   only one 64-bit seed per generator.
+- `swb64sc`: a new experimental PRNG based on 64-bit subtract-with-borrow
+  algorithm with a non-linear output function.
+- `swb64dec`: a new experimental PRNG based on 53-bit subtract-with-borrow
+  algorithm with decimation.
 - `xorrot512` and `xorrot512mrt` experimental PRNGs by A.L. Voskov.
+- `yasmarang` generator was added.
 - `test_lfsr_period.c`: `xoshiro512++` was added as a test example.
 - `include/coredefs.h`: `swb_u64` function wad added to provide a portable and
   reliable support of subtract with borrow for unsigned 64-bit integers.

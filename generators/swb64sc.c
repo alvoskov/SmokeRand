@@ -39,13 +39,19 @@
  *
  *    for i in range(16):
  *        print(hex(swb.next()))
+ *
+ * @copyright
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
  */
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 
-#define SWB_R 9
-#define SWB_S 8
+#define SWB_R 13
+#define SWB_S 7
 
 typedef struct {    
     uint64_t x[SWB_R];
