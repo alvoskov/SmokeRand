@@ -170,6 +170,7 @@ CallerAPI CallerAPI_init_mthr(void)
 {
     CallerAPI intf;
     init_mutexes();
+    init_thread_dispatcher();
     use_mutexes = 1;
     intf.get_seed32 = get_seed32_mt;
     intf.get_seed64 = get_seed64_mt;
@@ -873,7 +874,6 @@ static void TestsBattery_run_threads(const TestsBattery *bat,
     TestsDispatcher tdisp;
     TestsDispatcher_init(&tdisp, bat, gen, intf, opts->nthreads, results, 1);
     // Run threads
-    init_thread_dispatcher();
     ThreadObj *thrd = calloc(opts->nthreads, sizeof(ThreadObj));
     for (unsigned int i = 0; i < opts->nthreads; i++) {
         const unsigned int ord = tdisp.queues[i].thread_ord;

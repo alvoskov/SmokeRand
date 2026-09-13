@@ -51,6 +51,7 @@ add_library(smokerand_core
     src/entropy.c       include/smokerand/entropy.h
     src/extratests.c    include/smokerand/extratests.h
     src/lfsr_period.c   include/smokerand/lfsr_period.h
+    src/lfsr_period_factors.c include/smokerand/lfsr_period_factors.h
     src/lineardep.c     include/smokerand/lineardep.h
     src/fileio.c        include/smokerand/fileio.h
     src/hwtests.c       include/smokerand/hwtests.h
