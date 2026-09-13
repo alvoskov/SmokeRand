@@ -49,21 +49,29 @@ void init_thread_dispatcher(void)
  */
 ThreadObj ThreadObj_create(ThreadFuncPtr thr_func, void *udata, unsigned int ord)
 {
-    ThreadObj obj;
+    ThreadObj obj = {0};
     obj.ord = ord;
     obj.exists = 1;
 #ifdef USE_PTHREADS
-    pthread_create(&obj.id, NULL, thr_func, udata);
-    // Get data from threads
+    if (pthread_create(&obj.id, NULL, thr_func, udata) != 0) {
+        fprintf(stderr, "ThreadObj_create: cannot create a thread\n");
+        exit(EXIT_FAILURE);
+    }
 #elif defined(USE_WINTHREADS)
     // Don't use CreateThread because it may cause problem with C standard
     // libraries in MSVC and Open Watcom
-    obj.handle = (HANDLE) _beginthreadex(NULL, 0, thr_func, udata, 0, (unsigned int *) &obj.id);
+    unsigned int id;
+    obj.handle = (HANDLE) _beginthreadex(NULL, 0, thr_func, udata, 0, &id);
+    obj.id = id;
+    if (obj.handle == 0) {
+        fprintf(stderr, "ThreadObj_create: cannot create a thread\n");
+        exit(EXIT_FAILURE);
+    }
 #else
     obj.id = ord;
     thr_func(udata);
 #endif
-
+    // Get data from threads
     MUTEX_LOCK(thread_ord_mutex, "ThreadObj_create");
     if (nthreads < NTHREADS_MAX) {
         threads[nthreads++] = obj;
@@ -89,6 +97,9 @@ int ThreadObj_equal(const ThreadObj *a, const ThreadObj *b)
  */
 void ThreadObj_wait(ThreadObj *obj)
 {
+    if (!obj->exists) {
+        return;
+    }
 #ifdef USE_PTHREADS
     pthread_join(obj->id, NULL);
 #elif defined(USE_WINTHREADS)
@@ -96,11 +107,13 @@ void ThreadObj_wait(ThreadObj *obj)
 #else
     (void) obj;
 #endif
+    MUTEX_LOCK(thread_ord_mutex, "ThreadObj_wait");
     for (int i = 0; i < nthreads; i++) {
         if (ThreadObj_equal(obj, &threads[i]) && threads[i].exists) {
             threads[i].exists = 0;
         }
     }
+    MUTEX_UNLOCK(thread_ord_mutex);
 }
 
 /**
@@ -108,7 +121,7 @@ void ThreadObj_wait(ThreadObj *obj)
  */
 ThreadObj ThreadObj_current(void)
 {
-    ThreadObj obj;
+    ThreadObj obj = {0};
 #ifdef USE_PTHREADS
     obj.id = pthread_self();
 #elif defined(USE_WINTHREADS)
@@ -116,11 +129,14 @@ ThreadObj ThreadObj_current(void)
 #else
     obj.id = THREAD_ID_UNKNOWN;
 #endif
+    MUTEX_LOCK(thread_ord_mutex, "ThreadObj_current");
     for (int i = 0; i < nthreads; i++) {
         if (ThreadObj_equal(&obj, &threads[i]) && threads[i].exists) {
+            MUTEX_UNLOCK(thread_ord_mutex);
             return threads[i];
         }
     }
+    MUTEX_UNLOCK(thread_ord_mutex);
     obj.ord = THREAD_ORD_UNKNOWN;
     return obj;
 }
@@ -132,7 +148,7 @@ ThreadObj ThreadObj_current(void)
 // #define USE_PE32_DOS
 // #endif
 
-#ifdef USE_LOADLIBRARY
+#ifdef USE_WINDOWS
     #include <windows.h>
 #elif defined(USE_PE32_DOS)
     #include "smokerand/pe32loader.h"
@@ -236,7 +252,11 @@ unsigned int get_cpu_numcores(void)
 #ifdef USE_LOADLIBRARY
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
-    return sysinfo.dwNumberOfProcessors;
+    if (sysinfo.dwNumberOfProcessors >= 1) {
+        return sysinfo.dwNumberOfProcessors;
+    } else {
+        return 1;
+    }
 #elif defined(__DJGPP__)
     return 1;
 #elif !defined(NO_POSIX)
@@ -258,7 +278,7 @@ unsigned int get_cpu_numcores(void)
  */
 void set_bin_stdout(void)
 {
-#if defined(USE_LOADLIBRARY) || defined(NO_POSIX)
+#if defined(USE_WINDOWS) || defined(NO_POSIX)
     (void) _setmode( _fileno(stdout), _O_BINARY);
 #endif
 }
@@ -270,7 +290,7 @@ void set_bin_stdout(void)
  */
 void set_bin_stdin(void)
 {
-#if defined(USE_LOADLIBRARY) || defined(NO_POSIX)
+#if defined(USE_WINDOWS) || defined(NO_POSIX)
     (void) _setmode( _fileno(stdin), _O_BINARY);
 #endif
 }
@@ -337,7 +357,11 @@ int get_ram_info(RamInfo *info)
 #ifdef USE_LOADLIBRARY
     MEMORYSTATUSEX statex;
     statex.dwLength = sizeof(statex);
-    GlobalMemoryStatusEx(&statex);
+    if (!GlobalMemoryStatusEx(&statex)) {
+        info->phys_total_nbytes = RAM_SIZE_UNKNOWN;
+        info->phys_avail_nbytes = RAM_SIZE_UNKNOWN;
+        return 0;
+    }
     info->phys_total_nbytes = (long long) statex.ullTotalPhys;
     info->phys_avail_nbytes = (long long) statex.ullAvailPhys;
     trunc_ram_info(info);

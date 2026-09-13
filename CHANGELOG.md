@@ -51,6 +51,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 ### Changes
 
 - Refactoring: more compact assertions for malloc in some places.
+- Some improvements in `src/threads_intf.c`: improved error processing and less
+  fragile `ThreadObj` methods.
+- Refactoring: `m - 1` prime cofactors for `src/lfsr_period.c` are now separated
+  into `src/lfsr_period_factors.c` and `include/smokerand/lfsr_period_factors.h`.
 
 ## [0.50] 2026-09-01
 
