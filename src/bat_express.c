@@ -30,9 +30,9 @@ BatteryExitCode battery_express(const GeneratorInfo *gen, const CallerAPI *intf,
     const BatteryOptions *opts)
 {
     static const BSpaceNDOptions
-        bspace32_1d = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 1024, .get_lower = 1},
-        bspace8_4d  = {.nbits_per_dim = 8,  .ndims = 4, .nsamples = 256,  .get_lower = 1},
-        bspace4_8d  = {.nbits_per_dim = 4,  .ndims = 8, .nsamples = 128,  .get_lower = 1};
+        bspace32_1d = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 1024, .get_lower = 1, .lambda = 4},
+        bspace8_4d  = {.nbits_per_dim = 8,  .ndims = 4, .nsamples = 256,  .get_lower = 1, .lambda = 4},
+        bspace4_8d  = {.nbits_per_dim = 4,  .ndims = 8, .nsamples = 128,  .get_lower = 1, .lambda = 4};
     static const BSpace4x8dDecimatedOptions bs_dec = {.step = 1 << 7};
     static const NBitWordsFreqOptions
         byte_freq   = {.bits_per_word = 8, .average_freq = 256, .nblocks = 256};

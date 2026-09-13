@@ -83,10 +83,7 @@ typedef struct {
 
 static inline uint64_t get_bits_nolux(Swb64State *obj)
 {
-    // SWB part
-    const uint64_t xj = obj->x[obj->j], xi = obj->x[obj->i];
-    const uint64_t t = xj - xi - obj->c;
-    obj->c = (xj < t) ? 1 : 0;
+    const uint64_t t = swb_u64(obj->x[obj->j], obj->x[obj->i], obj->c, &obj->c);
     obj->x[obj->i] = t;
     if (obj->i == 0) { obj->i = SWB_A; }
 	if (obj->j == 0) { obj->j = SWB_A; }
@@ -114,12 +111,8 @@ static inline uint64_t get_bits_raw(Swb64State *obj)
 static void *create_lux(const CallerAPI *intf, int luxury)
 {
     Swb64State *obj = intf->malloc(sizeof(Swb64State));    
-    for (size_t i = 0; i < SWB_A; i++) {
-        obj->x[i] = intf->get_seed64();
-    }
-    obj->c = 1;
-    obj->x[1] |= 1;
-    obj->x[2] = (obj->x[2] >> 1) << 1;
+    expand_seed64_to_u64(obj->x, SWB_A, intf->get_seed64());
+    obj->c = (obj->x[0] == 0) ? 1 : 0;
     obj->i = SWB_A - 1; obj->j = SWB_B - 1;
     obj->pos = 0;
     obj->luxury = luxury;

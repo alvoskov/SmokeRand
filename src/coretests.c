@@ -115,15 +115,37 @@ static unsigned int bspace_get_ndups##suffix(type *x, size_t len) \
 BSPACE_GET_NDUPS_FUNC_TPL(32, uint32_t)
 BSPACE_GET_NDUPS_FUNC_TPL(64, uint64_t)
 
-
-static unsigned long bspace_calc_len(unsigned int nbits_total)
+/**
+ * @brief Calculates sample size.
+ * @details The next formula is used:
+ *
+ * \f[
+ * m = \sqrt[3]{4n\lambda}
+ * \f]
+ */ 
+static unsigned long bspace_calc_len(const BSpaceNDOptions *opts)
 {
-    return (unsigned long) pow(2.0, (nbits_total + 4.0) / 3.0);
+    const unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
+    const double log2_lambda = sr_log2(opts->lambda);
+    return (unsigned long) pow(2.0, (nbits_total + 2.0 + log2_lambda) / 3.0);
 }
 
-static double bspace_calc_lambda(size_t len, unsigned int nbits_total)
+/**
+ * @brief Calculates \f$\lambda\f$ for the given sample length and number
+ * of bits in its each value.
+ * @details The next formula is used:
+ *
+ * \f[
+ * \lambda = \frac{m^3}{4n}
+ * \f]
+ *
+ * where \f$m\f$ is the sample size (values), \f$ n \f$ is the number of
+ * bits in each sample.
+ */
+static double bspace_calc_lambda(const BSpaceNDOptions *opts, size_t len)
 {
-    return pow((double) len, 3.0) / (4 * pow(2.0, nbits_total));
+    const unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
+    return pow((double) len, 3.0) / (4.0 * pow(2.0, nbits_total));
 }
 
 /**
@@ -132,8 +154,7 @@ static double bspace_calc_lambda(size_t len, unsigned int nbits_total)
  */
 static unsigned long bspace32_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
-    const unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
-    const size_t len = bspace_calc_len(nbits_total);
+    const size_t len = bspace_calc_len(opts);
     uint32_t *u = calloc(len, sizeof(uint32_t));
     ASSERT_MALLOC_PTR(u, "bspace32_nd_test")
     unsigned long *ndups = calloc(opts->nsamples, sizeof(unsigned long));
@@ -157,8 +178,8 @@ static unsigned long bspace32_nd_test(GeneratorState *obj, const BSpaceNDOptions
  */
 static unsigned long bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
-    const unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
-    const size_t len = bspace_calc_len(nbits_total);
+    //const unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
+    const size_t len = bspace_calc_len(opts);
     uint64_t *u = calloc(len, sizeof(uint64_t));
     ASSERT_MALLOC_PTR(u, "bspace64_nd_test")
     unsigned long *ndups = calloc(opts->nsamples, sizeof(unsigned long));
@@ -212,6 +233,13 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     TestResults ans = TestResults_create("bspace_nd");
     if (opts->ndims * opts->nbits_per_dim > 64 ||
         (obj->gi->nbits != 32 && obj->gi->nbits != 64)) {
+        obj->intf->printf("Birthday spacings test error:\n");
+        obj->intf->printf("  invalid ndims or nbits_per_dim values\n");
+        return ans;
+    }
+    if (opts->lambda < 1 || opts->lambda > 1024) {
+        obj->intf->printf("Birthday spacings test error:\n");
+        obj->intf->printf("  lambda must be between 1 and 1024\n");
         return ans;
     }
     // A special case: 64-bit one-dimensional test for 32-bit
@@ -223,14 +251,14 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
         opts32.ndims = 2;
         opts32.nsamples = opts->nsamples;
         opts32.get_lower = opts->get_lower;
+        opts32.lambda = opts->lambda;
         obj->intf->printf("Birthday spacings test: 1D 64-bit test for 32-bit PRNG\n");
         obj->intf->printf("Switching to the 2D 32-bit test\n");
         return bspace_nd_test(obj, &opts32);
     }
     // Initialize some variables
-    unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
-    unsigned long len = bspace_calc_len(nbits_total);
-    double lambda = bspace_calc_lambda(len, nbits_total);
+    unsigned long len = bspace_calc_len(opts);
+    double lambda = bspace_calc_lambda(opts, len);
     // Show information about the test
     obj->intf->printf("Birthday spacings test\n");
     obj->intf->printf("  ndims = %u; nbits_per_dim = %u; get_lower = %d\n",
@@ -238,12 +266,9 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     obj->intf->printf("  nsamples = %lu; len = %lu, lambda = %g\n",
         opts->nsamples, len, lambda);
     // Compute number of duplicates
-    unsigned long ndups_total = 0;
-    if (nbits_total > 32) {
-        ndups_total = bspace64_nd_test(obj, opts);
-    } else {
-        ndups_total = bspace32_nd_test(obj, opts);
-    }
+    const unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
+    const unsigned long ndups_total = (nbits_total > 32) ?
+        bspace64_nd_test(obj, opts) : bspace32_nd_test(obj, opts);
     ans.penalty = PENALTY_BSPACE;
     ans.x = (double) ndups_total;
     ans.p = sr_poisson_pvalue(ans.x, lambda * (double) opts->nsamples);
@@ -319,10 +344,12 @@ static void bspace4_8d_decimated_pvalue(TestResults *ans, const char *name,
  */
 TestResults bspace4_8d_decimated_test(GeneratorState *obj, unsigned long step)
 {
+    const BSpaceNDOptions opts =
+        {.lambda = 4, .nbits_per_dim = 4, .ndims = 8, .nsamples = 1, .get_lower = 1};
     TestResults ans = TestResults_create("bspace4_8d_dec");
-    const unsigned int nbits_total = 32;
-    const size_t len = bspace_calc_len(nbits_total);
-    const double lambda = bspace_calc_lambda(len, nbits_total);
+    //const unsigned int nbits_total = 32;
+    const size_t len = bspace_calc_len(&opts);
+    const double lambda = bspace_calc_lambda(&opts, len);
     // Show information about the test
     obj->intf->printf("Birthday spacings test with decimation\n");
     obj->intf->printf("  ndims = 8; nbits_per_dim = 4; step = %lu\n", step);
@@ -601,7 +628,6 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     GapFreqTable gaps_hi, gaps_lo;
     GapFreqTable_init(&gaps_hi, beta_mask_hi, nbins, p);
     GapFreqTable_init(&gaps_lo, beta_mask_lo, nbins, p);
-    unsigned long long nvalues = 0;
     const unsigned long long max_gap_len = GapOptions_max_gaplen(opts, pgap_fail);
     TestResults ans = TestResults_create("Gap");
     obj->intf->printf("Gap test\n");
@@ -611,6 +637,7 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
         (unsigned long long) nbins);
     obj->intf->printf("  max_gap_len = %llu\n", max_gap_len);
 
+    unsigned long long nvalues = 0;
     do {
         uint64_t u = obj->gi->get_bits(obj->state); nvalues++;
         GapFreqTable_add_value(&gaps_hi, u);

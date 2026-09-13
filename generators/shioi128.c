@@ -9,16 +9,9 @@
  * To the extent possible under law, the author has waived all copyright 
  * and related or neighboring rights to this software.
  * See: https://creativecommons.org/publicdomain/zero/1.0/
+ *
+ * The reentrant C99 version of shioi128 was made by A.L. Voskov.
  */
-
-/**
- * @brief 
- *https://github.com/andanteyk/prng-shioi/blob/master/shioi128.c
-
- *To the extent possible under law, the author has waived all copyright 
- *and related or neighboring rights to this software.
- *See: https://creativecommons.org/publicdomain/zero/1.0/
-*/
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG

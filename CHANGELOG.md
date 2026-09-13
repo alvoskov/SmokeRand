@@ -13,14 +13,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   etc. (e.g. `lrnd64_255`, `tt800`, `well1024a` etc), can use `stdin`/`stdout`
   interface. Cannot work if nonlinear scramblers are present. This battery
   also supports PRNGs based on Mersenne primes.
+- `full` battery: new modifications of the birthday spacings test with expected
+  number collison of 256. They are rather fast but allow to catch `grube_mrg2`
+  generator.
+- birthday spacings test: lambda (expected number of collisions) can be now
+  set by a user.
 - gap test: now it simultaneously applied to the lowest and highest bits,
   it is equivalent to the subtests: for raw values and for values with reversed
   bits order. Useful for `gap_inv8` test for a simplified version of Sirius64.
 - `hamming_distr` test now contains subtests for the lowest bit. Useful for
   catching flaws in `tf0_64`, `swbw`, `sirius64_bad`.
 - `melg4253` generator was added.
+- `swbmwc32`, `swbmwc64`, `swblux64`: simplification of the initialization
+  procedure, now it is based on the `expand_seed64_to_u64` function and requires
+  only one 64-bit seed per generator.
 - `xorrot512` and `xorrot512mrt` experimental PRNGs by A.L. Voskov.
 - `test_lfsr_period.c`: `xoshiro512++` was added as a test example.
+- `include/coredefs.h`: `swb_u64` function wad added to provide a portable and
+  reliable support of subtract with borrow for unsigned 64-bit integers.
 
 ### Bugfix
 
@@ -29,6 +39,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   terminator (undefined behaviour!)
 - `hamming_distr_calc_zemp`: now it takes into account the number of tuples
   with the maximal Hamming weight. May be detectable only for 32-bit tuples.
+- `swbmwc64`, `swblux64`: now uses `swb_u64` to prevent rare and subtle errors.
 
 ### Changes
 

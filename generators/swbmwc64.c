@@ -84,10 +84,8 @@ typedef struct {
 static inline uint64_t get_bits_raw(SwbMwc64State *obj)
 {
     static const uint64_t MWC_A = 0xff676488; // 2^32 - 10001272
-    // SWB part
-    const uint64_t xj = obj->x[obj->j], xi = obj->x[obj->i];
-    const uint64_t t = xj - xi - obj->c;
-    obj->c = (xj < t) ? 1 : 0;
+    // SWB part    
+    const uint64_t t = swb_u64(obj->x[obj->j], obj->x[obj->i], obj->c, &obj->c);
     obj->x[obj->i] = t;
     if (obj->i == 0) { obj->i = SWB_A; }
 	if (obj->j == 0) { obj->j = SWB_A; }
@@ -102,12 +100,8 @@ static inline uint64_t get_bits_raw(SwbMwc64State *obj)
 static void *create(const CallerAPI *intf)
 {
     SwbMwc64State *obj = intf->malloc(sizeof(SwbMwc64State));    
-    for (size_t i = 0; i < SWB_A; i++) {
-        obj->x[i] = intf->get_seed64();
-    }
-    obj->c = 1;
-    obj->x[1] |= 1;
-    obj->x[2] = (obj->x[2] >> 1) << 1;
+    expand_seed64_to_u64(obj->x, SWB_A, intf->get_seed64());
+    obj->c = (obj->x[0] == 0) ? 1 : 0;
     obj->mwc = (intf->get_seed64() >> 8) | 0x1;
     obj->i = SWB_A - 1; obj->j = SWB_B - 1;
     return obj;

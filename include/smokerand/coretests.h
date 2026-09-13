@@ -20,6 +20,7 @@ typedef struct {
     unsigned int ndims; ///< Number of dimensions.
     unsigned long nsamples; ///< Number of samples.
     int get_lower; ///< 0/1 - use lower/higher part of PRNG output.
+    unsigned int lambda; ///< Expected number of collisions per sample.
 } BSpaceNDOptions;
 
 

@@ -21,9 +21,9 @@
  *    ----------------------------------------------
  *    All other tests were passed
  *
- * It does pass `full` SmokeRand battery with `uint31` filter but if the
- * `bspace16_4d_high` test is used with larger number of samples it returns
- * suspicious values:
+ * It fails only the `bspace16_4d_c256_high` test from the `full` SmokeRand
+ * battery with `uint31` filter. If the `bspace16_4d_high` test is used with
+ * larger number of samples it returns suspicious values:
  *
  *     bspace16_4d_high test=bspace_nd nbits_per_dim=16 ndims=4 nsamples=400  get_lower=0 end
  *

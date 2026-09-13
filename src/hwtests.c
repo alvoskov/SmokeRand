@@ -419,6 +419,11 @@ static const uint8_t *hamming_ot_fill_hw_tables(GeneratorState *obj,
  * analysed - it detects SWB and SWBW (Subtract-with-Borrow + "Weyl sequence").
  * SWBW passes BigCrush but not PractRand. For such detection the ordering of
  * lower bits in the output is very important.
+ *
+ * About penalties for the test failure:
+ *
+ * - `HAMMING_OT_BYTES_LOW1` mode: `PENALTY_HAMMING_LOW1` penalty.
+ * - all other modes: `PENALTY_HAMMING_OT` penalty.
  * 
  * References:
  *
@@ -495,6 +500,9 @@ TestResults hamming_ot_test(GeneratorState *obj, const HammingOtOptions *opts)
     obj->intf->printf("   Number of tuples types: %llu\n",
         (unsigned long long) table.len);
     TestResults res = HammingTuplesTable_get_results(&table);
+    if (opts->mode == HAMMING_OT_BYTES_LOW1) {
+        res.penalty = PENALTY_HAMMING_LOW1;
+    }
     obj->intf->printf("   Number of bins after reduction: %llu\n",
         (unsigned long long) table.len);
     obj->intf->printf("  zemp = %g, p = %g\n", res.x, res.p);
@@ -735,11 +743,11 @@ static void HammingDistrHist_destruct(HammingDistrHist *obj)
 
 
 static inline void calc_block_hw_sums(unsigned long long *hw_freq,
-    const int *hw_vals, int block_len, int total_len)
+    const int *hw_vals, size_t block_len, size_t total_len)
 {
-    for (int i = 0; i < total_len; i += block_len) {
+    for (size_t i = 0; i < total_len; i += block_len) {
         int hw_sum = 0;
-        for (int j = 0; j < block_len; j++) {
+        for (size_t j = 0; j < block_len; j++) {
             hw_sum += hw_vals[i + j];
         }
         hw_freq[hw_sum]++;
@@ -747,12 +755,12 @@ static inline void calc_block_hw_sums(unsigned long long *hw_freq,
 }
 
 static inline void calc_block_hw_xorsums(unsigned long long *hw_freq,
-    const uint64_t *x, int block_len, int total_len)
+    const uint64_t *x, size_t block_len, size_t total_len)
 {
-    for (int i = 0; i < total_len; i += block_len * 2) {
+    for (size_t i = 0; i < total_len; i += block_len * 2) {
         int hw_xorsum = 0;
-        for (int j = 0; j < block_len; j++) {
-            uint64_t xored = x[i + j] ^ x[i + j + block_len];
+        for (size_t j = 0; j < block_len; j++) {
+            const uint64_t xored = x[i + j] ^ x[i + j + block_len];
             hw_xorsum += get_uint64_hamming_weight(xored);
         }
         hw_freq[hw_xorsum]++;
@@ -771,20 +779,20 @@ HammingDistrHistArray_process_block(HammingDistrHist *h, size_t nlevels,
     }
     // 2, 4, 8, 16 - value blocks
     for (size_t j = 1; j < nlevels; j++) {
-        calc_block_hw_sums(h[j].o,        buf->hw, 1 << j, (int) buf->len);
-        calc_block_hw_xorsums(h[j].o_xor, buf->x,  1 << j, (int) buf->len);
+        calc_block_hw_sums(h[j].o,        buf->hw, 1 << j, buf->len);
+        calc_block_hw_xorsums(h[j].o_xor, buf->x,  1 << j, buf->len);
     }
 }
 
 
 static double
 HammingDistrHistArray_calc_stats(HammingDistrHist *h,
-    int nlevels, size_t nbits, const CallerAPI *intf)
+    unsigned int nlevels, size_t nbits, const CallerAPI *intf)
 {
     double zabs_max = -1.0;
     intf->printf("    %8s | %8s %10s | %8s %10s\n",
         "bits", "z", "p", "z_xor", "p_xor");
-    for (int i = 0; i < nlevels; i++) {
+    for (unsigned int i = 0; i < nlevels; i++) {
         HammingDistrHist_calc_stats(&h[i]);
         intf->printf("    %8d | %8.3f %10.3g | %8.3f %10.3g\n",
             (int) ((1ULL << i) * nbits), h[i].z, h[i].p, h[i].z_xor, h[i].p_xor);
@@ -818,13 +826,9 @@ hamming_distr_test_calc_stats(GeneratorState *obj, const HammingDistrOptions *op
     obj->intf->printf("  The lowest bits: z = %7.3f, p = %.3g\n", zabs_low1, p_low1);
     // The final statistics
     TestResults ans = TestResults_create("hamming_distr");
-    if (zabs_all > zabs_low1) {
-        ans.x = zabs_all;
-    } else {
-        ans.x = zabs_low1;
-    }
-
-    ans.penalty = PENALTY_HAMMING_DISTR;
+    ans.x = (zabs_all > zabs_low1) ? zabs_all : zabs_low1;
+    ans.penalty = (get_pvalue_category(p_all) == PVALUE_FAILED) ?
+        PENALTY_HAMMING_DISTR : PENALTY_HAMMING_LOW1;
     TestResults_set_pmin_ntests(&ans,
         (unsigned long) (4 * opts->nlevels),
         sr_halfnormal_pvalue(ans.x)
@@ -841,10 +845,14 @@ hamming_distr_test_calc_stats(GeneratorState *obj, const HammingDistrOptions *op
  *
  * 1. Histogram of Hamming weights of values.
  * 2. Histogram of XORed Hamming weights of values. I.e. Hamming weights of
- *    x1 ^ x2, x3 ^ x4, x5 ^ x6 are processed.
+ *    `x1 ^ x2`, `x3 ^ x4`, `x5 ^ x6` are processed.
  *
  * The x values are bit blocks, i.e. 1, 2, 4 or 8 concatenated pseudorandom
  * values.
+ *
+ * It also contains a subtest that is applied only to the sequence assembled
+ * from the lowest bits of the PRNG outputs. It can detect the weak lowest bit
+ * in the `swbw`, `tf0_64` and `sirius64_bad` generators.
  *
  * The variant 2 (XORed) allows to catch 32-bit LCGs such as `lcg69069` or
  * `randu`; also detects SplitMix with some bad gammas such as 1. The idea of
@@ -855,6 +863,11 @@ hamming_distr_test_calc_stats(GeneratorState *obj, const HammingDistrOptions *op
  * the testing (e.g. `splitmix32`). The test also detects some LFSRs with
  * small sparse matrices (such as SHR3, XSH, xorshift128, lrnd64_255) and
  * some obsolete combined generators such as SuperDuper73.
+ *
+ * About penalties for the test failure:
+ *
+ * - `PENALTY_HAMMING_LOW1` penalty only the lowest bits subtest failed.
+ * - `PENALTY_HAMMING_OT` penalty if the subtest for all bits failed.
  */
 TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *opts)
 {
@@ -865,16 +878,16 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
         obj->intf->printf("  Invalid nlevels value\n");
         return ans;
     }
-    unsigned long block_len = 1UL << opts->nlevels;
-    HammingDistrHist *h = calloc((size_t) opts->nlevels, sizeof(HammingDistrHist));
+    size_t block_len = 1UL << opts->nlevels;
+    HammingDistrHist *h = calloc(opts->nlevels, sizeof(HammingDistrHist));
     ASSERT_MALLOC_PTR(h, "hamming_distr_test")
-    HammingDistrHist *h_low1 = calloc((size_t) opts->nlevels, sizeof(HammingDistrHist));
+    HammingDistrHist *h_low1 = calloc(opts->nlevels, sizeof(HammingDistrHist));
     ASSERT_MALLOC_PTR(h_low1, "hamming_distr_test")
     HammingDistrBuffer buf;
-    HammingDistrBuffer_init(&buf, (size_t) block_len);
+    HammingDistrBuffer_init(&buf, block_len);
     HammingDistrBuffer buf_low1;
-    HammingDistrBuffer_init(&buf_low1, (size_t) block_len);
-    for (int i = 0; i < opts->nlevels; i++) {
+    HammingDistrBuffer_init(&buf_low1, block_len);
+    for (unsigned int i = 0; i < opts->nlevels; i++) {
         HammingDistrHist_init(&h[i], nbits << i);
         HammingDistrHist_init(&h_low1[i], nbits << i);
     }
@@ -907,11 +920,11 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
             }
             // Accumulate statistics            
             if (block_pos == block_len) {
-                HammingDistrHistArray_process_block(h, (size_t) opts->nlevels, &buf);
+                HammingDistrHistArray_process_block(h, opts->nlevels, &buf);
                 block_pos = 0;
             }
             if (block_low1_pos == block_len) {
-                HammingDistrHistArray_process_block(h_low1, (size_t) opts->nlevels, &buf_low1);
+                HammingDistrHistArray_process_block(h_low1, opts->nlevels, &buf_low1);
                 block_low1_pos = 0;
             }
         }
@@ -921,7 +934,7 @@ TestResults hamming_distr_test(GeneratorState *obj, const HammingDistrOptions *o
         obj->intf->printf("  Warning: generator output size exceeds its declared size\n");
     }
     const TestResults ans = hamming_distr_test_calc_stats(obj, opts, h, h_low1);
-    for (int i = 0; i < opts->nlevels; i++) {
+    for (unsigned int i = 0; i < opts->nlevels; i++) {
         HammingDistrHist_destruct(&h[i]);
         HammingDistrHist_destruct(&h_low1[i]);
     }   

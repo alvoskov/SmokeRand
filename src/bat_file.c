@@ -367,12 +367,14 @@ static int parse_bspace_nd(TestDescription *out, const TestInfo *obj, char *errm
     GET_LIMITED_INTVALUE(ndims, 1, 64)
     GET_LIMITED_INTVALUE(nsamples, 1, 1ll << 30ll)
     GET_LIMITED_INTVALUE(get_lower, 0, 1)
+    GET_LIMITED_INTVALUE(lambda, 1, 1024)
     BSpaceNDOptions *opts = calloc(1, sizeof(BSpaceNDOptions));
     ASSERT_MALLOC_PTR(opts, "parse_bspace_nd")
     opts->nbits_per_dim = (unsigned int) nbits_per_dim;
     opts->ndims = (unsigned int) ndims;
     opts->nsamples = (unsigned long) nsamples;
     opts->get_lower = (int) get_lower;
+    opts->lambda = (unsigned int) lambda;
     out->name = obj->testname;
     out->run = bspace_nd_test_wrap;
     out->udata = opts;
@@ -489,7 +491,7 @@ static int parse_hamming_distr(TestDescription *out, const TestInfo *obj, char *
     HammingDistrOptions *opts = calloc(1, sizeof(HammingDistrOptions));
     ASSERT_MALLOC_PTR(opts, "parse_hamming_distr")
     opts->nvalues = (unsigned long long) nvalues;
-    opts->nlevels = (int) nlevels;
+    opts->nlevels = (unsigned int) nlevels;
     out->name = obj->testname;
     out->run = hamming_distr_test_wrap;
     out->udata = opts;
