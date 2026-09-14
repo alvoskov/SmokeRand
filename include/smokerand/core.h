@@ -143,12 +143,44 @@ typedef struct {
 } BatteryOptions;
 
 
+typedef struct {
+    unsigned int npassed;
+    unsigned int nwarnings;
+    unsigned int nfailed;
+    double grade;
+    const char *grade_text;
+} TestResultsSummary;
+
+
+typedef struct {
+    // Generic info about the battery run
+    const char *smokerand_version;
+    char *battery_name;
+    char *generator_name;
+    unsigned int generator_nbits;
+    unsigned int nthreads;
+    unsigned int testid;
+    // Array of tests resulst
+    TestResults *results;
+    size_t nresults;
+    // Some extra info filled after initialization
+    char *seed_key_txt;
+    time_t nseconds_total;
+} BatteryResults;
+
+
 size_t TestsBattery_ntests(const TestsBattery *obj);
 unsigned int TestsBattery_get_testid(const TestsBattery *obj, const TestIdentifier *test);
 void TestsBattery_print_info(const TestsBattery *obj);
 BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     const GeneratorInfo *gen, const CallerAPI *intf,
     const BatteryOptions *opts); 
+
+void BatteryResults_init(BatteryResults *obj, const TestsBattery *bat,
+    const GeneratorInfo *gen, const BatteryOptions *opts);
+TestResultsSummary BatteryResults_get_summary(const BatteryResults *obj);
+void BatteryResults_destruct(BatteryResults *obj);
+
 
 
 typedef enum {
