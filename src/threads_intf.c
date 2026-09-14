@@ -16,6 +16,7 @@
 #include <fcntl.h>
 
 #include "smokerand/threads_intf.h"
+#include "smokerand/core.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,7 +39,25 @@ DECLARE_MUTEX(thread_ord_mutex)
 void init_thread_dispatcher(void)
 {
     INIT_MUTEX(thread_ord_mutex);
+    MUTEX_LOCK(thread_ord_mutex, "init_thread_dispatcher");
     nthreads = 0;
+    MUTEX_UNLOCK(thread_ord_mutex);
+}
+
+typedef struct {
+    ThreadFuncPtr thr_func;
+    void *udata;
+} ThreadUDataWrapper;
+
+
+static ThreadRetVal THREADFUNC_SPEC thread_wrapper(void *udata)
+{
+    ThreadUDataWrapper *uwrap = udata;
+    MUTEX_LOCK(thread_ord_mutex, "thread_wrapper");
+    MUTEX_UNLOCK(thread_ord_mutex);
+    const ThreadRetVal ans = uwrap->thr_func(uwrap->udata);
+    free(uwrap);
+    return ans;
 }
 
 /**
@@ -49,30 +68,49 @@ void init_thread_dispatcher(void)
  */
 ThreadObj ThreadObj_create(ThreadFuncPtr thr_func, void *udata, unsigned int ord)
 {
+    ThreadUDataWrapper *uwrap = calloc(1, sizeof(ThreadUDataWrapper));
+    ASSERT_MALLOC_PTR(uwrap, "ThreadObj_create")
+    uwrap->thr_func = thr_func;
+    uwrap->udata = udata;
+
     ThreadObj obj = {0};
     obj.ord = ord;
     obj.exists = 1;
+
+    MUTEX_LOCK(thread_ord_mutex, "ThreadObj_create");
+
 #ifdef USE_PTHREADS
-    if (pthread_create(&obj.id, NULL, thr_func, udata) != 0) {
+    pthread_t id;
+    if (pthread_create(&id, NULL, thread_wrapper, uwrap) != 0) {
         fprintf(stderr, "ThreadObj_create: cannot create a thread\n");
+        MUTEX_UNLOCK(thread_ord_mutex);
+        free(uwrap);
         exit(EXIT_FAILURE);
     }
+    obj.id = id;
 #elif defined(USE_WINTHREADS)
     // Don't use CreateThread because it may cause problem with C standard
     // libraries in MSVC and Open Watcom
     unsigned int id;
-    obj.handle = (HANDLE) _beginthreadex(NULL, 0, thr_func, udata, 0, &id);
+    obj.handle = (HANDLE) _beginthreadex(NULL, 0, thread_wrapper, uwrap, 0, &id);
     obj.id = id;
     if (obj.handle == 0) {
         fprintf(stderr, "ThreadObj_create: cannot create a thread\n");
+        MUTEX_UNLOCK(thread_ord_mutex);
+        free(uwrap);
         exit(EXIT_FAILURE);
     }
 #else
     obj.id = ord;
-    thr_func(udata);
+    // Get data from threads
+    if (nthreads < NTHREADS_MAX) {
+        threads[nthreads++] = obj;
+    }
+    MUTEX_UNLOCK(thread_ord_mutex);
+    thread_wrapper(uwrap);
+    return obj;
 #endif
     // Get data from threads
-    MUTEX_LOCK(thread_ord_mutex, "ThreadObj_create");
     if (nthreads < NTHREADS_MAX) {
         threads[nthreads++] = obj;
     }
@@ -97,13 +135,14 @@ int ThreadObj_equal(const ThreadObj *a, const ThreadObj *b)
  */
 void ThreadObj_wait(ThreadObj *obj)
 {
-    if (!obj->exists) {
+    if (obj == NULL || !obj->exists) {
         return;
     }
 #ifdef USE_PTHREADS
     pthread_join(obj->id, NULL);
 #elif defined(USE_WINTHREADS)
     WaitForSingleObject(obj->handle, INFINITE);
+    CloseHandle(obj->handle);
 #else
     (void) obj;
 #endif
@@ -113,6 +152,7 @@ void ThreadObj_wait(ThreadObj *obj)
             threads[i].exists = 0;
         }
     }
+    obj->exists = 0;
     MUTEX_UNLOCK(thread_ord_mutex);
 }
 
@@ -132,8 +172,9 @@ ThreadObj ThreadObj_current(void)
     MUTEX_LOCK(thread_ord_mutex, "ThreadObj_current");
     for (int i = 0; i < nthreads; i++) {
         if (ThreadObj_equal(&obj, &threads[i]) && threads[i].exists) {
+            const ThreadObj result = threads[i];
             MUTEX_UNLOCK(thread_ord_mutex);
-            return threads[i];
+            return result;
         }
     }
     MUTEX_UNLOCK(thread_ord_mutex);
@@ -217,6 +258,7 @@ void *dlsym_wrap(void *handle, const char *symname)
 #elif defined(__DJGPP__)
     size_t len = strlen(symname);
     char *mangled_symname = calloc(len + 2, sizeof(char));    
+    ASSERT_MALLOC_PTR(mangled_symname, "dlsym_wrap")
     mangled_symname[0] = '_';
     memcpy(mangled_symname + 1, symname, len);
     void *lib = dlsym(handle, mangled_symname);

@@ -11,7 +11,7 @@
  * or by `-dUSE_WINTHREADS` (use WinAPI threads).
  *
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -43,7 +43,7 @@
 // pthreads version
 #include <pthread.h>
 #define DECLARE_MUTEX(mutex) static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-#define INIT_MUTEX(mutex) pthread_mutex_init(&(mutex), NULL);
+#define INIT_MUTEX(mutex) /* Initialized by DECLARE_MUTEX */
 #define MUTEX_LOCK(mutex, infostr) pthread_mutex_lock(&(mutex));
 #define MUTEX_UNLOCK(mutex) pthread_mutex_unlock(&(mutex));
 #define MUTEX_DESTROY(mutex) pthread_mutex_destroy(&(mutex));
