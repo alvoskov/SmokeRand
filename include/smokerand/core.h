@@ -336,9 +336,11 @@ static inline unsigned int countl_zero_u64(uint64_t x)
 }
 
 #define ASSERT_MALLOC_PTR(ptr, msg) \
-if (ptr == NULL) { \
-    fprintf(stderr, "***** %s: not enough memory *****\n", msg); \
-    exit(EXIT_FAILURE); \
-}
+do { \
+    if ((ptr) == NULL) { \
+        fprintf(stderr, "***** %s: not enough memory *****\n", (msg)); \
+        exit(EXIT_FAILURE); \
+    } \
+} while (0);
 
 #endif // __SMOKERAND_CORE_H

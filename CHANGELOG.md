@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
+## [0.52]
+
+### Added
+
+- gap test now checks individual frequencies too, i.e. compares distritutions
+  for each `|Oi - Ei|/Ei**0.5` with the theoretical one. It improves its 
+  sensitivity to the additive/subtractive lagged Fibonacci PRNGs and SWB
+  (subtract-with-borrow) PRNGs.
+
+### Bugfix
+
+- Threads abstraction layer refinement (some subtle data races and pthreads
+  mutexes double initialization problem fixed).
+
 ## [0.51] 2026-09-14
 
 ### Added

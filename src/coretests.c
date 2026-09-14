@@ -562,6 +562,17 @@ typedef struct {
 } GapFreqTable;
 
 
+typedef struct {
+    double chi2;            ///< chi2 statistics.
+    double zabs_sum;        ///< `|z|` statistics obtained from `chi2`.
+    double zabs_maxbin_raw; ///< `|z|` maximal value for `|Oi - Ei| / Ei**0.5`.
+    double zabs_maxbin;     ///< `|z|` renormed for multiple comparison.
+    size_t ind_maxbin;
+    double pvalue_sum;
+    double pvalue_maxbin;
+} GapTestStats;
+
+
 void GapFreqTable_init(GapFreqTable *obj, uint64_t mask, size_t nbins, double beta)
 {
     obj->Oi = calloc(nbins + 1, sizeof(size_t));
@@ -584,23 +595,46 @@ static inline void GapFreqTable_add_value(GapFreqTable *obj, uint64_t u)
     }
 }
 
-double GapFreqTable_calc_chi2emp(GapFreqTable *obj)
+GapTestStats GapFreqTable_calc_stats(GapFreqTable *obj)
 {
     const double p = obj->beta, ngaps = (double) obj->ngaps;
-    double chi2emp = 0.0;
+    GapTestStats ans = {.chi2 = 0.0, .zabs_sum = 0.0,
+        .zabs_maxbin_raw = 0.0, .zabs_maxbin = 0.0, .ind_maxbin = 0};
+    // Calculate chi2 and zabs_maxbin_raw
     for (size_t i = 0; i < obj->nbins; i++) {
         const double Ei = p * pow(1.0 - p, (double) i) * ngaps;
-        chi2emp += calc_chi2emp_term(obj->Oi[i], Ei);
+        const double t = calc_chi2emp_term(obj->Oi[i], Ei);
+        const double sqrt_t = sqrt(t);
+        if (ans.zabs_maxbin_raw < sqrt_t) {
+            ans.zabs_maxbin_raw = sqrt_t;
+            ans.ind_maxbin = i;
+        }
+        ans.chi2 += t;
     }
-    return chi2emp;
+    // Calculate some other statistics and p-values
+    // a) chi2emp to zabs
+    const unsigned long f = (unsigned long) (obj->nbins - 1);
+    ans.zabs_sum = fabs(sr_chi2_to_stdnorm_approx(ans.chi2, f));
+    ans.pvalue_sum = sr_halfnormal_pvalue(ans.zabs_sum);
+    // b) renorm ans.zabs_maxbin_raw
+    ans.pvalue_maxbin = sr_geom_cdf(
+        (unsigned long) obj->nbins,
+        sr_halfnormal_pvalue(ans.zabs_maxbin_raw)
+    );
+    ans.zabs_maxbin = (ans.pvalue_maxbin > DBL_MIN) ?
+        -sr_stdnorm_inv(0.5 * ans.pvalue_maxbin) : 40.0;
+    return ans;
 }
 
 
-double GapFreqTable_calc_zabs_emp(GapFreqTable *obj)
+void GapTestStats_print(const GapTestStats *obj, const char *prefix, const CallerAPI *intf)
 {
-    const double chi2emp = GapFreqTable_calc_chi2emp(obj);
-    const unsigned long f = (unsigned long) (obj->nbins - 1);
-    return fabs(sr_chi2_to_stdnorm_approx(chi2emp, f));
+    intf->printf("  %6s\n", prefix);
+    intf->printf("    sum:    zabs = %g; p = %g; chi2 = %g\n",
+        obj->zabs_sum, obj->pvalue_sum, obj->chi2);
+    intf->printf("    maxbin: zabs = %g; p = %g; ind = %lu; zabs_raw = %g\n",
+        obj->zabs_maxbin, obj->pvalue_maxbin,
+        (unsigned long) obj->ind_maxbin, obj->zabs_maxbin_raw);
 }
 
 
@@ -615,7 +649,11 @@ void GapFreqTable_destruct(GapFreqTable *obj)
  * @brief Knuth's gap test for detecting lagged Fibonacci generators.
  * @details Gap is \f$ [0;\beta) \f$ where \f$\beta = 1 / (2^{shl}) \f$.
  * It contains two subtests: (1) for the raw values; (2) for the reverse
- * bits order.
+ * bits order. For each subtests two statistics are calculated:
+ *
+ * 1. `chi2emp`: \f$ \sum_i \frac{\left(O_i - E_i\right)^2}{E_i} \f$.
+ * 2. `zabs_maxbin_raw`: \f$ \max_i \frac{|O_i - E_i|}{\sqrt{E_i}} \f$, allows
+ *    to find gaps with anomalies.
  */
 TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
 {
@@ -624,12 +662,20 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
     const uint64_t beta_mask_lo = (1ULL << opts->shl) - 1;
     const uint64_t beta_mask_hi = beta_mask_lo << (obj->gi->nbits - opts->shl);
     const unsigned long long ngaps = opts->ngaps;
-    const size_t nbins = (size_t) (log(Ei_min / ((double) ngaps * p)) / log(1 - p));
+    TestResults ans = TestResults_create("Gap");
+    const double nbins_dbl = log(Ei_min / ((double) ngaps * p)) / log(1 - p);
+    if (nbins_dbl < 10.0) {
+        obj->intf->printf("  Number of gaps is too small\n");
+        ans.p = NAN;
+        ans.alpha = NAN;
+        ans.x = NAN;
+        return ans;
+    }
+    const size_t nbins = (size_t) nbins_dbl;
     GapFreqTable gaps_hi, gaps_lo;
     GapFreqTable_init(&gaps_hi, beta_mask_hi, nbins, p);
     GapFreqTable_init(&gaps_lo, beta_mask_lo, nbins, p);
     const unsigned long long max_gap_len = GapOptions_max_gaplen(opts, pgap_fail);
-    TestResults ans = TestResults_create("Gap");
     obj->intf->printf("Gap test\n");
     obj->intf->printf("  alpha = 0.0; beta = %g; shl = %u;\n", p, opts->shl);
     obj->intf->printf("  ngaps = %llu (2^%.2f or 10^%.2f); nbins = %llu\n",
@@ -653,23 +699,23 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
         }
     } while (gaps_hi.ngaps < ngaps || gaps_lo.ngaps < ngaps);
 
-    const double zabs_emp_hi = GapFreqTable_calc_zabs_emp(&gaps_hi);
-    const double zabs_emp_lo = GapFreqTable_calc_zabs_emp(&gaps_lo);
-    const double p_hi = sr_halfnormal_pvalue(zabs_emp_hi);
-    const double p_lo = sr_halfnormal_pvalue(zabs_emp_lo);
-
-    ans.penalty = PENALTY_GAP;
-    ans.x = zabs_emp_hi;
-    TestResults_set_pmin_ntests(&ans, 2, (p_hi < p_lo) ? p_hi : p_lo);
+    const GapTestStats stats_hi = GapFreqTable_calc_stats(&gaps_hi);
+    const GapTestStats stats_lo = GapFreqTable_calc_stats(&gaps_lo);
     GapFreqTable_destruct(&gaps_hi);
     GapFreqTable_destruct(&gaps_lo);
+
+    ans.penalty = PENALTY_GAP;
+    ans.x = stats_hi.zabs_sum; ans.p = stats_hi.pvalue_sum;
+    if (stats_hi.zabs_maxbin > ans.x) { ans.x = stats_hi.zabs_maxbin; ans.p = stats_hi.pvalue_maxbin; }
+    if (stats_lo.zabs_maxbin > ans.x) { ans.x = stats_lo.zabs_maxbin; ans.p = stats_lo.pvalue_maxbin; }
+    if (stats_lo.zabs_sum    > ans.x) { ans.x = stats_lo.zabs_sum;    ans.p = stats_lo.pvalue_sum; }
+    TestResults_set_pmin_ntests(&ans, 4, ans.p);
     obj->intf->printf("  Values processed: %llu (2^%.1f)\n",
         nvalues, sr_log2((double) nvalues));
-    
-    obj->intf->printf("  High: x = %g; p = %g\n", zabs_emp_hi, p_hi);
-    obj->intf->printf("  Low:  x = %g; p = %g\n", zabs_emp_lo, p_lo);
-    obj->intf->printf("  x = %g; p = %g\n", ans.x, ans.p);
+    GapTestStats_print(&stats_hi, "High: ", obj->intf);
+    GapTestStats_print(&stats_lo, "Low:  ", obj->intf);
     obj->intf->printf("\n");
+
     return ans;
 }
 
