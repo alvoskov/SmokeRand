@@ -714,8 +714,9 @@ TestResults gap_test(GeneratorState *obj, const GapOptions *opts)
         nvalues, sr_log2((double) nvalues));
     GapTestStats_print(&stats_hi, "High: ", obj->intf);
     GapTestStats_print(&stats_lo, "Low:  ", obj->intf);
+    obj->intf->printf("  Total:\n");
+    obj->intf->printf("    zabs = %g; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
-
     return ans;
 }
 

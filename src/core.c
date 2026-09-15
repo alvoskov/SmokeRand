@@ -1059,6 +1059,7 @@ void BatteryResults_init(BatteryResults *obj, const TestsBattery *bat,
         strcat(obj->generator_name, ":");
         strcat(obj->generator_name, gen->parent->name);
     }
+    obj->generator_nbits = gen->nbits;
     // Other settings
     obj->seed_key_txt = NULL;
     obj->nseconds_total = (time_t) 0;

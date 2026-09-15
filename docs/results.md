@@ -33,13 +33,13 @@ Note: some of `full` results are for SmokeRand < 0.51.
  Algorithm         | Output | express | brief | default | full | cpb  | coll64 | Grade | TestU01 | PractRand 
 -------------------|--------|---------|-------|---------|------|------|--------|-------|---------|-----------
  a5rand            | u64    | +       | +     | +       | +    | 0.37 | +      | 4(0)  |         | >= 16 TiB
- a5rand32          | u32    | +       | 1/2   | 9       | 11   | 1.0  | -(>>>) | 0     | Small   | 4 GiB
+ a5rand32          | u32    | +       | ?1/2  | 9       | 11   | 1.0  | -(>>>) | 0     | Small   | 4 GiB
  a5randw           | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 16 TiB
- a5rand32w         | u32    | +       | 0/1   | 1       | 1    | 0.75 | *      | 0     | +       | 256 GiB
+ a5rand32w         | u32    | +       | ?0/1  | 1       | 1    | 0.75 | *      | 0     | +       | 256 GiB
  aesni128          | u64    | +       | +     | +       | +    | 0.89 | +      | 5     | +il     | >= 32 TiB
  aes128(c99)       | u64    | +       | +     | +       | +    | 6.8  | +      | 5     |         | >= 32 TiB
  aesdec2           | u64    | +       | +     | +       | +    | 0.14 | +      | 4     |         | >= 8 TiB
- alfib             | u64    | 2       | 5     | 6       | 8    | 0.23 | +      | 0     | Small   | 128 MiB
+ alfib             | u64    | 2       | ?5    | 6       | 8    | 0.23 | +      | 0     | Small   | 128 MiB
  alfib8x5          | u32    | +       | +     | +       | +    | 3.2  | +      | 4     | +       | >= 4 TiB
  alfib64x5         | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 8 TiB
  alfib_lux         | u32    | +       | 1     | 1       | 1    | 6.1  | +      | 3.75  | +       | 4 GiB
@@ -48,8 +48,8 @@ Note: some of `full` results are for SmokeRand < 0.51.
  ara64             | u64    | +       | 1     | 1       | 1    | 0.50 | +      | 2(0)  |+H/+L/+il| 1 GiB
  arx32             | u32    | +       | +     | +       | +    | 1.0  | +      | 3.5(0)| +       | 1 TiB
  arx64             | u32    | +       | +     | +       | +    | 0.50 | +      | 4(0)  |         | >= 4 TiB
- arxfw8            | u32    | +       | 18    | 33      |      | 4.4  | -(>>>) | 0     | -       | 2 MiB
- arxfw8ex          | u32    | +       | 3/5   | 8       | 16   | 5.0  | -(>>>) | 0     | -/Small | 128 MiB
+ arxfw8            | u32    | +       | ?18   | 33      |      | 4.4  | -(>>>) | 0     | -       | 2 MiB
+ arxfw8ex          | u32    | +       | ?3/5  | 8       | 16   | 5.0  | -(>>>) | 0     | -/Small | 128 MiB
  arxfw8ex2         | u32    | +       | +     | +       | +    | 3.8  | +      | 3.5(0)| +       | 8 TiB
  arxfw8ex3         | u32    | +       | +     | +       | +    | 4.0  | +      | 4(0)  | +       | >= 16 TiB
  arxfw16           | u32    | +       | +     | +       | +    | 2.6  | +      | 3.5(0)| +       | 8 TiB
@@ -57,11 +57,11 @@ Note: some of `full` results are for SmokeRand < 0.51.
  arxfw32           | u32    | +       | +     | +       | +    | 0.74 | +      | 4(0)  | +       | >= 16 TiB
  arxfw64           | u32    | +       | +     | +       | +    | 0.38 | +      | 4     | +IL     | >= 8 TiB
  bbs64             | u64    | +       | +     | +       | +    | 2.0  |        | 3.5   | Small   | 256 GiB
- biski8_mul        | u32    | 1       | 19    | 33      | 41   | 2.2  | -(>>>) | 0     | -       | 512 KiB
- biski16_mul       | u32    | +       | 2     | 3       | 6    | 1.6  | -      | 0     | -       | 16 GiB
+ biski8_mul        | u32    | 1       | ?19   | 33      | 41   | 2.2  | -(>>>) | 0     | -       | 512 KiB
+ biski16_mul       | u32    | +       | ?2    | 3       | 6    | 1.6  | -      | 0     | -       | 16 GiB
  biski64_mul       | u64    | +       | +     | +       | +    | 0.18 | +      | 4     |         | >= 2 TiB
- biski8            | u32    | +       | 17    | 35      | 35   | 1.4  | -(>>>) | 0     | -       | 2 MiB
- biski8_alt        | u32    | +       | 17    | 31      | 31   | 1.4  | -(>>>) | 0     | -       | 2 MiB
+ biski8            | u32    | +       | ?17   | 35      | 35   | 1.4  | -(>>>) | 0     | -       | 2 MiB
+ biski8_alt        | u32    | +       | ?17   | 31      | 31   | 1.4  | -(>>>) | 0     | -       | 2 MiB
  biski16           | u32    | +       | +     | +       | 1    | 0.81 | +      | 2(0)  | +       | 1 TiB
  biski16_alt       | u32    | +       | +     | +       | +    | 1.1  | +      | 3.5(0)| +       | 1 TiB
  biski32_v2        | u32    | +       | +     | +       | +    | 0.31 | +      | 4(0)  | +       | >= 32 TiB
@@ -79,33 +79,33 @@ Note: some of `full` results are for SmokeRand < 0.51.
  chacha12_avx      | u32    | +       | +     | +       | +    | 2.0  | +      | 5     | +       | >= 32 TiB
  chacha12_avx2     | u32    | +       | +     | +       | +    | 0.78 | +      | 5     | +       | >= 16 TiB
  chacha12_ctr32    | u32    | +       | +     | +       | 1    | 2.0  | -(>>>) | 0     | +       | 256 GiB
- chip8             | u32    | +       | 2/3   | 7/8     | 14/20| 1.9  |        | 0     | Small   | 64 MiB
+ chip8             | u32    | +       | ?2/3  | 7/8     | 14/20| 1.9  |        | 0     | Small   | 64 MiB
  chip16            | u32    | +       | +     | +       | +    | 0.78 | +      | 4(0)  | +       | >= 8 TiB
  chip32            | u32    | +       | +     | +       | +    | 0.27 | +      | 4(0)  | +       | 16 TiB
  chip64            | u64    | +       | +     | +       | +    | 0.16 | +      | 4     | +IL     | >= 32 TiB
  cmwc4096          | u32    | +       | +     | +       | +    | 0.43 | +      | 4     | +       | >= 32 TiB
- cmwc4827          | u32    | +       | 1     | 1       | 1    | 0.44 | +      | 2     | +       | 512 MiB
- combo             | u32    | +       | 4     | 6       | 8    | 0.75 | +      | 0     | Small   | 4 GiB
+ cmwc4827          | u32    | +       | ?1    | 1       | 1    | 0.44 | +      | 2     | +       | 512 MiB
+ combo             | u32    | +       | ?4    | 6       | 8    | 0.75 | +      | 0     | Small   | 4 GiB
  combmrg96         | u31    | +       | +     | +       | +    | 1.9  | N/A    | 4     | +       | >= 8 TiB
- coveyou64         | u32    | 1       | 3     | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
- coveyou128        | u64    | +       | 1     | 1       | 1    | 0.36 | +      | 3     | +lo     | 64 GiB
- cswb4288          | u32    | +       | 1     | 1       | ?4/5 | 0.90 | +      | 0     | Crush   | >= 32 TiB
+ coveyou64         | u32    | 1       | ?3    | 4       | 4    | 0.62 | +      | 0     | Small   | 256 KiB
+ coveyou128        | u64    | +       | ?1    | 1       | 1    | 0.36 | +      | 3     | +lo     | 64 GiB
+ cswb4288          | u32    | +       | 1     | 1       | 5    | 0.90 | +      | 0     | Crush   | >= 32 TiB
  cswb4288_64       | u64    | +       | 2     | 3       | 5    | 0.52 | +      | 0     | +lo/+hi | >= 32 TiB
  cwg64             | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +lo/+hi | >= 16 TiB
- dandelion32       | u32    | +       | 1     | 1/2     | 7/8  | 1.1  | -(>>>) | 0     | Small   | 512 MiB
+ dandelion32       | u32    | +       | ?1    | 1/2     | 7/8  | 1.1  | -(>>>) | 0     | Small   | 512 MiB
  dandelion64       | u32    | +       | +     | +       | +    | 0.38 | +      | 4     | +       | >= 2 TiB
  dandelion128      | u64    | +       | +     | +       | +    | 0.18 | +      | 4     | +IL     | >= 8 TiB
  des-ctr           | u64    | +       | +     | +       | +    | 24   | -      | 3     | +IL     | >= 4 TiB
- drand48           | u32    | 3       | 13    | 21      | 23/24| 0.72 | -      | 0     | -       | 1 MiB
+ drand48           | u32    | 3       | ?13   | 21      | 23/24| 0.72 | -      | 0     | -       | 1 MiB
  efiix64x48        | u64    | +       | +     | +       | +    | 0.38 | +      | 4     | +IL     | >= 16 TiB
  flea32x1          | u32    | +       | 1     | 1       | 1    | 0.48 | +      | 2     | +       | 4 MiB
  fwfarx128ctr(avx2)| u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 16 TiB
  fwfarx256ctr(avx2)| u64    | +       | +     | +       | +    | 0.47 | +      | 4     | +IL     | >= 32 TiB
- ghsc64_old        | u64    | +       | 3     | 10      | 18   | ~0.1 |        | 0     |         | 256 KiB
+ ghsc64_old        | u64    | +       | ?3    | 10      | 18   | ~0.1 |        | 0     |         | 256 KiB
  ghsc64            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 16 TiB
  ghsc128           | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |         | >= 16 TiB
  ghsc256           | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | >= 16 TiB
- gjrand8           | u32    | +       | 4     | 11      | >=15 | 3.5  | -(>>>) | 0     | Small   | 128 MiB
+ gjrand8           | u32    | +       | ?4    | 11      | >=15 | 3.5  | -(>>>) | 0     | Small   | 128 MiB
  gjrand16          | u32    | +       | +     | +       | +    | 2.6  | +      | 4(0)  | +       | 8 TiB
  gjrand32          | u32    | +       | +     | +       | +    | 0.69 | +      | 4(0)  | +       | >= 32 TiB
  gjrand64          | u64    | +       | +     | +       | +    | 0.32 | +      | 4     |+il      | >= 32 TiB
@@ -113,11 +113,11 @@ Note: some of `full` results are for SmokeRand < 0.51.
  grube73_mrg2      | u31    | +       | +     | +       | 1    | 1.4  | N/A    | 1     | Crush   | ?
  grube73_mrg3      | u31    | +       | +     | +       | +    | 1.9  | N/A    | 4     | +       | >= 2 TiB
  hc256             | u32    | +       | +     | +       | +    | 1.1  | +      | 5     | +       | >= 32 TiB
- hicg64_u32        | u32    | 1       | 2     | 3       | 3    | 5.4  | +      | 0     | Small   | 32 MiB
+ hicg64_u32        | u32    | 1       | ?2    | 3       | 3    | 5.4  | +      | 0     | Small   | 32 MiB
  icg31x2           | u32    | +       | +     | +       | 1    | 87   |        | 2     | Crush   | 8 GiB
  icg64             | u32    | +       | +     | +       | +    | 113  |        |       | +       | >= 1 TiB
- icg64_p2          | u32    | 1       | 2     | 3       | 3/4  | 5.1  | +      | 0     | Small   | 32 MiB
- icg128_p2         | u32    | +       | 1     | 1       | 1    | 2.6  | +      | 3     | +lo     | 64 GiB
+ icg64_p2          | u32    | 1       | ?2    | 3       | 3/4  | 5.1  | +      | 0     | Small   | 32 MiB
+ icg128_p2         | u32    | +       | ?1    | 1       | 1    | 2.6  | +      | 3     | +lo     | 64 GiB
  isaac             | u32    | +       | +     | +       | +    | 1.6  | +      | 4.5   | +       | >= 16 TiB
  isaac64           | u64    | +       | +     | +       | +    | 0.75 | +      | 4.5   | +       | >= 32 TiB
  jctr32            | u32    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 16 TiB
@@ -127,7 +127,7 @@ Note: some of `full` results are for SmokeRand < 0.51.
  jkiss             | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 16 TiB 
  jkiss32           | u32    | +       | +     | +       | +    | 0.71 | +      | 4     | +       | >= 16 TiB
  jlkiss64          | u64    | +       | +     | +       | +    | 0.50 | +      | 4     |         | >= 16 TiB
- kiss93            | u32    | 1       | 1     | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
+ kiss93            | u32    | 1       | ?1    | 3       | 5    | 0.82 | +      | 2.75  | Small   | 1 MiB
  kiss96(orig)      | u32    | +       | +     | +       | +    | 0.80 | +      | 4     | +       | >= 32 TiB(?)
  kiss96(corr)      | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 16 TiB(?)
  kiss99(orig)      | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
@@ -140,9 +140,9 @@ Note: some of `full` results are for SmokeRand < 0.51.
  kiss11_32         | u32    | +       | +     | +       | +    | 0.96 | +      | 4     | +       | >= 16 TiB
  kiss11_64         | u64    | +       | +     | +       | +    | 0.60 | +      | 4     |         | >= 32 TiB
  kiss4691          | u32    | +       | +     | +       | +    | 1.1  | +      | 4     | +       | >= 32 TiB
- komirand16        | u32    | 1-7     | 19-20 | 40      |      | 2.1  | -(>>>) | 0     | -       | 64 KiB
- komirand16w       | u32    | 1-4     | 20-21 | 39      |      | 2.1  | -(>>>) | 0     | -       | 16 MiB
- komirand32        | u32    | +       | 1     | 2       | 10   | 0.63 | -(>>>) | 0     | Small   | 2-8 GiB
+ komirand16        | u32    | 1-7     | ?19-20| 40      |      | 2.1  | -(>>>) | 0     | -       | 64 KiB
+ komirand16w       | u32    | 1-4     | ?20-21| 39      |      | 2.1  | -(>>>) | 0     | -       | 16 MiB
+ komirand32        | u32    | +       | ?1    | 2       | 10   | 0.63 | -(>>>) | 0     | Small   | 2-8 GiB
  komirand32w       | u32    | +       | +     | +       | +    | 1.0  | +      | 4(0)  | +       | >= 16 TiB
  komirand          | u64    | +       | +     | +       | +    | 0.49 | +      | 4(0)  |+H/+L/+IL| >= 16 TiB
  komirandw         | u64    | +       | +     | +       | +    | 0.52 | +      | 4     |         | >= 8 TiB
@@ -152,11 +152,11 @@ Note: some of `full` results are for SmokeRand < 0.51.
  leptonflurry32x1_2| u32    | +       | +     | +       | +    | 2.0  |        |       |         | >= 4 TiB
  leptonflurry32x2  | u32    | +       | +     | +       | 2    |      |        | 0     |         | 32 GiB
  leptonflurry32x4  | u32    | +       | +     | 1       |      |      |        |       |         | 64 GiB
- lcg32prime        | u32    | 1       | 13/14 | 28      |      | 2.2  | -(>>>) | 0     | -       | 512 MiB
- lcg32sc           | u32    | +       | 1     | 2       | 8/9  | 0.62 | -(>>>) | 0     | Small   | 512 MiB
- lcg42             | u32    | 5       | 17    | 34      | 36   | 0.66 | -      | 0     | -       | 16 KiB
- lcg61prime        | u32    | +       | 3     | 5       | 5    | 2.0  | -      | 0     | Small   | >= 16 TiB
- lcg64             | u32    | 1       | 6/7   | 8/9     | 12/13| 0.40 | *      | 0     | Small   | 16 MiB
+ lcg32prime        | u32    | 1       | 13/14 | >=28    |      | 2.2  | -(>>>) | 0     | -       | 512 MiB
+ lcg32sc           | u32    | +       | ?1    | ?2      | ?8/9 | 0.62 | -(>>>) | 0     | Small   | 512 MiB
+ lcg42             | u32    | 5       | 19    | 37      | ?36  | 0.66 | -      | 0     | -       | 16 KiB
+ lcg61prime        | u32    | +       | 2     | 3/5     | ?5   | 2.0  | -      | 0     | Small   | >= 16 TiB
+ lcg64             | u32    | 1       | 7/8   | 9       |?12/13| 0.40 | *      | 0     | Small   | 16 MiB
  lcg64bd           | u32    | +       | +     | +       | +    | 0.60 | +      | 3.5   | +       | 32 GiB
  lcg64prime        | u64    | +       | 1     | 1       | 1    | 1.5  | -      | 0     | +-      | >= 32 TiB
  lcg64sc           | u64    | +       | +     | +       | +    | 0.30 | -      | 3     |+HI/+LO  | >= 16 TiB
@@ -167,7 +167,7 @@ Note: some of `full` results are for SmokeRand < 0.51.
  lcg128prime       | u64    | +       | +     | +       | +    | 0.48 | +      | 4     | +IL     | >= 1 TiB
  lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | 3     | +       | 64 GiB
  lcg128_u32_full   | u32    | +       | +     | 1       | 1    | 0.75 | +      | 3     | +       | >= 32 TiB
- lcg69069          | u32    | 6       | 20    | 45      |      | 0.38 | -(>>>) | 0     | -       | 2 KiB
+ lcg69069          | u32    | 6       | 24    | ?45     |      | 0.38 | -(>>>) | 0     | -       | 2 KiB
  lea128            | u32    | +       | +     | +       | +    | 5.7  | +      | 5     | +       | >= 32 TiB
  lea128_avx        | u32    | +       | +     | +       | +    | 1.2  | +      | 5     | >= Crush| >= 32 TiB
  lfib_par[31+]     | u32    | 1       | 7/8   | ?       | ?    | 0.70 | +      | 0     | -       | 32 MiB
@@ -197,14 +197,14 @@ Note: some of `full` results are for SmokeRand < 0.51.
  lfib_par[44497-]  | u32    | +       | +     | 1       | 1    | 0.49 | +      | 2     | +       | >= 2 TiB
  lfib_par[110503+] | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 16 TiB
  lfib_par[110503-] | u32    | +       | +     | +       | +    | 0.50 | +      | 4     | +       | >= 1 TiB
- lfib4             | u32    | 1       | 1     | 3       | 4    | 0.37 | +      | 3     | +       | 32 MiB
+ lfib4             | u32    | 1       | ?1    | 3       | 4    | 0.37 | +      | 3     | +       | 32 MiB
  lfib4_u64         | u32    | +       | +     | +       | +    | 0.34 | +      | 4     | +       | >= 32 TiB
  lfsr113           | u32    | 2       | 3     | 5       | 7    | 1.1  | +      | 2.25  | Small   | 32 KiB 
  lfsr258           | u64    | 2       | 3     | 5       | 7    | 0.75 | +      | 2.25  | Small   | 1 MiB
  lrnd64_255        | u64    | 2       | 5     | 10      | 15   | 0.45 | +      | 0     | Small   | 512 KiB
  lrnd64_1023       | u64    | 2       | 3     | 5       | 7    | 0.44 | +      | 2.25  | Small   | 4 MiB
  lxm_64x128        | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 32 TiB
- macmarsa          | u32    | 2       | 12    | 18      | 19   | 0.67 | -(>>>) | 0     | -       | 128 KiB
+ macmarsa          | u32    | 2       | ?12   | 18      | 19   | 0.67 | -(>>>) | 0     | -       | 128 KiB
  magma             | u64    | +       | +     | +       | +    | 25   |        |       | +       | >= 1 TiB
  magma_avx-ctr     | u64    | +       | +     | +       | +    | 7.1  | -      | 3     |         | >= 16 TiB
  magma_avx-cbc     | u64    | +       | +     | +       | +    | 7.1  | +      | 4     |         | >= 2 TiB
@@ -215,7 +215,7 @@ Note: some of `full` results are for SmokeRand < 0.51.
  melg4253          | u64    | 2       | 3     | 5       |      | 0.77 |        |       | Small   | 4 GiB
  melg19937         | u64    | +       | 3     | 3       | 3    | 0.73 | +      | 3.25  | Small   | 256 GiB
  melg44497         | u64    | +       | +     | 3       | 3    | 0.75 | +      | 3.25  | Small   | 2 TiB
- minstd            | u31    | 1       | 14    | 32      | 37   | 1.4  | -(>>>) | 0     | -       | 256 KiB
+ minstd            | u31    | 1       | 17    | 35/36   |      | 1.4  | -(>>>) | 0     | -       | 256 KiB
  mixmax_low32      | u32    | +       | +     | +       | +    | 1.7  | +      | 4     | +       | >= 16 TiB
  mlfib17_5         | u32    | +       | +     | +       | +    | 0.48 | +      | 4     | +       | >= 32 TiB
  mrc16             | u32    | +       | +     | +       | +    | 1.1  | +      | 3.5(0)| +       | 1 TiB
@@ -223,14 +223,14 @@ Note: some of `full` results are for SmokeRand < 0.51.
  mrc64             | u64    | +       | +     | +       | +    | 0.19 | +      | 4     |         | >= 16 TiB
  mrg32k3a          | u32    | +       | +     | +       | +    | 2.7  | +      | 4     | +       | >= 4 TiB
  mrg_1592_7        | u31    | +       | +     | +       | +    | 1.7  | N/A    |       | >=Crush | ?
- mrg_denglin_2     | u31    | +       | 3     | 7/8     | 8/10 | 1.1  | N/A    | 0     | -       | 128 GiB
- mrg_denglin_4     | u31    | +       | 2     | 2       | 2/3  | 1.2  | N/A    | 0     | -       | >= 8 TiB
+ mrg_denglin_2     | u31    | +       | ?3    | 7/8     | 8/10 | 1.1  | N/A    | 0     | -       | 128 GiB
+ mrg_denglin_4     | u31    | +       | ?2    | 2       | 2/3  | 1.2  | N/A    | 0     | -       | >= 8 TiB
  mrsf32            | u32    | +       | +     | +       | +    | 0.19 | +      | 4(0)  |         | 4 TiB
  mrsf64            | u64    | +       | +     | +       | +    | <0.1 | +      | 4(0)  |         | >= 16 TiB
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.59 | +      | 3.25  | Small   | 128 GiB
  mt19937_64        | u64    | +       | 3     | 3       | 3    | 0.45 | +      | 3.25  | Small   | 256 GiB
  mt19937_64_full   | u64    | +       | 3     | 3       | 3    | 0.46 | +      | 3.25  | Small   | 256 GiB
- mtc8              | u32    | 1       | 20/21 | 35      | 39   | 1.9  |        | 0     | -       | 2 MiB
+ mtc8              | u32    | 1       | ?20/21| 35      | 39   | 1.9  |        | 0     | -       | 2 MiB
  mtc16             | u32    | +       | +     | +       | +    | 1.3  | +      | 3.5(0)| +       | 512 GiB(stdin32)*
  mtc32             | u32    | +       | +     | +       | +    | 0.39 | +      | 4(0)  | +       | >= 4 TiB
  mtc64             | u64    | +       | +     | +       | +    | 0.21 | +      | 4     |         | >= 16 TiB
@@ -245,22 +245,22 @@ Note: some of `full` results are for SmokeRand < 0.51.
  mularx128_u32     | u32    | +       | +     | +       | +    | 0.95 | +      | 4     |         | >= 32 TiB
  mularx128_str     | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 32 TiB
  mularx256         | u64    | +       | +     | +       | +    | 0.67 | +      | 4     |         | >= 32 TiB
- mulberry32        | u32    | +       | 1     | 2/3     | 5    | 0.51 | -(>>>) | 0     | Small   | 512 MiB
- mwc32x            | u32    | +       | 3     | 4       | 8    | 1.5  | -(>>>) | 0     | Small   | 128 MiB
- mwc32xxa8         | u32    | +       | 1     | 4       | 10   | 1.9  | -(>>>) | 0     | Small   | 256 MiB
+ mulberry32        | u32    | +       | ?1    | 2/3     | 5    | 0.51 | -(>>>) | 0     | Small   | 512 MiB
+ mwc32x            | u32    | +       | ?3    | 4       | 8    | 1.5  | -(>>>) | 0     | Small   | 128 MiB
+ mwc32xxa8         | u32    | +       | ?1    | 4       | 10   | 1.9  | -(>>>) | 0     | Small   | 256 MiB
  mwc40xxa8         | u32    | +       | +     | +       | 1    | 2.1  | -(>>>) | 0     | Crush   | 16 GiB
  mwc48xxa16        | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | +       | 1 TiB
- mwc64             | u32    | +       | 1     | 2       | 4    | 0.37 | -      | 0     | Small   | 1 TiB
+ mwc64             | u32    | +       | ?1    | 2       | 4    | 0.37 | -      | 0     | Small   | 1 TiB
  mwc64x            | u32    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
  mwc64x_u31        | u31    | +       | +     | +       | +    | 1.5  | +      | 4     | >=Crush | >= 8 TiB
- mwc64_2p58        | u64    | 2       | 9     | 17      | 17   | 0.26 | +      | 0     | -       | 128 KiB
+ mwc64_2p58        | u64    | 2       | ?9    | 17      | 17   | 0.26 | +      | 0     | -       | 128 KiB
  mwc128            | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 16 TiB
  mwc128x           | u64    | +       | +     | +       | +    | 0.30 | +      | 4     | +       | >= 32 TiB
  mwc128xxa32       | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 32 TiB
  mwc192            | u64    | +       | +     | +       | +    | 0.17 | +      | 4     |+H/+L/+IL| >= 16 TiB
  mwc256            | u64    | +       | +     | +       | +    | 0.18 | +      | 4     |         | >= 16 TiB
  mwc256xxa64       | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |+H       | >= 32 TiB
- mwc1616           | u32    | 1       | 10/11 | 13/19   | 20   | 0.48 | -      | 0     | -/Small | 16 MiB
+ mwc1616           | u32    | 1       | ?10/11| ?13/19  | ?20  | 0.48 | -      | 0     | -/Small | 16 MiB
  mwc1616p          | u32    | +       | +     | +       | +    | 0.55 | +      | 4     | +(?)    | 16 TiB
  mwc1616x          | u32    | +       | +     | +       | +    | 0.60 | +      | 3.5   | +       | 32 TiB
  mwc3232x          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |+il      | >= 32 TiB
@@ -269,11 +269,11 @@ Note: some of `full` results are for SmokeRand < 0.51.
  mwc4691           | u32    | +       | 1     | 1       | 1    | 0.45 | +      | 2     | +       | 1 GiB
  mwc8222           | u32    | +       | +     | +       | +    | 0.59 | +      | 4     | +       | >= 32 TiB
  mwc8222_v2        | u32    | +       | +     | +       | +    | 0.93 |        | 3.5   | +       | 2 TiB
- mwc_kiss96        | u32    | 2       | 14    | 28      | 35   | 0.47 |        | 0     | -       | 32 KiB
+ mwc_kiss96        | u32    | 2       | ?14   | 28      | 35   | 0.47 |        | 0     | -       | 32 KiB
  mwcsc_kiss96      | u32    | +       | +     | +       | +    | 0.62 | -      | 3     | +       | >= 2 TiB
- mzran13           | u32    | 1       | 4     | 8/9     | 11   | 1.2  | +      | 0     | Small   | 64 KiB
+ mzran13           | u32    | 1       | ?4    | 8/9     | 11   | 1.2  | +      | 0     | Small   | 64 KiB
  nasam             | u64    | +       | +     | +       | +    | 0.13 | -      | 3     |         | >= 16 TiB
- ncombo            | u32    | 2       | 5     | 8/9     | 11   | 1.4  | +      | 0     | Small   | 64 KiB
+ ncombo            | u32    | 2       | ?5    | 8/9     | 11   | 1.4  | +      | 0     | Small   | 64 KiB
  pelican           | u64    | +       | +     | +       | +    | 0.20 | -      | 3     |         | >= 16 TiB
  pcg32             | u32    | +       | +     | +       | +    | 0.44 | +      | 3.5   | +       | 32 TiB
  pcg32_dxsm        | u32    | +       | +     | +       | +    | 0.48 | +      | 4     | +       | >= 32 TiB
@@ -285,43 +285,43 @@ Note: some of `full` results are for SmokeRand < 0.51.
  philox            | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  philox2x32        | u32    | +       | +     | +       | +    | 1.6  | -      | 3     | +       | >= 32 TiB
  philox32          | u32    | +       | +     | +       | +    | 1.6  | +      | 4     | +       | >= 32 TiB
- poly96            | u32    | 2       | 3/4   | 7       | 11   | 2.8  |        | 0     | Small   | 64 KiB
- prvhash12c        | u32    | +       | 0/1   | 0/1     | 4    | 5.1  | -(>>>) | 0     | Crush   | 8 GiB
+ poly96            | u32    | 2       | ?3/4  | 7       | 11   | 2.8  |        | 0     | Small   | 64 KiB
+ prvhash12c        | u32    | +       | ?0/1  | 0/1     | 4    | 5.1  | -(>>>) | 0     | Crush   | 8 GiB
  prvhash12cw       | u32    | +       | +     | +       | +    | 5.1  | +      | 3.5(0)| +       | 2 TiB
  prvhash16c        | u32    | +       | +     | +       | +    | 2.4  | +      | 3.5(0)| +       | 256 GiB
  prvhash16cw       | u32    | +       | +     | +       | +    | 2.4  | +      | 3.5(0)| +       | 4 TiB
  prvhash64c        | u64    | +       | +     | +       | +    | 0.51 | +      | 4(0)  |         | >= 16 TiB
  prvhash64cw       | u64    | +       | +     | +       | +    | 0.41 | +      | 4     |         | >= 16 TiB
- pqrng32           | u32    | 5       | 18    | 35      | 39   | 0.50 | -(>>>) | 0     | -       | 2 KiB
+ pqrng32           | u32    | 5       | ?18   | 35      | 39   | 0.50 | -(>>>) | 0     | -       | 2 KiB
  pqrng64           | u32    | +       | +     | 1       | 1    | 0.64 | -(<)   | 2     | +       | 16 GiB
  pqrng128          | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | >= 8 TiB
  ran               | u64    | +       | +     | +       | +    | 0.43 | +      | 4     |         | >= 32 TiB
  ranhash           | u64    | +       | +     | 1       | 1    | 0.25 | -      | 2     |+IL/+L/+H| 8 TiB
  ran2              | u31    | +       | +     | +       | +    | 3.2  | N/A    | 4     | +       | 2 TiB
- ranq1             | u64    | 1       | 1     | 3       | 6    | 0.32 | -      | 0     |S_lo/+_hi| 512 KiB
+ ranq1             | u64    | 1       | ?1    | 3       | 6    | 0.32 | -      | 0     |S_lo/+_hi| 512 KiB
  ranq2             | u64    | +       | +     | 1       | 2    | 0.33 | +      | 3.5   |+_lo/+_hi| 2 MiB
- randu             | u32    | 6       | 23    | 41      | 45   | 0.41 | -(>>>) | 0     | -       | 1 KiB
+ randu             | u32    | 6       | 26    | 47      | 63   | 0.41 | -(>>>) | 0     | -       | 1 KiB
  ranecu            | u31    | +       | +     | 1       | 1    | 3.1  | N/A    | 1     | Small   | 2 TiB
  ranlim32          | u32    | +       | +     | +       | +    | 1.3  | +      | 4     | +       | >= 16 TiB
  ranlux++          | u64    | +       | +     | +       | +    | 2.4  | +      | 4     | +       | >= 32 TiB
  ranrot_bi         | u64    | +       | +     | 1       | 2/4  | 0.33 | +      | 0     |+IL/+H/+L| 8 GiB
- ranrot32[7/3]     | u32    | +       | 3     | 5/6     | 6    | 0.58 | +      | 0     | Small   | 128 MiB
- ranrot32[17/9]    | u32    | +       | 1     | 2       | 4    | 0.68 | +      | 0     | +       | 1 GiB
+ ranrot32[7/3]     | u32    | +       | ?3    | 5/6     | 6    | 0.58 | +      | 0     | Small   | 128 MiB
+ ranrot32[17/9]    | u32    | +       | ?1    | 2       | 4    | 0.68 | +      | 0     | +       | 1 GiB
  ranrot32[57/13]   | u32    | +       | +     | +       | 1    | 0.74 | +      | 2     | +       | 8 GiB
- ranrot8tiny       | u32    | +       | 8     | 24      | 27   | 2.0  | -(>>>) | 0     | -       | 4 MiB
- ranrot16tiny      | u32    | +       | +     | +       | 1    | 1.0  | -      | 2(0)  | Crush   | 8 GiB
- ranrot32tiny      | u32    | +       | +     | +       | +    | 0.41 | +      | 3(0)  | +       | 2 TiB
+ ranrot8tiny       | u32    | +       | ?8    | 24      | 27   | 2.0  | -(>>>) | 0     | -       | 4 MiB
+ ranrot16tiny      | u32    | +       | ?+    | +       | 1    | 1.0  | -      | 2(0)  | Crush   | 8 GiB
+ ranrot32tiny      | u32    | +       | ?+    | +       | +    | 0.41 | +      | 3(0)  | +       | 2 TiB
  ranrot64tiny      | u64    | +       | +     | +       | +    | 0.21 | +      | 4     | +il     | >= 16 TiB
- ranshi            | u64    | +       | 2     | 7       | 8    | 0.43 | +      | 0     | -IL     | 32 KiB
+ ranshi            | u64    | +       | ?2    | 7       | 8    | 0.43 | +      | 0     | -IL     | 32 KiB
  ranshi_upper32    | u32    | +       | +     | +       | +    | 0.86 | +      | 3.5   | +       | 8 TiB
  ranshi_lower32    | u32    | +       | +     | +       | +    | 0.86 | +      | 4     | +       | >= 32 TiB
  ranval            | u32    | +       | +     | +       | +    | 0.31 | +      | 4(0)  | +       | >= 32 TiB
  ranval64          | u64    | +       | +     | +       | +    | 0.23 | +      | 4(0)  | +IL     | >= 16 TiB
- r250              | u32    | 3       | 7     | 10      | 13   | 0.50 | +      | 0     | -       | 1 MiB
- r1279             | u32    | 2       | 5     | 7       | 10   | 0.47 | +      | 0     | Small   | 64 MiB
- ranlux[0]         | u32    | 1       | 6     | 9       | 12   | 6.8  | N/A    | 0     | -       | 4 MiB
- ranlux[1]         | u32    | +       | +     | 2       | 3    | 13   | N/A    | 0     | Small   | 4 GiB
- ranlux[2]         | u32    | +       | +     | +       | +    | 27   | N/A    |       |         | >= 2 TiB
+ r250              | u32    | 3       | ?7    | 10      | 13   | 0.50 | +      | 0     | -       | 1 MiB
+ r1279             | u32    | 2       | ?5    | 7       | 10   | 0.47 | +      | 0     | Small   | 64 MiB
+ ranlux[0]         | u32    | 1       | ?6    | 9       | 12   | 6.8  | N/A    | 0     | -       | 4 MiB
+ ranlux[1]         | u32    | +       | ?+    | 2       | 3    | 13   | N/A    | 0     | Small   | 4 GiB
+ ranlux[2]         | u32    | +       | ?+    | +       | +    | 27   | N/A    |       |         | >= 2 TiB
  rapidrand128      | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |         | >= 1 TiB
  rc4               | u32    | +       | +     | +       | +    | 6.0  | +      | 3     | +       | 512 GiB
  rc4ok             | u32    | +       | +     | +       | +    | 6.2  | +      | 4.5   | +       | >= 32 TiB
@@ -334,7 +334,7 @@ Note: some of `full` results are for SmokeRand < 0.51.
  romutrio          | u64    | +       | +     | +       | +    | 0.16 | +      | 4(0)  |         | >= 32 TiB
  romuduojr         | u64    | +       | +     | +       | +    | 0.11 | +      | 4(0)  |         | >= 2 TiB
  romuduojrw        | u64    | +       | +     | +       | +    | 0.12 | +      | 4     |         | >= 16 TiB
- romumono          | u32    | +       | 1     | 1       | 1    | 0.35 | -      | 1     | Crush   | ?
+ romumono          | u32    | +       | ?1    | 1       | 1    | 0.35 | -      | 1     | Crush   | ?
  rrmxmx            | u64    | +       | +     | +       | +    | 0.14 | -      | 3     |         | >= 16 TiB
  rwc32sm           | u32    | +       | +     | +       | 1    | 0.83 | +      | 1     | Small   | >= 16 TiB
  rwc32             | u32    | +       | +     | +       | +    | 0.55 | +      | 4     | +       | >= 8 TiB
@@ -344,14 +344,14 @@ Note: some of `full` results are for SmokeRand < 0.51.
  rwc4157           | u64    | +       | +     | +       | +    | 0.27 | +      | 4     |+HI      | >= 1 TiB
  rwc16446lin       | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |+HI/+LO  | >= 8 TiB
  rwc16446rrx       | u64    | +       | +     | +       | +    | 0.28 | +      | 4     |+HI      | >= 16 TiB
- sapparot          | u32    | +       | 2     | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
+ sapparot          | u32    | +       | ?2    | 3       | 5    | 0.70 | +      | 0     | Crush   | 8 MiB
  sapparot2         | u32    | +       | +     | +       | +    | 0.42 | +      | 3.5(0)| +       | 2 TiB
  sapparot2_64      | u64    | +       | +     | +       | +    | 0.27 | +      | 4(0)  |         | >= 16 TiB
  seiran128         | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
- sezgin63          | u32    | +       | +     | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB
- sezgin63_u63      | u63    | +       | +     | +       | 1/2  | 1.6  | N/A    | 1     | Crush   | >= 1 TiB
+ sezgin63          | u32    | +       | 0/1   | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB
+ sezgin63_u63      | u63    | +       | +     | +       | ?1/2 | 1.6  | N/A    | 1     | Crush   | >= 1 TiB
  sirius64          | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | >= 8 TiB
- sfc8              | u32    | +       | 3     | 7       | 14   | 1.9  | -(>>>) | 0     | -       | 128 MiB
+ sfc8              | u32    | +       | ?3    | 7       | 14   | 1.9  | -(>>>) | 0     | -       | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)| +       | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  | +       | >= 16 TiB
  sfc64             | u64    | +       | +     | +       | +    | 0.10 | +      | 4     | +       | >= 16 TiB
@@ -366,39 +366,39 @@ Note: some of `full` results are for SmokeRand < 0.51.
  speck128_avx(full)| u64    | +       | +     | +       | +    | 0.84 | +      | 5     | +IL     | >= 16 TiB
  speck128_avx(r16) | u64    | +       | +     | +       | +    | 0.46 | +      | 4     |         | >= 32 TiB
  splitmix          | u64    | +       | +     | +       | +    | 0.12 | -      | 3     | +       | >= 32 TiB
- splitmix_g1       | u64    | +       | 1     | 1       | 2    | 0.12 | -      | 0.75  |sIL/>=CLH| 8 GiB
- splitmix32        | u32    | +       | 3     | 4       | 5/7  | 0.25 | -(>>>) | 0     | Small   | 1 GiB
+ splitmix_g1       | u64    | +       | ?1    | 1       | 2    | 0.12 | -      | 0.75  |sIL/>=CLH| 8 GiB
+ splitmix32        | u32    | +       | ?3    | 4       | 5/7  | 0.25 | -(>>>) | 0     | Small   | 1 GiB
  splitmix32cbc     | u32    | +       | +     | +       | +    | 2.1  | -      | 3     | +       | 8 TiB
  sqxor             | u64    | +       | +     | +       | +    | 0.13 | -(>)   | 3     | +       | >= 16 TiB
- sqxor32           | u32    | +       | 2     | 3       | 5    | 0.20 | -(>>>) | 0     | Small   | 16 GiB
- stormdrop         | u32    | +       | +     | +       | 1    | 1.2  | +      | 0     | +       | >= 32 TiB
- stormdrop_old     | u32    | +       | +     | 1       | 2    | 1.4  | +      | 3.5(0)| Small   | 1 MiB
- superduper73      | u32    | 3       | 11    | 17      | 21   | 0.64 | +      | 0     | -       | 32 KiB
- superduper96      | u32    | 1       | 2     | 5/6     | 9/10 | 0.71 | +      | 0     | Small   | 128 KiB
- superduper64      | u64    | 1       | 1     | 3       | 5    | 0.35 | +      | 2.75  | Small   | 512 KiB
+ sqxor32           | u32    | +       | 1/2   | 3       | ?5   | 0.20 | -(>>>) | 0     | Small   | 16 GiB
+ stormdrop         | u32    | +       | +     | +       | ?1   | 1.2  | +      | 0     | +       | >= 32 TiB
+ stormdrop_old     | u32    | +       | +     | ?1      | ?2   | 1.4  | +      | 3.5(0)| Small   | 1 MiB
+ superduper73      | u32    | 3       | ?11   | 17      | 21   | 0.64 | +      | 0     | -       | 32 KiB
+ superduper96      | u32    | 1       | ?2    | 5/6     | 9/10 | 0.71 | +      | 0     | Small   | 128 KiB
+ superduper64      | u64    | 1       | ?1    | 3       | 5    | 0.35 | +      | 2.75  | Small   | 512 KiB
  superduper64_u32  | u32    | +       | +     | +       | +    | 0.70 | +      | 4     | +       | >= 32 TiB
- shr3              | u32    | 2       | 17    | 33      | 37(?)| 0.76 | -(>>>) | 0     | -       | 32 KiB
- swb               | u32    | 1       | 6     | 7       | 9    | 3.2  | +      | 0     | Small   | 128 MiB
- swblux[luxury=1]  | u32    | +       | +     | +       | 0/1  | 6.3  | N/A    | 2     | Crush   | 4 TiB
- swblux[luxury=2]  | u32    | +       | +     | +       | +    | 9.1  | N/A    | 4     | +       | >= 8 TiB
- swblux64[luxury=0]| u64    | 1       | 7     | 13      | 17   | 0.56 | +      | 0     | -hi     | 4 MiB
- swblux64[luxury=1]| u64    | +       | 3     | 3       | 6    | 0.93 | +      | 0     | Small   | 2 GiB
- swblux64[luxury=2]| u64    | +       | +     | 2       | 4    | 1.5  |        | 0     | Crush   | 16 TiB
- swblux64[luxury=3]| u64    | +       | +     | +       | +    | 2.7  |        | 4     |         | >= 2 TiB
- swblarge          | u32    | 1       | 4     | 5       | 8    | 0.56 | +      | 0     | Crush   | 512 GiB
+ shr3              | u32    | 2       | 20    | >=37    | ?    | 0.76 | -(>>>) | 0     | -       | 32 KiB
+ swb               | u32    | 1       | ?6    | 7       | 9    | 3.2  | +      | 0     | Small   | 128 MiB
+ swblux[luxury=1]  | u32    | +       | ?+    | +       | 0/1  | 6.3  | N/A    | 2     | Crush   | 4 TiB
+ swblux[luxury=2]  | u32    | +       | ?+    | +       | +    | 9.1  | N/A    | 4     | +       | >= 8 TiB
+ swblux64[luxury=0]| u64    | 1       | ?7    | 13      | 17   | 0.56 | +      | 0     | -hi     | 4 MiB
+ swblux64[luxury=1]| u64    | +       | ?3    | 3       | 6    | 0.93 | +      | 0     | Small   | 2 GiB
+ swblux64[luxury=2]| u64    | +       | ?+    | 2       | 4    | 1.5  |        | 0     | Crush   | 16 TiB
+ swblux64[luxury=3]| u64    | +       | ?+    | +       | +    | 2.7  |        | 4     |         | >= 2 TiB
+ swblarge          | u32    | 1       | ?4    | 5       | 8    | 0.56 | +      | 0     | Crush   | 512 GiB
  swbmwc32          | u32    | +       | 1     | 1       | 1    | 0.87 | +      | 0     | Small   | 128 GiB
  swbmwc64          | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |+_lo/+_hi| >= 32 TiB
  swbw              | u32    | +       | 2     | 2       | 2    | 2.8  | +      | 2     | +       | 4 GiB
  taus88            | u32    | 2       | 3     | 5       | 7    | 0.74 | +      | 2.25  | Small   | 32 KiB
- tf0_32            | u32    | 5       | 18    | 33      | 38   | 0.48 | -(>>>) | 0     | -       | 2 KiB
- tf0_32sc2         | u32    | +       | 1     | 2       | 8    | 0.57 | -(>>>) | 0     | Small   | 512 MiB
- tf0_64            | u32    | +       | +     | 1       | 1    | 0.45 | +      | 3     | +       | 2 GiB
- tf0_64sc          | u32    | +       | +     | +       | +    | 0.50 | +      | 3.5   | +       | 16 TiB
- tf0_64sc2         | u64    | +       | +     | +       | +    | 0.40 | -      | 3     |         | >= 16 TiB
+ tf0_32            | u32    | 5       | ?18   | 33      | 38   | 0.48 | -(>>>) | 0     | -       | 2 KiB
+ tf0_32sc2         | u32    | +       | ?1    | 2       | 8    | 0.57 | -(>>>) | 0     | Small   | 512 MiB
+ tf0_64            | u32    | +       | +     | 1       | 2    | 0.45 | +      | 2     | +       | 2 GiB
+ tf0_64sc          | u32    | +       | ?+    | +       | +    | 0.50 | +      | 3.5   | +       | 16 TiB
+ tf0_64sc2         | u64    | +       | ?+    | +       | +    | 0.40 | -      | 3     |         | >= 16 TiB
  tf0_128           | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |+lo      | >= 16 TiB
- tf0_ctr64         | u64    | +       | +     | +       | +    | 0.13 | -      | 3     |         | >= 8 TiB
- tf0duper32        | u32    | +       | +     | +       | +    | 0.70 | +      | 4     | +       | >= 16 TiB(?)
- tf0duper64        | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |+h/+l/+il| >= 16 TiB
+ tf0_ctr64         | u64    | +       | ?+    | +       | +    | 0.13 | -      | 3     |         | >= 8 TiB
+ tf0duper32        | u32    | +       | ?+    | +       | +    | 0.70 | +      | 4     | +       | >= 16 TiB(?)
+ tf0duper64        | u64    | +       | ?+    | +       | +    | 0.40 | +      | 4     |+h/+l/+il| >= 16 TiB
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 8 TiB
  threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | >= 32 TiB
@@ -407,11 +407,11 @@ Note: some of `full` results are for SmokeRand < 0.51.
  threefish1024_avx | u64    | +       | +     | +       | +    | 1.3  | +      | 5     | +(il)   | >= 2 TiB
  threefry2x64      | u64    | +       | +     | +       | +    | 1.3  | +      | 4     |         | >= 16 TiB
  threefry2x64_avx  | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 32 TiB
- thurst:v1         | u64    | +       | 1     | 1       | 1    | <0.1 | +      | 2     |         | 1 TiB
- thurst:v2         | u64    | +       | +     | +       | +    | <0.1 | +      | 3.5   |         | 1 TiB
- tinymt32          | u32    | 1       | 2     | 4       | 6    | 1.5  | +      | 0     | +       | 4 GiB
- tinymt64          | u64    | 1       | 1     | 2       | 4    | 2.7  | +      | 3     |+_lo/+_hi| 32 GiB 
- tt800             | u32    | 2       | 3     | 5       | 7    | 0.85 | +      | 2.25  | Small   | 8 MiB
+ thurst:v1         | u64    | +       | ?1    | 1       | 1    | <0.1 | +      | 2     |         | 1 TiB
+ thurst:v2         | u64    | +       | ?+    | +       | +    | <0.1 | +      | 3.5   |         | 1 TiB
+ tinymt32          | u32    | 1       | 2/3   | 5/6     | ?6   | 1.5  | +      | 0     | +       | 4 GiB
+ tinymt64          | u64    | 1       | 1     | 2       | ?4   | 2.7  | +      | 3     |+_lo/+_hi| 32 GiB 
+ tt800             | u32    | 2       | ?3    | 5       | 7    | 0.85 | +      | 2.25  | Small   | 8 MiB
  tt1600mrt         | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 16 TiB
  tychei            | u32    | +       | +     | +       | +    | 0.76 | +      | 4(0)  | +       | >= 8 TiB
  tychei64          | u64    | +       | +     | +       | +    | 0.38 | +      | 4(0)  |         | >= 16 TiB
@@ -421,8 +421,8 @@ Note: some of `full` results are for SmokeRand < 0.51.
  ultra64           | u64    | +       | +     | +       | +    | 0.37 | +      | 4     |+_lo/+_hi| >= 16 TiB
  v3b               | u32    | +       | +     | +       | +    | 0.78 | +      | 4     | +       | >= 32 TiB
  w1rand            | u64    | +       | +     | +       | +    | ~0.1 | -(>)   | 3     |         | 1 TiB
- wanghash64        | u64    | +       | 1     | 1       | 1    | 0.15 | -      | 1     |+H/+L/sIL| 16 GiB
- wich1982          | u32    | +       | 5     | 11      | 13   | 2.3  | -      | 0     | -       | 256 GiB
+ wanghash64        | u64    | +       | ?1    | 1       | 1    | 0.15 | -      | 1     |+H/+L/sIL| 16 GiB
+ wich1982          | u32    | +       | ?5    | 11      | 13   | 2.3  | -      | 0     | -       | 256 GiB
  wich2006          | u32    | +       | +     | +       | +    | 4.6  | +      | 4     | +       | >= 16 TiB
  well1024a         | u32    | 2       | 3     | 5       | 7    | 1.0  | +      | 2.25  | Small   | 64 MiB
  wob2m             | u64    | +       | +     | +       | +    | 0.24 | +      | 4     |+_lo/+_hi| >= 32 TiB
@@ -431,8 +431,8 @@ Note: some of `full` results are for SmokeRand < 0.51.
  wyrand_v43        | u64    | +       | +     | +       | +    | ~0.1 | -(>)   | 3     |         | >= 16 TiB
  wyranda_par       | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | >= 16 TiB
  wyrand128         | u64    | +       | +     | +       | +    | 0.18 | +      | 4     |         | >= 8 TiB
- xabc8             | u32    | +       | 8     | 15      | 22   | 3.7  | -(>>>) | 0     | -       | 8 MiB
- xabc16            | u32    | +       | +     | 1       | 1    | 1.6  | +      | 2     | Small   | 64 GiB
+ xabc8             | u32    | +       | ?8    | 15      | 22   | 3.7  | -(>>>) | 0     | -       | 8 MiB
+ xabc16            | u32    | +       | ?+    | 1       | 1    | 1.6  | +      | 2     | Small   | 64 GiB
  xabc32            | u32    | +       | +     | +       | +    | 0.82 | +      | 4(0)  | +       | 16 TiB
  xabc64            | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |+IL/+H   | 4 TiB
  xkiss8_awc        | u32    | +       | +     | +       | +    | 3.2  | +      | 4     | +       | >= 16 TiB
@@ -442,58 +442,58 @@ Note: some of `full` results are for SmokeRand < 0.51.
  xkiss32_awc_rot   | u32    | +       | +     | +       | +    | 0.99 | +      | 4     | +       | >= 16 TiB
  xkiss32sh_awc     | u32    | +       | +     | +       | +    | 0.99 | +      | 4     | +       | >= 16 TiB
  xkiss64_awc       | u64    | +       | +     | +       | +    | 0.40 | +      | 4     |         | >= 16 TiB
- xorgens           | u64    | +       | +/1   | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
+ xorgens           | u64    | +       | ?+/1  | 1       | 1    | 0.41 | +      | 3.75  |         | 2 TiB
  xorgens256        | u64    | 2       | 3     | 5       | 7/8  | 0.21 | +      | 2.25? | Small   | 1 MiB
  xorgens512        | u64    | 2       | 3     | 5       | 7    | 0.38 | +      | 2.25  |         | 8 MiB
  xorgens1024       | u64    | 2       | 3     | 5       | 7    | 1.1  |        | 2.25  |         | 32 MiB
- xoroshiro32       | u32    | 2       | 14    | 28/29   | 37/39| 1.4  | -(>>>) | 0     | -       | 32 KiB
- xoroshiro32pp     | u32    | +       | 1     | 2       | 6/8  | 1.5  | -(>>>) | 0     | Small   | 256 MiB
+ xoroshiro32       | u32    | 2       | ?14   | 28/29   | 37/39| 1.4  | -(>>>) | 0     | -       | 32 KiB
+ xoroshiro32pp     | u32    | +       | ?1    | 2       | 6/8  | 1.5  | -(>>>) | 0     | Small   | 256 MiB
  xoroshiro64aox    | u32    | +       | +     | +       | +    | 0.52 | +      | 3.5   | +       | 512 GiB
  xoroshiro64pp     | u32    | +       | +     | +       | +    | 0.52 | +      | 4     | +       | >= 8 TiB
- xoroshiro64st     | u32    | 1       | 1     | 3       | 5    | 0.51 | -      | 1.75  | Small   | 1 MiB
+ xoroshiro64st     | u32    | 1       | ?1    | 3       | 5    | 0.51 | -      | 1.75  | Small   | 1 MiB
  xoroshiro64stst   | u32    | +       | +     | +       | +    | 0.61 | -      | 3     |         | >= 32 TiB
  xoroshiro48w8ppp  | u32    | +       | +     | +       | +    | 2.9  | +      | 3.5   | +       | 4 TiB
  xoroshiro48w16pp  | u32    | +       | +     | +       | +    | 1.1  | +      | 3.5(0)| +       | 512 GiB
  xoroshiro48w16ppp | u32    | +       | +     | +       | +    | 1.2  | +      | 3.5(0)| +       | 32 TiB
  xoroshiro64w16pp  | u32    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 8 TiB
- xoroshiro128      | u64    | 2       | 3     | 5       | 7    | 0.27 | +      | 2.25  | Small   | 256 KiB
+ xoroshiro128      | u64    | 2       | ?3    | 5       | 7    | 0.27 | +      | 2.25  | Small   | 256 KiB
  xoroshiro128aox   | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |+lo/+hi  | >= 32 TiB
- xoroshiro128p     | u64    | 1       | 1     | 2       | 3    | 0.16 | +      | 3.25  |+lo/+hi  | 16 MiB
+ xoroshiro128p     | u64    | 1       | ?1    | 2       | 3    | 0.16 | +      | 3.25  |+lo/+hi  | 16 MiB
  xoroshiro128pp    | u64    | +       | +     | +       | +    | 0.26 | +      | 4     |         | >= 32 TiB
  xoroshiro128pp_avx| u64    | +       | +     | +       | +    | 0.16 | +      | 4     |         | >= 1 TiB
- xoroshiro1024st   | u64    | 1       | 1     | 1       | 2    | 0.33 | +      | 3.5   |+lo/+hi  | 128 GiB
+ xoroshiro1024st   | u64    | 1       | ?1    | 1       | 2    | 0.33 | +      | 3.5   |+lo/+hi  | 128 GiB
  xoroshiro1024stst | u64    | +       | +     | +       | +    | 0.33 | +      | 4     | +       | >= 16 TiB
- xorrot32          | u32    | 2       | 16    | 32      | 41   | 0.55 | -(>>>) | 0     | -       | 32 KiB
- xorrot64          | u64    | 2       | 3     | 5/6     | 9    | 0.33 | -      | 0     | -       | 32 KiB
+ xorrot32          | u32    | 2       | ?16   | 32      | 41   | 0.55 | -(>>>) | 0     | -       | 32 KiB
+ xorrot64          | u64    | 2       | ?3    | 5/6     | 9    | 0.33 | -      | 0     | -       | 32 KiB
  xorrot64mrt       | u64    | +       | +     | +       | +    | 0.44 | -      | 3     |         | >= 8 TiB
  xorrot64mn        | u64    | +       | +     | +       | +    | 0.44 | -(<)   | 3     |         | >= 16 TiB
  xorrot64w8sc      | u64    | +       | +     | +       | +    | 3.2  |        | 3.5   | +       | 64 GiB
  xorrot64w8arx     | u32    | +       | +     | +       | +    | 4.1  |        | 4     | +       | >= 16 TiB
- xorrot64w32       | u32    | 2       | 3/4   | 8/9     | 12/13| 0.35 | -      | 0     | -       | 32 KiB
+ xorrot64w32       | u32    | 2       | ?3/4  | 8/9     | 12/13| 0.35 | -      | 0     | -       | 32 KiB
  xorrot64w32mn     | u32    | +       | +     | +       | +    | 0.44 | +      | 4     | +       | >= 16 TiB
  xorrot64w16       | u32    | 2       | 3     | 5       | 7    | 1.5  |        | 2.25  | -       | 32 KiB
  xorrot64w16nn     | u32    | +       | +     | +       | +    | 1.8  | +      | 4     | +       | >= 8 TiB
- xorrot128         | u64    | 2       | 3     | 5       | 7/8  | 0.30 | +      |       | Small   | 256 KiB
+ xorrot128         | u64    | 2       | ?3    | 5       | 7/8  | 0.30 | +      |       | Small   | 256 KiB
  xorrot128mn       | u64    | +       | +     | +       | +    | 0.42 | +      | 4     |         | >= 8 TiB
  xorrot128w32      | u32    | 2       | 3     | 5       | 7    | 0.48 | +      | 2.25  | Small   | 256 KiB
  xorrot128w32mrt   | u32    | +       | +     | +       | +    | 0.62 | +      | 4     | +       | >= 16 TiB
- xorrot160         | u32    | 2       | 3     | 5       | 7    | 0.41 | +      | 2.25  | Small   | 256 JiB
- xorrot256         | u64    | 2       | 3     | 5       | 7    | 0.30 | +      | 2.25  | Small   | 1 MiB
+ xorrot160         | u32    | 2       | ?3    | 5       | 7    | 0.41 | +      | 2.25  | Small   | 256 JiB
+ xorrot256         | u64    | 2       | ?3    | 5       | 7    | 0.30 | +      | 2.25  | Small   | 1 MiB
  xorrot256mrt      | u64    | +       | +     | +       | +    | 0.34 | +      | 4     |         | >= 16 TiB
- xorrot320         | u64    | 2       | 3     | 5       | 7    | 0.23 | +      | 2.25  |         | 1 MiB
+ xorrot320         | u64    | 2       | ?3    | 5       | 7    | 0.23 | +      | 2.25  |         | 1 MiB
  xorshift7         | u32    | 2       | 3     | 5       | 7    | 1.2  |        | 2.25  | Small   | 1 MiB
- xorshift64        | u64    | 2       | 6     | 12      | 15/16| 0.49 | -      | 0     | -       | 32 KiB
- xorshift64st      | u64    | 1       | 1     | 3       | 5    | 0.48 | -      | 1.75  |S_lo/+_hi| 512 KiB
- xorshift96        | u32    | 2       | 5     | 8       | 12/13| 0.39 | +      | 0     | -       | 64 KiB
- xorshift128       | u32    | 2       | 7     | 9/10    | 14/15| 0.41 | +      | 0     | -       | 128 KiB
- xorshift128p      | u64    | 1       | 1     | 2       | 3    | 0.26 | +      | 0     |+lo/+hi  | 32 GiB
+ xorshift64        | u64    | 2       | ?6    | 12      | 15/16| 0.49 | -      | 0     | -       | 32 KiB
+ xorshift64st      | u64    | 1       | ?1    | 3       | 5    | 0.48 | -      | 1.75  |S_lo/+_hi| 512 KiB
+ xorshift96        | u32    | 2       | ?5    | 8       | 12/13| 0.39 | +      | 0     | -       | 64 KiB
+ xorshift128       | u32    | 2       | 7     | 10/11   |?14/15| 0.41 | +      | 0     | -       | 128 KiB
+ xorshift128p      | u64    | 1       | ?1    | 2       | 3    | 0.26 | +      | 0     |+lo/+hi  | 32 GiB
  xorshift128pp     | u64    | +       | +     | +       | +    | 0.29 | +      | 4     |         | >= 16 TiB
  xorshift128pp_avx | u64    | +       | +     | +       | +    | 0.15 | +      | 4     |         | >= 1 TiB
  xorshift128rp     | u64    | +       | +     | 1       | 3/5  | 0.21 | +      | 0     | Small   | 4 GiB
- xorshift160       | u32    | 2       | 4     | 7       | 12/13| 0.44 | +      | 0     | -       | 256 KiB
- xorshift192       | u64    | 2       | 3     | 5       | 9    | 0.19 | +      | 0     | Small   | 256 KiB
- xorshift256       | u64    | 2       | 3     | 5       | 7/8  | 0.21 | +      | 2.25? | Small   | 1 MiB
- xorwow            | u32    | 1       | 3     | 7       | 9    | 0.52 | +      | 0     | Small   | 128 KiB
+ xorshift160       | u32    | 2       | ?4    | 7       | 12/13| 0.44 | +      | 0     | -       | 256 KiB
+ xorshift192       | u64    | 2       | ?3    | 5       | 9    | 0.19 | +      | 0     | Small   | 256 KiB
+ xorshift256       | u64    | 2       | ?3    | 5       | 7/8  | 0.21 | +      | 2.25? | Small   | 1 MiB
+ xorwow            | u32    | 1       | ?3    | 7       | 9    | 0.52 | +      | 0     | Small   | 128 KiB
  xoshiro128aox     | u32    | +       | +     | +       | +    | 0.61 | +      | 4     | +       | >= 8 TiB
  xoshiro128p       | u32    | 1       | 1     | 2       | 4    | 0.38 | +      | 3     | +       | 8 MiB
  xoshiro128pp      | u32    | +       | +     | +       | +    | 0.42 | +      | 4     | +       | >= 16 TiB
@@ -501,8 +501,8 @@ Note: some of `full` results are for SmokeRand < 0.51.
  xoshiro256pp      | u64    | +       | +     | +       | +    | 0.22 | +      | 4     |         | >= 16 TiB
  xoshiro256stst    | u64    | +       | +     | +       | +    | 0.22 | +      | 4     |         | >= 4 TiB
  xoshiro512pp      | u64    | +       | +     | +       | +    | 0.36 | +      | 4     |         | >= 8 TiB
- xsadd             | u32    | 1       | 1/2   | 4       | 9    | 1.3  | +      | 0     | +       | 8 MiB
- xsh               | u64    | 2       | 9     | 14      | 18   | 0.43 | -      | 0     | -       | 32 KiB
+ xsadd             | u32    | 1       | 1/3   | 4/5     | ?9   | 1.3  | +      | 0     | +       | 8 MiB
+ xsh               | u64    | 2       | 9     | ?14     | ?18  | 0.43 | -      | 0     | -       | 32 KiB
  xtea              | u64    | +       | +     | +       | +    | 27   | -      | 3     | +IL     | >= 4 TiB
  xtea_avx(ctr)     | u64    | +       | +     | +       | +    | 2.3  | -      | 3     | >= Crush| >= 32 TiB
  xtea_avx(cbc)     | u64    | +       | +     | +       | +    | 2.3  | +      | 4     | >= Crush| >= 8 TiB
@@ -512,13 +512,13 @@ Note: some of `full` results are for SmokeRand < 0.51.
  xxtea128_avx      | u32    | +       | +     | +       | +    | 2.7  | +      | 4.5   | >= Crush| >= 32 TiB
  xxtea256          | u32    | +       | +     | +       | +    | 12   | +      | 4.5   | >= Crush| >= 1 TiB
  xxtea256_avx      | u32    | +       | +     | +       | +    | 1.9  | +      | 4.5   | >= Crush| >= 32 TiB
- yasmarang         | u32    | +       | 1/2   | 3/5     | 13/20| 1.2  | -(>>>) | 0     | Small   | 8 GiB
+ yasmarang         | u32    | +       | ?1/2  | 3/5     | 13/20| 1.2  | -(>>>) | 0     | Small   | 8 GiB
  zibri64ex         | u32    | +       | +     | +       | +    | 0.43 | +      | 3.5(0)| +       | 4 TiB
- zibri128          | u64    | +       | 7     | 13      | 15/16| 0.14 | +      | 0     | -       | 32 KiB
+ zibri128          | u64    | +       | ?7    | 13      | 15/16| 0.14 | +      | 0     | -       | 32 KiB
  zibri128ex        | u64    | +       | +     | +       | +    | 0.14 | +      | 4     | +HI     | >= 16 TiB
- zibri192          | u64    | +       | 3/5   | 9       | 11   | 0.20 | +      | 0     | Crush   | 2 MiB
+ zibri192          | u64    | +       | ?3/5  | 9       | 11   | 0.20 | +      | 0     | Crush   | 2 MiB
  zibri192ex        | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | >= 4 TiB
- ziff98            | u32    | +       | 3     | 3       | 3    | 0.47 | +      | 3.25  | Small   | 32 GiB
+ ziff98            | u32    | +       | ?3    | 3       | 3    | 0.47 | +      | 3.25  | Small   | 32 GiB
 
 
 # 64-bit collision test results
