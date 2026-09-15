@@ -165,7 +165,7 @@ typedef struct {
     size_t nresults;
     // Some extra info filled after initialization
     char *seed_key_txt;
-    time_t nseconds_total;
+    unsigned long long nseconds_total;
 } BatteryResults;
 
 

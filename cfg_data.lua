@@ -1,6 +1,6 @@
 local lib_sources = {'base64.c', 'core.c', 'coretests.c', 'cpuinfo.c',
     'blake2s.c', 'entropy.c',
-    'extratests.c', 'fileio.c', 'lfsr_period.c', 'lfsr_period_factors',
+    'extratests.c', 'fileio.c', 'lfsr_period.c', 'lfsr_period_factors.c',
     'lineardep.c', 'hwtests.c', 'specfuncs.c', 'threads_intf.c'}
 
 local bat_sources = {'bat_express.c', 'bat_brief.c', 'bat_default.c',
