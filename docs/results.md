@@ -225,7 +225,7 @@ Note: some of `full` results are for SmokeRand < 0.51.
  mrg_1592_7        | u31    | +       | +     | +       | +    | 1.7  | N/A    |       | >=Crush | ?
  mrg_denglin_2     | u31    | +       | 3     | 7/8     | 8/10 | 1.1  | N/A    | 0     | -       | 128 GiB
  mrg_denglin_4     | u31    | +       | 2     | 2       | 2/3  | 1.2  | N/A    | 0     | -       | >= 8 TiB
- mrsf32            | u32    | +       | +     | +       | +    | 0.19 | +      | 4(0)  |         | ?
+ mrsf32            | u32    | +       | +     | +       | +    | 0.19 | +      | 4(0)  |         | 4 TiB
  mrsf64            | u64    | +       | +     | +       | +    | <0.1 | +      | 4(0)  |         | >= 16 TiB
  mt19937           | u32    | +       | 3     | 3       | 3    | 0.59 | +      | 3.25  | Small   | 128 GiB
  mt19937_64        | u64    | +       | 3     | 3       | 3    | 0.45 | +      | 3.25  | Small   | 256 GiB
@@ -705,6 +705,30 @@ Note about `mrg32k3a`:
 - It fails the `FPF-14+6/16:cross` test from PractRand at 4 TiB sample if raw output
   The failure is systematic and reproducible.
 - After renormalization: >= 4 TiB in PractRand 0.96 (`stdin64`)
+
+Note about `mrsf32`: fails at 8 TiB in PractRand 0.96:
+
+    rng=RNG_stdin64, seed=unknown
+    length= 1 terabyte (2^40 bytes), time= 3003 seconds
+      no anomalies in 354 test result(s)
+
+    rng=RNG_stdin64, seed=unknown
+    length= 2 terabytes (2^41 bytes), time= 5986 seconds
+      Test Name                         Raw       Processed     Evaluation
+      DC6-9x1Bytes-1                    R=  +5.9  p =  1.0e-3   unusual
+      ...and 363 test result(s) without anomalies
+
+    rng=RNG_stdin64, seed=unknown
+    length= 4 terabytes (2^42 bytes), time= 11990 seconds
+      Test Name                         Raw       Processed     Evaluation
+      DC6-9x1Bytes-1                    R= +11.7  p =  2.0e-7   very suspicious
+      ...and 373 test result(s) without anomalies
+
+    rng=RNG_stdin64, seed=unknown
+    length= 8 terabytes (2^43 bytes), time= 23982 seconds
+      Test Name                         Raw       Processed     Evaluation
+      DC6-9x1Bytes-1                    R= +17.7  p =  3.4e-11    FAIL
+      ...and 382 test result(s) without anomalies
 
 Note about `mtc16`: if its output is processed as `stdin16` by PractRand 0.94 then it
 fails after 256 GiB, not after 512 GiB.
