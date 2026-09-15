@@ -1111,7 +1111,6 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     const GeneratorInfo *gen, const CallerAPI *intf,
     const BatteryOptions *opts)
 {
-    time_t tic, toc;
     const unsigned int testid = TestsBattery_get_testid(bat, &opts->test);
 #ifdef NOTHREADS
     const unsigned int nthreads = 1;
@@ -1137,13 +1136,12 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     GeneratorState obj = GeneratorState_create(gen, intf);
     if (GeneratorState_check_size(&obj) == 0) {
         GeneratorState_destruct(&obj);
-        //free(results);
         BatteryResults_destruct(&res);
         fprintf(stderr, "***** TestsBattery_run: invalid generator output size *****\n");
         return BATTERY_ERROR;            
     }
     // Run the tests
-    tic = time(NULL);
+    const time_t tic = time(NULL);
     if (nthreads == 1 || testid != TESTS_ALL) {
         // One-threaded version
         TestsBattery_run_serial(bat, &obj, intf, opts, res.results);
@@ -1153,8 +1151,8 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
         GeneratorState_destruct(&obj);
         TestsBattery_run_threads(bat, gen, intf, opts, res.results);
     }
-    toc = time(NULL);
-    res.nseconds_total = toc - tic;
+    const time_t toc = time(NULL);
+    res.nseconds_total = (unsigned long long) (toc - tic);
     res.seed_key_txt = Entropy_get_base64_key(&entropy);
 
     printf("\n");
