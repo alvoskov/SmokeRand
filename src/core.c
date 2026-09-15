@@ -889,6 +889,29 @@ static void TestsBattery_run_threads(const TestsBattery *bat,
 }
 
 
+static void TestsBattery_run_serial(const TestsBattery *bat,
+    GeneratorState *obj, const CallerAPI *intf,
+    const BatteryOptions *opts, TestResults *results)
+{
+    const size_t ntests = TestsBattery_ntests(bat);
+    const unsigned int testid = TestsBattery_get_testid(bat, &opts->test);
+    if (testid == TESTS_ALL) {
+        for (size_t i = 0; i < ntests; i++) {
+            intf->printf("----- Test %u of %u (%s)\n",
+                (unsigned int) (i + 1), (unsigned int) ntests, bat->tests[i].name);
+            results[i] = TestDescription_run(&bat->tests[i], obj);
+            results[i].name = bat->tests[i].name;
+            results[i].id = (unsigned int) (i + 1);
+            results[i].thread_id = 0;
+        }
+    } else {
+        *results = TestDescription_run(&bat->tests[testid - 1], obj);
+        results->name = bat->tests[testid - 1].name;
+        results->id = testid;
+    }
+}    
+
+
 static void snprintf_pvalue(char *buf, size_t len, double p, double alpha)
 {
     if (p != p || alpha != alpha) {
@@ -932,65 +955,44 @@ static void print_bar(void)
 }
 
 
-typedef struct {
-    unsigned int npassed;
-    unsigned int nwarnings;
-    unsigned int nfailed;
-    double grade;
-    const char *grade_text;
-} TestResultsSummary;
-
-
-static void
-TestResultsSummary_fill(TestResultsSummary *obj, const TestResults *results, size_t ntests)
+static void BatteryResults_print_seed(const BatteryResults *obj, const char *filler)
 {
-    obj->npassed = 0;
-    obj->nwarnings = 0;
-    obj->nfailed = 0;
-    obj->grade = 4.0;
-    for (size_t i = 0; i < ntests; i++) {
-        PValueCategory pvalue_cat = get_pvalue_category(results[i].p);
-        switch (pvalue_cat) {
-        case PVALUE_PASSED:
-            obj->npassed++; break;
-        case PVALUE_WARNING:
-            obj->nwarnings++; break;
-        case PVALUE_FAILED:
-            obj->nfailed++;
-            obj->grade -= results[i].penalty;
-            break;
-        }
+    if (obj->seed_key_txt != NULL) {
+        printf("Used seed:%s_%.2X_%s\n\n",
+            filler, obj->nthreads, obj->seed_key_txt);
+    } else {
+        printf("Used seed:%snone\n\n", filler);
     }
-    if (obj->grade < 0.0) {
-        obj->grade = 0.0;
-    }
-    obj->grade_text = interpret_grade(obj->grade);
 }
 
-
-static TestResultsSummary TestResults_print_report(const TestResults *results,
-    size_t ntests, time_t nseconds_total, ReportType rtype)
+static TestResultsSummary
+BatteryResults_print_report(const BatteryResults *obj, ReportType rtype)
 {
-    TestResultsSummary summary;
-    TestResultsSummary_fill(&summary, results, ntests);
-    if (rtype != REPORT_FULL && summary.npassed == ntests) {
+    printf("Generator name:    %s\n", obj->generator_name);
+    printf("Output size, bits: %u\n", obj->generator_nbits);
+    printf("SmokeRand version: %s\n", obj->smokerand_version);
+    BatteryResults_print_seed(obj, "         ");
+
+    const TestResultsSummary summary = BatteryResults_get_summary(obj);
+    if (rtype != REPORT_FULL && summary.npassed == obj->nresults) {
         printf("\n\n"
             "---------------------------------------------------\n"
             "----- All tests have been passed successfully -----\n"
             "---------------------------------------------------\n\n");
     } else {
+        const TestResults *r = obj->results;
         printf("  %3s %-22s %12s %14s %-15s %4s\n",
             "#", "Test name", "xemp", "p", "Interpretation", "Thr#");
         print_bar();
-        for (size_t i = 0; i < ntests; i++) {
+        for (size_t i = 0; i < obj->nresults; i++) {
             char pvalue_txt[32];
-            PValueCategory pvalue_cat = get_pvalue_category(results[i].p);
+            PValueCategory pvalue_cat = get_pvalue_category(r[i].p);
             if (rtype == REPORT_FULL || pvalue_cat != PVALUE_PASSED) {
-                snprintf_pvalue(pvalue_txt, 32, results[i].p, results[i].alpha);
+                snprintf_pvalue(pvalue_txt, 32, r[i].p, r[i].alpha);
                 printf("  %3u %-22s %12g %14s %-15s %4llu\n",
-                    results[i].id, results[i].name, results[i].x, pvalue_txt,
-                    interpret_pvalue(results[i].p),
-                    (unsigned long long) results[i].thread_id);
+                    r[i].id, r[i].name, r[i].x, pvalue_txt,
+                    interpret_pvalue(r[i].p),
+                    (unsigned long long) r[i].thread_id);
             }
         }
         print_bar();
@@ -998,12 +1000,13 @@ static TestResultsSummary TestResults_print_report(const TestResults *results,
     printf("Passed:        %u\n", summary.npassed);
     printf("Suspicious:    %u\n", summary.nwarnings);
     printf("Failed:        %u\n", summary.nfailed);
-    if (ntests >= 5) {
+    if (obj->nresults >= 5) {
         printf("Quality (0-4): %.2f (%s)\n", summary.grade, summary.grade_text);
     }
     printf("Elapsed time:  ");
-    print_elapsed_time((unsigned long long) nseconds_total);
+    print_elapsed_time((unsigned long long) obj->nseconds_total);
     printf("\n");
+    BatteryResults_print_seed(obj, "     ");
     return summary;
 }
 
@@ -1024,6 +1027,82 @@ void TestsBattery_print_info(const TestsBattery *obj)
 }
 
 
+void BatteryResults_init(BatteryResults *obj, const TestsBattery *bat,
+    const GeneratorInfo *gen, const BatteryOptions *opts)
+{
+    // Program versions
+    obj->smokerand_version = SMOKERAND_VERSION_FULL;
+    // Array of tests results
+    const size_t ntests = TestsBattery_ntests(bat);
+    obj->testid = TestsBattery_get_testid(bat, &opts->test);
+    obj->nresults = (obj->testid == TESTS_ALL) ? ntests : 1;
+    obj->results = calloc(obj->nresults, sizeof(TestResults));
+    ASSERT_MALLOC_PTR(obj->results, "BatteryResults_init")
+    // Battery name
+    const size_t batname_buf_len = strlen(bat->name) + 16;
+    obj->battery_name = calloc(batname_buf_len, sizeof(char));
+    ASSERT_MALLOC_PTR(obj->battery_name, "BatteryResults_init")
+    if (obj->testid == TESTS_ALL) {
+        strcpy(obj->battery_name, bat->name);
+    } else {
+        snprintf(obj->battery_name, batname_buf_len, "%s:%u\n",
+            bat->name, obj->testid);
+    }
+    // Generator name
+    obj->generator_name = calloc(
+        strlen(gen->name) + ((gen->parent) ? strlen(gen->parent->name) : 0) + 2,
+        sizeof(char)
+    );
+    ASSERT_MALLOC_PTR(obj->generator_name, "BatteryResults_init")
+    strcpy(obj->generator_name, gen->name);
+    if (gen->parent != NULL) {
+        strcat(obj->generator_name, ":");
+        strcat(obj->generator_name, gen->parent->name);
+    }
+    // Other settings
+    obj->seed_key_txt = NULL;
+    obj->nseconds_total = (time_t) 0;
+    obj->nthreads = opts->nthreads;
+}
+
+
+TestResultsSummary BatteryResults_get_summary(const BatteryResults *obj)
+{
+    TestResultsSummary sum = {
+        .npassed = 0, .nwarnings = 0, .nfailed = 0,
+        .grade = 4.0, .grade_text = NULL
+    };
+    for (size_t i = 0; i < obj->nresults; i++) {
+        const PValueCategory pvalue_cat = get_pvalue_category(obj->results[i].p);
+        switch (pvalue_cat) {
+        case PVALUE_PASSED:
+            sum.npassed++; break;
+        case PVALUE_WARNING:
+            sum.nwarnings++; break;
+        case PVALUE_FAILED:
+            sum.nfailed++;
+            sum.grade -= obj->results[i].penalty;
+            break;
+        }
+    }
+    if (sum.grade < 0.0) {
+        sum.grade = 0.0;
+    }
+    sum.grade_text = interpret_grade(sum.grade);
+    return sum;
+}
+
+
+
+void BatteryResults_destruct(BatteryResults *obj)
+{    
+    free(obj->battery_name);
+    free(obj->generator_name);    
+    free(obj->seed_key_txt);
+    free(obj->results);    
+}
+
+
 /**
  * @brief Runs the given battery of the statistical test for the given
  * pseudorandom number generator.
@@ -1032,10 +1111,6 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
     const GeneratorInfo *gen, const CallerAPI *intf,
     const BatteryOptions *opts)
 {
-    time_t tic, toc;
-    const size_t ntests = TestsBattery_ntests(bat);
-    size_t nresults = ntests;
-    TestResults *results = NULL;
     const unsigned int testid = TestsBattery_get_testid(bat, &opts->test);
 #ifdef NOTHREADS
     const unsigned int nthreads = 1;
@@ -1054,48 +1129,32 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
         return BATTERY_ERROR;
     }
     // Allocate memory for tests
-    if (testid == TESTS_ALL) {
-        results = calloc(ntests, sizeof(TestResults));
-        nresults = ntests;
-    } else {
-        results = calloc(1, sizeof(TestResults));
-        nresults = 1;
-    }
-    ASSERT_MALLOC_PTR(results, "TestsBattery_run")
+    BatteryResults res;
+    BatteryResults_init(&res, bat, gen, opts);
     // Create a PRNG example: either for one-threaded version or for basic
     // sanity check for multithreaded version.
     GeneratorState obj = GeneratorState_create(gen, intf);
     if (GeneratorState_check_size(&obj) == 0) {
         GeneratorState_destruct(&obj);
-        free(results);
+        BatteryResults_destruct(&res);
         fprintf(stderr, "***** TestsBattery_run: invalid generator output size *****\n");
         return BATTERY_ERROR;            
     }
     // Run the tests
-    tic = time(NULL);
+    const time_t tic = time(NULL);
     if (nthreads == 1 || testid != TESTS_ALL) {
         // One-threaded version
-        if (testid == TESTS_ALL) {
-            for (size_t i = 0; i < ntests; i++) {
-                intf->printf("----- Test %u of %u (%s)\n",
-                    (unsigned int) (i + 1), (unsigned int) ntests, bat->tests[i].name);
-                results[i] = TestDescription_run(&bat->tests[i], &obj);
-                results[i].name = bat->tests[i].name;
-                results[i].id = (unsigned int) (i + 1);
-                results[i].thread_id = 0;
-            }
-        } else {
-            *results = TestDescription_run(&bat->tests[testid - 1], &obj);
-            results->name = bat->tests[testid - 1].name;
-            results->id = testid;
-        }
+        TestsBattery_run_serial(bat, &obj, intf, opts, res.results);
         GeneratorState_destruct(&obj);
     } else {
         // Multithreaded version
         GeneratorState_destruct(&obj);
-        TestsBattery_run_threads(bat, gen, intf, opts, results);
+        TestsBattery_run_threads(bat, gen, intf, opts, res.results);
     }
-    toc = time(NULL);
+    const time_t toc = time(NULL);
+    res.nseconds_total = (unsigned long long) (toc - tic);
+    res.seed_key_txt = Entropy_get_base64_key(&entropy);
+
     printf("\n");
     if (opts->report_type == REPORT_FULL) {
         printf("==================== Seeds logger report ====================\n");
@@ -1107,29 +1166,8 @@ BatteryExitCode TestsBattery_run(const TestsBattery *bat,
         printf("==================== '%s' battery test #%d report ====================\n",
             bat->name, testid);
     }
-    printf("Generator name:    %s", gen->name);
-    if (gen->parent != NULL) {
-        printf(":%s\n", gen->parent->name);
-    } else {
-        printf("\n");
-    }
-    printf("Output size, bits: %d\n", (int) gen->nbits);
-    printf("SmokeRand version: %s\n", SMOKERAND_VERSION_FULL);
-    char *seed_key_txt = Entropy_get_base64_key(&entropy);
-    if (seed_key_txt != NULL) {
-        printf("Used seed:         _%.2X_%s\n\n", opts->nthreads, seed_key_txt);
-    } else {
-        printf("Used seed:         none\n\n");
-    }
-    TestResultsSummary summary =
-        TestResults_print_report(results, nresults, toc - tic, opts->report_type);
-    if (seed_key_txt != NULL) {
-        printf("Used seed:     _%.2X_%s\n", opts->nthreads, seed_key_txt);
-    } else {
-        printf("Used seed:     none\n");
-    }
-    free(seed_key_txt);
-    free(results);
+    TestResultsSummary summary = BatteryResults_print_report(&res, opts->report_type);
+    BatteryResults_destruct(&res);
     return (summary.nfailed == 0) ? BATTERY_PASSED : BATTERY_FAILED;
 }
 

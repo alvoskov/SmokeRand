@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 - Threads abstraction layer refinement (some subtle data races and pthreads
   mutexes double initialization problem fixed).
+- Lua scripts for Ninja/Watcom generation: an issue with the absent/misspelled
+  `src/lfsr_period_factors.c` was fixed.
 
 ## [0.51] 2026-09-14
 
