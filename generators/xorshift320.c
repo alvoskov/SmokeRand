@@ -1,18 +1,20 @@
 /**
  * @file xorshift320.c
  * @brief An implementation of 320-bit LSFR generator proposed by G. Marsaglia.
- * @details 
+ * @details The recommended shifts triple is `[31 1 28]` (passes `express`,
+ * `brief` and `default`, suspicious values for `hamming_ot_u128` in the `full`
+ * battery). Fails BCFN test from PractRand 0.96 at 32 GiB.
  *
- * [9 3 2]   -express/bspace
- * [10 1 32] -brief/maxoft
- * [10 13 2] -brief/maxoft
- * [9 3 25]  -brief/maxoft
- * [7 3 34]  -brief/maxoft
- * [7 35 1]  -brief/maxoft
- *
- * [31 1 28] +brief/+default/full:suspicious hammming_ot_u128
- * [37 1 30] +brief/ but suspicious HWs from full
- * [41 3 6]  +brief/ but suspicious HWs from full
+ * Other less optimal triples:
+ * 
+ * - `[9 3 2]` fails `express` (birthday spacings)
+ * - `[10 1 32]`, `[10 13 2]`, `[10 13 2]`, `[9 3 25]`, `[7 3 34]`, `[7 35 1]`:
+ *   fails maxoft tests from the `brief` battery.
+ * - `[16 5 52]`: passes `brief`, fails maxoft from `full` battery.
+ * - `[24 5 3]` fails `bspace8_8d` from `brief`
+ * - `[31 1 28]`: +brief/+default/full:suspicious hammming_ot_u128
+ * - `[37 1 30]`: +brief/ but suspicious HWs from full
+ * - `[41 3 6]`:  +brief/ but suspicious HWs from full
  *
  * References:
  * 

@@ -787,7 +787,7 @@ static uint64_t get_bits_xs320(void *state)
 static int is_triple_valid_xs320(unsigned int ai, unsigned int bi, unsigned int ci)
 {
     (void) ai; (void) bi; (void) ci;
-    return (ai >= 35);
+    return 1;
 }
 
 
@@ -1269,6 +1269,7 @@ int main(int argc, char *argv[])
         {"xorshift32",     test_xorshift32},
         {"xorshift64",     test_xorshift64},
         {"xorshift128",    test_xorshift128},
+        {"xorshift160",    test_xorshift160},
         {"xorshift320",    test_xorshift320},
         {"xorrot128",      test_xorrot128},
         {"xorrot160",      test_xorrot160},
