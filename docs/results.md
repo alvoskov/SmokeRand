@@ -167,7 +167,7 @@ Note: some of `full` results are for SmokeRand < 0.51.
  lcg128prime       | u64    | +       | +     | +       | +    | 0.48 | +      | 4     | +IL     | >= 1 TiB
  lcg128_full       | u64    | +       | 1     | 1       | 1    | 0.42 | +      | 3     | +       | 64 GiB
  lcg128_u32_full   | u32    | +       | +     | 1       | 1    | 0.75 | +      | 3     | +       | >= 32 TiB
- lcg69069          | u32    | 6       | 24    | ?45     |      | 0.38 | -(>>>) | 0     | -       | 2 KiB
+ lcg69069          | u32    | 6       | 24    | 45      | 63   | 0.38 | -(>>>) | 0     | -       | 2 KiB
  lea128            | u32    | +       | +     | +       | +    | 5.7  | +      | 5     | +       | >= 32 TiB
  lea128_avx        | u32    | +       | +     | +       | +    | 1.2  | +      | 5     | >= Crush| >= 32 TiB
  lfib_par[31+]     | u32    | 1       | 7/8   | ?       | ?    | 0.70 | +      | 0     | -       | 32 MiB
@@ -183,7 +183,7 @@ Note: some of `full` results are for SmokeRand < 0.51.
  lfib_par[607-]    | u32    | 1       | 4     | 4       | 5    | 0.40 | +      | 0     | Small   | 256 GiB
  lfib_par[1279+]   | u32    | 1       | 4     | 4       | >=4/5| 0.40 | +      | 0     | Crush   | 1 TiB
  lfib_par[1279-]   | u32    | 1       | 4     | 4       | >=4/5| 0.40 | +      | 0     | Crush   | 1 TiB
- lfib_par[2281+]   | u32    | +       | 3/4   | 3/4     | >=4  | 0.38 | +      | 0     | +       | 8 TiB
+ lfib_par[2281+]   | u32    | +       | 3/4   | 3/4     | 5    | 0.38 | +      | 0     | +       | 8 TiB
  lfib_par[2281-]   | u32    | 0/1     | 3/4   | 3/4     | >=4  | 0.38 | +      | 0     | +       | 8 TiB
  lfib_par[3217+]   | u32    | +       | 1     | 1       | 2/3  | 0.39 | +      | 0     | +       | 16 TiB
  lfib_par[3217-]   | u32    | +       | 1     | 1       | 2/5  | 0.39 | +      | 0     | +       | 16 TiB
@@ -250,7 +250,7 @@ Note: some of `full` results are for SmokeRand < 0.51.
  mwc32xxa8         | u32    | +       | ?1    | 4       | 10   | 1.9  | -(>>>) | 0     | Small   | 256 MiB
  mwc40xxa8         | u32    | +       | +     | +       | 1    | 2.1  | -(>>>) | 0     | Crush   | 16 GiB
  mwc48xxa16        | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | +       | 1 TiB
- mwc64             | u32    | +       | ?1    | 2       | 4    | 0.37 | -      | 0     | Small   | 1 TiB
+ mwc64             | u32    | +       | 1     | 2/3     | 5/7  | 0.37 | -      | 0     | Small   | 1 TiB
  mwc64x            | u32    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
  mwc64x_u31        | u31    | +       | +     | +       | +    | 1.5  | +      | 4     | >=Crush | >= 8 TiB
  mwc64_2p58        | u64    | 2       | ?9    | 17      | 17   | 0.26 | +      | 0     | -       | 128 KiB
@@ -518,7 +518,7 @@ Note: some of `full` results are for SmokeRand < 0.51.
  zibri128ex        | u64    | +       | +     | +       | +    | 0.14 | +      | 4     | +HI     | >= 16 TiB
  zibri192          | u64    | +       | ?3/5  | 9       | 11   | 0.20 | +      | 0     | Crush   | 2 MiB
  zibri192ex        | u64    | +       | +     | +       | +    | 0.35 | +      | 4     |         | >= 4 TiB
- ziff98            | u32    | +       | ?3    | 3       | 3    | 0.47 | +      | 3.25  | Small   | 32 GiB
+ ziff98            | u32    | +       | 3     | 3       | 3    | 0.47 | +      | 3.25  | Small   | 32 GiB
 
 
 # 64-bit collision test results

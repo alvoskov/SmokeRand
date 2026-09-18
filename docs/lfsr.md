@@ -273,6 +273,15 @@ triples were mentioned in the Marsaglia's article about xorshift PRNG family.
 `xorrot` PRNG family was developed by A.L. Voskov, it resembles `xorshift` and
 `xoroshiro`.
 
+Some triples for `xorrot128` (64-bit version) with good distribution
+of Hamming weights:
+
+    [ 3  2 15]:0.000519 [ 3 17 52]:0.000722 [ 3 27 57]:1.51e-05
+    [ 5  1 24]:5.18e-05 [ 5 24 47]:3.3e-05 [ 7  2 15]:0.000321
+    [ 7 47 52]:2.14e-05
+
+    Total number of triples: 374
+
 Triples for `xorrot160` (32-bit version):
 
     [ 3 19 31] [ 5  5 15] [ 7 24 27] [13  4 11]
