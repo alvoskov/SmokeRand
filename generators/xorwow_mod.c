@@ -65,7 +65,7 @@ static void *create(const CallerAPI *intf)
     if (obj->v == 0) {
         obj->v = 0x12345678;
     }
-    obj->d2 = 12345678;
+    obj->d2 = 1234567;
     return obj;
 }
 

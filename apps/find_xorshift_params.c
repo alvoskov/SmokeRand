@@ -25,9 +25,6 @@
 static unsigned int get_default_nthreads(void)
 {
     unsigned int nthreads = get_cpu_numcores();
-//    if (sizeof(size_t) == 4 * sizeof(char) && nthreads > 2) {
-  //      nthreads = 2;
-    //}
     if (nthreads > 4)
         nthreads--;
     return nthreads;
@@ -109,15 +106,22 @@ typedef struct {
 } XsThreadData;
 
 
+void print_bytes(const uint8_t *u)
+{
+    for (int i = 0; i < 16; i++) {
+        printf("%X ", (unsigned int) u[i]);
+    }
+}
+
 ThreadRetVal THREADFUNC_SPEC xorshift_thread(void *data)
 {
     LfsrPeriodOptions opts;
     opts.check_validity = 1;
 
-    XsThreadData *obj = data;
+    const XsThreadData *obj = data;
     ThreadObj thrd = ThreadObj_current();
-    GeneratorStateExt ext = GeneratorStateExt_create_sized(obj->gi, obj->intf, obj->gen_props->nbytes);
     for (ShiftsTriple *t = obj->triples; t->a != 0; t++) {
+        GeneratorStateExt ext = GeneratorStateExt_create_sized(obj->gi, obj->intf, obj->gen_props->nbytes);
         if (t->thrd_ord == thrd.ord) {
             if (t->b == 1 && (t->c == 1 || t->c == 2)) {
                 printf("_%u", t->a);
@@ -126,7 +130,8 @@ ThreadRetVal THREADFUNC_SPEC xorshift_thread(void *data)
                 fflush(stdout);
             }
             obj->gen_props->set_triple(ext.state.state, t->a, t->b, t->c);
-            if (lfsr_period_test(&ext, obj->intf, &opts) == LFSR_PERIOD_MAX) {
+            const LfsrPeriodResult res = lfsr_period_test(&ext, obj->intf, &opts);
+            if (res == LFSR_PERIOD_MAX) {
                 static const HammingDistrOptions
                     hw_distr = {.nvalues = 1ull << 33, .nlevels = 10}; // or << 30 for faster screening
                 static const HammingDistrOptions
@@ -134,13 +139,16 @@ ThreadRetVal THREADFUNC_SPEC xorshift_thread(void *data)
                 const TestResults hw_res = hamming_distr_test(
                     &ext.state,
                     (ext.nbytes > 8) ? &hw_distr : &hw_distr_sm);
-                printf("<%u>[%u %u %u]:%g", thrd.ord, t->a, t->b, t->c, hw_res.p);
+                const double p = hw_res.p;
+                printf("<%u>[%u %u %u]:%g", thrd.ord, t->a, t->b, t->c, p);
                 t->is_good = 1;
-                t->pvalue = hw_res.p;
+                t->pvalue = p;
+            } else if (res == LFSR_PERIOD_ERROR) {
+                printf("[%u %u %u: error]", t->a, t->b, t->c);
             }
-        }
+        }                               
+        GeneratorStateExt_destruct(&ext);
     }
-    GeneratorStateExt_destruct(&ext);
     return 0;
 }
 
@@ -181,7 +189,7 @@ int run_triples_search(const GeneratorInfo *gen, const XorshiftProps *props)
     }
     // Get data from threads
     for (unsigned int i = 0; i < nthreads; i++) {
-        ThreadObj_wait(&thrd[i]);
+        ThreadObj_wait(&thrd[i]);    
     }
 
     unsigned int ntriples = 0;
@@ -746,6 +754,93 @@ int test_xorshift160(void)
 }
 
 
+///////////////////////////////
+///// xorshift320 testing /////
+///////////////////////////////
+
+typedef struct {
+    uint64_t x;
+    uint64_t y; 
+    uint64_t z;
+    uint64_t w;
+    uint64_t v;
+    unsigned int a;
+    unsigned int b;
+    unsigned int c;
+} Xorshift320VarShiftsState;
+
+
+static uint64_t get_bits_xs320(void *state)
+{
+    Xorshift320VarShiftsState *obj = state;
+    uint64_t t = obj->x ^ (obj->x << obj->a);
+    t ^= t >> obj->b;
+    obj->x = obj->y;
+    obj->y = obj->z;
+    obj->z = obj->w;
+    obj->w = obj->v;
+    obj->v = (obj->v ^ (obj->v >> obj->c)) ^ t;
+    return obj->v;
+}
+
+
+static int is_triple_valid_xs320(unsigned int ai, unsigned int bi, unsigned int ci)
+{
+    (void) ai; (void) bi; (void) ci;
+    return (ai >= 35);
+}
+
+
+static void *gen_create_xs320(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+    Xorshift320VarShiftsState *obj = intf->malloc(sizeof(Xorshift320VarShiftsState));
+    obj->x = intf->get_seed64();
+    obj->y = intf->get_seed64();
+    obj->z = intf->get_seed64();
+    obj->w = intf->get_seed64();
+    obj->v = intf->get_seed64() | 0x1; // State mustn't be all zeros
+    obj->a = 1;
+    obj->b = 2;
+    obj->c = 3;
+    return obj;
+}
+
+
+static void set_triple_xs320(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
+{
+    Xorshift320VarShiftsState *obj = state;
+    obj->a = ai; obj->b = bi; obj->c = ci;
+}
+
+
+int test_xorshift320(void)
+{
+    static const GeneratorInfo gen = {
+        .name = "xorshift320:dynshifts",
+        .description = "xorshift320 with dynamic shifts",
+        .nbits = 64,
+        .create = gen_create_xs320,
+        .free = gen_free,
+        .get_bits = get_bits_xs320,
+        .self_test = NULL,
+        .get_sum = NULL,
+        .parent = NULL
+    };
+
+    static const XorshiftProps props = {
+        .max_value = 64,
+        .nbytes = 40,
+        .is_triple_valid = is_triple_valid_xs320,
+        .set_triple = set_triple_xs320
+    };
+
+
+    return run_triples_search(&gen, &props);
+}
+
+
+
 /////////////////////////////
 ///// xorrot128 testing /////
 /////////////////////////////
@@ -759,7 +854,7 @@ typedef struct {
 } Xorrot128VarShiftsState;
 
 
-static uint64_t get_bits_xr128(void *state)
+static uint64_t get_bits_xorrot128(void *state)
 {
     Xorrot128VarShiftsState *obj = state;
     const uint64_t x0 = obj->x, y0 = obj->y;
@@ -769,31 +864,38 @@ static uint64_t get_bits_xr128(void *state)
 }
 
 
-static int is_triple_valid_xr128(unsigned int ai, unsigned int bi, unsigned int ci)
+static int is_triple_valid_xorrot128(unsigned int ai, unsigned int bi, unsigned int ci)
 {
     (void) ai;
     return bi < ci;
 }
 
 
-static void *gen_create_xr128(const GeneratorInfo *gi, const CallerAPI *intf)
+static void *gen_create_xorrot128(const GeneratorInfo *gi, const CallerAPI *intf)
 {
     (void) gi;
     Xorrot128VarShiftsState *obj = intf->malloc(sizeof(Xorrot128VarShiftsState));
     obj->x = intf->get_seed64();
     obj->y = intf->get_seed64() | 0x1; // State mustn't be all zeros
+    if (obj->x == 0 && obj->y == 0) {
+        printf("????????????? %u %u %u\n", obj->a, obj->b, obj->c);
+    }
     obj->a = 3;
     obj->b = 17;
     obj->c = 52;
+    //printf("create: %llX %llX %u %u %u\n", obj->x, obj->y, obj->a, obj->b, obj->c);
     return obj;
 }
 
 
-static void set_triple_xr128(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
+static void set_triple_xorrot128(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
 {
     Xorrot128VarShiftsState *obj = state;
-    obj->a = ai; obj->b = bi; obj->c = ci;
-    obj->a = 3;// obj->b = 17; obj->c = 52;
+    obj->a = ai; obj->b = bi; obj->c = ci;    
+    //(void) ai; (void) bi; (void) ci;
+    //obj->a = 3; obj->b = 17; obj->c = 52;
+    //printf("set: %llX %llX %u %u %u\n", obj->x, obj->y, obj->a, obj->b, obj->c);    
+    // For experiments obj->a = 3;// obj->b = 17; obj->c = 52;
 }
 
 
@@ -803,9 +905,9 @@ int test_xorrot128(void)
         .name = "xorrot128:dynshifts",
         .description = "xorrot128 with dynamic shifts",
         .nbits = 64,
-        .create = gen_create_xr128,
+        .create = gen_create_xorrot128,
         .free = gen_free,
-        .get_bits = get_bits_xr128,
+        .get_bits = get_bits_xorrot128,
         .self_test = NULL,
         .get_sum = NULL,
         .parent = NULL
@@ -814,8 +916,8 @@ int test_xorrot128(void)
     static const XorshiftProps props = {
         .max_value = 64,
         .nbytes = 16,
-        .is_triple_valid = is_triple_valid_xr128,
-        .set_triple = set_triple_xr128
+        .is_triple_valid = is_triple_valid_xorrot128,
+        .set_triple = set_triple_xorrot128
     };
 
 
@@ -1167,6 +1269,7 @@ int main(int argc, char *argv[])
         {"xorshift32",     test_xorshift32},
         {"xorshift64",     test_xorshift64},
         {"xorshift128",    test_xorshift128},
+        {"xorshift320",    test_xorshift320},
         {"xorrot128",      test_xorrot128},
         {"xorrot160",      test_xorrot160},
         {"xorrot256",      test_xorrot256},
