@@ -1,3 +1,4 @@
+// >= 2 TiB
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG

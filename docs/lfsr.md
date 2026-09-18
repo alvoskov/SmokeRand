@@ -268,6 +268,18 @@ triples were mentioned in the Marsaglia's article about xorshift PRNG family.
 
 ## New results
 
+### xorshift160
+
+    [ 1  1 20]:0 [ 1  1 21]:0 [ 1  3  4]:4.56e-63 [ 1 13  7]:0
+    [ 2  1  4]:0.00267 [ 2  3  7]:3.34e-82 [ 2  5 27]:1.15e-242 [ 3 23 13]:0
+    [ 4  9  5]:1.24e-210 [ 5  1  1]:0.000765 [ 5  3 27]:5.54e-66 [ 5  3 29]:2.89e-78
+    [ 6 11 20]:0 [ 6 11 31]:0 [ 7 11 20]:0 [ 7 13  6]:1.41e-311
+    [ 7 23  2]:1.15e-92 [ 8  9 14]:0 [ 8 21  4]:5.73e-188 [10  5 11]:1.89e-219
+    [13  9  3]:1.32e-86 [13 15 17]:0 [16  5 18]:4.95e-224 [19  3 11]:5.26e-113
+    [21  7  3]:2.25e-134
+
+    Total number of triples: 25
+
 ### xorrot
 
 `xorrot` PRNG family was developed by A.L. Voskov, it resembles `xorshift` and
