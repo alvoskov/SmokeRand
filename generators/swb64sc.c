@@ -4,7 +4,7 @@
  * (scrambler) that hides its artefacts.
  * @details
  *
- * (9,8)>=2 TiB; smokerand full
+ * (9,8)>=16 TiB; smokerand full
  *
  * Python code for verification:
  *
@@ -50,8 +50,20 @@
 
 PRNG_CMODULE_PROLOG
 
+//#define DECIM 3
 #define SWB_R 13
 #define SWB_S 7
+
+
+//#define DECIM 0
+//#define SWB_R 117
+//#define SWB_S 50
+
+
+//#define DECIM 0
+//#define SWB_R 9
+//#define SWB_S 8
+
 
 typedef struct {    
     uint64_t x[SWB_R];
@@ -63,12 +75,14 @@ typedef struct {
 static inline uint64_t get_bits_raw(Swb64State *obj)
 {
     if (obj->pos == SWB_R) {
-        for (int i = 0; i < SWB_S; i++) {
-            obj->x[i] = swb_u64(obj->x[i + (SWB_R - SWB_S)], obj->x[i], obj->c, &obj->c);
-        }
-        for (int i = SWB_S; i < SWB_R; i++) {
-            obj->x[i] = swb_u64(obj->x[i - SWB_S], obj->x[i], obj->c, &obj->c);
-        }
+        //for (int ii = 0; ii < DECIM + 1; ii++) {
+            for (int i = 0; i < SWB_S; i++) {
+                obj->x[i] = swb_u64(obj->x[i + (SWB_R - SWB_S)], obj->x[i], obj->c, &obj->c);
+            }
+            for (int i = SWB_S; i < SWB_R; i++) {
+                obj->x[i] = swb_u64(obj->x[i - SWB_S], obj->x[i], obj->c, &obj->c);
+            }
+        //}
         obj->pos = 0;
     }
     uint64_t out = obj->x[obj->pos++];
