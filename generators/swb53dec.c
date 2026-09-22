@@ -2,9 +2,9 @@
 
 PRNG_CMODULE_PROLOG
 
-#define SWB_R 65
-#define SWB_S 5
-#define SWB_DECIM 3
+#define SWB_R 83
+#define SWB_S 60
+#define SWB_DECIM 0
 #define TWO_M53 0x1.0p-53
 
 typedef struct {    
@@ -14,25 +14,27 @@ typedef struct {
 } Swb64State;
 
 
+static inline double swb_double(double x, double y, double c_in, double *c_out)
+{
+    const double delta = x - y - c_in;
+    if (delta < 0.0) {
+        *c_out = TWO_M53;
+        return delta + 1.0;
+    } else {
+        *c_out = 0.0;
+        return delta;
+    }
+}
+
 static inline uint64_t get_bits_raw(Swb64State *obj)
 {
     if (obj->pos == SWB_R) {
-        for (int ii = 0; ii < SWB_DECIM; ii++) {
+        for (int ii = 0; ii < SWB_DECIM + 1; ii++) {
             for (int i = 0; i < SWB_S; i++) {
-                obj->x[i] = obj->x[i] - obj->x[i + (SWB_R - SWB_S)] - obj->c;
-                if (obj->x[i] < 0.0) {
-                    obj->x[i] += 1.0; obj->c = TWO_M53;
-                } else {
-                    obj->c = 0.0;
-                }
+                obj->x[i] = swb_double(obj->x[i], obj->x[i + (SWB_R - SWB_S)], obj->c, &obj->c);
             }
             for (int i = SWB_S; i < SWB_R; i++) {
-                obj->x[i] = obj->x[i - SWB_S] - obj->x[i] - obj->c;
-                if (obj->x[i] < 0.0) {
-                    obj->x[i] += 1.0; obj->c = TWO_M53;
-                } else {
-                    obj->c = 0.0;
-                }
+                obj->x[i] = swb_double(obj->x[i - SWB_S], obj->x[i], obj->c, &obj->c);
             }
             obj->pos = 0;
         }
