@@ -1,10 +1,12 @@
+// (83, 60, 4) >= 1 TiB
+// (83, 60, 2): passes full, 
 #include "smokerand/cinterface.h"
 
 PRNG_CMODULE_PROLOG
 
 #define SWB_R 83
 #define SWB_S 60
-#define SWB_DECIM 0
+#define SWB_DECIM 2
 #define TWO_M53 0x1.0p-53
 
 typedef struct {    
