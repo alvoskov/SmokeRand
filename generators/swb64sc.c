@@ -4,7 +4,9 @@
  * (scrambler) that hides its artefacts.
  * @details
  *
- * (9,8)>=16 TiB; smokerand full
+ * (9,8)>=16 TiB; smokerand full; TestU01 small/crush/big: +IL/+HI/+LO
+ * (13,7)>=16 TiB; smokerand full; TestU01 small/crush/big: +IL/+HI/+LO
+ * (99,35)>=16 TiB
  *
  * Python code for verification:
  *
@@ -51,8 +53,13 @@
 PRNG_CMODULE_PROLOG
 
 //#define DECIM 3
+//#define SWB_R 13
+//#define SWB_S 7
+
+
 #define SWB_R 13
 #define SWB_S 7
+
 
 
 //#define DECIM 0
