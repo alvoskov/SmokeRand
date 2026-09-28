@@ -6,7 +6,7 @@
  *
  * (9,8)>=16 TiB; smokerand full; TestU01 small/crush/big: +IL/+HI/+LO
  * (13,7)>=16 TiB; smokerand full; TestU01 small/crush/big: +IL/+HI/+LO
- * (99,35)>=16 TiB
+ * (99,35)>=16 TiB; TestU01 small/crush/big: +IL/+HI/+LO
  *
  * Python code for verification:
  *
@@ -52,13 +52,14 @@
 
 PRNG_CMODULE_PROLOG
 
-//#define DECIM 3
-//#define SWB_R 13
-//#define SWB_S 7
-
-
+//#define DECIM 6
 #define SWB_R 13
 #define SWB_S 7
+
+
+//#define SWB_R 99
+//#define SWB_S 35
+
 
 
 
@@ -93,8 +94,8 @@ static inline uint64_t get_bits_raw(Swb64State *obj)
         obj->pos = 0;
     }
     uint64_t out = obj->x[obj->pos++];
-    out += out * out | 0x40000005;
-    out ^= rotl64(out, 13) ^ rotl64(out, 47);
+    //out += out * out | 0x40000005;
+    //out ^= rotl64(out, 13) ^ rotl64(out, 47);
     return out;
 }
 
