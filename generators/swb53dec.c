@@ -6,7 +6,7 @@ PRNG_CMODULE_PROLOG
 
 #define SWB_R 83
 #define SWB_S 60
-#define SWB_DECIM 2
+#define SWB_DECIM 5
 #define TWO_M53 0x1.0p-53
 
 typedef struct {    
