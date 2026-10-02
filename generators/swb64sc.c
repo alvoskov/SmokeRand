@@ -63,32 +63,15 @@
 
 PRNG_CMODULE_PROLOG
 
-//#define DECIM 6
-#define SWB_R 13
-#define SWB_S 7
+#define SWB64_DECIM 3
 
-
-//#define SWB_R 99
-//#define SWB_S 35
-
-
-
-
-//#define DECIM 0
-//#define SWB_R 117
-//#define SWB_S 50
-
-
-//#define DECIM 0
-//#define SWB_R 9
-//#define SWB_S 8
-
-
-typedef struct {    
-    uint64_t x[SWB_R];
-    uint64_t c;
-    size_t pos;
-} Swb64State;
+#define SWB64_UPDATE_BUFFER(r_swb, s_swb) \
+    for (int j = 0; j < s_swb; j++) { \
+        obj->x[j] = swb_u64(obj->x[j + (r_swb - s_swb)], obj->x[j], obj->c, &obj->c); \
+    } \
+    for (int j = s_swb; j < r_swb; j++) { \
+        obj->x[j] = swb_u64(obj->x[j - s_swb], obj->x[j], obj->c, &obj->c); \
+    } \
 
 
 #define SWB64SC_TEMPLATE(r_swb, s_swb) \
@@ -99,12 +82,7 @@ typedef struct { \
 } Swb64ScR##r_swb##S##s_swb##State; \
 static inline uint64_t get_bits_r##r_swb##s##s_swb##sc_raw(Swb64ScR##r_swb##S##s_swb##State *obj) { \
     if (obj->pos == r_swb) { \
-        for (int i = 0; i < s_swb; i++) { \
-            obj->x[i] = swb_u64(obj->x[i + (r_swb - s_swb)], obj->x[i], obj->c, &obj->c); \
-        } \
-        for (int i = s_swb; i < r_swb; i++) { \
-            obj->x[i] = swb_u64(obj->x[i - s_swb], obj->x[i], obj->c, &obj->c); \
-        } \
+        SWB64_UPDATE_BUFFER(r_swb, s_swb) \
         obj->pos = 0; \
     } \
     uint64_t out = obj->x[obj->pos++]; \
@@ -122,6 +100,35 @@ static void *create_r##r_swb##s##s_swb##sc(const GeneratorInfo *gi, const Caller
 } \
 MAKE_GET_BITS_WRAPPERS(r##r_swb##s##s_swb##sc)
 
+
+#define SWB64DEC_TEMPLATE(r_swb, s_swb) \
+typedef struct { \
+    uint64_t x[r_swb]; \
+    uint64_t c; \
+    size_t pos; \
+    int decim; \
+} Swb64DecR##r_swb##S##s_swb##State; \
+static inline uint64_t get_bits_r##r_swb##s##s_swb##dec_raw(Swb64DecR##r_swb##S##s_swb##State *obj) { \
+    if (obj->pos == r_swb) { \
+        for (int i = 0; i < obj->decim; i++) { \
+            SWB64_UPDATE_BUFFER(r_swb, s_swb) \
+        } \
+        obj->pos = 0; \
+    } \
+    return obj->x[obj->pos++]; \
+} \
+static void *create_r##r_swb##s##s_swb##dec(const GeneratorInfo *gi, const CallerAPI *intf) { \
+    Swb64DecR##r_swb##S##s_swb##State *obj = intf->malloc(sizeof(Swb64DecR##r_swb##S##s_swb##State)); \
+    (void) gi; \
+    expand_seed64_to_u64(obj->x, r_swb, intf->get_seed64()); \
+    obj->c = (obj->x[0] == 0) ? 1 : 0; \
+    obj->pos = r_swb; \
+    obj->decim = SWB64_DECIM + 1; \
+    return obj; \
+} \
+MAKE_GET_BITS_WRAPPERS(r##r_swb##s##s_swb##dec)
+
+
 // The most important generators (the shortest lags and the best lags)
 SWB64SC_TEMPLATE(9, 8)
 SWB64SC_TEMPLATE(13, 7)
@@ -136,6 +143,20 @@ SWB64SC_TEMPLATE(89, 11)
 SWB64SC_TEMPLATE(98, 90)
 SWB64SC_TEMPLATE(117, 50)
 
+// --- Generators that use decimation
+// The most important generators (the shortest lags and the best lags)
+SWB64DEC_TEMPLATE(9, 8)
+SWB64DEC_TEMPLATE(13, 7)
+SWB64DEC_TEMPLATE(99, 35)
+// The less important generators
+SWB64DEC_TEMPLATE(26, 4)
+SWB64DEC_TEMPLATE(30, 6)  
+SWB64DEC_TEMPLATE(67, 59)
+SWB64DEC_TEMPLATE(71, 47)
+SWB64DEC_TEMPLATE(77, 56)
+SWB64DEC_TEMPLATE(89, 11)
+SWB64DEC_TEMPLATE(98, 90)
+SWB64DEC_TEMPLATE(117, 50)
 
 
 
@@ -184,6 +205,7 @@ static void *create(const CallerAPI *intf)
 }
 
 static const GeneratorParamVariant gen_list[] = {
+    // Scrambled
     {"",          "SWB(2**64,7,13)[*]",   64, create_r13s7sc,   get_bits_r13s7sc,   get_sum_r13s7sc},
     {"13-7-sc",   "SWB(2**64,7,13)[*]",   64, create_r13s7sc,   get_bits_r13s7sc,   get_sum_r13s7sc},
     {"9-8-sc",    "SWB(2**64,8,9)[*]",    64, create_r9s8sc,    get_bits_r9s8sc,    get_sum_r9s8sc},
@@ -196,6 +218,18 @@ static const GeneratorParamVariant gen_list[] = {
     {"89-11-sc",  "SWB(2**64,11,89)[*]",  64, create_r89s11sc,  get_bits_r89s11sc,  get_sum_r89s11sc},
     {"98-90-sc",  "SWB(2**64,90,98)[*]",  64, create_r98s90sc,  get_bits_r98s90sc,  get_sum_r98s90sc},
     {"117-50-sc", "SWB(2**64,50,117)[*]", 64, create_r117s50sc, get_bits_r117s50sc, get_sum_r117s50sc},
+    // Decimation
+    {"13-7-dec",   "SWB(2**64,7,13)[dec]",   64, create_r13s7dec,   get_bits_r13s7dec,   get_sum_r13s7dec},
+    {"9-8-dec",    "SWB(2**64,8,9)[dec]",    64, create_r9s8dec,    get_bits_r9s8dec,    get_sum_r9s8dec},
+    {"99-35-dec",  "SWB(2**64,35,99)[dec]",  64, create_r99s35dec,  get_bits_r99s35dec,  get_sum_r99s35dec},
+    {"26-4-dec",   "SWB(2**64,4,26)[dec]",   64, create_r26s4dec,   get_bits_r26s4dec,   get_sum_r26s4dec},
+    {"30-6-dec",   "SWB(2**64,6,30)[dec]",   64, create_r30s6dec,   get_bits_r30s6dec,   get_sum_r30s6dec},
+    {"67-59-dec",  "SWB(2**64,59,67)[dec]",  64, create_r67s59dec,  get_bits_r67s59dec,  get_sum_r67s59dec},
+    {"71-47-dec",  "SWB(2**64,47,71)[dec]",  64, create_r71s47dec,  get_bits_r71s47dec,  get_sum_r71s47dec},
+    {"77-56-dec",  "SWB(2**64,56,77)[dec]",  64, create_r77s56dec,  get_bits_r77s56dec,  get_sum_r77s56dec},
+    {"89-11-dec",  "SWB(2**64,11,89)[dec]",  64, create_r89s11dec,  get_bits_r89s11dec,  get_sum_r89s11dec},
+    {"98-90-dec",  "SWB(2**64,90,98)[dec]",  64, create_r98s90dec,  get_bits_r98s90dec,  get_sum_r98s90dec},
+    {"117-50-dec", "SWB(2**64,50,117)[dec]", 64, create_r117s50dec, get_bits_r117s50dec, get_sum_r117s50dec},
     GENERATOR_PARAM_VARIANT_EMPTY
 };
 
@@ -205,7 +239,8 @@ static const char description[] =
 "  13-7-sc - default one for SWB(2**64,7,13)[*]\n"
 "  9-8-sc  - the smallest one\n"
 "  99-35-sc - recommended large\n"
-"  26-4-sc; 30-6-sc; 67-59-sc; 71-47-sc; 77-56-sc; 89-11-sc; 98-90-sc; 117-50-sc\n";
+"  26-4-sc; 30-6-sc; 67-59-sc; 71-47-sc; 77-56-sc; 89-11-sc; 98-90-sc; 117-50-sc\n"
+"  Also `-dec` modification (decimation) are supported\n";
 
 int EXPORT gen_getinfo(GeneratorInfo *gi, const CallerAPI *intf)
 {

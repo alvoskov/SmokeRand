@@ -840,6 +840,84 @@ int test_xorshift320(void)
 }
 
 
+/////////////////////////////////////
+
+typedef struct {
+    uint8_t x;
+    uint8_t y;
+    uint8_t z;
+    unsigned int a;
+    unsigned int b;
+    unsigned int c;
+} Xorrot24VarShiftsState;
+
+
+static inline uint64_t get_bits_xr24(void *state)
+{
+    Xorrot24VarShiftsState *obj = state;
+    const uint8_t x0 = obj->x, z0 = obj->z;
+    obj->x = (uint8_t) (x0 ^ obj->y);
+    obj->y = (uint8_t) (x0 ^ z0);
+    obj->z = (uint8_t) ((x0 << (int) obj->a) ^ obj->y ^ rotl8(z0, (int) obj->b) ^ rotl8(z0, (int) obj->c));
+    return x0;
+}
+
+
+static int is_triple_valid_xr24(unsigned int ai, unsigned int bi, unsigned int ci)
+{
+    (void) ai;
+    return bi < ci;
+}
+
+
+static void *gen_create_xr24(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+    Xorrot24VarShiftsState *obj = intf->malloc(sizeof(Xorrot24VarShiftsState));
+    obj->x = (uint8_t) intf->get_seed64();
+    obj->y = (uint8_t) intf->get_seed64();
+    obj->z = (uint8_t) (intf->get_seed64() | 0x1); // State mustn't be all zeros
+    obj->a = 1;
+    obj->b = 2;
+    obj->c = 3;
+    return obj;
+}
+
+
+static void set_triple_xr24(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
+{
+    Xorrot24VarShiftsState *obj = state;
+    obj->a = ai; obj->b = bi; obj->c = ci;    
+}
+
+
+int test_xorrot24(void)
+{
+    static const GeneratorInfo gen = {
+        .name = "xorrot24:dynshifts",
+        .description = "xorrot24 with dynamic shifts",
+        .nbits = 64,
+        .create = gen_create_xr24,
+        .free = gen_free,
+        .get_bits = get_bits_xr24,
+        .self_test = NULL,
+        .get_sum = NULL,
+        .parent = NULL
+    };
+
+    static const XorshiftProps props = {
+        .max_value = 8,
+        .nbytes = 3,
+        .is_triple_valid = is_triple_valid_xr24,
+        .set_triple = set_triple_xr24
+    };
+
+
+    return run_triples_search(&gen, &props);
+}
+
+
+
 
 /////////////////////////////
 ///// xorrot128 testing /////
@@ -1271,6 +1349,7 @@ int main(int argc, char *argv[])
         {"xorshift128",    test_xorshift128},
         {"xorshift160",    test_xorshift160},
         {"xorshift320",    test_xorshift320},
+        {"xorrot24",       test_xorrot24},
         {"xorrot128",      test_xorrot128},
         {"xorrot160",      test_xorrot160},
         {"xorrot256",      test_xorrot256},
