@@ -20,6 +20,19 @@ static const LargeInt lfsr_noexps[] = {
 };
 
 /**
+ * @brief 2**24 - 1 =  [3, 5, 7, 13, 17, 241]
+ */
+static const LargeInt lfsr24_exps[] = {
+    {{0x0000000000555555}}, // 0x555555
+    {{0x0000000000333333}}, // 0x333333
+    {{0x0000000000249249}}, // 0x249249
+    {{0x000000000013B13B}}, // 0x13B13B
+    {{0x00000000000F0F0F}}, // 0xF0F0F
+    {{0x0000000000010FEF}}, // 0x10FEF
+    LFSR_EXPS_END
+};
+
+/**
  * @brief `2**32 - 1 =  [3, 5, 17, 257, 65537]`
  */
 static const LargeInt lfsr32_exps[] = {
@@ -368,7 +381,9 @@ const LargeInt *get_lfsr_exps(size_t n)
         0
     };
 
-    if (n == 32) {
+    if (n == 24) {
+        return lfsr24_exps;
+    } else if (n == 32) {
         return lfsr32_exps;
     } else if (n == 48) {
         return lfsr48_exps;
