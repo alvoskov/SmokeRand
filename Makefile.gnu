@@ -314,7 +314,7 @@ else
 	rm -f smokerand.1.gz
 endif
 
-install:
+install: all
 ifeq ($(OS), Windows_NT)
 	echo `make install` is supported only for UNIX-like systems.
 else
