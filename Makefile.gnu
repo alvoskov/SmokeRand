@@ -290,6 +290,7 @@ ifeq ($(OS), Windows_NT)
 	cmd /c "del $(BINDIR)\generators\*.dll /q"
 	cmd /c "del $(BINDIR)\generators\obj\*.o"
 	cmd /c "del $(BINDIR)\generators\*.a /q"
+	cmd /c "del smokerand.1.gz /q"
 else
 	rm -f $(BINDIR)/smokerand
 	rm -f $(BINDIR)/bat_example.so
@@ -310,6 +311,7 @@ else
 	rm -f $(LIBDIR)/*
 	rm -f $(BINDIR)/generators/*.so
 	rm -f $(BINDIR)/generators/obj/*.o
+	rm -f smokerand.1.gz
 endif
 
 install:
