@@ -274,6 +274,7 @@ ifeq ($(OS), Windows_NT)
 	cmd /c "del $(BINDIR)\bat_example.dll"
 	cmd /c "del $(BINDIR)\calibrate_dc6.exe"
 	cmd /c "del $(BINDIR)\calibrate_linearcomp.exe"
+	cmd /c "del $(BINDIR)\find_xorshift_params.exe"
 	cmd /c "del $(BINDIR)\sr_speed.exe"
 	cmd /c "del $(BINDIR)\sr_tiny.exe"
 	cmd /c "del $(BINDIR)\test_base64.exe"
@@ -281,6 +282,7 @@ ifeq ($(OS), Windows_NT)
 	cmd /c "del $(BINDIR)\test_crand.exe"
 	cmd /c "del $(BINDIR)\test_cpp11.exe"
 	cmd /c "del $(BINDIR)\test_funcs.exe"
+	cmd /c "del $(BINDIR)\test_lfsr_period.exe"
 	cmd /c "del $(BINDIR)\test_rdseed.exe"
 	cmd /c "del $(BINDIR)\test_syscrypto.exe"
 	cmd /c "del $(OBJDIR)\*.o /q"
@@ -288,11 +290,13 @@ ifeq ($(OS), Windows_NT)
 	cmd /c "del $(BINDIR)\generators\*.dll /q"
 	cmd /c "del $(BINDIR)\generators\obj\*.o"
 	cmd /c "del $(BINDIR)\generators\*.a /q"
+	cmd /c "del smokerand.1.gz /q"
 else
 	rm -f $(BINDIR)/smokerand
 	rm -f $(BINDIR)/bat_example.so
 	rm -f $(BINDIR)/calibrate_dc6
 	rm -f $(BINDIR)/calibrate_linearcomp
+	rm -f $(BINDIR)/find_xorshift_params
 	rm -f $(BINDIR)/sr_speed
 	rm -f $(BINDIR)/sr_tiny
 	rm -f $(BINDIR)/test_base64
@@ -300,15 +304,17 @@ else
 	rm -f $(BINDIR)/test_crand
 	rm -f $(BINDIR)/test_funcs
 	rm -f $(BINDIR)/test_cpp11
+	rm -f $(BINDIR)/test_lfsr_period
 	rm -f $(BINDIR)/test_rdseed
 	rm -f $(BINDIR)/test_syscrypto
 	rm -f $(OBJDIR)/*.o
 	rm -f $(LIBDIR)/*
 	rm -f $(BINDIR)/generators/*.so
 	rm -f $(BINDIR)/generators/obj/*.o
+	rm -f smokerand.1.gz
 endif
 
-install:
+install: all
 ifeq ($(OS), Windows_NT)
 	echo `make install` is supported only for UNIX-like systems.
 else
