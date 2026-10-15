@@ -13,7 +13,8 @@
  * 1. https://web.archive.org/web/20160125103112/http://stat.fsu.edu/pub/diehard/
  * 2. https://web.archive.org/web/20070402163410/http://www.cs.hku.hk/%7Ediehard/cdrom/
  * 3. https://pbcrypto.basicaware.de/ShowAlgorithm.aspx?id=45
- * 4. https://groups.google.com/g/sci.stat.math/c/p7aLW3TsJys
+ * 4. G. Marsaglia. Yet another PRNG. 01-AUG-1994.
+ *    https://groups.google.com/g/sci.stat.math/c/p7aLW3TsJys
  * 5. M. Goresky, A. Klapper. Efficient multiply-with-carry random number
  *    generators with maximal period // ACM Trans. Model. Comput. Simul. 2003.
  *    V. 13. N 4. P. 310-321. https://doi.org/10.1145/945511.945514

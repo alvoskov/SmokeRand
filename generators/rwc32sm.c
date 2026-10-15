@@ -26,7 +26,8 @@
  *
  * References:
  *
- * 1. https://groups.google.com/g/sci.stat.math/c/p7aLW3TsJys
+ * 1. G. Marsaglia. Yet another PRNG. 01-AUG-1994.
+ *    https://groups.google.com/g/sci.stat.math/c/p7aLW3TsJys
  * 2. M. Goresky, A. Klapper. Efficient multiply-with-carry random number
  *    generators with maximal period // ACM Trans. Model. Comput. Simul. 2003.
  *    V. 13. N 4. P. 310-321. https://doi.org/10.1145/945511.945514
