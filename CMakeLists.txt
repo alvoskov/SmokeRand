@@ -120,7 +120,7 @@ target_link_libraries(test_crand smokerand_bat smokerand_core ${COMMON_LIBS})
 # Generators list
 set (GENERATORS
     a5rand a5rand32 a5rand32w a5randw aes128 aesdec2 alfib alfib64x5 
-    alfib8x5 alfib_lux alfib_mod ara32 ara64 arx32 arx64 arxfw16 
+    alfib8x5 alfib_lux alfib_mod ara32 ara64 arata arx32 arx64 arxfw16 
     arxfw16ex2 arxfw32 arxfw64 arxfw8 arxfw8ex arxfw8ex2 arxfw8ex3 
     bbs64 biski16 biski16_alt biski16_mul biski32 biski32_alt biski64 
     biski64sh biski64_alt biski64_mul biski8 biski8_alt biski8_mul 
@@ -135,7 +135,7 @@ set (GENERATORS
     komirand komirand16 komirand16w komirand32 komirand32w komirandw 
     konadare192 kuzn lcg127prime lcg128 lcg128prime lcg32prime lcg32sc 
     lcg42 lcg61prime lcg64 lcg64bd lcg64prime lcg64sc lcg64sc2 lcg69069 
-    lcg96 lea leptonflurry32x1 leptonflurry32x2 leptonflurry32x4 
+    lcg96 lcg_hp48 lea leptonflurry32x1 leptonflurry32x2 leptonflurry32x4 
     lfib4 lfib4_u64 lfib_par lfib_ranmar lfsr113 lfsr258 loop_7fff_w64 
     loop_antigap_w64 lrnd64_1023 lrnd64_255 lxm_64x128 macmarsa mad0 
     magma mall16ex mall32 mall64 melg19937 melg44497 melg607 minstd 
@@ -145,28 +145,29 @@ set (GENERATORS
     mularx128_u32 mularx256 mularx64_r2 mularx64_u32 mulberry32 mwc128 
     mwc128x mwc128xxa32 mwc1616 mwc1616p mwc1616x mwc16x6 mwc16_32 
     mwc192 mwc2110_u64 mwc256 mwc256xxa64 mwc3232x mwc32x mwc32xxa8 
-    mwc40xxa8 mwc4159_u64 mwc4691 mwc48xxa16 mwc63x2 mwc64 mwc64x 
-    mwc64x_u31 mwc64_2p58 mwc8222 mwc8222_v2 mwcfp mwcsc_kiss96 mwc_kiss96 
-    mzran13 nasam ncombo pcg128 pcg32 pcg32_dxsm pcg32_xsl_rr pcg64_64 
-    pcg64_dxsm pcg64_xsl_rr pelican philox philox2x32 philox32 poly96 
-    pqrng128 pqrng32 pqrng64 prvhash12c prvhash12cw prvhash16c prvhash16cw 
-    prvhash64c prvhash64cw r1279 r250 ran ran2 randu ranecu ranhash 
-    ranlim32 ranlux48 ranluxpp ranq1 ranq2 ranrot16tiny ranrot32 
-    ranrot32tiny ranrot64tiny ranrot8tiny ranrot_bi ranshi ranval 
-    ranval64 rapidrand128 rc4 rc4ok rdrand rge256ex rge256exctr rge256lite 
-    rge512ex rge512exctr romuduojr romuduojrw romumono romutrio rrmxmx 
-    rwc16446 rwc32 rwc32sm rwc32u48 rwc4157 rwc64 rwc64large sapparot 
-    sapparot2 sapparot2_64 seed seiran128 sezgin63 sfc16 sfc32 sfc64 
-    sfc8 shioi128 shr3 sirius64 sirius64_bad skiss32 skiss64 smwc16x8 
-    smwc192 smwc192lux smwc24 smwc48 smwc48lux smwc8x16 smwc96 speck128 
-    speck128sc speck64_128 splitmix splitmix32 splitmix32cbc splitmix_g1 
-    sqxor sqxor32 stormdrop superduper64 superduper73 superduper96 
-    swb swb53dec swb64sc swblarge swblux swblux64 swbmwc32 swbmwc64 
-    swbw taus88 tf0duper32 tf0duper64 tf0_128 tf0_32 tf0_32sc2 tf0_32sc3 
-    tf0_64 tf0_64sc tf0_64sc2 tf0_ctr64 threefish1024 threefry threefry2x64 
-    thurst tinymt32 tinymt64 tt1600mrt tt800 tychei tychei64 tychei64w 
-    tylo64 ultra ultra64 v3b w1rand wanghash64 well1024a weyl wich1982 
-    wich2006 wob2m wyrand wyrand128 xabc16 xabc32 xabc64 xabc8 xkiss16sh_awc 
+    mwc40xxa8 mwc4159_u64 mwc4691 mwc48xxa16 mwc63x2 mwc64 mwc64k3a3eq 
+    mwc64x mwc64x_u31 mwc64_2p58 mwc8222 mwc8222_v2 mwcfp mwcsc_kiss96 
+    mwc_decimal mwc_kiss96 mzran13 nasam ncombo pcg128 pcg32 pcg32_dxsm 
+    pcg32_xsl_rr pcg64_64 pcg64_dxsm pcg64_xsl_rr pelican philox 
+    philox2x32 philox32 poly96 pqrng128 pqrng32 pqrng64 prvhash12c 
+    prvhash12cw prvhash16c prvhash16cw prvhash64c prvhash64cw r1279 
+    r250 ran ran2 randu ranecu ranhash ranlim32 ranlux48 ranluxpp 
+    ranq1 ranq2 ranrot16tiny ranrot32 ranrot32tiny ranrot64tiny ranrot8tiny 
+    ranrot_bi ranshi ranval ranval64 rapidrand128 rc4 rc4ok rdrand 
+    rge256ex rge256exctr rge256lite rge512ex rge512exctr romuduojr 
+    romuduojrw romumono romutrio rrmxmx rwc16446 rwc32 rwc32sm rwc32u48 
+    rwc4157 rwc64 rwc64large sapparot sapparot2 sapparot2_64 seed 
+    seiran128 sezgin63 sfc16 sfc32 sfc64 sfc8 shioi128 shr3 sirius64 
+    sirius64_bad skiss32 skiss64 smwc16x8 smwc192 smwc192lux smwc24 
+    smwc48 smwc48lux smwc8x16 smwc96 speck128 speck128sc speck64_128 
+    splitmix splitmix32 splitmix32cbc splitmix_g1 sqxor sqxor32 stormdrop 
+    superduper64 superduper73 superduper96 swb swb53dec swb64sc swblarge 
+    swblux swblux64 swbmwc32 swbmwc64 swbw taus88 tf0duper32 tf0duper64 
+    tf0_128 tf0_32 tf0_32sc2 tf0_32sc3 tf0_64 tf0_64sc tf0_64sc2 
+    tf0_ctr64 threefish1024 threefry threefry2x64 thurst tinymt32 
+    tinymt64 tt1600mrt tt800 tychei tychei64 tychei64w tylo64 ultra 
+    ultra64 v3b w1rand wanghash64 well1024a weyl wich1982 wich2006 
+    wob2m wyrand wyrand128 xabc16 xabc32 xabc64 xabc8 xkiss16sh_awc 
     xkiss16_awc xkiss32sh_awc xkiss32_awc xkiss32_awc_rot xkiss64_awc 
     xkiss8_awc xorgens xorgens1024 xorgens256 xorgens512 xormix32 
     xormix64 xormix64ctr xoroshiro1024st xoroshiro1024stst xoroshiro128 
@@ -174,14 +175,15 @@ set (GENERATORS
     xoroshiro32 xoroshiro32pp xoroshiro48w16ppp xoroshiro48w8ppp 
     xoroshiro64aox xoroshiro64pp xoroshiro64st xoroshiro64stst xoroshiro64w16pp 
     xorrot128 xorrot128mn xorrot128w32 xorrot128w32mrt xorrot160 
-    xorrot256 xorrot256mrt xorrot32 xorrot320 xorrot512 xorrot512mrt 
-    xorrot64 xorrot64mn xorrot64mrt xorrot64w16 xorrot64w16nn xorrot64w32 
-    xorrot64w32mn xorrot64w8arx xorrot64w8sc xorshift128 xorshift128p 
-    xorshift128pp xorshift128rp xorshift160 xorshift192 xorshift256 
-    xorshift64 xorshift64st xorshift7 xorshift96 xorwow xorwow_mod 
-    xoshiro128aox xoshiro128p xoshiro128pp xoshiro256p xoshiro256pp 
-    xoshiro256stst xoshiro512pp xsadd xsh xtea xtea2 xtea2_64 xxtea 
-    yasmarang zibri128 zibri128ex zibri192 zibri192ex zibri64ex ziff98
+    xorrot24 xorrot256 xorrot256mrt xorrot32 xorrot320 xorrot512 
+    xorrot512mrt xorrot64 xorrot64mn xorrot64mrt xorrot64w16 xorrot64w16nn 
+    xorrot64w32 xorrot64w32mn xorrot64w8arx xorrot64w8sc xorshift128 
+    xorshift128p xorshift128pp xorshift128rp xorshift160 xorshift192 
+    xorshift256 xorshift320 xorshift64 xorshift64st xorshift7 xorshift96 
+    xorwow xorwow_mod xorwow_w64 xoshiro128aox xoshiro128p xoshiro128pp 
+    xoshiro256p xoshiro256pp xoshiro256stst xoshiro512pp xsadd xsh 
+    xtea xtea2 xtea2_64 xxtea yasmarang zibri128 zibri128ex zibri192 
+    zibri192ex zibri64ex ziff98 
 )
 
 # Examples of plugins, i.e. modules with PRNGs
