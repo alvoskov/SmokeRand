@@ -917,6 +917,85 @@ int test_xorrot24(void)
 }
 
 
+///////////////////
+
+typedef struct {
+    uint32_t x;
+    unsigned int a;
+    unsigned int b;
+    unsigned int c;
+} Xorrot24BVarShiftsState;
+
+
+static inline uint64_t get_bits_xr24b(void *state)
+{
+    Xorrot24BVarShiftsState *obj = state;
+    uint32_t x = (obj->x ^ (obj->x >> obj->a)) & 0xFFFFFF;
+    x = (x ^ (x << obj->b)) & 0xFFFFFF;
+    x = (x ^ (x >> obj->c)) & 0xFFFFFF;
+    /*
+    uint32_t x = (obj->x ^ (obj->x << obj->a)) & 0xFFFFFF;
+    x = x ^ ((x << obj->b) | (x >> (24 - obj->b))) ^ ((x << obj->c) | (x >> (24 - obj->c)));
+    x &= 0xFFFFFF;
+    */
+    obj->x = x;
+    return x;
+}
+
+
+static int is_triple_valid_xr24b(unsigned int ai, unsigned int bi, unsigned int ci)
+{
+    (void) ai;
+    return bi < ci;
+}
+
+
+static void *gen_create_xr24b(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+    Xorrot24BVarShiftsState *obj = intf->malloc(sizeof(Xorrot24BVarShiftsState));
+    obj->x = ((uint32_t) (intf->get_seed64() & 0xFFFFFF) | 0x1);
+    obj->a = 1;
+    obj->b = 2;
+    obj->c = 3;
+    return obj;
+}
+
+
+static void set_triple_xr24b(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
+{
+    Xorrot24BVarShiftsState *obj = state;
+    obj->a = ai; obj->b = bi; obj->c = ci;    
+}
+
+
+int test_xorrot24b(void)
+{
+    static const GeneratorInfo gen = {
+        .name = "xorrot24b:dynshifts",
+        .description = "xorrot24b with dynamic shifts",
+        .nbits = 32,
+        .create = gen_create_xr24b,
+        .free = gen_free,
+        .get_bits = get_bits_xr24b,
+        .self_test = NULL,
+        .get_sum = NULL,
+        .parent = NULL
+    };
+
+    static const XorshiftProps props = {
+        .max_value = 24,
+        .nbytes = 3,
+        .is_triple_valid = is_triple_valid_xr24b,
+        .set_triple = set_triple_xr24b
+    };
+
+
+    return run_triples_search(&gen, &props);
+}
+
+
+
 
 
 /////////////////////////////
@@ -1350,6 +1429,7 @@ int main(int argc, char *argv[])
         {"xorshift160",    test_xorshift160},
         {"xorshift320",    test_xorshift320},
         {"xorrot24",       test_xorrot24},
+        {"xorrot24b",      test_xorrot24b},
         {"xorrot128",      test_xorrot128},
         {"xorrot160",      test_xorrot160},
         {"xorrot256",      test_xorrot256},

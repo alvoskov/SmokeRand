@@ -8,7 +8,6 @@ typedef struct {
     uint8_t z;
 } Xorrot24State;
 
-
 static inline uint8_t get_byte(Xorrot24State *obj)
 {
     const uint8_t x0 = obj->x, z0 = obj->z;
