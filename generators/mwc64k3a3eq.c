@@ -29,14 +29,12 @@
  *
  * @copyright mwc64k3a3eq generator was suggested by P. L'Ecuyer.
  *
- * Reentrant implementat
+ * Reentrant implementation for SmokeRand:
  *
- * (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
- *
- * KISSS64 algorithm was developed by George Marsaglia.
  */
 #include "smokerand/cinterface.h"
 #include "smokerand/int128defs.h"
@@ -74,7 +72,10 @@ static void *create(const CallerAPI *intf)
     return obj;
 }
 
-
+/**
+ * @brief An internal self-test with values obtained from the Python 3.x
+ * script (see the `..\misc\rwc.py` file)
+ */
 static int run_self_test(const CallerAPI *intf)
 {
     Mwc64k3a3eqState obj = {.x = {77777, 56789, 12345}, .c = 12345};

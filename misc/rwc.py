@@ -64,6 +64,12 @@ gen_mwc = RwcGenerator(c=12345, x=[12345, 56789, 77777], a = [0x1d495210185c, 0x
 #gen_mwc.check_constants()
 run_generator(gen_mwc)
 
+
+print("----- Mwc64k3a3 -----")
+gen_mwc2 = RwcGenerator(c=12345, x=[12345, 56789, 77777], a = [0x5194d4649dcd, 0x31dcb74b96510a8, 0x979f3660cbaca4], b = 2**64)
+gen_mwc.check_constants()
+run_generator(gen_mwc2)
+
 #// prod = 0x1d495210185c*(x{-1} + x{-2} + x_{-3}) + c
 
 

@@ -252,7 +252,8 @@ Note: some of `full` results are for SmokeRand < 0.51.
  mwc40xxa8         | u32    | +       | +     | +       | 1    | 2.1  | -(>>>) | 0     | Crush   | 16 GiB
  mwc48xxa16        | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | +       | 1 TiB
  mwc64             | u32    | +       | 1     | 2/3     | 5/7  | 0.37 | -      | 0     | Small   | 1 TiB
- mwc64k3a3eq       | u64    | +       | +     |         |      |      |        |       |         | ?
+ mwc64k3a3         | u64    | +       | +     | +       |      |      |        |       |         | ?
+ mwc64k3a3eq       | u64    | +       | +     | +       | +    |      | +      |       |         | ?
  mwc64x            | u32    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
  mwc64x_u31        | u31    | +       | +     | +       | +    | 1.5  | +      | 4     | >=Crush | >= 8 TiB
  mwc64_2p58        | u64    | 2       | ?9    | 17      | 17   | 0.26 | +      | 0     | -       | 128 KiB
@@ -544,6 +545,7 @@ Some results obtained during the `coll64dec` test runs using 8 GiB of RAM:
  msws_ctr          | - (>80 TiB)| 305/320
  mrsf32            | - (>18 TiB)| 76/72
  mrsf64            | - (>69 TiB)| 267/276
+ mwc64k3a3eq       | - (>12 TiB)| 44/48
  pqrng64           | 11 TiB     | 8/44
  rapidrand128      | - (>30 TiB)| 107/120
  sirius64          | -(>173 TiB)| 690/692

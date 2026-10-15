@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   for each `|Oi - Ei|/Ei**0.5` with the theoretical one. It improves its 
   sensitivity to the additive/subtractive lagged Fibonacci PRNGs and SWB
   (subtract-with-borrow) PRNGs.
+- `arata`, `mwc64k3a3` and `mwc64k3a3eq` generators.
+- `lcg_hp48` and `mwc_decim` decimal generators.
 
 ### Bugfix
 
