@@ -24,16 +24,24 @@ typedef struct {
 } MwcDecim;
 
 
+static inline uint32_t decrot5(uint32_t x, uint32_t r)
+{
+    static const uint32_t p10[] = {1, 10, 100, 1000, 10000, 100000};
+    r = r % 5;
+    return (x * p10[r] + x / p10[5 - r]) % 100000;
+}
+
+
 static inline uint32_t get_decim(MwcDecim *obj)
 {
-    uint64_t p0 = 57099U * (uint64_t)obj->x0 + obj->c0;
-    uint64_t p1 = 58751U * (uint64_t)obj->x1 + obj->c1;
+    const uint64_t p0 = 97377U * (uint64_t)obj->x0 + obj->c0;
+    const uint64_t p1 = 97587U * (uint64_t)obj->x1 + obj->c1;
     obj->c0 = (uint32_t) (p0 / 100000U);
     obj->x0 = (uint32_t) (p0 % 100000U);
     obj->c1 = (uint32_t) (p1 / 100000U);
     obj->x1 = (uint32_t) (p1 % 100000U);
-    uint32_t out = (obj->x0 + 0*obj->x1) % 100000U;
-    return out;
+    const uint32_t out = (obj->x0 + obj->x1) % 100000U;
+    return out;//decrot5(out, obj->c1 % 10000U);
 }
 
 

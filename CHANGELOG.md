@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
+
+## [0.53] 2026-10-16
+
+
+### Bugfix
+
+- `lcg_hp48`: bugs in seeding fixed, now it is also cross-platform.
+- Built-in version info was fixed.
+
 ## [0.52] 2026-10-15
 
 ### Added
