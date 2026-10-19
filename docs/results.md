@@ -247,13 +247,14 @@ Note: some of `full` results are for SmokeRand < 0.51.
  mularx128_str     | u64    | +       | +     | +       | +    | 0.38 | +      | 4     |         | >= 32 TiB
  mularx256         | u64    | +       | +     | +       | +    | 0.67 | +      | 4     |         | >= 32 TiB
  mulberry32        | u32    | +       | ?1    | 2/3     | 5    | 0.51 | -(>>>) | 0     | Small   | 512 MiB
+ mwc_decimal       | u32    | +       | +     | +       | +    |      |        |       | +       |
  mwc32x            | u32    | +       | ?3    | 4       | 8    | 1.5  | -(>>>) | 0     | Small   | 128 MiB
  mwc32xxa8         | u32    | +       | ?1    | 4       | 10   | 1.9  | -(>>>) | 0     | Small   | 256 MiB
  mwc40xxa8         | u32    | +       | +     | +       | 1    | 2.1  | -(>>>) | 0     | Crush   | 16 GiB
  mwc48xxa16        | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | +       | 1 TiB
  mwc64             | u32    | +       | 1     | 2/3     | 5/7  | 0.37 | -      | 0     | Small   | 1 TiB
  mwc64k3a3         | u64    | +       | +     | +       |      |      |        |       |         | ?
- mwc64k3a3eq       | u64    | +       | +     | +       | +    |      | +      |       |         | ?
+ mwc64k3a3eq       | u64    | +       | +     | +       | +    | 0.63 | +      | 4     |         | ?
  mwc64x            | u32    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
  mwc64x_u31        | u31    | +       | +     | +       | +    | 1.5  | +      | 4     | >=Crush | >= 8 TiB
  mwc64_2p58        | u64    | 2       | ?9    | 17      | 17   | 0.26 | +      | 0     | -       | 128 KiB
