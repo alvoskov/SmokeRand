@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
+
+## [0.53] 2026-10-??
+
+### Added
+
+- `mwc64k2a2` generator.
+
+### Bugfix
+
+- Forgotten `mwc64k3a3` source code was added.
+- Some doxygen documentation corrections for `rwc16446` and `rwc4157`.
+
+
 ## [0.52] 2026-10-15
 
 ### Added
