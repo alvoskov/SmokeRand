@@ -1,6 +1,6 @@
 /**
  * @file rwc4157.c
- * @brief A 64-bit RWC generator with a large lag (64) and base \f$2^{64}-1\f$.
+ * @brief A 64-bit RWC generator with a large lag (64) and base \f$2^{64}\f$.
  * Has the period around \f$ 2^{4157} \f$ (\f$ \sim 2^{4157.744} \f$).
  * @details This PRNG was designed by A.L. Voskov. It uses the next recurrent
  * formula:
