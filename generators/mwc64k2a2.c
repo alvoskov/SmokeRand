@@ -1,7 +1,7 @@
 /**
  * @file mwc64k2a2.c
  * @brief mwc64k2a2 is a modification of MWC (multiply-with-carry) generator
- * with three taps and large period.
+ * with two taps and large period.
  * @details Designed for 64-bit computers, resembles Mother-Of-All PRNG from
  * DIEHARD CD-ROM. Developed by P. L'Ecuyer.
  *

@@ -8,7 +8,7 @@
  * It uses the next recurrent formula (\f$ a=\mathrm{1D495210185C}_{16}\f$):
  *
  * \f[
- * p = a \cdot (x_{n-1} + x_{n-2} + x_{n-3}) + c;~
+ * p = a \cdot (x_{n-1} + x_{n-2} + x_{n-3}) + c_{n-1};~
  * x_n = p \mod b;~
  * c_n = \left\lfloor \frac{p}{b} \right\rfloor
  * \f]

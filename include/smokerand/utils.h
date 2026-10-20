@@ -78,7 +78,7 @@ static inline void expand_seed64_to_u64(uint64_t *x, size_t len, uint64_t seed)
     for (size_t i = 0; i < len; i++) {
         u += u * u | 0x40000005;
         const uint64_t y = 6906969069U * (u ^ (u >> 32));
-        x[i] = (y ^ rotl64(y, 17) ^ rotl64(y, 53)) >> 32;
+        x[i] = y ^ rotl64(y, 17) ^ rotl64(y, 53);
     }
 }
 

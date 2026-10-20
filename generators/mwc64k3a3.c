@@ -8,7 +8,7 @@
  * It uses the next recurrent formula:
  *
  * \f[
- * p = a_1 x_{n-1} + a_2 x_{n-2} + a_3 x_{n-3}) + c;~
+ * p = a_1 x_{n-1} + a_2 x_{n-2} + a_3 x_{n-3}) + c_{n-1};~
  * x_n = p \mod b;~
  * c_n = \left\lfloor \frac{p}{b} \right\rfloor
  * \f]
@@ -20,6 +20,11 @@
  * prime modulus and \f$ b^{-1} \mod m \f$ multiplier. The modulus value is
  * \f$ a_3 b^3 + a_2 b^2 + a_1 b - 1\f$. The period is
  * \f$(m - 1) / 2 = 2^{237.35}\f$.
+ *
+ * \f[
+ * m - 1 = 2 \times 3 \times 887 \times 3953923 \times 3623689 \times
+ *         2355281837 \times 3135112198551084309513051045954941486630353837
+ * \f]
  *
  * References:
  *

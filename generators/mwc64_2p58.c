@@ -2,13 +2,17 @@
  * @file mwc64_2p58.c
  * @brief 64-bit multiply-with-carry PRNG taken from KISS64 generator
  * by George Marsaglia.
- * @details It is developed by George Marsaglia. References:
+ * @details It is developed by George Marsaglia, uses \f$ b = 2^64 \f$,
+ * \f$a = 2^{58} + 1\f$, its period is around \f 2^{121.00} \f$.
+ *
+ * References:
  *
  * - https://groups.google.com/g/comp.lang.fortran/c/qFv18ql_WlU
  * - https://www.thecodingforums.com/threads/64-bit-kiss-rngs.673657/
  * - https://ssau.ru/pagefiles/sbornik_pit_2021.pdf
  *
- * @copyright (c) 2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2025-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.

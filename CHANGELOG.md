@@ -9,11 +9,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 ### Added
 
 - `mwc64k2a2` generator.
+- `mwc64_2p58` generator: better documentation.
 
 ### Bugfix
 
 - Forgotten `mwc64k3a3` source code was added.
 - `lcg_hp48`: bugs in seeding fixed, now it is also cross-platform.
+- `expand_seed64_to_u64`: filled array of 64-bit unsigned integers with
+  32-bit outputs, now fills with 64-bit integers.
 - Built-in version info was fixed.
 - Some doxygen documentation corrections for `rwc16446` and `rwc4157`.
 
