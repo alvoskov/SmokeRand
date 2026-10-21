@@ -3,7 +3,8 @@
  * @brief mwc64k3a3eq is a modification of MWC (multiply-with-carry) generator
  * with three taps and large period.
  * @details Designed for 64-bit computers, resembles Mother-Of-All PRNG from
- * DIEHARD CD-ROM. Developed by P. L'Ecuyer.
+ * DIEHARD CD-ROM. Developed by P. L'Ecuyer. Passes at least 16 TiB in
+ * PractRand 0.96.
  *
  * It uses the next recurrent formula (\f$ a=\mathrm{1D495210185C}_{16}\f$):
  *

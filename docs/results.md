@@ -254,7 +254,7 @@ Note: some of `full` results are for SmokeRand < 0.51.
  mwc48xxa16        | u32    | +       | +     | +       | +    | 1.2  | +      | 4     | +       | 1 TiB
  mwc64             | u32    | +       | 1     | 2/3     | 5/7  | 0.37 | -      | 0     | Small   | 1 TiB
  mwc64k2a2         | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | >= 16 TiB
- mwc64k3a3         | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | ?
+ mwc64k3a3         | u64    | +       | +     | +       | +    | 0.45 | +      | 4     |         | >= 16 TiB
  mwc64k3a3eq       | u64    | +       | +     | +       | +    | 0.47 | +      | 4     |         | >= 16 TiB
  mwc64x            | u32    | +       | +     | +       | +    | 0.53 | +      | 4     | +       | >= 32 TiB
  mwc64x_u31        | u31    | +       | +     | +       | +    | 1.5  | +      | 4     | >=Crush | >= 8 TiB

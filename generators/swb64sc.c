@@ -4,20 +4,33 @@
  * (scrambler) that hides its artefacts.
  * @details
  *
+ * Full tests for scrambled generators:
+ *
  * (9,8)>=16 TiB; smokerand full; TestU01 small/crush/big: +IL/+HI/+LO
  * (13,7)>=16 TiB; smokerand full; TestU01 small/crush/big: +IL/+HI/+LO
  * (99,35)>=16 TiB; TestU01 small/crush/big: +IL/+HI/+LO
  *
- * Fast check:
+ * Fast tests for scrambled generators:
  *
- * (26,4)
- * (30,6)  
- * (67,59)
- * (71,47)
- * (77,56)
- * (89,11)
- * (98,90)
- * (117,50)
+ *  26-4-sc: smokerand full
+ *  30-6-sc: smokerand full
+ *  67-59-sc: smokerand full
+ *  71-47-sc: smokerand full
+ *  77-56-sc: smokerand full
+ *  89-11-sc: smokerand full
+ *  98-90-sc: smokerand full
+ *  117-50-sc: smokerand
+ *
+ * Fast tests for decimated generators:
+ *
+ *  26-4-dec: smokerand
+ *  30-6-dec: smokerand
+ *  67-59-dec: smokerand
+ *  71-47-dec: smokerand
+ *  77-56-dec: smokerand
+ *  89-11-dec: smokerand
+ *  98-90-dec: smokerand
+ *  117-50-dec: smokerand
  *
  * Python code for verification:
  *
@@ -159,7 +172,10 @@ SWB64DEC_TEMPLATE(98, 90)
 SWB64DEC_TEMPLATE(117, 50)
 
 
-
+/**
+ * @brief An internal self-test based on the `SWB(2**64,7,13)[*]` generator.
+ * Uses reference values obtained by the Python 3.x script.
+ */
 static int run_self_test(const CallerAPI *intf)
 {
     static const uint64_t u_ref[16] = { // For r=13, s=7
