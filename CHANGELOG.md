@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 - `mwc64k2a2` generator.
 - `mwc64_2p58` generator: better documentation.
+- `mwc128_x32`, `mwc59` generator.
 
 ### Bugfix
 
