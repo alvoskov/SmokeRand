@@ -6,8 +6,22 @@
  *
  * - `lin`, no scrambler, fails a lot of tests
  * - `sc1`, a weak scrambler, fails `bspace8_8d`, `bspace21_3d_c256` and
- *   `bspace8_8d_c256` tests from the SmokeRand `full` battery.
- * - `sc2`.
+ *   `bspace8_8d_c256` tests from the SmokeRand `full` battery. May be
+ *   suspicious in `bspace21_3d`.
+ * - `sc2`, a strong scrambler.
+ *
+ * It is interesting that the `sc1` modification passes BigCrush:
+ *
+ *    ========= Summary results of BigCrush(mt) =========
+ *
+ *     Version:                      TestU01 1.2.3
+ *     Generator:                    mwc59_sc1
+ *     Number of statistics:         160
+ *     Total CPU time (all cores):   03:55:26.578
+ *     Elapsed time:                 00:50:43.329
+ *     p-values checksum:            0x4BBBB3DC55AD1A89
+ *
+ *     All tests were passed
  *
  * MWC is a special form of multiplicative congruential generator with the
  * multiplier \f$a\f$ and prime modulus \f$m = ab - 1\f$.
