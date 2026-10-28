@@ -10,6 +10,11 @@
  * (13,7)>=16 TiB; smokerand full; TestU01 small/crush/big: +IL/+HI/+LO
  * (99,35)>=16 TiB; TestU01 small/crush/big: +IL/+HI/+LO
  *
+ * Full tests for decimated generators (`SWB64_DECIM 3`):
+ * (9,8); smokerand full: FAILS
+ * (13,7); smokerand full: passes
+ * (99,35); smokerand full: passes; TestU01
+ *
  * Fast tests for scrambled generators:
  *
  *  26-4-sc: smokerand full
@@ -19,11 +24,11 @@
  *  77-56-sc: smokerand full
  *  89-11-sc: smokerand full
  *  98-90-sc: smokerand full
- *  117-50-sc: smokerand
+ *  117-50-sc: smokerand full
  *
  * Fast tests for decimated generators:
  *
- *  26-4-dec: smokerand
+ *  26-4-dec: smokerand full
  *  30-6-dec: smokerand
  *  67-59-dec: smokerand
  *  71-47-dec: smokerand

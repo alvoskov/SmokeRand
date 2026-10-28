@@ -687,7 +687,7 @@ static void *create_vector_full(const GeneratorInfo *gi, const CallerAPI *intf)
 /**
  * @brief Print the ncols matrix of uint32_t from the ChaCha PRNG state.
  * @param x      Pointer to the matrix (C-style)
- * @param ncols  Number of columns.                       n
+ * @param ncols  Number of columns.
  * @param nelem  Number of elements.
  */
 void print_matx(const CallerAPI *intf, const uint32_t *x, size_t ncols, size_t nelem)
