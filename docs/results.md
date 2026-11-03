@@ -408,6 +408,8 @@ Note: some of `full` results are for SmokeRand < 0.51.
  tf0_ctr64         | u64    | +       | ?+    | +       | +    | 0.13 | -      | 3     |         | >= 8 TiB
  tf0duper32        | u32    | +       | ?+    | +       | +    | 0.70 | +      | 4     | +       | >= 16 TiB(?)
  tf0duper64        | u64    | +       | ?+    | +       | +    | 0.40 | +      | 4     |+h/+l/+il| >= 16 TiB
+ tf0mwc32          | u32    | +       | +     | +       | +    | 0.58 | +      | 4     | +       | >= 16 TiB
+ tf0mwc64          | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |+h/+l/+il| >= 16 TiB
  threefry          | u64    | +       | +     | +       | +    | 1.0  | +      | 4     | +       | >= 32 TiB
  threefry_avx      | u64    | +       | +     | +       | +    | 0.39 | +      | 4     |         | >= 8 TiB
  threefish         | u64    | +       | +     | +       | +    | 4.3  | +      | 5     |         | >= 32 TiB

@@ -1,11 +1,14 @@
 /**
- * @file tf0mwc32.c
- * @brief Tf0mwc32 is a high-quality combined PRNG inspired by SuperDuper
+ * @file tf0mwc64.c
+ * @brief Tf0mwc64 is a high-quality combined PRNG inspired by SuperDuper
  * generators family developed by G.Marsaglia.
  * @details Differences from SuperDuper:
  *
  * 1. Klimov-Shamir "crazy" T-function TF0 instead of LCG.
  * 2. mwc instead of xorshift32
+ *
+ * SmokeRand 0.53: passes `full`
+ * PractRand 0.96: >= 16 TiB (but unusual for `[Low1/64]Gap-16:A`)
  *
  * @copyright
  * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
@@ -22,7 +25,7 @@ PRNG_CMODULE_PROLOG
  */
 typedef struct {
     uint64_t tf;  ///< TF0 part
-    uint64_t mwc; ///< xorrot64 (LFSR) part
+    uint64_t mwc; ///< MWC (multiply-with-carry) part
 } Tf0Mwc64State;
 
 
@@ -31,7 +34,7 @@ static inline uint64_t get_bits_raw(Tf0Mwc64State *obj)
     const uint64_t out = rotl64(obj->tf, 8) + obj->mwc;
     obj->tf += obj->tf * obj->tf | 0x40000005U;
     obj->mwc = 4027340273U * (obj->mwc & 0xFFFFFFFFU) + (obj->mwc >> 32);
-    return out;
+    return out ^ (out >> 32);
 }
 
 
