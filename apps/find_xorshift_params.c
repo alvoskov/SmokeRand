@@ -522,6 +522,86 @@ int test_xoshiro48w8(void)
 }
 
 
+///////////////////////////////////
+///// xorshiro256_mod testing /////
+///////////////////////////////////
+
+
+typedef struct {
+    uint64_t s[4];
+    unsigned int a;
+    unsigned int b;
+} Xoshiro256VarShiftsState;
+
+// https://gist.github.com/andanteyk/916c48ea34d7e6d18fd261c22ba69e4b
+static uint64_t get_bits_xo256mod(void *udata)
+{
+    Xoshiro256VarShiftsState *state = udata;
+
+    const uint64_t result = state->s[0];//rotl64(state->s[0] + state->s[3], 23) + state->s[0];
+    const uint64_t t = state->s[3] << state->a;
+    state->s[3] ^= state->s[0];
+    state->s[0] ^= state->s[1];
+    state->s[1] ^= state->s[2];
+    state->s[2] ^= state->s[3];
+
+    state->s[0] ^= t;
+    state->s[2] = rotl64(state->s[2], (int) state->b);
+    return result;
+}
+
+static void *gen_create_xo256mod(const GeneratorInfo *gi, const CallerAPI *intf)
+{
+    (void) gi;
+    Xoshiro256VarShiftsState *obj = intf->malloc(sizeof(Xoshiro256VarShiftsState));
+    obj->s[0] = intf->get_seed64();
+    obj->s[1] = intf->get_seed64();
+    obj->s[2] = intf->get_seed64();
+    obj->s[3] = 0xCAFEBABEDEADBEEF;
+    obj->a = 12;
+    obj->b = 25;
+    return obj;
+}
+
+
+static int is_triple_valid_xo256mod(unsigned int ai, unsigned int bi, unsigned int ci)
+{
+    (void) ai; (void) bi;
+    return ci == 1;
+}
+
+static void set_triple_xo256mod(void *state, unsigned int ai, unsigned int bi, unsigned int ci)
+{
+    Xoshiro256VarShiftsState *obj = state;
+    (void) ci;
+    obj->a = ai; obj->b = bi;
+}
+
+int test_xoshiro256_mod(void)
+{
+    static const GeneratorInfo gen = {
+        .name = "xoshiro256_mod",
+        .description = "xoshiro256_mod",
+        .nbits = 64,
+        .create = gen_create_xo256mod,
+        .free = gen_free,
+        .get_bits = get_bits_xo256mod,
+        .self_test = NULL,
+        .get_sum = NULL,
+        .parent = NULL
+    };
+
+    static const XorshiftProps props = {
+        .max_value = 64,
+        .nbytes = 32,
+        .is_triple_valid = is_triple_valid_xo256mod,
+        .set_triple = set_triple_xo256mod
+    };
+
+    return run_triples_search(&gen, &props);
+}
+
+
 
 //////////////////////////////////
 ///// xoroshiro48w16 testing /////
@@ -1423,6 +1503,7 @@ int main(int argc, char *argv[])
         {"xoroshiro48w8", test_xoshiro48w8},
         {"xoroshiro48w16", test_xoshiro48w16},
         {"xoroshiro64w16", test_xoshiro64w16},
+        {"xoshiro256_mod", test_xoshiro256_mod},
         {"xorshift32",     test_xorshift32},
         {"xorshift64",     test_xorshift64},
         {"xorshift128",    test_xorshift128},

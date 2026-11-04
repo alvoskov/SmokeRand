@@ -1,6 +1,19 @@
-// SmokeRand: full for ctr0++ and ctr1++
-// PractRand 0.96: ctr[1]++ >= 2 TiB
-// PractRand 0.96: ctr[0]++ ???
+/**
+ * @file tf0_ctr128.c
+ * @brief tf0_ctr128 is a simple counter-based PRNG that was designed
+ * for an easy memorization.
+ * @details
+ * - SmokeRand: full for ctr0++ and ctr1++
+ * - coll64dec: >= 16 TiB (8 GiB RAM buffer)
+ * - PractRand 0.96: ctr[1]++ >= 2 TiB; SmallCrush/Crush/BigCrush (IL)
+ * - PractRand 0.96: ctr[0]++ >= 8 TiB; SmallCrush/Crush/BigCrush (IL)
+ *
+ * @copyright
+ * (c) 2026 Alexey L. Voskov, Lomonosov Moscow State University.
+ * alvoskov@gmail.com
+ *
+ * This software is licensed under the MIT license.
+ */
 #include "smokerand/cinterface.h"
 #include "smokerand/int128defs.h"
 
@@ -50,7 +63,7 @@ static inline uint64_t get_bits_raw(Tf0Ctr128State *obj)
         ctr_round(obj);
         ctr_round(obj);
         // Counter increment
-        obj->ctr[1]++;
+        obj->ctr[0]++;
         obj->pos = 0;
     }
     return obj->out[obj->pos++];
