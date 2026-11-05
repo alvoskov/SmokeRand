@@ -51,6 +51,7 @@ static void *create(const CallerAPI *intf)
 static inline uint64_t get_bits_x64u64_raw(void *state)
 {
     const uint64_t a = 18000690696906969069ull;
+    //const uint64_t a = 0xF840F845F840F845;  // fails only `bspace4_8d_dec`
     return Lcg128State_a64_iter(state, a, 1ull);
 }
 
