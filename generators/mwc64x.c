@@ -12,6 +12,8 @@
  * Crush battery. The similar problem was noticed by S.Vigna in MWC128,
  * and he proposed a similar (but not the same) solution with XORing.
  *
+ * Mnemonic >= 16 TiB in PractRand 0.96
+ *
  * References:
  * 1. David B. Thomas. The MWC64X Random Number Generator.
  *    https://cas.ee.ic.ac.uk/people/dt10/research/rngs-gpu-mwc64x.html
