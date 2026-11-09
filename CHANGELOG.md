@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
-## [0.53] 2026-10-??
+## [0.53] 2026-11-??
 
 ### Added
 
@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
   32-bit outputs, now fills with 64-bit integers.
 - Built-in version info was fixed.
 - Some doxygen documentation corrections for `rwc16446` and `rwc4157`.
+- `swb53dec`: bug in the engine (also an internal self-test was added).
 
 ## [0.52] 2026-10-15
 

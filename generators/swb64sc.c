@@ -6,22 +6,29 @@
  *
  * Full tests for scrambled generators:
  *
- * - (9,8)>=16 TiB; smokerand full; TestU01 small/crush/big: +IL/+HI/+LO
- * - (13,7)>=16 TiB; smokerand full; TestU01 small/crush/big: +IL/+HI/+LO
- * - (99,35)>=16 TiB; TestU01 small/crush/big: +IL/+HI/+LO
+ *  Generator | PractRand 0.96 | SmokeRand 0.53 | TestU01
+ * -----------|----------------|----------------|-------------
+ *  9-8-sc    | >= 16 TiB      | full           | +IL/+HI/+LO
+ *  13-7-sc   | >= 16 TiB      | full           | +IL/+HI/+LO
+ *  99-35-sc  | >= 16 TiB      | full           | +IL/+HI/+LO
  *
  * Full tests for decimated generators (`SWB64_DECIM 3`):
- * - (9,8) 128 GiB (fails at 256 GiB); smokerand full: FAILS
- * - (13,7)>= 2 TiB; smokerand full: passes
- * - (99,35); smokerand full: passes; TestU01
  *
+ *  Generator | PractRand 0.96 | SmokeRand 0.53 | TestU01
+ * -----------|----------------|----------------|-------------
+ *  9-8-dec   | 128 GiB*       | fails full     | fails Crush
+ *  13-7-dec  | >= 2 TiB       | passes full    | +HI/+LO
+ *  99-35-dec | >= 16 TiB      | passes full    | +HI/+LO
+ *
+ * "128 GiB" means "fails at 256 GiB"
+ * 
  * Fast tests for scrambled generators:
  *
  *  Generator | SmokeRand 0.53
  * -----------|----------------
  *  26-4-sc   | full
  *  30-6-sc   | full
- *  67-59-sc: | full
+ *  67-59-sc  | full
  *  71-47-sc  | full
  *  77-56-sc  | full
  *  89-11-sc  | full
