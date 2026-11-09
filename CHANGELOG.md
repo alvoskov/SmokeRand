@@ -12,6 +12,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - `mwc64_2p58` generator: better documentation.
 - `mwc128_x32`, `mwc59` generator.
 
+### Changed
+
+- Improved documentation on birthday spacings and maxoft tests in the
+  [tests documentation](docs/tests.md) file.
+
 ### Bugfix
 
 - Forgotten `mwc64k3a3` source code was added.

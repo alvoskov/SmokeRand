@@ -17,23 +17,23 @@
  *  Generator | PractRand 0.96 | SmokeRand 0.53 | TestU01
  * -----------|----------------|----------------|-------------
  *  9-8-dec   | 128 GiB*       | fails full     | fails Crush
- *  13-7-dec  | >= 2 TiB       | passes full    | +HI/+LO
- *  99-35-dec | >= 16 TiB      | passes full    | +HI/+LO
+ *  13-7-dec  | >= 2 TiB       | passes full    | +IL/+HI/+LO
+ *  99-35-dec | >= 16 TiB      | passes full    | +IL/+HI/+LO
  *
  * "128 GiB" means "fails at 256 GiB"
  * 
  * Fast tests for scrambled generators:
  *
- *  Generator | SmokeRand 0.53
- * -----------|----------------
- *  26-4-sc   | full
- *  30-6-sc   | full
- *  67-59-sc  | full
- *  71-47-sc  | full
- *  77-56-sc  | full
- *  89-11-sc  | full
- *  98-90-sc  | full
- *  117-50-sc | full
+ *  Generator | SmokeRand 0.53 | PractRand 0.96
+ * -----------|----------------|----------------
+ *  26-4-sc   | full           | 
+ *  30-6-sc   | full           |
+ *  67-59-sc  | full           |
+ *  71-47-sc  | full           |
+ *  77-56-sc  | full           |
+ *  89-11-sc  | full           |
+ *  98-90-sc  | full           |
+ *  117-50-sc | full           |
  *
  * Fast tests for decimated generators:
  *

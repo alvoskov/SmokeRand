@@ -124,21 +124,29 @@ The birthday test generates input values using the next algorithm:
 
 This n-dimensional modification is described by P. L'Ecuyer and R.Simard
 (https://doi.org/10.1016/S0378-4754(00)00253-6). Then classic "birthday test"
-is applied, number of "birthdays" is adjusted to \f$ \lambda = 4 \f$ value.
-The test is repeated several times (`nsamples`), the number of duplicates
-from these runs are summed. This sum obeys Poisson distribution.
+is applied, number of "birthdays" is adjusted to \f$ \lambda = 4 \f$ or
+\f$ lambda = 256 \f$ (for the `_c256` tests) values. The test is repeated
+several times (`nsamples`), the number of duplicates from these runs are summed.
+This sum obeys Poisson distribution.
 
- Name        | nbits | ndim | `express` | `brief` | `default` | `full` 
--------------|-------|------|-----------|---------|-----------|--------
- bspace64_1d | 64    | 1    | -         | 40      | 100       | 250
- bspace32_1d | 32    | 1    | 1024      | 4096    | 8192      | 8192
- bspace32_2d | 32    | 2    | -         | 5       | 10        | 250
- bspace21_3d | 21    | 3    | -         | 5       | 10        | 250
- bspace16_4d | 16    | 4    | -         | 5       | 10        | 250
- bspace8_8d  | 8     | 8    | -         | 5       | 10        | 250
- bspace4_16d | 4     | 16   | -         | -       | 10        | 250
- bspace8_4d  | 8     | 4    | 256       | -       | -         | -
- bspace4_8d  | 4     | 8    | 128       | -       | -         | -
+ Name             | L   | nbits | ndim | `express` | `brief` | `default` | `full` 
+------------------|-----|-------|------|-----------|---------|-----------|--------
+ bspace64_1d      | 4   | 64    | 1    | -         | 40      | 100       | 250
+ bspace32_1d      | 4   | 32    | 1    | 1024      | 4096    | 8192      | 8192
+ bspace32_2d      | 4   | 32    | 2    | -         | 5       | 10        | 250
+ bspace21_3d      | 4   | 21    | 3    | -         | 5       | 10        | 250
+ bspace16_4d      | 4   | 16    | 4    | -         | 5       | 10        | 250
+ bspace8_8d       | 4   | 8     | 8    | -         | 5       | 10        | 250
+ bspace4_16d      | 4   | 4     | 16   | -         | -       | 10        | 250
+ bspace8_4d       | 4   | 8     | 4    | 256       | -       | -         | -
+ bspace4_8d       | 4   | 4     | 8    | 128       | -       | -         | -
+ bspace64_1d_c256 | 256 | 64    | 1    | -         | -       | -         | 12
+ bspace32_2d_c256 | 256 | 32    | 2    | -         | -       | -         | 12
+ bspace21_3d_c256 | 256 | 21    | 3    | -         | -       | -         | 12
+ bspace16_4d_c256 | 256 | 16    | 4    | -         | -       | -         | 12
+ bspace8_8d_c256  | 256 | 8     | 8    | -         | -       | -         | 12
+ bspace4_16d_c256 | 256 | 4     | 16   | -         | -       | -         | 12
+                                   
 
 1-dimensional tests are sensitive to 64-bit LCGs with prime modulus and lagged
 Fibonacci generators, 3-dimensional tests detect 32- and 64-bit MWC
@@ -181,7 +189,7 @@ only when \f$ n \ll d^t \f$.
  collover13_3d | 13    | 3    | 3       | 5         | 50
  collover8_5d  | 8     | 5    | 3       | 5         | 50
  collover5_8d  | 5     | 8    | 3       | 5         | 50
- collover3_13d | 3     | 13   | -       | -         | -
+ collover3_13d | 3     | 13   | -       | 5         | 50
  collover2_20d | 2     | 20   | -       | 5         | 50
 
 ## Gap test
@@ -194,6 +202,12 @@ counter may fail some modifications of the gap test.
 The implementation of gap test in SmokeRand is equipped with "guard function"
 that will prevent infinite cycle in the case of constant output from a broken
 generator.
+
+The test is simultaneously applied to the higher and lower bits of the PRNG
+output sequence that sometimes allows to detect defects in the lower bits.
+It also controls frequencies for every gap length (of course with corrections
+to multiple comparisons) that slightly increases its sensitivity for some
+PRNGs such as additive/subtractive lagged Fibonacci generators.
 
 ## Gap test with 16-bit words
 
@@ -271,6 +285,15 @@ and MRGs (`mrg_denglin_2`, `mrg_denglin_4`). It seems that it is the only test
 failed by `mrg_denglin_4`, so it was included in `brief`, `default` and `full`
 batteries since SmokeRand 0.50.
 
+For all MaxOfT tests in preconfigured SmokeRand batteries `nbins = 100_000` value
+(the number of bins in the chi2 test) is used.
+
+ Name       | t  | express | brief      | default    | full
+------------|----|---------|------------|------------|------------
+ maxoft_4d  | 4  | -       | 10'000'000 | 20'000'000 | 50'000'000
+ maxoft_8d  | 8  | -       | 10'000'000 | 20'000'000 | 50'000'000
+ maxoft_16d | 16 | -       | 10'000'000 | 20'000'000 | 50'000'000
+ maxoft_32d | 32 | -       | -          | 20'000'000 | 50'000'000
 
 ## Hamming weights histogram test
 
