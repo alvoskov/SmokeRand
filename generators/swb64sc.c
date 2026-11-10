@@ -26,11 +26,11 @@
  *
  *  Generator | SmokeRand 0.53 | PractRand 0.96
  * -----------|----------------|----------------
- *  26-4-sc   | full           | 
- *  30-6-sc   | full           |
- *  67-59-sc  | full           |
- *  71-47-sc  | full           |
- *  77-56-sc  | full           |
+ *  26-4-sc   | full           | >= 1 TiB
+ *  30-6-sc   | full           | >= 4 TiB
+ *  67-59-sc  | full           | >= 1 TiB
+ *  71-47-sc  | full           | >= 1 TiB
+ *  77-56-sc  | full           | >= 1 TiB
  *  89-11-sc  | full           |
  *  98-90-sc  | full           |
  *  117-50-sc | full           |
