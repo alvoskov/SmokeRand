@@ -17,7 +17,7 @@
  *  Generator | PractRand 0.96 | SmokeRand 0.53 | TestU01
  * -----------|----------------|----------------|-------------
  *  9-8-dec   | 128 GiB*       | fails full     | fails Crush
- *  13-7-dec  | >= 2 TiB       | passes full    | +IL/+HI/+LO
+ *  13-7-dec  | >= 16 TiB      | passes full    | +IL/+HI/+LO
  *  99-35-dec | >= 16 TiB      | passes full    | +IL/+HI/+LO
  *
  * "128 GiB" means "fails at 256 GiB"
