@@ -473,7 +473,7 @@ static int parse_gap(TestDescription *out, const TestInfo *obj, char *errmsg)
 
 static int parse_gap16_count0(TestDescription *out, const TestInfo *obj, char *errmsg)
 {
-    GET_LIMITED_INTVALUE(ngaps, 10000, 1ll << 40ll)
+    GET_LIMITED_INTVALUE(ngaps, 10000, 1ll << 50ll)
     Gap16Count0Options *opts = calloc(1, sizeof(Gap16Count0Options));
     ASSERT_MALLOC_PTR(opts, "parse_gap16_count0")
     opts->ngaps = (unsigned long long) ngaps;
