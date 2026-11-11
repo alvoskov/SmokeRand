@@ -31,8 +31,8 @@
  *  67-59-sc  | full           | >= 1 TiB
  *  71-47-sc  | full           | >= 1 TiB
  *  77-56-sc  | full           | >= 1 TiB
- *  89-11-sc  | full           |
- *  98-90-sc  | full           |
+ *  89-11-sc  | full           | >= 1 TiB
+ *  98-90-sc  | full           | >= 1 TiB
  *  117-50-sc | full           |
  *
  * Fast tests for decimated generators:
@@ -93,6 +93,7 @@
 PRNG_CMODULE_PROLOG
 
 #define SWB64_DECIM 3
+//#define SWB64_DECIM 0
 
 #define SWB64_UPDATE_BUFFER(r_swb, s_swb) \
     for (int j = 0; j < s_swb; j++) { \

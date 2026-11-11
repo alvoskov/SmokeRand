@@ -861,9 +861,9 @@ void gap16_count0_mainloop(GapFrequencyArray *gapfreq, GapFrequencyArray *gapfre
         uint64_t w16 = u & 0xFFFF;
         u >>= 16;
         // Update "last seen 0" position
-        if (w16 == 0) {
-            last0_pos = pos;
-        }
+        //if (w16 == 0) {
+        //    last0_pos = pos;
+        //}
         // Update gaps information (symmetric boundaries)
         if (lastw16_pos[w16] != ULLONG_MAX) {
             // a) Get beginning and length
@@ -888,6 +888,10 @@ void gap16_count0_mainloop(GapFrequencyArray *gapfreq, GapFrequencyArray *gapfre
         }
         // c) Update beginning
         lastw16_pos[w16] = pos;
+        // Update "last seen 0" position
+        if (w16 == 0) {
+            last0_pos = pos;
+        }
     }
     free(lastw16_pos);
 }

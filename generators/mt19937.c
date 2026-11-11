@@ -86,6 +86,11 @@ void *create(const CallerAPI *intf)
     return mt;
 }
 
+/**
+ * @brief An internal self-test based on the test vectors obtained from
+ * the `mt19937ar.c` reference implementation using the
+ * `init_genrand(0x12345678);` initialization subroutine call.
+ */
 static int run_self_test(const CallerAPI *intf)
 {
     static const uint32_t x_ref[] = {

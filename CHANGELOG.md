@@ -26,6 +26,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - Built-in version info was fixed.
 - Some doxygen documentation corrections for `rwc16446` and `rwc4157`.
 - `swb53dec`: bug in the engine (also an internal self-test was added).
+- `gap16_count0` test: wrong computation of the `[X; 0; X]` gap frequency
+  was fixed (problems with in the `last0_pos` index `gap16_count0_mainloop`
+  function; it caused doubled frequencies of the `[X; 0; X]` gaps among
+  the `[X; Y; X]` gap).
 
 ## [0.52] 2026-10-15
 
