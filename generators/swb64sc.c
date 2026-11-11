@@ -33,7 +33,7 @@
  *  77-56-sc  | full           | >= 1 TiB
  *  89-11-sc  | full           | >= 1 TiB
  *  98-90-sc  | full           | >= 1 TiB
- *  117-50-sc | full           |
+ *  117-50-sc | full           | >= 1 TiB
  *
  * Fast tests for decimated generators:
  *
