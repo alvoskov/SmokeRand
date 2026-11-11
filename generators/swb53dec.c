@@ -9,7 +9,7 @@
  *  13-2-dec  | 3         | SmallCrush/Crush/BigCrush | >= 4 TiB
  *  18-12-dec | 6         |                           |
  *  83-60-dec | 1         | SmallCrush/Crush/BigCrush | 1 TiB
- *  83-60-dec | 2         | SmallCrush/Crush          | ?
+ *  83-60-dec | 2         | SmallCrush/Crush          | >= 8 TiB
  *
  * Dec.level - minimal decimation level to pass the `full` battery
  *
