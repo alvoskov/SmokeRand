@@ -9,8 +9,8 @@
  *  13-2-dec  | 3         | SmallCrush/Crush/BigCrush | >= 4 TiB
  *  18-12-dec | 6         |                           |
  *  83-60-dec | 1         | SmallCrush/Crush/BigCrush | 1 TiB
- *  83-60-dec | 2         | SmallCrush/Crush          | >= 8 TiB
- *  83-60-dec | 3?(sr)    |                           |
+ *  83-60-dec | 2         | SmallCrush/Crush/?        | >= 8 TiB
+ *  83-60-dec | 3         | SmallCrush/Crush/?        | >= 4 TiB
  *
  * Dec.level - minimal decimation level to pass the `full` battery
  *
@@ -44,8 +44,11 @@
 
 PRNG_CMODULE_PROLOG
 
-#define SWB_R 83
-#define SWB_S 60
+//#define SWB_R 83
+//#define SWB_S 60
+#define SWB_R 13
+#define SWB_S 2
+
 #define SWB_DECIM 3
 //#define SWB_DECIM 0
 #define TWO_M53 0x1.0p-53
