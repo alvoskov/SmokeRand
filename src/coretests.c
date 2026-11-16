@@ -96,20 +96,66 @@ static inline void bspace_make_tuples32(const BSpaceNDOptions *opts,
     }
 }
 
+static inline unsigned long long
+ullong_add_sat(unsigned long long sum, unsigned long long x)
+{
+    const unsigned long long sum_new = sum + x;
+    return (sum_new < sum) ? ULLONG_MAX : sum_new;
+}
+
+/**
+ * @brief DIEHARD/TestU01 variant: just return eqcmp, Klykova-2002 (more
+ * accurate statistics): return (eqcmp + 1) * eqcmp / 2 with overflow
+ * protection.
+ */
+static inline unsigned long long
+bspace_eqcmp_to_ndups(unsigned long long eqcmp)
+{
+    if (eqcmp >= 1ULL << 32) {
+        return ULLONG_MAX;
+    } else {
+        return (eqcmp + 1) * eqcmp / 2;
+    }
+}
+
+typedef struct {
+    unsigned long long eqcmp; ///< DIEHARD type statistics
+    unsigned long long ndups; ///< Klykova-2002 type statistics
+} BSpaceNdups;
+
+#define BSPACE_NDUPS_EMPTY {.eqcmp = 0, .ndups = 0}
+
+
+void BSpaceNdups_add(BSpaceNdups *to, const BSpaceNdups *from)
+{
+    to->eqcmp = ullong_add_sat(to->eqcmp, from->eqcmp);
+    to->ndups = ullong_add_sat(to->ndups, from->ndups);
+}
+
+
 #define BSPACE_GET_NDUPS_FUNC_TPL(suffix, type) \
-static unsigned int bspace_get_ndups##suffix(type *x, size_t len) \
+static BSpaceNdups bspace_get_ndups##suffix(type *x, size_t len) \
 { \
-    unsigned int ndups = 0; \
+    BSpaceNdups ans = {.eqcmp = 0, .ndups = 0}; \
+    unsigned long long eqcmp_cur = 0; \
+    if (len < 2) { \
+        return ans; \
+    } \
     fastsort##suffix(x, len); \
     for (size_t i = 0; i < len - 1; i++) { \
         x[i] = x[i + 1] - x[i]; \
     } \
     fastsort##suffix(x, len - 1); \
     for (size_t i = 0; i < len - 2; i++) { \
-        if (x[i] == x[i + 1]) \
-            ndups++; \
+        if (x[i] == x[i + 1]) { \
+            eqcmp_cur++; ans.eqcmp++; \
+        } else if (eqcmp_cur > 0) { \
+            ans.ndups = ullong_add_sat(ans.ndups, bspace_eqcmp_to_ndups(eqcmp_cur)); \
+            eqcmp_cur = 0; \
+        } \
     } \
-    return ndups; \
+    ans.ndups = ullong_add_sat(ans.ndups, bspace_eqcmp_to_ndups(eqcmp_cur)); \
+    return ans; \
 }
 
 BSPACE_GET_NDUPS_FUNC_TPL(32, uint32_t)
@@ -148,53 +194,61 @@ static double bspace_calc_lambda(const BSpaceNDOptions *opts, size_t len)
     return pow((double) len, 3.0) / (4.0 * pow(2.0, nbits_total));
 }
 
+
+/**
+ * @brief Calculates \f$\lambda\f$ for the given sample length and number
+ * of bits in its each value.
+ * @details The next formula is used:
+ *
+ * \f[
+ * \lambda = \frac{m(m-1)(m-2)}{4n}
+ * \f]
+ *
+ * where \f$m\f$ is the sample size (values), \f$ n \f$ is the number of
+ * bits in each sample.
+ */
+static double bspace_calc_lambda_corrected(const BSpaceNDOptions *opts, size_t len)
+{
+    const unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
+    const double dl = (double) len;
+    return dl * (dl - 1.0) * (dl - 2.0) / (4.0 * pow(2.0, nbits_total));
+}
+
+
 /**
  * @brief 32-bit version of n-dimensional birthday spacings test.
  * @return Number of duplicates.
  */
-static unsigned long bspace32_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
+static BSpaceNdups bspace32_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
     const size_t len = bspace_calc_len(opts);
     uint32_t *u = calloc(len, sizeof(uint32_t));
-    ASSERT_MALLOC_PTR(u, "bspace32_nd_test")
-    unsigned long *ndups = calloc(opts->nsamples, sizeof(unsigned long));
-    ASSERT_MALLOC_PTR(ndups, "bspace32_nd_test")
+    BSpaceNdups ndups = BSPACE_NDUPS_EMPTY;
     for (size_t i = 0; i < opts->nsamples; i++) {
         bspace_make_tuples32(opts, obj->gi, obj->state, u, len);
-            ndups[i] = bspace_get_ndups32(u, len);
-    }
-    unsigned long ndups_total = 0;
-    for (size_t i = 0; i < opts->nsamples; i++) {
-        ndups_total += ndups[i];
+        const BSpaceNdups nd_i = bspace_get_ndups32(u, len);
+        BSpaceNdups_add(&ndups, &nd_i);
     }
     free(u);
-    free(ndups);
-    return ndups_total;
+    return ndups;
 }
 
 /**
  * @brief 64-bit version of n-dimensional birthday spacings test.
  * @return Number of duplicates.
  */
-static unsigned long bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
+static BSpaceNdups bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
-    //const unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
     const size_t len = bspace_calc_len(opts);
     uint64_t *u = calloc(len, sizeof(uint64_t));
-    ASSERT_MALLOC_PTR(u, "bspace64_nd_test")
-    unsigned long *ndups = calloc(opts->nsamples, sizeof(unsigned long));
-    ASSERT_MALLOC_PTR(ndups, "bspace64_nd_test")
+    BSpaceNdups ndups = BSPACE_NDUPS_EMPTY;
     for (size_t i = 0; i < opts->nsamples; i++) {
         bspace_make_tuples64(opts, obj->gi, obj->state, u, len);
-            ndups[i] = bspace_get_ndups64(u, len);
-    }
-    unsigned long ndups_total = 0;
-    for (size_t i = 0; i < opts->nsamples; i++) {
-        ndups_total += ndups[i];
+        const BSpaceNdups nd_i = bspace_get_ndups64(u, len);
+        BSpaceNdups_add(&ndups, &nd_i);
     }
     free(u);
-    free(ndups);
-    return ndups_total;
+    return ndups;
 }
 
 /**
@@ -227,6 +281,23 @@ static unsigned long bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions
  * 1. Marsaglia G., Tsang W. W. Some Difficult-to-pass Tests of Randomness
  *    // Journal of Statistical Software. 2002. V. 7. N. 3. P.1-9.
  *    https://doi.org/10.18637/jss.v007.i03
+ * 2. Klykova N. V. Limit Distribution of a Number of Coinciding Intervals
+ *    // Theory of Probability & Its Applications. 2003. V. 47. N 1
+ *    P. 151-156. https://doi.org/10.1137/S0040585X97979512
+ * 3. Клыкова Н. В. Предельное распределение числа совпадающих промежутков
+ *    // Теория вероятн. и ее примен. 2002. Т. 47. N 1. С.147-152.
+ *    https://doi.org/10.4213/tvp3069
+ * 4. Kruglov V. I. Limit distributions of the number of vectors satisfying
+ *    a linear relation // Discrete Mathematics and Applications. 2008. V. 18.
+ *    N 5. P. 465-481. https://doi.org/10.1515/DMA.2008.034
+ * 5. Круглов В. И. Предельные распределения числа наборов, удовлетворяющих
+ *    линейному соотношению // Дискрет. матем. 2008. Т. 20. N 4. С. 120-135
+ *    https://doi.org/10.4213/dm1032
+ * 6. L'Ecuyer P, Simard R. On the performance of birthday spacings tests
+ *    with certain families of random number generators // Mathematics and
+ *    Computers in Simulation. 2001. V. 55. N 1. P. 131-137.
+ *    https://doi.org/10.1016/S0378-4754(00)00253-6
+ * 7. https://github.com/alvoskov/SmokeRand/issues/34
  */
 TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 {
@@ -258,21 +329,24 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     }
     // Initialize some variables
     unsigned long len = bspace_calc_len(opts);
-    double lambda = bspace_calc_lambda(opts, len);
+    const double lambda = bspace_calc_lambda(opts, len);
+    const double lambda_corr = bspace_calc_lambda_corrected(opts, len);
     // Show information about the test
     obj->intf->printf("Birthday spacings test\n");
     obj->intf->printf("  ndims = %u; nbits_per_dim = %u; get_lower = %d\n",
         opts->ndims, opts->nbits_per_dim, opts->get_lower);
-    obj->intf->printf("  nsamples = %lu; len = %lu, lambda = %g\n",
-        opts->nsamples, len, lambda);
+    obj->intf->printf("  nsamples = %lu; len = %lu, lambda = %g, lambda_corr = %g\n",
+        opts->nsamples, len, lambda, lambda_corr);
     // Compute number of duplicates
     const unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
-    const unsigned long ndups_total = (nbits_total > 32) ?
+    const BSpaceNdups stats = (nbits_total > 32) ?
         bspace64_nd_test(obj, opts) : bspace32_nd_test(obj, opts);
+    obj->intf->printf("  x(DIEHARD) = %llu; x(KL2002) = %llu\n",
+        stats.eqcmp, stats.ndups);
     ans.penalty = PENALTY_BSPACE;
-    ans.x = (double) ndups_total;
-    ans.p = sr_poisson_pvalue(ans.x, lambda * (double) opts->nsamples);
-    ans.alpha = sr_poisson_cdf(ans.x, lambda * (double) opts->nsamples);
+    ans.x = (double) stats.eqcmp; // TODO: selection of statistics
+    ans.p = sr_poisson_pvalue(ans.x, lambda_corr * (double) opts->nsamples);
+    ans.alpha = sr_poisson_cdf(ans.x, lambda_corr * (double) opts->nsamples);
     obj->intf->printf("  x = %.0f; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
     return ans;
@@ -286,7 +360,8 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 static void bspace4_8d_decimated_pvalue(TestResults *ans, const char *name,
     uint32_t *u, size_t len, double lambda, const CallerAPI *intf)
 {
-    const double x = (double) bspace_get_ndups32(u, len);
+    const BSpaceNdups stats = bspace_get_ndups32(u, len);
+    const double x = (double) stats.eqcmp; /// TODO: control!
     const double p = sr_poisson_pvalue(x, lambda);
     const double alpha = sr_poisson_cdf(x, lambda);
     intf->printf("  %-30s x = %6.0f; p = %g\n", name, x, p);
