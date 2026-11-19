@@ -2,7 +2,8 @@
  * @file bat_full.c
  * @brief The `full` battery of tests that runs in about 1 hour.
  *
- * @copyright (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * @copyright
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -13,10 +14,12 @@
 #include "smokerand/hwtests.h"
 #include "smokerand/entropy.h"
 
+#define BSPACE_C4_LO_PROPS  .lambda = 4, .get_lower = 1, .all_pairs = BSPACE_DEFAULT_PAIRS
+#define BSPACE_C4_HI_PROPS  .lambda = 4, .get_lower = 0, .all_pairs = BSPACE_DEFAULT_PAIRS
+#define BSPACE_C256_LO_PROPS .nsamples = 12, .get_lower = 1, .lambda = 256, .all_pairs = BSPACE_DEFAULT_PAIRS
+#define BSPACE_C256_HI_PROPS .nsamples = 12, .get_lower = 0, .lambda = 256, .all_pairs = BSPACE_DEFAULT_PAIRS
 #define COLLOVER_LO_PROPS .nsamples = 50, .n = COLLOVER_DEFAULT_N, .get_lower = 1
 #define COLLOVER_HI_PROPS .nsamples = 50, .n = COLLOVER_DEFAULT_N, .get_lower = 0
-#define BSPACE_C256_LO_PROPS .nsamples = 12, .get_lower = 1, .lambda = 256
-#define BSPACE_C256_HI_PROPS .nsamples = 12, .get_lower = 0, .lambda = 256
 
 /**
  * @brief SmokeRand `full` battery.
@@ -35,19 +38,19 @@ BatteryExitCode battery_full(const GeneratorInfo *gen, const CallerAPI *intf,
     static const MonobitFreqOptions monobit = {.nvalues = 1ull << 28};
     // Birthday spacings tests options
     static const BSpaceNDOptions
-        bspace64_1d      = {.nbits_per_dim = 64, .ndims = 1,  .nsamples = 250,  .get_lower = 1, .lambda = 4},
-        bspace32_1d      = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, .get_lower = 1, .lambda = 4},
-        bspace32_1d_high = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, .get_lower = 0, .lambda = 4},
-        bspace32_2d      = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 250,  .get_lower = 1, .lambda = 4},
-        bspace32_2d_high = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 250,  .get_lower = 0, .lambda = 4},
-        bspace21_3d      = {.nbits_per_dim = 21, .ndims = 3,  .nsamples = 200,  .get_lower = 1, .lambda = 4},
-        bspace21_3d_high = {.nbits_per_dim = 21, .ndims = 3,  .nsamples = 200,  .get_lower = 0, .lambda = 4},
-        bspace16_4d      = {.nbits_per_dim = 16, .ndims = 4,  .nsamples = 200,  .get_lower = 1, .lambda = 4},
-        bspace16_4d_high = {.nbits_per_dim = 16, .ndims = 4,  .nsamples = 200,  .get_lower = 0, .lambda = 4},
-        bspace8_8d       = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 200,  .get_lower = 1, .lambda = 4},
-        bspace8_8d_high  = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 200,  .get_lower = 0, .lambda = 4},
-        bspace4_16d      = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 200,  .get_lower = 1, .lambda = 4},
-        bspace4_16d_high = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 200,  .get_lower = 0, .lambda = 4};
+        bspace64_1d      = {.nbits_per_dim = 64, .ndims = 1,  .nsamples = 250,  BSPACE_C4_LO_PROPS},
+        bspace32_1d      = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, BSPACE_C4_LO_PROPS},
+        bspace32_1d_high = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, BSPACE_C4_HI_PROPS},
+        bspace32_2d      = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 250,  BSPACE_C4_LO_PROPS},
+        bspace32_2d_high = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 250,  BSPACE_C4_HI_PROPS},
+        bspace21_3d      = {.nbits_per_dim = 21, .ndims = 3,  .nsamples = 200,  BSPACE_C4_LO_PROPS},
+        bspace21_3d_high = {.nbits_per_dim = 21, .ndims = 3,  .nsamples = 200,  BSPACE_C4_HI_PROPS},
+        bspace16_4d      = {.nbits_per_dim = 16, .ndims = 4,  .nsamples = 200,  BSPACE_C4_LO_PROPS},
+        bspace16_4d_high = {.nbits_per_dim = 16, .ndims = 4,  .nsamples = 200,  BSPACE_C4_HI_PROPS},
+        bspace8_8d       = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 200,  BSPACE_C4_LO_PROPS},
+        bspace8_8d_high  = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 200,  BSPACE_C4_HI_PROPS},
+        bspace4_16d      = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 200,  BSPACE_C4_LO_PROPS},
+        bspace4_16d_high = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 200,  BSPACE_C4_HI_PROPS};
 
     // Birthday spacings tests (lambda = 256)
     // That variants may be more sensitive to some PRNGs artefacts, e.g. grube73_mrg2
@@ -221,7 +224,9 @@ BatteryExitCode battery_full(const GeneratorInfo *gen, const CallerAPI *intf,
 }
 
 // For unity builds
-#undef COLLOVER_LO_PROPS
-#undef COLLOVER_HI_PROPS
+#undef BSPACE_C4_LO_PROPS
+#undef BSPACE_C4_HI_PROPS
 #undef BSPACE_C256_LO_PROPS
 #undef BSPACE_C256_HI_PROPS
+#undef COLLOVER_LO_PROPS
+#undef COLLOVER_HI_PROPS

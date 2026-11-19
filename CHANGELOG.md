@@ -10,7 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 - `mwc64k2a2` generator.
 - `mwc64_2p58` generator: better documentation.
-- `mwc128_x32`, `mwc59` generator.
+- `mwc128_x32`, `mwc59` generators.
+- `xoshiro256pp_mod` generator: slightly faster version of `xoroshiro256pp`
+  designed by https://github.com/andanteyk
+- `all_pairs` flag for the birthday spacings test, allows to select between
+  DIEHARD (`all_pairs=0`) and Klykova-2002 (`all_pairs=1`) statistics.
+  The default one is the `all_pairs=0` (DIEHARD) variant, but Klykova-2002 is
+  slightly less biased. Thanks to matx-phillip for the interesting bugreport:
+  https://github.com/alvoskov/SmokeRand/issues/34
 
 ### Changed
 

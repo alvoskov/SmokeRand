@@ -13,6 +13,7 @@
 #include "smokerand/lineardep.h"
 #include "smokerand/entropy.h"
 
+#define BSPACE_C4_LO_PROPS  .lambda = 4, .get_lower = 1, .all_pairs = BSPACE_DEFAULT_PAIRS
 #define COLLOVER_PROPS .nsamples = 3, .n = COLLOVER_DEFAULT_N, .get_lower = 1
 
 /**
@@ -30,13 +31,13 @@ BatteryExitCode battery_brief(const GeneratorInfo *gen, const CallerAPI *intf,
     static const MonobitFreqOptions monobit = {.nvalues = 1ull << 28};
     // Birthday spacings tests options
     static const BSpaceNDOptions
-        bspace64_1d      = {.nbits_per_dim = 64, .ndims = 1, .nsamples = 40,   .get_lower = 1, .lambda = 4},
-        bspace32_1d      = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 4096, .get_lower = 1, .lambda = 4},
-        bspace32_1d_high = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 4096, .get_lower = 0, .lambda = 4},
-        bspace32_2d      = {.nbits_per_dim = 32, .ndims = 2, .nsamples = 5, .get_lower = 1, .lambda = 4},
-        bspace21_3d      = {.nbits_per_dim = 21, .ndims = 3, .nsamples = 5, .get_lower = 1, .lambda = 4},
-        bspace16_4d      = {.nbits_per_dim = 16, .ndims = 4, .nsamples = 5, .get_lower = 1, .lambda = 4},
-        bspace8_8d       = {.nbits_per_dim = 8,  .ndims = 8, .nsamples = 5, .get_lower = 1, .lambda = 4};
+        bspace64_1d      = {.nbits_per_dim = 64, .ndims = 1, .nsamples = 40,   BSPACE_C4_LO_PROPS},
+        bspace32_1d      = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 4096, BSPACE_C4_LO_PROPS},
+        bspace32_1d_high = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 4096, BSPACE_C4_LO_PROPS},
+        bspace32_2d      = {.nbits_per_dim = 32, .ndims = 2, .nsamples = 5,    BSPACE_C4_LO_PROPS},
+        bspace21_3d      = {.nbits_per_dim = 21, .ndims = 3, .nsamples = 5,    BSPACE_C4_LO_PROPS},
+        bspace16_4d      = {.nbits_per_dim = 16, .ndims = 4, .nsamples = 5,    BSPACE_C4_LO_PROPS},
+        bspace8_8d       = {.nbits_per_dim = 8,  .ndims = 8, .nsamples = 5,    BSPACE_C4_LO_PROPS};
 
     // Birthday spacings test with decimation
     static const BSpace4x8dDecimatedOptions bs_dec = {.step = 1 << 12};
@@ -126,4 +127,5 @@ BatteryExitCode battery_brief(const GeneratorInfo *gen, const CallerAPI *intf,
 }
 
 // For unity builds
+#undef BSPACE_C4_LO_PROPS
 #undef COLLOVER_PROPS

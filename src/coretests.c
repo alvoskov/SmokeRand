@@ -333,8 +333,8 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     const double lambda_corr = bspace_calc_lambda_corrected(opts, len);
     // Show information about the test
     obj->intf->printf("Birthday spacings test\n");
-    obj->intf->printf("  ndims = %u; nbits_per_dim = %u; get_lower = %d\n",
-        opts->ndims, opts->nbits_per_dim, opts->get_lower);
+    obj->intf->printf("  ndims = %u; nbits_per_dim = %u; get_lower = %d; all_pairs = %d\n",
+        opts->ndims, opts->nbits_per_dim, opts->get_lower, opts->all_pairs);
     obj->intf->printf("  nsamples = %lu; len = %lu, lambda = %g, lambda_corr = %g\n",
         opts->nsamples, len, lambda, lambda_corr);
     // Compute number of duplicates
@@ -344,9 +344,19 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
     obj->intf->printf("  x(DIEHARD) = %llu; x(KL2002) = %llu\n",
         stats.eqcmp, stats.ndups);
     ans.penalty = PENALTY_BSPACE;
-    ans.x = (double) stats.eqcmp; // TODO: selection of statistics
-    ans.p = sr_poisson_pvalue(ans.x, lambda_corr * (double) opts->nsamples);
-    ans.alpha = sr_poisson_cdf(ans.x, lambda_corr * (double) opts->nsamples);
+    if (opts->all_pairs) {
+        // Klykova-2002 statistics
+        obj->intf->printf("  x(KL2002) and lambda_corr will be used\n");
+        ans.x = (double) stats.ndups;
+        ans.p = sr_poisson_pvalue(ans.x, lambda_corr * (double) opts->nsamples);
+        ans.alpha = sr_poisson_cdf(ans.x, lambda_corr * (double) opts->nsamples);
+    } else {
+        // DIEHARD statistics
+        obj->intf->printf("  x(DIEHARD) and lambda will be used\n");
+        ans.x = (double) stats.eqcmp;
+        ans.p = sr_poisson_pvalue(ans.x, lambda * (double) opts->nsamples);
+        ans.alpha = sr_poisson_cdf(ans.x, lambda * (double) opts->nsamples);
+    }
     obj->intf->printf("  x = %.0f; p = %g\n", ans.x, ans.p);
     obj->intf->printf("\n");
     return ans;

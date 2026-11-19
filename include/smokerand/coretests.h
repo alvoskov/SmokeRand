@@ -12,6 +12,9 @@
 #ifndef __SMOKERAND_CORETESTS_H
 #define __SMOKERAND_CORETESTS_H
 #include "smokerand/core.h"
+
+#define BSPACE_DEFAULT_PAIRS 0
+
 /**
  * @brief Options for n-dimensional birthday spacings tests.
  */
@@ -19,8 +22,9 @@ typedef struct {
     unsigned int nbits_per_dim; ///< Number of bits per dimension.
     unsigned int ndims; ///< Number of dimensions.
     unsigned long nsamples; ///< Number of samples.
-    int get_lower; ///< 0/1 - use lower/higher part of PRNG output.
     unsigned int lambda; ///< Expected number of collisions per sample.
+    int get_lower; ///< 0/1 - use lower/higher part of PRNG output.
+    int all_pairs; ///< 0/1 - use DIEHARD/Klykova test statistic.
 } BSpaceNDOptions;
 
 

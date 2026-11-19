@@ -23,6 +23,8 @@
 #include "smokerand/hwtests.h"
 #include "smokerand/entropy.h"
 
+#define BSPACE_C4_LO_PROPS  .lambda = 4, .get_lower = 1, .all_pairs = BSPACE_DEFAULT_PAIRS
+
 /**
  * @brief SmokeRand `express` battery.
  */
@@ -30,9 +32,9 @@ BatteryExitCode battery_express(const GeneratorInfo *gen, const CallerAPI *intf,
     const BatteryOptions *opts)
 {
     static const BSpaceNDOptions
-        bspace32_1d = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 1024, .get_lower = 1, .lambda = 4},
-        bspace8_4d  = {.nbits_per_dim = 8,  .ndims = 4, .nsamples = 256,  .get_lower = 1, .lambda = 4},
-        bspace4_8d  = {.nbits_per_dim = 4,  .ndims = 8, .nsamples = 128,  .get_lower = 1, .lambda = 4};
+        bspace32_1d = {.nbits_per_dim = 32, .ndims = 1, .nsamples = 1024, BSPACE_C4_LO_PROPS},
+        bspace8_4d  = {.nbits_per_dim = 8,  .ndims = 4, .nsamples = 256,  BSPACE_C4_LO_PROPS},
+        bspace4_8d  = {.nbits_per_dim = 4,  .ndims = 8, .nsamples = 128,  BSPACE_C4_LO_PROPS};
     static const BSpace4x8dDecimatedOptions bs_dec = {.step = 1 << 7};
     static const NBitWordsFreqOptions
         byte_freq   = {.bits_per_word = 8, .average_freq = 256, .nblocks = 256};
@@ -63,3 +65,6 @@ BatteryExitCode battery_express(const GeneratorInfo *gen, const CallerAPI *intf,
         return BATTERY_PASSED;
     }
 }
+
+// For unity builds
+#undef BSPACE_C4_LO_PROPS

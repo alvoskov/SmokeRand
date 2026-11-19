@@ -13,6 +13,8 @@
 #include "smokerand/lineardep.h"
 #include "smokerand/entropy.h"
 
+#define BSPACE_C4_LO_PROPS  .lambda = 4, .get_lower = 1, .all_pairs = BSPACE_DEFAULT_PAIRS
+#define BSPACE_C4_HI_PROPS  .lambda = 4, .get_lower = 0, .all_pairs = BSPACE_DEFAULT_PAIRS
 #define COLLOVER_LO_PROPS .nsamples = 5, .n = COLLOVER_DEFAULT_N, .get_lower = 1
 #define COLLOVER_HI_PROPS .nsamples = 5, .n = COLLOVER_DEFAULT_N, .get_lower = 0
 
@@ -26,33 +28,33 @@ BatteryExitCode battery_default(const GeneratorInfo *gen, const CallerAPI *intf,
     static const MonobitFreqOptions monobit = {.nvalues = 1ull << 28};
     // Birthday spacings tests options
     static const BSpaceNDOptions
-        bspace64_1d      = {.nbits_per_dim = 64, .ndims = 1,  .nsamples = 100,  .get_lower = 1, .lambda = 4},
-        bspace32_1d      = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, .get_lower = 1, .lambda = 4},
-        bspace32_1d_high = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, .get_lower = 0, .lambda = 4},
-        bspace32_2d      = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 10,   .get_lower = 1, .lambda = 4},
-        bspace32_2d_high = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 10,   .get_lower = 0, .lambda = 4},
-        bspace21_3d      = {.nbits_per_dim = 21, .ndims = 3,  .nsamples = 10,   .get_lower = 1, .lambda = 4},
-        bspace21_3d_high = {.nbits_per_dim = 21, .ndims = 3,  .nsamples = 10,   .get_lower = 0, .lambda = 4},
-        bspace16_4d      = {.nbits_per_dim = 16, .ndims = 4,  .nsamples = 10,   .get_lower = 1, .lambda = 4},
-        bspace16_4d_high = {.nbits_per_dim = 16, .ndims = 4,  .nsamples = 10,   .get_lower = 0, .lambda = 4},
-        bspace8_8d       = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 10,   .get_lower = 1, .lambda = 4},
-        bspace8_8d_high  = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 10,   .get_lower = 0, .lambda = 4},
-        bspace4_16d      = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 10,   .get_lower = 1, .lambda = 4},
-        bspace4_16d_high = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 10,   .get_lower = 0, .lambda = 4};
+        bspace64_1d      = {.nbits_per_dim = 64, .ndims = 1,  .nsamples = 100,  BSPACE_C4_LO_PROPS},
+        bspace32_1d      = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, BSPACE_C4_LO_PROPS},
+        bspace32_1d_high = {.nbits_per_dim = 32, .ndims = 1,  .nsamples = 8192, BSPACE_C4_HI_PROPS},
+        bspace32_2d      = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 10,   BSPACE_C4_LO_PROPS},
+        bspace32_2d_high = {.nbits_per_dim = 32, .ndims = 2,  .nsamples = 10,   BSPACE_C4_HI_PROPS},
+        bspace21_3d      = {.nbits_per_dim = 21, .ndims = 3,  .nsamples = 10,   BSPACE_C4_LO_PROPS},
+        bspace21_3d_high = {.nbits_per_dim = 21, .ndims = 3,  .nsamples = 10,   BSPACE_C4_HI_PROPS},
+        bspace16_4d      = {.nbits_per_dim = 16, .ndims = 4,  .nsamples = 10,   BSPACE_C4_LO_PROPS},
+        bspace16_4d_high = {.nbits_per_dim = 16, .ndims = 4,  .nsamples = 10,   BSPACE_C4_HI_PROPS},
+        bspace8_8d       = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 10,   BSPACE_C4_LO_PROPS},
+        bspace8_8d_high  = {.nbits_per_dim = 8,  .ndims = 8,  .nsamples = 10,   BSPACE_C4_HI_PROPS},
+        bspace4_16d      = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 10,   BSPACE_C4_LO_PROPS},
+        bspace4_16d_high = {.nbits_per_dim = 4,  .ndims = 16, .nsamples = 10,   BSPACE_C4_HI_PROPS};
 
     // Birthday spacings test with decimation
     static const BSpace4x8dDecimatedOptions bs_dec = {.step = 1 << 18};
 
     // CollisionOver tests options
     static const CollOverNDOptions
-        collover20_2d      = {.nbits_per_dim = 20, .ndims = 2, COLLOVER_LO_PROPS},
-        collover20_2d_high = {.nbits_per_dim = 20, .ndims = 2, COLLOVER_HI_PROPS},
-        collover13_3d      = {.nbits_per_dim = 13, .ndims = 3, COLLOVER_LO_PROPS},
-        collover13_3d_high = {.nbits_per_dim = 13, .ndims = 3, COLLOVER_HI_PROPS},
-        collover8_5d       = {.nbits_per_dim = 8,  .ndims = 5, COLLOVER_LO_PROPS},
-        collover8_5d_high  = {.nbits_per_dim = 8,  .ndims = 5, COLLOVER_HI_PROPS},
-        collover5_8d       = {.nbits_per_dim = 5,  .ndims = 8, COLLOVER_LO_PROPS},
-        collover5_8d_high  = {.nbits_per_dim = 5,  .ndims = 8, COLLOVER_HI_PROPS},
+        collover20_2d      = {.nbits_per_dim = 20, .ndims = 2,  COLLOVER_LO_PROPS},
+        collover20_2d_high = {.nbits_per_dim = 20, .ndims = 2,  COLLOVER_HI_PROPS},
+        collover13_3d      = {.nbits_per_dim = 13, .ndims = 3,  COLLOVER_LO_PROPS},
+        collover13_3d_high = {.nbits_per_dim = 13, .ndims = 3,  COLLOVER_HI_PROPS},
+        collover8_5d       = {.nbits_per_dim = 8,  .ndims = 5,  COLLOVER_LO_PROPS},
+        collover8_5d_high  = {.nbits_per_dim = 8,  .ndims = 5,  COLLOVER_HI_PROPS},
+        collover5_8d       = {.nbits_per_dim = 5,  .ndims = 8,  COLLOVER_LO_PROPS},
+        collover5_8d_high  = {.nbits_per_dim = 5,  .ndims = 8,  COLLOVER_HI_PROPS},
         collover2_20d      = {.nbits_per_dim = 2,  .ndims = 20, COLLOVER_LO_PROPS},
         collover2_20d_high = {.nbits_per_dim = 2,  .ndims = 20, COLLOVER_HI_PROPS};
 
@@ -164,5 +166,7 @@ BatteryExitCode battery_default(const GeneratorInfo *gen, const CallerAPI *intf,
 }
 
 // For unity builds
+#undef BSPACE_C4_LO_PROPS
+#undef BSPACE_C4_HI_PROPS
 #undef COLLOVER_LO_PROPS
 #undef COLLOVER_HI_PROPS
