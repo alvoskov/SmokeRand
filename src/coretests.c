@@ -109,7 +109,7 @@ ullong_add_sat(unsigned long long sum, unsigned long long x)
  * protection.
  */
 static inline unsigned long long
-bspace_eqcmp_to_ndups(unsigned long long eqcmp)
+bspace_eqcmp_to_npairs(unsigned long long eqcmp)
 {
     if (eqcmp >= 1ULL << 32) {
         return ULLONG_MAX;
@@ -119,24 +119,30 @@ bspace_eqcmp_to_ndups(unsigned long long eqcmp)
 }
 
 typedef struct {
-    unsigned long long eqcmp; ///< DIEHARD type statistics
-    unsigned long long ndups; ///< Klykova-2002 type statistics
-} BSpaceNdups;
+    unsigned long long eqcmp;  ///< DIEHARD type statistics
+    unsigned long long npairs; ///< Klykova-2002 type statistics
+} BSpaceNPairs;
 
-#define BSPACE_NDUPS_EMPTY {.eqcmp = 0, .ndups = 0}
+typedef struct {
+    double eqcmp;
+    double eqcmp_corr;
+    double npairs;
+} BSpaceNPairsPValue;
+
+#define BSPACE_NPAIRS_EMPTY {.eqcmp = 0, .npairs = 0}
 
 
-void BSpaceNdups_add(BSpaceNdups *to, const BSpaceNdups *from)
+void BSpaceNPairs_add(BSpaceNPairs *to, const BSpaceNPairs *from)
 {
-    to->eqcmp = ullong_add_sat(to->eqcmp, from->eqcmp);
-    to->ndups = ullong_add_sat(to->ndups, from->ndups);
+    to->eqcmp  = ullong_add_sat(to->eqcmp,  from->eqcmp);
+    to->npairs = ullong_add_sat(to->npairs, from->npairs);
 }
 
 
-#define BSPACE_GET_NDUPS_FUNC_TPL(suffix, type) \
-static BSpaceNdups bspace_get_ndups##suffix(type *x, size_t len) \
+#define BSPACE_GET_NPAIRS_FUNC_TPL(suffix, type) \
+static BSpaceNPairs bspace_get_npairs##suffix(type *x, size_t len) \
 { \
-    BSpaceNdups ans = {.eqcmp = 0, .ndups = 0}; \
+    BSpaceNPairs ans = BSPACE_NPAIRS_EMPTY; \
     unsigned long long eqcmp_cur = 0; \
     if (len < 2) { \
         return ans; \
@@ -150,16 +156,16 @@ static BSpaceNdups bspace_get_ndups##suffix(type *x, size_t len) \
         if (x[i] == x[i + 1]) { \
             eqcmp_cur++; ans.eqcmp++; \
         } else if (eqcmp_cur > 0) { \
-            ans.ndups = ullong_add_sat(ans.ndups, bspace_eqcmp_to_ndups(eqcmp_cur)); \
+            ans.npairs = ullong_add_sat(ans.npairs, bspace_eqcmp_to_npairs(eqcmp_cur)); \
             eqcmp_cur = 0; \
         } \
     } \
-    ans.ndups = ullong_add_sat(ans.ndups, bspace_eqcmp_to_ndups(eqcmp_cur)); \
+    ans.npairs = ullong_add_sat(ans.npairs, bspace_eqcmp_to_npairs(eqcmp_cur)); \
     return ans; \
 }
 
-BSPACE_GET_NDUPS_FUNC_TPL(32, uint32_t)
-BSPACE_GET_NDUPS_FUNC_TPL(64, uint64_t)
+BSPACE_GET_NPAIRS_FUNC_TPL(32, uint32_t)
+BSPACE_GET_NPAIRS_FUNC_TPL(64, uint64_t)
 
 /**
  * @brief Calculates sample size.
@@ -215,41 +221,230 @@ static double bspace_calc_lambda_corrected(const BSpaceNDOptions *opts, size_t l
 }
 
 
-/**
- * @brief 32-bit version of n-dimensional birthday spacings test.
- * @return Number of duplicates.
- */
-static BSpaceNdups bspace32_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
+typedef struct {
+    size_t nbins;
+    unsigned long long *eqcmp_freq;
+    unsigned long long *npairs_freq;
+    unsigned long long eqcmp_outliers;
+    unsigned long long npairs_outliers;
+    unsigned long long npoints;
+} BSpaceHistogram;
+
+
+void BSpaceHistogram_init(BSpaceHistogram *obj, const BSpaceNDOptions *opts)
 {
-    const size_t len = bspace_calc_len(opts);
-    uint32_t *u = calloc(len, sizeof(uint32_t));
-    BSpaceNdups ndups = BSPACE_NDUPS_EMPTY;
-    for (size_t i = 0; i < opts->nsamples; i++) {
-        bspace_make_tuples32(opts, obj->gi, obj->state, u, len);
-        const BSpaceNdups nd_i = bspace_get_ndups32(u, len);
-        BSpaceNdups_add(&ndups, &nd_i);
+    const double var = sqrt(opts->lambda);
+    double nbins = opts->lambda;
+    while (sr_poisson_pvalue(nbins, opts->lambda) > 1e-20) {
+        nbins += var;
     }
-    free(u);
-    return ndups;
+    obj->nbins = (size_t) nbins;
+    obj->eqcmp_freq = calloc(obj->nbins, sizeof(unsigned long long));
+    obj->npairs_freq = calloc(obj->nbins, sizeof(unsigned long long));
+    obj->eqcmp_outliers = 0;
+    obj->npairs_outliers = 0;
 }
 
-/**
- * @brief 64-bit version of n-dimensional birthday spacings test.
- * @return Number of duplicates.
- */
-static BSpaceNdups bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
+
+inline void BSpaceHistogram_add(BSpaceHistogram *obj, const BSpaceNPairs *elem)
 {
-    const size_t len = bspace_calc_len(opts);
-    uint64_t *u = calloc(len, sizeof(uint64_t));
-    BSpaceNdups ndups = BSPACE_NDUPS_EMPTY;
-    for (size_t i = 0; i < opts->nsamples; i++) {
-        bspace_make_tuples64(opts, obj->gi, obj->state, u, len);
-        const BSpaceNdups nd_i = bspace_get_ndups64(u, len);
-        BSpaceNdups_add(&ndups, &nd_i);
+    if (elem->eqcmp < obj->nbins) {
+        obj->eqcmp_freq[elem->eqcmp]++;
+    } else {
+        obj->eqcmp_outliers++;
     }
-    free(u);
-    return ndups;
+
+    if (elem->npairs < obj->nbins) {
+        obj->npairs_freq[elem->npairs]++;
+    } else {
+        obj->npairs_outliers++;
+    }
+
+    obj->npoints++;
 }
+
+
+void BSpaceHistogram_dealloc(BSpaceHistogram *obj)
+{
+    free(obj->eqcmp_freq);
+    free(obj->npairs_freq);
+}
+
+
+/**
+ * @brief Total variance distances for the birthday spacings test
+ */
+typedef struct {
+    double tvd_total;
+    double tvd_tail;
+    double chi2emp;
+    unsigned long chi2emp_df;
+    double chi2emp_pvalue;
+} BSpaceHistogramMetrics;
+
+/**
+ * @brief Detailed statistics for the birthday spacings test multiple runs.
+ */
+typedef struct {
+    // Some basic statistics
+    double lambda; ///< \f$ \frac{m^3}{4n} \f$
+    double lambda_corr; ///< \f$ \frac{m(m-1)(m-2)}{4n} \f$
+    BSpaceNPairs total; ///< Total number of pairs
+    BSpaceNPairsPValue total_p; ///< P-values for total number of pairs
+    BSpaceNPairsPValue total_cdf; ///< (1 - p) for total number of pairs
+    // Extended statistics for asymptotic behaviour control
+    int is_hm_valid; ///< Is "Histogram metrics" block valid
+    BSpaceHistogramMetrics eqcmp;
+    BSpaceHistogramMetrics eqcmp_corr;
+    BSpaceHistogramMetrics npairs;
+} BSpaceStats;
+
+
+static size_t find_nbins_Oi_bound(const unsigned long long *freq, size_t nbins,
+    unsigned long long Oi_min)
+{
+    size_t bnd = nbins;
+    unsigned long long Oi_sum = 0;
+    for (size_t i = nbins; i-- != 0;) {
+        Oi_sum += freq[i];
+        if (Oi_sum >= Oi_min) {
+            return i;
+        }
+    }
+    return bnd;
+}
+
+
+void BSpaceHistogramMetrics_init(BSpaceHistogramMetrics *obj,
+    const unsigned long long *freq, size_t nbins, double lambda)
+{
+    const unsigned long long Oi_min = 10;
+    obj->tvd_total = 0.0;
+    obj->tvd_tail = 0.0;
+    obj->chi2emp = 0.0;
+    obj->chi2emp_df = 0;
+    unsigned long long nsamples = 0;
+    for (size_t i = 0; i < nbins; i++) {
+        nsamples += freq[i];
+    }
+    unsigned long long Oi_cur = 0;
+    double pi_cur = 0.0;
+    const size_t nbins_Oi_bound = find_nbins_Oi_bound(freq, nbins, Oi_min);
+
+    for (size_t i = 0; i < nbins; i++) {
+        const double p_obs = (double) freq[i] / (double) nsamples;
+        const double p_calc = sr_poisson_pdf((double) i, lambda);
+        const double dp = fabs(p_obs - p_calc);
+        if (freq[i] != 0) {
+            obj->tvd_total += dp;
+            obj->tvd_tail += p_calc;
+            Oi_cur += freq[i];
+            pi_cur += p_calc;
+            if (Oi_cur >= Oi_min && (i < nbins_Oi_bound)) {
+                obj->chi2emp += calc_chi2emp_term(Oi_cur, pi_cur * (double) nsamples);
+                obj->chi2emp_df++;
+                Oi_cur = 0;
+                pi_cur = 0.0;
+            }
+        }
+    }
+    if (Oi_cur > 0) {
+        obj->chi2emp += calc_chi2emp_term(Oi_cur, pi_cur * (double) nsamples);
+        obj->chi2emp_df++;
+    }    
+    obj->tvd_total = 0.5 * obj->tvd_total;    
+    obj->tvd_tail = 0.5 * (1.0 - obj->tvd_tail);
+    if (obj->tvd_tail < 0) obj->tvd_tail = 0;
+    obj->tvd_total += obj->tvd_tail;
+    if (obj->tvd_total > 1) obj->tvd_total = 1;
+    if (obj->chi2emp_df > 1) {
+        obj->chi2emp_df--;
+        obj->chi2emp_pvalue = sr_chi2_pvalue(obj->chi2emp, obj->chi2emp_df);
+    } else {
+        obj->chi2emp_pvalue = NAN;
+    }
+}
+
+
+static void BSpaceHistogramMetrics_print_line(const BSpaceHistogramMetrics *obj,
+    const char *name, const CallerAPI *intf)
+{
+    intf->printf("    %12s %12g %12g %12g %5lu %12g\n",
+        name, obj->tvd_total, obj->tvd_tail, obj->chi2emp,
+        obj->chi2emp_df, obj->chi2emp_pvalue);
+}
+
+
+void BSpaceStats_print(const BSpaceStats *obj, const CallerAPI *intf)
+{
+    intf->printf("  x(DIEHARD/eqcmp) = %llu; p = %g; 1-p = %g\n",
+        obj->total.eqcmp, obj->total_p.eqcmp, obj->total_cdf.eqcmp);
+    intf->printf("    DIEHARD/eqcmp corr.L: p = %g; 1-p = %g\n",
+        obj->total_p.eqcmp_corr, obj->total_cdf.eqcmp_corr);
+    intf->printf("  x(KL2002/npairs) = %llu; p = %g; 1-p = %g\n",
+        obj->total.npairs, obj->total_p.npairs, obj->total_cdf.npairs);
+    if (obj->is_hm_valid) {
+        intf->printf("  Extended statistics for asymptotic behaviour verification\n");
+        intf->printf("    %12s %12s %12s %12s %5s %12s\n",
+            "", "tvd_total", "tvd_tail", "chi2emp", "df", "chi2_p");
+        BSpaceHistogramMetrics_print_line(&obj->eqcmp,      "eqcmp",      intf);
+        BSpaceHistogramMetrics_print_line(&obj->eqcmp_corr, "eqcmp_corr", intf);
+        BSpaceHistogramMetrics_print_line(&obj->npairs,     "npairs",     intf);
+    }
+}
+
+
+/**
+ * @brief 32/64-bit versions of n-dimensional birthday spacings test.
+ */
+#define BSPACE_ND_TEST_FUNC_TPL(suffix, type) \
+static BSpaceStats bspace##suffix##_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts) \
+{ \
+    const size_t len = bspace_calc_len(opts); \
+    type *u = calloc(len, sizeof(type)); \
+    ASSERT_MALLOC_PTR(u, "bspace_nd_test") \
+    BSpaceStats res; \
+    res.total.eqcmp = 0; res.total.npairs = 0; \
+    res.lambda = bspace_calc_lambda(opts, len); \
+    res.lambda_corr = bspace_calc_lambda_corrected(opts, len); \
+    res.is_hm_valid = (opts->nsamples >= 100) ? 1 : 0; \
+    if (res.is_hm_valid) { /* Extended statistics */ \
+        BSpaceHistogram hist; \
+        BSpaceHistogram_init(&hist, opts); \
+        for (size_t i = 0; i < opts->nsamples; i++) { \
+            bspace_make_tuples##suffix(opts, obj->gi, obj->state, u, len); \
+            const BSpaceNPairs npairs_i = bspace_get_npairs##suffix(u, len); \
+            BSpaceNPairs_add(&res.total, &npairs_i); \
+            BSpaceHistogram_add(&hist, &npairs_i); \
+        } \
+        BSpaceHistogramMetrics_init(&res.eqcmp,      hist.eqcmp_freq,  hist.nbins, res.lambda); \
+        BSpaceHistogramMetrics_init(&res.eqcmp_corr, hist.eqcmp_freq,  hist.nbins, res.lambda_corr); \
+        BSpaceHistogramMetrics_init(&res.npairs,     hist.npairs_freq, hist.nbins, res.lambda_corr); \
+        BSpaceHistogram_dealloc(&hist); \
+    } else { /* Only basic statistics */ \
+        for (size_t i = 0; i < opts->nsamples; i++) { \
+            bspace_make_tuples##suffix(opts, obj->gi, obj->state, u, len); \
+            const BSpaceNPairs npairs_i = bspace_get_npairs##suffix(u, len); \
+            BSpaceNPairs_add(&res.total, &npairs_i); \
+        } \
+    } \
+    const double nlambda      = res.lambda * (double) opts->nsamples; \
+    const double nlambda_corr = res.lambda_corr * (double) opts->nsamples; \
+    const double eqcmp        = (double) res.total.eqcmp; \
+    const double npairs       = (double) res.total.npairs; \
+    res.total_p.eqcmp         = sr_poisson_pvalue(eqcmp, nlambda); \
+    res.total_cdf.eqcmp       = sr_poisson_cdf(eqcmp, nlambda); \
+    res.total_p.eqcmp_corr    = sr_poisson_pvalue(eqcmp, nlambda_corr); \
+    res.total_cdf.eqcmp_corr  = sr_poisson_cdf(eqcmp, nlambda_corr); \
+    res.total_p.npairs        = sr_poisson_pvalue(npairs, nlambda_corr); \
+    res.total_cdf.npairs      = sr_poisson_cdf(npairs, nlambda_corr); \
+    free(u); \
+    return res; \
+}
+
+BSPACE_ND_TEST_FUNC_TPL(32, uint32_t)
+BSPACE_ND_TEST_FUNC_TPL(64, uint64_t)
+
 
 /**
  * @brief n-dimensional birthday spacings test.
@@ -339,25 +534,25 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
         opts->nsamples, len, lambda, lambda_corr);
     // Compute number of duplicates
     const unsigned int nbits_total = opts->ndims * opts->nbits_per_dim;
-    const BSpaceNdups stats = (nbits_total > 32) ?
+    const BSpaceStats stats = (nbits_total > 32) ?
         bspace64_nd_test(obj, opts) : bspace32_nd_test(obj, opts);
-    obj->intf->printf("  x(DIEHARD) = %llu; x(KL2002) = %llu\n",
-        stats.eqcmp, stats.ndups);
+    BSpaceStats_print(&stats, obj->intf);
     ans.penalty = PENALTY_BSPACE;
+    // Calculate the output statistics
     if (opts->all_pairs) {
         // Klykova-2002 statistics
         obj->intf->printf("  x(KL2002) and lambda_corr will be used\n");
-        ans.x = (double) stats.ndups;
-        ans.p = sr_poisson_pvalue(ans.x, lambda_corr * (double) opts->nsamples);
-        ans.alpha = sr_poisson_cdf(ans.x, lambda_corr * (double) opts->nsamples);
+        ans.x = (double) stats.total.npairs;
+        ans.p = stats.total_p.npairs;
+        ans.alpha = stats.total_cdf.npairs;
     } else {
         // DIEHARD statistics
         obj->intf->printf("  x(DIEHARD) and lambda will be used\n");
-        ans.x = (double) stats.eqcmp;
-        ans.p = sr_poisson_pvalue(ans.x, lambda * (double) opts->nsamples);
-        ans.alpha = sr_poisson_cdf(ans.x, lambda * (double) opts->nsamples);
+        ans.x = (double) stats.total.eqcmp;
+        ans.p = stats.total_p.eqcmp;
+        ans.alpha = stats.total_cdf.eqcmp;
     }
-    obj->intf->printf("  x = %.0f; p = %g\n", ans.x, ans.p);
+    obj->intf->printf("  x = %.0f; p = %g; 1-p = %g\n", ans.x, ans.p, ans.alpha);
     obj->intf->printf("\n");
     return ans;
 }
@@ -370,7 +565,7 @@ TestResults bspace_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts)
 static void bspace4_8d_decimated_pvalue(TestResults *ans, const char *name,
     uint32_t *u, size_t len, double lambda, const CallerAPI *intf)
 {
-    const BSpaceNdups stats = bspace_get_ndups32(u, len);
+    const BSpaceNPairs stats = bspace_get_npairs32(u, len);
     const double x = (double) stats.eqcmp; /// TODO: control!
     const double p = sr_poisson_pvalue(x, lambda);
     const double alpha = sr_poisson_cdf(x, lambda);

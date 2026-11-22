@@ -25,6 +25,7 @@ double sr_binomial_cdf(unsigned long k, unsigned long n, double p);
 double sr_binomial_pvalue(double k, double n, double p);
 double sr_poisson_cdf(double x, double lambda);
 double sr_poisson_pvalue(double x, double lambda);
+double sr_poisson_pdf(double x, double lambda);
 double sr_stdnorm_cdf(double x);
 double sr_stdnorm_pvalue(double x);
 double sr_stdnorm_inv(double p);

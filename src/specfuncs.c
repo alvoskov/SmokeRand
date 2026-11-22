@@ -5,7 +5,7 @@
  * @details This file is designed for C89 (ANSI C)! Don't use features
  * from C99 and later!
  * @copyright
- * (c) 2024-2025 Alexey L. Voskov, Lomonosov Moscow State University.
+ * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
  * alvoskov@gmail.com
  *
  * This software is licensed under the MIT license.
@@ -361,7 +361,7 @@ double sr_poisson_cdf(double x, double lambda)
 }
 
 /**
- * @brief Calculate p-value for Poission distribution as 1 - F(x)
+ * @brief Calculate p-value for Poisson distribution as 1 - F(x)
  * where F(x) is Poission distribution C.D.F.
  */
 double sr_poisson_pvalue(double x, double lambda)
@@ -369,6 +369,13 @@ double sr_poisson_pvalue(double x, double lambda)
     return sr_gammainc(floor(x) + 1.0, lambda);
 }
 
+/**
+ * @brief Calculate probability for Poisson distribution
+ */
+double sr_poisson_pdf(double x, double lambda)
+{
+    return exp(x * log(lambda) - lambda - sr_lgamma(x + 1));
+}
 
 static double ln_binomial_coeff(unsigned long n, unsigned long k)
 {
