@@ -133,6 +133,57 @@ TestResults nbit_words_freq_test(GeneratorState *obj,
 TestResults byte_freq_test(GeneratorState *obj);
 TestResults word16_freq_test(GeneratorState *obj);
 
+// Extended statistics for the birthday spacings test
+
+/**
+ * @brief Total variation distances for the birthday spacings test
+ */
+typedef struct {
+    double tvd_total;
+    double tvd_tail;
+    double chi2emp;
+    unsigned long chi2emp_df;
+    double chi2emp_pvalue;
+} BSpaceHistogramMetrics;
+
+
+typedef struct {
+    unsigned long long eqcmp;  ///< DIEHARD type statistics
+    unsigned long long npairs; ///< Klykova-2002 type statistics
+} BSpaceNPairs;
+
+
+typedef struct {
+    double eqcmp;
+    double eqcmp_corr;
+    double npairs;
+} BSpaceNPairsPValue;
+
+
+#define BSPACE_NPAIRS_EMPTY {.eqcmp = 0, .npairs = 0}
+
+/**
+ * @brief Detailed statistics for the birthday spacings test multiple runs.
+ */
+typedef struct {
+    // Some basic statistics
+    double lambda; ///< \f$ \frac{m^3}{4n} \f$
+    double lambda_corr; ///< \f$ \frac{m(m-1)(m-2)}{4n} \f$
+    BSpaceNPairs total; ///< Total number of pairs
+    BSpaceNPairsPValue total_p; ///< P-values for total number of pairs
+    BSpaceNPairsPValue total_cdf; ///< (1 - p) for total number of pairs
+    // Extended statistics for asymptotic behaviour control
+    int is_hm_valid; ///< Is "Histogram metrics" block valid
+    BSpaceHistogramMetrics eqcmp;
+    BSpaceHistogramMetrics eqcmp_corr;
+    BSpaceHistogramMetrics npairs;
+} BSpaceStats;
+
+void BSpaceHistogramMetrics_init(BSpaceHistogramMetrics *obj,
+    const unsigned long long *freq, size_t nbins, double lambda);
+void BSpaceStats_print(const BSpaceStats *obj, const CallerAPI *intf);
+BSpaceStats bspace32_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts);
+BSpaceStats bspace64_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts);
 
 // Unified interfaces that can be used for batteries composition
 TestResults monobit_freq_test_wrap(GeneratorState *obj, const void *udata);

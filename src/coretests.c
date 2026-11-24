@@ -118,21 +118,7 @@ bspace_eqcmp_to_npairs(unsigned long long eqcmp)
     }
 }
 
-typedef struct {
-    unsigned long long eqcmp;  ///< DIEHARD type statistics
-    unsigned long long npairs; ///< Klykova-2002 type statistics
-} BSpaceNPairs;
-
-typedef struct {
-    double eqcmp;
-    double eqcmp_corr;
-    double npairs;
-} BSpaceNPairsPValue;
-
-#define BSPACE_NPAIRS_EMPTY {.eqcmp = 0, .npairs = 0}
-
-
-void BSpaceNPairs_add(BSpaceNPairs *to, const BSpaceNPairs *from)
+static inline void BSpaceNPairs_add(BSpaceNPairs *to, const BSpaceNPairs *from)
 {
     to->eqcmp  = ullong_add_sat(to->eqcmp,  from->eqcmp);
     to->npairs = ullong_add_sat(to->npairs, from->npairs);
@@ -231,7 +217,7 @@ typedef struct {
 } BSpaceHistogram;
 
 
-void BSpaceHistogram_init(BSpaceHistogram *obj, const BSpaceNDOptions *opts)
+static void BSpaceHistogram_init(BSpaceHistogram *obj, const BSpaceNDOptions *opts)
 {
     const double var = sqrt(opts->lambda);
     double nbins = opts->lambda;
@@ -264,40 +250,11 @@ inline void BSpaceHistogram_add(BSpaceHistogram *obj, const BSpaceNPairs *elem)
 }
 
 
-void BSpaceHistogram_dealloc(BSpaceHistogram *obj)
+static void BSpaceHistogram_dealloc(BSpaceHistogram *obj)
 {
     free(obj->eqcmp_freq);
     free(obj->npairs_freq);
 }
-
-
-/**
- * @brief Total variance distances for the birthday spacings test
- */
-typedef struct {
-    double tvd_total;
-    double tvd_tail;
-    double chi2emp;
-    unsigned long chi2emp_df;
-    double chi2emp_pvalue;
-} BSpaceHistogramMetrics;
-
-/**
- * @brief Detailed statistics for the birthday spacings test multiple runs.
- */
-typedef struct {
-    // Some basic statistics
-    double lambda; ///< \f$ \frac{m^3}{4n} \f$
-    double lambda_corr; ///< \f$ \frac{m(m-1)(m-2)}{4n} \f$
-    BSpaceNPairs total; ///< Total number of pairs
-    BSpaceNPairsPValue total_p; ///< P-values for total number of pairs
-    BSpaceNPairsPValue total_cdf; ///< (1 - p) for total number of pairs
-    // Extended statistics for asymptotic behaviour control
-    int is_hm_valid; ///< Is "Histogram metrics" block valid
-    BSpaceHistogramMetrics eqcmp;
-    BSpaceHistogramMetrics eqcmp_corr;
-    BSpaceHistogramMetrics npairs;
-} BSpaceStats;
 
 
 static size_t find_nbins_Oi_bound(const unsigned long long *freq, size_t nbins,
@@ -398,7 +355,7 @@ void BSpaceStats_print(const BSpaceStats *obj, const CallerAPI *intf)
  * @brief 32/64-bit versions of n-dimensional birthday spacings test.
  */
 #define BSPACE_ND_TEST_FUNC_TPL(suffix, type) \
-static BSpaceStats bspace##suffix##_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts) \
+BSpaceStats bspace##suffix##_nd_test(GeneratorState *obj, const BSpaceNDOptions *opts) \
 { \
     const size_t len = bspace_calc_len(opts); \
     type *u = calloc(len, sizeof(type)); \
