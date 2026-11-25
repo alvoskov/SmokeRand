@@ -8,9 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ### Added
 
-- `mwc64k2a2` generator.
 - `mwc64_2p58` generator: better documentation.
-- `mwc128_x32`, `mwc59` generators.
+- `mwc64k2a2`, `mwc128_x32`, `mwc59`, `sirius128` generators.
 - `xoshiro256pp_mod` generator: slightly faster version of `xoroshiro256pp`
   designed by https://github.com/andanteyk
 - `all_pairs` flag for the birthday spacings test, allows to select between

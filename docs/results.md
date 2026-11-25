@@ -360,6 +360,7 @@ Note: some of `full` results are for SmokeRand < 0.51.
  sezgin63          | u32    | +       | 0/1   | 1       | 3    | 3.0  | -      | 0     | Crush   | >= 32 TiB
  sezgin63_u63      | u63    | +       | +     | +       | ?1/2 | 1.6  | N/A    | 1     | Crush   | >= 1 TiB
  sirius64          | u64    | +       | +     | +       | +    | ~0.1 | +      | 4     |         | >= 8 TiB
+ sirius128         | u64    | +       | +     | +       | +    | 0.30 | +      | 4     |         | ?
  sfc8              | u32    | +       | ?3    | 7       | 14   | 1.9  | -(>>>) | 0     | -       | 128 MiB
  sfc16             | u32    | +       | +     | +       | +    | 0.93 | +      | 3.5(0)| +       | 128 GiB(stdin32)*
  sfc32             | u32    | +       | +     | +       | +    | 0.24 | +      | 4(0)  | +       | >= 16 TiB
