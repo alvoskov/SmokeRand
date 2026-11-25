@@ -21,6 +21,8 @@
  * 1. Steele G.L., Vigna S. Computationally easy, spectrally good multipliers
  *    for congruential pseudorandom number generators // Softw Pract Exper. 2022
  *    V. 52. N. 2. P. 443-458. https://doi.org/10.1002/spe.3030
+ * 2. https://sci-hub.ru/10.1016/S0010-4655(99)00467-1
+ * 3. https://link.springer.com/chapter/10.1007/978-3-540-73940-1_28
  *
  * @copyright
  * (c) 2024-2026 Alexey L. Voskov, Lomonosov Moscow State University.
